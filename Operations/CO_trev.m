@@ -1,4 +1,4 @@
-function out = CO_trev(y,tau)
+function out = CO_trev(y, tau)
 % CO_trev   Normalized nonlinear autocorrelation, trev function of a time series
 %
 % Calculates the trev function, a normalized nonlinear autocorrelation,
@@ -9,7 +9,7 @@ function out = CO_trev(y,tau)
 % analysis, cf. "Surrogate time series", T. Schreiber and A. Schmitz, Physica D,
 % 142(3-4) 346 (2000).
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, time series
 %
@@ -17,7 +17,7 @@ function out = CO_trev(y,tau)
 %       autocorrelation function, or the first minimum of the automutual
 %       information function, respectively)
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % The raw trev expression, its magnitude, the numerator and its magnitude, and
 % the denominator.
 
@@ -50,42 +50,42 @@ function out = CO_trev(y,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Set defaults:
 if nargin < 2 || isempty(tau)
     tau = 'ac';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi':
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
     % tau is first zero crossing of the autocorrelation function
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi');
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi');
     % tau is the first minimum of the automutual information function
 end
 if isnan(tau)
     error('No valid setting for time delay. (Is the time series too short?)');
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Compute trev quantities:
 
-yn = y(1:end-tau);
-yn1 = y(1+tau:end); % yn, tau steps ahead
+yn = y(1:end - tau);
+yn1 = y(1 + tau:end); % yn, tau steps ahead
 
 % The trev expression used in TSTOOL:
-out.raw = mean((yn1-yn).^3)/(mean((yn1-yn).^2))^(3/2);
+out.raw = mean((yn1 - yn).^3) / (mean((yn1 - yn).^2))^(3 / 2);
 
 % The magnitude
 out.abs = abs(out.raw);
 
 % The numerator
-out.num = mean((yn1-yn).^3);
+out.num = mean((yn1 - yn).^3);
 out.absnum = abs(out.num);
 
 % The denominator
-out.denom = (mean((yn1-yn).^2))^(3/2);
+out.denom = (mean((yn1 - yn).^2))^(3 / 2);
 
 end

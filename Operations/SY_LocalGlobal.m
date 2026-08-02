@@ -1,7 +1,7 @@
-function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
+function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
 % SY_LocalGlobal  Compares local statistics to global statistics of a time series.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the time series to analyze
 %
 % subsetHow, the local subset of time series to study:
@@ -16,7 +16,7 @@ function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
 % randomSeed, an option for whether (and how) to reset the random seed, for the
 % 'randcg' input
 %
-%---OUTPUTS: the mean, standard deviation, median, interquartile range,
+% ---OUTPUTS: the mean, standard deviation, median, interquartile range,
 % skewness, kurtosis, AC(1), and SampEn(1,0.1).
 %
 % This is not the most reliable or systematic operation because only a single
@@ -61,7 +61,7 @@ function out = SY_LocalGlobal(y,subsetHow,n,randomSeed)
 % Check input time series is z-scored:
 if ~BF_iszscored(y)
     warning('The input time series should be z-scored (mean=%g and std-1=%g)', ...
-                                            mean(y),std(y)-1)
+            mean(y), std(y) - 1)
 end
 
 % Set default l
@@ -72,10 +72,10 @@ end
 % Set default n
 if nargin < 3 || isempty(n)
     switch subsetHow
-    case {'l','unicg','randcg'}
-        n = 100; % 100 samples
-    case 'p'
-        n = 0.1; % 10% of the time series
+        case {'l', 'unicg', 'randcg'}
+            n = 100; % 100 samples
+        case 'p'
+            n = 0.1; % 10% of the time series
     end
 end
 
@@ -87,13 +87,13 @@ N = length(y); % Length of the time series
 switch subsetHow
     case 'l'
         % Take first n points of time series
-        r = (1:min(n,N));
+        r = (1:min(n, N));
     case 'p'
         % Take initial proportion n of time series
-    	r = (1:round(N*n));
+        r = (1:round(N * n));
     case 'unicg'
         % Take n uniformly distributed points in time series
-        r = round(linspace(1,N,n));
+        r = round(linspace(1, N, n));
     case 'randcg'
         if nargin < 4
             randomSeed = [];
@@ -103,17 +103,17 @@ switch subsetHow
         BF_ResetSeed(randomSeed);
 
         % Take n random points in time series; there could be repeats:
-        r = randi(N,n,1);
+        r = randi(N, n, 1);
 
         % This is not very statistically robust: just a single stochastic
         % sample with a (possibly) large variance
     otherwise
-        error('Unknown specifier, ''%s''',subsetHow);
+        error('Unknown specifier, ''%s''', subsetHow);
 end
 
 if length(r) < 5
     % It's not really appropriate to compute statistics on less than 5 datapoints
-    warning('Time series (of length %u) is too short',N)
+    warning('Time series (of length %u) is too short', N)
     out = NaN;
     return
 end
@@ -121,15 +121,15 @@ end
 % ------------------------------------------------------------------------------
 % Compare statistics of this subset to those obtained from the full time series
 % ------------------------------------------------------------------------------
-out.absmean = abs(mean(y(r))); %/mean(y); % Makes sense without normalization if y is z-scored
-out.std = std(y(r)); %/std(y); % Makes sense without normalization if y is z-scored
-out.median = median(y(r)); %/median(y); % if median is very small then normalization could be very noisy
-out.iqr = abs(1 - iqr(y(r))/iqr(y));
-out.skewness = abs(1 - skewness(y(r))/skewness(y)); % how far from true
-out.kurtosis = abs(1 - kurtosis(y(r))/kurtosis(y)); % how far from true
-out.ac1 = abs(1 - CO_AutoCorr(y(r),1,'Fourier')/CO_AutoCorr(y,1,'Fourier')); % how far from true
-sampEn_struct_r = EN_SampEn(y(r),1,0.1);
-sampEn_struct = EN_SampEn(y,1,0.1);
-out.sampen101 = sampEn_struct_r.sampen1/sampEn_struct.sampen1;
+out.absmean = abs(mean(y(r))); % /mean(y); % Makes sense without normalization if y is z-scored
+out.std = std(y(r)); % /std(y); % Makes sense without normalization if y is z-scored
+out.median = median(y(r)); % /median(y); % if median is very small then normalization could be very noisy
+out.iqr = abs(1 - iqr(y(r)) / iqr(y));
+out.skewness = abs(1 - skewness(y(r)) / skewness(y)); % how far from true
+out.kurtosis = abs(1 - kurtosis(y(r)) / kurtosis(y)); % how far from true
+out.ac1 = abs(1 - CO_AutoCorr(y(r), 1, 'Fourier') / CO_AutoCorr(y, 1, 'Fourier')); % how far from true
+sampEn_struct_r = EN_SampEn(y(r), 1, 0.1);
+sampEn_struct = EN_SampEn(y, 1, 0.1);
+out.sampen101 = sampEn_struct_r.sampen1 / sampEn_struct.sampen1;
 
 end

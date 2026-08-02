@@ -4,7 +4,7 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
 % Identification Toolbox
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -17,7 +17,7 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % numSteps, number of steps to predict into the future for testing the model.
 %
 %
-%---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
+% ---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
 % the training data, and statistics on the residuals from using the fitted model
 % to predict the testing data.
 
@@ -59,12 +59,12 @@ BF_CheckToolbox('identification_toolbox');
 %% Prepare Inputs
 % ------------------------------------------------------------------------------
 % (1) y, the time series as a column vector
-if size(y,2) > size(y,1)
-   y = y'; % ensure a column vector
+if size(y, 2) > size(y, 1)
+    y = y'; % ensure a column vector
 end
 N = length(y); % number of samples
 % Convert y to time series object
-y = iddata(y,[],1);
+y = iddata(y, [], 1);
 
 % orders; vector specifying the AR and MA components
 if nargin < 2 || isempty(orders)
@@ -99,12 +99,12 @@ dc = m.dc; % must uncertainties in MA coeffs
 % Make these outputs
 if length(c_ar) > 1
     for i = 2:length(c_ar)
-        out.(sprintf('AR_%u',i-1)) = c_ar(i);
+        out.(sprintf('AR_%u', i - 1)) = c_ar(i);
     end
 end
 if length(c_ma) > 1
     for i = 2:length(c_ma)
-        out.(sprintf('MA_%u',i-1)) = c_ma(i);
+        out.(sprintf('MA_%u', i - 1)) = c_ma(i);
     end
 end
 
@@ -141,9 +141,9 @@ out.aic = aic(m); % ~ log(fpe)
 % Select first portion of data for estimation
 % This could be any portion, actually... Maybe could look at robustness of
 % model to different training sets...
-ytrain = y(1:floor(pTrain*N));
+ytrain = y(1:floor(pTrain * N));
 % ytest = y;
-ytest = y(floor(pTrain*N):end); % overlap
+ytest = y(floor(pTrain * N):end); % overlap
 
 % Train the model on just this portion
 mp = armax(ytrain, orders);
@@ -166,6 +166,5 @@ fields = fieldnames(residout);
 for k = 1:length(fields);
     out.(fields{k}) = residout.(fields{k});
 end
-
 
 end

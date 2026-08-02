@@ -1,4 +1,4 @@
-function out = SY_DynWin(y,maxNumSegments)
+function out = SY_DynWin(y, maxNumSegments)
 % SY_DynWin  How stationarity estimates depend on the number of time-series subsegments
 %
 % Specifically, variation in a range of local measures are implemented: mean,
@@ -9,7 +9,7 @@ function out = SY_DynWin(y,maxNumSegments)
 % series are calculated as an estimate of the stationarity in this quantity as a
 % function of the number of splits, n_{seg}, of the time series.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series.
 %
@@ -17,7 +17,7 @@ function out = SY_DynWin(y,maxNumSegments)
 %                   maxNumSegments.
 %
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 %
 % The standard deviation of this set of 'stationarity' estimates
 % across these window sizes.
@@ -59,24 +59,24 @@ nsegr = (2:1:maxNumSegments); % range of nseg to sweep across
 nmov = 1; % controls window overlap
 
 numFeatures = 11; % number of features
-fs = zeros(length(nsegr),numFeatures); % standard deviation of feature values over windows
-taug = CO_FirstCrossing(y,'ac',0,'discrete'); % global tau
+fs = zeros(length(nsegr), numFeatures); % standard deviation of feature values over windows
+taug = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % global tau
 
 for i = 1:length(nsegr)
     nseg = nsegr(i);
-    wlen = floor(length(y)/nseg); % window length
-    inc = floor(wlen/nmov); % increment to move at each step
+    wlen = floor(length(y) / nseg); % window length
+    inc = floor(wlen / nmov); % increment to move at each step
     % If increment rounded down to zero, prop it up
     if inc == 0
         inc = 1;
     end
 
-    numSteps = (floor((length(y)-wlen)/inc)+1);
-    qs = zeros(numSteps,numFeatures);
+    numSteps = (floor((length(y) - wlen) / inc) + 1);
+    qs = zeros(numSteps, numFeatures);
 
     for j = 1:numSteps
-        ySub = y((j-1)*inc+1:(j-1)*inc+wlen);
-        taul = CO_FirstCrossing(ySub,'ac',0,'discrete');
+        ySub = y((j - 1) * inc + 1:(j - 1) * inc + wlen);
+        taul = CO_FirstCrossing(ySub, 'ac', 0, 'discrete');
 
         % qs.mean(j) = mean(ySub); % mean
         % qs.std(j) = std(ySub); % standard deviation
@@ -90,20 +90,20 @@ for i = 1:length(nsegr)
         % qs.tauloc(j) = CO_AutoCorr(ySub,taul); % AC_loc_tau
         % qs.taul(j) = taul;
 
-        qs(j,1) = mean(ySub); % mean
-        qs(j,2) = std(ySub); % standard deviation
-        qs(j,3) = skewness(ySub); % skewness
-        qs(j,4) = kurtosis(ySub); % kurtosis
+        qs(j, 1) = mean(ySub); % mean
+        qs(j, 2) = std(ySub); % standard deviation
+        qs(j, 3) = skewness(ySub); % skewness
+        qs(j, 4) = kurtosis(ySub); % kurtosis
         % qs(j,5) = EN_ApEn(ySub,1,0.2); % ApEn_1_02
-        sampenStruct = EN_SampEn(ySub,2,0.15);
-        qs(j,5) = sampenStruct.quadSampEn1; % SampEn_1_015
-        qs(j,6) = sampenStruct.quadSampEn2; % SampEn_2_015
-        qs(j,7) = CO_AutoCorr(ySub,1,'Fourier'); % AC1
-        qs(j,8) = CO_AutoCorr(ySub,2,'Fourier'); % AC2
+        sampenStruct = EN_SampEn(ySub, 2, 0.15);
+        qs(j, 5) = sampenStruct.quadSampEn1; % SampEn_1_015
+        qs(j, 6) = sampenStruct.quadSampEn2; % SampEn_2_015
+        qs(j, 7) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
+        qs(j, 8) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
         % (Sometimes taug or taul can be longer than ySub; then these will output NaNs:)
-        qs(j,9) = CO_AutoCorr(ySub,taug,'Fourier'); % AC_glob_tau
-        qs(j,10) = CO_AutoCorr(ySub,taul,'Fourier'); % AC_loc_tau
-        qs(j,11) = taul;
+        qs(j, 9) = CO_AutoCorr(ySub, taug, 'Fourier'); % AC_glob_tau
+        qs(j, 10) = CO_AutoCorr(ySub, taul, 'Fourier'); % AC_loc_tau
+        qs(j, 11) = taul;
     end
 
     % plot(qs,'o-');
@@ -111,7 +111,7 @@ for i = 1:length(nsegr)
 
     % fs(i,1:numFeatures) = structfun(@(x)std(x),qs,'UniformOutput',1);
     % fs(i) = structfun(@(x)std(x),qs,'UniformOutput',0);
-    fs(i,1:numFeatures) = std(qs);
+    fs(i, 1:numFeatures) = std(qs);
 end
 
 % fs contains std of quantities at all different 'scales' (segment lengths)

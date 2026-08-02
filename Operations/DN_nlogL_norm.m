@@ -5,7 +5,7 @@ function nlogL = DN_nlogL_norm(y)
 % Matlab's Statistics Toolbox and returns the negative log likelihood of the
 % data coming from a Gaussian distribution using the normlike function.
 %
-%---INPUT:
+% ---INPUT:
 % y, a vector of data
 
 % ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ function nlogL = DN_nlogL_norm(y)
 % ------------------------------------------------------------------------------
 
 [muhat, sigmahat] = normfit(y);
-nlogL = normlike([muhat, sigmahat],y)/length(y);
+nlogL = normlike([muhat, sigmahat], y) / length(y);
 
 % ** Somehow this just scales with length, regardless of the distribution of y?
 

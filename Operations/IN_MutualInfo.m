@@ -1,9 +1,9 @@
-function out = IN_MutualInfo(y1,y2,estMethod,extraParam)
+function out = IN_MutualInfo(y1, y2, estMethod, extraParam)
 % IN_MutualInfo     Mutual information of two data vectors.
 %
 % Uses the information dynamics toolkit implementation.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y1: input time series 1
 % y2: input time series 2
@@ -52,7 +52,7 @@ function out = IN_MutualInfo(y1,y2,estMethod,extraParam)
 if nargin < 2 || isempty(y1) || isempty(y2)
     error('Need to provide two input vectors');
 end
-if size(y1)~=size(y2)
+if size(y1) ~= size(y2)
     error('Input vectors need to be the same size... :/');
 end
 
@@ -66,7 +66,7 @@ end
 
 % ------------------------------------------------------------------------------
 % Initialize miCalc object (don't add noise!):
-miCalc = IN_Initialize_MI(estMethod,extraParam,0);
+miCalc = IN_Initialize_MI(estMethod, extraParam, 0);
 
 % Set observations to two time series:
 miCalc.setObservations(y1, y2);

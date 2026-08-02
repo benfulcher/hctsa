@@ -1,7 +1,7 @@
-function out = DN_TrimmedMean(y,n)
+function out = DN_TrimmedMean(y, n)
 % DN_TrimmedMean    Mean of the trimmed time series using trimmean.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % n, the percent of highest and lowest values in y to exclude from the mean
 %     calculation
@@ -39,6 +39,6 @@ if nargin < 2 || isempty(n)
     n = 0; % A normal mean by default
 end
 
-out = trimmean(y,n);
+out = trimmean(y, n);
 
 end

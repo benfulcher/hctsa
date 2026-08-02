@@ -7,7 +7,7 @@ function out = MD_pNN(x)
 % cf. "The pNNx files: re-examining a widely used heart rate variability
 %           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % This code is derived from MD_hrv_classic.m becuase it doesn't make medical
@@ -60,7 +60,7 @@ N = length(x); % length of the time series
 Dx = abs(diffx) * 1000; % assume milliseconds as for RR intervals
 pnns = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 for i = 1:length(pnns)
-    out.(sprintf('pnn%u',pnns(i))) = sum(Dx > pnns(i)) / (N-1);
+    out.(sprintf('pnn%u', pnns(i))) = sum(Dx > pnns(i)) / (N - 1);
 end
 
 end

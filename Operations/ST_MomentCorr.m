@@ -1,9 +1,9 @@
-function out = ST_MomentCorr(x,windowLength,wOverlap,mom1,mom2,whatTransform)
+function out = ST_MomentCorr(x, windowLength, wOverlap, mom1, mom2, whatTransform)
 % ST_MomentCorr   Correlations between simple statistics in local windows of a time series.
 %
 % The idea to implement this was that of Prof. Nick S. Jones (Imperial College London).
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % windowLength, the sliding window length (can be a fraction to specify a proportion of
@@ -59,24 +59,24 @@ doPlot = false; % plot outputs
 
 N = length(x); % number of samples in the input signal
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs, set defaults
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Sliding window length (samples)
 if nargin < 2 || isempty(windowLength)
     windowLength = 0.02; % 2% of the time-series length
 end
 if windowLength < 1
-    windowLength = ceil(N*windowLength);
+    windowLength = ceil(N * windowLength);
 end
 
 % Sliding window overlap length
 if nargin < 3 || isempty(wOverlap)
-    wOverlap = 1/5;
+    wOverlap = 1 / 5;
 end
 if wOverlap < 1 % specify a fraction OF THE WINDOW LENGTH
-    wOverlap = floor(windowLength*wOverlap);
+    wOverlap = floor(windowLength * wOverlap);
 end
 
 if nargin < 4 || isempty(mom1)
@@ -102,46 +102,46 @@ switch whatTransform
     case 'none'
         % x = x;
     otherwise
-        error('Unknown tranformation ''%s''',whatTransform)
+        error('Unknown tranformation ''%s''', whatTransform)
 end
 
 % ------------------------------------------------------------------------------
 % Create the windows:
 % ------------------------------------------------------------------------------
-x_buff = buffer(x,windowLength,wOverlap);
-numWindows = (N/(windowLength - wOverlap)); % number of windows
+x_buff = buffer(x, windowLength, wOverlap);
+numWindows = (N / (windowLength - wOverlap)); % number of windows
 
-if size(x_buff,2) > numWindows
+if size(x_buff, 2) > numWindows
     % fprintf(1,'Should have %u columns but we have %u: removing last one',numWindows,size(x_buff,2))
-    x_buff = x_buff(:,1:end-1); % lose last point
+    x_buff = x_buff(:, 1:end - 1); % lose last point
 end
-pointsPerWindow = size(x_buff,1);
-if pointsPerWindow==1
-    error('This time series (N = %u) is too short to extract %u windows.',N,numWindows);
+pointsPerWindow = size(x_buff, 1);
+if pointsPerWindow == 1
+    error('This time series (N = %u) is too short to extract %u windows.', N, numWindows);
 end
 
 % ok, now we have the sliding window ('buffered') signal, x_buff
 % first calculate the first moment in all the windows (each column is a
 % 'window' of the signal
-M1 = SUB_CalcMeMoments(x_buff,mom1);
-M2 = SUB_CalcMeMoments(x_buff,mom2);
+M1 = SUB_CalcMeMoments(x_buff, mom1);
+M2 = SUB_CalcMeMoments(x_buff, mom2);
 
-R = corrcoef(M1,M2);
-out.R = R(2,1); % correlation coefficient
-out.absR = abs(R(2,1)); % absolute value of correlation coefficient
-out.density = range(M1)*range(M2)/N; % density of points in M1--M2 space
-out.mi = IN_MutualInfo(M1,M2,'gaussian');
+R = corrcoef(M1, M2);
+out.R = R(2, 1); % correlation coefficient
+out.absR = abs(R(2, 1)); % absolute value of correlation coefficient
+out.density = range(M1) * range(M2) / N; % density of points in M1--M2 space
+out.mi = IN_MutualInfo(M1, M2, 'gaussian');
 % out.mi = BF_MutualInformation(M1,M2,'range','range',floor(sqrt(N)));
 % out.mi = BF_MutualInformation(M1,M2,[0,1],[0,1],floor(sqrt(N)));
 % this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doPlot
-    figure('color','w');
-    plot(M1,M2,'.k');
+    figure('color', 'w');
+    plot(M1, M2, '.k');
 end
 
 % ------------------------------------------------------------------------------
-function moms = SUB_CalcMeMoments(x_buff,momType)
+function moms = SUB_CalcMeMoments(x_buff, momType)
     switch momType
         case 'mean'
             moms = mean(x_buff);
@@ -152,7 +152,7 @@ function moms = SUB_CalcMeMoments(x_buff,momType)
         case 'iqr'
             moms = iqr(x_buff);
         otherwise
-            error('Unknown statistic ''%s''.',momType)
+            error('Unknown statistic ''%s''.', momType)
     end
 end
 % ------------------------------------------------------------------------------

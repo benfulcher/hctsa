@@ -1,7 +1,7 @@
-function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
+function out = NL_TISEAN_fnn(y, tau, maxm, theilerWin, justBest, bestp)
 % NL_TISEAN_fnn     False nearest neighbors of a time series.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % tau, the time delay
 % maxm, the maximum embedding dimension
@@ -10,7 +10,7 @@ function out = NL_TISEAN_fnn(y,tau,maxm,theilerWin,justBest,bestp)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %                dimension
 %
-%---OUTPUTS: individual false nearest neighbors proportions, as well as
+% ---OUTPUTS: individual false nearest neighbors proportions, as well as
 % summaries of neighborhood size, and embedding dimensions at which the
 % proportion of nearest neighbours falls below a range of thresholds
 
@@ -68,17 +68,17 @@ if nargin < 1
 end
 N = length(y);
 if N < 10
-    warning('Time series (N=%u) too short for fnn',N);
+    warning('Time series (N=%u) too short for fnn', N);
     out = NaN; return
 end
 
 if nargin < 2 || isempty(tau)
     tau = 1; % time delay
 end
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete'); % first zero-crossing of autocorrelation function
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');
@@ -94,7 +94,7 @@ if nargin < 4 || isempty(theilerWin)
     theilerWin = 0.05; % 5% of the time-series length
 end
 if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
-    theilerWin = round(theilerWin*N);
+    theilerWin = round(theilerWin * N);
 end
 
 % Just return best dimension:
@@ -111,12 +111,12 @@ end
 %% Write the file
 % ------------------------------------------------------------------------------
 filePath = BF_WriteTempFile(y);
-fprintf(1,'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN.\n',length(y),filePath);
+fprintf(1, 'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN.\n', length(y), filePath);
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, false_nearest
 % ------------------------------------------------------------------------------
-tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s',tau,maxm,theilerWin,filePath);
+tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s', tau, maxm, theilerWin, filePath);
 [~, res] = system(tisean_command);
 delete(filePath) % remove the temporary time-series data file
 
@@ -129,7 +129,7 @@ delete(filePath) % remove the temporary time-series data file
 if isempty(res)
     error('No output from TISEAN routine false_nearest on the data');
 end
-data = textscan(res,'%u%f%f%f');
+data = textscan(res, '%u%f%f%f');
 
 mDim = double(data{1}); % embedding dimension
 pNN = data{2}; % fraction of false nearest neighbors
@@ -142,9 +142,9 @@ if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
 end
 
 if doPlot
-    f = figure('color','w'); box('on'); hold on
-    plot(pNN,'o-k'); plot(nHoodSize2,'o-r')
-    legend('pNN','mean squared size of neighbourhood')
+    f = figure('color', 'w'); box('on'); hold on
+    plot(pNN, 'o-k'); plot(nHoodSize2, 'o-r')
+    legend('pNN', 'mean squared size of neighbourhood')
     xlabel('Embedding dimension');
 end
 
@@ -153,19 +153,19 @@ end
 % ------------------------------------------------------------------------------
 if justBest
     % We just want a scalar to choose the embedding with
-    out = firstunderf(bestp,mDim,pNN);
+    out = firstunderf(bestp, mDim, pNN);
     return
 end
 
 % Output all of them
 for i = 1:maxm
     if i <= length(mDim)
-        out.(sprintf('pfnn_%u',i)) = pNN(i); % proportion of false nearest neighbors
-        out.(sprintf('nHood2_%u',i)) = nHoodSize2(i); % mean squared size of neighbourhood
+        out.(sprintf('pfnn_%u', i)) = pNN(i); % proportion of false nearest neighbors
+        out.(sprintf('nHood2_%u', i)) = nHoodSize2(i); % mean squared size of neighbourhood
     else
         % Not enough points found to estimate at this dimension
-        out.(sprintf('pfnn_%u',i)) = NaN;
-        out.(sprintf('nHood2_%u',i)) = NaN;
+        out.(sprintf('pfnn_%u', i)) = NaN;
+        out.(sprintf('nHood2_%u', i)) = NaN;
     end
 end
 
@@ -179,24 +179,24 @@ out.maxnHood2 = max(nHoodSize2); % maximum
 out.meannHood2 = mean(nHoodSize2); % mean
 
 % Find embedding dimension for the first time p goes under x%
-out.firstunder09 = firstunderf(0.9,mDim,pNN);   % 80%
-out.firstunder08 = firstunderf(0.8,mDim,pNN);   % 80%
-out.firstunder07 = firstunderf(0.7,mDim,pNN);   % 70%
-out.firstunder06 = firstunderf(0.6,mDim,pNN);   % 60%
-out.firstunder05 = firstunderf(0.5,mDim,pNN);   % 50%
-out.firstunder04 = firstunderf(0.4,mDim,pNN);   % 50%
-out.firstunder03 = firstunderf(0.3,mDim,pNN);   % 30%
-out.firstunder02 = firstunderf(0.2,mDim,pNN);   % 20%
-out.firstunder01 = firstunderf(0.1,mDim,pNN);   % 10%
-out.firstunder005 = firstunderf(0.05,mDim,pNN); % 5%
+out.firstunder09 = firstunderf(0.9, mDim, pNN);   % 80%
+out.firstunder08 = firstunderf(0.8, mDim, pNN);   % 80%
+out.firstunder07 = firstunderf(0.7, mDim, pNN);   % 70%
+out.firstunder06 = firstunderf(0.6, mDim, pNN);   % 60%
+out.firstunder05 = firstunderf(0.5, mDim, pNN);   % 50%
+out.firstunder04 = firstunderf(0.4, mDim, pNN);   % 50%
+out.firstunder03 = firstunderf(0.3, mDim, pNN);   % 30%
+out.firstunder02 = firstunderf(0.2, mDim, pNN);   % 20%
+out.firstunder01 = firstunderf(0.1, mDim, pNN);   % 10%
+out.firstunder005 = firstunderf(0.05, mDim, pNN); % 5%
 
 % Maximum step-wise change across p
 out.max1stepchange = max(abs(diff(pNN)));
 
 % ------------------------------------------------------------------------------
-function firsti = firstunderf(x,m,p)
+function firsti = firstunderf(x, m, p)
     %% Find m for the first time p goes under x%
-    firsti = m(find(p < x,1,'first'));
+    firsti = m(find(p < x, 1, 'first'));
     if isempty(firsti)
         firsti = m(length(m)) + 1;
     end

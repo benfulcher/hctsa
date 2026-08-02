@@ -1,4 +1,4 @@
-function out = MF_GP_FitAcross(y,covFunc,npoints)
+function out = MF_GP_FitAcross(y, covFunc, npoints)
 % MF_GP_FitAcross   Gaussian Process time-series modeling for local prediction.
 %
 % Trains a Gaussian Process model on equally-spaced points throughout the time
@@ -7,12 +7,12 @@ function out = MF_GP_FitAcross(y,covFunc,npoints)
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % covFunc, the covariance function (structured in the standard way for the gpml toolbox)
 % npoints, the number of points through the time series to fit the GP model to
 %
-%---OUTPUTS: summarize the error and fitted hyperparameters.
+% ---OUTPUTS: summarize the error and fitted hyperparameters.
 %
 % In future could do a better job of the sampling of points -- perhaps to take
 % into account the autocorrelation of the time series.
@@ -51,13 +51,13 @@ doplot = 0; % set to 1 to visualize behavior
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
-if size(y,2) > size(y,1);
+if size(y, 2) > size(y, 1);
     y = y'; % make sure a column vector
 end
 
 if nargin < 2 || isempty(covFunc)
-    fprintf(1,'Using default sum of SE and noise covariance function\n')
-    covFunc = {'covSum', {'covSEiso','covNoise'}};
+    fprintf(1, 'Using default sum of SE and noise covariance function\n')
+    covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
 
 if nargin < 3 || isempty(npoints)
@@ -68,7 +68,7 @@ end
 %% Get the points
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
-tt = floor(linspace(1,N,npoints))'; % time range (training)
+tt = floor(linspace(1, N, npoints))'; % time range (training)
 yt = y(tt);
 
 % ------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ infAlg = @infLaplace; % Inference algorithm (Laplace approximation)
 nfevals = -50; % number of function evaluations (with negative)
 
 try
-    hyp = MF_GP_LearnHyperp(tt,yt,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp);
+    hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
 catch emsg
     error('Error learning hyperparameters for time series')
 end
@@ -107,39 +107,37 @@ end
 if N <= 2000
     ts = (1:N)';
 else % memory constraints force us to crudely resample
-    ts = round(linspace(1,N,2000))';
+    ts = round(linspace(1, N, 2000))';
 end
 try
     % [mu, S2] = gpr(loghyper, covFunc, tt, yt, ts);
     [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
 catch emsg
-    error('Error running Gaussian Process regression on time series: %s',emsg.message);
+    error('Error running Gaussian Process regression on time series: %s', emsg.message);
 end
-
 
 %% For Plotting
 if doplot
-    xstar = linspace(min(t),max(t),1000)';
+    xstar = linspace(min(t), max(t), 1000)';
     [mu, S2] = gpr(loghyper, covFunc, t, y, ts);
-    S2p = S2 - exp(2*loghyper(3)); % remove noise from predictions
+    S2p = S2 - exp(2 * loghyper(3)); % remove noise from predictions
     S2p = S2;
-    figure('color','w');
-    f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
-    fill([ts; flipdim(ts,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8);
-            % grayscale error bars
+    figure('color', 'w');
+    f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
+    fill([ts; flipdim(ts, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8);
+    % grayscale error bars
     hold on;
-    plot(ts,mu,'k-','LineWidth',2); % mean function
-    plot(ts,y(ts),'.-k'); % original data
+    plot(ts, mu, 'k-', 'LineWidth', 2); % mean function
+    plot(ts, y(ts), '.-k'); % original data
 end
-
 
 % ------------------------------------------------------------------------------
 %% Output statistics
 % ------------------------------------------------------------------------------
 S = sqrt(S2); % standard deviation function, S
 % rms error from mean function, mu
-out.rmserr = mean(sqrt((y(ts)-mu).^2));
-out.meanstderr = mean(abs(y(ts)-mu)./S);
+out.rmserr = mean(sqrt((y(ts) - mu).^2));
+out.meanstderr = mean(abs(y(ts) - mu) ./ S);
 out.stdmu = std(mu);
 out.meanS = mean(S);
 out.stdS = std(S);
@@ -154,16 +152,14 @@ end
 
 % Loghyperparameters
 for i = 1:nhps
-    out.(['logh',num2str(i)]) = loghyper(i); % dynamic field referencing
+    out.(['logh', num2str(i)]) = loghyper(i); % dynamic field referencing
     % eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
-if strcmp(covFunc{1},'covSum') && strcmp(covFunc{2}{1},'covSEiso') && strcmp(covFunc{2}{2},'covNoise')
-   % Give extra output based on length parameter on length of time series
-   out.h_lonN = exp(loghyper(1))/N;
+if strcmp(covFunc{1}, 'covSum') && strcmp(covFunc{2}{1}, 'covSEiso') && strcmp(covFunc{2}{2}, 'covNoise')
+    % Give extra output based on length parameter on length of time series
+    out.h_lonN = exp(loghyper(1)) / N;
 end
-
-
 
 %% Subfunctions
 
@@ -200,6 +196,5 @@ end
 %         end
 %
 %     end
-
 
 end

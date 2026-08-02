@@ -1,4 +1,4 @@
-function out = CO_fzcglscf(y,alpha,beta,maxtau)
+function out = CO_fzcglscf(y, alpha, beta, maxtau)
 % CO_fzcglscf   The first zero-crossing of the generalized self-correlation function
 %
 % Returns the first zero-crossing of the generalized self-correlation function
@@ -8,7 +8,7 @@ function out = CO_fzcglscf(y,alpha,beta,maxtau)
 % Uses CO_glscf to calculate the generalized self-correlations.
 % Keeps calculating until the function finds a minimum, and returns this lag.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series.
 % alpha, the parameter alpha.
 % beta, the parameter beta.
@@ -52,20 +52,20 @@ if nargin < 4 || isempty(maxtau)
     % maxtau = min(maxtau,N); % make sure no longer than the time series itself
 end
 
-glscfs = zeros(maxtau,1);
+glscfs = zeros(maxtau, 1);
 
 for i = 1:maxtau
-	tau = i;
+    tau = i;
     % y1 = abs(y(1:end-tau));
     % y2 = abs(y(1+tau:end));
 
-    glscfs(i) = CO_glscf(y,alpha,beta,tau);
+    glscfs(i) = CO_glscf(y, alpha, beta, tau);
 
-	if (i > 1) && (glscfs(i)*glscfs(i-1) < 0)
-		% Draw a straight line between these two and look at where hits zero
-		out = i - 1 + glscfs(i)/(glscfs(i)-glscfs(i-1));
-		return
-	end
+    if (i > 1) && (glscfs(i) * glscfs(i - 1) < 0)
+        % Draw a straight line between these two and look at where hits zero
+        out = i - 1 + glscfs(i) / (glscfs(i) - glscfs(i - 1));
+        return
+    end
 end
 
 out = maxtau; % if the function hasn't exited yet, set output to maxtau

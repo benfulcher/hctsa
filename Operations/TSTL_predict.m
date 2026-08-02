@@ -7,7 +7,7 @@ function out = TSTL_predict(y, plen, NNR, stepSize, pmode, embedParams)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, scalar column vector time series
 %
@@ -86,10 +86,9 @@ end
 
 % (*) embedParams
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding using autocorrelation for tau and Cao''s method for m\n');
+    embedParams = {'ac', 'fnnmar'};
+    fprintf(1, 'Using default embedding using autocorrelation for tau and Cao''s method for m\n');
 end
-
 
 % ------------------------------------------------------------------------------
 %% Embed the scalar time series by time-delay method
@@ -98,12 +97,12 @@ end
 % delay = embedpn(1);
 % dim = embedpn(2);
 if iscell(embedParams)
-    s = BF_Embed(y,embedParams{1},embedParams{2},1); % last in
+    s = BF_Embed(y, embedParams{1}, embedParams{2}, 1); % last in
 elseif embedParams == 0
     s = signal(y);
 end
 
-if ~isa(s,'signal')
+if ~isa(s, 'signal')
     out = NaN; return
 end
 
@@ -113,7 +112,7 @@ if Ns < 50
 end
 y = y(1:Ns); % for statistical purposes...
 if plen > 0 && plen <= 1
-    plen = floor(plen*Ns); % specify a proportion of the time series length
+    plen = floor(plen * Ns); % specify a proportion of the time series length
 end
 
 % ------------------------------------------------------------------------------
@@ -126,13 +125,13 @@ catch
 end
 
 y_pred = data(rs);
-y_pred1 = y_pred(:,1); % for this embedding dimension (?)
+y_pred1 = y_pred(:, 1); % for this embedding dimension (?)
 
 if doPlot
-    figure('color','w'); box('on'); view(rs);
+    figure('color', 'w'); box('on'); view(rs);
 
-    figure('color','w'); box('on');
-    hold off; plot(y,'k'), hold on; plot(y_pred1,'m'), hold off;
+    figure('color', 'w'); box('on');
+    hold off; plot(y, 'k'), hold on; plot(y_pred1, 'm'), hold off;
 end
 
 % ------------------------------------------------------------------------------
@@ -142,40 +141,39 @@ end
 % actual basic statistical properties
 out.pred1mean = mean(y_pred1);
 out.pred1std = std(y_pred1);
-out.pred1maxc = abs(max(y_pred1)-max(y));
-out.pred1maxc = abs(max(y_pred(:))-max(y));
-out.pred1minc = abs(min(y_pred1)-min(y));
-out.predminc = abs(min(y_pred(:))-min(y));
-out.pred1rangec = abs(range(y_pred1)/range(y)-1);
+out.pred1maxc = abs(max(y_pred1) - max(y));
+out.pred1maxc = abs(max(y_pred(:)) - max(y));
+out.pred1minc = abs(min(y_pred1) - min(y));
+out.predminc = abs(min(y_pred(:)) - min(y));
+out.pred1rangec = abs(range(y_pred1) / range(y) - 1);
 
 % look at structure in cross correlation function, xcf
 % (requires that prediction length the same as the time series itself)
-[xcf, lags] = xcorr(y,y_pred1,'coeff');
+[xcf, lags] = xcorr(y, y_pred1, 'coeff');
 % plot(lags,xcf);
 
 out.maxabsxcf = max(abs(xcf)); % maximum of cross-correlation function; where it occurs
-out.maxabsxcflag = lags(find(abs(xcf) == out.maxabsxcf,1,'first'));
+out.maxabsxcflag = lags(find(abs(xcf) == out.maxabsxcf, 1, 'first'));
 out.maxxcf = max(xcf); % maximum positive cross-correlation
-out.maxxcflag = lags(find(xcf == out.maxxcf,1,'first'));
+out.maxxcflag = lags(find(xcf == out.maxxcf, 1, 'first'));
 out.meanxcf = mean(xcf);
 out.minxcf = min(xcf);
 out.stdxcf = std(xcf);
 
-
-out.pred1_ac1 = CO_AutoCorr(y_pred1,1,'Fourier'); % autocorrelation at lag one of prediction
-out.pred1ac1diff = abs(out.pred1_ac1 - CO_AutoCorr(y,1,'Fourier')); % difference in autocorrelations of prediction and original
-out.pred1_ac2 = CO_AutoCorr(y_pred1,2,'Fourier'); % autocorrelation at lag one of prediction
-out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y,2,'Fourier')); % difference in autocorrelations of prediction and original
-out.pred_tau_comp = CO_FirstCrossing(y_pred1,'ac',0,'continuous')/CO_FirstCrossing(y,'ac',0,'continuous'); % ratio of first zero crossings of autocorrelation function
+out.pred1_ac1 = CO_AutoCorr(y_pred1, 1, 'Fourier'); % autocorrelation at lag one of prediction
+out.pred1ac1diff = abs(out.pred1_ac1 - CO_AutoCorr(y, 1, 'Fourier')); % difference in autocorrelations of prediction and original
+out.pred1_ac2 = CO_AutoCorr(y_pred1, 2, 'Fourier'); % autocorrelation at lag one of prediction
+out.pred1ac2diff = abs(out.pred1_ac2 - CO_AutoCorr(y, 2, 'Fourier')); % difference in autocorrelations of prediction and original
+out.pred_tau_comp = CO_FirstCrossing(y_pred1, 'ac', 0, 'continuous') / CO_FirstCrossing(y, 'ac', 0, 'continuous'); % ratio of first zero crossings of autocorrelation function
 
 % Autocorrelation structure:
-acs_y = CO_AutoCorr(y,1:10,'Fourier');
-acs_y_pred1 = CO_AutoCorr(y_pred1,1:10,'Fourier');
+acs_y = CO_AutoCorr(y, 1:10, 'Fourier');
+acs_y_pred1 = CO_AutoCorr(y_pred1, 1:10, 'Fourier');
 out.acs1_10_sumabsdiffpred1 = sum(abs(acs_y - acs_y_pred1));
 
 % mean square residuals: this will likely be a bad measure (as may be out
 % of sync)
-out.pred1rmsres = sqrt(mean((y-y_pred1).^2));
+out.pred1rmsres = sqrt(mean((y - y_pred1).^2));
 
 % align at best positive cross-correlation and then look at residuals
 if out.maxxcflag > 0
@@ -197,16 +195,16 @@ end
 out.Nlagxcorr = Nlag;
 res = y_lagged - y_pred1_lagged;
 out.bestpred1rmsres = sqrt(mean(res.^2)); % rms residuals
-out.ac1bestres = CO_AutoCorr(res,1,'Fourier'); % autocorrelation of residuals
+out.ac1bestres = CO_AutoCorr(res, 1, 'Fourier'); % autocorrelation of residuals
 
 % now look at fraction of points that are within a threshold of each
 % other...
-fracresfn = @(x) sum(abs(res) < x)/Nlag;
-out.fracres005 = fracresfn(0.05); %sum(abs(res)<0.05)/Nlag;
-out.fracres01 = fracresfn(0.1); %sum(abs(res)<0.1)/Nlag;
-out.fracres02 = fracresfn(0.2); %sum(abs(res)<0.2)/Nlag;
-out.fracres03 = fracresfn(0.3); %sum(abs(res)<0.3)/Nlag;
-out.fracres05 = fracresfn(0.5); %sum(abs(res)<0.5)/Nlag;
+fracresfn = @(x) sum(abs(res) < x) / Nlag;
+out.fracres005 = fracresfn(0.05); % sum(abs(res)<0.05)/Nlag;
+out.fracres01 = fracresfn(0.1); % sum(abs(res)<0.1)/Nlag;
+out.fracres02 = fracresfn(0.2); % sum(abs(res)<0.2)/Nlag;
+out.fracres03 = fracresfn(0.3); % sum(abs(res)<0.3)/Nlag;
+out.fracres05 = fracresfn(0.5); % sum(abs(res)<0.5)/Nlag;
 
 % now look at fraction of points within a circle of (time-measurement) radius
 % near a real point in the time series
@@ -219,6 +217,5 @@ out.fracres05 = fracresfn(0.5); %sum(abs(res)<0.5)/Nlag;
 % There are heaps of metrics you could use to compare... Ultimately may be
 % able to implement model outputs as rows so as to compare across many
 % measures...
-
 
 end

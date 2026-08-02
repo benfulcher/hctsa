@@ -1,4 +1,4 @@
-function out = SY_DriftingMean(y,segmentHow,l)
+function out = SY_DriftingMean(y, segmentHow, l)
 % SY_DriftingMean   Mean and variance in local time-series subsegments.
 %
 % Splits the time series into segments, computes the mean and variance in each
@@ -19,7 +19,7 @@ function out = SY_DriftingMean(y,segmentHow,l)
 % >>
 % >> Rune
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % segmentHow, (i) 'fix': fixed-length segments (of length l)
@@ -64,37 +64,37 @@ N = length(y); % length of the input time series
 if nargin < 2 || isempty(segmentHow)
     segmentHow = 'num'; % a specified number of segments
 end
-if strcmp(segmentHow,'num')
-    l = floor(N/l);
-elseif ~strcmp(segmentHow,'fix')
-    error('Unknown input setting ''%s''',segmentHow)
+if strcmp(segmentHow, 'num')
+    l = floor(N / l);
+elseif ~strcmp(segmentHow, 'fix')
+    error('Unknown input setting ''%s''', segmentHow)
 end
 
 if nargin < 3 || isempty(l)
     switch segmentHow
-    case 'num'
-        l = 5; % 5 segments
-    case 'fix'
-        l = 200; % 200-sample segments
+        case 'num'
+            l = 5; % 5 segments
+        case 'fix'
+            l = 200; % 200-sample segments
     end
 end
 
 % ------------------------------------------------------------------------------
 %% Check for short time series
-%-------------------------------------------------------------------------------
-if l==0 || N < l % doesn't make sense to split into more windows than there are data points
-    fprintf(1,'Time Series (N = %u < l = %u) is too short for this operation\n',N,l);
+% -------------------------------------------------------------------------------
+if l == 0 || N < l % doesn't make sense to split into more windows than there are data points
+    fprintf(1, 'Time Series (N = %u < l = %u) is too short for this operation\n', N, l);
     out = NaN;
     return
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Get going
-%-------------------------------------------------------------------------------
-numFits = floor(N/l); % number of times l fits completely into N
-z = zeros(l,numFits);
+% -------------------------------------------------------------------------------
+numFits = floor(N / l); % number of times l fits completely into N
+z = zeros(l, numFits);
 for i = 1:numFits
-    z(:,i) = y((i-1)*l + 1:i*l);
+    z(:, i) = y((i - 1) * l + 1:i * l);
 end
 zm = mean(z);
 zv = var(z);
@@ -103,14 +103,14 @@ maxMean = max(zm);
 minMean = min(zm);
 meanMean = mean(zm);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Output statistics
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
-out.max = maxMean/meanVar;
-out.min = minMean/meanVar;
-out.mean = meanMean/meanVar;
-out.meanmaxmin = (out.max + out.min)/2;
-out.meanabsmaxmin = (abs(out.max) + abs(out.min))/2;
+out.max = maxMean / meanVar;
+out.min = minMean / meanVar;
+out.mean = meanMean / meanVar;
+out.meanmaxmin = (out.max + out.min) / 2;
+out.meanabsmaxmin = (abs(out.max) + abs(out.min)) / 2;
 
 end

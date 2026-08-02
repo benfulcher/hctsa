@@ -1,4 +1,4 @@
-function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
+function out = MF_StateSpace_n4sid(y, ord, ptrain, steps)
 % MF_StateSpace_n4sid   State space time-series model fitting.
 %
 % First fits the model to the whole time series, then trains it on the first
@@ -17,13 +17,13 @@ function out = MF_StateSpace_n4sid(y,ord,ptrain,steps)
 % (for state space matrices A, B, C, D), disturbance matrix K (coefficients of
 % noise input), input u, output y, vector of states x, and disturbance (noise) e.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % ord, the order of state-space model to implement (can also be the string 'best')
 % ptrain, the proportion of the time series to use for training
 % steps, the number of steps ahead to predict
 %
-%---OUTPUTS: parameters from the model fitted to the entire time series, and
+% ---OUTPUTS: parameters from the model fitted to the entire time series, and
 % goodness of fit and residual analysis from n4sid prediction.
 %
 % Uses the functions iddata, n4sid, aic, and predict from Matlab's System
@@ -70,7 +70,7 @@ BF_CheckToolbox('identification_toolbox');
 % Convert y to time series object
 N = length(y); % length of time series, N
 
-y = iddata(y,[],1);
+y = iddata(y, [], 1);
 
 % (2) Order, the order of the state space model to fit. Can specify a positive
 % integer or the string 'best'.
@@ -88,14 +88,13 @@ if nargin < 4 || isempty(steps)
     steps = 1; % one-step ahead prediction
 end
 
-
 % ------------------------------------------------------------------------------
 %% Build the state-space model
 % ------------------------------------------------------------------------------
 % Use the whole time series -- prediction comes later...
-m = n4sid(y,ord); % fits a state-space model of given order
+m = n4sid(y, ord); % fits a state-space model of given order
 
-if strcmp(ord,'best')
+if strcmp(ord, 'best')
     % also return the best order as an output statistic
     out.bestorder = length(m.k);
 end
@@ -115,13 +114,13 @@ m_np = length(m.ParameterVector); % number of parameters fitted
 % Output model parameters
 allm_as = m_as(:);
 for i = 1:length(allm_as)
-    out.(sprintf('A_%u',i)) = allm_as(i);
+    out.(sprintf('A_%u', i)) = allm_as(i);
 end
 for i = 1:length(m_ks)
-    out.(sprintf('k_%u',i)) = m_ks(i);
+    out.(sprintf('k_%u', i)) = m_ks(i);
 end
 for i = 1:length(m_cs)
-    out.(sprintf('c_%u',i)) = m_cs(i);
+    out.(sprintf('c_%u', i)) = m_cs(i);
 end
 out.x0mod = sqrt(sum(m_x0.^2));
 out.np = m_np; % the number of parameters, only a useful output if not specified
@@ -145,22 +144,22 @@ out.m_aic = aic(m);
 % Select first portion of data for estimation
 % This could be any portion, actually... Maybe could look at robustness of
 % model to different training sets...
-ytrain = y(1:floor(ptrain*N));
+ytrain = y(1:floor(ptrain * N));
 % ytest = y;
-ytest = y(floor(ptrain*N):end); % overlap
+ytest = y(floor(ptrain * N):end); % overlap
 
 % Train the model on just this portion
 % mp = armax(ytrain, orders);
 try
     mp = n4sid(ytrain, ord);
 catch emsg
-    error('Couldn''t fit the model to this time series: %s',emsg.message)
+    error('Couldn''t fit the model to this time series: %s', emsg.message)
     % out = NaN; return
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Step-ahead predictions
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % steps = 2; % predicts this many steps ahead
 % Maybe look at trends across different prediction horizons...
 yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
@@ -170,9 +169,9 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 
 mresiduals = ytest.y - yp.y;
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Statistics on residuals
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 residout = MF_ResidualAnalysis(mresiduals);
 
 % Convert these to local outputs in quick loop
@@ -181,6 +180,6 @@ for k = 1:length(fields);
     out.(fields{k}) = residout.(fields{k});
 end
 
-out.ac1diff = abs(CO_AutoCorr(y.y,1,'Fourier')) - abs(CO_AutoCorr(mresiduals,1,'Fourier'));
+out.ac1diff = abs(CO_AutoCorr(y.y, 1, 'Fourier')) - abs(CO_AutoCorr(mresiduals, 1, 'Fourier'));
 
 end

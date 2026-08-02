@@ -1,10 +1,10 @@
 function out = SY_Trend(y)
 % SY_Trend  Quantifies various measures of trend in a time series.
 %
-%---INPUT:
+% ---INPUT:
 % y, the input time series.
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % Linearly detrends the time series using detrend, and returns the ratio of
 % standard deviations before and after the linear detrending. If a strong linear
 % trend is present in the time series, this operation should output a low value.
@@ -51,24 +51,24 @@ N = length(y);
 out.stdRatio = std(detrend(y)) / std(y);
 
 % Linear fit:
-[out.gradient,out.intercept] = LinearFit(1:N,y);
+[out.gradient, out.intercept] = LinearFit(1:N, y);
 
 % Stats on the cumulative sum:
 yC = cumsum(y);
 out.meanYC = mean(yC);
 out.stdYC = std(yC);
-[out.gradientYC,out.interceptYC] = LinearFit(1:N,yC);
+[out.gradientYC, out.interceptYC] = LinearFit(1:N, yC);
 
 % Mean cumsum in first and second half of the time series:
-out.meanYC12 = mean(yC(1:floor(N/2)));
-out.meanYC22 = mean(yC(floor(N/2)+1:end));
+out.meanYC12 = mean(yC(1:floor(N / 2)));
+out.meanYC22 = mean(yC(floor(N / 2) + 1:end));
 
 % ------------------------------------------------------------------------------
-function [m,b] = LinearFit(xData,yData)
-    if size(xData,1) ~= size(yData,1);
+function [m, b] = LinearFit(xData, yData)
+    if size(xData, 1) ~= size(yData, 1);
         yData = yData';
     end
-    coeff = polyfit(xData,yData,1);
+    coeff = polyfit(xData, yData, 1);
     m = coeff(1); b = coeff(2);
 end
 % ------------------------------------------------------------------------------

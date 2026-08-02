@@ -1,15 +1,15 @@
-function out = IN_AutoMutualInfoStats(y,maxTau,estMethod,extraParam)
+function out = IN_AutoMutualInfoStats(y, maxTau, estMethod, extraParam)
 % IN_AutoMutualInfoStats  Statistics on automutual information function
 %                         of a time series.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, column vector of time series data
 %
 % maxTau, maximal time delay
 %
 % estMethod, extraParam -- cf. inputs to IN_AutoMutualInfo.m
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % out, a structure containing statistics on the AMIs and their pattern across
 %       the range of specified time delays.
 
@@ -53,12 +53,12 @@ N = length(y); % length of time series
 
 % maxTau: the maximum time delay to investigate
 if nargin < 2 || isempty(maxTau)
-    maxTau = ceil(N/4);
+    maxTau = ceil(N / 4);
 end
 maxTau0 = maxTau;
 
 % Don't go above N/2
-maxTau = min(maxTau,ceil(N/2));
+maxTau = min(maxTau, ceil(N / 2));
 
 % Estimation method:
 if nargin < 3
@@ -73,7 +73,7 @@ end
 % ------------------------------------------------------------------------------
 %% Get the AMI data:
 % ------------------------------------------------------------------------------
-ami = IN_AutoMutualInfo(y,1:maxTau,estMethod,extraParam);
+ami = IN_AutoMutualInfo(y, 1:maxTau, estMethod, extraParam);
 
 % Convert structure to a vector
 ami = struct2cell(ami);
@@ -84,9 +84,9 @@ ami = [ami{:}];
 % ------------------------------------------------------------------------------
 for i = 1:maxTau0
     if i <= maxTau
-        out.(sprintf('ami%u',i)) = ami(i);
+        out.(sprintf('ami%u', i)) = ami(i);
     else % we've trimmed the maximum back because time series is too short
-        out.(sprintf('ami%u',i)) = NaN;
+        out.(sprintf('ami%u', i)) = NaN;
     end
 end
 
@@ -101,49 +101,49 @@ out.stdami = std(ami);
 
 % First minimum of mutual information across range
 dami = diff(ami);
-extremai = find(dami(1:end-1).*dami(2:end) < 0);
-out.pextrema = length(extremai)/(lami-1);
+extremai = find(dami(1:end - 1) .* dami(2:end) < 0);
+out.pextrema = length(extremai) / (lami - 1);
 if isempty(extremai)
     out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
     out.fmmi = min(extremai);
 end
 
-%----Look for periodicities in local maxima
-maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
+% ----Look for periodicities in local maxima
+maximai = find(dami(1:end - 1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
 % Is there a big peak in dmaxima?
 % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
-out.pmaxima = length(dmaximai)/floor(lami/2);
+out.pmaxima = length(dmaximai) / floor(lami / 2);
 if isempty(dmaximai) % fewer than 2 local maxima
     out.modeperiodmax = NaN;
     out.pmodeperiodmax = NaN;
 else
     out.modeperiodmax = mode(dmaximai);
-    out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
+    out.pmodeperiodmax = sum(dmaximai == mode(dmaximai)) / length(dmaximai);
 end
 
-%----Look for periodicities in local minima
-minimai = find(dami(1:end-1) < 0 & dami(2:end) > 0) + 1;
+% ----Look for periodicities in local minima
+minimai = find(dami(1:end - 1) < 0 & dami(2:end) > 0) + 1;
 dminimai = diff(minimai);
 % Is there a big peak in dminima?
- % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
-out.pminima = length(dminimai)/floor(lami/2);
+% (no need to normalize since a given method inputs its range; but do it anyway... ;-))
+out.pminima = length(dminimai) / floor(lami / 2);
 if isempty(dminimai) % fewer than 2 local maxima
     out.modeperiodmin = NaN;
     out.pmodeperiodmin = NaN;
 else
     out.modeperiodmin = mode(dminimai);
-    out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
+    out.pmodeperiodmin = sum(dminimai == mode(dminimai)) / length(dminimai);
 end
 
-%----Number of crossings at mean/median level, percentiles
-out.pcrossmean = mean(BF_SignChange(ami-mean(ami)));
-out.pcrossmedian = mean(BF_SignChange(ami-median(ami)));
-out.pcrossq10 = mean(BF_SignChange(ami-quantile(ami,0.1)));
-out.pcrossq90 = mean(BF_SignChange(ami-quantile(ami,0.9)));
+% ----Number of crossings at mean/median level, percentiles
+out.pcrossmean = mean(BF_SignChange(ami - mean(ami)));
+out.pcrossmedian = mean(BF_SignChange(ami - median(ami)));
+out.pcrossq10 = mean(BF_SignChange(ami - quantile(ami, 0.1)));
+out.pcrossq90 = mean(BF_SignChange(ami - quantile(ami, 0.9)));
 
 % ac1
-out.amiac1 = CO_AutoCorr(ami,1,'Fourier');
+out.amiac1 = CO_AutoCorr(ami, 1, 'Fourier');
 
 end

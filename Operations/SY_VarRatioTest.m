@@ -1,4 +1,4 @@
-function out = SY_VarRatioTest(y,periods,IIDs)
+function out = SY_VarRatioTest(y, periods, IIDs)
 % SY_VarRatioTest   Variance ratio test for random walk.
 %
 % Implemented using the vratiotest function from Matlab's Econometrics Toolbox.
@@ -6,7 +6,7 @@ function out = SY_VarRatioTest(y,periods,IIDs)
 % The test assesses the null hypothesis of a random walk in the time series,
 % which is rejected for some critical p-value.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % periods, a vector (or scalar) of period(s)
@@ -69,7 +69,7 @@ IIDs = logical(IIDs);
 % ------------------------------------------------------------------------------
 %% Perform the test:
 % ------------------------------------------------------------------------------
-[h, pValue, stat, ~, ratio] = vratiotest(y,'period',periods,'IID',IIDs);
+[h, pValue, stat, ~, ratio] = vratiotest(y, 'period', periods, 'IID', IIDs);
 
 if length(h) == 1
     % Summarize the single test performed
@@ -78,21 +78,21 @@ if length(h) == 1
     out.ratio = ratio;
 
 else
-   % Return statistics on multiple outputs for multiple periods/IIDs
-   out.maxpValue = max(pValue);
-   out.minpValue = min(pValue);
-   out.meanpValue = mean(pValue);
+    % Return statistics on multiple outputs for multiple periods/IIDs
+    out.maxpValue = max(pValue);
+    out.minpValue = min(pValue);
+    out.meanpValue = mean(pValue);
 
-   imaxp = find(pValue == max(pValue),1,'first');
-   iminp = find(pValue == min(pValue),1,'first');
-   out.periodmaxpValue = periods(imaxp);
-   out.periodminpValue = periods(iminp);
-   out.IIDperiodmaxpValue = IIDs(imaxp);
-   out.IIDperiodminpValue = IIDs(iminp);
+    imaxp = find(pValue == max(pValue), 1, 'first');
+    iminp = find(pValue == min(pValue), 1, 'first');
+    out.periodmaxpValue = periods(imaxp);
+    out.periodminpValue = periods(iminp);
+    out.IIDperiodmaxpValue = IIDs(imaxp);
+    out.IIDperiodminpValue = IIDs(iminp);
 
-   out.meanstat = mean(stat);
-   out.maxstat = max(stat);
-   out.minstat = min(stat);
+    out.meanstat = mean(stat);
+    out.maxstat = max(stat);
+    out.minstat = min(stat);
 end
 
 end

@@ -8,7 +8,7 @@ function out = EN_CID(y)
 % CID: an efficient complexity-invariant distance for time series. Data Min.
 % Knowl. Disc. 28, 634–669 (2014). https://doi.org/10.1007/s10618-013-0312-3
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 
@@ -48,10 +48,9 @@ f_CE1 = @(x) sqrt(mean(diff(x).^2));
 
 out.CE1 = f_CE1(y);
 
-
 % Definition corresponding to the line segment example in Fig. 9 of the paper
 % cited above (using Pythagoras's theorum):
-f_CE2 = @(x) mean(sqrt(1+diff(x).^2));
+f_CE2 = @(x) mean(sqrt(1 + diff(x).^2));
 
 out.CE2 = f_CE2(y);
 
@@ -62,8 +61,7 @@ out.CE2 = f_CE2(y);
 out.minCE1 = f_CE1(sort(y));
 out.minCE2 = f_CE2(sort(y));
 
-out.CE1_norm = out.CE1/out.minCE1;
-out.CE2_norm = out.CE2/out.minCE2;
-
+out.CE1_norm = out.CE1 / out.minCE1;
+out.CE2_norm = out.CE2 / out.minCE2;
 
 end

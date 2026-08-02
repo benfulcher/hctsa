@@ -1,4 +1,4 @@
-function out = DN_OutlierTest(y,p,justMe)
+function out = DN_OutlierTest(y, p, justMe)
 % DN_OutlierTest    How distributional statistics depend on distributional outliers.
 %
 % Removes the p% of highest and lowest values in the time series (i.e., 2*p%
@@ -6,7 +6,7 @@ function out = DN_OutlierTest(y,p,justMe)
 % mean or the standard deviation of the time series, before and after this
 % transformation.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 % p, the percentage of values to remove beyond upper and lower percentiles
 % justMe [opt], just returns a number:
@@ -42,9 +42,9 @@ function out = DN_OutlierTest(y,p,justMe)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check Inputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(p)
     p = 2; % by default, remove 2% of values from upper and lower percentiles
@@ -53,24 +53,24 @@ if nargin < 3
     justMe = ''; % return a structure with both the mean and std
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Get going:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % mean of the middle (100-2*p)% of the data
-out.mean = mean(y(y > prctile(y,p) & y < prctile(y,100-p)));
+out.mean = mean(y(y > prctile(y, p) & y < prctile(y, 100 - p)));
 
 % std of the middle (100-2*p)% ofthe data
-out.std = std(y(y > prctile(y,p) & y < prctile(y,100-p))) / std(y); % [although std(y) should be 1]
+out.std = std(y(y > prctile(y, p) & y < prctile(y, 100 - p))) / std(y); % [although std(y) should be 1]
 
 % Output just a specified element of the output structure:
 if ~isempty(justMe)
     switch justMe
-    case 'mean'
-        out = out.mean;
-    case 'std'
-        out = out.std;
-    otherwise
-        error('Unknown option ''%s''',justMe);
+        case 'mean'
+            out = out.mean;
+        case 'std'
+            out = out.std;
+        otherwise
+            error('Unknown option ''%s''', justMe);
     end
 end
 

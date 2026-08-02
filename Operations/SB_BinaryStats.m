@@ -1,11 +1,11 @@
-function out = SB_BinaryStats(y,binaryMethod)
+function out = SB_BinaryStats(y, binaryMethod)
 % SB_BinaryStats    Statistics on a binary symbolization of the time series
 %
 % Binary symbolization of the time series is a symbolic string of 0s and 1s.
 %
 % Provides information about the coarse-grained behavior of the time series
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % binaryMethod, the symbolization rule:
@@ -15,7 +15,7 @@ function out = SB_BinaryStats(y,binaryMethod)
 %         (iii) 'iqr': by whether the time series is within the interquartile range
 %                      (1), or not (0).
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % Include the Shannon entropy of the string, the longest stretches of 0s
 % or 1s, the mean length of consecutive 0s or 1s, and the spread of consecutive
 % strings of 0s or 1s.
@@ -49,42 +49,42 @@ function out = SB_BinaryStats(y,binaryMethod)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs, set defaults:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(binaryMethod)
     binaryMethod = 'diff';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Binarize the time series:
-%-------------------------------------------------------------------------------
-yBin = BF_Binarize(y,binaryMethod);
+% -------------------------------------------------------------------------------
+yBin = BF_Binarize(y, binaryMethod);
 
 N = length(yBin); % length of signal - 1 (difference operation)
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Stationarity of binarized time series:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % (cf. SB_MotifTwo for basic stats on binarized time series)
 
 % Stationarity:
-out.pupstat2 = sum(yBin(floor(end/2)+1:end) == 1)/sum(yBin(1:floor(end/2)) == 1);
+out.pupstat2 = sum(yBin(floor(end / 2) + 1:end) == 1) / sum(yBin(1:floor(end / 2)) == 1);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Consecutive string of ones / zeros (normalized by length)
-%-------------------------------------------------------------------------------
-difffy = diff(find([1;yBin;1]));
+% -------------------------------------------------------------------------------
+difffy = diff(find([1; yBin; 1]));
 stretch0 = difffy(difffy ~= 1) - 1;
 
-difffy = diff(find([0;yBin;0] == 0));
+difffy = diff(find([0; yBin; 0] == 0));
 stretch1 = difffy(difffy ~= 1) - 1;
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % pstretches
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Number of different stretches as proportion of the time-series length
-out.pstretch1 = length(stretch1)/N;
+out.pstretch1 = length(stretch1) / N;
 % The following are trivially dependent on pstretch1:
 % out.pstretch0 = length(stretch0)/N;
 % out.pstretches = (length(stretch0)+length(stretch1))/N;
@@ -98,11 +98,11 @@ if isempty(stretch0) % all 1s (almost impossible to actually occur)
     out.stdstretch0norm = NaN;
 else
     out.longstretch0 = max(stretch0); % longest consecutive stretch of zeros
-    out.longstretch0norm = max(stretch0)/N; % longest consecutive stretch of zeros as proportion of time-series length
+    out.longstretch0norm = max(stretch0) / N; % longest consecutive stretch of zeros as proportion of time-series length
     out.meanstretch0 = mean(stretch0); % mean stretch of zeros
-    out.meanstretch0norm = mean(stretch0)/N; % mean stretch of zeros
+    out.meanstretch0norm = mean(stretch0) / N; % mean stretch of zeros
     out.stdstretch0 = std(stretch0); % standard deviation of stretch lengths of consecutive zeros
-    out.stdstretch0norm = std(stretch0)/N; % standard deviation of stretch lengths of consecutive zeros
+    out.stdstretch0norm = std(stretch0) / N; % standard deviation of stretch lengths of consecutive zeros
 end
 
 if isempty(stretch1) % all 0s (almost impossible to actually occur)
@@ -113,15 +113,15 @@ if isempty(stretch1) % all 0s (almost impossible to actually occur)
     out.stdstretch1 = NaN;
 else
     out.longstretch1 = max(stretch1); % longest consecutive stretch of ones
-    out.longstretch1norm = max(stretch1)/N; % longest consecutive stretch of ones as proportion of the time-series length
+    out.longstretch1norm = max(stretch1) / N; % longest consecutive stretch of ones as proportion of the time-series length
     out.meanstretch1 = mean(stretch1);
-    out.meanstretch1norm = mean(stretch1)/N;
+    out.meanstretch1norm = mean(stretch1) / N;
     out.stdstretch1 = std(stretch1);
-    out.stdstretch1norm = std(stretch1)/N;
+    out.stdstretch1norm = std(stretch1) / N;
 end
 
-out.meanstretchdiff = (out.meanstretch1 - out.meanstretch0)/N;
-out.stdstretchdiff = (out.stdstretch1 - out.stdstretch0)/N;
+out.meanstretchdiff = (out.meanstretch1 - out.meanstretch0) / N;
+out.stdstretchdiff = (out.stdstretch1 - out.stdstretch0) / N;
 
 out.diff21stretch1 = mean(stretch1 == 2) - mean(stretch1 == 1);
 out.diff21stretch0 = mean(stretch0 == 2) - mean(stretch0 == 1);

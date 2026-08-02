@@ -1,10 +1,10 @@
-function out = NL_MS_nlpe(y,de,tau,maxN)
+function out = NL_MS_nlpe(y, de, tau, maxN)
 % NL_MS_nlpe   Normalized drop-one-out constant interpolation nonlinear prediction error.
 %
 % Computes the nlpe for a time-delay embedded time series using Michael Small's
 % code, nlpe (renamed MS_nlpe here):
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the
 %       point where the proportion of false nearest neighbors falls below 5%
@@ -13,7 +13,7 @@ function out = NL_MS_nlpe(y,de,tau,maxN)
 %       of the ACF or 'mi' to be the first minimum of the automutual information
 %       function)
 %
-%---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
+% ---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
 %
 % cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
@@ -69,10 +69,10 @@ end
 if nargin < 3 || isempty(tau)
     tau = 1;
 end
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi');
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');
@@ -83,31 +83,31 @@ if nargin < 4 || isempty(maxN)
     % with longer time series
     maxN = 5000;
 end
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % nlpe can cause memory pains for long time series
 % Let's do this dirty cheat
 if N > maxN
     % Crop the time series to the first maxN samples:
     y = y(1:maxN);
-    fprintf(1,['Michael Small''s ''nlpe'' code is only being evaluated ' ...
-                    'on the first %u (/%u) time-series samples...\n'],maxN,N);
+    fprintf(1, ['Michael Small''s ''nlpe'' code is only being evaluated ' ...
+                'on the first %u (/%u) time-series samples...\n'], maxN, N);
     N = maxN;
 end
 if N < 20 % Short time series cause problems:
-    fprintf(1,'Time series (N = %u) is too short.\n',length(y));
+    fprintf(1, 'Time series (N = %u) is too short.\n', length(y));
     out = NaN; return
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
-if strcmp(de,'fnn')
-    de = NL_MS_fnn(y,1:10,tau,5,1,1,0.05);
+if strcmp(de, 'fnn')
+    de = NL_MS_fnn(y, 1:10, tau, 5, 1, 1, 0.05);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Run Michael Small's nonlinear prediction error code:
-res = MS_nlpe(y,de,tau); % residuals
+res = MS_nlpe(y, de, tau); % residuals
 
 % ------------------------------------------------------------------------------
 %% Compute outputs

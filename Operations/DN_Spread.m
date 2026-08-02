@@ -1,10 +1,10 @@
-function out = DN_Spread(y,spreadMeasure)
+function out = DN_Spread(y, spreadMeasure)
 % DN_Spread     Measure of spread of the input time series.
 %
 % Returns the spread of the raw data vector, as the standard deviation,
 % inter-quartile range, mean absolute deviation, or median absolute deviation.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 %
 % spreadMeasure, the spead measure:
@@ -53,24 +53,24 @@ end
 % Evaluate the spread measure
 % ------------------------------------------------------------------------------
 switch spreadMeasure
-	case 'std'
+    case 'std'
         % Standard deviation
-		out = std(y);
+        out = std(y);
 
-	case 'iqr'
+    case 'iqr'
         % Interquartile range
-		out = iqr(y);
+        out = iqr(y);
 
-	case 'mad'
+    case 'mad'
         % Mean absolute deviation
-		out = mad(y,0);
+        out = mad(y, 0);
 
     case 'mead'
         % Median absolute deviation
-        out = mad(y,1);
+        out = mad(y, 1);
 
     otherwise
-        error('Unknown spread measure ''%s''',spreadMeasure)
+        error('Unknown spread measure ''%s''', spreadMeasure)
 end
 
 end

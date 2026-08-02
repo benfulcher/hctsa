@@ -1,4 +1,4 @@
-function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp)
+function hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp)
 % MF_GP_LearnHyperp     Learns Gaussian Process hyperparameters for a time series
 %
 % Used by main Gaussian Process model fitting operations.
@@ -7,7 +7,7 @@ function hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,nfevals,hyp
 % CLASSIFICATION Toolbox version 3.2, which is avilable at:
 % http://gaussianprocess.org/gpml/code
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % t,             time
 % y,             data
@@ -73,13 +73,13 @@ nhps = eval(s);
 % Initial values for covariance function:
 covFunc1 = covFunc{1};
 covFunc2 = covFunc{2};
-if strcmp(covFunc1,'covSum') && strcmp(covFunc2{1},'covSEiso') && strcmp(covFunc2{2},'covNoise')
-    hyp.cov = zeros(3,1);
+if strcmp(covFunc1, 'covSum') && strcmp(covFunc2{1}, 'covSEiso') && strcmp(covFunc2{2}, 'covNoise')
+    hyp.cov = zeros(3, 1);
     % length parameter is in the ballpark of the difference between time
     % elements
     hyp.cov(1) = log(mean(diff(t)));
 else
-    hyp.cov = zeros(nhps,1); % Default: initialize all log hyperparameters at -1
+    hyp.cov = zeros(nhps, 1); % Default: initialize all log hyperparameters at -1
 end
 
 % ------------------------------------------------------------------------------
@@ -89,13 +89,13 @@ try
     % loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
     hyp = minimize(hyp, @gp, nfevals, infAlg, meanFunc, covFunc, likFunc, t, y);
 catch emsg
-    if strcmp(emsg.identifier,'MATLAB:posdef')
-        fprintf(1,'Error with lack of positive definite matrix for this function\n');
+    if strcmp(emsg.identifier, 'MATLAB:posdef')
+        fprintf(1, 'Error with lack of positive definite matrix for this function\n');
         hyp = NaN; return % return NaN -- the data is not suited to GP fitting
-    elseif strcmp(emsg.identifier,'MATLAB:nomem')
+    elseif strcmp(emsg.identifier, 'MATLAB:nomem')
         error('Not enough memory to fit a Gaussian Process to this data');
     else
-        error('Error fitting Gaussian Process to data: %s\n',emsg.message)
+        error('Error fitting Gaussian Process to data: %s\n', emsg.message)
     end
 end
 

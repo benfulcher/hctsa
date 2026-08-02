@@ -6,7 +6,7 @@ function out = EN_RM_entropy(y)
 %
 % The above website has code and documentation for the function.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 
 % ------------------------------------------------------------------------------

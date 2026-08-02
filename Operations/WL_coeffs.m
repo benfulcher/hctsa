@@ -6,7 +6,7 @@ function out = WL_coeffs(y, wname, level)
 %
 % Uses Matlab's Wavelet Toolbox.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % wname, the wavelet name, e.g., 'db3' (see Wavelet Toolbox Documentation for
@@ -55,17 +55,17 @@ if nargin < 2 || isempty(wname)
     wname = 'db3'; % default wavelet
 end
 if nargin < 3 || isempty(level)
-   level = 3; % level of wavelet decomposition
+    level = 3; % level of wavelet decomposition
 end
-if strcmp(level,'max')
-    level = wmaxlev(N,wname);
-    if level==0
+if strcmp(level, 'max')
+    level = wmaxlev(N, wname);
+    if level == 0
         error('Cannot compute wavelet coefficients (short time series?)');
     end
 end
 
-if wmaxlev(N,wname) < level
-    fprintf(1,'Chosen level is too large for this wavelet on this signal\n');
+if wmaxlev(N, wname) < level
+    fprintf(1, 'Chosen level is too large for this wavelet on this signal\n');
     out = NaN;
     return
 end
@@ -73,12 +73,12 @@ end
 % ------------------------------------------------------------------------------
 %% Perform a single-level wavelet decomposition
 % (Recover a noisy signal by suppressing an approximation)
-[c,l] = wavedec(y,level,wname);
+[c, l] = wavedec(y, level, wname);
 
 % Reconstruct detail
-det = wrcoef('d',c,l,wname,level); % detail this level
+det = wrcoef('d', c, l, wname, level); % detail this level
 
-det_s = sort(abs(det),'descend'); % sorted detail coefficient magnitudes
+det_s = sort(abs(det), 'descend'); % sorted detail coefficient magnitudes
 
 % plot(det_s);
 
@@ -100,8 +100,8 @@ out.wb1m = findMyThreshold(0.01);
 % ------------------------------------------------------------------------------
 function propt = findMyThreshold(x)
     % where drops below proportion x of maximum
-    propt = find(det_s < x*max(det_s),1,'first') / N;
-            % (as a proportion of time-series length)
+    propt = find(det_s < x * max(det_s), 1, 'first') / N;
+    % (as a proportion of time-series length)
     if isempty(propt)
         propt = NaN;
     end

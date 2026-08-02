@@ -1,7 +1,7 @@
-function out = DN_Withinp(x,p,meanOrMedian)
+function out = DN_Withinp(x, p, meanOrMedian)
 % DN_Withinp    Proportion of data points within p standard deviations of the mean.
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input data vector
 % p, the number (proportion) of standard deviations.
 % meanOrMedian, whether to use units of 'mean' and standard deviation, or median
@@ -36,9 +36,9 @@ function out = DN_Withinp(x,p,meanOrMedian)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(p)
     p = 1; % 1 std from mean
 end
@@ -46,26 +46,26 @@ if nargin < 3 || isempty(meanOrMedian)
     meanOrMedian = 'mean';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Compute the property:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 N = length(x); % length of the time series
 
 switch meanOrMedian
-case 'mean'
-    mu = mean(x); % mean of the time series
-    sig = std(x); % standard deviation of the time series
+    case 'mean'
+        mu = mean(x); % mean of the time series
+        sig = std(x); % standard deviation of the time series
 
-case 'median'
-    mu = median(x); % median of the time series
-    sig = 1.35*iqr(x); % rescaled interquartile range of the time series (equal
-                       % to standard deviation for Gaussian distribution)
-otherwise
-    error('Unknown setting: ''%s''',meanOrMedian);
+    case 'median'
+        mu = median(x); % median of the time series
+        sig = 1.35 * iqr(x); % rescaled interquartile range of the time series (equal
+        % to standard deviation for Gaussian distribution)
+    otherwise
+        error('Unknown setting: ''%s''', meanOrMedian);
 end
 
 % The withinp statistic:
-out = sum(x >= mu-p*sig & x <= mu+p*sig)/N;
+out = sum(x >= mu - p * sig & x <= mu + p * sig) / N;
 
 end

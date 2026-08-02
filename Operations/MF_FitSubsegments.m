@@ -1,4 +1,4 @@
-function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
+function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed)
 % MF_FitSubsegments Robustness of model parameters across different segments of a time series
 %
 % The spread of parameters obtained (including in-sample goodness of fit
@@ -8,7 +8,7 @@ function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
 %
 % This code inherits strongly from MF_CompareTestSets
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series.
 %
 % model, the model to fit in each segments of the time series:
@@ -39,7 +39,7 @@ function out = MF_FitSubsegments(y,model,order,subsetHow,samplep,randomSeed)
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for when subsetHow is 'rand')
 %
-%---OUTPUTS: depend on the model, as described above.
+% ---OUTPUTS: depend on the model, as described above.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -84,7 +84,7 @@ if nargin < 1 || isempty(y)
     error('Give us a time series, ya mug');
 end
 % Convert y to time series object
-y = iddata(y,[],1);
+y = iddata(y, [], 1);
 
 % (2) model, the type of model to fit
 if nargin < 2 || isempty(model)
@@ -116,12 +116,12 @@ end
 % ------------------------------------------------------------------------------
 % Number of samples to take, numPred
 numPred = samplep(1);
-r = zeros(numPred,2); % ranges
+r = zeros(numPred, 2); % ranges
 
 switch subsetHow
     case 'rand'
         if samplep(2) < 1 % specified a fraction of time series
-            l = floor(N*samplep(2));
+            l = floor(N * samplep(2));
         else % specified an absolute interval
             l = samplep(2);
         end
@@ -130,28 +130,28 @@ switch subsetHow
         BF_ResetSeed(randomSeed);
 
         % numPred random starting points:
-        spts = randi(N-l+1,numPred,1);
-        r(:,1) = spts;
-        r(:,2) = spts+l-1;
+        spts = randi(N - l + 1, numPred, 1);
+        r(:, 1) = spts;
+        r(:, 2) = spts + l - 1;
 
     case 'uniform'
         if length(samplep) == 1 % size will depend on number of unique subsegments
-            spts = round(linspace(0,N,numPred+1)); % numPred+1 boundaries = numPred portions
-            r(:,1) = spts(1:numPred)+1;
-            r(:,2) = spts(2:end);
+            spts = round(linspace(0, N, numPred + 1)); % numPred+1 boundaries = numPred portions
+            r(:, 1) = spts(1:numPred) + 1;
+            r(:, 2) = spts(2:end);
         else
             if samplep(2) < 1 % specified a fraction of time series
-                l = floor(N*samplep(2));
+                l = floor(N * samplep(2));
             else % specified an absolute interval
                 l = samplep(2);
             end
-            spts = round(linspace(1,N-l+1,numPred)); % numPred+1 boundaries = numPred portions
-            r(:,1) = spts;
-            r(:,2) = spts+l-1;
+            spts = round(linspace(1, N - l + 1, numPred)); % numPred+1 boundaries = numPred portions
+            r(:, 1) = spts;
+            r(:, 2) = spts + l - 1;
         end
 
     otherwise
-        error('Unknown subset method ''%s''',subsetHow);
+        error('Unknown subset method ''%s''', subsetHow);
 end
 
 % ------------------------------------------------------------------------------
@@ -168,8 +168,8 @@ switch model
         % fit AR models of 'best' order, return statistics on how this best
         % order changes. The order input argument is not used for this
         % option.
-        orders = zeros(numPred,1);
-        sbcs = zeros(numPred,1);
+        orders = zeros(numPred, 1);
+        sbcs = zeros(numPred, 1);
         yy = y.y;
         for i = 1:numPred
             % Use arfit software to retrieve the optimum AR(p) order by
@@ -177,11 +177,11 @@ switch model
             % p = 1-10
             % Enforce zero mean level. This could be relaxed.
             try
-                [west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i,1):r(i,2)), 1, 10, 'sbc', 'zero');
+                [west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
             catch emsg
-                if strcmp(emsg.message,'Time series too short.')
-                   fprintf(1,'Time Series is too short for ARFIT\n');
-                   out = NaN; return
+                if strcmp(emsg.message, 'Time series too short.')
+                    fprintf(1, 'Time Series is too short for ARFIT\n');
+                    out = NaN; return
                 else
                     error('Problem fitting AR model');
                 end
@@ -211,14 +211,14 @@ switch model
         %% Check that a System Identification Toolbox license is available to run the 'ar' function:
         BF_CheckToolbox('identification_toolbox');
 
-        fpes = zeros(numPred,1);
-        as = zeros(numPred,order+1);
+        fpes = zeros(numPred, 1);
+        as = zeros(numPred, order + 1);
         for i = 1:numPred
             % fit the ar model
-            m = ar(y(r(i,1):r(i,2)),order);
+            m = ar(y(r(i, 1):r(i, 2)), order);
             % get parameters and goodness of fit
             fpes(i) = m.EstimationInfo.FPE;
-            as(i,:) = m.a;
+            as(i, :) = m.a;
         end
 
         % statistics on FPE
@@ -231,10 +231,10 @@ switch model
         % Statistics on fitted AR parameters
         for i = 1:order % first column will be ones
             % Dynamic field referencing:
-            out.(['a_',num2str(i),'_std']) = std(as(:,i+1));
-            out.(['a_',num2str(i),'_mean']) = mean(as(:,i+1));
-            out.(['a_',num2str(i),'_max']) = max(as(:,i+1));
-            out.(['a_',num2str(i),'_min']) = min(as(:,i+1));
+            out.(['a_', num2str(i), '_std']) = std(as(:, i + 1));
+            out.(['a_', num2str(i), '_mean']) = mean(as(:, i + 1));
+            out.(['a_', num2str(i), '_max']) = max(as(:, i + 1));
+            out.(['a_', num2str(i), '_min']) = min(as(:, i + 1));
             % eval(sprintf('out.a_%u_std = std(as(:,%u+1));',i,i));
             % eval(sprintf('out.a_%u_mean = mean(as(:,%u+1));',i,i));
             % eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
@@ -245,9 +245,9 @@ switch model
         %% Fit state space models of specified order
         % Return statistics on goodness of fit
         % Could do parameters too, but I this would involve many outputs
-        fpes = zeros(numPred,1);
+        fpes = zeros(numPred, 1);
         for i = 1:numPred
-            try  m = n4sid(y(r(i,1):r(i,2)),order);
+            try  m = n4sid(y(r(i, 1):r(i, 2)), order);
             catch
                 % Some range of the time series is invalid for fitting the
                 % model to.
@@ -267,19 +267,19 @@ switch model
         %% fit an ARMA model of specified order(s)
         % Note: order should be a two-component vector
         % Output parameters and goodness of fit
-        fpes = zeros(numPred,1);
-        ps = zeros(numPred,order(1)+1);
-        qs = zeros(numPred,order(2)+1);
+        fpes = zeros(numPred, 1);
+        ps = zeros(numPred, order(1) + 1);
+        qs = zeros(numPred, order(2) + 1);
 
         for i = 1:numPred
             try
-                m = armax(y(r(i,1):r(i,2)),order);
+                m = armax(y(r(i, 1):r(i, 2)), order);
             catch emsg
                 error('Couldn''t fit this ARMA model')
             end
             fpes(i) = m.EstimationInfo.FPE;
-            ps(i,:) = m.a;
-            qs(i,:) = m.c;
+            ps(i, :) = m.a;
+            qs(i, :) = m.c;
         end
 
         % statistics on FPE
@@ -291,22 +291,21 @@ switch model
 
         % Statistics on fitted AR parameters, p
         for i = 1:order % first column will be ones
-            out.(['p_',num2str(i),'_std']) = std(ps(:,i+1));
-            out.(['p_',num2str(i),'_mean']) = mean(ps(:,i+1));
-            out.(['p_',num2str(i),'_max']) = max(ps(:,i+1));
-            out.(['p_',num2str(i),'_min']) = min(ps(:,i+1));
+            out.(['p_', num2str(i), '_std']) = std(ps(:, i + 1));
+            out.(['p_', num2str(i), '_mean']) = mean(ps(:, i + 1));
+            out.(['p_', num2str(i), '_max']) = max(ps(:, i + 1));
+            out.(['p_', num2str(i), '_min']) = min(ps(:, i + 1));
         end
 
         % Statistics on fitted MA parameters, q
         for i = 1:order % first column will be ones
-            out.(['q_',num2str(i),'_std']) = std(qs(:,i+1));
-            out.(['q_',num2str(i),'_mean']) = mean(qs(:,i+1));
-            out.(['q_',num2str(i),'_max']) = max(qs(:,i+1));
-            out.(['q_',num2str(i),'_min']) = min(qs(:,i+1));
+            out.(['q_', num2str(i), '_std']) = std(qs(:, i + 1));
+            out.(['q_', num2str(i), '_mean']) = mean(qs(:, i + 1));
+            out.(['q_', num2str(i), '_max']) = max(qs(:, i + 1));
+            out.(['q_', num2str(i), '_min']) = min(qs(:, i + 1));
         end
     otherwise
-        error('Unknown model ''%s''',model);
+        error('Unknown model ''%s''', model);
 end
-
 
 end

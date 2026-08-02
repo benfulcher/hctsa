@@ -1,4 +1,4 @@
-function out = DN_pleft(y,th)
+function out = DN_pleft(y, th)
 % DN_pleft  Distance from the mean at which a given proportion of data are
 %                   more distant.
 %
@@ -8,7 +8,7 @@ function out = DN_pleft(y,th)
 % (could generalize to separate positive and negative deviations in future)
 % Uses the quantile function from Matlab's Statistics Toolbox
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 % th, the proportion of data further than p from the mean
 %           (output p, normalized by standard deviation)
@@ -46,9 +46,9 @@ if nargin < 2 || isempty(th)
     th = 0.1; % default
 end
 
-p = quantile(abs(y-mean(y)),1-th);
+p = quantile(abs(y - mean(y)), 1 - th);
 
 % A proportion, th, of the data lie further than p from the mean
-out = p/std(y);
+out = p / std(y);
 
 end

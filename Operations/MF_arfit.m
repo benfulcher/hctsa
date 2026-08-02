@@ -1,4 +1,4 @@
-function out = MF_arfit(y,pmin,pmax,selector)
+function out = MF_arfit(y, pmin, pmax, selector)
 % MF_arfit      Statistics of a fitted AR model to a time series.
 %
 % Uses various functions implemented in the ARfit package, which is
@@ -15,14 +15,14 @@ function out = MF_arfit(y,pmin,pmax,selector)
 %
 % The optimal model order is selected using Schwartz's Bayesian Criterion (SBC).
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % pmin, the minimum AR model order to fit
 % pmax, the maximum AR model order to fit
 % selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
 %           ARFIT package documentation)
 %
-%---OUTPUTS: include the model coefficients obtained, the SBCs at each model
+% ---OUTPUTS: include the model coefficients obtained, the SBCs at each model
 % order, various tests on residuals, and statistics from an eigendecomposition
 % of the time series using the estimated AR model.
 
@@ -58,7 +58,7 @@ function out = MF_arfit(y,pmin,pmax,selector)
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if size(y,2) > size(y,1)
+if size(y, 2) > size(y, 1)
     y = y'; % needs to be a column vector
 end
 N = length(y); % time series length
@@ -70,12 +70,12 @@ if nargin < 3 || isempty(pmax)
     pmax = 10;
 end
 if nargin < 4 || isempty(selector)
-     selector = 'sbc';
-     % Use Schwartz's Bayesian Criterion to choose optimum model order
+    selector = 'sbc';
+    % Use Schwartz's Bayesian Criterion to choose optimum model order
 end
 
 % Check the ARfit toolbox is installed and in the Matlab path
-if ~exist('ARFIT_arfit','file')
+if ~exist('ARFIT_arfit', 'file')
     error('Cannot find the function ''ARFIT_arfit''. There''s a problem with the ARfit toolbox.')
 end
 
@@ -106,10 +106,10 @@ popt = length(Aest);
 out.A1 = Aest(1);
 for i = 2:6
     if popt >= i
-        out.(sprintf('A%u',i)) = Aest(i);
+        out.(sprintf('A%u', i)) = Aest(i);
     else
         % it's as if the higher order coefficients are all zero
-        out.(sprintf('A%u',i)) = 0;
+        out.(sprintf('A%u', i)) = 0;
     end
 end
 
@@ -136,74 +136,74 @@ out.C = Cest;
 % There will be a value for each model order from pmin:pmax
 % (i) Return all
 for i = 1:length(ps)
-    out.(sprintf('sbc_%u',ps(i))) = SBC(i);
+    out.(sprintf('sbc_%u', ps(i))) = SBC(i);
     % eval(sprintf('out.sbc_%u = SBC(%u);',ps(i),i));
 end
 
 % (ii) Return minimum
 out.minsbc = min(SBC);
-out.popt_sbc = find(SBC == min(SBC),1,'first');
+out.popt_sbc = find(SBC == min(SBC), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
 if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC));
-    meanaround = mean(abs([SBC(out.popt_sbc-1), SBC(out.popt_sbc+1)]));
+    meanaround = mean(abs([SBC(out.popt_sbc - 1), SBC(out.popt_sbc + 1)]));
 elseif out.popt_sbc == 1
-    meanaround = abs(SBC(out.popt_sbc+1)); % just the next value
+    meanaround = abs(SBC(out.popt_sbc + 1)); % just the next value
 elseif out.popt_sbc == length(SBC) % really an else
-    meanaround = abs(SBC(out.popt_sbc-1)); % just the previous value
+    meanaround = abs(SBC(out.popt_sbc - 1)); % just the previous value
 else
     error('Weird error!');
 end
-out.aroundmin_sbc = abs(min(SBC))/meanaround;
+out.aroundmin_sbc = abs(min(SBC)) / meanaround;
 
 % ------------------------------------------------------------------------------
 % (5) Aikake's Final Prediction Error (FPE)
 % ------------------------------------------------------------------------------
 % (i) Return all
 for i = 1:length(ps)
-    out.(['fpe_',num2str(ps(i))]) = FPE(i);
+    out.(['fpe_', num2str(ps(i))]) = FPE(i);
     % eval(sprintf('out.fpe_%u = FPE(%u);',ps(i),i));
 end
 % (ii) Return minimum
 out.minfpe = min(FPE);
-out.popt_fpe = find(FPE == min(FPE),1,'first');
+out.popt_fpe = find(FPE == min(FPE), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
 if out.popt_fpe > 1 && out.popt_fpe < length(FPE);
-    meanaround = mean(abs([FPE(out.popt_fpe-1),FPE(out.popt_fpe+1)]));
+    meanaround = mean(abs([FPE(out.popt_fpe - 1), FPE(out.popt_fpe + 1)]));
 elseif out.popt_fpe == 1
-    meanaround = abs(FPE(out.popt_fpe+1)); % just the next value
+    meanaround = abs(FPE(out.popt_fpe + 1)); % just the next value
 elseif out.popt_fpe == length(FPE) % really an else
-    meanaround = abs(FPE(out.popt_fpe-1));
+    meanaround = abs(FPE(out.popt_fpe - 1));
 else
     error('Weird error!!');
 end
-out.aroundmin_fpe = abs(min(FPE))/meanaround;
+out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% (II) Test Residuals
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Run code from ARfit package:
-[siglev, res] = ARFIT_arres(west,Aest,y);
+[siglev, res] = ARFIT_arres(west, Aest, y);
 
 % (1) Significance Level
 out.res_siglev = siglev;
 
 % (2) Correlation test of residuals
 % error margins are within 1.96/sqrt(N);
-out.res_ac1 = CO_AutoCorr(res,1,'Fourier');
-out.res_ac1_norm = CO_AutoCorr(res,1,'Fourier')/sqrt(N); % normalize by sqrt(N)
+out.res_ac1 = CO_AutoCorr(res, 1, 'Fourier');
+out.res_ac1_norm = CO_AutoCorr(res, 1, 'Fourier') / sqrt(N); % normalize by sqrt(N)
 
 % Calculate correlations up to 20, return how many exceed significance threshold
-acf = CO_AutoCorr(res,1:20,'Fourier');
-out.pcorr_res = sum(abs(acf)>1.96/sqrt(N))/20;
+acf = CO_AutoCorr(res, 1:20, 'Fourier');
+out.pcorr_res = sum(abs(acf) > 1.96 / sqrt(N)) / 20;
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% (III) Confidence Intervals
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Run code from ARfit package:
 Aerr = ARFIT_arconf(Aest, Cest, th);
@@ -213,9 +213,9 @@ out.aerr_min = min(Aerr);
 out.aerr_max = max(Aerr);
 out.aerr_mean = mean(Aerr);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% (III) Eigendecomposition
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Run code from the ARfit package
 [S, ~, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);
@@ -238,18 +238,18 @@ perSpecial = ~isfinite(per);
 perFiltered = per;
 perFiltered(perSpecial) = NaN;
 
-out.hasInfper = sum(perSpecial(1,:));
-out.meanper = nanmean(perFiltered(1,:));
-out.stdper = nanstd(perFiltered(1,:));
-out.maxper = nanmax(perFiltered(1,:));
-out.minper = nanmin(perFiltered(1,:));
-out.meanpererr = nanmean(per(2,:));
+out.hasInfper = sum(perSpecial(1, :));
+out.meanper = nanmean(perFiltered(1, :));
+out.stdper = nanstd(perFiltered(1, :));
+out.maxper = nanmax(perFiltered(1, :));
+out.minper = nanmin(perFiltered(1, :));
+out.meanpererr = nanmean(per(2, :));
 
-out.meantau = mean(tau(1,:));
-out.maxtau = max(tau(1,:));
-out.mintau = min(tau(1,:));
-out.stdtau = std(tau(1,:));
-out.meantauerr = mean(tau(2,:));
+out.meantau = mean(tau(1, :));
+out.maxtau = max(tau(1, :));
+out.mintau = min(tau(1, :));
+out.stdtau = std(tau(1, :));
+out.meantauerr = mean(tau(2, :));
 
 out.maxexctn = max(exctn);
 out.minexctn = min(exctn);

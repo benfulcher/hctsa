@@ -1,4 +1,4 @@
-function out = TSTL_localdensity(y,NNR,past,embedParams)
+function out = TSTL_localdensity(y, NNR, past, embedParams)
 % TSTL_localdensity     Local density estimates in the time-delay embedding space
 %
 % TSTOOL code localdensity is very poorly documented in the TSTOOL
@@ -7,7 +7,7 @@ function out = TSTL_localdensity(y,NNR,past,embedParams)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the time series as a column vector
 %
@@ -19,7 +19,7 @@ function out = TSTL_localdensity(y,NNR,past,embedParams)
 %               tau and m can be characters specifying a given automatic method
 %               of determining tau and/or m (see BF_Embed).
 %
-%---OUTPUTS: various statistics on the local density estimates at each point in
+% ---OUTPUTS: various statistics on the local density estimates at each point in
 % the time-delay embedding, including the minimum and maximum values, the range,
 % the standard deviation, mean, median, and autocorrelation.
 
@@ -64,23 +64,23 @@ if nargin < 3 || isempty(past)
 end
 
 if nargin < 4 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding using autocorrelation and cao''s method.\n');
+    embedParams = {'ac', 'fnnmar'};
+    fprintf(1, 'Using default embedding using autocorrelation and cao''s method.\n');
 end
 
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_Embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
 
-if ~isa(s,'signal') && isnan(s); % embedding failed
+if ~isa(s, 'signal') && isnan(s); % embedding failed
     error('Embedding failed.')
 end
 
 % ------------------------------------------------------------------------------
 %% Run the TSTOOL function, localdensity
 % ------------------------------------------------------------------------------
-rs = localdensity(s,NNR,past);
+rs = localdensity(s, NNR, past);
 
 % ------------------------------------------------------------------------------
 %% Convert output to data
@@ -101,13 +101,13 @@ out.stdden = std(locden);
 out.meanden = mean(locden);
 out.medianden = median(locden);
 
-F_acden = @(x) CO_AutoCorr(locden,x,'Fourier'); % autocorrelation of locden for 1:5
+F_acden = @(x) CO_AutoCorr(locden, x, 'Fourier'); % autocorrelation of locden for 1:5
 for i = 1:5
-    out.(sprintf('ac%uden',i)) = F_acden(i);
+    out.(sprintf('ac%uden', i)) = F_acden(i);
 end
 
 % Estimates of correlation length:
-out.tauacden = CO_FirstCrossing(locden,'ac',0,'continuous'); % first zero-crossing of autocorrelation function
-out.taumiden = CO_FirstMin(locden,'mi'); % first minimum of automutual information function
+out.tauacden = CO_FirstCrossing(locden, 'ac', 0, 'continuous'); % first zero-crossing of autocorrelation function
+out.taumiden = CO_FirstMin(locden, 'mi'); % first minimum of automutual information function
 
 end

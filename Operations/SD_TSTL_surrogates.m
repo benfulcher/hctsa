@@ -5,7 +5,7 @@ function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % series according to some test statistics: T_{C3}, using the TSTOOL code tc3 or
 % T_{rev}, using TSTOOL code trev.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % tau, the autocorrelation lag length <x_n x_{n-tau} x_{n-2tau)>/abs(<x_n
@@ -22,7 +22,7 @@ function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
-%---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
+% ---OUTPUTS: include the Gaussianity of the test statistics, a z-test, and
 % various tests based on fitted kernel densities.
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
@@ -63,10 +63,10 @@ function out = SD_TSTL_surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 if nargin < 2 || isempty(tau)
     tau = 1;
 end
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi');
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');
@@ -79,7 +79,7 @@ end
 
 % 3) surrogate data method, SURRMETHOD
 if nargin < 4 || isempty(surrMethod)
-    fprintf(1,'Surrogate method set to default: ''surrogate1''.\n');
+    fprintf(1, 'Surrogate method set to default: ''surrogate1''.\n');
     surrMethod = 1;
 end
 % surrMethod = 1: randomizes phases of fourier spectrum
@@ -88,7 +88,7 @@ end
 
 % 4) surrogate function, SURRFN
 if nargin < 5 || isempty(surrfn)
-    fprintf(1,'surrogate function set to default value: ''tc3''.\n');
+    fprintf(1, 'surrogate function set to default value: ''tc3''.\n');
     surrfn = 'tc3';
 end
 
@@ -114,12 +114,12 @@ switch surrfn
         % Run external TSTOOL code, trev
         rs = trev(s, tau, nsurr, surrMethod);
     otherwise
-        error('Unknown surrogate function ''%s''',surrfn)
+        error('Unknown surrogate function ''%s''', surrfn)
 end
 
 tc3dat = data(rs);
 if all(isnan(tc3dat))
-    error('TSTOOL: ''%s'' failed',surrfn);
+    error('TSTOOL: ''%s'' failed', surrfn);
 end
 tc3_y = tc3dat(1);
 tc3_surr = tc3dat(2:end);
@@ -136,43 +136,43 @@ tc3_surr = tc3dat(2:end);
 muhat = mean(tc3_surr);
 sigmahat = std(tc3_surr);
 % probability of data given Guassian surrogates
-out.normpatponmax = normpdf(tc3_y,muhat,sigmahat)/normpdf(muhat,muhat,sigmahat);
+out.normpatponmax = normpdf(tc3_y, muhat, sigmahat) / normpdf(muhat, muhat, sigmahat);
 
 % Probability at least that distance from mean, using ztest:
 
 % 2) stds from mean
-out.stdfrommean = abs(tc3_y - mean(tc3_surr))/std(tc3_surr);
+out.stdfrommean = abs(tc3_y - mean(tc3_surr)) / std(tc3_surr);
 % (~equivalent to a z-test:)
 [~, out.ztestp] = ztest(tc3_y, muhat, sigmahat);
 % (both of these stats are a monotonic function of normpatponmax)
 
 % iqrs from median
-out.iqrsfrommedian = abs(tc3_y - median(tc3_surr))/iqr(tc3_surr);
+out.iqrsfrommedian = abs(tc3_y - median(tc3_surr)) / iqr(tc3_surr);
 
 % 3) basic info on surrogates
 out.stdsurr = sigmahat;
 out.meansurr = muhat;
 
 % 4) kernel density test
-[ksf, ksx] = ksdensity(tc3_surr,'function','pdf');
+[ksf, ksx] = ksdensity(tc3_surr, 'function', 'pdf');
 % hold on;plot(ksx,ksf,'r')
 ksdx = ksx(2) - ksx(1);
-ihit = find(ksx > tc3_y,1,'first');
+ihit = find(ksx > tc3_y, 1, 'first');
 
 if isempty(ihit) %% off the scale!
     out.kspminfromext = 0;
     out.ksphereonmax = 0;
 else % on the scale!
-    pfromleft = ksdx*sum(ksf(1:ihit));
+    pfromleft = ksdx * sum(ksf(1:ihit));
     % pfromright = ksdx*sum(ksf(ihit+1:end))
-    out.kspminfromext = min([pfromleft 1-pfromleft]);
+    out.kspminfromext = min([pfromleft 1 - pfromleft]);
     % out.phereonstd = ksf(ihit)/sigmahat;
-    out.ksphereonmax = ksf(ihit)/normpdf(muhat,muhat,sigmahat);
-%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+    out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
+    %     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
 end
 
 % iqrs from mode
-imode = find(ksf == max(ksf),1,'first');
-out.ksiqrsfrommode = abs(ksx(imode)-tc3_y)/iqr(tc3_surr);
+imode = find(ksf == max(ksf), 1, 'first');
+out.ksiqrsfrommode = abs(ksx(imode) - tc3_y) / iqr(tc3_surr);
 
 end

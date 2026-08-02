@@ -3,7 +3,7 @@ function out = MD_hrv_classic(y)
 %
 % Typically assumes an NN/RR time series in units of seconds.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series.
 %
 % Includes:
@@ -69,7 +69,7 @@ Dy = abs(diffy);
 
 % Anonymous function to do the PNNx calcualtion:
 % proportion of difference magnitudes greater than X*sigma
-PNNxfn = @(x) mean(Dy > x/1000);
+PNNxfn = @(x) mean(Dy > x / 1000);
 
 out.pnn5  = PNNxfn(5); % 0.005*sigma
 out.pnn10 = PNNxfn(10); % 0.01*sigma
@@ -81,7 +81,7 @@ out.pnn40 = PNNxfn(40); % 0.04*sigma
 % Calculate PSD
 % ------------------------------------------------------------------------------
 % [Pxx, F] = psd(series,1024,1,hanning(1024),512);
-[Pxx, F] = periodogram(y,hann(N)); % periodogram with hanning window
+[Pxx, F] = periodogram(y, hann(N)); % periodogram with hanning window
 
 % ------------------------------------------------------------------------------
 % Calculate spectral measures such as subband spectral power percentage, LF/HF ratio etc.
@@ -101,15 +101,15 @@ hfp   = fbinsize * sum(Pxx(indh));
 vlfp  = fbinsize * sum(Pxx(indv));
 out.lfhf  = lfp / hfp;
 total     = fbinsize * sum(Pxx);
-out.vlf   = vlfp/total * 100;
-out.lf    = lfp/total * 100;
-out.hf    = hfp/total * 100;
+out.vlf   = vlfp / total * 100;
+out.lf    = lfp / total * 100;
+out.hf    = hfp / total * 100;
 
 % ------------------------------------------------------------------------------
 % Triangular histogram index
 % ------------------------------------------------------------------------------
 numBins = 10;
-out.tri = length(y)/max(histcounts(y,numBins));
+out.tri = length(y) / max(histcounts(y, numBins));
 
 % ------------------------------------------------------------------------------
 % Poincare plot measures:
@@ -117,7 +117,7 @@ out.tri = length(y)/max(histcounts(y,numBins));
 % cf. "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
 rmssd = std(diffy); % std of differenced series
 sigma = std(y); % should be 1 for zscored time series
-out.SD1 = 1/sqrt(2) * rmssd * 1000;
-out.SD2 = sqrt(2 * sigma^2 - (1/2) * rmssd^2) * 1000;
+out.SD1 = 1 / sqrt(2) * rmssd * 1000;
+out.SD2 = sqrt(2 * sigma^2 - (1 / 2) * rmssd^2) * 1000;
 
 end

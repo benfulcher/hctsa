@@ -1,9 +1,9 @@
-function out = EN_wentropy(y,whaten,p)
+function out = EN_wentropy(y, whaten, p)
 % EN_wentropy   Entropy of time series using wavelets.
 %
 % Uses the wentropy function from Matlab's Wavelet toolbox.
 %
-%--INPUTS:
+% --INPUTS:
 % y, the input time series
 % whaten, the entropy type:
 %               'shannon',
@@ -13,7 +13,7 @@ function out = EN_wentropy(y,whaten,p)
 %               (see the wentropy documentation for information)
 % p, the additional parameter needed for threshold and sure entropies
 %
-%---NOTE:
+% ---NOTE:
 % It seems likely that this implementation of wentropy is nonsense.
 
 % ------------------------------------------------------------------------------
@@ -60,18 +60,18 @@ end
 N = length(y); % time-series length
 
 switch whaten
-	case 'shannon' % Shannon entropy
-		out = wentropy(y,'shannon')/N; % scales with N for large N
+    case 'shannon' % Shannon entropy
+        out = wentropy(y, 'shannon') / N; % scales with N for large N
 
-	case 'logenergy' % Log Energy entropy
-		out = wentropy(y,'log energy')/N; % scales with N for large N
+    case 'logenergy' % Log Energy entropy
+        out = wentropy(y, 'log energy') / N; % scales with N for large N
 
     case 'threshold' % Magnitude of the signal greater than some value
-        out = wentropy(y,'threshold',p)/N;
+        out = wentropy(y, 'threshold', p) / N;
 
     case 'sure'
         % Equivalent to threshold entropy?
-        out = wentropy(y,'sure',p)/N;
+        out = wentropy(y, 'sure', p) / N;
 
     otherwise
         error('Unknown entropy type ''%s''.', whaten);

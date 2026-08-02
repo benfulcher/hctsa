@@ -1,9 +1,9 @@
-function out = SY_PPtest(y,lags,model,testStatistic)
+function out = SY_PPtest(y, lags, model, testStatistic)
 % SY_PPtest   Phillips-Peron unit root test.
 %
 % Uses the pptest code from Matlab's Econometrics Toolbox.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % lags, a vector of lags
@@ -19,7 +19,7 @@ function out = SY_PPtest(y,lags,model,testStatistic)
 %               't2' a lag-adjusted, 'unStudentized' t statistic.
 %               (see Matlab documentation for information)
 %
-%---OUTPUTS: statistics on the p-values and lags obtained from the set of tests, as
+% ---OUTPUTS: statistics on the p-values and lags obtained from the set of tests, as
 % well as measures of the regression statistics.
 
 % ------------------------------------------------------------------------------
@@ -80,9 +80,9 @@ end
 % ------------------------------------------------------------------------------
 %% Run the test
 % ------------------------------------------------------------------------------
-warning('off','econ:pptest:LeftTailStatTooSmall')
-[h, pValue, stat, ~, reg] = pptest(y,'lags',lags,'model',model,'test',testStatistic);
-warning('on','econ:pptest:LeftTailStatTooSmall')
+warning('off', 'econ:pptest:LeftTailStatTooSmall')
+[h, pValue, stat, ~, reg] = pptest(y, 'lags', lags, 'model', model, 'test', testStatistic);
+warning('on', 'econ:pptest:LeftTailStatTooSmall')
 
 % ------------------------------------------------------------------------------
 %% Get outputs
@@ -106,8 +106,8 @@ else
     out.minpValue = min(pValue);
     out.meanpValue = mean(pValue);
     out.stdpValue = std(pValue);
-    imaxp = find(pValue == max(pValue),1,'first');
-    iminp = find(pValue == min(pValue),1,'first');
+    imaxp = find(pValue == max(pValue), 1, 'first');
+    iminp = find(pValue == min(pValue), 1, 'first');
     out.lagmaxp = lags(imaxp);
     out.lagminp = lags(iminp);
 

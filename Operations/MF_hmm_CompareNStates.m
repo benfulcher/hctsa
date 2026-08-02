@@ -1,4 +1,4 @@
-function out = MF_hmm_CompareNStates(y,trainp,nstater,randomSeed)
+function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
 % MF_hmm_CompareNStates     Hidden Markov Model (HMM) fitting to a time series.
 %
 % Fits HMMs with different numbers of states, and compares the resulting
@@ -12,7 +12,7 @@ function out = MF_hmm_CompareNStates(y,trainp,nstater,randomSeed)
 % or, specifically:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -21,7 +21,7 @@ function out = MF_hmm_CompareNStates(y,trainp,nstater,randomSeed)
 % nstater, the vector of state numbers to compare. E.g., (2:4) compares a number
 %               of states 2, 3, and 4.
 %
-%---OUTPUTS: statistics on how the log likelihood of the test data changes with
+% ---OUTPUTS: statistics on how the log likelihood of the test data changes with
 % the number of states n_{states}$. We implement the code for p_{train} = 0.6$
 % as n_{states}$ varies across the range n_{states} = 2, 3, 4$.
 
@@ -60,13 +60,13 @@ function out = MF_hmm_CompareNStates(y,trainp,nstater,randomSeed)
 N = length(y); % number of samples in time series
 
 if nargin < 2 || isempty(trainp)
-    fprintf(1,'Training the model on 60%% of the data by default\n');
+    fprintf(1, 'Training the model on 60%% of the data by default\n');
     trainp = 0.6; % train on 60% of the data
 end
-Ntrain = floor(trainp*N); % number of initial samples to train the model on
+Ntrain = floor(trainp * N); % number of initial samples to train the model on
 
 if nargin < 3 || isempty(nstater)
-    fprintf(1,'Using 2--4 states by default\n');
+    fprintf(1, 'Using 2--4 states by default\n');
     nstater = (2:4); % use 2:4 states
 end
 
@@ -74,9 +74,9 @@ if nargin < 4
     randomSeed = [];
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Deal with random seeds
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 BF_ResetSeed(randomSeed); % reset the random seed if specified
 
 % ------------------------------------------------------------------------------
@@ -85,26 +85,26 @@ BF_ResetSeed(randomSeed); % reset the random seed if specified
 % Divide up dataset into training (yTrain) and test (yTest) portions
 yTrain = y(1:Ntrain);
 if Ntrain < N
-    yTest = y(Ntrain+1:end);
+    yTest = y(Ntrain + 1:end);
     Ntest = length(yTest);
 end
 
 Nstate = length(nstater);
-LLtrains = zeros(Nstate,1);
-LLtests = zeros(Nstate,1);
+LLtrains = zeros(Nstate, 1);
+LLtests = zeros(Nstate, 1);
 
 for j = 1:Nstate
     numStates = nstater(j);
     % train HMM with <numStates> states for 30 cycles of EM (or until
     % convergence); default termination tolerance
-    [Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain,Ntrain,numStates,30);
+    [Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain, Ntrain, numStates, 30);
 
-    LLtrains(j) = LL(end)/Ntrain;
+    LLtrains(j) = LL(end) / Ntrain;
 
     %% Calculate log likelihood for the test data
-    lik = ZG_hmm_cl(yTest,Ntest,numStates,Mu,Cov,P,Pi);
+    lik = ZG_hmm_cl(yTest, Ntest, numStates, Mu, Cov, P, Pi);
 
-    LLtests(j) = lik/Ntest;
+    LLtests(j) = lik / Ntest;
 end
 
 %% Output some statistics
@@ -114,11 +114,10 @@ out.maxLLtrain = max(LLtrains);
 out.maxLLtest = max(LLtests);
 out.chLLtrain = LLtrains(end) - LLtrains(1);
 out.chLLtest = LLtests(end) - LLtests(1);
-out.meandiffLLtt = mean(abs(LLtests-LLtrains));
+out.meandiffLLtt = mean(abs(LLtests - LLtrains));
 
-for i = 1:Nstate-1
-    out.(sprintf('LLtestdiff%u',i)) = LLtests(i+1) - LLtests(i);
+for i = 1:Nstate - 1
+    out.(sprintf('LLtestdiff%u', i)) = LLtests(i + 1) - LLtests(i);
 end
-
 
 end

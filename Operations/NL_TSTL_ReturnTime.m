@@ -1,4 +1,4 @@
-function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
+function out = NL_TSTL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
 % NL_TSTL_ReturnTime    Analysis of the histogram of return times.
 %
 % Return times are the time taken for the time series to return to a similar
@@ -6,7 +6,7 @@ function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 %
 % Strong peaks in the histogram are indicative of periodicities in the data.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, scalar time series as a column vector
 % NNR, number of nearest neighbours
@@ -15,7 +15,7 @@ function out = NL_TSTL_ReturnTime(y,NNR,maxT,past,Nref,embedParams)
 % Nref, number of reference indicies
 % embedParams, to feed into BF_Embed
 %
-%---OUTPUTS: include basic measures from the histogram, including the occurrence of
+% ---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
 %
 % Uses the code, return_time, from TSTOOL.
@@ -60,7 +60,7 @@ if nargin < 2 || isempty(NNR)
     NNR = 5;
 end
 if (NNR > 0) && (NNR < 1) % specify a proportion of time series length
-    NNR = floor(NNR*N); if NNR == 0, NNR = 1; end
+    NNR = floor(NNR * N); if NNR == 0, NNR = 1; end
 end
 
 % Maximum return time, maxT
@@ -68,7 +68,7 @@ if nargin < 3 || isempty(maxT)
     maxT = 0.1;
 end
 if (maxT > 0) && (maxT <= 1) % specify a proportion
-    maxT = floor(N*maxT);
+    maxT = floor(N * maxT);
     if maxT == 0, maxT = 1; end
 end
 
@@ -77,7 +77,7 @@ if nargin < 4 || isempty(past)
     past = 10;
 end
 if (past > 0) && (past < 1) % specify a proportion
-    past = floor(N*past);
+    past = floor(N * past);
     if past == 0, past = 1; end % round up from 0
 end
 
@@ -88,8 +88,8 @@ end
 
 % embed parameters
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default embedding using autocorrelation and cao\n');
+    embedParams = {'ac', 'fnnmar'};
+    fprintf(1, 'Using default embedding using autocorrelation and cao\n');
 end
 
 doPlot = false; % plot outputs to figures
@@ -97,12 +97,12 @@ doPlot = false; % plot outputs to figures
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
-s = BF_Embed(y,embedParams{1},embedParams{2},1,true);
-if ~isa(s,'signal') && isnan(s); % embedding failed
+s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, true);
+if ~isa(s, 'signal') && isnan(s); % embedding failed
     warning('Embedding failed');
     out = NaN; return
 end
-numPoints = size(data(s),1);
+numPoints = size(data(s), 1);
 if numPoints < 10
     % Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
     warning('Time series not long enough for return time analysis')
@@ -115,8 +115,8 @@ end
 try
     rs = return_time(s, NNR, maxT, past, Nref);
 catch emsg
-    if strcmp(emsg.message,'Index exceeds matrix dimensions.')
-        fprintf(1,'Error evaluating return_time\n');
+    if strcmp(emsg.message, 'Index exceeds matrix dimensions.')
+        fprintf(1, 'Error evaluating return_time\n');
         out = NaN; return
     else
         error(emsg.message);
@@ -131,21 +131,21 @@ NN = length(Trett);
 % ------------------------------------------------------------------------------
 out.max = max(Trett);
 out.std = std(Trett);
-out.pzeros = sum(Trett == 0)/NN;
-out.pg05 = sum(Trett>max(Trett)*0.5)/NN;
+out.pzeros = sum(Trett == 0) / NN;
+out.pg05 = sum(Trett > max(Trett) * 0.5) / NN;
 out.iqr = iqr(Trett);
 
 % recurrent peaks:
-icross05 = find((Trett(1:end-1)-0.5*max(Trett)).*(Trett(2:end)-0.5*max(Trett)) < 0);
+icross05 = find((Trett(1:end - 1) - 0.5 * max(Trett)) .* (Trett(2:end) - 0.5 * max(Trett)) < 0);
 if ~isempty(icross05) && length(icross05) > 2
     difficross05 = diff(icross05);
-    difficross05 = difficross05(difficross05 > 0.4*max(difficross05)); % remove small entries, crossing peaks
+    difficross05 = difficross05(difficross05 > 0.4 * max(difficross05)); % remove small entries, crossing peaks
 
-    out.meanpeaksep = mean(difficross05)/NN;
-    out.maxpeaksep = max(difficross05)/NN;
-    out.minpeaksep = min(difficross05)/NN;
-    out.rangepeaksep = range(difficross05)/NN;
-    out.stdpeaksep = std(difficross05)/sqrt(NN);
+    out.meanpeaksep = mean(difficross05) / NN;
+    out.maxpeaksep = max(difficross05) / NN;
+    out.minpeaksep = min(difficross05) / NN;
+    out.rangepeaksep = range(difficross05) / NN;
+    out.stdpeaksep = std(difficross05) / sqrt(NN);
 else
     out.meanpeaksep = NaN;
     out.maxpeaksep = NaN;
@@ -154,40 +154,40 @@ else
     out.stdpeaksep = NaN;
 end
 
-out.statrtys = std(Trett(1:floor(end/2)))/std(Trett(floor(end/2)+1:end));
-out.statrtym = mean(Trett(1:floor(end/2)))/mean(Trett(floor(end/2)+1:end));
+out.statrtys = std(Trett(1:floor(end / 2))) / std(Trett(floor(end / 2) + 1:end));
+out.statrtym = mean(Trett(1:floor(end / 2))) / mean(Trett(floor(end / 2) + 1:end));
 
-out.hhist = -sum(Trett(Trett>0).*log(Trett(Trett>0)));
+out.hhist = -sum(Trett(Trett > 0) .* log(Trett(Trett > 0)));
 
 % ------------------------------------------------------------------------------
 %% Coarse-grain to 20 bins
 % ------------------------------------------------------------------------------
 numBins = 20;
-cglav = zeros(numBins,1);
-inds = round(linspace(0,NN,numBins+1));
+cglav = zeros(numBins, 1);
+inds = round(linspace(0, NN, numBins + 1));
 for i = 1:numBins
-    cglav(i) = sum(Trett(inds(i)+1:inds(i+1)));
+    cglav(i) = sum(Trett(inds(i) + 1:inds(i + 1)));
 end
 if doPlot
-    figure('color','w');
+    figure('color', 'w');
     box('on');
-    plot(cglav,'k')
+    plot(cglav, 'k')
 end
-out.hcgdist = -sum(cglav(cglav > 0).*log(cglav(cglav > 0)));
+out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
 out.rangecgdist = range(cglav);
-out.pzeroscgdist = sum(cglav == 0)/numBins;
+out.pzeroscgdist = sum(cglav == 0) / numBins;
 
 % ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times
 % ------------------------------------------------------------------------------
-[nhist, binEdges] = histcounts(Trett,'BinMethod','sqrt','Normalization','probability');
+[nhist, binEdges] = histcounts(Trett, 'BinMethod', 'sqrt', 'Normalization', 'probability');
 if doPlot
-    binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
-    figure('color','w');
-    plot(binCenters,nhist,'o-k')
+    binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
+    figure('color', 'w');
+    plot(binCenters, nhist, 'o-k')
 end
 out.maxhisthist = max(nhist);
 out.phisthistmin = nhist(1); % this is the same as maxhisthist
-out.hhisthist = -sum(nhist(nhist > 0).*log(nhist(nhist > 0)));
+out.hhisthist = -sum(nhist(nhist > 0) .* log(nhist(nhist > 0)));
 
 end

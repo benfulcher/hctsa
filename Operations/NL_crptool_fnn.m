@@ -1,7 +1,7 @@
-function out = NL_crptool_fnn(y,maxm,r,taum,th,randomSeed)
+function out = NL_crptool_fnn(y, maxm, r, taum, th, randomSeed)
 % NL_crptool_fnn    Analyzes the false-nearest neighbors statistic.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % maxm, the maximum embedding dimension to consider
 % r, the threshold; neighbourhood criterion
@@ -93,22 +93,22 @@ if isempty(cacheY)
 end
 
 for ci = 1:numel(cacheY)
-    if isequaln(y,cacheY{ci}) && isequaln(maxm,cacheMaxm{ci}) && isequaln(r,cacheR{ci}) && ...
-            isequaln(taum,cacheTaum{ci}) && isequaln(th,cacheTh{ci}) && isequaln(randomSeed,cacheRandomSeed{ci})
+    if isequaln(y, cacheY{ci}) && isequaln(maxm, cacheMaxm{ci}) && isequaln(r, cacheR{ci}) && ...
+            isequaln(taum, cacheTaum{ci}) && isequaln(th, cacheTh{ci}) && isequaln(randomSeed, cacheRandomSeed{ci})
         out = cacheOut{ci};
         return
     end
 end
 
-out = NL_crptool_fnn_Compute(y,maxm,r,taum,th,randomSeed);
+out = NL_crptool_fnn_Compute(y, maxm, r, taum, th, randomSeed);
 
-cacheY{end+1} = y;
-cacheMaxm{end+1} = maxm;
-cacheR{end+1} = r;
-cacheTaum{end+1} = taum;
-cacheTh{end+1} = th;
-cacheRandomSeed{end+1} = randomSeed;
-cacheOut{end+1} = out;
+cacheY{end + 1} = y;
+cacheMaxm{end + 1} = maxm;
+cacheR{end + 1} = r;
+cacheTaum{end + 1} = taum;
+cacheTh{end + 1} = th;
+cacheRandomSeed{end + 1} = randomSeed;
+cacheOut{end + 1} = out;
 if numel(cacheY) > maxCacheEntries
     cacheY(1) = [];
     cacheMaxm(1) = [];
@@ -122,7 +122,7 @@ end
 end
 
 % ------------------------------------------------------------------------------
-function out = NL_crptool_fnn_Compute(y,maxm,r,taum,th,randomSeed)
+function out = NL_crptool_fnn_Compute(y, maxm, r, taum, th, randomSeed)
 % The original computation, unchanged -- moved into its own local function so
 % the cache wrapper above can store its result. All inputs are already
 % resolved (non-default) by the caller above.
@@ -133,25 +133,25 @@ N = length(y); % length of the input time series
 % determine the time delay
 if ischar(taum)
     % time delay
-    if strcmp(taum,'mi')
-        tau = CO_FirstMin(y,'mi');
-    elseif strcmp(taum,'ac')
-        tau = CO_FirstCrossing(y,'ac',0,'discrete');
+    if strcmp(taum, 'mi')
+        tau = CO_FirstMin(y, 'mi');
+    elseif strcmp(taum, 'ac')
+        tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
     else
-        error('Invalid time-delay method ''%s''.',taum)
+        error('Invalid time-delay method ''%s''.', taum)
     end
 else % give a numeric answer
     tau = taum;
 end
 % Don't want tau to be too large
-if tau > N/10
-    tau = floor(N/10);
+if tau > N / 10
+    tau = floor(N / 10);
 end
 
 % ------------------------------------------------------------------------------
 %% Here's where the action happens:
 % ------------------------------------------------------------------------------
-if ~exist(fullfile('Marwan_crptool','crptool_fnn'),'file')
+if ~exist(fullfile('Marwan_crptool', 'crptool_fnn'), 'file')
     error('Error -- the CRP Toolbox functions for calculating nearest neighbours can not be found');
 end
 
@@ -159,15 +159,15 @@ end
 BF_ResetSeed(randomSeed);
 
 % Run Marwan's CRPToolbox false nearest neighbors code:
-nn = crptool_fnn(y,maxm,tau,r,'silent');
+nn = crptool_fnn(y, maxm, tau, r, 'silent');
 
 if isnan(nn);
     error('Error running the function ''fnn'' from Marwan''s CRPToolbox')
 end
 
 if doPlot
-    figure('color','w')
-    plot(1:maxm,nn,'o-k');
+    figure('color', 'w')
+    plot(1:maxm, nn, 'o-k');
 end
 
 % Output some summary statistics
@@ -180,27 +180,26 @@ if isempty(th)
 
     % fnn
     for i = 2:maxm
-        out.(sprintf('fnn%u',i)) = nn(i);
+        out.(sprintf('fnn%u', i)) = nn(i);
     end
 
     % first time NN error goes below a set of thresholds
     % firstunderfn = @(x) find(nn < x,1,'first');
-    out.firstunder08 = firstunderf(0.8,1:maxm,nn);
-    out.firstunder07 = firstunderf(0.7,1:maxm,nn);
-    out.firstunder05 = firstunderf(0.5,1:maxm,nn);
-    out.firstunder02 = firstunderf(0.2,1:maxm,nn);
-    out.firstunder01 = firstunderf(0.1,1:maxm,nn);
-    out.firstunder005 = firstunderf(0.05,1:maxm,nn);
+    out.firstunder08 = firstunderf(0.8, 1:maxm, nn);
+    out.firstunder07 = firstunderf(0.7, 1:maxm, nn);
+    out.firstunder05 = firstunderf(0.5, 1:maxm, nn);
+    out.firstunder02 = firstunderf(0.2, 1:maxm, nn);
+    out.firstunder01 = firstunderf(0.1, 1:maxm, nn);
+    out.firstunder005 = firstunderf(0.05, 1:maxm, nn);
 
 else % in this case return a scalar of embedding dimension as output
-    out = firstunderf(th,1:maxm,nn);
+    out = firstunderf(th, 1:maxm, nn);
 end
 
-
 % ------------------------------------------------------------------------------
-function firsti = firstunderf(x,m,p)
+function firsti = firstunderf(x, m, p)
     %% Find m for the first time p goes under x%
-    firsti = m(find(p < x,1,'first'));
+    firsti = m(find(p < x, 1, 'first'));
     if isempty(firsti)
         firsti = m(end) + 1;
     end

@@ -1,4 +1,4 @@
-function out = NL_TSTL_BoxCorrDim(y,numBins,embedParams)
+function out = NL_TSTL_BoxCorrDim(y, numBins, embedParams)
 % NL_TSTL_BoxCorrDim  Correlation dimension of a time series.
 %
 % Uses TSTOOL code, corrdim, to estimate the correlation dimension of a
@@ -6,13 +6,13 @@ function out = NL_TSTL_BoxCorrDim(y,numBins,embedParams)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%---INPUTS:
+% ---INPUTS:
 % y, column vector of time series data
 % numBins, maximum number of partitions per axis
 % embedParams [opt], embedding parameters as {tau,m} in 2-entry cell for a
 %                   time-delay, tau, and embedding dimension, m. As inputs to BF_Embed.
 %
-%---OUTPUTS: Simple summaries of the outputs from corrdim.
+% ---OUTPUTS: Simple summaries of the outputs from corrdim.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,7 +55,7 @@ end
 
 % (2) Set embedding parameters to defaults
 if nargin < 3 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
+    embedParams = {'ac', 'fnnmar'};
 else
     if length(embedParams) ~= 2
         error('Embedding parameters should be formatted like {tau,m}')
@@ -66,21 +66,21 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_Embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
 
-if ~isa(s,'signal') && isnan(s) % embedding failed
+if ~isa(s, 'signal') && isnan(s) % embedding failed
     error('Time-series embedding to signal class for TSTOOL failed')
 end
 
 % ------------------------------------------------------------------------------
 %% Run
 % ------------------------------------------------------------------------------
-rs = data(corrdim(s,numBins));
+rs = data(corrdim(s, numBins));
 
 % Contains ldr as rows for embedding dimensions 1:m as columns;
 if doPlot
-    figure('color','w'); box('on');
-    plot(rs,'k');
+    figure('color', 'w'); box('on');
+    plot(rs, 'k');
 end
 
 % ------------------------------------------------------------------------------
@@ -88,20 +88,20 @@ end
 % ------------------------------------------------------------------------------
 % These statistics are just from intuition
 
-m = size(rs,2); % number of embedding dimensions
-ldr = size(rs,1); % not completely clear from TSTOOL what ldr represents (= 17)
+m = size(rs, 2); % number of embedding dimensions
+ldr = size(rs, 1); % not completely clear from TSTOOL what ldr represents (= 17)
 
 for i = 2:m
-    out.(sprintf('meand%u',i)) = mean(rs(:,i));
-    out.(sprintf('mediand%u',i)) = median(rs(:,i));
-    out.(sprintf('mind%u',i)) = min(rs(:,i));
+    out.(sprintf('meand%u', i)) = mean(rs(:, i));
+    out.(sprintf('mediand%u', i)) = median(rs(:, i));
+    out.(sprintf('mind%u', i)) = min(rs(:, i));
 end
 
 for i = 2:ldr
-    out.(sprintf('meanr%u',i)) = mean(rs(i,:));
-    out.(sprintf('medianr%u',i)) = median(rs(i,:));
-    out.(sprintf('minr%u',i)) = min(rs(i,:));
-    out.(sprintf('meanchr%u',i)) = mean(diff(rs(i,:)));
+    out.(sprintf('meanr%u', i)) = mean(rs(i, :));
+    out.(sprintf('medianr%u', i)) = median(rs(i, :));
+    out.(sprintf('minr%u', i)) = min(rs(i, :));
+    out.(sprintf('meanchr%u', i)) = mean(diff(rs(i, :)));
 end
 
 out.stdmean = std(mean(rs));

@@ -1,14 +1,14 @@
-function out = EN_MS_LZcomplexity(y,n,preProc)
+function out = EN_MS_LZcomplexity(y, n, preProc)
 % EN_MS_LZcomplexity Lempel-Ziv complexity of a n-bit encoding of a time series
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % n, the (integer) number of bits to encode the data into
 % preProc [opt], first apply a given preProcessing to the time series. For now,
 %               just 'diff' is implemented, which zscores incremental
 %               differences and then applies the complexity method.
 %
-%---OUTPUT: the normalized Lempel-Ziv complexity: i.e., the number of distinct
+% ---OUTPUT: the normalized Lempel-Ziv complexity: i.e., the number of distinct
 %           symbol sequences in the time series divided by the expected number
 %           of distinct symbols for a noise sequence.
 
@@ -61,14 +61,14 @@ end
 % Apply some pre-processing to the time series before performing the analysis
 if ischar(preProc)
     switch preProc
-    case 'diff'
-        y = zscore(diff(y));
-    otherwise
-        error('Unknown preprocessing setting ''%s''', preProc);
+        case 'diff'
+            y = zscore(diff(y));
+        otherwise
+            error('Unknown preprocessing setting ''%s''', preProc);
     end
 end
 
 % Run Michael Small's (mexed) code for calcaulting the Lempel-Ziv complexity:
-out = MS_complexity(y,n);
+out = MS_complexity(y, n);
 
 end

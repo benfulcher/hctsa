@@ -4,7 +4,7 @@ function out = SC_fastdfa(y)
 % Measures the scaling exponent of the time series using a fast implementation
 % of detrended fluctuation analysis (DFA).
 %
-%---INPUT:
+% ---INPUT:
 % y, the input time series, is fed straight into the fastdfa script.
 
 % The original fastdfa code is by Max A. Little and publicly-available at
@@ -38,7 +38,7 @@ function out = SC_fastdfa(y)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if size(y,2) > size(y,1);
+if size(y, 2) > size(y, 1);
     y = y'; % Ensure input time series is a column vector
 end
 

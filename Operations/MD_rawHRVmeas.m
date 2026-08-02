@@ -48,9 +48,9 @@ function out = MD_rawHRVmeas(x)
 N = length(x); % time-series length
 
 % Triangular histogram index
-out.tri10 = N/max(histcounts(x,10));
-out.tri20 = N/max(histcounts(x,20));
-out.trisqrt = N/max(histcounts(x,'BinMethod','sqrt'));
+out.tri10 = N / max(histcounts(x, 10));
+out.tri20 = N / max(histcounts(x, 20));
+out.trisqrt = N / max(histcounts(x, 'BinMethod', 'sqrt'));
 
 % 'Poincare plot measures': see
 % "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
@@ -59,13 +59,13 @@ diffx = diff(x);
 
 % SD1: Standard deviation of first derivative (differences):
 %       (variability in direction perpendicular to line of identity in (x_t,x_{t+1}))
-out.SD1 = 1/sqrt(2) * std(diffx) * 1000;
+out.SD1 = 1 / sqrt(2) * std(diffx) * 1000;
 
 % SD2: (variability in direction of line of identity in (x_t,x_{t+1}))
 % Mix of standard deviation of data and standard deviation of first derivative:
 % High values for signal with high variance but low variance of differences
 % Low values for signal with low variance but high variance of differences
-out.SD2 = sqrt(2*var(x) - 0.5*std(diffx)^2) * 1000;
+out.SD2 = sqrt(2 * var(x) - 0.5 * std(diffx)^2) * 1000;
 
 % NOTE: the SD1 measure is the same (up to a rescaling)
 %       as the implementation in DN_Spread(diff(x),'std');

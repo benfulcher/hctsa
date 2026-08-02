@@ -1,4 +1,4 @@
-function out = SY_KPSStest(y,lags)
+function out = SY_KPSStest(y, lags)
 % SY_KPSStest   The KPSS stationarity test.
 %
 % The KPSS stationarity test, of Kwiatkowski, Phillips, Schmidt, and Shin:
@@ -15,7 +15,7 @@ function out = SY_KPSStest(y,lags)
 % of change in p-values and test statistics will be outputted if the input is a
 % vector of time lags.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % lags, can be either a scalar (returns basic test statistic and p-value), or
 %                   vector (returns statistics on changes across these time lags)
@@ -54,9 +54,9 @@ function out = SY_KPSStest(y,lags)
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('econometrics_toolbox');
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(lags)
     lags = 0;
 end
@@ -65,11 +65,11 @@ end
 %% (1) Perform the test(s)
 % ------------------------------------------------------------------------------
 % Temporarily turn off warnings for the test statistic being too big or small
-warning('off','econ:kpsstest:StatTooSmall')
-warning('off','econ:kpsstest:StatTooBig')
-[~, pValue, stat] = kpsstest(y,'lags',lags);
-warning('on','econ:kpsstest:StatTooSmall')
-warning('on','econ:kpsstest:StatTooBig')
+warning('off', 'econ:kpsstest:StatTooSmall')
+warning('off', 'econ:kpsstest:StatTooBig')
+[~, pValue, stat] = kpsstest(y, 'lags', lags);
+warning('on', 'econ:kpsstest:StatTooSmall')
+warning('on', 'econ:kpsstest:StatTooBig')
 
 % ------------------------------------------------------------------------------
 %% (2) Return statistics on outputs of test(s)

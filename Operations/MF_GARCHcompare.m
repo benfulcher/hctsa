@@ -1,4 +1,4 @@
-function out = MF_GARCHcompare(y,preProc,pr,qr,randomSeed,beVocal)
+function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % MF_GARCHcompare   Comparison of GARCH time-series models
 %
 % This code fits a set of GARCH(p,q) models to the time series and
@@ -15,7 +15,7 @@ function out = MF_GARCHcompare(y,preProc,pr,qr,randomSeed,beVocal)
 % attempts to pre-whiten and assumes a constant mean process (applies a linear
 % detrending).
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % preProc, a preprocessing to apply:
 %           (i) 'none': no preprocessing is performed
@@ -28,7 +28,7 @@ function out = MF_GARCHcompare(y,preProc,pr,qr,randomSeed,beVocal)
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 %
-%---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
+% ---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
 
@@ -97,7 +97,7 @@ end
 % ------------------------------------------------------------------------------
 y0 = y; % the original, unprocessed time series
 
-y = BF_Whiten(y,preProc,0,randomSeed); % Use a basic preprocessing to whiten the time series
+y = BF_Whiten(y, preProc, 0, randomSeed); % Use a basic preprocessing to whiten the time series
 
 % ------------------------------------------------------------------------------
 %% Preliminaries
@@ -121,26 +121,25 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,'lags',1:20,'alpha',0.1);
+[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
 % [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1); % depricated syntax
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,'lags',1:20,'alpha',0.1);
+[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1); % depricated syntax
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]); % depricated syntax
-
 
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_AutoCorr(y,1:20);
 % autocorrs_var = CO_AutoCorr(y.^2,1:20);
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,NumLags=20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,NumLags=20);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, NumLags = 20);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, NumLags = 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,NumLags=20);
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, NumLags = 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
@@ -148,74 +147,74 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % initialize statistics
 np = length(pr);
 nq = length(qr);
-LLFs = NaN*ones(np,nq); % log-likelihood
-AICs = NaN*ones(np,nq); % AIC
-BICs = NaN*ones(np,nq); % BIC
-Ks = NaN*ones(np,nq); % constant term in variance
-meanarchps = NaN*ones(np,nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
-maxarchps = NaN*ones(np,nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
-meanlbqps = NaN*ones(np,nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
-maxlbqps = NaN*ones(np,nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
-isBad = zeros(np,nq);
+LLFs = NaN * ones(np, nq); % log-likelihood
+AICs = NaN * ones(np, nq); % AIC
+BICs = NaN * ones(np, nq); % BIC
+Ks = NaN * ones(np, nq); % constant term in variance
+meanarchps = NaN * ones(np, nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
+maxarchps = NaN * ones(np, nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
+meanlbqps = NaN * ones(np, nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
+maxlbqps = NaN * ones(np, nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+isBad = zeros(np, nq);
 
 for i = 1:np
     p = pr(i); % garch order
     for j = 1:nq
-       q = qr(j); % arch order
+        q = qr(j); % arch order
 
-       % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
-       GModel = garch(p,q);
-       GModel.Constant = NaN;
+        % (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
+        GModel = garch(p, q);
+        GModel.Constant = NaN;
 
-       % (ii) fit the model
-       [Gfit, estParamCov, LLF, info] = estimate(GModel,y,'Display','off');
-       % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
+        % (ii) fit the model
+        [Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
+        % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
 
-       numParams = sum(any(estParamCov)); % number of parameters
-       if numParams < p + q + 1
-           if beVocal
-               fprintf(1,'Bad fit at p = %u, q = %u\n',p,q);
-           end
-           isBad(i,j) = 1;
-           continue; % didn't fit successfully; everything stays NaN
-       end
+        numParams = sum(any(estParamCov)); % number of parameters
+        if numParams < p + q + 1
+            if beVocal
+                fprintf(1, 'Bad fit at p = %u, q = %u\n', p, q);
+            end
+            isBad(i, j) = 1;
+            continue; % didn't fit successfully; everything stays NaN
+        end
 
-       % (iii) store derived statistics on the fitted model
-       LLFs(i,j) = LLF;
-       [AIC, BIC] = aicbic(LLF,numParams,N); % aic and bic of fit
-       AICs(i,j) = AIC;
-       BICs(i,j) = BIC;
-       Ks(i,j) = Gfit.Constant;
+        % (iii) store derived statistics on the fitted model
+        LLFs(i, j) = LLF;
+        [AIC, BIC] = aicbic(LLF, numParams, N); % aic and bic of fit
+        AICs(i, j) = AIC;
+        BICs(i, j) = BIC;
+        Ks(i, j) = Gfit.Constant;
 
-       % (iv) store summaries of standardized errors
-       %    (less need to compare to original because now we're only
-       %    comparing *between* models, which should all have the same
-       %    baseline...?) It's just that the absolute values of these
-       %    summaries are less meaningful; should be with respect to the
-       %    original time series
-       innovations = (y - Gfit.Offset); % residuals (departures from mean process)
-       [sigmas,logL] = infer(Gfit,y); % estimate time series of conditional variance, sigmas
-       stde = innovations./sqrt(sigmas); % standardized residuals
-       stde2 = stde.^2; % squared
+        % (iv) store summaries of standardized errors
+        %    (less need to compare to original because now we're only
+        %    comparing *between* models, which should all have the same
+        %    baseline...?) It's just that the absolute values of these
+        %    summaries are less meaningful; should be with respect to the
+        %    original time series
+        innovations = (y - Gfit.Offset); % residuals (departures from mean process)
+        [sigmas, logL] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
+        stde = innovations ./ sqrt(sigmas); % standardized residuals
+        stde2 = stde.^2; % squared
 
-       % (i) Engle's ARCH test
-       %       look at autoregressive lags 1:20
-       [Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,'lags',1:20,'alpha',0.1);
+        % (i) Engle's ARCH test
+        %       look at autoregressive lags 1:20
+        [Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
 
-       meanarchps(i,j) = mean(Engle_pValue_stde);
-       maxarchps(i,j) = max(Engle_pValue_stde);
+        meanarchps(i, j) = mean(Engle_pValue_stde);
+        maxarchps(i, j) = max(Engle_pValue_stde);
 
-       % (ii) Ljung-Box Q-test
-       %       look at autocorrelation at lags 1:20
-       %       use the 10% significance level
-       %       departure from randomness hypothesis test
-       [lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,'lags',1:20,'alpha',0.1);
+        % (ii) Ljung-Box Q-test
+        %       look at autocorrelation at lags 1:20
+        %       use the 10% significance level
+        %       departure from randomness hypothesis test
+        [lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
 
-       meanlbqps(i,j) = mean(lbq_pValue_stde2);
-       maxlbqps(i,j) = max(lbq_pValue_stde2);
+        meanlbqps(i, j) = mean(lbq_pValue_stde2);
+        maxlbqps(i, j) = max(lbq_pValue_stde2);
 
-       % Difficult to take parameter values since their number if
-       % changing...
+        % Difficult to take parameter values since their number if
+        % changing...
     end
 end
 
@@ -257,15 +256,15 @@ out.max_maxlbqps = max(maxlbqps(:));
 out.mean_maxlbqps = nanmean(maxlbqps(:));
 
 % 'bests' (orders)
-[a, b] = find(LLFs == min(LLFs(:)),1,'first');
+[a, b] = find(LLFs == min(LLFs(:)), 1, 'first');
 out.bestpLLF = pr(a);
 out.bestqLLF = qr(b);
 
-[a, b] = find(AICs == min(AICs(:)),1,'first');
+[a, b] = find(AICs == min(AICs(:)), 1, 'first');
 out.bestpAIC = pr(a);
 out.bestqAIC = qr(b);
 
-[a, b] = find(BICs == min(BICs(:)),1,'first');
+[a, b] = find(BICs == min(BICs(:)), 1, 'first');
 out.bestpAIC = pr(a);
 out.bestqAIC = qr(b);
 

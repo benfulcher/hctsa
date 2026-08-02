@@ -4,14 +4,14 @@ function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSe
 % cf. "Detecting strange attractors in turbulence", F. Takens.
 % Lect. Notes Math. 898 p366 (1981)
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % Nref, the number of reference points (can be -1 to use all points)
 % rad, the maximum search radius (as a proportion of the attractor size)
 % past, the Theiler window
 % embedParams, the embedding parameters for BF_Embed, in the form {tau,m}
 %
-%---OUTPUT: the Taken's estimator of the correlation dimension, d2.
+% ---OUTPUT: the Taken's estimator of the correlation dimension, d2.
 %
 % Uses the TSTOOL code, takens_estimator.
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
@@ -65,13 +65,13 @@ if nargin < 4 || isempty(past)
     past = 1; % just exclude current point
 end
 if (past > 0) && (past < 1)
-    past = floor(N*past); % specify a fraction of the time series length...
+    past = floor(N * past); % specify a fraction of the time series length...
 end
 
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
-    fprintf(1,'Using default time-delay embedding using autocorrelation and fnn-mar\n');
+    embedParams = {'ac', 'fnnmar'};
+    fprintf(1, 'Using default time-delay embedding using autocorrelation and fnn-mar\n');
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are incorrectly formatted, we need {tau,m}')
@@ -87,15 +87,15 @@ end
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_Embed(y,embedParams{1},embedParams{2},1,randomSeed);
+s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, randomSeed);
 
-if ~isa(s,'signal') && isnan(s); % Embedding failed
+if ~isa(s, 'signal') && isnan(s); % Embedding failed
     fprintf('Embedding failed.\n')
     out = NaN; return % assume an error with large time-lag or dimension
 end
 
 % Check that there are enough points:
-if size(data(s),1) < 10
+if size(data(s), 1) < 10
     % Too few data points:
     out = NaN; return
 end

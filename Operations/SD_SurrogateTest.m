@@ -1,4 +1,4 @@
-function out = SD_SurrogateTest(x,surrMeth,numSurrs,extrap,theTestStat,randomSeed)
+function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, randomSeed)
 % SD_SurrogateTest   Analyzes test statistics obtained from surrogate time series
 %
 % This function is based on information found in:
@@ -8,7 +8,7 @@ function out = SD_SurrogateTest(x,surrMeth,numSurrs,extrap,theTestStat,randomSee
 % The generation of surrogates is done by the periphery function,
 % SD_MakeSurrogates
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % surrMeth, the method for generating surrogate time series:
@@ -108,18 +108,17 @@ end
 
 N = length(x); % time-series length
 
-
 % ------------------------------------------------------------------------------
 %% Generate surrogate time series using SD_MakeSurrogates:
 % ------------------------------------------------------------------------------
-z = SD_MakeSurrogates(x,surrMeth,numSurrs,extrap,randomSeed);
+z = SD_MakeSurrogates(x, surrMeth, numSurrs, extrap, randomSeed);
 
 % z is matrix where each column is a surrogate time series
 
 % ------------------------------------------------------------------------------
 % Evaluate test statistic on each surrogate
 % ------------------------------------------------------------------------------
-if ismember('ami1',theTestStat)
+if ismember('ami1', theTestStat)
     % Investigate AMI(1) of surrogates compared to that of signal itself
     % This statistic is used by Nakamura et al. (2006), PRE
     % Could use CO_HistogramAMI or TSTL, but I'll use IN_AutoMutualInfo with
@@ -129,31 +128,31 @@ if ismember('ami1',theTestStat)
 
     % Use the gaussian approximation to estimate automutual information using the
     % Information Dynamics Toolkit:
-    ami_fn = @(timeSeries,timeDelay) IN_AutoMutualInfo(timeSeries,timeDelay,'gaussian');
+    ami_fn = @(timeSeries, timeDelay) IN_AutoMutualInfo(timeSeries, timeDelay, 'gaussian');
 
-    AMIx = ami_fn(x,1);
-    AMIsurr = zeros(numSurrs,1);
+    AMIx = ami_fn(x, 1);
+    AMIsurr = zeros(numSurrs, 1);
     for i = 1:numSurrs
-        AMIsurr(i) = ami_fn(z(:,i),1);
+        AMIsurr(i) = ami_fn(z(:, i), 1);
     end
     % So we have a value AMIx, and a distribution for the surrogates
     % AMIsurr -- we must compare and return something meaningful
     % surrogates should always have lower AMI than original signal
-    someStats = SDgivemestats(AMIx,AMIsurr,'right');
+    someStats = SDgivemestats(AMIx, AMIsurr, 'right');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('ami_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('ami_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('fmmi',theTestStat)
+if ismember('fmmi', theTestStat)
     % Investigate the first minimum of mutual information of surrogates compared to
     % that of signal itself
-    fmmix = CO_FirstMin(x,'mi');
-    fmmiSurr = zeros(numSurrs,1);
+    fmmix = CO_FirstMin(x, 'mi');
+    fmmiSurr = zeros(numSurrs, 1);
     for i = 1:numSurrs
         try
-            fmmiSurr(i) = CO_FirstMin(z(:,i),'mi');
+            fmmiSurr(i) = CO_FirstMin(z(:, i), 'mi');
         catch
             fmmiSurr(i) = NaN;
         end
@@ -163,92 +162,92 @@ if ismember('fmmi',theTestStat)
     end
 
     % FMMI should be higher for signal than surrogates
-    someStats = SDgivemestats(fmmix,fmmiSurr,'right');
+    someStats = SDgivemestats(fmmix, fmmiSurr, 'right');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('fmmi_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('fmmi_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('o3',theTestStat)
+if ismember('o3', theTestStat)
     % Third-order statistic in Schreiber, Schmitz (Physica D)
     tau = 1;
-    o3x = 1/(N-tau)*sum((x(1+tau:end) - x(1:end-tau)).^3);
-    o3surr = zeros(numSurrs,1);
+    o3x = 1 / (N - tau) * sum((x(1 + tau:end) - x(1:end - tau)).^3);
+    o3surr = zeros(numSurrs, 1);
     for i = 1:numSurrs
-        o3surr(i) = 1/(N-tau)*sum((z(1+tau:end,i) - z(1:end-tau,i)).^3);
+        o3surr(i) = 1 / (N - tau) * sum((z(1 + tau:end, i) - z(1:end - tau, i)).^3);
     end
-    someStats = SDgivemestats(o3x,o3surr,'both');
+    someStats = SDgivemestats(o3x, o3surr, 'both');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('o3_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('o3_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('tc3',theTestStat)
+if ismember('tc3', theTestStat)
     % TC3 statistic -- another time-reversal asymmetry measure
     tau = 1;
-    tmp = CO_tc3(x,tau);
+    tmp = CO_tc3(x, tau);
     tc3x = tmp.raw;
-    tc3surr = zeros(numSurrs,1);
+    tc3surr = zeros(numSurrs, 1);
     for i = 1:numSurrs
-        tmp = CO_tc3(z(:,i),tau);
+        tmp = CO_tc3(z(:, i), tau);
         tc3surr(i) = tmp.raw;
     end
 
-    someStats = SDgivemestats(tc3x,tc3surr,'both');
+    someStats = SDgivemestats(tc3x, tc3surr, 'both');
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('tc3_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('tc3_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('nlpe',theTestStat)
+if ismember('nlpe', theTestStat)
     % Locally constant phase space prediction error
     warning('''nlpe'' can be very time consuming...')
     de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-    tmp = NL_MS_nlpe(x,de,tau);
+    tmp = NL_MS_nlpe(x, de, tau);
     nlpex = tmp.msqerr;
-    nlpesurr = zeros(numSurrs,1);
+    nlpesurr = zeros(numSurrs, 1);
     for i = 1:numSurrs
-        res = MS_nlpe(z(:,i),de,tau);
+        res = MS_nlpe(z(:, i), de, tau);
         msqerr = sum(res.^2);
         nlpesurr(i) = msqerr;
     end
 
-    someStats = SDgivemestats(nlpex,nlpesurr,'right'); % NLPE should be higher than surrogates
+    someStats = SDgivemestats(nlpex, nlpesurr, 'right'); % NLPE should be higher than surrogates
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('nlpe_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('nlpe_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
-if ismember('fnn',theTestStat)
+if ismember('fnn', theTestStat)
     warning('fnn takes like *literally forever*...')
 
     % false nearest neighbours at d=2;
-    tmp = NL_MS_fnn(x,2,1,5,1);
+    tmp = NL_MS_fnn(x, 2, 1, 5, 1);
     fnnx = tmp.pfnn_2;
-    fnnsurr = zeros(numSurrs,1);
+    fnnsurr = zeros(numSurrs, 1);
     for i = 1:numSurrs
-        tmp = NL_MS_fnn(z(:,i),2,1,5,1);
+        tmp = NL_MS_fnn(z(:, i), 2, 1, 5, 1);
         fnnsurr(i) = tmp.pfnn_2;
     end
 
-    someStats = SDgivemestats(fnnx,fnnsurr,'right'); % FNN(2) should be higher than surrogates?
+    someStats = SDgivemestats(fnnx, fnnsurr, 'right'); % FNN(2) should be higher than surrogates?
     fnames = fieldnames(someStats);
     for i = 1:length(fnames)
-        out.(sprintf('fnn_%s',fnames{i})) = someStats.(fnames{i});
+        out.(sprintf('fnn_%s', fnames{i})) = someStats.(fnames{i});
     end
 end
 
 % ------------------------------------------------------------------------------
-function someStats = SDgivemestats(statx,statsurr,leftrightboth)
+function someStats = SDgivemestats(statx, statsurr, leftrightboth)
     numSurrs = length(statsurr);
     if any(isnan(statsurr))
         error('SDgivemestats failed');
     end
-%         leftrightboth = {'left','right','both'}
+    %         leftrightboth = {'left','right','both'}
     % have a distribution of some statistic with samples statsurr
     % and we have the value of the statistic for a given process in
     % statx. Want to return measures of how consistant the measured
@@ -269,19 +268,19 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
         if statx < min(xi) || statx > max(xi)
             someStats.f = 0; % out of range -- assume p=0 here
         else
-            [~, minhere] = min(abs(statx-xi));
+            [~, minhere] = min(abs(statx - xi));
             someStats.f = f(minhere); % return probability density where the point is
         end
     else
-        zscstatsurr = (statsurr-mean(statsurr))/std(statsurr);
-        zscstatx = (statx-mean(statsurr))/std(statsurr);
+        zscstatsurr = (statsurr - mean(statsurr)) / std(statsurr);
+        zscstatx = (statx - mean(statsurr)) / std(statsurr);
         [f, xi] = ksdensity(zscstatsurr);
 
         % find where the statx value would be:
         if (zscstatx < min(xi)) || (zscstatx > max(xi))
             someStats.f = 0; % out of range -- assume p=0 here
         else
-            [~, minhere] = min(abs(zscstatx-xi));
+            [~, minhere] = min(abs(zscstatx - xi));
             someStats.f = f(minhere); % return probability density where the point is
         end
     end
@@ -292,33 +291,33 @@ function someStats = SDgivemestats(statx,statsurr,leftrightboth)
     if iqrsurr == 0
         someStats.mediqr = NaN;
     else
-        someStats.mediqr = abs(statx-medsurr)/iqrsurr;
+        someStats.mediqr = abs(statx - medsurr) / iqrsurr;
     end
 
     % rank statistic
     [~, ix] = sort([statx; statsurr]);
     xfitshere = find(ix == 1) - 1;
-    if strcmp(leftrightboth,'right') % x statistic smaller than distribution
+    if strcmp(leftrightboth, 'right') % x statistic smaller than distribution
         xfitshere = numSurrs + 1 - xfitshere; % how far from highest ranked value
-    elseif strcmp(leftrightboth,'both')
-        xfitshere = min(xfitshere,numSurrs+1-xfitshere);
+    elseif strcmp(leftrightboth, 'both')
+        xfitshere = min(xfitshere, numSurrs + 1 - xfitshere);
     end
 
     if isempty(xfitshere)
-        someStats.prank = 1/(numSurrs+1); % rank-based p-value
+        someStats.prank = 1 / (numSurrs + 1); % rank-based p-value
     else
-        someStats.prank = (1+xfitshere)/(numSurrs+1); % rank-based p-value
+        someStats.prank = (1 + xfitshere) / (numSurrs + 1); % rank-based p-value
     end
-    if strcmp(leftrightboth,'both')
-        someStats.prank = someStats.prank*2; % I think this factor should be in here
+    if strcmp(leftrightboth, 'both')
+        someStats.prank = someStats.prank * 2; % I think this factor should be in here
     end
 
     % DO PLOTTING:
     if doPlot
-        figure('color','w')
-        plot(statsurr,ones(numSurrs,1),'.k');
+        figure('color', 'w')
+        plot(statsurr, ones(numSurrs, 1), '.k');
         hold('on');
-        plot(statx*ones(2,1),[0,2],'r')
+        plot(statx * ones(2, 1), [0, 2], 'r')
     end
 end
 % ------------------------------------------------------------------------------

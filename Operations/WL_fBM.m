@@ -3,10 +3,10 @@ function out = WL_fBM(y)
 %
 % Uses the wfbmesti function from Matlab's Wavelet Toolbox
 %
-%---INPUT:
+% ---INPUT:
 % y, the time series to analyze.
 %
-%---OUTPUTS: All three outputs of wfbmesti are returned from this function.
+% ---OUTPUTS: All three outputs of wfbmesti are returned from this function.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

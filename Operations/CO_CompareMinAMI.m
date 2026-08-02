@@ -1,5 +1,5 @@
-function out = CO_CompareMinAMI(y,binMethod,numBins)
-% CO_CompareMinAMI	Variability in first minimum of automutual information
+function out = CO_CompareMinAMI(y, binMethod, numBins)
+% CO_CompareMinAMI  Variability in first minimum of automutual information
 %
 % Finds the first minimum of the automutual information by various different
 % estimation methods, and sees how this varies over different coarse-grainings
@@ -9,7 +9,7 @@ function out = CO_CompareMinAMI(y,binMethod,numBins)
 % automutual information function obtained over a range of the number of bins
 % used in the histogram estimation, when specifying 'numBins' as a vector
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % binMethod, the method for estimating mutual information (input to CO_HistogramAMI)
@@ -55,7 +55,7 @@ function out = CO_CompareMinAMI(y,binMethod,numBins)
 % ------------------------------------------------------------------------------
 % Default number of bins
 if nargin < 3,
-	numBins = 10;
+    numBins = 10;
 end
 % ------------------------------------------------------------------------------
 
@@ -63,38 +63,38 @@ doPlot = 0; % plot outputs to figure
 N = length(y); % time-series length
 
 % Range of time lags, tau, to consider
-%	(although loop usually broken before this maximum)
-tauRange = (0:1:round(N/2));
+%   (although loop usually broken before this maximum)
+tauRange = (0:1:round(N / 2));
 numTaus = length(tauRange);
 
 % Range of bin numbers to consider
 numBinsRange = length(numBins);
-amiMins = zeros(numBinsRange,1);
+amiMins = zeros(numBinsRange, 1);
 
 % Calculate automutual information
 for i = 1:numBinsRange % vary over number of bins in histogram
-    amis = zeros(numTaus,1);
+    amis = zeros(numTaus, 1);
     for j = 1:numTaus % vary over time lags, tau
-        amis(j) = CO_HistogramAMI(y,tauRange(j),binMethod,numBins(i));
-        if (j > 2) && ((amis(j)-amis(j-1))*(amis(j-1)-amis(j-2)) < 0)
-            amiMins(i) = tauRange(j-1);
+        amis(j) = CO_HistogramAMI(y, tauRange(j), binMethod, numBins(i));
+        if (j > 2) && ((amis(j) - amis(j - 1)) * (amis(j - 1) - amis(j - 2)) < 0)
+            amiMins(i) = tauRange(j - 1);
             break
         end
     end
     if amiMins(i) == 0
-		amiMins(i) = tauRange(end);
-	end
+        amiMins(i) = tauRange(end);
+    end
 end
 
 % Plot:
 if doPlot
-    figure('color','w');
-    plot(numBins,amiMins,'o-k');
+    figure('color', 'w');
+    plot(numBins, amiMins, 'o-k');
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Basic statistics
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 out.min = min(amiMins);
 out.max = max(amiMins);
 out.range = range(amiMins);
@@ -105,19 +105,19 @@ out.std = std(amiMins);
 % Unique values, mode
 out.nunique = length(unique(amiMins));
 [out.mode, out.modef] = mode(amiMins);
-out.modef = out.modef/numBinsRange;
+out.modef = out.modef / numBinsRange;
 
 % Converged value?
-out.conv4 = mean(amiMins(end-4:end));
+out.conv4 = mean(amiMins(end - 4:end));
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Look for peaks (local maxima)
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
-loc_extr = intersect(find(diff(amiMins(1:end-1)) > 0), BF_SignChange(diff(amiMins(1:end-1)),1)) + 1;
-big_loc_extr = intersect(find(amiMins > out.mean+out.std),loc_extr);
+loc_extr = intersect(find(diff(amiMins(1:end - 1)) > 0), BF_SignChange(diff(amiMins(1:end - 1)), 1)) + 1;
+big_loc_extr = intersect(find(amiMins > out.mean + out.std), loc_extr);
 out.nlocmax = length(big_loc_extr);
 
 end

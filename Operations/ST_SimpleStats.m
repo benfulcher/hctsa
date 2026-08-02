@@ -1,7 +1,7 @@
-function out = ST_SimpleStats(x,whatStat)
+function out = ST_SimpleStats(x, whatStat)
 % ST_SimpleStats   Basic statistics about an input time series
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % whatStat, the statistic to return:
@@ -52,46 +52,46 @@ switch whatStat
     case 'zcross'
         % Proportion of zero-crossings of the time series
         % (in the case of z-scored input, crosses its mean)
-        xch = x(1:end-1).*x(2:end);
-        out = sum(xch < 0)/N;
+        xch = x(1:end - 1) .* x(2:end);
+        out = sum(xch < 0) / N;
 
     case 'maxima'
         % Proportion of local maxima in the time series
         dx = diff(x);
-        out = sum(dx(1:end-1) > 0 & dx(2:end) < 0)/(N-1);
+        out = sum(dx(1:end - 1) > 0 & dx(2:end) < 0) / (N - 1);
 
     case 'minima'
         % Proportion of local minima in the time series
         dx = diff(x);
-        out = sum(dx(1:end-1) < 0 & dx(2:end) > 0)/(N-1);
+        out = sum(dx(1:end - 1) < 0 & dx(2:end) > 0) / (N - 1);
 
     case 'pmcross'
         % ratio of times cross 1 to -1
-        c1sig = sum(BF_SignChange(x-1)); % num times cross 1
-        c2sig = sum(BF_SignChange(x+1)); % num times cross -1
+        c1sig = sum(BF_SignChange(x - 1)); % num times cross 1
+        c2sig = sum(BF_SignChange(x + 1)); % num times cross -1
         if c2sig == 0
             out = NaN;
         else
-            out = c1sig/c2sig;
+            out = c1sig / c2sig;
         end
 
     case 'zsczcross'
         % ratio of zero crossings of raw to detrended time series
         % where the raw has zero mean
         x = zscore(x);
-        xch = x(1:end-1).*x(2:end);
+        xch = x(1:end - 1) .* x(2:end);
         h1 = sum(xch < 0); % num of zscross of raw series
         y = detrend(x);
-        ych = y(1:end-1).*y(2:end);
+        ych = y(1:end - 1) .* y(2:end);
         h2 = sum(ych < 0); % of detrended series
         if h1 == 0;
             out = NaN;
         else
-            out = h2/h1;
+            out = h2 / h1;
         end
 
     otherwise
-        error('Unknown statistic ''%s''',whatStat);
+        error('Unknown statistic ''%s''', whatStat);
 end
 
 end

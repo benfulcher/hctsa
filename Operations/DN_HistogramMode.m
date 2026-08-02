@@ -1,10 +1,10 @@
-function out = DN_HistogramMode(y,numBins,doSimple,doPlot)
+function out = DN_HistogramMode(y, numBins, doSimple, doPlot)
 % DN_HistogramMode      Mode of a data vector.
 %
 % Measures the mode of the data vector using histograms with a given number
 % of bins.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input data vector.
 % numBins, the number of bins to use in the histogram.
@@ -40,9 +40,9 @@ function out = DN_HistogramMode(y,numBins,doSimple,doPlot)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs and set defaults:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2
     numBins = 'auto';
 end
@@ -52,32 +52,32 @@ end
 if nargin < 4
     doPlot = false;
 end
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Compute the histogram from the data:
 if isnumeric(numBins)
     if doSimple
-        [N,binEdges] = BF_SimpleBinner(y,numBins);
+        [N, binEdges] = BF_SimpleBinner(y, numBins);
     else
-        [N,binEdges] = histcounts(y,numBins);
+        [N, binEdges] = histcounts(y, numBins);
     end
 elseif ischar(numBins)
-    [N,binEdges] = histcounts(y,'BinMethod',numBins);
+    [N, binEdges] = histcounts(y, 'BinMethod', numBins);
 else
     error('Unknown format for numBins');
 end
 
 % Compute bin centers from bin edges:
-binCenters = mean([binEdges(1:end-1); binEdges(2:end)]);
+binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
 
 % Mean position of maximums (if multiple):
 out = mean(binCenters(N == max(N)));
 
 % Plot a summary of what was computed:
 if doPlot
-    histogram('BinEdges',binEdges,'BinCounts',N,'EdgeColor','k','FaceColor',0.6*ones(1,3));
+    histogram('BinEdges', binEdges, 'BinCounts', N, 'EdgeColor', 'k', 'FaceColor', 0.6 * ones(1, 3));
     hold('on');
-    plot(out*ones(2,1),[0,max(N)],'r','LineWidth',2);
+    plot(out * ones(2, 1), [0, max(N)], 'r', 'LineWidth', 2);
     hold('off')
 end
 

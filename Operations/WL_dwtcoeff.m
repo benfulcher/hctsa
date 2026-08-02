@@ -1,10 +1,10 @@
-function out = WL_dwtcoeff(y,wname,level)
+function out = WL_dwtcoeff(y, wname, level)
 % WL_dwtcoeff   Discrete wavelet transform coefficients.
 %
 % Decomposes the time series using a given wavelet and outputs statistics on the
 % coefficients obtained up to a maximum level, level.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -60,13 +60,13 @@ end
 if nargin < 3 || isempty(level)
     level = 3; % level of wavelet decomposition
 end
-if strcmp(level,'max')
-    level = wmaxlev(N,wname);
+if strcmp(level, 'max')
+    level = wmaxlev(N, wname);
 end
 
-maxLevelAllowed = wmaxlev(N,wname);
+maxLevelAllowed = wmaxlev(N, wname);
 if maxLevelAllowed < level
-    fprintf(1,'Chosen level is too large for this wavelet on this signal...\n');
+    fprintf(1, 'Chosen level is too large for this wavelet on this signal...\n');
 end
 
 % ------------------------------------------------------------------------------
@@ -99,16 +99,16 @@ end
 % cfd = reshape(cfd,level,N);
 % cfd = wcodemat(cfd,nbcol,'row');
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Plotting
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if doPlot
-    figure('color','w'); box('on');
+    figure('color', 'w'); box('on');
     colormap(pink(nbcol));
     image(cfd);
     tics = 1:level;
     labs = int2str((1:level)');
-    set(gca,'YTicklabelMode','manual','Ydir','normal', 'Box','On','Ytick',tics,'YTickLabel',labs);
+    set(gca, 'YTicklabelMode', 'manual', 'Ydir', 'normal', 'Box', 'On', 'Ytick', tics, 'YTickLabel', labs);
     title('Discrete Wavelet Transform, Absolute Coefficients.');
     xlabel('Time (or Space)')
     ylabel('Level');
@@ -119,23 +119,22 @@ end
 % ------------------------------------------------------------------------------
 for k = 1:level
     if k <= maxLevelAllowed
-        d = detcoef(c,l,k); % detail coefficients at level k
+        d = detcoef(c, l, k); % detail coefficients at level k
         % maximum coefficient at this level:
-        out.(sprintf('maxd_l%u',k)) = max(d);
+        out.(sprintf('maxd_l%u', k)) = max(d);
         % minimum coefficient at this level:
-        out.(sprintf('mind_l%u',k)) = min(d);
+        out.(sprintf('mind_l%u', k)) = min(d);
         % std coefficients at this level:
-        out.(sprintf('stdd_l%u',k)) = std(d);
+        out.(sprintf('stdd_l%u', k)) = std(d);
         % 1-D noise coefficient estimate (estimate of the noise std):
-        out.(sprintf('noisestd_l%u',k)) = wnoisest(c,l,k);
+        out.(sprintf('noisestd_l%u', k)) = wnoisest(c, l, k);
     else
-        out.(sprintf('maxd_l%u',k)) = NaN;
-        out.(sprintf('mind_l%u',k)) = NaN;
-        out.(sprintf('stdd_l%u',k)) = NaN;
-        out.(sprintf('noisestd_l%u',k)) = NaN;
+        out.(sprintf('maxd_l%u', k)) = NaN;
+        out.(sprintf('mind_l%u', k)) = NaN;
+        out.(sprintf('stdd_l%u', k)) = NaN;
+        out.(sprintf('noisestd_l%u', k)) = NaN;
     end
 end
-
 
 % %% Compress Signal
 % % Set approximation coefficients to zero
@@ -147,7 +146,6 @@ end
 % X = waverec(c,l,wname);
 % plot(X);
 % keyboard
-
 
 %% Extract Approximation Coefficients from wavelet decomposition structure
 

@@ -1,4 +1,4 @@
-function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
+function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
 % CO_AddNoise  Changes in the automutual information with the addition of noise
 %
 % Adds Gaussian-distributed noise to the time series with increasing standard
@@ -18,7 +18,7 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 % titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
 % and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -63,7 +63,7 @@ function out = CO_AddNoise(y,tau,amiMethod,extraParam,randomSeed)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Preliminary checks
 
 % Check a curve-fitting toolbox license is available:
@@ -71,7 +71,7 @@ BF_CheckToolbox('curve_fitting_toolbox');
 
 doPlot = false; % plot outputs to figure
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Check inputs:
 
 % Expecting a z-scored input time series:
@@ -81,8 +81,8 @@ if nargin < 2
     tau = []; % set default in CO_HistogramAMI
 end
 % Set tau to minimum of autocorrelation function
-if ~isempty(tau) && ischar(tau) && ismember(tau,{'ac','tau'})
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
+if ~isempty(tau) && ischar(tau) && ismember(tau, {'ac', 'tau'})
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 if nargin < 3
     amiMethod = 'even'; % using evenly spaced bins in CO_HistogramAMI
@@ -94,16 +94,16 @@ if nargin < 5
     randomSeed = [];
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Preliminaries
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Generate noise:
 BF_ResetSeed(randomSeed); % reset the random seed if specified
 noise = randn(size(y)); % generate uncorrelated additive noise
 
 % Set up noise range:
-noiseRange = linspace(0,3,50); % compare properties across this noise range
+noiseRange = linspace(0, 3, 50); % compare properties across this noise range
 numRepeats = length(noiseRange);
 
 % ------------------------------------------------------------------------------
@@ -112,61 +112,61 @@ numRepeats = length(noiseRange);
 % The *same* noise vector, noise, is added to the signal, with increasing
 % standard deviation (one could imagine repeating the calculation with different
 % random seeds)...
-amis = zeros(numRepeats,1); % preassign
+amis = zeros(numRepeats, 1); % preassign
 switch amiMethod
-case {'std1','std2','quantiles','even'}
-    % histogram-based methods using my naive implementation in CO_Histogram
-    for i = 1:numRepeats
-        amis(i) = CO_HistogramAMI(y + noiseRange(i)*noise,tau,amiMethod,extraParam);
-        if isnan(amis(i))
-            error('Error computing AMI: Time series too short (?)');
+    case {'std1', 'std2', 'quantiles', 'even'}
+        % histogram-based methods using my naive implementation in CO_Histogram
+        for i = 1:numRepeats
+            amis(i) = CO_HistogramAMI(y + noiseRange(i) * noise, tau, amiMethod, extraParam);
+            if isnan(amis(i))
+                error('Error computing AMI: Time series too short (?)');
+            end
         end
-    end
-case {'gaussian','kernel','kraskov1','kraskov2'}
-    for i = 1:numRepeats
-        amis(i) = IN_AutoMutualInfo(y + noiseRange(i)*noise,tau,amiMethod,extraParam);
-        if isnan(amis(i))
-            error('Error computing AMI: Time series too short (?)');
+    case {'gaussian', 'kernel', 'kraskov1', 'kraskov2'}
+        for i = 1:numRepeats
+            amis(i) = IN_AutoMutualInfo(y + noiseRange(i) * noise, tau, amiMethod, extraParam);
+            if isnan(amis(i))
+                error('Error computing AMI: Time series too short (?)');
+            end
         end
-    end
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Output statistics
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Proportion decreases:
-out.pdec = sum(diff(amis) < 0)/(numRepeats - 1);
+out.pdec = sum(diff(amis) < 0) / (numRepeats - 1);
 
 % Mean change in AMI:
 out.meanch = mean(diff(amis));
 
 % Autocorrelation of AMIs:
-out.ac1 = CO_AutoCorr(amis,1,'Fourier');
-out.ac2 = CO_AutoCorr(amis,2,'Fourier');
+out.ac1 = CO_AutoCorr(amis, 1, 'Fourier');
+out.ac2 = CO_AutoCorr(amis, 2, 'Fourier');
 
 % Noise level required to reduce ami to proportion x of its initial value:
-firstUnderVals = [0.75,0.5,0.25];
+firstUnderVals = [0.75, 0.5, 0.25];
 for i = 1:length(firstUnderVals)
-    out.(sprintf('firstUnder%u',firstUnderVals(i)*100)) = ...
-                    firstUnder_fn(firstUnderVals(i)*amis(1),noiseRange,amis);
+    out.(sprintf('firstUnder%u', firstUnderVals(i) * 100)) = ...
+                    firstUnder_fn(firstUnderVals(i) * amis(1), noiseRange, amis);
 end
 
 % AMI at actual noise levels: 0.5, 1, 1.5 and 2
-noiseLevels = [0.5,1,1.5,2];
+noiseLevels = [0.5, 1, 1.5, 2];
 for i = 1:length(noiseLevels)
-    out.(sprintf('ami_at_%u',noiseLevels(i)*10)) = ...
-            amis(find(noiseRange >= noiseLevels(i),1,'first'));
+    out.(sprintf('ami_at_%u', noiseLevels(i) * 10)) = ...
+            amis(find(noiseRange >= noiseLevels(i), 1, 'first'));
 end
 
 % Count number of times the AMI function crosses its mean
-out.pcrossmean = sum(BF_SignChange(amis-mean(amis)))/(numRepeats-1);
+out.pcrossmean = sum(BF_SignChange(amis - mean(amis))) / (numRepeats - 1);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Fit exponential decay (using Curve Fitting Toolbox)
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[amis(1) -1]);
-f = fittype('a*exp(b*x)','options',s);
-[c,gof] = fit(noiseRange',amis,f);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [amis(1) -1]);
+f = fittype('a*exp(b*x)', 'options', s);
+[c, gof] = fit(noiseRange', amis, f);
 
 % Output statistics on fit to an exponential decay
 out.fitexpa = c.a;
@@ -177,31 +177,30 @@ out.fitexprmse = gof.rmse;
 
 % ------------------------------------------------------------------------------
 % Fit linear function:
-p = polyfit(noiseRange',amis,1);
+p = polyfit(noiseRange', amis, 1);
 out.fitlina = p(1); % gradient
 out.fitlinb = p(2); % intercept
-linfit = polyval(p,noiseRange);
+linfit = polyval(p, noiseRange);
 out.linfit_mse = mean((linfit' - amis).^2);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Plot output:
 if doPlot
-    figure('color','w'); box('on');
-    cc = BF_GetColorMap('set1',2,1);
+    figure('color', 'w'); box('on');
+    cc = BF_GetColorMap('set1', 2, 1);
     % figure('color','w');
     hold on; box('on')
-    plot(noiseRange,c.a*exp(c.b*noiseRange),'color',cc{2},'linewidth',2)
-    plot(noiseRange,amis,'.-','color',cc{1})
+    plot(noiseRange, c.a * exp(c.b * noiseRange), 'color', cc{2}, 'linewidth', 2)
+    plot(noiseRange, amis, '.-', 'color', cc{1})
     xlabel('\eta'); ylabel('AMI_1')
 end
 
-
-%-------------------------------------------------------------------------------
-function firsti = firstUnder_fn(x,m,p)
+% -------------------------------------------------------------------------------
+function firsti = firstUnder_fn(x, m, p)
     % Find the value of m for the first time p goes under the threshold, x
     % p and m vectors of the same length
 
-    firsti = m(find(p < x,1,'first'));
+    firsti = m(find(p < x, 1, 'first'));
 
     % If it never goes under -- saturate as m at the maximum
     % (could be NaN, but this is more interpretable/comparable)

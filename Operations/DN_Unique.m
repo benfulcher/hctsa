@@ -1,7 +1,7 @@
 function out = DN_Unique(x)
 % DN_Unique     The proportion of the time series that are unique values
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % x, the input data vector
 
@@ -34,6 +34,6 @@ function out = DN_Unique(x)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-out = length(unique(x))/length(x);
+out = length(unique(x)) / length(x);
 
 end

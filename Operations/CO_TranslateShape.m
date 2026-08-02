@@ -1,4 +1,4 @@
-function out = CO_TranslateShape(y,shape,d,howToMove)
+function out = CO_TranslateShape(y, shape, d, howToMove)
 % CO_TranslateShape  Statistics on datapoints inside geometric shapes across
 %                    the time series.
 %
@@ -11,7 +11,7 @@ function out = CO_TranslateShape(y,shape,d,howToMove)
 % In the future, could perform a similar analysis with a soft boundary, some
 % decaying force function V(r), or perhaps truncated...?
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % shape, the shape to move about the time-domain (e.g., 'circle')
 % d, a parameter specifying the size of the shape (e.g., d = 2)
@@ -66,57 +66,57 @@ end
 N = length(y); % the length of the time series
 
 % y must be a column vector, transpose it if it's a row vector
-if size(y,2) > size(y,1)
+if size(y, 2) > size(y, 1)
     y = y';
 end
 
 % Add a time index
 ty = [(1:N)', y]; % has increasing integers as time in the first column
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Generate the statistics on the number of points inside the shape as it is
 % translated across the time series
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 switch howToMove
     case 'pts' % Place shapes on each timepoint (excluding a range at start and end)
         switch shape
             case 'circle' % uses a circle of radius 'd'
                 r = d;
                 w = floor(r); % only consider a window radius w (these are the
-                            %    only points that could possibly be inside)
-                rnge = 1+w:N-w;
+                %    only points that could possibly be inside)
+                rnge = 1 + w:N - w;
                 NN = length(rnge); % number of admissible points
-                np = zeros(NN,1); % number of points
+                np = zeros(NN, 1); % number of points
                 for i = 1:NN
-                    win = ty(rnge(i)-w:rnge(i)+w,:); % create window
+                    win = ty(rnge(i) - w:rnge(i) + w, :); % create window
                     % win - ty(rnge(i),:) relies on implicit broadcasting to
                     % subtract the row ty(rnge(i),:) from every row of win --
                     % identical result to win - ones(2*w+1,1)*ty(rnge(i),:),
                     % without allocating/multiplying by an explicit ones()
                     % matrix on every iteration (same fix as CO_Embed2_Shapes):
-                    difwin = win - ty(rnge(i),:);
-                    np(i) = sum(sum(difwin.^2,2) <= r^2); % number of points enclosed in shape
+                    difwin = win - ty(rnge(i), :);
+                    np(i) = sum(sum(difwin.^2, 2) <= r^2); % number of points enclosed in shape
                 end
             case 'rectangle'
                 % uses a rectangle of half-width d (integer), height as double the current time
                 % series value (on either side of origin)
                 w = d;
-                rnge = 1+d:N-d;
+                rnge = 1 + d:N - d;
                 NN = length(rnge); % number of admissible points
-                np = zeros(NN,1); % number of points
+                np = zeros(NN, 1); % number of points
                 for i = 1:NN
-                    np(i) = sum(abs(y(rnge(i)-d:rnge(i)+d)) <= abs(y(rnge(i))));
+                    np(i) = sum(abs(y(rnge(i) - d:rnge(i) + d)) <= abs(y(rnge(i))));
                 end
-        otherwise
-            error('Unknown shape ''%s''',shape)
+            otherwise
+                error('Unknown shape ''%s''', shape)
         end
     otherwise
-        error('Unknown setting for ''howToMove'' input: ''%s''',howToMove)
+        error('Unknown setting for ''howToMove'' input: ''%s''', howToMove)
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Output statistics
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Statistics on number of hits inside the shape:
 out.max = max(np); % max hits
@@ -124,33 +124,33 @@ out.std = std(np); % std of hits
 out.mean = mean(np); % mean number of hits
 
 % Count the hits:
-histnp = arrayfun(@(x)sum(np==x),unique(np));
+histnp = arrayfun(@(x)sum(np == x), unique(np));
 
 % Compute mode of the histogram:
-[out.npatmode,out.mode] = max(histnp);
-out.npatmode = out.npatmode/NN;
+[out.npatmode, out.mode] = max(histnp);
+out.npatmode = out.npatmode / NN;
 
 % Output all stats:
-if 2*w + 1 >= 1; out.ones = mean(np==1); end
-if 2*w + 1 >= 2; out.twos = mean(np==2); end
-if 2*w + 1 >= 3; out.threes = mean(np==3); end
-if 2*w + 1 >= 4; out.fours = mean(np==4); end
-if 2*w + 1 >= 5; out.fives = mean(np==5); end
-if 2*w + 1 >= 6; out.sixes = mean(np==6); end
-if 2*w + 1 >= 7; out.sevens = mean(np==7); end
-if 2*w + 1 >= 8; out.eights = mean(np==8); end
-if 2*w + 1 >= 9; out.nines = mean(np==9); end
-if 2*w + 1 >= 10; out.tens = mean(np==10); end
-if 2*w + 1 >= 11; out.elevens = mean(np==11); end
+if 2 * w + 1 >= 1; out.ones = mean(np == 1); end
+if 2 * w + 1 >= 2; out.twos = mean(np == 2); end
+if 2 * w + 1 >= 3; out.threes = mean(np == 3); end
+if 2 * w + 1 >= 4; out.fours = mean(np == 4); end
+if 2 * w + 1 >= 5; out.fives = mean(np == 5); end
+if 2 * w + 1 >= 6; out.sixes = mean(np == 6); end
+if 2 * w + 1 >= 7; out.sevens = mean(np == 7); end
+if 2 * w + 1 >= 8; out.eights = mean(np == 8); end
+if 2 * w + 1 >= 9; out.nines = mean(np == 9); end
+if 2 * w + 1 >= 10; out.tens = mean(np == 10); end
+if 2 * w + 1 >= 11; out.elevens = mean(np == 11); end
 
 % -----
 % Stationarity of the statistics in 2,3, & 4 segments of the time series:
 
-out.statav2_m = SY_SlidingWindow(np,'mean','std',2,1);
-out.statav2_s = SY_SlidingWindow(np,'std','std',2,1);
-out.statav3_m = SY_SlidingWindow(np,'mean','std',3,1);
-out.statav3_s = SY_SlidingWindow(np,'std','std',3,1);
-out.statav4_m = SY_SlidingWindow(np,'mean','std',4,1);
-out.statav4_s = SY_SlidingWindow(np,'std','std',4,1);
+out.statav2_m = SY_SlidingWindow(np, 'mean', 'std', 2, 1);
+out.statav2_s = SY_SlidingWindow(np, 'std', 'std', 2, 1);
+out.statav3_m = SY_SlidingWindow(np, 'mean', 'std', 3, 1);
+out.statav3_s = SY_SlidingWindow(np, 'std', 'std', 3, 1);
+out.statav4_m = SY_SlidingWindow(np, 'mean', 'std', 4, 1);
+out.statav4_s = SY_SlidingWindow(np, 'std', 'std', 4, 1);
 
 end

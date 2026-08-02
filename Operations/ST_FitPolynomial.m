@@ -1,14 +1,14 @@
-function out = ST_FitPolynomial(y,k)
+function out = ST_FitPolynomial(y, k)
 % ST_FitPolynomial   Goodness of a polynomial fit to a time series
 %
 % Usually kind of a stupid thing to do with a time series, but it's sometimes
 % somehow informative for time series with large trends.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series.
 % k, the order of the polynomial to fit to y.
 %
-%---OUTPUT:
+% ---OUTPUT:
 % RMS error of the fit.
 
 % ------------------------------------------------------------------------------
@@ -53,27 +53,27 @@ t = (1:N)'; % Get a range for the time axis for time series y
 % Fit a polynomial to the time series
 % ------------------------------------------------------------------------------
 % Supress the (valid!) warning from stupidly fitting a polynomial to a time series...
-warning('off','MATLAB:polyfit:RepeatedPointsOrRescale');
-cf = polyfit(t,y,k);
-warning('on','MATLAB:polyfit:RepeatedPointsOrRescale');
+warning('off', 'MATLAB:polyfit:RepeatedPointsOrRescale');
+cf = polyfit(t, y, k);
+warning('on', 'MATLAB:polyfit:RepeatedPointsOrRescale');
 
-f = polyval(cf,t);
-out = mean((y-f).^2); % mean RMS ERROR OF FIT
+f = polyval(cf, t);
+out = mean((y - f).^2); % mean RMS ERROR OF FIT
 
 % ------------------------------------------------------------------------------
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
     n = 10;
-    errs = zeros(n,1);
+    errs = zeros(n, 1);
     x = 1:length(y);
     for i = 1:n
-        cf = polyfit(x,y',i);
-        f = polyval(cf,x);
-        errs(i) = sum((y'-f).^2);
+        cf = polyfit(x, y', i);
+        f = polyval(cf, x);
+        errs(i) = sum((y' - f).^2);
     end
-    f = figure('color','w'); hold on;
-    plot(f,'k')
+    f = figure('color', 'w'); hold on;
+    plot(f, 'k')
     plot(errs);
 end
 

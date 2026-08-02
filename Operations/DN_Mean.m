@@ -1,7 +1,7 @@
-function out = DN_Mean(y,meanType)
+function out = DN_Mean(y, meanType)
 % DN_Mean   A given measure of location of a data vector.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input data vector
 %
@@ -52,20 +52,20 @@ end
 N = length(y); % time-series length
 
 switch meanType
-	case {'norm','arithmetic'} % mean
-		out = mean(y);
+    case {'norm', 'arithmetic'} % mean
+        out = mean(y);
 
     case 'median' % median
         out = median(y);
 
-	case 'geom' % geometric mean
-		out = geomean(y); %(prod(y))^(1/N);
+    case 'geom' % geometric mean
+        out = geomean(y); % (prod(y))^(1/N);
 
-	case 'harm' % harmonic mean
-		out = harmmean(y); % N/sum(y.^(-1));
+    case 'harm' % harmonic mean
+        out = harmmean(y); % N/sum(y.^(-1));
 
-	case 'rms' % rms
-		out = sqrt(sum(y.^2)/N);
+    case 'rms' % rms
+        out = sqrt(sum(y.^2) / N);
 
     case 'iqm' % interquartile mean, cf. DN_TrimmedMean
         p = prctile(y, [25; 75]);

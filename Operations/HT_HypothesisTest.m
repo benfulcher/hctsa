@@ -1,10 +1,10 @@
-function p = HT_HypothesisTest(x,theTest)
+function p = HT_HypothesisTest(x, theTest)
 % HT_HypothesisTest     Statistical hypothesis test applied to a time series.
 %
 % Tests are implemented as functions in Matlab's Statistics Toolbox.
 % (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % theTest, the hypothesis test to perform:
@@ -16,7 +16,7 @@ function p = HT_HypothesisTest(x,theTest)
 %           (vi) Jarque-Bera test of composite normality ('jbtest').
 %           (vii) Ljung-Box Q-test for residual autocorrelation ('lbq')
 %
-%---OUTPUT:
+% ---OUTPUT:
 % p-value from the specified statistical test
 
 % ------------------------------------------------------------------------------
@@ -57,20 +57,20 @@ switch theTest
         [~, p] = runstest(x);
 
     case 'vartest' % Statistics Toolbox
-        [~, p] = vartest(x,1); % normal distribution of variance 1
+        [~, p] = vartest(x, 1); % normal distribution of variance 1
 
     case 'ztest' % Statistics Toolbox
-        [~, p] = ztest(x,0,1);
+        [~, p] = ztest(x, 0, 1);
 
     case 'signrank' % Statistics Toolbox
         [p, ~] = signrank(x);
 
     case 'jbtest' % Statistics Toolbox
-        warning('off','stats:jbtest:PTooBig'); % suspend this warning
-        warning('off','stats:jbtest:PTooSmall'); % suspend this warning
+        warning('off', 'stats:jbtest:PTooBig'); % suspend this warning
+        warning('off', 'stats:jbtest:PTooSmall'); % suspend this warning
         [~, p] = jbtest(x);
-        warning('on','stats:jbtest:PTooBig'); % resume this warning
-        warning('on','stats:jbtest:PTooSmall'); % resume this warning
+        warning('on', 'stats:jbtest:PTooBig'); % resume this warning
+        warning('on', 'stats:jbtest:PTooSmall'); % resume this warning
 
     case 'lbq'
         % Check that an Econometrics Toolbox license is available:
@@ -80,7 +80,7 @@ switch theTest
         [~, p] = lbqtest(x);
 
     otherwise
-        error('Unknown hypothesis test ''%s''',theTest);
+        error('Unknown hypothesis test ''%s''', theTest);
 end
 
 end

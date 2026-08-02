@@ -1,4 +1,4 @@
-function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
+function out = SY_TISEAN_nstat_z(y, numSeg, embedParams)
 % SY_TISEAN_nstat_z     Cross-forecast errors of zeroth-order time-series models
 %
 % Uses the nstat_z routine from the TISEAN package for nonlinear time-series
@@ -20,7 +20,7 @@ function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 % in Matlab, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -32,7 +32,7 @@ function out = SY_TISEAN_nstat_z(y,numSeg,embedParams)
 %               {1,3} has a time-delay of 1 and embedding dimension of 3.
 %
 %
-%---OUTPUTS: include the trace of the cross-prediction error matrix, the mean,
+% ---OUTPUTS: include the trace of the cross-prediction error matrix, the mean,
 % minimum, and maximum cross-prediction error, the minimum off-diagonal
 % cross-prediction error, and eigenvalues of the cross-prediction error matrix.
 
@@ -78,8 +78,8 @@ if nargin < 2 || isempty(numSeg)
 end
 
 if nargin < 3
-    embedParams = {1,3};
-    fprintf(1,'Using default embedding using tau = 1 and m = 3\n');
+    embedParams = {1, 3};
+    fprintf(1, 'Using default embedding using tau = 1 and m = 3\n');
 end
 
 N = length(y); % length of the time series
@@ -93,14 +93,14 @@ filePath = BF_WriteTempFile(y);
 % fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
 
 % Get embedding parameters:
-tm = BF_Embed(y,embedParams{1},embedParams{2},2);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
 tau = tm(1); % time delay
 m = tm(2); % embedding dimension
 
 % ------------------------------------------------------------------------------
 % Do some preliminary checks:
 % ------------------------------------------------------------------------------
-clength = (N-(m-1)*tau)/numSeg;
+clength = (N - (m - 1) * tau) / numSeg;
 incStep = 1; % step increment
 minNeighbors = 30; % minimum number of neighbors for fit
 
@@ -108,7 +108,7 @@ minNeighbors = 30; % minimum number of neighbors for fit
 % find_neighbors routine is crashing, but it's definitely to do with not being
 % able to find enough neighbors and getting stuck in a while loop...
 % Try this heuristic (multiplying the actual minimum number by 1.5):
-if (clength-(m-1)*tau-incStep) <= minNeighbors*1.5
+if (clength - (m - 1) * tau - incStep) <= minNeighbors * 1.5
     delete(filePath); % remove the temporary file
     warning('Not enough neighbors to reliably estimate prediction errors with these settings');
     out = NaN; return
@@ -118,26 +118,26 @@ end
 %% Do the calculation in the commandline
 % ------------------------------------------------------------------------------
 
-[~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s',numSeg,tau,m,filePath));
+[~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s', numSeg, tau, m, filePath));
 delete(filePath) % remove the temporary file filePath
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 % ------------------------------------------------------------------------------
 %% Read the output from TISEAN
 % ------------------------------------------------------------------------------
-s = textscan(res,'%[^\n]'); s = s{1};
-wi = strmatch('Writing to stdout',s);
+s = textscan(res, '%[^\n]'); s = s{1};
+wi = strmatch('Writing to stdout', s);
 if isempty(wi)
     error('TISEAN routine ''nstat_z'' returned unexpected output...');
 end
-s = s(wi+1:end);
+s = s(wi + 1:end);
 
 xperr = zeros(numSeg); % cross prediction error from using segment i to forecast segment j
 
 for i = 1:numSeg
     for j = 1:numSeg
-        tmp = textscan(s{(i-1)*numSeg+j},'%n%n%n');
-        xperr(i,j) = tmp{3};
+        tmp = textscan(s{(i - 1) * numSeg + j}, '%n%n%n');
+        xperr(i, j) = tmp{3};
     end
 end
 
@@ -162,8 +162,8 @@ out.std = std(xperr(:));
 out.range = range(xperr(:));
 
 % minimum prediction error not on diagonal
-lowertri = tril(xperr,-1); lowertri = lowertri(lowertri>0);
-uppertri = triu(xperr,1); uppertri = uppertri(uppertri>0);
+lowertri = tril(xperr, -1); lowertri = lowertri(lowertri > 0);
+uppertri = triu(xperr, 1); uppertri = uppertri(uppertri > 0);
 offdiag = [lowertri; uppertri];
 if isempty(lowertri)
     out.minlower = NaN;
@@ -209,6 +209,5 @@ out.rangeeig = range(realEigs); % range of real parts of eigenvalues
 out.stdeig = std(realEigs);
 out.mineig = min(realEigs);
 out.maxeig = max(realEigs);
-
 
 end

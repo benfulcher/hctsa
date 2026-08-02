@@ -1,11 +1,11 @@
-function out = DN_ProportionValues(x,propWhat)
+function out = DN_ProportionValues(x, propWhat)
 % DN_ProportionValues   Proportion of values in a data vector.
 %
 % Returns statistics on the values of the data vector: the proportion of zeros,
 % the proportion of positive values, and the proportion of values greater than or
 % equal to zero.
 %
-%---INPUTS:
+% ---INPUTS:
 % x, the input time series
 %
 % propWhat, the proportion of a given type of value in the time series:
@@ -42,9 +42,9 @@ function out = DN_ProportionValues(x,propWhat)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check Inputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2
     propWhat = 'positive';
 end
@@ -53,16 +53,16 @@ N = length(x); % length of the time series
 
 switch propWhat
     case 'zeros' % returns the proportion of zeros in the input vector
-        out = sum(x == 0)/N;
+        out = sum(x == 0) / N;
 
     case 'positive'
-        out = sum(x > 0)/N;
+        out = sum(x > 0) / N;
 
     case 'geq0'
-        out = sum(x >= 0)/N;
+        out = sum(x >= 0) / N;
 
     otherwise
-        error('Unknown condition to measure: ''%s''',propWhat);
+        error('Unknown condition to measure: ''%s''', propWhat);
 end
 
 end

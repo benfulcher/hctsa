@@ -1,7 +1,7 @@
-function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
+function out = NL_TSTL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % NL_TSTL_GPCorrSum correlation sum scaling by Grassberger-Proccacia algorithm
 %
-%---INPUTS:
+% ---INPUTS:
 % y, column vector of time-series data
 % Nref, number of (randomly-chosen) reference points (-1: use all points,
 %       if a decimal, then use this fraction of the time series length)
@@ -15,7 +15,7 @@ function out = NL_TSTL_GPCorrSum(y,Nref,r,thwin,nbins,embedParams,doTwo)
 %           For corrsum2, n specifies the number of pairs per bin. Default is 1,
 %           to use corrsum.
 %
-%---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
+% ---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
 % re-weighted least squares linear fits to log-log plots using the robustfit
 % function in Matlab's Statistics Toolbox.
 %
@@ -68,7 +68,7 @@ if nargin < 2 || isempty(Nref)
     Nref = 500; % 500 points
 end
 if (Nref > 0) && (Nref < 1)
-    Nref = round(N*Nref); % specify a proportion of time series length
+    Nref = round(N * Nref); % specify a proportion of time series length
 end
 if Nref >= N
     Nref = -1; % Number of reference points capped at time series length
@@ -91,7 +91,7 @@ end
 
 % (5) Set embedding parameters to defaults
 if nargin < 6 || isempty(embedParams)
-    embedParams = {'ac','fnnmar'};
+    embedParams = {'ac', 'fnnmar'};
 else
     if length(embedParams) ~= 2
         error('Embedding parameters are formatted incorrectly -- need {tau,m}')
@@ -105,20 +105,20 @@ end
 if (Nref == -1) && (doTwo == 2)
     % we need a *number* of pairs for corrsum2, round down from 50% of time series
     % length
-    Nref = floor(N*0.5);
+    Nref = floor(N * 0.5);
 end
 
 % ------------------------------------------------------------------------------
 %% Embed the signal
 % ------------------------------------------------------------------------------
 % Convert to embedded signal object for TSTOOL
-s = BF_Embed(y,embedParams{1},embedParams{2},1);
+s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
 
-if ~isa(s,'signal') && isnan(s); % embedding failed
-    error('Embedding of the %u-sample time series failed',N)
+if ~isa(s, 'signal') && isnan(s); % embedding failed
+    error('Embedding of the %u-sample time series failed', N)
 elseif length(data(s)) < thwin
     warning(['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
-                ' to do a correlation sum\n'],N,embedParams{1},embedParams{2});
+             ' to do a correlation sum\n'], N, embedParams{1}, embedParams{2});
     out = NaN; return
 end
 
@@ -128,29 +128,29 @@ end
 me = []; % error catcher
 if doTwo == 1 % use corrsum
     try
-        rs = corrsum(s,Nref,r,thwin,nbins);
+        rs = corrsum(s, Nref, r, thwin, nbins);
     catch me % DEAL WITH ERROR MESSAGE BELOW
     end
 elseif doTwo == 2 % use corrsum2
     try
-        rs = corrsum2(s,Nref,r,thwin,nbins);
+        rs = corrsum2(s, Nref, r, thwin, nbins);
     catch me
     end
 end
 
 if ~isempty(me)
     switch me.message
-    case 'Maximal search radius must be greater than starting radius'
-        fprintf(1,'Max search radius less than starting radius. Returning NaNs.\n');
-        out = NaN; return
-    case 'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given'
-        fprintf(1,'Cannot find an interpoint distance greater than zero. Returning NaNs.\n');
-        out = NaN; return
-    case 'Reference indices out of range'
-        fprintf(1,'Reference indicies out of range. Returning NaNs.\n');
-        out = NaN; return
-    otherwise
-        error('Unknown error %s', me.message);
+        case 'Maximal search radius must be greater than starting radius'
+            fprintf(1, 'Max search radius less than starting radius. Returning NaNs.\n');
+            out = NaN; return
+        case 'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given'
+            fprintf(1, 'Cannot find an interpoint distance greater than zero. Returning NaNs.\n');
+            out = NaN; return
+        case 'Reference indices out of range'
+            fprintf(1, 'Reference indicies out of range. Returning NaNs.\n');
+            out = NaN; return
+        otherwise
+            error('Unknown error %s', me.message);
     end
 end
 
@@ -158,8 +158,8 @@ lnr = spacing(rs);
 lnCr = data(rs);
 
 if doPlot
-    figure('color','w'); box('on');
-    plot(lnr,lnCr,'.-k');
+    figure('color', 'w'); box('on');
+    plot(lnr, lnCr, '.-k');
 end
 
 % Contains ln(r) in rows and values are ln(C(r));
@@ -169,7 +169,7 @@ end
 % ------------------------------------------------------------------------------
 rGood = (isfinite(lnCr));
 if ~any(rGood)
-    fprintf(1,'No good outputs obtained from corrsum.\n');
+    fprintf(1, 'No good outputs obtained from corrsum.\n');
     out = NaN; return
 end
 
@@ -191,9 +191,9 @@ out.meanlnCr = mean(lnCr);
 % Fit linear to log-log plot (full range)
 enoughpoints = true;
 try
-    [a, stats] = robustfit(lnr,lnCr);
+    [a, stats] = robustfit(lnr, lnCr);
 catch me
-    if strcmp(me.message,'Not enough points to perform robust estimation.')
+    if strcmp(me.message, 'Not enough points to perform robust estimation.')
         enoughpoints = false;
     end
 end
@@ -201,20 +201,20 @@ end
 if enoughpoints
     out.robfit_a1 = a(1);
     out.robfit_a2 = a(2);
-    out.robfit_sigrat = stats.ols_s/stats.robust_s;
+    out.robfit_sigrat = stats.ols_s / stats.robust_s;
     out.robfit_s = stats.s;
     out.robfit_sea1 = stats.se(1);
     out.robfit_sea2 = stats.se(2);
 
-    fit_lnCr = a(2)*lnr+a(1);
-    if doPlot, hold on; plot(lnr,fit_lnCr,'r'); hold off; end
+    fit_lnCr = a(2) * lnr + a(1);
+    if doPlot, hold on; plot(lnr, fit_lnCr, 'r'); hold off; end
 
     % Compute residuals:
     res = lnCr - fit_lnCr';
 
     out.robfitresmeanabs = mean(abs(res));
     out.robfitresmeansq = mean(res.^2);
-    out.robfitresac1 = CO_AutoCorr(res,1,'Fourier');
+    out.robfitresac1 = CO_AutoCorr(res, 1, 'Fourier');
 else
     out.robfit_a1 = NaN;
     out.robfit_a2 = NaN;
@@ -227,7 +227,6 @@ else
     out.robfitresmeansq = NaN;
     out.robfitresac1 = NaN;
 end
-
 
 % now non-robust linear fit
 % [p, S] = polyfit(lnr',lnCr,1);

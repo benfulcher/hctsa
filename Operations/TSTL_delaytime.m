@@ -1,4 +1,4 @@
-function out = TSTL_delaytime(y,maxDelay,past,randomSeed)
+function out = TSTL_delaytime(y, maxDelay, past, randomSeed)
 % TSTL_delaytime    Optimal delay time using the method of Parlitz and Wichard.
 %
 % Uses the TSTOOL code delaytime (this method is specified in the TSTOOL
@@ -6,7 +6,7 @@ function out = TSTL_delaytime(y,maxDelay,past,randomSeed)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%---INPUTS:
+% ---INPUTS:
 % y, column vector of time series data
 %
 % maxDelay, maximum value of the delay to consider (can also specify a
@@ -64,16 +64,16 @@ if nargin < 2 || isempty(maxDelay)
     maxDelay = 0.2; % 1/5 the length of the time series
 end
 if maxDelay < 1 && maxDelay > 0
-    maxDelay = round(N*maxDelay); % specify a proportion of time series length
+    maxDelay = round(N * maxDelay); % specify a proportion of time series length
 end
 
 if maxDelay < 10
     maxDelay = 10;
-    fprintf(1,'Max delay set to its minimum: delaytime = 10\n');
+    fprintf(1, 'Max delay set to its minimum: delaytime = 10\n');
 end
-if maxDelay >= N/2
+if maxDelay >= N / 2
     % Heuristic for appropriate time delay
-    warning('Max delay, %u, too long for time series of length %u',maxDelay,N)
+    warning('Max delay, %u, too long for time series of length %u', maxDelay, N)
     out = NaN; return
 end
 
@@ -90,7 +90,7 @@ end
 BF_ResetSeed(randomSeed);
 
 % Run the TSTOOL delaytime function on the signal object time series:
-tau = data(delaytime(s,maxDelay,past));
+tau = data(delaytime(s, maxDelay, past));
 
 % plot(tau);
 
@@ -101,8 +101,8 @@ tau = data(delaytime(s,maxDelay,past));
 out.tau1 = tau(1);
 out.tau2 = tau(2);
 out.tau3 = tau(3);
-out.difftau12 = tau(2)-tau(1);
-out.difftau13 = tau(3)-tau(1);
+out.difftau12 = tau(2) - tau(1);
+out.difftau13 = tau(3) - tau(1);
 out.meantau = mean(tau);
 out.stdtau = std(tau);
 out.mintau = min(tau);

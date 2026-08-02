@@ -1,4 +1,4 @@
-function out = CP_ML_StepDetect(y,method,params)
+function out = CP_ML_StepDetect(y, method, params)
 % CP_ML_StepDetect      Analysis of discrete steps in a time series.
 %
 % Gives information about discrete steps in the signal, using the function
@@ -14,7 +14,7 @@ function out = CP_ML_StepDetect(y,method,params)
 %
 % Software available at: http://www.maxlittle.net/software/index.php
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % method, the step-detection method:
@@ -33,7 +33,7 @@ function out = CP_ML_StepDetect(y,method,params)
 %           (i) 'kv': (no parameters required)
 %           (ii) 'l1pwc': params = lambda
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % Statistics on the output of the step-detection method, including the intervals
 % between change points, the proportion of constant segments, the reduction in
 % variance from removing the piece-wise constants, and stationarity in the
@@ -68,14 +68,14 @@ function out = CP_ML_StepDetect(y,method,params)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs:
 if nargin < 2 || isempty(method)
-    fprintf(1,'Using Kalafut-Visscher step detection by default\n');
+    fprintf(1, 'Using Kalafut-Visscher step detection by default\n');
     method = 'kv';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Preliminaries:
 doPlot = false; % whether to plot outputs
 N = length(y); % time-series length
@@ -86,61 +86,61 @@ N = length(y); % time-series length
 switch method
     case 'kv'
         % Kalafut-Visscher step detection
-        [steppedy,steps] = ML_kvsteps(y);
+        [steppedy, steps] = ML_kvsteps(y);
 
         % Put in chpts form: a vector specifying indicies of starts of
         % constant runs.
         if length(steps) == 2
             chpts = 1;
         else
-            chpts = [1;steps(2:end-1)+1];
+            chpts = [1; steps(2:end - 1) + 1];
         end
 
-    % case 'ck'
-    %     % ------------------------------------------------------------------------------
-    %     %% Chung-Kennedy
-    %     % ------------------------------------------------------------------------------
-    %     % The algorithm is described in:
-    %     % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
-    %     % technique for extracting small biological signals from noise",
-    %     % J. Neurosci. Methods. 40(1):71-86.
-    %     % It is quite slow...
-    %     % And not supported!
-    %
-    %     % Inputs:
-    %     %  y - Input signal
-    %     %  K - Maximum forward/backward moving average filter length (samples)
-    %     %  M - Prediction error analysis window size (samples)
-    %     %  p - Positive scaling of prediction error
-    %     % Outputs:
-    %     %  x - Step-filtered output signal
-    %
-    %     % Set defaults, params should be [K,M,p]
-    %     if nargin < 3
-    %         params = [];
-    %     end
-    %     if length(params) >= 1
-    %         K = params(1);
-    %     else
-    %         K = 1/20; % 1/20th of time series length
-    %     end
-    %     if K < 1
-    %         K = floor(N*K);
-    %     end
-    %     if length(params) >= 2
-    %         M = params(2);
-    %     else
-    %         M = 1/10; % 1/10th the time series length
-    %     end
-    %     if M < 1
-    %         M = floor(N*M);
-    %     end
-    %     if length(params) >= 3
-    %         p = params(3);
-    %     else
-    %         p = 10;
-    %     end
-    %     steppedy = ML_ckfilter(y, K, M, p);
+        % case 'ck'
+        %     % ------------------------------------------------------------------------------
+        %     %% Chung-Kennedy
+        %     % ------------------------------------------------------------------------------
+        %     % The algorithm is described in:
+        %     % S.H. Chung, R.A. Kennedy (1991), "Forward-backward non-linear filtering
+        %     % technique for extracting small biological signals from noise",
+        %     % J. Neurosci. Methods. 40(1):71-86.
+        %     % It is quite slow...
+        %     % And not supported!
+        %
+        %     % Inputs:
+        %     %  y - Input signal
+        %     %  K - Maximum forward/backward moving average filter length (samples)
+        %     %  M - Prediction error analysis window size (samples)
+        %     %  p - Positive scaling of prediction error
+        %     % Outputs:
+        %     %  x - Step-filtered output signal
+        %
+        %     % Set defaults, params should be [K,M,p]
+        %     if nargin < 3
+        %         params = [];
+        %     end
+        %     if length(params) >= 1
+        %         K = params(1);
+        %     else
+        %         K = 1/20; % 1/20th of time series length
+        %     end
+        %     if K < 1
+        %         K = floor(N*K);
+        %     end
+        %     if length(params) >= 2
+        %         M = params(2);
+        %     else
+        %         M = 1/10; % 1/10th the time series length
+        %     end
+        %     if M < 1
+        %         M = floor(N*M);
+        %     end
+        %     if length(params) >= 3
+        %         p = params(3);
+        %     else
+        %         p = 10;
+        %     end
+        %     steppedy = ML_ckfilter(y, K, M, p);
 
     case 'l1pwc'
         % ------------------------------------------------------------------------------
@@ -183,14 +183,14 @@ switch method
             lambda = 10; % higher lambda --> less steps
         end
         if lambda < 1 % specify as a proportion of lambdamax
-            lambda = ML_l1pwclmax(y)*lambda;
+            lambda = ML_l1pwclmax(y) * lambda;
         end
 
         % Run the code
-        [steppedy,E,s,lambdaMax] = ML_l1pwc(y,lambda,0); % use defaults for stoptol and maxiter
+        [steppedy, E, s, lambdaMax] = ML_l1pwc(y, lambda, 0); % use defaults for stoptol and maxiter
 
         % Round to remove numberical flucuations of order less than 1e-4
-        steppedy = round(steppedy*1e4)/1e4;
+        steppedy = round(steppedy * 1e4) / 1e4;
 
         % Compute outputs specific to this method:
         out.E = E;
@@ -199,26 +199,26 @@ switch method
 
         % Get step indicies from steppedy
         % these give the index of the start of each run
-        whch = find(diff(steppedy)~=0);
+        whch = find(diff(steppedy) ~= 0);
         if ~isempty(whch)
-            chpts = [1;whch+1];
+            chpts = [1; whch + 1];
         else
             chpts = 1; % no changes
         end
     otherwise
-        error('Unknown step detection method ''%s''',method);
+        error('Unknown step detection method ''%s''', method);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Plot computed change points onto the time series:
 if doPlot
-    f = figure('color','w');
+    f = figure('color', 'w');
     hold('on')
-    plot(y,'k')
-    plot(chpts,y(chpts),'or')
+    plot(y, 'k')
+    plot(chpts, y(chpts), 'or')
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Outputs common to all step detection methods:
 % requires: chpts -- a vector of indicies for changes in the time series
 %           steppedy -- an (Nx1) vector specifying the new stepped time
@@ -230,22 +230,22 @@ numChangePoints = length(chpts);
 chints = diff([chpts; N]);
 
 % Number of constant segments per sample
-out.nsegments = numChangePoints/N; % will be 1 if there are no changes
+out.nsegments = numChangePoints / N; % will be 1 if there are no changes
 
 % How much reduces variance
-out.rmsoff = std(y) - std(y-steppedy);
+out.rmsoff = std(y) - std(y - steppedy);
 
 % Reduces variance per step
-out.rmsoffpstep = out.rmsoff/numChangePoints;
+out.rmsoffpstep = out.rmsoff / numChangePoints;
 
 % Ratio of number of steps in first half of time series to second half
-sum1 = sum(chpts < N/2) - 1; % (exclude the chpt that's always sitting at 1)
-sum2 = sum(chpts >= N/2);
+sum1 = sum(chpts < N / 2) - 1; % (exclude the chpt that's always sitting at 1)
+sum2 = sum(chpts >= N / 2);
 if (sum2 > 0) && (sum1 > 0)
     if sum2 > sum1
-        out.ratn12 = sum1/sum2;
+        out.ratn12 = sum1 / sum2;
     else
-        out.ratn12 = sum2/sum1;
+        out.ratn12 = sum2 / sum1;
     end
 else
     out.ratn12 = 0;
@@ -254,21 +254,21 @@ end
 % as a proportion of total number of change points
 % Maximal (1) when all change points are in one half of data
 % Minimal (0) when same number of change points in both halves
-out.diffn12 = abs(sum1-sum2)/numChangePoints;
+out.diffn12 = abs(sum1 - sum2) / numChangePoints;
 
 % Proportion of really short steps:
-out.pshort_3 = sum(chints <= 3)/N;
+out.pshort_3 = sum(chints <= 3) / N;
 % Mean interval between steps:
-out.meanstepint = mean(chints)/N;
+out.meanstepint = mean(chints) / N;
 % Mean interval greater than 3 samples, per sample:
-out.meanstepintgt3 = mean(chints(chints>3))/N;
+out.meanstepintgt3 = mean(chints(chints > 3)) / N;
 % Mean error on step interval distribution:
-out.meanerrstepint = std(chints)/sqrt(length(chints));
+out.meanerrstepint = std(chints) / sqrt(length(chints));
 % Maximum step interval:
-out.maxstepint = max(chints)/N;
+out.maxstepint = max(chints) / N;
 % Minimum step interval:
-out.minstepint = min(chints)/N;
+out.minstepint = min(chints) / N;
 % Median step interval:
-out.medianstepint = median(chints)/N;
+out.medianstepint = median(chints) / N;
 
 end

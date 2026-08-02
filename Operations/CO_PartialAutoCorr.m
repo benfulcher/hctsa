@@ -1,14 +1,14 @@
-function out = CO_PartialAutoCorr(y,maxTau,whatMethod)
+function out = CO_PartialAutoCorr(y, maxTau, whatMethod)
 % CO_PartialAutoCorr   Compute the partial autocorrelation of an input time series
 %
-%---INPUTS:
+% ---INPUTS:
 % y, a scalar time series column vector.
 %
 % maxTau, the maximum time-delay. Returns for lags up to this maximum.
 %
 % whatMethod, the method used to compute: 'ols' or 'yule_walker'
 %
-%---OUTPUT: the partial autocorrelations across the set of time lags.
+% ---OUTPUT: the partial autocorrelations across the set of time lags.
 %
 
 % ------------------------------------------------------------------------------
@@ -53,9 +53,9 @@ if nargin < 3 || isempty(whatMethod)
     whatMethod = 'ols';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Initial checks on maxTau
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 N = length(y); % time-series length
 
 assert(maxTau > 0)
@@ -68,12 +68,12 @@ end
 %% Do the computation
 % ------------------------------------------------------------------------------
 
-pacf = parcorr(y,'NumLags',maxTau,'Method',whatMethod);
+pacf = parcorr(y, 'NumLags', maxTau, 'Method', whatMethod);
 
 % Zero lag is the first entry in the PACF (and should always be 1)
 
 for i = 1:maxTau
-    out.(sprintf('pac_%u',i)) = pacf(i+1);
+    out.(sprintf('pac_%u', i)) = pacf(i + 1);
 end
 
 end

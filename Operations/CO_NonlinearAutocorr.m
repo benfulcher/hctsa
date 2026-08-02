@@ -1,4 +1,4 @@
-function out = CO_NonlinearAutocorr(y,taus,doAbs)
+function out = CO_NonlinearAutocorr(y, taus, doAbs)
 % CO_NonlinearAutocorr      A custom nonlinear autocorrelation of a time series.
 %
 % Nonlinear autocorrelations are of the form: <x_i x_{i-\tau_1} x{i-\tau_2}...>
@@ -10,7 +10,7 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 % standard deviations approximated as the sample standard deviations and so
 % the z-scored time series can simply be used straight-up.
 %
-%---INPUTS:
+% ---INPUTS:
 % y -- should be the z-scored time series (Nx1 vector)
 % taus -- should be a vector of the time delays as above (mx1 vector)
 %   e.g., [2] computes <x_i x_{i-2}>
@@ -22,7 +22,7 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 %                contributions to the sum. Default is to do this for odd
 %                numbers anyway, if not specified.
 %
-%---NOTES:
+% ---NOTES:
 % (*) For odd numbers of regressions (i.e., even number length
 %         taus vectors) the result will be near zero (for reversible processes
 %         due to fluctuations about the mean; even for highly-correlated signals. (doAbs)
@@ -66,7 +66,7 @@ function out = CO_NonlinearAutocorr(y,taus,doAbs)
 %% Check inputs & set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 3 || isempty(doAbs) % use default settings for doAbs
-    if rem(length(taus),2) == 1
+    if rem(length(taus), 2) == 1
         % Odd number of time-lags
         doAbs = false;
     else
@@ -74,18 +74,18 @@ if nargin < 3 || isempty(doAbs) % use default settings for doAbs
         doAbs = true; % take abs, otherwise will be a very small number
     end
 end
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 N = length(y); % time-series length
 tMax = max(taus); % the maximum delay time
 
 % Compute the autocorrelation sum iteratively
-nonlinearAC = y(tMax+1:N);
+nonlinearAC = y(tMax + 1:N);
 for i = 1:length(taus)
-    nonlinearAC = nonlinearAC .* y(tMax-taus(i)+1:N-taus(i));
+    nonlinearAC = nonlinearAC .* y(tMax - taus(i) + 1:N - taus(i));
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Compute output
 if doAbs
     out = mean(abs(nonlinearAC));

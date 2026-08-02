@@ -1,9 +1,9 @@
-function out = SY_LocalDistributions(y,numSegs,eachOrPar,numPoints)
+function out = SY_LocalDistributions(y, numSegs, eachOrPar, numPoints)
 % SY_LocalDistributions  Compares the distribution in consecutive time-series segments
 %
 % Returns the sum of differences between each kernel-smoothed distributions
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -21,7 +21,7 @@ function out = SY_LocalDistributions(y,numSegs,eachOrPar,numPoints)
 % each segment to that in every other segment, and par compares each
 % distribution to the so-called 'parent' distribution, that of the full signal.
 %
-%---OUTPUTS: measures of the sum of absolute deviations between distributions
+% ---OUTPUTS: measures of the sum of absolute deviations between distributions
 % across the different pairwise comparisons.
 
 % ------------------------------------------------------------------------------
@@ -74,66 +74,66 @@ end
 % Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % Length of the time series (number of samples)
-lseg = floor(N/numSegs);
-dns = zeros(numPoints,numSegs);
-r = linspace(min(y),max(y),numPoints); % Make range of ksdensity uniform across all subsegments
+lseg = floor(N / numSegs);
+dns = zeros(numPoints, numSegs);
+r = linspace(min(y), max(y), numPoints); % Make range of ksdensity uniform across all subsegments
 
 % ------------------------------------------------------------------------------
 % Compute the kernel-smoothed distribution in all numSegs segments of the time series
 % ------------------------------------------------------------------------------
 for i = 1:numSegs
-    dns(:,i) = ksdensity(y((i-1)*lseg+1:i*lseg),r,'function','pdf');
+    dns(:, i) = ksdensity(y((i - 1) * lseg + 1:i * lseg), r, 'function', 'pdf');
 end
 
 if doPlot
-    figure('color','w')
-    plot(dns,'k')
+    figure('color', 'w')
+    plot(dns, 'k')
 end
 
 % ------------------------------------------------------------------------------
 % Compare the local distributions
 % ------------------------------------------------------------------------------
 switch eachOrPar
-    case {'par','parent'}
+    case {'par', 'parent'}
         % Compares each subdistribtuion to the parent (full signal) distribution
-        pardn = ksdensity(y,r,'function','pdf');
-        divs = zeros(numSegs,1);
+        pardn = ksdensity(y, r, 'function', 'pdf');
+        divs = zeros(numSegs, 1);
         for i = 1:numSegs
-            divs(i) = sum(abs(dns(:,i)-pardn')); % each is just divergence to parent
+            divs(i) = sum(abs(dns(:, i) - pardn')); % each is just divergence to parent
         end
         if doPlot
-            hold on; plot(pardn,'r','LineWidth',2); hold off
+            hold on; plot(pardn, 'r', 'LineWidth', 2); hold off
         end
     case 'each'
         % Compares each subdistribtuion to the parent (full signal) distribution
         if numSegs == 2 % output is just an integer: only two distributions to compare
-            out = sum(abs(dns(:,1)-dns(:,2)));
+            out = sum(abs(dns(:, 1) - dns(:, 2)));
             return
         end
 
         % numSegs > 2: need to compare a number of different distributions against each other
         diffmat = NaN * ones(numSegs); % store pairwise differences
-                                    % start as NaN to easily get upper triangle later
+        % start as NaN to easily get upper triangle later
         for i = 1:numSegs
             for j = 1:numSegs
                 if j > i
-                    diffmat(i,j) = sum(abs(dns(:,i)-dns(:,j))); % store sum of absolute differences
+                    diffmat(i, j) = sum(abs(dns(:, i) - dns(:, j))); % store sum of absolute differences
                 end
             end
         end
-        
+
         divs = diffmat(~isnan(diffmat)); % (the upper triangle of diffmat)
-                                         % set of divergences in all pairs of segments of the time series
+        % set of divergences in all pairs of segments of the time series
         % divs = diffmat(diffmat > 0); % a set of non-zero divergences in all pairs of segments of the time series
         % if isempty(divs);
         %     fprintf(1,'That''s strange -- no changes in distribution??! This must be a really strange time series.\n');
         %     out = NaN; return
         % end
     otherwise
-        error('Unknown method ''%s'', should be ''each'' or ''par''',eachOrPar);
+        error('Unknown method ''%s'', should be ''each'' or ''par''', eachOrPar);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Return basic statistics on differences in distributions in different
 % segments of the time series
 out.meandiv = mean(divs);

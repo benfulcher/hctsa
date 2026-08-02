@@ -1,4 +1,4 @@
-function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
+function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
 % SB_TransitionMatrix  Transition probabilities between time-series states.
 %
 % The time series is coarse-grained according to a given method.
@@ -11,7 +11,7 @@ function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 % cf. Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
 % https://doi.org/10.1371/journal.pone.0023378
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % howtocg, the method of discretization (currently 'quantile' is the only
@@ -25,7 +25,7 @@ function out = SB_TransitionMatrix(y,howtocg,numGroups,tau)
 %      look at this dicrete lag. Here we do the former. Can also set tau to 'ac'
 %      to set tau to the first zero-crossing of the autocorrelation function.
 %
-%---OUTPUTS: include the transition probabilities themselves, as well as the trace
+% ---OUTPUTS: include the transition probabilities themselves, as well as the trace
 % of the transition matrix, measures of asymmetry, and eigenvalues of the
 % transition matrix.
 
@@ -73,8 +73,8 @@ end
 if nargin < 4 || isempty(tau)
     tau = 1;
 end
-if strcmp(tau,'ac') % determine tau from first zero of autocorrelation
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
+if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 if isnan(tau)
     error('Time series too short to estimate tau');
@@ -82,7 +82,7 @@ end
 
 if tau > 1 % calculate transition matrix at a non-unit lag
     % downsample at rate 1:tau
-    y = resample(y,1,tau);
+    y = resample(y, 1, tau);
 end
 
 N = length(y); % time-series length
@@ -90,12 +90,12 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 %% (((1))) Discretize the time series to a symbolic string
 % ------------------------------------------------------------------------------
-yth = SB_CoarseGrain(y,howtocg,numGroups);
+yth = SB_CoarseGrain(y, howtocg, numGroups);
 
 % At this point we should have:
 % (*) yth: a thresholded y containing integers from 1 to numGroups
 
-if size(yth,2) > size(yth,1)
+if size(yth, 2) > size(yth, 1)
     yth = yth';
 end
 
@@ -107,20 +107,20 @@ end
 T = zeros(numGroups); % probability of transition from state i -> state j
 for i = 1:numGroups
     ri = (yth == i); % indices where the time series is in state i
-    if sum(ri)==0 % is never in state i
-        T(i,:) = 0; % all transition probabilities are zero (could be NaN)
+    if sum(ri) == 0 % is never in state i
+        T(i, :) = 0; % all transition probabilities are zero (could be NaN)
     else
         % Indices of states immediately following a state i:
-        ri_next = [false; ri(1:end-1)];
+        ri_next = [false; ri(1:end - 1)];
         % Compute transitions from state i to each of the states j:
         for j = 1:numGroups
-            T(i,j) = sum(yth(ri_next) == j); % the next element is of this class
+            T(i, j) = sum(yth(ri_next) == j); % the next element is of this class
         end
     end
 end
 
 % Normalize from counts to probabilities:
-T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
+T = T / (N - 1); % N-1 is appropriate because it's a 1-time transition matrix
 
 % ------------------------------------------------------------------------------
 %% (((3))) Output measures from the transition matrix
@@ -129,15 +129,15 @@ T = T/(N-1); % N-1 is appropriate because it's a 1-time transition matrix
 % [this has to be done bulkily (only for numGroups = 2,3)]:
 if numGroups == 2 % return all elements of T
     for i = 1:4
-        out.(sprintf('T%u',i)) = T(i);
+        out.(sprintf('T%u', i)) = T(i);
     end
 elseif numGroups == 3 % return all elements of T
     for i = 1:9
-        out.(sprintf('T%u',i)) = T(i);
+        out.(sprintf('T%u', i)) = T(i);
     end
 elseif numGroups > 3 % return just diagonal elements of T
     for i = 1:numGroups
-        out.(sprintf('TD%u',i)) = T(i,i);
+        out.(sprintf('TD%u', i)) = T(i, i);
     end
 end
 
@@ -147,8 +147,8 @@ out.stddiag = std(diag(T)); % std of diagonal elements
 
 % (iii) Measures of symmetry:
 out.symdiff = sum(sum(abs((T - T')))); % sum of differences of individual elements
-out.symsumdiff = sum(sum(tril(T,-1))) - sum(sum(triu(T,+1))); % difference in sums of upper and lower
-                                                          % triangular parts of T
+out.symsumdiff = sum(sum(tril(T, -1))) - sum(sum(triu(T, +1))); % difference in sums of upper and lower
+% triangular parts of T
 
 % (iv) Measures from eigenvalues of T
 eigT = eig(T);
@@ -159,7 +159,7 @@ out.mineig = min(real(eigT)); % minimum eigenvalue
 % (ought to be always zero? Not necessary to measure:)
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % (v) Measures from covariance matrix:
 covT = cov(T);
 out.sumdiagcov = trace(covT); % trace of covariance matrix

@@ -1,4 +1,4 @@
-function out = PP_ModelFit(y,model,order,randomSeed)
+function out = PP_ModelFit(y, model, order, randomSeed)
 % PP_ModelFit   Investigates whether AR model fit improves with different preprocessings.
 %
 % After performing the range of transformations to the time series, returns the
@@ -17,7 +17,7 @@ function out = PP_ModelFit(y,model,order,randomSeed)
 % (iii) removal of piece-wise polynomial trends, and
 % (iv) rank mapping the values of the time series to a Gaussian distribution.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 % model, the time-series model to fit to the transformed time series (currently
@@ -82,7 +82,7 @@ end
 % ------------------------------------------------------------------------------
 %% Apply a range of preprocessings
 % ------------------------------------------------------------------------------
-yp = PP_PreProcess(y,'',[],[],[],randomSeed);
+yp = PP_PreProcess(y, '', [], [], [], randomSeed);
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
 %% ____________________FIT MODEL TO ALL:_______________________ %%
@@ -102,19 +102,19 @@ for i = 1:numFields
             BF_CheckToolbox('identification_toolbox');
 
             data = zscore(data); % zscore the data from this preprocessing
-            m = ar(data,order); % fit the model
+            m = ar(data, order); % fit the model
 
             % Get statistics on fit
             %     () FPE
             statstore.fpe(i) = m.EstimationInfo.FPE;
             %     () in-sample prediction error
-            e = pe(m,data);
+            e = pe(m, data);
             statstore.rmserr(i) = sqrt(mean(e.^2));
             statstore.mabserr(i) = mean(abs(e));
-            statstore.ac1(i) = CO_AutoCorr(e,1,'Fourier');
+            statstore.ac1(i) = CO_AutoCorr(e, 1, 'Fourier');
 
         otherwise
-            error('Unknown model ''%s''',model);
+            error('Unknown model ''%s''', model);
     end
 end
 
@@ -133,7 +133,7 @@ end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:numFields
-    out.(sprintf('rmserrrat_%s',fields{i})) = statstore.rmserr(i)/statstore.rmserr(1);
+    out.(sprintf('rmserrrat_%s', fields{i})) = statstore.rmserr(i) / statstore.rmserr(1);
 end
 % In fact, greater error in this case means a better detrending in some
 % sense -- it's remobed more of the 'obvious' linear structure (assuming
@@ -206,6 +206,5 @@ end
 % %         plot(y,'b'); hold on; plot(ydt,'r');
 % %         input('here we are')
 %     end
-
 
 end

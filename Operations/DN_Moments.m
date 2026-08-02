@@ -1,10 +1,10 @@
-function out = DN_Moments(y,theMom)
+function out = DN_Moments(y, theMom)
 % DN_Moments    A moment of the distribution of the input time series.
 %
 % Normalizes by the standard deviation
 % Uses the moment function from Matlab's Statistics Toolbox
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 % theMom, the moment to calculate (a scalar)
 
@@ -37,6 +37,6 @@ function out = DN_Moments(y,theMom)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-out = moment(y,theMom) / std(y); % normalized
+out = moment(y, theMom) / std(y); % normalized
 
 end

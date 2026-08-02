@@ -1,10 +1,10 @@
-function out = DN_Quantile(y,p)
+function out = DN_Quantile(y, p)
 % DN_Quantile   Quantile of the data vector
 %
 % Calculates the quantile value at a specified proportion, p, using the
 % Statistics Toolbox function, quantile.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 % p, the quantile proportion
 
@@ -38,13 +38,13 @@ function out = DN_Quantile(y,p)
 % ------------------------------------------------------------------------------
 
 if nargin < 2
-    fprintf(1,'Using quantile p = 0.5 (median) by default\n');
+    fprintf(1, 'Using quantile p = 0.5 (median) by default\n');
     p = 0.5;
 end
 if ~isnumeric(p) || (p < 0) || (p > 1)
     error('p must specify a proportion, in (0,1)');
 end
 
-out = quantile(y,p);
+out = quantile(y, p);
 
 end

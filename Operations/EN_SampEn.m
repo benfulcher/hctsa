@@ -1,4 +1,4 @@
-function out = EN_SampEn(y,M,r,preProcessHow)
+function out = EN_SampEn(y, M, r, preProcessHow)
 % EN_SampEn     Sample Entropy of a time series
 %
 % SampEn(m,r), using code from PhysioNet.
@@ -22,7 +22,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % M, the embedding dimension
 % r, the threshold
@@ -61,7 +61,7 @@ function out = EN_SampEn(y,M,r,preProcessHow)
 if isempty(y)
     error('Must input a valid data vector.');
 end
-if size(y,1)==1
+if size(y, 1) == 1
     y = y';
 end
 
@@ -72,20 +72,20 @@ end
 
 % Tolerance:
 if nargin < 3
-    r = 0.1*std(y);
+    r = 0.1 * std(y);
 end
 
 if nargin < 4
     preProcessHow = ''; % don't apply any preprocessing
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Can specify to first apply an incremental differencing of the time series
 % thus yielding the 'Control Entropy':
 % "Control Entropy: A complexity measure for nonstationary signals"
 % E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
 if ~isempty(preProcessHow)
-    y = BF_PreProcess(y,preProcessHow);
+    y = BF_PreProcess(y, preProcessHow);
 end
 
 % ------------------------------------------------------------------------------
@@ -94,12 +94,12 @@ end
 % Check if a compiled C version exists:
 % [a,b] = system('which sampen');
 
-sampEn = sampen_mex(y',M+1,r);
-sampEn = sampEn(1:M+1); % always that extra one for the M = 0
+sampEn = sampen_mex(y', M + 1, r);
+sampEn = sampEn(1:M + 1); % always that extra one for the M = 0
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % This is dangerous because it could lead to inconsistent implementations across runs
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % warning('No mex file found: using a slower native Matlab implementation instead');
 % No mex version available; use (much slower) Matlab implementation
 % if isempty(b) || length(y) < 3000 % faster to run within Matlab
@@ -128,13 +128,13 @@ sampEn = sampEn(1:M+1); % always that extra one for the M = 0
 % ------------------------------------------------------------------------------
 % Compute outputs from the code
 % ------------------------------------------------------------------------------
-for i = 1:M+1
+for i = 1:M + 1
     % Sample entropy:
-    out.(sprintf('sampen%u',i-1)) = sampEn(i);
+    out.(sprintf('sampen%u', i - 1)) = sampEn(i);
 
     % Quadratic sample entropy (QSE), Lake (2006):
     % (allows better comparison across r values)
-    out.(sprintf('quadSampEn%u',i-1)) = sampEn(i) + log(2*r);
+    out.(sprintf('quadSampEn%u', i - 1)) = sampEn(i) + log(2 * r);
 
     % COSEn (Lake and Moorman, 2011), doesn't really make sense in general;
     % especially for z-scored series!:

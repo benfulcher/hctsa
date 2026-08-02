@@ -4,10 +4,10 @@ function out = DN_HighLowMu(y)
 % The highlowmu statistic is the ratio of the mean of the data that is above the
 % (global) mean compared to the mean of the data that is below the global mean.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector
 
-%---NOTES:
+% ---NOTES:
 % Somehow measures the same information as SB_MotifTwo(y,'mean') -> u, i.e.,
 % contains the same information as the proportion of the data that is above the
 % mean. This indicates that you cannot independently control the proportion of
@@ -46,6 +46,6 @@ function out = DN_HighLowMu(y)
 mu = mean(y); % mean of data
 mhi = mean(y(y > mu)); % mean of data above the mean
 mlo = mean(y(y < mu)); % mean of data below the mean
-out = (mhi-mu)/(mu-mlo); % ratio of the differences
+out = (mhi - mu) / (mu - mlo); % ratio of the differences
 
 end

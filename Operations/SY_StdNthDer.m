@@ -1,4 +1,4 @@
-function out = SY_StdNthDer(y,n)
+function out = SY_StdNthDer(y, n)
 % SY_StdNthDer  Standard deviation of the nth derivative of the time series.
 %
 % Based on an idea by Vladimir Vassilevsky, a DSP and Mixed Signal Design
@@ -15,7 +15,7 @@ function out = SY_StdNthDer(y,n)
 % cf. "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
 % (and function MD_hrv_classic)
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, time series to analyze
 %
@@ -54,12 +54,12 @@ if nargin < 2 || isempty(n)
     n = 2;
 end
 
-yd = diff(y,n); % crude method of taking a derivative that could be improved
-                % upon in future
+yd = diff(y, n); % crude method of taking a derivative that could be improved
+% upon in future
 
 if isempty(yd)
-    error('Time series (N = %u) too short to compute differences at %u',...
-                            length(y),n);
+    error('Time series (N = %u) too short to compute differences at %u', ...
+          length(y), n);
 end
 out = std(yd);
 

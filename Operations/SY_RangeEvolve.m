@@ -5,10 +5,10 @@ function out = SY_RangeEvolve(y)
 % i.e., range(x_{1:i}) for i = 1, 2, ..., N, where N is the length of the time
 % series.
 %
-%---INPUT:
+% ---INPUT:
 % y, the time series
 %
-%---OUTPUTS: based on the dynamics of how new extreme events occur with time.
+% ---OUTPUTS: based on the dynamics of how new extreme events occur with time.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,7 +52,7 @@ cums = cummax(y(:)) - cummin(y(:));
 % cums = cums/range(y);
 
 if doPlot
-    figure('color','w');
+    figure('color', 'w');
     plot(cums);
 end
 
@@ -64,7 +64,7 @@ lunique = @(x) length(unique(x));
 out.totnuq = lunique(cums);
 
 % How many of the unique extrema are in first <proportion> of time series?
-cumtox = @(x) lunique(cums(1:floor(N*x)))/out.totnuq;
+cumtox = @(x) lunique(cums(1:floor(N * x))) / out.totnuq;
 out.nuqp1 = cumtox(0.01);
 out.nuqp10 = cumtox(0.1);
 out.nuqp20 = cumtox(0.2);
@@ -75,26 +75,25 @@ out.nuqp50 = cumtox(0.5);
 Ns = [10, 50, 100, 1000];
 for i = 1:length(Ns)
     if N >= Ns(i)
-        out.(sprintf('nuql%u',Ns(i))) = lunique(cums(1:Ns(i)))/out.totnuq;
+        out.(sprintf('nuql%u', Ns(i))) = lunique(cums(1:Ns(i))) / out.totnuq;
     else
-        out.(sprintf('nuql%u',Ns(i))) = NaN;
+        out.(sprintf('nuql%u', Ns(i))) = NaN;
     end
 end
 
 % (**2**) Actual proportion of full range captured at different points
 
-out.p1 = cums(ceil(N*0.01))/fullr;
-out.p10 = cums(ceil(N*0.1))/fullr;
-out.p20 = cums(ceil(N*0.2))/fullr;
-out.p50 = cums(ceil(N*0.5))/fullr;
-
+out.p1 = cums(ceil(N * 0.01)) / fullr;
+out.p10 = cums(ceil(N * 0.1)) / fullr;
+out.p20 = cums(ceil(N * 0.2)) / fullr;
+out.p50 = cums(ceil(N * 0.5)) / fullr;
 
 Ns = [10, 50, 100, 1000];
 for i = 1:length(Ns)
     if N >= Ns(i)
-        out.(sprintf('l%u',Ns(i))) = cums(Ns(i))/fullr;
+        out.(sprintf('l%u', Ns(i))) = cums(Ns(i)) / fullr;
     else
-        out.(sprintf('l%u',Ns(i))) = NaN;
+        out.(sprintf('l%u', Ns(i))) = NaN;
     end
 end
 

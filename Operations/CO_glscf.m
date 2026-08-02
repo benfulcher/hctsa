@@ -1,4 +1,4 @@
-function glscf = CO_glscf(y,alpha,beta,tau)
+function glscf = CO_glscf(y, alpha, beta, tau)
 % CO_glscf  The generalized linear self-correlation function of a time series.
 %
 % This function was introduced in Queiros and Moyano in Physica A, Vol. 383, pp.
@@ -8,7 +8,7 @@ function glscf = CO_glscf(y,alpha,beta,tau)
 %
 % The function considers magnitude correlations.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % alpha and beta are real and nonzero parameters
 % tau is the time-delay (can also be 'tau' to set to first zero-crossing of the ACF)
@@ -55,8 +55,8 @@ if nargin < 4 || isempty(tau)
 end
 
 % Set tau to first zero-crossing of the autocorrelation function with the input 'tau'
-if strcmp(tau,'tau')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
+if strcmp(tau, 'tau')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 
 % Take magnitudes of time-delayed versions of the time series. abs(y) is
@@ -75,7 +75,7 @@ end
 
 foundInCache = false;
 for ci = 1:numel(cacheY)
-    if isequaln(y,cacheY{ci})
+    if isequaln(y, cacheY{ci})
         ay = cacheAy{ci};
         foundInCache = true;
         break
@@ -83,20 +83,19 @@ for ci = 1:numel(cacheY)
 end
 if ~foundInCache
     ay = abs(y);
-    cacheY{end+1} = y;
-    cacheAy{end+1} = ay;
+    cacheY{end + 1} = y;
+    cacheAy{end + 1} = ay;
     if numel(cacheY) > maxCacheEntries
         cacheY(1) = [];
         cacheAy(1) = [];
     end
 end
 
-y1 = ay(1:end-tau);
-y2 = ay(1+tau:end);
+y1 = ay(1:end - tau);
+y2 = ay(1 + tau:end);
 
-glscf = (mean((y1.^alpha).*(y2.^beta)) - mean(y1.^alpha)*mean(y2.^beta)) / ...
-     		    (sqrt(mean(y1.^(2*alpha)) - mean(y1.^alpha)^2) ...
-     		          * sqrt(mean(y2.^(2*beta)) - mean(y2.^beta)^2));
-
+glscf = (mean((y1.^alpha) .* (y2.^beta)) - mean(y1.^alpha) * mean(y2.^beta)) / ...
+                (sqrt(mean(y1.^(2 * alpha)) - mean(y1.^alpha)^2) ...
+                 * sqrt(mean(y2.^(2 * beta)) - mean(y2.^beta)^2));
 
 end

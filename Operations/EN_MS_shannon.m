@@ -1,4 +1,4 @@
-function out = EN_MS_shannon(y,numBin,depth)
+function out = EN_MS_shannon(y, numBin, depth)
 % EN_MS_shannon     Approximate Shannon entropy of a time series.
 %
 % Uses an numBin-bin encoding and depth-symbol sequences.
@@ -14,7 +14,7 @@ function out = EN_MS_shannon(y,numBin,depth)
 % also across a range of depth and numBin to return statistics on how the obtained
 % entropies change.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % numBin, the number of bins to discretize the time series into (i.e., alphabet size)
 % depth, the length of strings to analyze
@@ -48,9 +48,9 @@ function out = EN_MS_shannon(y,numBin,depth)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(numBin)
     numBin = 2; % two bins to discretize the time series, y
 end
@@ -66,15 +66,15 @@ if binRangeSize == 1
         %% Evaluate the shannon entropy of discretization
         % Run the code, just return a number
         % This scales with depth, so it's nice to normalize by this factor:
-        out = MS_shannon(y,numBin,depth) / depth;
+        out = MS_shannon(y, numBin, depth) / depth;
     elseif depthRangeSize > 1
         % Range over depths specified in the vector and return statistics on results
         % (constant number of bins)
         % Somewhat strange behaviour -- very variable
         numDepths = length(depth);
-        ents = zeros(numDepths,1);
+        ents = zeros(numDepths, 1);
         for i = 1:numDepths
-            ents(i) = MS_shannon(y,numBin,depth(i)) / depth(i);
+            ents(i) = MS_shannon(y, numBin, depth(i)) / depth(i);
         end
         % Output statistics on variation across the range tested:
         out.maxent = max(ents);
@@ -84,12 +84,12 @@ if binRangeSize == 1
         out.stdent = std(ents);
     end
 elseif binRangeSize > 1
-    if depthRangeSize==1
+    if depthRangeSize == 1
         %% (*) Statistics over different bin numbers (constant depth)
         % Range over bins specified in the vector numBin; return statistics on results
-        ents = zeros(binRangeSize,1);
+        ents = zeros(binRangeSize, 1);
         for i = 1:binRangeSize
-            ents(i) = MS_shannon(y,numBin(i),depth);
+            ents(i) = MS_shannon(y, numBin(i), depth);
         end
         out.maxent = max(ents);
         out.minent = min(ents);

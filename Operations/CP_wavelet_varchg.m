@@ -5,7 +5,7 @@ function out = CP_wavelet_varchg(y, wName, level, maxnchpts, minDelay)
 % including the primary function wvarchg, which estimates the change points in
 % the time series.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -22,7 +22,7 @@ function out = CP_wavelet_varchg(y, wName, level, maxnchpts, minDelay)
 %           time-series length)
 %
 %
-%---OUTPUT:
+% ---OUTPUT:
 % The optimal number of change points.
 
 % ------------------------------------------------------------------------------
@@ -67,21 +67,21 @@ if nargin < 2 || isempty(wName)
 end
 
 if nargin < 3 || isempty(level)
-   level = 3; % level of wavelet decomposition
+    level = 3; % level of wavelet decomposition
 end
-if strcmp(level,'max')
-    level = wmaxlev(N,wName);
+if strcmp(level, 'max')
+    level = wmaxlev(N, wName);
 end
 
 if nargin < 4 || isempty(maxnchpts)
-   maxnchpts = 5; % maximum number of change points
+    maxnchpts = 5; % maximum number of change points
 end
 
 if nargin < 5 || isempty(minDelay)
-     minDelay = 0.01; % 1% of the time series length
+    minDelay = 0.01; % 1% of the time series length
 end
 if (minDelay > 0) && (minDelay < 1)
-   minDelay = ceil(minDelay*N);
+    minDelay = ceil(minDelay * N);
 end
 
 if wmaxlev(N, wName) < level
@@ -97,17 +97,17 @@ end
 % ------------------------------------------------------------------------------
 
 % Perform a single-level wavelet decomposition :
-[c, l] = wavedec(y,level,wName);
+[c, l] = wavedec(y, level, wName);
 
 % Reconstruct detail at the same level.
-det = wrcoef('d',c,l,wName,level);
+det = wrcoef('d', c, l, wName, level);
 
 % ------------------------------------------------------------------------------
 % 2. Replace 2% of the greatest (absolute) values by the mean
 % ------------------------------------------------------------------------------
 % % in order to remove almost all the signal.
 x = sort(abs(det));
-v2p100 = x(fix(length(x)*0.98));
+v2p100 = x(fix(length(x) * 0.98));
 det(abs(det) > v2p100) = mean(det);
 
 % ------------------------------------------------------------------------------
@@ -116,8 +116,8 @@ det(abs(det) > v2p100) = mean(det);
 try
     [~, kopt, ~] = wvarchg(det, maxnchpts, minDelay);
 catch emsg
-    if strcmp(emsg.identifier,'MATLAB:nomem')
-       error('Not enough memory.');
+    if strcmp(emsg.identifier, 'MATLAB:nomem')
+        error('Not enough memory.');
     end
 end
 

@@ -1,4 +1,4 @@
-function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
+function out = MF_GARCHfit(y, preproc, P, Q, randomSeed)
 % MF_GARCHfit   GARCH time-series modeling.
 %
 % Simulates a procedure for fitting Generalized Autoregressive Conditional
@@ -36,7 +36,7 @@ function out = MF_GARCHfit(y,preproc,P,Q,randomSeed)
 % Where r and m are the autoregressive and moving average orders of the model,
 % respectively, and p and q control the conditional variance parameters.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % preproc, the preprocessing to apply, can be 'ar' or 'none'
@@ -116,7 +116,7 @@ end
 % Save the original, unprocessed time series
 y0 = y;
 
-y = BF_Whiten(y,preproc,beVocal,randomSeed);
+y = BF_Whiten(y, preproc, beVocal, randomSeed);
 
 y = zscore(y); % z-score the time series (after whitening)
 
@@ -142,39 +142,37 @@ N = length(y);
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,'lags',1:20,'alpha',0.1);
+[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,'lags',1:20,'alpha',0.1);
-
+[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 
 % (iii) Correlation in time series: autocorrelation
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y,NumLags=20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2,NumLags=20);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, NumLags = 20);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, NumLags = 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y,NumLags=20);
-
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, NumLags = 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
 % ------------------------------------------------------------------------------
-GModel = garch(P,Q); % ARCH order P, GARCH order Q
+GModel = garch(P, Q); % ARCH order P, GARCH order Q
 
 % Include a constant in the GARCH model
 GModel.Constant = NaN;
 
 % Fit the model
 try
-    [Gfit, estParamCov, LLF, info] = estimate(GModel,y,'Display','off');
+    [Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
     % Estimate standard errors using variance/covariance matrix:
     errors = sqrt(diag(estParamCov));
     % [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(GModel,y);
 catch emsg
-    error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s',emsg.message);
+    error('GARCH fit failed (data does not allow a valid GARCH model to be estimated): %s', emsg.message);
     % Sometimes this happens for some time series (e.g., when it removes some GARCH
     % lags and makes the resulting model invalid)
 end
@@ -186,58 +184,57 @@ end
 % (i) Return coefficients, and their standard errors as seperate statistics
 % ___Mean_Process___
 % --Constant--
-if isprop(Gfit,'Constant')
+if isprop(Gfit, 'Constant')
     out.constant = Gfit.Constant;
     out.constanterr = errors(1);
 end
 
 % __Variance_Process___
 % -- Offset (should be zero for z-scored time series)--
-if isprop(Gfit,'Offset')
+if isprop(Gfit, 'Offset')
     out.offset = Gfit.Offset;
 end
 
-
 indexAdjust = 0; % required because sometimes you fit at fewer lags than you
-                 % specified, but the errors output is a vector,
-                 % so sadly you have to keep count...
+% specified, but the errors output is a vector,
+% so sadly you have to keep count...
 
 % -- GARCH component --
 for i = 1:P
-    if isprop(Gfit,'GARCH') && length(Gfit.GARCH)>=i
-        out.(sprintf('GARCH_%u',i)) = Gfit.GARCH{i};
+    if isprop(Gfit, 'GARCH') && length(Gfit.GARCH) >= i
+        out.(sprintf('GARCH_%u', i)) = Gfit.GARCH{i};
         % New (in this way shit) format means that this no longer works for
         % custom GARCH models (you can no longer index a particular
         % error) ///
-        if Gfit.GARCH{i}==0
+        if Gfit.GARCH{i} == 0
             % no fit at this lag, even though it was specified
             indexAdjust = indexAdjust + 1;
-            out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
+            out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
         else
-            out.(sprintf('GARCHerr_%u',i)) = errors(1+i-indexAdjust); % first is the constant
+            out.(sprintf('GARCHerr_%u', i)) = errors(1 + i - indexAdjust); % first is the constant
         end
     else
         % fitted GARCH model not as specified
-        out.(sprintf('GARCH_%u',i)) = NaN;
-        out.(sprintf('GARCHerr_%u',i)) = NaN; % first is the constant
+        out.(sprintf('GARCH_%u', i)) = NaN;
+        out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
     end
 end
 
 % -- ARCH component --
 for i = 1:Q
-    if isprop(Gfit,'ARCH') && length(Gfit.ARCH)>=i
-        out.(sprintf('ARCH_%u',i)) = Gfit.ARCH{i};
-        if Gfit.ARCH{i}==0
+    if isprop(Gfit, 'ARCH') && length(Gfit.ARCH) >= i
+        out.(sprintf('ARCH_%u', i)) = Gfit.ARCH{i};
+        if Gfit.ARCH{i} == 0
             % No fit at this specified lag
-            out.(sprintf('ARCHerr_%u',i)) = NaN; % constant, then GARCH, then ARCH
+            out.(sprintf('ARCHerr_%u', i)) = NaN; % constant, then GARCH, then ARCH
             indexAdjust = indexAdjust + 1;
         else
-            out.(sprintf('ARCHerr_%u',i)) = errors(1+length(Gfit.GARCH)+i-indexAdjust); % constant, then GARCH, then ARCH
+            out.(sprintf('ARCHerr_%u', i)) = errors(1 + length(Gfit.GARCH) + i - indexAdjust); % constant, then GARCH, then ARCH
         end
     else
         % ARCH fit not as specified
-        out.(sprintf('ARCH_%u',i)) = NaN;
-        out.(sprintf('ARCHerr_%u',i)) = NaN;
+        out.(sprintf('ARCH_%u', i)) = NaN;
+        out.(sprintf('ARCHerr_%u', i)) = NaN;
     end
 end
 
@@ -252,7 +249,7 @@ nparams = sum(any(estParamCov)); % number of parameters
 out.nparams = nparams;
 
 % use aicbic function
-[AIC, BIC] = aicbic(LLF,nparams,N); % aic and bic of fit
+[AIC, BIC] = aicbic(LLF, nparams, N); % aic and bic of fit
 out.aic = AIC;
 out.bic = BIC;
 
@@ -260,7 +257,7 @@ out.bic = BIC;
 %% Sigmas, the time series of conditional variances
 % ------------------------------------------------------------------------------
 % Estimate it:
-[sigmas,logL] = infer(Gfit,y);
+[sigmas, logL] = infer(Gfit, y);
 % For a time series with strong ARCH/GARCH effects, this will fluctuate;
 % otherwise will be quite flat...
 out.maxsigma = max(sigmas);
@@ -273,20 +270,19 @@ out.meansigma = mean(sigmas);
 %% Check residuals
 % ------------------------------------------------------------------------------
 res = (y - Gfit.Offset); % residuals (departures from mean process)
-stde = res./sqrt(sigmas); % standardize residuals by conditional standard deviation
+stde = res ./ sqrt(sigmas); % standardize residuals by conditional standard deviation
 stde2 = stde.^2;
 
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde,'lags',1:20,'alpha',0.1);
+[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2,'lags',1:20,'alpha',0.1);
-
+[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
 
 % Ok, so now we've corrected for GARCH effects, how does this 'improve' the
 % randomness/correlation in our signal. If the signal is much less
@@ -314,8 +310,6 @@ out.lbq_pval_stde_10 = lbq_pValue_stde2(10);
 out.minlbqpval_stde2 = min(lbq_pValue_stde2);
 out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 
-
-
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_AutoCorr(y,1:20);
 % autocorrs_var = CO_AutoCorr(y.^2,1:20);
@@ -325,7 +319,6 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 % (iv) Partial autocorrelation function: PACF
 % [PACF,Lags_pacf,bounds_pacf] = parcorr(e,20,[],[]);
 
-
 % Use MF_ResidualAnalysis on the standardized innovations
 % 1) Get statistics on standardized innovations
 residout = MF_ResidualAnalysis(stde);
@@ -333,16 +326,14 @@ residout = MF_ResidualAnalysis(stde);
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-    out.(sprintf('stde_%s',fields{k})) = residout.(fields{k});
+    out.(sprintf('stde_%s', fields{k})) = residout.(fields{k});
 end
 
-out.ac1_stde2 = CO_AutoCorr(stde2,1,'Fourier');
-out.diff_ac1 = CO_AutoCorr(y.^2,1,'Fourier') - CO_AutoCorr(stde2,1,'Fourier');
-
+out.ac1_stde2 = CO_AutoCorr(stde2, 1, 'Fourier');
+out.diff_ac1 = CO_AutoCorr(y.^2, 1, 'Fourier') - CO_AutoCorr(stde2, 1, 'Fourier');
 
 %% (5) Comparison to other models
 % e.g., does the additional heteroskedastic component improve the model fit
 % over just the conditional mean component of the model.
-
 
 end

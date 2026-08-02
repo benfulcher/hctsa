@@ -1,4 +1,4 @@
-function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
+function out = CO_TSTL_amutual(y, maxTau, numBins, versionTwo)
 % CO_TSTL_amutual   Automutual information calculation using code from TSTOOL.
 %
 % Uses amutual code from TSTOOL, which uses a histogram method with n bins to
@@ -7,7 +7,7 @@ function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
 %
 % TSTOOL: http://www.physik3.gwdg.de/tstool/
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the time series
 %
@@ -17,7 +17,7 @@ function out = CO_TSTL_amutual(y,maxTau,numBins,versionTwo)
 %
 % versionTwo, uses amutual2 instead of amutual (from the TSTOOL package)
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % A number of statistics of the function over the range of tau, including the
 % mean mutual information, its standard deviation, first minimum, proportion of
 % extrema, and measures of periodicity in the positions of local maxima.
@@ -61,13 +61,13 @@ s = signal(y); % convert to signal object for TSTOOL
 %% Check Inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxTau)
-    maxTau = ceil(N/4);
+    maxTau = ceil(N / 4);
 end
 maxTau0 = maxTau; % keep this original number if changed
-maxTau = min(maxTau,ceil(N/2)); % Don't go above N/2
+maxTau = min(maxTau, ceil(N / 2)); % Don't go above N/2
 
 if nargin < 3 || isempty(numBins)
-    numBins = round(sqrt(N/10)); % this is an arbitrary choice (!!) ;-)
+    numBins = round(sqrt(N / 10)); % this is an arbitrary choice (!!) ;-)
 end
 
 if nargin < 4 || isempty(versionTwo)
@@ -79,32 +79,32 @@ end
 % ------------------------------------------------------------------------------
 if versionTwo
     % Check existence of code:
-    if ~exist('amutual2','file')
+    if ~exist('amutual2', 'file')
         error('''amutual2'' not found -- ensure the TSTOOL package is installed correctly??\n');
     end
-    ami = data(amutual2(s,maxTau));
+    ami = data(amutual2(s, maxTau));
 else
     % Check existence of code:
-    if ~exist('amutual','file')
+    if ~exist('amutual', 'file')
         error('''amutual'' not found -- ensure the TSTOOL package is installed correctly??\n');
     end
-    ami = data(amutual(s,maxTau,numBins));
+    ami = data(amutual(s, maxTau, numBins));
 end
 
 % Plot results
 if doPlot
-    figure('color','w'); box('on');
-    plot(ami,'-ok');
+    figure('color', 'w'); box('on');
+    plot(ami, '-ok');
 end
 
 % ------------------------------------------------------------------------------
 % Change automutual information vector to a structure for output
 % ------------------------------------------------------------------------------
-for i = 1:maxTau0+1
+for i = 1:maxTau0 + 1
     if i <= maxTau
-        out.(sprintf('ami%u',i)) = ami(i);
+        out.(sprintf('ami%u', i)) = ami(i);
     else
-        out.(sprintf('ami%u',i)) = NaN;
+        out.(sprintf('ami%u', i)) = NaN;
     end
 end
 
@@ -119,40 +119,40 @@ out.stdami = std(ami);
 
 % First miniimum of mutual information across range
 dami = diff(ami);
-extremai = find(dami(1:end-1).*dami(2:end) < 0);
-out.pextrema = length(extremai)/(lami-1);
+extremai = find(dami(1:end - 1) .* dami(2:end) < 0);
+out.pextrema = length(extremai) / (lami - 1);
 if isempty(extremai)
-   out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
+    out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
 else
     out.fmmi = extremai(1);
 end
 
 % Periodicities in local maxima?
-maximai = find(dami(1:end-1) > 0 & dami(2:end) < 0) + 1;
+maximai = find(dami(1:end - 1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
 % is there a big peak in dmaxima?
 % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
-out.pmaxima = length(dmaximai)/floor(lami/2);
+out.pmaxima = length(dmaximai) / floor(lami / 2);
 out.modeperiodmax = mode(dmaximai);
-out.pmodeperiodmax = sum(dmaximai == mode(dmaximai))/length(dmaximai);
+out.pmodeperiodmax = sum(dmaximai == mode(dmaximai)) / length(dmaximai);
 
 % Same for local minima
 % Look for periodicities in local maxima
-minimai = find(dami(1:end-1) < 0 & dami(2:end) > 0) + 1;
+minimai = find(dami(1:end - 1) < 0 & dami(2:end) > 0) + 1;
 dminimai = diff(minimai);
 % is there a big peak in dmaxima?
 % (no need to normalize since a given method inputs its range; but do it anyway... ;-))
-out.pminima = length(dminimai)/floor(lami/2);
+out.pminima = length(dminimai) / floor(lami / 2);
 out.modeperiodmin = mode(dminimai);
-out.pmodeperiodmin = sum(dminimai == mode(dminimai))/length(dminimai);
+out.pmodeperiodmin = sum(dminimai == mode(dminimai)) / length(dminimai);
 
 % Number of crossings at mean/median level, percentiles:
-out.pcrossmean = sum(BF_SignChange(ami-mean(ami)))/(lami-1);
-out.pcrossmedian = sum(BF_SignChange(ami-median(ami)))/(lami-1);
-out.pcrossq10 = sum(BF_SignChange(ami-quantile(ami,0.1)))/(lami-1);
-out.pcrossq90 = sum(BF_SignChange(ami-quantile(ami,0.9)))/(lami-1);
+out.pcrossmean = sum(BF_SignChange(ami - mean(ami))) / (lami - 1);
+out.pcrossmedian = sum(BF_SignChange(ami - median(ami))) / (lami - 1);
+out.pcrossq10 = sum(BF_SignChange(ami - quantile(ami, 0.1))) / (lami - 1);
+out.pcrossq90 = sum(BF_SignChange(ami - quantile(ami, 0.9))) / (lami - 1);
 
 % ac1
-out.amiac1 = CO_AutoCorr(ami,1,'Fourier');
+out.amiac1 = CO_AutoCorr(ami, 1, 'Fourier');
 
 end

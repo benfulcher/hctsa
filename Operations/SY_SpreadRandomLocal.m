@@ -1,4 +1,4 @@
-function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
+function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
 % SY_SpreadRandomLocal  Bootstrap-based stationarity measure.
 %
 % numSegs time-series segments of length l are selected at random from the time
@@ -8,7 +8,7 @@ function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
 % Outputs summarize how these quantities vary in different local segments of the
 % time series.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % l, the length of local time-series segments to analyze as a positive integer.
@@ -20,7 +20,7 @@ function out = SY_SpreadRandomLocal(y,l,numSegs,randomSeed)
 %
 % randomSeed, the input to BF_ResetSeed to control reproducibility
 %
-%---OUTPUTS: the mean and also the standard deviation of this set of 100 local
+% ---OUTPUTS: the mean and also the standard deviation of this set of 100 local
 % estimates.
 
 % ------------------------------------------------------------------------------
@@ -63,20 +63,20 @@ end
 
 if ischar(l)
     % tau (global)
-    taug = CO_FirstCrossing(y,'ac',0,'discrete');
+    taug = CO_FirstCrossing(y, 'ac', 0, 'discrete');
     switch l
-    case 'ac2'
-        l = 2*taug;
-    case 'ac5'
-        l = 5*taug;
-    otherwise
-        error('Unknown specifier ''%s''',l);
+        case 'ac2'
+            l = 2 * taug;
+        case 'ac5'
+            l = 5 * taug;
+        otherwise
+            error('Unknown specifier ''%s''', l);
     end
 
     % Very short l for this sort of time series:
     if l < 5
         warning(['This time series has a very short correlation length;\nSetting ' ...
-            'l=%u means that changes estimates will be difficult to compare...'],l);
+                 'l=%u means that changes estimates will be difficult to compare...'], l);
     end
 end
 
@@ -86,8 +86,8 @@ end
 
 % Check the parameters are appropriate for the length of the input time series:
 N = length(y); % the length of the time series
-if l > 0.9*N % operation is not suitable -- time series is too short
-	warning('This time series (N = %u) is too short to use l = %.1f\n',N,l)
+if l > 0.9 * N % operation is not suitable -- time series is too short
+    warning('This time series (N = %u) is too short to use l = %.1f\n', N, l)
     out = NaN;
     return % NaN means not suitable
 end
@@ -100,7 +100,7 @@ end
 % numSegs segments, each of length segl data points
 
 numFeat = 8; % number of features
-qs = zeros(numSegs,numFeat);
+qs = zeros(numSegs, numFeat);
 
 % Reset random seed, for reproducibility:
 BF_ResetSeed(randomSeed);
@@ -109,32 +109,32 @@ for j = 1:numSegs
     % pick a range
     % in this implementation, ranges CAN overlap
 
-    ist = randi(N-1-l,1); % random start point (not exceeding the endpoint)
-    ifh = ist+l-1; % finish index
+    ist = randi(N - 1 - l, 1); % random start point (not exceeding the endpoint)
+    ifh = ist + l - 1; % finish index
     rs = ist:ifh; % sample range (from starting to finishing index)
     ySub = y(rs); % contiguous subsegment of the time series
 
-    qs(j,1) = mean(ySub); % mean
-    qs(j,2) = std(ySub); % standard deviation
-    qs(j,3) = skewness(ySub); % skewness
-    qs(j,4) = kurtosis(ySub); % kurtosis
-    entropyStruct = EN_SampEn(ySub,1,0.15);
-    qs(j,5) = entropyStruct.quadSampEn1; % SampEn_1_01
-    qs(j,6) = CO_AutoCorr(ySub,1,'Fourier'); % AC1
-    qs(j,7) = CO_AutoCorr(ySub,2,'Fourier'); % AC2
-    qs(j,8) = CO_FirstCrossing(ySub,'ac',0,'continuous'); % first zero crossing
+    qs(j, 1) = mean(ySub); % mean
+    qs(j, 2) = std(ySub); % standard deviation
+    qs(j, 3) = skewness(ySub); % skewness
+    qs(j, 4) = kurtosis(ySub); % kurtosis
+    entropyStruct = EN_SampEn(ySub, 1, 0.15);
+    qs(j, 5) = entropyStruct.quadSampEn1; % SampEn_1_01
+    qs(j, 6) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
+    qs(j, 7) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
+    qs(j, 8) = CO_FirstCrossing(ySub, 'ac', 0, 'continuous'); % first zero crossing
 end
 
 % ------------------------------------------------------------------------------
 % Plot some output?:
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w');
-    subplot(2,1,1); hold on;
-    plot(y,'k');
-    plot(ists,y(ists),'.r');
+    figure('color', 'w');
+    subplot(2, 1, 1); hold on;
+    plot(y, 'k');
+    plot(ists, y(ists), '.r');
     title('time series')
-    subplot(2,1,2); plot(qs(:,1),'b'); title('local means')
+    subplot(2, 1, 2); plot(qs(:, 1), 'b'); title('local means')
 end
 
 % ------------------------------------------------------------------------------
@@ -143,26 +143,26 @@ end
 % Can think of this as a big bootstrapped distribution of the timeseries at
 % a scale given by the length l
 
-fs = zeros(numFeat,2);
-fs(:,1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
-fs(:,2) = nanstd(qs); % the spread of the feature across subsegments of the time series
+fs = zeros(numFeat, 2);
+fs(:, 1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
+fs(:, 2) = nanstd(qs); % the spread of the feature across subsegments of the time series
 
-out.meanmean = fs(1,1);
-out.meanstd = fs(2,1);
-out.meanskew = fs(3,1);
-out.meankurt = fs(4,1);
-out.meansampen1_015 = fs(5,1);
-out.meanac1 = fs(6,1);
-out.meanac2 = fs(7,1);
-out.meantaul = fs(8,1);
+out.meanmean = fs(1, 1);
+out.meanstd = fs(2, 1);
+out.meanskew = fs(3, 1);
+out.meankurt = fs(4, 1);
+out.meansampen1_015 = fs(5, 1);
+out.meanac1 = fs(6, 1);
+out.meanac2 = fs(7, 1);
+out.meantaul = fs(8, 1);
 
-out.stdmean = fs(1,2);
-out.stdstd = fs(2,2);
-out.stdskew = fs(3,2);
-out.stdkurt = fs(4,2);
-out.stdsampen1_015 = fs(5,2);
-out.stdac1 = fs(6,2);
-out.stdac2 = fs(7,2);
-out.stdtaul = fs(8,2);
+out.stdmean = fs(1, 2);
+out.stdstd = fs(2, 2);
+out.stdskew = fs(3, 2);
+out.stdkurt = fs(4, 2);
+out.stdsampen1_015 = fs(5, 2);
+out.stdac1 = fs(6, 2);
+out.stdac2 = fs(7, 2);
+out.stdtaul = fs(8, 2);
 
 end

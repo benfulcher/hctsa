@@ -1,4 +1,4 @@
-function out = EN_ApEn(y,mnom,rth)
+function out = EN_ApEn(y, mnom, rth)
 % EN_ApEn   Approximate Entropy of a time series
 %
 % ApEn(m,r).
@@ -8,12 +8,12 @@ function out = EN_ApEn(y,mnom,rth)
 %
 % For more information, cf. http://physionet.org/physiotools/ApEn/
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % mnom, the embedding dimension
 % rth, the threshold for judging closeness/similarity
 %
-%---NOTES:
+% ---NOTES:
 % I have no record of where this was code was derived from :-/
 
 % ------------------------------------------------------------------------------
@@ -54,23 +54,23 @@ if nargin < 3 || isempty(rth)
     rth = 0.2; % r = 0.2 (default)
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
-r = rth*std(y); % threshold of similarity
+r = rth * std(y); % threshold of similarity
 N = length(y); % length of time series
-phi = zeros(2,1); % phi(1)=phi_m, phi(2)=phi_{m+1}
+phi = zeros(2, 1); % phi(1)=phi_m, phi(2)=phi_{m+1}
 
 for k = 1:2
-    m = mnom+k-1; % pattern length
-    C = zeros(N-m+1,1);
+    m = mnom + k - 1; % pattern length
+    C = zeros(N - m + 1, 1);
 
     % Form vector sequences x from the time series y: x(i,:) = y(i:i+m-1).
     % Built via one vectorized indexing operation instead of an N-m+1
     % iteration loop:
-    idx = (1:N-m+1)' + (0:m-1);
+    idx = (1:N - m + 1)' + (0:m - 1);
     x = y(idx);
 
-    for i = 1:N-m+1
+    for i = 1:N - m + 1
         % m - m(i,:)-style implicit broadcasting subtracts the row x(i,:)
         % from every row of x, giving the same result as explicitly building
         % ax (formerly done via an inner for-loop over j=1:m per i -- an
@@ -78,15 +78,15 @@ for k = 1:2
         % that per-iteration loop. The outer loop over i is kept (rather than
         % vectorizing across all i at once) to avoid an O(N^2*m) intermediate
         % array that could be excessive memory for long time series:
-        d = abs(x - x(i,:));
+        d = abs(x - x(i, :));
         if m > 1 % Takes maximum distance
-            d = max(d,[],2)';
+            d = max(d, [], 2)';
         end
-        dr = (d<=r);
-        C(i) = sum(dr)/(N-m+1); % Number of x(j) within r of x(i)
+        dr = (d <= r);
+        C(i) = sum(dr) / (N - m + 1); % Number of x(j) within r of x(i)
     end
     phi(k) = mean(log(C));
 end
-out = phi(1)-phi(2);
+out = phi(1) - phi(2);
 
 end

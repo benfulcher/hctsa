@@ -1,4 +1,4 @@
-function out = EX_MovingThreshold(y,a,b)
+function out = EX_MovingThreshold(y, a, b)
 % EX_MovingThreshold    Moving threshold model for extreme events in a time series
 %
 % Inspired by an idea contained in:
@@ -11,12 +11,12 @@ function out = EX_MovingThreshold(y,a,b)
 % is greater than the barrier, the barrier is increased by a proportion 'a',
 % otherwise the position of the barrier is decreased by a proportion 'b'.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input (z-scored) time series
 % a, the barrier jump parameter (in extreme event)
 % b, the barrier decay proportion (in absence of extreme event)
 %
-%---OUTPUTS: the mean, spread, maximum, and minimum of the time series for the
+% ---OUTPUTS: the mean, spread, maximum, and minimum of the time series for the
 % barrier, the mean of the difference between the barrier and the time series
 % values, and statistics on the occurrence of 'kicks' (times at which the
 % threshold is modified), and by how much the threshold changes on average.
@@ -80,8 +80,8 @@ end
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
 y = abs(y); % extreme events defined in terms of absolute deviation from mean
-q = zeros(N,1); % the barrier
-kicks = zeros(N,1);
+q = zeros(N, 1); % the barrier
+kicks = zeros(N, 1);
 
 % Treat the barrier as knowing nothing about the time series, until it encounters it
 % (except for the std! -- starts at 1)
@@ -93,20 +93,20 @@ kicks = zeros(N,1);
 q(1) = 1; % begin at sigma
 
 for i = 2:N
-	if y(i) > q(i-1) % Extreme event -- time series value more extreme than the barrier
-		% q(i) = (1+a)*q(i-1); % increase barrier by proportion a
-		q(i) = (1+a)*y(i); % increase barrier above the new observation by a factor a
-		kicks(i) = q(i) - q(i-1); % The size of the increase
-	else
-		q(i) = (1-b)*q(i-1); % Decrease barrier by proportion b
-	end
+    if y(i) > q(i - 1) % Extreme event -- time series value more extreme than the barrier
+        % q(i) = (1+a)*q(i-1); % increase barrier by proportion a
+        q(i) = (1 + a) * y(i); % increase barrier above the new observation by a factor a
+        kicks(i) = q(i) - q(i - 1); % The size of the increase
+    else
+        q(i) = (1 - b) * q(i - 1); % Decrease barrier by proportion b
+    end
 end
 
 if doPlot
-    figure('color','w'); box('on')
+    figure('color', 'w'); box('on')
     hold('on')
-    plot(y,'.-k')
-    plot(q,'--r')
+    plot(y, '.-k')
+    plot(q, '--r')
     hold('off')
 end
 
@@ -124,7 +124,7 @@ out.stdq = std(q);
 out.meanqover = mean(q - y);
 
 % Kicks (when the barrier is changed due to extreme event)
-out.pkick = sum(kicks)/(N-1); % probability of a kick
+out.pkick = sum(kicks) / (N - 1); % probability of a kick
 fkicks = find(kicks);
 I_kick = diff(fkicks); % time intervals between successive kicks
 out.stdkickf = std(I_kick);

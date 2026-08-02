@@ -1,10 +1,10 @@
-function out = CO_RM_AMInformation(y,tau)
+function out = CO_RM_AMInformation(y, tau)
 % CO_RM_AMInformation Automutual information (Rudy Moddemeijer implementation)
 %
 % Wrapper for Rudy Moddemeijer's information code to calculate automutual
 % information.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % tau, the time lag at which to calculate the automutual information
 
@@ -41,13 +41,12 @@ if nargin < 2 || isempty(tau)
     tau = 1; % Default is to calculate the automutual information at lag 1
 end
 if tau >= length(y)
-    warning('Time series too short for a time lag of %u',tau);
+    warning('Time series too short for a time lag of %u', tau);
     out = NaN; return
 end
 
-y1 = y(1:end-tau);
-y2 = y(1+tau:end); % time-delayed version of y
-out = RM_information(y1,y2);
-
+y1 = y(1:end - tau);
+y2 = y(1 + tau:end); % time-delayed version of y
+out = RM_information(y1, y2);
 
 end

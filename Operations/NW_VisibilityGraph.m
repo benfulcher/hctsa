@@ -1,4 +1,4 @@
-function out = NW_VisibilityGraph(y,meth,maxL)
+function out = NW_VisibilityGraph(y, meth, maxL)
 % NW_VisibilityGraph    Visibility graph analysis of a time series.
 %
 % Constructs a visibility graph of the time series and returns various
@@ -12,20 +12,20 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 % Luque, B. and Lacasa, L. and Ballesteros, F. and Luque, J.
 % Phys. Rev. E. 80(4) 046103 (2009)
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the time series (a column vector)
 %
 % meth, the method for constructing:
-% 			(i) 'norm': the normal visibility definition
-% 			(ii) 'horiz': uses only horizonatal lines to link nodes/datums
+%           (i) 'norm': the normal visibility definition
+%           (ii) 'horiz': uses only horizonatal lines to link nodes/datums
 %
 % maxL, the maximum number of samples to consider. Due to memory constraints,
 %               only the first maxL (6000 by default) points of time series are
 %               analyzed. Longer time series are reduced to their first maxL
 %               samples.
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 %
 % Statistics on the degree distribution, including the mode, mean, spread,
 % histogram entropy, and fits to gaussian, exponential, and power-law distributions.
@@ -64,7 +64,7 @@ function out = NW_VisibilityGraph(y,meth,maxL)
 % ------------------------------------------------------------------------------
 N = length(y); % time-series length
 
-if size(y,2) > size(y,1), y = y'; end % make sure a column vector
+if size(y, 2) > size(y, 1), y = y'; end % make sure a column vector
 if nargin < 2
     % compute the horizontal visibility graph by default
     meth = 'horiz';
@@ -77,12 +77,11 @@ if N > maxL % too long to store in memory
     % ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
     % could alter to take different subsets, or set a maximum distance range
     % allowed to make a link (using sparse), etc.
-	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
-                ' Analyzing the first %u samples'],N,maxL,maxL));
+    warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
+                     ' Analyzing the first %u samples'], N, maxL, maxL));
     y = y(1:maxL);
     N = length(y); % new time-series length
 end
-
 
 y = y - min(y); % adjust so that minimum of y is at zero
 
@@ -90,11 +89,11 @@ y = y - min(y); % adjust so that minimum of y is at zero
 %% Compute the visibility graph:
 % ------------------------------------------------------------------------------
 switch meth
-	case 'norm'
+    case 'norm'
         % Normal visibility graph:
         A = EZ_VisibilityGraph(y);
 
-	case 'horiz'
+    case 'horiz'
         % Horizontal visibility graph
 
         % The graph has only O(N) edges, so accumulate (row,col) edge indices
@@ -102,56 +101,56 @@ switch meth
         % N x N matrix (an O(N^2) allocation/initialization that's mostly
         % zeros -- e.g., ~200MB at the default maxL=5000 cap):
         yr = flipud(y); % reversed order time series
-        rows = zeros(2*N,1);
-        cols = zeros(2*N,1);
+        rows = zeros(2 * N, 1);
+        cols = zeros(2 * N, 1);
         numEdges = 0;
 
-		for i = 1:N
-			% Look forward to first blocker, then stop
+        for i = 1:N
+            % Look forward to first blocker, then stop
             if i < N
-    			nAhead = find(y(i+1:end) > y(i),1,'first');
+                nAhead = find(y(i + 1:end) > y(i), 1, 'first');
                 if ~isempty(nAhead)
                     numEdges = numEdges + 1;
                     rows(numEdges) = i;
-                    cols(numEdges) = i+nAhead;
+                    cols(numEdges) = i + nAhead;
                 end
             end
 
             % Look back to the first hit, then stop
             if i > 1
-    			nBack = find(yr(N-i+2:end) > yr(N-i+1),1,'first');
+                nBack = find(yr(N - i + 2:end) > yr(N - i + 1), 1, 'first');
                 if ~isempty(nBack)
                     numEdges = numEdges + 1;
-                    rows(numEdges) = i-nBack;
+                    rows(numEdges) = i - nBack;
                     cols(numEdges) = i;
                 end
             end
-		end
+        end
         % Every edge added above has row < col (no self-loops, strictly upper
         % triangular), so collapsing any duplicate (row,col) pairs added from
         % both directions back to 0/1 (sparse() sums duplicates) matches the
         % original dense code's idempotent A(i,j)=1 assignment exactly:
-        A = double(sparse(rows(1:numEdges),cols(1:numEdges),1,N,N) > 0);
+        A = double(sparse(rows(1:numEdges), cols(1:numEdges), 1, N, N) > 0);
 
         % Symmetrize A (safe because A is strictly upper triangular: A and A'
         % have disjoint nonzero support, so no double-counting):
         A = A + A';
     otherwise
-        error('Unknown visibility graph method ''%s''',meth);
+        error('Unknown visibility graph method ''%s''', meth);
 end
 
 % ------------------------------------------------------------------------------
 %%% Statistics on the output
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Degree distribution: basic statistics
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 k = sum(A); % the degree distribution
 k = full(k);
 
 out.modek = mode(k); % mode of degree distribution
-out.propmode = sum(k == mode(k))/sum(k);
+out.propmode = sum(k == mode(k)) / sum(k);
 out.meank = mean(k); % mean number of links per node
 out.mediank = median(k); % median number of links per node
 out.stdk = std(k); % std of k
@@ -160,19 +159,19 @@ out.mink = min(k); % minimum degree
 out.rangek = range(k); % range of degree distribution
 out.iqrk = iqr(k); % interquartile range of degree distribution
 out.skewnessk = skewness(k); % skewness of degree distribution
-out.maxonmedian = max(k)/median(k); % max on median (indicator of outlier)
-out.ol90 = mean(k(k>=quantile(k,0.05) & k<=quantile(k,0.95)))/mean(k);
-out.olu90 = (mean(k(k>=quantile(k,0.95)))-mean(k))/std(k); % top 5% of points are
-                                                       % how far from mean (in std units)?
+out.maxonmedian = max(k) / median(k); % max on median (indicator of outlier)
+out.ol90 = mean(k(k >= quantile(k, 0.05) & k <= quantile(k, 0.95))) / mean(k);
+out.olu90 = (mean(k(k >= quantile(k, 0.95))) - mean(k)) / std(k); % top 5% of points are
+% how far from mean (in std units)?
 
 % ------------------------------------------------------------------------------
 %% Fit distributions to degree distribution
 % ------------------------------------------------------------------------------
 % (1) Gauss1: Gaussian fit to degree distribution
 try
-    dgaussout = DN_SimpleFit(k,'gauss1',range(k)); % range(k)-bin single gaussian fit
+    dgaussout = DN_SimpleFit(k, 'gauss1', range(k)); % range(k)-bin single gaussian fit
 catch emsg
-    warning(sprintf('Error fitting gaussian distribution to data:\n%s',emsg.message))
+    warning(sprintf('Error fitting gaussian distribution to data:\n%s', emsg.message))
     dgaussout = NaN;
 end
 
@@ -194,9 +193,9 @@ end
 
 % (2) Exponential1: Exponential fit to degree distribution
 try
-    dexpout = DN_SimpleFit(k,'exp1',range(k)); % range(k)-bin single exponential fit
+    dexpout = DN_SimpleFit(k, 'exp1', range(k)); % range(k)-bin single exponential fit
 catch emsg
-    warning(sprintf('Error fitting exponential distribution to data:\n%s',emsg.message))
+    warning(sprintf('Error fitting exponential distribution to data:\n%s', emsg.message))
     dexpout = NaN;
 end
 if ~isstruct(dexpout) && isnan(dexpout)
@@ -217,54 +216,54 @@ end
 
 % (3) Power1: Power-law fit to degree distribution
 try
-    dpowerout = DN_SimpleFit(k,'power1',range(k)); % range(k)-bin single power law fit
+    dpowerout = DN_SimpleFit(k, 'power1', range(k)); % range(k)-bin single power law fit
 catch emsg
-    warning(sprintf('Error fitting power-law distribution to data:\n%s',emsg.message))
+    warning(sprintf('Error fitting power-law distribution to data:\n%s', emsg.message))
     dpowerout = NaN;
 end
 if ~isstruct(dpowerout) && isnan(dpowerout)
-	out.dpowerk_r2 = NaN;
-	out.dpowerk_adjr2 = NaN;
-	out.dpowerk_rmse = NaN;
-	out.dpowerk_resAC1 = NaN;
-	out.dpowerk_resAC2 = NaN;
-	out.dpowerk_resruns = NaN;
+    out.dpowerk_r2 = NaN;
+    out.dpowerk_adjr2 = NaN;
+    out.dpowerk_rmse = NaN;
+    out.dpowerk_resAC1 = NaN;
+    out.dpowerk_resAC2 = NaN;
+    out.dpowerk_resruns = NaN;
 else
-	out.dpowerk_r2 = dpowerout.r2; % rsquared
-	out.dpowerk_adjr2 = dpowerout.adjr2; % degrees of freedom-adjusted rsqured
-	out.dpowerk_rmse = dpowerout.rmse;  % root mean square error
-	out.dpowerk_resAC1 = dpowerout.resAC1; % autocorrelation of residuals at lag 1
-	out.dpowerk_resAC2 = dpowerout.resAC2; % autocorrelation of residuals at lag 2
-	out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
+    out.dpowerk_r2 = dpowerout.r2; % rsquared
+    out.dpowerk_adjr2 = dpowerout.adjr2; % degrees of freedom-adjusted rsqured
+    out.dpowerk_rmse = dpowerout.rmse;  % root mean square error
+    out.dpowerk_resAC1 = dpowerout.resAC1; % autocorrelation of residuals at lag 1
+    out.dpowerk_resAC2 = dpowerout.resAC2; % autocorrelation of residuals at lag 2
+    out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
 end
 
 % ------------------------------------------------------------------------------
 %% Using likelihood now:
 % ------------------------------------------------------------------------------
 % Gaussian
-out.gaussnlogL = normlike([mean(k),std(k)],k);
+out.gaussnlogL = normlike([mean(k), std(k)], k);
 
 % Exp
-out.expnlogL = explike(mean(k),k);
+out.expnlogL = explike(mean(k), k);
 
 % Extreme Value Distribution
 paramhat = evfit(k);
 out.evparam1 = paramhat(1);
 out.evparam2 = paramhat(2);
-out.evnlogL = evlike(paramhat,k);
+out.evnlogL = evlike(paramhat, k);
 
 % ------------------------------------------------------------------------------
 %% Entropy of distribution:
 % ------------------------------------------------------------------------------
-out.entropy = EN_DistributionEntropy(k,'hist','sqrt');
+out.entropy = EN_DistributionEntropy(k, 'hist', 'sqrt');
 
 % Autocorrelations:
-out.kac1 = CO_AutoCorr(k,1,'Fourier');
-out.kac2 = CO_AutoCorr(k,2,'Fourier');
-out.kac3 = CO_AutoCorr(k,3,'Fourier');
-out.ktau = CO_FirstCrossing(k,'ac',0,'continuous');
+out.kac1 = CO_AutoCorr(k, 1, 'Fourier');
+out.kac2 = CO_AutoCorr(k, 2, 'Fourier');
+out.kac3 = CO_AutoCorr(k, 3, 'Fourier');
+out.ktau = CO_FirstCrossing(k, 'ac', 0, 'continuous');
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 function A = symmetrize(A)
     % Symmetrize an upper triangular matrix:
     At = A';
@@ -272,11 +271,11 @@ function A = symmetrize(A)
     A(lowerT) = At(lowerT);
 end
 
-function ind = findFirst(vector,threshold)
+function ind = findFirst(vector, threshold)
     % Find index of the first time a vector exceeds a threshold
     % -- not used because just as fast to use find(x,1,'first')
     for k = 1:length(vector)
-        if vector(k)>threshold
+        if vector(k) > threshold
             ind = k;
             return;
         end

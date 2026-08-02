@@ -1,10 +1,10 @@
-function out = ST_LocalExtrema(y,howToWindow,n)
+function out = ST_LocalExtrema(y, howToWindow, n)
 % ST_LocalExtrema   How local maximums and minimums vary across the time series.
 %
 % Finds maximums and minimums within given segments of the time series and
 % analyses the results.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % howToWindow, whether to use:
@@ -56,10 +56,10 @@ if nargin < 2 || isempty(howToWindow)
 end
 if nargin < 3 || isempty(n)
     switch howToWindow
-       case 'l'
-           n = 100; % 100-sample windows
-       case 'n'
-           n = 5; % 5 windows
+        case 'l'
+            n = 100; % 100-sample windows
+        case 'n'
+            n = 5; % 5 windows
     end
 end
 
@@ -74,17 +74,17 @@ switch howToWindow
     case 'l'
         windowLength = n; % window length
     case 'n'
-        windowLength = floor(N/n); % number of windows
+        windowLength = floor(N / n); % number of windows
     case 'tau'
         % this may not be a good idea!
-        windowLength = CO_FirstCrossing(y,'ac',0,'discrete');
+        windowLength = CO_FirstCrossing(y, 'ac', 0, 'discrete');
     otherwise
-        error('Unknown method ''%s''',howToWindow);
+        error('Unknown method ''%s''', howToWindow);
 end
 
 if (windowLength > N) || (windowLength <= 1)
     % This feature is unsuitable if the window length exceeds ts
-    fprintf(1,'The window length is longer than the time-series length!\n');
+    fprintf(1, 'The window length is longer than the time-series length!\n');
     out = NaN;
     return
 end
@@ -92,12 +92,12 @@ end
 % ------------------------------------------------------------------------------
 %% Buffer the time series
 % ------------------------------------------------------------------------------
-y_buff = buffer(y,windowLength); % no overlap
+y_buff = buffer(y, windowLength); % no overlap
 % Each *column* is a window of samples:
 if y_buff(end) == 0
-    y_buff = y_buff(:,1:end-1); % remove last window if zero-padded
+    y_buff = y_buff(:, 1:end - 1); % remove last window if zero-padded
 end
-numWindows = size(y_buff,2); % number of windows
+numWindows = size(y_buff, 2); % number of windows
 
 % ------------------------------------------------------------------------------
 %% Find local extrema
@@ -111,22 +111,22 @@ locExt(exti) = locMin(exti); % local extrema (furthest from mean; either maxs or
 absLocExt = abs(locExt); % the magnitude of the most extreme events in each window
 
 if doPlot
-    figure('color','w');
+    figure('color', 'w');
     hold('on');
     plot(locMax);
-    plot(absLocExt,'--g');
-    plot(absLocMin,':r')
-    plot(locExt,'k');
+    plot(absLocExt, '--g');
+    plot(absLocMin, ':r')
+    plot(locExt, 'k');
 end
 
 % ------------------------------------------------------------------------------
 %% Return outputs
 % ------------------------------------------------------------------------------
-out.meanrat = mean(locMax)/mean(absLocMin);
-out.medianrat = median(locMax)/median(absLocMin);
+out.meanrat = mean(locMax) / mean(absLocMin);
+out.medianrat = median(locMax) / median(absLocMin);
 out.minmax = min(locMax);
 out.minabsmin = min(absLocMin);
-out.minmaxonminabsmin = min(locMax)/min(absLocMin);
+out.minmaxonminabsmin = min(locMax) / min(absLocMin);
 out.meanmax = mean(locMax);
 out.meanabsmin = mean(absLocMin);
 out.meanext = mean(locExt);
@@ -136,14 +136,13 @@ out.medianext = median(locExt);
 out.stdmax = std(locMax);
 out.stdmin = std(locMin);
 out.stdext = std(locExt);
-out.zcext = ST_SimpleStats(locExt,'zcross');
+out.zcext = ST_SimpleStats(locExt, 'zcross');
 out.meanabsext = mean(absLocExt);
 out.medianabsext = median(absLocExt);
-out.diffmaxabsmin = sum(abs(locMax - absLocMin))/numWindows;
-out.uord = sum(sign(locExt))/numWindows; % whether extreme events are more up or down
-out.maxmaxmed = max(locMax)/median(locMax);
-out.minminmed = min(locMin)/median(locMin);
-out.maxabsext = max(absLocExt)/median(absLocExt);
-
+out.diffmaxabsmin = sum(abs(locMax - absLocMin)) / numWindows;
+out.uord = sum(sign(locExt)) / numWindows; % whether extreme events are more up or down
+out.maxmaxmed = max(locMax) / median(locMax);
+out.minminmed = min(locMin) / median(locMin);
+out.maxabsext = max(absLocExt) / median(absLocExt);
 
 end

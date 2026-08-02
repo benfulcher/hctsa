@@ -1,4 +1,4 @@
-function out = MF_StateSpaceCompOrder(y,maxOrder)
+function out = MF_StateSpaceCompOrder(y, maxOrder)
 % MF_StateSpaceCompOrder    Change in goodness of fit across different state space models.
 %
 % Fits state space models using n4sid (from Matlab's System Identification
@@ -9,7 +9,7 @@ function out = MF_StateSpaceCompOrder(y,maxOrder)
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification
 % Toolbox
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % maxOrder, the maximum model order to consider.
 
@@ -62,7 +62,7 @@ end
 % ------------------------------------------------------------------------------
 
 % Convert y to time series object
-y = iddata(y,[],1);
+y = iddata(y, [], 1);
 
 % ------------------------------------------------------------------------------
 %% Fit the state space models, returning basic fit statistics as we go
@@ -73,16 +73,16 @@ y = iddata(y,[],1);
 
 % noisevars = zeros(maxOrder,1); % Noise variance -- for us the same as
 % loss fn
-lossfns = zeros(maxOrder,1); % Loss function
-fpes = zeros(maxOrder,1); % Akaike's final prediction error
-aics = zeros(maxOrder,1); % Akaike's information criterion
+lossfns = zeros(maxOrder, 1); % Loss function
+fpes = zeros(maxOrder, 1); % Akaike's final prediction error
+aics = zeros(maxOrder, 1); % Akaike's information criterion
 
 for k = 1:maxOrder
     % Fit the state space model for this order, k
     try
-        m = n4sid(y,k);
+        m = n4sid(y, k);
     catch emsg
-        error('Model fitting failed for k = %u',k)
+        error('Model fitting failed for k = %u', k)
     end
 
     lossfns(k) = m.EstimationInfo.LossFcn;

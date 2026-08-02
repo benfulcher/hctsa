@@ -1,10 +1,10 @@
-function out = DN_cv(x,k)
+function out = DN_cv(x, k)
 % DN_cv     Coefficient of variation
 %
 % Coefficient of variation of order k is sigma^k / mu^k (for sigma, standard
 % deviation and mu, mean) of a data vector, x
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % x, the input data vector
 % k, the order of coefficient of variation (k = 1 is default)
@@ -38,14 +38,14 @@ function out = DN_cv(x,k)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(k)
     k = 1; % Do standard CV by default
 end
 
-if (rem(k,1) ~= 0) || (k < 0)
+if (rem(k, 1) ~= 0) || (k < 0)
     warning('k should probably be a positive integer');
     % Carry on with just this warning, though
 end

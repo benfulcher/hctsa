@@ -1,4 +1,4 @@
-function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,resampleHow,randomSeed)
+function out = MF_GP_hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed)
 % MF_GP_hyperparameters    Gaussian Process time-series model parameters and goodness of fit
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
@@ -14,7 +14,7 @@ function out = MF_GP_hyperparameters(y,covFunc,squishorsquash,maxN,resampleHow,r
 % (ii) taking the first 200 samples from the time series, or
 % (iii) taking random samples from the time series.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % covFunc, the covariance function, in the standard form of the gmpl package
@@ -68,7 +68,7 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if size(y,2) > size(y,1);
+if size(y, 2) > size(y, 1);
     y = y'; % ensure a column vector input
 end
 % Make sure that y is indeed zscored
@@ -77,8 +77,8 @@ if ~BF_iszscored(y)
 end
 
 if nargin < 2 || isempty(covFunc),
-    fprintf(1,'Using a default covariance function: sum of squared exponential and noise\n');
-    covFunc = {'covSum', {'covSEiso','covNoise'}};
+    fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
+    covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
 
 if nargin < 3 || isempty(squishorsquash)
@@ -87,12 +87,12 @@ end
 
 if nargin < 4 || isempty(maxN)
     maxN = 500; % maximum length time series we do this for --
-                 % resample longer time series
+    % resample longer time series
     % maxN = 0 --> include the whole thing
 end
 if (maxN > 0) && (maxN < 1)
     % Specify a proportion of the time series length, N
-    maxN = ceil(N*maxN);
+    maxN = ceil(N * maxN);
 end
 
 if nargin < 5 || isempty(resampleHow)
@@ -112,59 +112,59 @@ infAlg = @infLaplace;
 if (maxN > 0) && (N > maxN)
     switch resampleHow
         case 'resample' % resamples the whole time series down
-            f = maxN/N;
-            y = resample(y,ceil(f*10000), 10000);
+            f = maxN / N;
+            y = resample(y, ceil(f * 10000), 10000);
             if length(y) > maxN
                 y = y(1:maxN);
             end
             if beVocal
-                fprintf(1,'Resampled the time series from a length %u down to %u (%u)\n',N,length(y),maxN);
+                fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN);
             end
             N = length(y); % update time series length (should be maxN)
-            t = SUB_settimeindex(N,squishorsquash); % set time index
+            t = SUB_settimeindex(N, squishorsquash); % set time index
 
         case 'random_i' % takes maxN random indicies in the time series
             % Set time index
-            t = SUB_settimeindex(N,squishorsquash);
+            t = SUB_settimeindex(N, squishorsquash);
             % Control the random seed (for reproducibility):
             BF_ResetSeed(randomSeed);
             % Now take samples (unevenly spaced!!)
-            ii = randsample(N,maxN);
-            ii = sort(ii,'ascend');
+            ii = randsample(N, maxN);
+            ii = sort(ii, 'ascend');
             t = t(ii);
-            t = (t-min(t))/max(t)*(maxN-1)+1; % respace from 1:maxN
+            t = (t - min(t)) / max(t) * (maxN - 1) + 1; % respace from 1:maxN
             y = y(ii);
 
         case 'random_consec' % takes maxN consecutive indicies from a random position in the time series
             % Control the random seed (for reproducibility):
             BF_ResetSeed(randomSeed);
-            sind = randi(N-maxN+1); % start index
-            y = y(sind:sind+maxN-1); % take this bit
-            t = SUB_settimeindex(maxN,squishorsquash); % set time index
+            sind = randi(N - maxN + 1); % start index
+            y = y(sind:sind + maxN - 1); % take this bit
+            t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
         case 'first' % takes first maxN indicies from the time series
             y = y(1:maxN); % take this bit
-            t = SUB_settimeindex(maxN,squishorsquash); % set time index
+            t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
         case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
             % Control the random seed (for reproducibility):
             BF_ResetSeed(randomSeed);
             % Take sample from random position in time series
-            sind = randi(N-maxN+1); % start index
-            y = y(sind:sind+maxN-1); % take this bit
+            sind = randi(N - maxN + 1); % start index
+            y = y(sind:sind + maxN - 1); % take this bit
             N = length(y); % update time series length (should be maxN)
-            t = SUB_settimeindex(N,squishorsquash); % set time index
+            t = SUB_settimeindex(N, squishorsquash); % set time index
             % Now take samples (unevenly spaced!!)
-            ii = randsample(N,ceil(maxN/5)); % This 5 is really a parameter...
-            ii = sort(ii,'ascend');
+            ii = randsample(N, ceil(maxN / 5)); % This 5 is really a parameter...
+            ii = sort(ii, 'ascend');
             t = t(ii);
             y = y(ii);
 
         otherwise
-            error('Invalid sampling method ''%s''.',resampleHow)
+            error('Invalid sampling method ''%s''.', resampleHow)
     end
 else
-    t = SUB_settimeindex(N,squishorsquash); % set time index
+    t = SUB_settimeindex(N, squishorsquash); % set time index
 end
 
 % ------------------------------------------------------------------------------
@@ -173,8 +173,8 @@ end
 
 % (1) Determine the number of hyperparameters, numHPs
 s = feval(covFunc{:}); % string in form '2+1', ... tells how many
-                        % hyperparameters for each contribution to the
-                        % covariance function
+% hyperparameters for each contribution to the
+% covariance function
 numHPs = eval(s); % number of hyperparameters
 
 % (2) Intialize hyperparameters before optimization and perform the optimization
@@ -189,7 +189,7 @@ likFunc = @likGauss; hyp.lik = log(0.1);
 % Maximum number of allowed function evaluations
 numfevals = -50; % (specified as the negative)
 
-hyp = MF_GP_LearnHyperp(t,y,covFunc,meanFunc,likFunc,infAlg,numfevals,hyp);
+hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
@@ -198,8 +198,8 @@ hyper = exp(logHyper);
 % Output the hyperparameters and log-hyperparameters
 for i = 1:numHPs
     % Set up structure output
-    out.(sprintf('h%u',i)) = hyper(i);
-    out.(sprintf('logh%u',i)) = logHyper(i);
+    out.(sprintf('h%u', i)) = hyper(i);
+    out.(sprintf('logh%u', i)) = logHyper(i);
 end
 
 % ------------------------------------------------------------------------------
@@ -212,12 +212,12 @@ if doPlot
     % S2p = S2 - exp(2*logHyper(3)); % remove noise from predictions
     S2p = S2;
 
-    figure('color','w');
-    f = [mu+2*sqrt(S2p); flipdim(mu-2*sqrt(S2p),1)];
-    fill([xstar; flipdim(xstar,1)], f, [6, 7, 7]/8, 'EdgeColor', [7, 7, 6]/8); % grayscale error bars
+    figure('color', 'w');
+    f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
+    fill([xstar; flipdim(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
     hold on;
-    plot(xstar,mu,'k-','LineWidth',2); % mean function
-    plot(t,y,'.-k'); % original data
+    plot(xstar, mu, 'k-', 'LineWidth', 2); % mean function
+    plot(t, y, '.-k'); % original data
 end
 
 % ------------------------------------------------------------------------------
@@ -232,21 +232,20 @@ out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y);
 % [mu, S2] = gpr(logHyper, covFunc, t, y, t); % evaluate at datapoints
 
 if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
-    fprintf(1,'This time series is not suited to Gaussian Process fitting\n');
+    fprintf(1, 'This time series is not suited to Gaussian Process fitting\n');
     out = NaN; return
 end
 
-out.rmserr = mean(sqrt((y-mu).^2));
+out.rmserr = mean(sqrt((y - mu).^2));
 % Better to look at mean distance away in units of std
-out.mabserr_std = mean(abs((y-mu)./sqrt(S2)));
+out.mabserr_std = mean(abs((y - mu) ./ sqrt(S2)));
 out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
-                            % (if not close to one, means a problem with
-                            % fitting)
+% (if not close to one, means a problem with
+% fitting)
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
-
 % Statistics on variance:
-xstar = linspace(min(t),max(t),1000)'; % crude, I know, but it's nearly 5pm
+xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2);
 out.maxS = max(S); % maximum variance
@@ -254,7 +253,7 @@ out.minS = min(S); % minimum variance
 out.meanS = mean(S); % mean variance
 
 % ------------------------------------------------------------------------------
-function t = SUB_settimeindex(N,squishorsquash)
+function t = SUB_settimeindex(N, squishorsquash)
     %% Set time index
     % Difficult for processes on different time scales -- to squash them all
     % into one time 'window' with linspace, or spread them all out into a
@@ -262,7 +261,7 @@ function t = SUB_settimeindex(N,squishorsquash)
     if squishorsquash
         t = (1:N)';
     else
-        t = linspace(0,1,N)';
+        t = linspace(0, 1, N)';
     end
 end
 % ------------------------------------------------------------------------------

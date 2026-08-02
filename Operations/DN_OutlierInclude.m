@@ -1,4 +1,4 @@
-function out = DN_OutlierInclude(y,thresholdHow,inc)
+function out = DN_OutlierInclude(y, thresholdHow, inc)
 % DN_OutlierInclude     How statistics depend on distributional outliers.
 %
 % Measures a range of different statistics about the time series as more and
@@ -15,7 +15,7 @@ function out = DN_OutlierInclude(y,thresholdHow,inc)
 % algorithm measure how these statistical quantities change as more extreme
 % points are included in the calculation.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series (ideally z-scored)
 %
 % thresholdHow, the method of how to determine outliers:
@@ -77,7 +77,7 @@ doPlot = false; % Plot some outputs
 % If the time series is a constant causes issues
 if all(y == y(1))
     % This method is not suitable for such time series: return a NaN
-    fprintf(1,'The time series is a constant!\n');
+    fprintf(1, 'The time series is a constant!\n');
     out = NaN;
     return
 end
@@ -111,17 +111,17 @@ switch thresholdHow
     case 'neg' % analyze only negative deviations
         thr = (0:inc:max(-y));
         tot = sum(y <= 0);
-otherwise
-    error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.',thresholdHow)
+    otherwise
+        error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.', thresholdHow)
 end
 
 if isempty(thr)
     error('Error setting increments through the time-series values...')
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Calculate statistics of over-threshold events, looping over thresholds
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Break out of the loop as soon as too few points remain to be useful,
 % instead of computing statistics across the full threshold range and
 % trimming afterward: raising the threshold can only shrink the qualifying
@@ -138,12 +138,12 @@ end
 % preserves relative order), which matters because Dt_exc = diff(r) and the
 % median(r)/mean(r) stats below depend on r being in temporal order, not
 % sorted by value.
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 trimthr = 2; % percent
 
-msDt = zeros(length(thr),6); % mean, std, proportion_of_time_series_included,
-                             % median of index relative to middle, mean,
-                             % error
+msDt = zeros(length(thr), 6); % mean, std, proportion_of_time_series_included,
+% median of index relative to middle, mean,
+% error
 rPrev = (1:N)'; % candidate index set, narrows each iteration
 numValid = 0;
 for i = 1:length(thr)
@@ -153,12 +153,12 @@ for i = 1:length(thr)
     % of the time series exceeding the threshold, th (in a given direction).
     % Searches only the previous iteration's qualifying indices, rPrev:
     switch thresholdHow
-    case 'abs' % look at absolute value deviations
-        r = rPrev(abs(y(rPrev)) >= th);
-    case 'pos' % look at only positive deviations
-        r = rPrev(y(rPrev) >= th);
-    case 'neg' % look at only negative deviations
-        r = rPrev(y(rPrev) <= -th);
+        case 'abs' % look at absolute value deviations
+            r = rPrev(abs(y(rPrev)) >= th);
+        case 'pos' % look at only positive deviations
+            r = rPrev(y(rPrev) >= th);
+        case 'neg' % look at only negative deviations
+            r = rPrev(y(rPrev) <= -th);
     end
     rPrev = r; % narrower candidate set for the next (higher) threshold
 
@@ -169,10 +169,10 @@ for i = 1:length(thr)
     % Statistics on the interval time series:
     % ~~~~~~~~~~~~
     meanDt = mean(Dt_exc); % the mean value of inter-event intervals
-    propIncluded = length(Dt_exc)/tot*100; % this is just really measuring the distribution
-                                            % : the proportion of possible values
-                                            % that are actually used in
-                                            % calculation
+    propIncluded = length(Dt_exc) / tot * 100; % this is just really measuring the distribution
+    % : the proportion of possible values
+    % that are actually used in
+    % calculation
 
     % Stop once too few events remain to say anything meaningful (Dt_exc
     % empty/singleton -> NaN mean), or once statistical power is lacking
@@ -182,48 +182,48 @@ for i = 1:length(thr)
     end
 
     numValid = numValid + 1;
-    msDt(numValid,1) = meanDt;
-    msDt(numValid,2) = std(Dt_exc)/sqrt(length(r)); % error on the mean
-    msDt(numValid,3) = propIncluded;
+    msDt(numValid, 1) = meanDt;
+    msDt(numValid, 2) = std(Dt_exc) / sqrt(length(r)); % error on the mean
+    msDt(numValid, 3) = propIncluded;
     % ~~~~~~~~~~~~
     % Statistics on the indices of over-threshold events:
     % ~~~~~~~~~~~~
     % The [x/(N/2)-1] rescales such that the middle index, N/2 => 0, and N maps to 1, 0 maps to -1.
-    msDt(numValid,4) = median(r)/(N/2)-1; % the median timing of events (relative to middle, N/2)
-    msDt(numValid,5) = mean(r)/(N/2)-1; % mean timing of events (relative to middle, N/2)
-    msDt(numValid,6) = std(r)/sqrt(length(r)); % variance of event timing
+    msDt(numValid, 4) = median(r) / (N / 2) - 1; % the median timing of events (relative to middle, N/2)
+    msDt(numValid, 5) = mean(r) / (N / 2) - 1; % mean timing of events (relative to middle, N/2)
+    msDt(numValid, 6) = std(r) / sqrt(length(r)); % variance of event timing
 end
-msDt = msDt(1:numValid,:);
+msDt = msDt(1:numValid, :);
 thr = thr(1:numValid);
 
 % ------------------------------------------------------------------------------
 %% Plot output
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w');
+    figure('color', 'w');
     hold('on')
-    plot(thr,msDt(:,1),'.-k');
-    plot(thr,msDt(:,2),'.-b');
-    plot(thr,msDt(:,3),'.-g');
-    plot(thr,msDt(:,4)*100,'.-m');
-    plot(thr,msDt(:,5)*100,'.-r');
-    plot(thr,msDt(:,6),'.-c'); hold off
+    plot(thr, msDt(:, 1), '.-k');
+    plot(thr, msDt(:, 2), '.-b');
+    plot(thr, msDt(:, 3), '.-g');
+    plot(thr, msDt(:, 4) * 100, '.-m');
+    plot(thr, msDt(:, 5) * 100, '.-r');
+    plot(thr, msDt(:, 6), '.-c'); hold off
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Quantify outputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 %% Fit an exponential to the mean inter-event interval as a function of the threshold
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[0.1 2.5 1]);
-f = fittype('a*exp(b*x)+c','options',s);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [0.1 2.5 1]);
+f = fittype('a*exp(b*x)+c', 'options', s);
 emsg = '';
 try
-    [c,gof] = fit(thr',msDt(:,1),f);
+    [c, gof] = fit(thr', msDt(:, 1), f);
 catch emsg
-    fprintf(1,'DN_OutlierInclude: error fitting exponential growth to means: %s\n',emsg);
+    fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg);
 end
 
 if isempty(emsg)
@@ -245,9 +245,9 @@ end
 % ------------------------------------------------------------------------------
 %% Fit an exponential to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[120,-1,-16]);
-f = fittype('a*exp(b*x)+c','options',s);
-[c,gof] = fit(thr',msDt(:,3),f);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [120, -1, -16]);
+f = fittype('a*exp(b*x)+c', 'options', s);
+[c, gof] = fit(thr', msDt(:, 3), f);
 
 out.nfexpa = c.a;
 out.nfexpb = c.b;
@@ -259,9 +259,9 @@ out.nfexprmse = gof.rmse;
 % ------------------------------------------------------------------------------
 %% Fit an linear trend to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[-40,100]);
-f = fittype('a*x+b','options',s);
-[c,gof] = fit(thr',msDt(:,3),f);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [-40, 100]);
+f = fittype('a*x+b', 'options', s);
+[c, gof] = fit(thr', msDt(:, 3), f);
 
 out.nfla = c.a;
 out.nflb = c.b;
@@ -273,36 +273,36 @@ out.nflrmse = gof.rmse;
 %% Stationarity metrics
 % ------------------------------------------------------------------------------
 % Mean, median and std of the mean inter-event interval:
-out.mdtm = mean(msDt(:,1));
-out.mdtmd = median(msDt(:,1));
-out.mdtstd = std(msDt(:,1));
+out.mdtm = mean(msDt(:, 1));
+out.mdtmd = median(msDt(:, 1));
+out.mdtstd = std(msDt(:, 1));
 
 % Mean, median and std of the median and mean of indices over-threshold events occur
-out.mdrm = mean(msDt(:,4));
-out.mdrmd = median(msDt(:,4));
-out.mdrstd = std(msDt(:,4));
+out.mdrm = mean(msDt(:, 4));
+out.mdrmd = median(msDt(:, 4));
+out.mdrstd = std(msDt(:, 4));
 
-out.mrm = mean(msDt(:,5));
-out.mrmd = median(msDt(:,5));
-out.mrstd = std(msDt(:,5));
+out.mrm = mean(msDt(:, 5));
+out.mrmd = median(msDt(:, 5));
+out.mrstd = std(msDt(:, 5));
 
 % ------------------------------------------------------------------------------
 %% Cross correlation between mean and error
 % ------------------------------------------------------------------------------
-xc = xcorr(msDt(:,1),msDt(:,2),1,'coeff');
+xc = xcorr(msDt(:, 1), msDt(:, 2), 1, 'coeff');
 out.xcmerr1 = xc(end); % this is the cross-correlation at lag 1
 out.xcmerrn1 = xc(1); % this is the cross-correlation at lag -1
 
 % ------------------------------------------------------------------------------
 %% Fit exponential to std in range
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[5, 1, 15]);
-f = fittype('a*exp(b*x)+c','options',s);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [5, 1, 15]);
+f = fittype('a*exp(b*x)+c', 'options', s);
 emsg = [];
 try
-    [c,gof] = fit(thr',msDt(:,6),f);
+    [c, gof] = fit(thr', msDt(:, 6), f);
 catch emsg
-    warning('Error fitting exponential growth to std: %s\n',emsg.message);
+    warning('Error fitting exponential growth to std: %s\n', emsg.message);
 end
 
 if isempty(emsg)
@@ -324,9 +324,9 @@ end
 % ------------------------------------------------------------------------------
 %% Fit linear to errors in range
 % ------------------------------------------------------------------------------
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[40, 4]);
-f = fittype('a*x +b','options',s);
-[c,gof] = fit(thr',msDt(:,6),f);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [40, 4]);
+f = fittype('a*x +b', 'options', s);
+[c, gof] = fit(thr', msDt(:, 6), f);
 
 out.stdrfla = c.a;
 out.stdrflb = c.b;
@@ -335,8 +335,8 @@ out.stdrfladjr2 = gof.adjrsquare;
 out.stdrflrmse = gof.rmse;
 
 if doPlot
-    figure('color','w')
-    errorbar(thr,msDt(:,1),msDt(:,2),'k');
+    figure('color', 'w')
+    errorbar(thr, msDt(:, 1), msDt(:, 2), 'k');
 end
 
 end

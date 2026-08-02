@@ -1,4 +1,4 @@
-function out = CO_Embed2_Dist(y,tau)
+function out = CO_Embed2_Dist(y, tau)
 % CO_Embed2_Dist    Analyzes distances in a 2-dim embedding space of a time series.
 %
 % Returns statistics on the sequence of successive Euclidean distances between
@@ -9,7 +9,7 @@ function out = CO_Embed2_Dist(y,tau)
 % spread of distances, and statistics from an exponential fit to the
 % distribution of distances.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, a z-scored column vector representing the input time series.
 % tau, the time delay.
 
@@ -51,30 +51,30 @@ N = length(y); % time-series length
 if nargin < 2 || isempty(tau)
     tau = 'tau'; % set to the first minimum of autocorrelation function
 end
-if strcmp(tau,'tau'),
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
-    if tau > N/10
-        tau = floor(N/10);
+if strcmp(tau, 'tau'),
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+    if tau > N / 10
+        tau = floor(N / 10);
     end
 end
 % Make sure the time series is a column vector
-if size(y,2) > size(y,1);
+if size(y, 2) > size(y, 1);
     y = y';
 end
 
 % ------------------------------------------------------------------------------
 % Construct a 2-dimensional time-delay embedding (delay of tau):
 % ------------------------------------------------------------------------------
-m = [y(1:end-tau), y(1+tau:end)];
+m = [y(1:end - tau), y(1 + tau:end)];
 
 % ------------------------------------------------------------------------------
 % Plot the embedding:
 % ------------------------------------------------------------------------------
 if doPlot
-    figure('color','w');
+    figure('color', 'w');
     box('on'); hold('on')
-    plot(m(:,1),m(:,2),'.');
-    plot(m(1:min(200,end),1),m(1:min(200,end),2),'k');
+    plot(m(:, 1), m(:, 2), '.');
+    plot(m(1:min(200, end), 1), m(1:min(200, end), 2), 'k');
 end
 
 % ------------------------------------------------------------------------------
@@ -82,14 +82,14 @@ end
 % ------------------------------------------------------------------------------
 
 % d = diff(m(:,1)).^2 + diff(m(:,2)).^2; % sum of squared differences
-d = sqrt(diff(m(:,1)).^2 + diff(m(:,2)).^2); % Euclidean distance
+d = sqrt(diff(m(:, 1)).^2 + diff(m(:, 2)).^2); % Euclidean distance
 
 % Outputs statistics obtained from ordered set of distances between successive
 % points in the recurrence space:
-acf = CO_AutoCorr(d,[],'Fourier');
-out.d_ac1 = acf(2); %CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
-out.d_ac2 = acf(3); %CO_AutoCorr(d,2,'Fourier'); % Autocorrelation at lag 2
-out.d_ac3 = acf(4); %CO_AutoCorr(d,3,'Fourier'); % Autocorrelation at lag 3
+acf = CO_AutoCorr(d, [], 'Fourier');
+out.d_ac1 = acf(2); % CO_AutoCorr(d,1,'Fourier'); % Autocorrelation at lag 1
+out.d_ac2 = acf(3); % CO_AutoCorr(d,2,'Fourier'); % Autocorrelation at lag 2
+out.d_ac3 = acf(4); % CO_AutoCorr(d,3,'Fourier'); % Autocorrelation at lag 3
 
 out.d_mean = mean(d); % Mean distance
 out.d_median = median(d); % Median distance
@@ -97,20 +97,20 @@ out.d_std = std(d); % Standard deviation of distances
 out.d_iqr = iqr(d); % Interquartile range of distances
 out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
-out.d_cv = mean(d)/std(d); % Coefficient of variation of distances
+out.d_cv = mean(d) / std(d); % Coefficient of variation of distances
 
 % ------------------------------------------------------------------------------
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
 l = expfit(d);
-nlogL = explike(l,d);
+nlogL = explike(l, d);
 out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:
 % Use a histogram with automatic binning
-[N,binEdges] = histcounts(d,'BinMethod','auto','Normalization','probability');
-binCentres = mean([binEdges(1:end-1); binEdges(2:end)]);
-expf = exppdf(binCentres,l); % exponential fit in each bin
+[N, binEdges] = histcounts(d, 'BinMethod', 'auto', 'Normalization', 'probability');
+binCentres = mean([binEdges(1:end - 1); binEdges(2:end)]);
+expf = exppdf(binCentres, l); % exponential fit in each bin
 out.d_expfit_meandiff = mean(abs(N - expf)); % mean absolute error of fit
 
 end

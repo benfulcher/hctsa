@@ -1,4 +1,4 @@
-function out = CP_l1pwc_sweep_lambda(y,lambdar)
+function out = CP_l1pwc_sweep_lambda(y, lambdar)
 % CP_l1pwc_sweep_lambda     Dependence of step detection on regularization parameter.
 %
 % Gives information about discrete steps in the signal across a range of
@@ -9,12 +9,12 @@ function out = CP_l1pwc_sweep_lambda(y,lambdar)
 % "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
 % Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % lambdar, a vector specifying the lambda parameters to use
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % At each iteration, the CP_ML_StepDetect code was run with a given
 % lambda, and the number of segments, and reduction in root mean square error
 % from removing the piecewise constants was recorded. Outputs summarize how the
@@ -50,14 +50,14 @@ function out = CP_l1pwc_sweep_lambda(y,lambdar)
 % ------------------------------------------------------------------------------
 
 Llambdar = length(lambdar);
-nsegs = zeros(Llambdar,1);
-rmserrs = zeros(Llambdar,1);
-rmserrpsegs = zeros(Llambdar,1);
+nsegs = zeros(Llambdar, 1);
+rmserrs = zeros(Llambdar, 1);
+rmserrpsegs = zeros(Llambdar, 1);
 
 for i = 1:length(lambdar)
     lambda = lambdar(i);
     % Run the (stochastic) step detection algorithm:
-    outi = CP_ML_StepDetect(y,'l1pwc',lambda);
+    outi = CP_ML_StepDetect(y, 'l1pwc', lambda);
     nsegs(i) = outi.nsegments;
     rmserrs(i) = outi.rmsoff;
     rmserrpsegs(i) = outi.rmsoffpstep;
@@ -69,31 +69,30 @@ end
 % Often finding the first time a certain vector (x) drops under a given
 % threshold (y). This function does it:
 
-FirstUnder = @(x,y) find(x < y, 1, 'first');
+FirstUnder = @(x, y) find(x < y, 1, 'first');
 
 % ------------------------------------------------------------------------------
 % (*) Use rmsunderx subfunction to analyze when RMS errors drop under a set of
 % thresholds, *x*, for the first time:
 % ------------------------------------------------------------------------------
-out.rmserrsu05 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.5)));
-out.rmserrsu02 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.2)));
-out.rmserrsu01 = NaNIfEmpty(lambdar(FirstUnder(rmserrs,0.1)));
+out.rmserrsu05 = NaNIfEmpty(lambdar(FirstUnder(rmserrs, 0.5)));
+out.rmserrsu02 = NaNIfEmpty(lambdar(FirstUnder(rmserrs, 0.2)));
+out.rmserrsu01 = NaNIfEmpty(lambdar(FirstUnder(rmserrs, 0.1)));
 
 % ------------------------------------------------------------------------------
 % (*) Use the nsegsunderx subfunction to analyze when nseg drops under a set of
 % thresholds, *x*, for the first time:
 % nsegunderx = @(x) find(nsegs < x, 1, 'first');
 % ------------------------------------------------------------------------------
-out.nsegsu005 = NaNIfEmpty(lambdar(FirstUnder(nsegs,0.05)));
-out.nsegsu001 = NaNIfEmpty(lambdar(FirstUnder(nsegs,0.01)));
-
+out.nsegsu005 = NaNIfEmpty(lambdar(FirstUnder(nsegs, 0.05)));
+out.nsegsu001 = NaNIfEmpty(lambdar(FirstUnder(nsegs, 0.01)));
 
 % Calculate the correlation between the number of segments and rmserrs
-R = corrcoef(nsegs,rmserrs);
-out.corrsegerr = R(2,1);
+R = corrcoef(nsegs, rmserrs);
+out.corrsegerr = R(2, 1);
 
 % Maximum rmserrpsegment
-indbest = find(rmserrpsegs == max(rmserrpsegs),1,'first'); % where the maximum occurs
+indbest = find(rmserrpsegs == max(rmserrpsegs), 1, 'first'); % where the maximum occurs
 out.bestrmserrpseg = rmserrpsegs(indbest);
 out.bestlambda = lambdar(indbest);
 

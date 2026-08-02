@@ -1,11 +1,11 @@
-function out = EN_mse(y,scaleRange,m,r,preProcessHow)
+function out = EN_mse(y, scaleRange, m, r, preProcessHow)
 % EN_mse  Multiscale entropy of a time series
 %
 % As per "Multiscale entropy analysis of biological signals",
 % Costa, Goldberger and Peng, PRE, 71, 021906 (2005)
 % http://physionet.comp.nus.edu.sg/physiotools/mse/papers/pre-2005.pdf
 %
-%---INPUTS:
+% ---INPUTS:
 % scaleRange: a vector of scales (default: 1:10)
 % m: embedding dimension/length of sequence to match (default: 2)
 % r: similarity threshold for matching (default: 0.15)
@@ -44,9 +44,9 @@ function out = EN_mse(y,scaleRange,m,r,preProcessHow)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs, set defaults
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2
     m = 2;
 end
@@ -60,7 +60,7 @@ if nargin < 5
     preProcessHow = '';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Impose a minimum time-series length of 20 samples to perform a SampEn
 % (should probably be even higher...?)
 minTSLength = 20;
@@ -68,80 +68,80 @@ minTSLength = 20;
 doPlot = false; % whether to plot outputs
 numScales = length(scaleRange);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Preprocess
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Do the specified pre-processing BEFORE applying the coarse-graining
 if ~isempty(preProcessHow)
-    y = zscore(BF_PreProcess(y,preProcessHow));
+    y = zscore(BF_PreProcess(y, preProcessHow));
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Coarse-graining across scales:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % cf. Eq. (16) in Costa et al. (2005)
-y_cg = cell(numScales,1);
+y_cg = cell(numScales, 1);
 for i = 1:numScales
     % Want non-overlapping windows of length scaleRange(i)
     bufferSize = scaleRange(i);
-    y_buffer = BF_MakeBuffer(y,bufferSize);
-    y_cg{i} = mean(y_buffer,2);
+    y_buffer = BF_MakeBuffer(y, bufferSize);
+    y_cg{i} = mean(y_buffer, 2);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Run sample entropy for each m and r value at each scale:
-%-------------------------------------------------------------------------------
-sampEns = zeros(numScales,1);
+% -------------------------------------------------------------------------------
+sampEns = zeros(numScales, 1);
 for si = 1:numScales
     if length(y_cg{si}) >= minTSLength
-        sampEnStruct = EN_SampEn(y_cg{si},m,r);
-        sampEns(si) = sampEnStruct.(sprintf('sampen%u',m));
+        sampEnStruct = EN_SampEn(y_cg{si}, m, r);
+        sampEns(si) = sampEnStruct.(sprintf('sampen%u', m));
     else
         sampEns(si) = NaN;
     end
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Outputs: multiscale entropy
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if all(isnan(sampEns))
     if ~isempty(preProcessHow)
-        ppText = sprintf('after %s pre-processing',preProcessHow);
+        ppText = sprintf('after %s pre-processing', preProcessHow);
     else
         ppText = '';
     end
-    warning('Not enough samples (%u %s) to compute SampEn at multiple scales',...
-                    length(y),ppText)
+    warning('Not enough samples (%u %s) to compute SampEn at multiple scales', ...
+            length(y), ppText)
     out = NaN;
     return
 end
 
 if doPlot
-    figure('color','w')
-    subplot(2,1,1);
+    figure('color', 'w')
+    subplot(2, 1, 1);
     plot(y);
-    subplot(2,1,2);
-    plot(sampEns,'o-k')
+    subplot(2, 1, 2);
+    plot(sampEns, 'o-k')
 end
 
 % Output raw values
 for i = 1:numScales
-    out.(sprintf('sampen_s%u',scaleRange(i))) = sampEns(i);
+    out.(sprintf('sampen_s%u', scaleRange(i))) = sampEns(i);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Summary statistics of the variation:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Maximum, and where it occurred
-[out.maxSampEn,maxInd] = nanmax(sampEns);
+[out.maxSampEn, maxInd] = nanmax(sampEns);
 out.maxScale = scaleRange(maxInd);
 % Minimum, and where it occurred
-[out.minSampEn,minInd] = nanmin(sampEns);
+[out.minSampEn, minInd] = nanmin(sampEns);
 out.minScale = scaleRange(minInd);
 % Mean, std, coefficient of variation:
 out.meanSampEn = nanmean(sampEns);
 out.stdSampEn = nanstd(sampEns);
-out.cvSampEn = out.stdSampEn/out.meanSampEn;
+out.cvSampEn = out.stdSampEn / out.meanSampEn;
 % Mean change across the range of scales:
 out.meanch = nanmean(diff(sampEns));
 

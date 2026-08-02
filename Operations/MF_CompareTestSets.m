@@ -1,4 +1,4 @@
-function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomSeed)
+function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, randomSeed)
 % MF_CompareTestSets    Robustness of test-set goodness of fit
 %
 % Robustness is quantified over different samples in the time series from
@@ -15,7 +15,7 @@ function out = MF_CompareTestSets(y,theModel,ord,subsetHow,samplep,steps,randomS
 % as well as either ar, n4sid, or armax from Matlab's System Identification
 % Toolbox to fit the models, depending on the specified model to fit to the data.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % theModel, the type of time-series model to fit:
@@ -87,7 +87,7 @@ if nargin < 1 || isempty(y)
 end
 
 % Convert y to time series object for the System Identification Toolbox
-y = iddata(y,[],1);
+y = iddata(y, [], 1);
 
 % (2) Model, the type of model to fit
 if nargin < 2 || isempty(theModel)
@@ -132,7 +132,7 @@ end
 
 switch theModel
     case 'ar' % fit an ar model of specified order
-        if strcmp(ord,'best')
+        if strcmp(ord, 'best')
             % Use arfit software to retrieve the optimum ar order by some
             % criterion (Schwartz's Bayesian Criterion, SBC)
             try
@@ -142,14 +142,14 @@ switch theModel
             end
             ord = length(Aest);
         end
-        m = ar(y,ord);
+        m = ar(y, ord);
 
     case 'ss' % fit a state space model of specified order
-        m = n4sid(y,ord);
+        m = n4sid(y, ord);
 
     case 'arma' % fit an arma model of specified orders
         % Note: order should be a two-component vector
-        m = armax(y,ord);
+        m = armax(y, ord);
 
     otherwise
         error('Unknown model ''%s''', theModel);
@@ -161,19 +161,19 @@ end
 % Number of samples to take, numPred
 numPred = samplep(1);
 % Initialize quantities to store into
-rmserrs = zeros(numPred,1);
-mabserrs = zeros(numPred,1);
-ac1s = zeros(numPred,1);
-meandiffs = zeros(numPred,1);
-stdrats = zeros(numPred,1);
+rmserrs = zeros(numPred, 1);
+mabserrs = zeros(numPred, 1);
+ac1s = zeros(numPred, 1);
+meandiffs = zeros(numPred, 1);
+stdrats = zeros(numPred, 1);
 
 % Set ranges beforehand
-r = zeros(numPred,2);
+r = zeros(numPred, 2);
 
 switch subsetHow
     case 'rand'
         if samplep(2) < 1 % specified a fraction of time series
-            l = floor(N*samplep(2));
+            l = floor(N * samplep(2));
         else % specified an absolute interval
             l = samplep(2);
         end
@@ -182,31 +182,31 @@ switch subsetHow
         BF_ResetSeed(randomSeed);
 
         % numPred starting points:
-        spts = randi(N-l+1,numPred,1);
-        r(:,1) = spts;
-        r(:,2) = spts+l-1;
+        spts = randi(N - l + 1, numPred, 1);
+        r(:, 1) = spts;
+        r(:, 2) = spts + l - 1;
 
     case 'uniform'
         if length(samplep) == 1 % size will depend on number of unique subsegments
-            spts = round(linspace(0,N,numPred+1)); % numPred+1 boundaries = numPred portions
-            r(:,1) = spts(1:numPred)+1;
-            r(:,2) = spts(2:end);
+            spts = round(linspace(0, N, numPred + 1)); % numPred+1 boundaries = numPred portions
+            r(:, 1) = spts(1:numPred) + 1;
+            r(:, 2) = spts(2:end);
         else
             if samplep(2) < 1 % specified a fraction of time series
-                l = floor(N*samplep(2));
+                l = floor(N * samplep(2));
             else % specified an absolute interval
                 l = samplep(2);
             end
-            spts = round(linspace(1,N-l+1,numPred)); % numPred+1 boundaries = numPred portions
-            r(:,1) = spts;
-            r(:,2) = spts+l-1;
+            spts = round(linspace(1, N - l + 1, numPred)); % numPred+1 boundaries = numPred portions
+            r(:, 1) = spts;
+            r(:, 2) = spts + l - 1;
         end
     otherwise
-        error('Unknown subset method ''%s''',subsetHow);
+        error('Unknown subset method ''%s''', subsetHow);
 end
 
 % Quickly check that ranges are valid
-if any(r(:,1) >= r(:,2))
+if any(r(:, 1) >= r(:, 2))
     error('Invalid settings');
 end
 
@@ -215,11 +215,11 @@ end
 % ------------------------------------------------------------------------------
 for i = 1:numPred
     % Retrieve the test data:
-    yTest = y(r(i,1):r(i,2));
+    yTest = y(r(i, 1):r(i, 2));
 
     % Compute step-ahead predictions using System Identification Toolbox:
     yp = predict(m, yTest, steps); % across test set using model, m,
-                                   % fitted to entire data set
+    % fitted to entire data set
 
     %     e = pe(m, yTest); % prediction errors -- exactly the same as returning
     %                       % residuals of 1-step-ahead prediction model
@@ -232,20 +232,20 @@ for i = 1:numPred
 
     rmserrs(i) = sqrt(mean(mres.^2));
     mabserrs(i) = mean(abs(mres));
-    ac1s(i) = CO_AutoCorr(mres,1,'Fourier');
+    ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
 
     % Get statistics on output time series
     meandiffs(i) = abs(mean(yp.y) - mean(yTest.y));
-    stdrats(i) = std(yp.y)/std(yTest.y);
+    stdrats(i) = std(yp.y) / std(yTest.y);
 
-%     % 1) Get statistics on residuals
-%     residout = MF_ResidualAnalysis(mresiduals);
-%
-%     % convert these to local outputs in quick loop
-%     fields = fieldnames(residout);
-%     for k=1:length(fields);
-%         eval(['out.' fields{k} ' = residout.' fields{k} ';']);
-%     end
+    %     % 1) Get statistics on residuals
+    %     residout = MF_ResidualAnalysis(mresiduals);
+    %
+    %     % convert these to local outputs in quick loop
+    %     fields = fieldnames(residout);
+    %     for k=1:length(fields);
+    %         eval(['out.' fields{k} ' = residout.' fields{k} ';']);
+    %     end
 end
 
 % ------------------------------------------------------------------------------

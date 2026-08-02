@@ -1,4 +1,4 @@
-function out = NL_embed_PCA(y,tau,m)
+function out = NL_embed_PCA(y, tau, m)
 % NL_embed_PCA  Principal Components analysis of a time series in an embedding space.
 %
 % Reconstructs the time series as a time-delay embedding, and performs Principal
@@ -10,7 +10,7 @@ function out = NL_embed_PCA(y,tau,m)
 % "Extracting qualitative dynamics from experimental data"
 % D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
@@ -64,14 +64,14 @@ if nargin < 3 || isempty(m)
     m = 3; % three-dimensional embedding
 end
 doPlot = false;
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 % Embed the signal via time-delay method
-y_embed = BF_Embed(y,tau,m,0);
+y_embed = BF_Embed(y, tau, m, 0);
 
 if isnan(y_embed);
     % embedding parameters are unsuitable (likely that tau is too long...)
-    fprintf(1,'Embedding parameters are not suitable for this time series\n');
+    fprintf(1, 'Embedding parameters are not suitable for this time series\n');
     out = NaN; return
 end
 
@@ -80,17 +80,17 @@ end
 % ------------------------------------------------------------------------------
 [~, ~, latent] = pca(y_embed);
 
-perc = latent/sum(latent); % proportion of variance explained
+perc = latent / sum(latent); % proportion of variance explained
 
 if doPlot
-    figure('color','w'); plot(perc,'o-k'); ylim([0,1]);
+    figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Raw outputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 for i = 1:m
-    out.(sprintf('perc_%u',i)) = perc(i);
+    out.(sprintf('perc_%u', i)) = perc(i);
 end
 
 % ------------------------------------------------------------------------------
@@ -104,28 +104,28 @@ out.top2 = sum(perc(1:2)); % variance explained in top two eigendirections
 
 % Number of eigenvalues you need to reconstruct X%
 csperc = cumsum(perc);
-out.nto50 = first_fn(csperc,0.5,+1);
-out.nto60 = first_fn(csperc,0.6,+1);
-out.nto70 = first_fn(csperc,0.7,+1);
-out.nto80 = first_fn(csperc,0.8,+1);
-out.nto90 = first_fn(csperc,0.9,+1);
+out.nto50 = first_fn(csperc, 0.5, +1);
+out.nto60 = first_fn(csperc, 0.6, +1);
+out.nto70 = first_fn(csperc, 0.7, +1);
+out.nto80 = first_fn(csperc, 0.8, +1);
+out.nto90 = first_fn(csperc, 0.9, +1);
 
 % When individual % variance explained goes below X for the first time:
-out.fb05 = first_fn(perc,0.5,-1);
-out.fb02 = first_fn(perc,0.2,-1);
-out.fb01 = first_fn(perc,0.1,-1);
-out.fb001 = first_fn(perc,0.01,-1);
+out.fb05 = first_fn(perc, 0.5, -1);
+out.fb02 = first_fn(perc, 0.2, -1);
+out.fb01 = first_fn(perc, 0.1, -1);
+out.fb001 = first_fn(perc, 0.01, -1);
 
 % ------------------------------------------------------------------------------
-function firsti = first_fn(p,threshold,overOrUnder)
+function firsti = first_fn(p, threshold, overOrUnder)
     % Find the first time p goes under the threshold, x
 
-    if overOrUnder==-1
+    if overOrUnder == -1
         % Under threshold
-        firsti = find(p < threshold,1,'first');
+        firsti = find(p < threshold, 1, 'first');
     else
         % Over threshold
-        firsti = find(p > threshold,1,'first');
+        firsti = find(p > threshold, 1, 'first');
     end
 
     % If it never goes under -- saturate as m at the maximum

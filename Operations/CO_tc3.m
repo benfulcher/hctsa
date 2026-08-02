@@ -1,4 +1,4 @@
-function out = CO_tc3(y,tau)
+function out = CO_tc3(y, tau)
 % CO_tc3    Normalized nonlinear autocorrelation function, tc3.
 %
 % Computes the tc3 function, a normalized nonlinear autocorrelation, at a
@@ -7,11 +7,11 @@ function out = CO_tc3(y,tau)
 % Used as a test statistic for higher order correlational moments in surrogate
 % data analysis.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, input time series
 % tau, time lag
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % The raw tc3 expression, its magnitude, the numerator and its magnitude, and
 % the denominator.
 %
@@ -59,11 +59,11 @@ end
 % Set the time lag as a measure of the time-series correlation length
 % ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi'
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete');
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
     % tau is first zero crossing of the autocorrelation function
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi');
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi');
     % tau is the first minimum of the automutual information function
 end
 if isnan(tau)
@@ -74,21 +74,21 @@ end
 % Compute tc3 statistic
 % ------------------------------------------------------------------------------
 
-yn = y(1:end-2*tau);
-yn1 = y(1+tau:end-tau); % yn1, tau steps ahead
-yn2 = y(1+2*tau:end); % yn2, 2*tau steps ahead
+yn = y(1:end - 2 * tau);
+yn1 = y(1 + tau:end - tau); % yn1, tau steps ahead
+yn2 = y(1 + 2 * tau:end); % yn2, 2*tau steps ahead
 
 % The expression used in TSTOOL tc3:
-out.raw = mean(yn.*yn1.*yn2)/abs(mean(yn.*yn1))^(3/2);
+out.raw = mean(yn .* yn1 .* yn2) / abs(mean(yn .* yn1))^(3 / 2);
 
 % The magnitude
 out.abs = abs(out.raw);
 
 % The numerator
-out.num = mean(yn.*yn1.*yn2);
+out.num = mean(yn .* yn1 .* yn2);
 out.absnum = abs(out.num);
 
 % The denominator
-out.denom = abs(mean(yn.*yn1))^(3/2);
+out.denom = abs(mean(yn .* yn1))^(3 / 2);
 
 end

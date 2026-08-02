@@ -1,9 +1,9 @@
-function out = SB_MotifTwo(y,binarizeHow)
+function out = SB_MotifTwo(y, binarizeHow)
 % SB_MotifTwo   Local motifs in a binary symbolization of the time series
 %
 % Coarse-graining is performed by a given binarization method.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % binarizeHow, the binary transformation method:
 %       (i) 'diff': incremental time-series increases are encoded as 1, and
@@ -13,7 +13,7 @@ function out = SB_MotifTwo(y,binarizeHow)
 %       (iii) 'median': time-series values above the median are given 1, and
 %       those below the median 0.
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % Probabilities of words in the binary alphabet of lengths 1, 2, 3, and 4, and
 % their entropies.
 
@@ -52,7 +52,7 @@ if nargin < 2 || isempty(binarizeHow)
 end
 
 % Generate a binarized version of the input time series:
-yBin = BF_Binarize(y,binarizeHow);
+yBin = BF_Binarize(y, binarizeHow);
 
 % Define the length of the new, symbolized sequence: N
 N = length(yBin);
@@ -78,12 +78,12 @@ out.d = mean(r0); % proportion 0 (corresponds to a movement down for 'diff')
 pp = [out.d, out.u];
 out.h = f_entropy(pp);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 %% Binary sequences of length 2:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
-r1 = r1(1:end-1);
-r0 = r0(1:end-1);
+r1 = r1(1:end - 1);
+r0 = r0(1:end - 1);
 
 % 00
 r00 = r0 & yBin(2:end) == 0;
@@ -107,10 +107,10 @@ out.hh = f_entropy(pp);
 %% 3
 % ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
-r00 = r00(1:end-1);
-r01 = r01(1:end-1);
-r10 = r10(1:end-1);
-r11 = r11(1:end-1);
+r00 = r00(1:end - 1);
+r01 = r01(1:end - 1);
+r10 = r10(1:end - 1);
+r11 = r11(1:end - 1);
 
 % 000
 r000 = r00 & yBin(3:end) == 0;
@@ -129,7 +129,6 @@ r110 = r11 & yBin(3:end) == 0;
 % 111
 r111 = r11 & yBin(3:end) == 1;
 
-
 % ----- Record these -----
 out.ddd = mean(r000);
 out.ddu = mean(r001);
@@ -147,14 +146,14 @@ out.hhh = f_entropy(ppp);
 %% 4
 % ------------------------------------------------------------------------------
 % Make sure ranges are valid for looking at the next one
-r000 = r000(1:end-1);
-r001 = r001(1:end-1);
-r010 = r010(1:end-1);
-r011 = r011(1:end-1);
-r100 = r100(1:end-1);
-r101 = r101(1:end-1);
-r110 = r110(1:end-1);
-r111 = r111(1:end-1);
+r000 = r000(1:end - 1);
+r001 = r001(1:end - 1);
+r010 = r010(1:end - 1);
+r011 = r011(1:end - 1);
+r100 = r100(1:end - 1);
+r101 = r101(1:end - 1);
+r110 = r110(1:end - 1);
+r111 = r111(1:end - 1);
 
 % 0000
 r0000 = r000 & yBin(4:end) == 0;
@@ -189,7 +188,6 @@ r1110 = r111 & yBin(4:end) == 0;
 % 1111
 r1111 = r111 & yBin(4:end) == 1;
 
-
 % ----- Record these -----
 out.dddd = mean(r0000);
 out.dddu = mean(r0001);
@@ -209,13 +207,13 @@ out.uuud = mean(r1110);
 out.uuuu = mean(r1111);
 
 pppp = [out.dddd, out.dddu, out.ddud, out.dduu, out.dudd, out.dudu, out.duud, out.duuu, out.uddd, ...
-              out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
+        out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
 out.hhhh = f_entropy(pppp);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 function h = f_entropy(x)
     % entropy of a set of counts, log(0)=0
-    h = -sum(x(x > 0).*log(x(x > 0)));
+    h = -sum(x(x > 0) .* log(x(x > 0)));
 end
 
 end

@@ -6,7 +6,7 @@ function out = MF_ResidualAnalysis(e)
 % These are motivated by a general expectation of model residuals to be
 % uncorrelated.
 %
-%---INPUT:
+% ---INPUT:
 % e, should be raw residuals as prediction minus data (e = yp - y) as a column
 %       vector.
 
@@ -46,7 +46,7 @@ function out = MF_ResidualAnalysis(e)
 % Check that a System Identification Toolbox license is available (for spa):
 BF_CheckToolbox('identification_toolbox');
 
-if size(e,2) > size(e,1)
+if size(e, 2) > size(e, 1)
     e = e'; % make sure residuals are a column vector
 end
 if all(e > 0)
@@ -63,11 +63,11 @@ out.meane = mean(e);
 out.meanabs = mean(abs(e));
 out.rmse = sqrt(mean(e.^2));
 out.stde = std(e);
-out.mms = abs(mean(e))+abs(std(e));
-out.maxonmean = max(e)/abs(mean(e));
+out.mms = abs(mean(e)) + abs(std(e));
+out.maxonmean = max(e) / abs(mean(e));
 
 if std(e) == 0
-    e = zeros(length(e),1);
+    e = zeros(length(e), 1);
 else
     e = zscore(e);
 end
@@ -84,15 +84,15 @@ gS = g.Spectrumdata(:);
 
 % Normalize them
 % this is like normalizing the residuals to unit variance
-gS = gS / (sum(gS)*(gf(2)-gf(1)));
+gS = gS / (sum(gS) * (gf(2) - gf(1)));
 
 % Look at proportion of power in fifths
-b = round(linspace(0,length(gf),6));
-out.p1_5 = sum(gS(b(1)+1:b(2)))*(gf(2) - gf(1));
-out.p2_5 = sum(gS(b(2)+1:b(3)))*(gf(2) - gf(1));
-out.p3_5 = sum(gS(b(3)+1:b(4)))*(gf(2) - gf(1));
-out.p4_5 = sum(gS(b(4)+1:b(5)))*(gf(2) - gf(1));
-out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2) - gf(1));
+b = round(linspace(0, length(gf), 6));
+out.p1_5 = sum(gS(b(1) + 1:b(2))) * (gf(2) - gf(1));
+out.p2_5 = sum(gS(b(2) + 1:b(3))) * (gf(2) - gf(1));
+out.p3_5 = sum(gS(b(3) + 1:b(4))) * (gf(2) - gf(1));
+out.p4_5 = sum(gS(b(4) + 1:b(5))) * (gf(2) - gf(1));
+out.p5_5 = sum(gS(b(5) + 1:b(6))) * (gf(2) - gf(1));
 
 % ------------------------------------------------------------------------------
 %% Analyze autocorrelation in residuals
@@ -105,34 +105,34 @@ out.p5_5 = sum(gS(b(5)+1:b(6)))*(gf(2) - gf(1));
 % normal (within a constant).
 maxLag = 25;
 
-autoCorrResid = CO_AutoCorr(e,1:maxLag,'Fourier');
+autoCorrResid = CO_AutoCorr(e, 1:maxLag, 'Fourier');
 sqrtN = sqrt(N);
 
 % Output first three ACs (at lags 1,2,3)
 out.ac1 = autoCorrResid(1);
 out.ac2 = autoCorrResid(2);
 out.ac3 = autoCorrResid(3);
-out.ac1n = abs(autoCorrResid(1))*sqrtN; % units of 1/sqrtN from zero
-out.ac2n = abs(autoCorrResid(2))*sqrtN; % units of 1/sqrtN from zero
-out.ac3n = abs(autoCorrResid(3))*sqrtN; % units of 1/sqrtN from zero
+out.ac1n = abs(autoCorrResid(1)) * sqrtN; % units of 1/sqrtN from zero
+out.ac2n = abs(autoCorrResid(2)) * sqrtN; % units of 1/sqrtN from zero
+out.ac3n = abs(autoCorrResid(3)) * sqrtN; % units of 1/sqrtN from zero
 
 % Median normalized distance from zero
-out.acmnd0 = median(abs(autoCorrResid))*sqrtN; % units of 1/sqrtN from zero
-out.acsnd0 = std(abs(autoCorrResid))*sqrtN; % units of 1/sqrtN from zero
-out.propbth = sum(abs(autoCorrResid) < 2.6/sqrtN)/maxLag;
+out.acmnd0 = median(abs(autoCorrResid)) * sqrtN; % units of 1/sqrtN from zero
+out.acsnd0 = std(abs(autoCorrResid)) * sqrtN; % units of 1/sqrtN from zero
+out.propbth = sum(abs(autoCorrResid) < 2.6 / sqrtN) / maxLag;
 
 % First time to get below the significance threshold
-out.ftbth = find(abs(autoCorrResid) < 2.6/sqrtN,1,'first');
+out.ftbth = find(abs(autoCorrResid) < 2.6 / sqrtN, 1, 'first');
 if isempty(out.ftbth)
     out.ftbth = maxLag + 1;
 end
 
 % Durbin-Watson test statistic (like AC1)
-out.dwts = sum((e(2:end) - e(1:end-1)).^2) / sum(e.^2);
+out.dwts = sum((e(2:end) - e(1:end - 1)).^2) / sum(e.^2);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Do the residuals contain Linear correlation structure?
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Fit a linear model and see if it picks up any structure.
 % There's also a suggestion in 'resid' documentation to fit an arx model to
 % the output of resid -- looks for correlations between inputs and
@@ -141,13 +141,13 @@ out.dwts = sum((e(2:end) - e(1:end-1)).^2) / sum(e.^2);
 % Fit a zero-mean AR process to residuals using the ARFIT package:
 emsg = '';
 try
-    [~,Aest,~,SBC,FPE] = ARFIT_arfit(e,1,10,'sbc','zero');
+    [~, Aest, ~, SBC, FPE] = ARFIT_arfit(e, 1, 10, 'sbc', 'zero');
 catch emsg
 end
 
 if ~isempty(emsg)
     % (strcmp(emsg.message,'Time series too short.') || strcmp(emsg.message,'Matrix must be positive definite.'))
-    warning('Error fitting AR model to residuals using ARFIT package: %s.\n',emsg.message)
+    warning('Error fitting AR model to residuals using ARFIT package: %s.\n', emsg.message)
     out.popt = NaN; % Optimum order
     out.minsbc = NaN; % Best sbc
     out.minfpe = NaN; % Best fpe
@@ -162,7 +162,7 @@ end
 % ------------------------------------------------------------------------------
 %% Distribution tests
 % ------------------------------------------------------------------------------
-[~,p,ksstat] = kstest(e);
+[~, p, ksstat] = kstest(e);
 out.normksstat = ksstat;
 out.normp = p;
 

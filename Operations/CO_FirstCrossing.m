@@ -1,7 +1,7 @@
-function out = CO_FirstCrossing(y,corrFun,threshold,whatOut)
+function out = CO_FirstCrossing(y, corrFun, threshold, whatOut)
 % CO_FirstCrossing  The first crossing of a given autocorrelation across a given threshold
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 % corrFun, the self-correlation function to measure:
@@ -54,35 +54,34 @@ if nargin < 4 || isempty(whatOut)
     whatOut = 'both';
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Select the self-correlation function as an inline function
 % Eventually could add additional self-correlation functions
 switch corrFun
-case 'ac'
-    % Autocorrelation at all time lags
-    % (a little inefficient to not do it incrementally, but maybe Fourier method)
-    % (does it anyway...)
-    corrs = CO_AutoCorr(y,[],'Fourier');
-otherwise
-    error('Unknown correlation function ''%s''',corrFun);
+    case 'ac'
+        % Autocorrelation at all time lags
+        % (a little inefficient to not do it incrementally, but maybe Fourier method)
+        % (does it anyway...)
+        corrs = CO_AutoCorr(y, [], 'Fourier');
+    otherwise
+        error('Unknown correlation function ''%s''', corrFun);
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Calculate point of crossing:
-[firstCrossingIndex, pointOfCrossingIndex] = BF_PointOfCrossing(corrs,threshold);
+[firstCrossingIndex, pointOfCrossingIndex] = BF_PointOfCrossing(corrs, threshold);
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Assemble the appropriate output (structure or double):
 % Convert from index space (1,2,…) to lag space (0,1,2,…):
 switch whatOut
-case 'both'
-    out.firstCrossing = firstCrossingIndex - 1;
-    out.pointOfCrossing = pointOfCrossingIndex - 1;
-case 'discrete'
-    out = firstCrossingIndex - 1;
-case 'continuous'
-    out = pointOfCrossingIndex - 1;
+    case 'both'
+        out.firstCrossing = firstCrossingIndex - 1;
+        out.pointOfCrossing = pointOfCrossingIndex - 1;
+    case 'discrete'
+        out = firstCrossingIndex - 1;
+    case 'continuous'
+        out = pointOfCrossingIndex - 1;
 end
-
 
 end

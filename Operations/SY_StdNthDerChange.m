@@ -1,4 +1,4 @@
-function out = SY_StdNthDerChange(y,maxd)
+function out = SY_StdNthDerChange(y, maxd)
 % SY_StdNthDerChange    How the output of SY_StdNthDer changes with order parameter.
 %
 % Order parameter controls the derivative of the signal.
@@ -8,12 +8,12 @@ function out = SY_StdNthDerChange(y,maxd)
 % Vladimir Vassilevsky, DSP and Mixed Signal Design Consultant from
 % http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % maxd, the maximum derivative to take.
 %
-%---OUTPUTS:
+% ---OUTPUTS:
 % An exponential function, f(x) = Aexp(bx), is fitted to the variation across
 % successive derivatives; outputs are the parameters and quality of this fit.
 %
@@ -49,34 +49,33 @@ function out = SY_StdNthDerChange(y,maxd)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-
 % Check that a Curve-Fitting Toolbox license is available:
 BF_CheckToolbox('curve_fitting_toolbox');
 
 doPlot = false; % plot outputs
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Set defaults:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2 || isempty(maxd)
     maxd = 10; % do 10 by default
 end
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
-ms = zeros(maxd,1);
+ms = zeros(maxd, 1);
 for i = 1:maxd
-    ms(i) = SY_StdNthDer(y,i);
+    ms(i) = SY_StdNthDer(y, i);
 end
 
 if doPlot
-    figure('color','w'); box('on');
-    plot(ms,'o-k')
+    figure('color', 'w'); box('on');
+    plot(ms, 'o-k')
 end
 
 % Fit exponential growth/decay using the Curve-Fitting Toolbox
-s = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1, 0.5*sign(ms(end)-ms(1))]);
-f = fittype('a*exp(b*x)','options',s);
-[c, gof] = fit((1:maxd)',ms,f);
+s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, 0.5 * sign(ms(end) - ms(1))]);
+f = fittype('a*exp(b*x)', 'options', s);
+[c, gof] = fit((1:maxd)', ms, f);
 out.fexp_a = c.a;
 out.fexp_b = c.b; % this is important
 out.fexp_r2 = gof.rsquare; % this is more important!

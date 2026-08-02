@@ -1,4 +1,4 @@
-function out = SY_StatAv(y,whatType,n)
+function out = SY_StatAv(y, whatType, n)
 % SY_StatAv     Simple mean-stationarity metric, StatAv.
 %
 % The StatAv measure divides the time series into non-overlapping subsegments,
@@ -10,7 +10,7 @@ function out = SY_StatAv(y,whatType,n)
 % cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
 % Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input time series
 %
@@ -68,27 +68,27 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 
 switch whatType
-case 'seg'
-    % divide time series into n segments
-    M = zeros(n,1);
-    p = floor(N/n);% lose the last N mod n data points
+    case 'seg'
+        % divide time series into n segments
+        M = zeros(n, 1);
+        p = floor(N / n); % lose the last N mod n data points
 
-    for j = 1:n
-        M(j) = mean(y(p*(j-1)+1:p*j));
-    end
-case 'len'
-    if N > 2*n
-        pn = floor(N/n);
-        M = zeros(pn,1);
-        for j = 1:pn
-            M(j) = mean(y((j-1)*n+1:j*n));
+        for j = 1:n
+            M(j) = mean(y(p * (j - 1) + 1:p * j));
         end
-    else
-        fprintf(1,'This time series (N = %u) is too short for StatAv(%s,''%u'')\n',N,whatType,n);
-        out = NaN; return
-    end
-otherwise
-    error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''',whatType)
+    case 'len'
+        if N > 2 * n
+            pn = floor(N / n);
+            M = zeros(pn, 1);
+            for j = 1:pn
+                M(j) = mean(y((j - 1) * n + 1:j * n));
+            end
+        else
+            fprintf(1, 'This time series (N = %u) is too short for StatAv(%s,''%u'')\n', N, whatType, n);
+            out = NaN; return
+        end
+    otherwise
+        error('Error evaluating StatAv of type ''%s'', please select either ''seg'' or ''len''', whatType)
 end
 
 % ------------------------------------------------------------------------------
@@ -96,6 +96,6 @@ end
 
 s = std(y); % should be 1 (for a z-scored time-series input)
 sdav = std(M);
-out = sdav/s;
+out = sdav / s;
 
 end

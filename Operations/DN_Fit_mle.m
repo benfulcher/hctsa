@@ -1,15 +1,15 @@
-function out = DN_Fit_mle(y,fitWhat)
+function out = DN_Fit_mle(y, fitWhat)
 % DN_Fit_mle    Maximum likelihood distribution fit to data.
 %
 % Fits either a Gaussian, Uniform, or Geometric distribution to the data using
 % maximum likelihood estimation via the Matlab function mle
 % from the Statistics Toolbox.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input data vector.
 % fitWhat, the type of fit to do: 'gaussian', 'uniform', or 'geometric'.
 %
-%---OUTPUTS: parameters from the fit.
+% ---OUTPUTS: parameters from the fit.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -40,32 +40,32 @@ function out = DN_Fit_mle(y,fitWhat)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check Inputs:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 if nargin < 2
     fitWhat = 'gaussian'; % fit a Gaussian by default
 end
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Do the fitting:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 switch fitWhat
-case 'gaussian'
-	phat = mle(y);
-	out.mean = phat(1); % mean of Gaussian fit
-    out.std = phat(2); % std of Gaussian fit
+    case 'gaussian'
+        phat = mle(y);
+        out.mean = phat(1); % mean of Gaussian fit
+        out.std = phat(2); % std of Gaussian fit
 
-case 'uniform' % turns out to be shit
-    phat = mle(y,'distribution','uniform');
-    out.a = phat(1);
-    out.b = phat(2);
+    case 'uniform' % turns out to be shit
+        phat = mle(y, 'distribution', 'uniform');
+        out.a = phat(1);
+        out.b = phat(2);
 
-case 'geometric'
-    out = mle(y,'distribution','geometric'); % just a single output
+    case 'geometric'
+        out = mle(y, 'distribution', 'geometric'); % just a single output
 
-otherwise
-    error('Invalid fit specifier, ''%s''',fitWhat)
+    otherwise
+        error('Invalid fit specifier, ''%s''', fitWhat)
 end
 
 end

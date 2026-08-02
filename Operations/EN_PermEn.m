@@ -1,15 +1,15 @@
-function out = EN_PermEn(y,m,tau)
+function out = EN_PermEn(y, m, tau)
 % EN_PermEn     Permutation Entropy of a time series.
 %
 % "Permutation Entropy: A Natural Complexity Measure for Time Series"
 % C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % m, the embedding dimension (or order of the permutation entropy)
 % tau, the time-delay for the embedding
 %
-%---OUTPUT:
+% ---OUTPUT:
 % Outputs the permutation entropy and normalized version computed according to
 % different implementations
 
@@ -42,9 +42,9 @@ function out = EN_PermEn(y,m,tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 % Check inputs and set defaults:
-%-------------------------------------------------------------------------------
+% -------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(m)
     m = 2; % order 2
@@ -57,8 +57,8 @@ end
 % ------------------------------------------------------------------------------
 % Embed the signal:
 % ------------------------------------------------------------------------------
-x = BF_Embed(y,tau,m,0);
-Nx = size(x,1); % number of embedding vectors produced
+x = BF_Embed(y, tau, m, 0);
+Nx = size(x, 1); % number of embedding vectors produced
 if Nx < 5 % need at least 5 embedding vectors to actually do a computation
     error('Time series too short to embed');
 end
@@ -67,7 +67,7 @@ permList = perms(1:m);
 numPerms = length(permList);
 
 % Initialize
-countPerms = zeros(numPerms,1);
+countPerms = zeros(numPerms, 1);
 
 % Build a permutation -> row-index lookup once (keyed by a string encoding of
 % each permutation), instead of linearly scanning permList for every one of
@@ -76,32 +76,32 @@ countPerms = zeros(numPerms,1);
 % directly from permList's own rows, so looking up any permutation of 1:m
 % (which is exactly what sort()'s index output always is) is guaranteed to
 % find the same row that the original linear scan would have:
-permKeys = cell(numPerms,1);
+permKeys = cell(numPerms, 1);
 for k = 1:numPerms
-    permKeys{k} = sprintf('%d,',permList(k,:));
+    permKeys{k} = sprintf('%d,', permList(k, :));
 end
-permIndexMap = containers.Map(permKeys,num2cell(1:numPerms));
+permIndexMap = containers.Map(permKeys, num2cell(1:numPerms));
 
 % Count each type of permutation through the time series
 for j = 1:Nx
 
     % Get the permutation for this local time-series segment:
-    [~,ix] = sort(x(j,:));
+    [~, ix] = sort(x(j, :));
 
     % Match this to one of the permutations:
-    thisPerm = permIndexMap(sprintf('%d,',ix));
+    thisPerm = permIndexMap(sprintf('%d,', ix));
     countPerms(thisPerm) = countPerms(thisPerm) + 1;
 end
 
 % ------------------------------------------------------------------------------
 % Convert counts to probabilities
-p = countPerms/Nx; %((Nx-(m-1))*tau);
-p_0 = p(p>0); % makes log(0) = 0
-out.permEn = -sum(p_0.*log2(p_0));
+p = countPerms / Nx; % ((Nx-(m-1))*tau);
+p_0 = p(p > 0); % makes log(0) = 0
+out.permEn = -sum(p_0 .* log2(p_0));
 
 % Normalized permutation entropy (more comparable across m?)
 mFact = factorial(m);
-out.normPermEn = out.permEn/log2(mFact);
+out.normPermEn = out.permEn / log2(mFact);
 
 % ------------------------------------------------------------------------------
 % Adapted implementation by Bruce Land and Damian Elias:
@@ -111,7 +111,7 @@ out.normPermEn = out.permEn/log2(mFact);
 
 % Not clear to me why you would make log(0) = log(1/Nx); (the minimum)
 % rather than exclude it from the sum, as is done here:
-p_LE = max(1/Nx,p);
-out.permEnLE = -sum(p_LE.*log(p_LE))/(m-1);
+p_LE = max(1 / Nx, p);
+out.permEnLE = -sum(p_LE .* log(p_LE)) / (m - 1);
 
 end

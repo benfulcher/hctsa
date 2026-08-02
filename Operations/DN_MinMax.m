@@ -1,7 +1,7 @@
-function out = DN_MinMax(y,minOrMax)
+function out = DN_MinMax(y, minOrMax)
 % DN_MinMax     The maximum and minimum values of the input data vector
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % y, the input data vector
 %
@@ -44,7 +44,7 @@ switch minOrMax
         out = min(y);
 
     otherwise
-        error('Unknown method ''%s''',minOrMax)
+        error('Unknown method ''%s''', minOrMax)
 end
 
 end

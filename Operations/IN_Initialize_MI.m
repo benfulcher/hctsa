@@ -1,7 +1,7 @@
-function miCalc = IN_Initialize_MI(estMethod,extraParam,addNoise)
+function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise)
 % IN_Initialize_MI  Initialize Information Dynamics Toolkit object for MI computation.
 %
-%---INPUTS:
+% ---INPUTS:
 %
 % estMethod: the estimation method used to compute the mutual information:
 %           (*) 'gaussian'
@@ -50,41 +50,41 @@ end
 
 % ------------------------------------------------------------------------------
 switch estMethod
-case 'gaussian'
-    implementingClass = 'infodynamics.measures.continuous.gaussian.MutualInfoCalculatorMultiVariateGaussian';
-case 'kernel'
-    implementingClass = 'infodynamics.measures.continuous.kernel.MutualInfoCalculatorMultiVariateKernel';
-case 'kraskov1' % algorithm 1
-    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1';
-case 'kraskov2' % algorithm 2
-    implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';
-otherwise
-    error('Unknown mutual information estimation method ''%s''',estMethod);
+    case 'gaussian'
+        implementingClass = 'infodynamics.measures.continuous.gaussian.MutualInfoCalculatorMultiVariateGaussian';
+    case 'kernel'
+        implementingClass = 'infodynamics.measures.continuous.kernel.MutualInfoCalculatorMultiVariateKernel';
+    case 'kraskov1' % algorithm 1
+        implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov1';
+    case 'kraskov2' % algorithm 2
+        implementingClass = 'infodynamics.measures.continuous.kraskov.MutualInfoCalculatorMultiVariateKraskov2';
+    otherwise
+        error('Unknown mutual information estimation method ''%s''', estMethod);
 end
 % ------------------------------------------------------------------------------
 
 miCalc = javaObject(implementingClass);
 
 % Add neighest neighbor option for KSG estimator
-if ismember(estMethod,{'kraskov1','kraskov2'})
+if ismember(estMethod, {'kraskov1', 'kraskov2'})
     if ~isempty(extraParam)
         if isnumeric(extraParam)
             warning(['Should set number of nearest neighbors to a string... ' ...
-                            'I''ll do it for you this time though...'])
+                     'I''ll do it for you this time though...'])
             extraParam = num2str(extraParam);
         end
-        miCalc.setProperty('k',extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
+        miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
     else
-        miCalc.setProperty('k','3'); % use 3 nearest neighbors for KSG estimator as default
+        miCalc.setProperty('k', '3'); % use 3 nearest neighbors for KSG estimator as default
     end
 end
 
 % Make deterministic is kraskov1 or 2 (which add a small amount of noise to the signal by default):
-if ~addNoise && ismember(estMethod,{'kraskov1','kraskov2'})
-    miCalc.setProperty('NOISE_LEVEL_TO_ADD','0');
+if ~addNoise && ismember(estMethod, {'kraskov1', 'kraskov2'})
+    miCalc.setProperty('NOISE_LEVEL_TO_ADD', '0');
 end
 
 % Specify a univariate calculation:
-miCalc.initialise(1,1);
+miCalc.initialise(1, 1);
 
 end

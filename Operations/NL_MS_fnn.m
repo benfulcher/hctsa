@@ -1,4 +1,4 @@
-function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
+function out = NL_MS_fnn(y, de, tau, th, kth, justBest, bestp)
 % NL_MS_fnn     False nearest neighbors of a time series.
 %
 % Determines the number of false nearest neighbors for the embedded time series
@@ -7,7 +7,7 @@ function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 % False nearest neighbors are judged using a ratio of the distances between the
 % next k points and the neighboring points of a given datapoint.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % de, the embedding dimensions to compare across (a vector)
@@ -28,7 +28,7 @@ function out = NL_MS_fnn(y,de,tau,th,kth,justBest,bestp)
 % as a function of the embedding dimension m = m_{min}, m_{min}+1, ..., m_{max}
 % for a given time lag tau, and distance threshold for neighbors, d_{th}.
 %
-%---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
+% ---OUTPUTS: include the proportion of false nearest neighbors at each m, the mean
 % and spread, and the smallest m at which the proportion of false nearest
 % neighbors drops below each of a set of fixed thresholds.
 
@@ -77,10 +77,10 @@ end
 if nargin < 3 || isempty(tau)
     tau = 1;
 end
-if strcmp(tau,'ac')
-    tau = CO_FirstCrossing(y,'ac',0,'discrete'); % first zero-crossing of autocorrelation function
-elseif strcmp(tau,'mi')
-    tau = CO_FirstMin(y,'mi'); % first minimum of automutual information function
+if strcmp(tau, 'ac')
+    tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
+elseif strcmp(tau, 'mi')
+    tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
 end
 if isnan(tau)
     error('Time series too short for fnn');
@@ -109,7 +109,7 @@ end
 % ------------------------------------------------------------------------------
 %% Run Michael Small's false nearest neighbour code, MS_fnn:
 % ------------------------------------------------------------------------------
-p = MS_fnn(y,de,tau,th,kth);
+p = MS_fnn(y, de, tau, th, kth);
 
 % ------------------------------------------------------------------------------
 %% Now make output
@@ -125,7 +125,7 @@ if justBest
 else
     % Output all of them
     for i = 1:length(de)
-        out.(sprintf('pfnn_%u',de(i))) = p(i);
+        out.(sprintf('pfnn_%u', de(i))) = p(i);
     end
 
     % Output mean
@@ -148,7 +148,7 @@ end
 % ------------------------------------------------------------------------------
 function firsti = firstunderf(x)
     %% Find de for the first time p goes under x%
-    firsti = de(find(p < x,1,'first'));
+    firsti = de(find(p < x, 1, 'first'));
     if isempty(firsti)
         firsti = de(end) + 1;
     end

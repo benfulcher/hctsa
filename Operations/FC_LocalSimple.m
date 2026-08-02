@@ -1,10 +1,10 @@
-function out = FC_LocalSimple(y,forecastMeth,trainLength)
+function out = FC_LocalSimple(y, forecastMeth, trainLength)
 % FC_LocalSimple    Simple local time-series forecasting.
 %
 % Simple predictors using the past trainLength values of the time series to
 % predict its next value.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 %
 % forecastMeth, the forecasting method:
@@ -17,7 +17,7 @@ function out = FC_LocalSimple(y,forecastMeth,trainLength)
 %
 % trainLength, the number of time-series values to use to forecast the next value
 %
-%---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
+% ---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
 % residuals, and their autocorrelation structure.
 
 % ------------------------------------------------------------------------------
@@ -66,39 +66,39 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 % Do the local prediction
 % ------------------------------------------------------------------------------
-if strcmp(trainLength,'ac')
+if strcmp(trainLength, 'ac')
     % Make it first zero-crossing of ACF:
-    lp = CO_FirstCrossing(y,'ac',0,'discrete');
+    lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 else
     lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
-evalr = lp+1:N; % range over which to evaluate the forecast
+evalr = lp + 1:N; % range over which to evaluate the forecast
 if isempty(evalr)
     warning('This time series is too short for forecasting');
     out = NaN;
     return
 end
-res = zeros(length(evalr),1); % residuals
+res = zeros(length(evalr), 1); % residuals
 
 switch forecastMeth
     case 'mean'
         for i = 1:length(evalr)
-            res(i) = mean(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction - value
+            res(i) = mean(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
         end
     case 'median'
         for i = 1:length(evalr)
-            res(i) = median(y(evalr(i)-lp:evalr(i)-1)) - y(evalr(i)); % prediction - value
+            res(i) = median(y(evalr(i) - lp:evalr(i) - 1)) - y(evalr(i)); % prediction - value
         end
     case 'lfit'
         for i = 1:length(evalr)
             % Fit linear
-            warning('off','MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
-            p = polyfit((1:lp)',y(evalr(i)-lp:evalr(i)-1),1);
-            warning('on','MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
-            res(i) = polyval(p,lp+1) - y(evalr(i)); % prediction - value
+            warning('off', 'MATLAB:polyfit:PolyNotUnique'); % Disable (potentially important ;)) warning
+            p = polyfit((1:lp)', y(evalr(i) - lp:evalr(i) - 1), 1);
+            warning('on', 'MATLAB:polyfit:PolyNotUnique'); % Re-enable warning
+            res(i) = polyval(p, lp + 1) - y(evalr(i)); % prediction - value
         end
     otherwise
-        error('Unknown forecasting method ''%s''',forecastMeth);
+        error('Unknown forecasting method ''%s''', forecastMeth);
 end
 
 % out=res;
@@ -116,11 +116,11 @@ out.stderr = std(res);
 out.meanabserr = mean(abs(res));
 
 % Stationarity of residuals:
-out.sws = SY_SlidingWindow(res,'std','std',5,1); % across five non-overlapping segments
-out.swm = SY_SlidingWindow(res,'mean','std',5,1); % across five non-overlapping segments
+out.sws = SY_SlidingWindow(res, 'std', 'std', 5, 1); % across five non-overlapping segments
+out.swm = SY_SlidingWindow(res, 'mean', 'std', 5, 1); % across five non-overlapping segments
 
 % Normality of residuals:
-tmp = DN_SimpleFit(res,'gauss1',0);
+tmp = DN_SimpleFit(res, 'gauss1', 0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
     out.gofr2 = NaN;
 else
@@ -128,9 +128,9 @@ else
 end
 
 % Autocorrelation structure of the residuals:
-out.ac1 = CO_AutoCorr(res,1,'Fourier');
-out.ac2 = CO_AutoCorr(res,2,'Fourier');
-out.taures = CO_FirstCrossing(res,'ac',0,'continuous');
-out.tauresrat = CO_FirstCrossing(res,'ac',0,'continuous')/CO_FirstCrossing(y,'ac',0,'continuous');
+out.ac1 = CO_AutoCorr(res, 1, 'Fourier');
+out.ac2 = CO_AutoCorr(res, 2, 'Fourier');
+out.taures = CO_FirstCrossing(res, 'ac', 0, 'continuous');
+out.tauresrat = CO_FirstCrossing(res, 'ac', 0, 'continuous') / CO_FirstCrossing(y, 'ac', 0, 'continuous');
 
 end
