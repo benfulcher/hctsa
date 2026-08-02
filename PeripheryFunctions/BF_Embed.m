@@ -146,24 +146,6 @@ else % use a routine to inform m
                 end
                 ssm = sprintf('by N. Marwan''s CRPtoolbox (GPL) ''fnn'' code with threshold %f to m = %u',th,m);
 
-            case 'cao'
-                % Uses TSTOOL code for cao method to determine optimal
-                % embedding dimension
-                % max embedding dimension of 10
-                % time delay determined by above method
-                % 3 nearest neighbours
-                % 20% of time series length as reference points
-                if length(m) == 1
-                    th = 10;
-                end
-                try
-                    m = NL_CaosMethod(y,10,tau,3,0.2,{'mmthresh',th});
-                catch
-                    fprintf(1,'Call to TSTOOL function ''cao'' failed');
-                    y_embed = NaN; return
-                end
-                ssm = sprintf('by TSTOOL function ''cao'' using ''mmthresh'' with threshold %f to m = %u',th,m);
-
             otherwise
                 error('Embedding dimension, m, incorrectly specified.')
         end
