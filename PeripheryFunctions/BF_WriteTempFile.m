@@ -38,8 +38,17 @@ if nargin < 2
     whatPrecision = 7;
 end
 
-% Filename is the tempname (which will be unique):
-filePath = tempname;
+% Filename is the tempname (which will be unique). On Unix, generate it
+% under /tmp rather than the default system temp directory: macOS's
+% per-user $TMPDIR (e.g., /private/var/folders/.../T/) can push the full
+% path past 72 characters, silently overflowing the fixed-size Fortran
+% CHARACTER*72 filename buffers used by several TISEAN routines (c1, c2d,
+% c2g, c2t), which then just report "cannot open input file".
+if isunix
+    filePath = tempname('/tmp');
+else
+    filePath = tempname;
+end
 
 % Write the file:
 dlmwrite(filePath,dataVector,'precision',whatPrecision);

@@ -101,14 +101,29 @@ m = tm(2); % embedding dimension
 % Do some preliminary checks:
 % ------------------------------------------------------------------------------
 clength = (N - (m - 1) * tau) / numSeg;
-incStep = 1; % step increment
-minNeighbors = 30; % minimum number of neighbors for fit
+incStep = 1; % step increment (TISEAN's -s; also its causal-window default (-C) when unset, as here)
+minNeighbors = 30; % minimum number of neighbors for fit (TISEAN's -k default)
 
-% Don't understand the c++ source code to work out exactly where the
-% find_neighbors routine is crashing, but it's definitely to do with not being
-% able to find enough neighbors and getting stuck in a while loop...
-% Try this heuristic (multiplying the actual minimum number by 1.5):
-if (clength - (m - 1) * tau - incStep) <= minNeighbors * 1.5
+% nstat_z's neighbor search grows its search radius (epsilon) without bound
+% until every reference point has >= minNeighbors neighbors, after excluding
+% a temporal window of width (2*causal + pstart - 1) around each point,
+% where pstart = (m-1)*tau is the embedding's history length and causal
+% defaults to incStep (since -C is never set here). Because nstat_z
+% internally rescales the data to [0,1], once epsilon reaches 1 every point
+% is already a neighbor of every other point, so no further growth can ever
+% produce more candidates. If the (clength-incStep-pstart) available
+% candidates minus that exclusion window is still short of minNeighbors,
+% nstat_z can never succeed for that point and loops forever: a real bug in
+% nstat_z's own upfront sanity check, which never accounts for this
+% exclusion window at all (see nstat_z.c's check just before its main
+% loop). The condition below is the exact (not heuristic) worst-case bound
+% for this to be guaranteed safe, derived from and confirmed against
+% nstat_z's source (patched separately to fail fast rather than hang, but
+% this check avoids relying on that fix and also avoids discarding
+% otherwise-computable feature values to an overly conservative margin).
+pstart = (m - 1) * tau;
+minSafeClength = minNeighbors + 3 * incStep + 2 * pstart - 1;
+if clength < minSafeClength
 	delete(filePath); % remove the temporary file
 	warning('Not enough neighbors to reliably estimate prediction errors with these settings');
 	out = NaN; return

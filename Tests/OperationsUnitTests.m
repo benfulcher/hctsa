@@ -704,6 +704,29 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % MF_FitSubsegments 'arma' asymmetric order
+        %-------------------------------------------------------------
+        function test_MF_FitSubsegments_ArmaAsymmetricOrder(testCase)
+            % The 'arma' case's parameter-statistics loops used
+            % `for i = 1:order`, where order is a two-element [p,q]
+            % vector for this model -- invalid syntax ("Colon operands
+            % must be real scalars") whenever order wasn't a scalar,
+            % which it never is here. Confirm order(1)/order(2) are now
+            % used independently by checking the right number of p_/q_
+            % fields are produced for an asymmetric AR/MA order.
+            rng(21);
+            y = randn(300,1);
+            out = MF_FitSubsegments(y,'arma',[2,3],'uniform',[10,0.1]);
+            for i = 1:2
+                testCase.verifyTrue(isfield(out,sprintf('p_%u_mean',i)));
+            end
+            testCase.verifyFalse(isfield(out,'p_3_mean'));
+            for i = 1:3
+                testCase.verifyTrue(isfield(out,sprintf('q_%u_mean',i)));
+            end
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)
