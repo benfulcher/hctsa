@@ -18,7 +18,7 @@ function [varargout] = likSech2(hyp, y, mu, s2, inf, i)
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
 %
-% See also LIKFUNCTIONS.M, LIKLOGISTIC.M.
+% See also likFunctions.m, lik/likLogistic.m.
 
 if nargin<3, varargout = {'1'}; return; end   % report number of hyperparameters
 
@@ -27,7 +27,7 @@ lZ = log(pi) - log(sn) - log(4*sqrt(3));
 
 if nargin<5                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>3, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>3&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                         % log probability evaluation
     lp = lZ - 2*logcosh(tau*(y-mu)); s2 = 0;
   else                                                              % prediction

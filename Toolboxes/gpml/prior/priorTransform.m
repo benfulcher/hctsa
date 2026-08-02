@@ -20,7 +20,7 @@ function [lp,dlp] = priorTransform(g,dg,ig,prior,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<4, error('g, dg, ig and prior parameters need to be provided'), end
 if nargin<5, lp = ig(feval(prior{:})); return, end      % apply inverse sampling

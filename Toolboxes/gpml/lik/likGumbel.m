@@ -17,7 +17,7 @@ function [varargout] = likGumbel(sign, hyp, y, mu, s2, inf, i)
 %
 % Copyright (c) by Hannes Nickisch, 2013-11-01.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 if nargin<4, varargout = {'1'}; return; end   % report number of hyperparameters
 if sign=='-', s = -1; else s = 1; end                 % extract sign of skewness
@@ -29,7 +29,7 @@ lZ = -log(be);
 
 if nargin<6                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>4, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>4&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                         % log probability evaluation
     lp = likGumbel(sign, hyp, y, mu, [], 'infLaplace'); s2 = 0;
   else                                                              % prediction

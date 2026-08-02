@@ -53,21 +53,22 @@ SIG = 0.1; RHO = SIG/2; % SIG and RHO are the constants controlling the Wolfe-
 % speed up the minimization; it is probably not worth playing much with RHO.
 
 % The code falls naturally into 3 parts, after the initial line search is
-% started in the direction of steepest descent. 1) we first enter a while loop
-% which uses point 1 (p1) and (p2) to compute an extrapolation (p3), until we
-% have extrapolated far enough (Wolfe-Powell conditions). 2) if necessary, we
-% enter the second loop which takes p2, p3 and p4 chooses the subinterval
-% containing a (local) minimum, and interpolates it, unil an acceptable point
-% is found (Wolfe-Powell conditions). Note, that points are always maintained
-% in order p0 <= p1 <= p2 < p3 < p4. 3) compute a new search direction using
-% conjugate gradients (Polack-Ribiere flavour), or revert to steepest if there
-% was a problem in the previous line-search. Return the best value so far, if
-% two consecutive line-searches fail, or whenever we run out of function
-% evaluations or line-searches. During extrapolation, the "f" function may fail
-% either with an error or returning Nan or Inf, and minimize should handle this
-% gracefully.
+% started in the direction of steepest descent.
+% 1) we first enter a while loop which uses point 1 (p1) and (p2) to compute an
+%    extrapolation (p3), until we have extrapolated far enough
+%    (Wolfe-Powell conditions).
+% 2) if necessary, we enter the second loop which takes p2, p3 and p4 chooses
+%    the subinterval containing a (local) minimum, and interpolates it, until
+%    an acceptable point is found (Wolfe-Powell conditions). Note, that points
+%    are always maintained in order p0 <= p1 <= p2 < p3 < p4.
+% 3) compute a new search direction using conjugate gradients
+%    (Polack-Ribiere flavour), or revert to steepest if there was a problem in
+%    the previous line-search. Return the best value so far, if two consecutive
+%    line-searches fail, or whenever we run out of function evaluations or
+%    line-searches. During extrapolation, the "f" function may fail either with
+%    an error or returning Nan or Inf, and minimize should handle this
+%    gracefully.
 
-bevocal = 0; % ++BF MODIFIED (set to 1 to give evaluation output to command line)
 if max(size(length)) == 2, red=length(2); length=length(1); else red=1; end
 if length>0, S='Linesearch'; else S='Function evaluation'; end 
 
@@ -75,7 +76,7 @@ i = 0;                                            % zero the run length counter
 ls_failed = 0;                             % no previous line search has failed
 [f0 df0] = feval(f, X, varargin{:});          % get function value and gradient
 Z = X; X = unwrap(X); df0 = unwrap(df0);
-if bevocal, fprintf('%s %6i;  Value %4.6e\r', S, i, f0); end % ++BF MODIFIED
+fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
 if exist('fflush','builtin') fflush(stdout); end
 fX = f0;
 i = i + (length<0);                                            % count epochs?!
@@ -122,7 +123,8 @@ while i < abs(length)                                      % while not finished
     end
   end                                                       % end extrapolation
 
-  while (abs(d3) > -SIG*d0 || f3 > f0+x3*RHO*d0) && M > 0  % keep interpolating
+  x4 = x3; f4 = f3; d4 = d3;                                     % init point 4
+  while (abs(d3) > -SIG*d0 || f3 > f0+x3*RHO*d0)  && M > 0 % keep interpolating
     if d3 > 0 || f3 > f0+x3*RHO*d0                         % choose subinterval
       x4 = x3; f4 = f3; d4 = d3;                      % move point 3 to point 4
     else
@@ -148,7 +150,7 @@ while i < abs(length)                                      % while not finished
 
   if abs(d3) < -SIG*d0 && f3 < f0+x3*RHO*d0          % if line search succeeded
     X = X+x3*s; f0 = f3; fX = [fX' f0]';                     % update variables
-    if bevocal, fprintf('%s %6i;  Value %4.6e\r', S, i, f0); end
+    fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
     if exist('fflush','builtin') fflush(stdout); end
     s = (df3'*df3-df0'*df3)/(df0'*df0)*s - df3;   % Polack-Ribiere CG direction
     df0 = df3;                                               % swap derivatives
@@ -169,7 +171,7 @@ while i < abs(length)                                      % while not finished
   end
 end
 X = rewrap(Z,X); 
-if bevocal, fprintf('\n'); end; if exist('fflush','builtin') fflush(stdout); end
+fprintf('\n'); if exist('fflush','builtin') fflush(stdout); end
 
 function v = unwrap(s)
 % Extract the numerical values from "s" into the column vector "v". The
@@ -201,7 +203,7 @@ elseif isstruct(s)
   [t v] = rewrap(struct2cell(s), v);                 % convert to cell, recurse
   s = orderfields(cell2struct(t,fieldnames(s),1),p);  % conv to struct, reorder
 elseif iscell(s)
-  for i = 1:numel(s)             % cell array elements are handled sequentially 
+  for i = 1:numel(s)             % cell array elements are handled sequentially
     [s{i} v] = rewrap(s{i}, v);
   end
 end                                             % other types are not processed

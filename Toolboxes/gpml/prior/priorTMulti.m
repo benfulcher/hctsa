@@ -16,7 +16,7 @@ function [lp,dlp] = priorTMulti(mu,s2,nu,x)
 %
 % Copyright (c) by Hannes Nickisch, 2014-10-16.
 %
-% See also PRIORDISTRIBUTIONS.M, PRIORLAPLACE.M.
+% See also priorDistributions.m, prior/priorLaplace.m.
 
 if nargin<3, error('mu, s2 and nu parameters need to be provided'), end
 if ndims(mu)~=2 || size(mu,2)~=1, error('mu needs to be (Dx1)'), end

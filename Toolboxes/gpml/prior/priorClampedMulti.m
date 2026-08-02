@@ -9,6 +9,6 @@ function [lp,dlp] = priorClampedMulti(x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-12-06.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 error('The function is not intended to be called directly.')

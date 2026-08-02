@@ -17,11 +17,12 @@ function [varargout] = likT(hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2016-10-01.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 if nargin<3, varargout = {'2'}; return; end   % report number of hyperparameters
+if ~exist('psi'), mypsi = @digamma; else mypsi = @psi; end    % no psi in Octave
 
 numin = 1;                                                 % minimum value of nu
 nu = exp(hyp(1))+numin; sn2 = exp(2*hyp(2));           % extract hyperparameters
@@ -29,7 +30,7 @@ lZ = gammaln(nu/2+1/2) - gammaln(nu/2) - log(nu*pi*sn2)/2;
 
 if nargin<5                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>3, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>3&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                         % log probability evaluation
     lp = lZ - (nu+1)*log( 1+(y-mu).^2./(nu.*sn2) )/2; s2 = 0;
   else                                                              % prediction
@@ -68,7 +69,7 @@ else
     else                                                       % derivative mode
       a = r2+nu*sn2; a2 = a.*a; a3 = a2.*a;
       if i==1                                             % derivative w.r.t. nu
-        lp_dhyp =  nu*( psi(nu/2+1/2)-psi(nu/2) )/2 - 1/2 ...
+        lp_dhyp =  nu*( mypsi(nu/2+1/2)-mypsi(nu/2) )/2 - 1/2 ...
                   -nu*log(1+r2/(nu*sn2))/2 +(nu/2+1/2)*r2./(nu*sn2+r2);
         lp_dhyp = (1-numin/nu)*lp_dhyp;          % correct for lower bound on nu
         dlp_dhyp = nu*r.*( a - sn2*(nu+1) )./a2;

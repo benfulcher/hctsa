@@ -12,12 +12,14 @@
 %   likT           (Student's t, regression)
 %
 %   likPoisson     (Poisson regression, count data)
+%   likNegBinom    (Negativ binomial regression, count data)
 %   likGamma       (Nonnegative regression, positive data)
 %   likExp         (Nonnegative regression, positive data)
 %   likInvGauss    (Nonnegative regression, positive data)
+%   likLogGauss    (Nonnegative regression, positive data)
 %   likBeta        (Beta regression, interval data)
 %
-%   likMix         (Mixture of individual covariance functions)
+%   likMix         (Mixture of individual likelihood functions)
 %
 % The likelihood functions have three possible modes, the mode being selected
 % as follows (where "lik" stands for any likelihood function in "lik/lik*.m".):
@@ -44,8 +46,8 @@
 %   lp = log( q(y) ) for a particular value of y, if s2 is [] or 0, this
 %                    corresponds to log( p(y|mu) )
 %   ymu and ys2      the mean and variance of the predictive marginal q(y)
-%                    note that these two numbers do not depend on a particular 
-%                    value of y 
+%                    note that these two numbers do not depend on a particular
+%                    value of y
 %  All vectors have the same size.
 %
 %
@@ -54,11 +56,11 @@
 % [varargout] = lik(hyp, y, mu, s2, inf) OR
 % [varargout] = lik(hyp, y, mu, s2, inf, i)
 %
-% There are three cases for inf, namely a) infLaplace, b) infEP and c) infVB. 
-% The last input i, refers to derivatives w.r.t. the ith hyperparameter. 
+% There are three cases for inf, namely a) infLaplace, b) infEP and c) infVB.
+% The last input i, refers to derivatives w.r.t. the ith hyperparameter.
 %
 % a1) [lp,dlp,d2lp,d3lp] = lik(hyp, y, f, [], 'infLaplace')
-% lp, dlp, d2lp and d3lp correspond to derivatives of the log likelihood 
+% lp, dlp, d2lp and d3lp correspond to derivatives of the log likelihood
 % log(p(y|f)) w.r.t. to the latent location f.
 %   lp = log( p(y|f) )
 %  dlp = d   log( p(y|f) ) / df
@@ -99,5 +101,9 @@
 % See the help for the individual likelihood for the computations specific to
 % each likelihood function.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% See also USAGELIK
+
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
+
+help likFunctions

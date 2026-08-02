@@ -17,7 +17,7 @@ function [lp,dlp] = priorGamma(k,t,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<2, error('k and t parameters need to be provided'), end
 if ~(isscalar(k)&&isscalar(t))

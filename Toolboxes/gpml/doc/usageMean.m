@@ -2,7 +2,7 @@
 %
 % See also meanFunctions.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
 clear all, close all
 n = 5; D = 2; x = randn(n,D);            % create a random data set
@@ -31,6 +31,7 @@ mpo = {'meanPow',3,msu};       hyppo = hypsu;         % third power
 mask = [false,true];     % mask excluding all but the 2nd component
 mma = {'meanMask',mask,ml};    hypma = hypl(mask);
 mpf = {@meanPref,ml};          hyppf = 2;  % linear pref with slope
+mwp = {@meanWarp,ml,@sin,@cos};hypwp = 2;           % sin of linear
 
 % 0) specify mean function
 % mean = md; hyp = hypd; x = randi([1,s],n,1);
@@ -49,5 +50,6 @@ feval(mean{:})
 % 2) evaluate the function on x
 feval(mean{:},hyp,x)
 
-% 3) compute the derivatives w.r.t. to hyperparameter i
-i = 2; feval(mean{:},hyp,x,i)
+% 3) evaluate and compute the derivatives
+mean = ml; hyp = hypl;
+[m,dm] = feval(mean{:},hyp,x)

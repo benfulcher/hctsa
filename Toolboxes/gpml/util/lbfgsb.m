@@ -52,3 +52,7 @@
 %   implementation we divide factr by the machine precision, so that the
 %   convergence condition is satisfied when it is less than factr, not less
 %   than factr times the machine precision.
+
+fprintf('You need to compile the LBFGSB code located in util/lbfgsb/.\n')
+fprintf('For Linux systems, you can use util/lbfgsb/Makefile.\n')
+fprintf('Please, see also the text in doc/README, section 2.\n')

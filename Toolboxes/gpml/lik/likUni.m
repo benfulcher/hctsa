@@ -14,7 +14,7 @@ function [varargout] = likUni(hyp, y, mu, s2, inf, i)
 %
 % Copyright (c) by Hannes Nickisch, 2013-09-02.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 if nargin<3, varargout = {'0'}; return; end   % report number of hyperparameters
 

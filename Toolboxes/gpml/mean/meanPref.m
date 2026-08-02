@@ -1,4 +1,4 @@
-function A = meanPref(mean, hyp, x, varargin)
+function [m,dm] = meanPref(mean, hyp, x)
 
 % meanPref - mean function for preference learning.
 %
@@ -13,11 +13,12 @@ function A = meanPref(mean, hyp, x, varargin)
 %
 % See Collaborative Gaussian Processes for Preference Learning, NIPS 2014.
 %
-% Copyright (c) by Hannes Nickisch and Roman Garnett, 2014-11-01.
+% Copyright (c) by Hannes Nickisch and Roman Garnett, 2016-04-16.
 %
-% See also MEANFUNCTIONS.M and COVPREF.M.
+% See also meanFunctions.m and cov/covPref.m.
 
-if nargin<3, A = strrep(feval(mean{:}),'D','D/2'); return; end    % no of params
+if nargin<3, m = strrep(feval(mean{:}),'D','D/2'); return; end    % no of params
 
-A =   feval(mean{:}, hyp, x(:,1      :end/2), varargin{:}) ...
-    - feval(mean{:}, hyp, x(:,1+end/2:end  ), varargin{:});
+[m1,dm1] = feval(mean{:}, hyp, x(:,1      :end/2));
+[m2,dm2] = feval(mean{:}, hyp, x(:,1+end/2:end  ));
+m = m1-m2; dm = @(q) dm1(q)-dm2(q);

@@ -44,7 +44,7 @@ function [varargout] = gp(hyp, inf, mean, cov, lik, x, y, xs, ys)
 %
 % See also infMethods.m, meanFunctions.m, covFunctions.m, likFunctions.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
 if nargin<7 || nargin>9
   disp('Usage: [nlZ dnlZ          ] = gp(hyp, inf, mean, cov, lik, x, y);')
@@ -53,28 +53,53 @@ if nargin<7 || nargin>9
   return
 end
 
+if size(y,2)>1      % deal with (independent) multivariate output y by recursing
+  d = size(y,2); varargout = cell(nargout,1); out = cell(nargout,1);  % allocate
+  for i=1:d
+    in = {hyp, inf, mean, cov, lik, x, y(:,i)};
+    if nargin>7, in = {in{:}, xs}; end
+    if nargin>8, in = {in{:}, ys(:,i)}; end
+    if i==1, [varargout{:}] = gp(in{:});    % perform inference for dimension ..
+    else           [out{:}] = gp(in{:});             % .. number i in the output
+      if nargin==7, no = 2;
+        varargout{1} = varargout{1} + out{1};                          % sum nlZ
+        if nargout>1                                                  % sum dnlZ
+          varargout{2} = vec2any(hyp,any2vec(varargout{2})+any2vec(out{2}));
+        end
+      else no = 5;                              % concatenate ymu ys2 fmu fs2 lp
+        for j=1:min(nargout,no), varargout{j} = [varargout{j},out{j}]; end
+      end
+      if nargout>no                                           % concatenate post
+        if i==2, varargout{no+1} = {varargout{no+1},out{no+1}};
+        else varargout{no+1} = {varargout{no+1}{:},out{no+1}}; end
+      end  
+    end
+  end, return                                      % return to end the recursion
+end
+
 if isempty(mean), mean = {@meanZero}; end                     % set default mean
 if ischar(mean) || isa(mean, 'function_handle'), mean = {mean}; end  % make cell
 if isempty(cov), error('Covariance function cannot be empty'); end  % no default
 if ischar(cov) || isa(cov,'function_handle'), cov  = {cov};  end     % make cell
 cstr = cov{1}; if isa(cstr,'function_handle'), cstr = func2str(cstr); end
-if strcmp(cstr,'covFITC') && isfield(hyp,'xu'), cov{3} = hyp.xu; end %use hyp.xu
-if isempty(inf)                                   % set default inference method
-  if strcmp(cstr,'covFITC'), inf = {@infFITC}; else inf = {@infExact}; end
+if (strcmp(cstr,'covFITC') || strcmp(cstr,'apxSparse')) && isfield(hyp,'xu')
+  cov{3} = hyp.xu;                                                   %use hyp.xu
 end
-if ischar(inf), inf = str2func(inf); end          % convert into function handle
+if isempty(inf), inf = {@infGaussLik}; end        % set default inference method
+if ischar(inf),  inf = str2func(inf);  end        % convert into function handle
 if ischar(inf) || isa(inf,'function_handle'), inf = {inf};  end      % make cell
 istr = inf{1}; if isa(istr,'function_handle'), istr = func2str(istr); end
-if strcmp(cstr,'covFITC')                           % only infFITC* are possible
-  if isempty(strfind(istr,'infFITC')==1)
-    error('Only infFITC* are possible inference algorithms')
-  end
-end                            % only one possible class of inference algorithms
+if strcmp(istr,'infPrior')
+  istr = inf{2}; if isa(istr,'function_handle'), istr = func2str(istr); end
+end
 if isempty(lik), lik = {@likGauss}; end                        % set default lik
 if ischar(lik) || isa(lik,'function_handle'), lik = {lik};  end      % make cell
 lstr = lik{1}; if isa(lstr,'function_handle'), lstr = func2str(lstr); end
 
 D = size(x,2);
+if strncmp(cstr,'covGrid',7) || strcmp(cstr,'apxGrid') % only some inf* possible
+  D = 0; xg = cov{3}; p = numel(xg); for i=1:p, D = D+size(xg{i},2); end  % dims
+end
 
 if ~isfield(hyp,'mean'), hyp.mean = []; end        % check the hyp specification
 if eval(feval(mean{:})) ~= numel(hyp.mean)
@@ -117,8 +142,7 @@ catch
   msgstr = lasterr;
   if nargin>7, error('Inference method failed [%s]', msgstr); else 
     warning('Inference method failed [%s] .. attempting to continue',msgstr)
-    dnlZ = struct('cov',0*hyp.cov, 'mean',0*hyp.mean, 'lik',0*hyp.lik);
-    varargout = {NaN, dnlZ}; return                    % continue with a warning
+    varargout = {NaN, vec2any(hyp,zeros(numel(any2vec(hyp)),1))}; return % go on
   end
 end
 
@@ -138,13 +162,14 @@ else
   %verify whether L contains valid Cholesky decomposition or something different
   Lchol = isnumeric(L) && all(all(tril(L,-1)==0)&diag(L)'>0&isreal(diag(L))');
   ns = size(xs,1);                                       % number of data points
+  if strncmp(cstr,'apxGrid',7), xs = apxGrid('idx2dat',cov{3},xs); end  % expand
   nperbatch = 1000;                       % number of data points per mini batch
   nact = 0;                       % number of already processed test data points
   ymu = zeros(ns,1); ys2 = ymu; fmu = ymu; fs2 = ymu; lp = ymu;   % allocate mem
   while nact<ns               % process minibatches of test cases to save memory
     id = (nact+1):min(nact+nperbatch,ns);               % data points to process
     kss = feval(cov{:}, hyp.cov, xs(id,:), 'diag');              % self-variance
-    if strcmp(cstr,'covFITC')                                % cross-covariances
+    if strcmp(cstr,'covFITC') || strcmp(cstr,'apxSparse')    % cross-covariances
       Ks = feval(cov{:}, hyp.cov, x, xs(id,:)); Ks = Ks(nz,:); % res indep. of x
     else
       Ks = feval(cov{:}, hyp.cov, x(nz,:), xs(id,:));        % avoid computation

@@ -21,15 +21,15 @@ function [varargout] = likPoisson(link, hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% See also LIKFUNCTIONS.M.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2016-10-04.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-10-16.
+% See also likFunctions.m.
 
 if nargin<4, varargout = {'0'}; return; end   % report number of hyperparameters
 
 if nargin<6                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>4, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>4&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                                    % log probability
     lg = g(mu,link);
     lp = lg.*y - exp(lg) - gammaln(y+1);
@@ -89,8 +89,10 @@ end
 % compute the log intensity using the inverse link function
 function varargout = g(f,link)
   varargout = cell(nargout, 1);  % allocate the right number of output arguments
-  if strcmp(link,'exp')
+  if isequal(link,'exp')
     [varargout{:}] = glm_invlink_exp(f);
-  else
+  elseif isequal(link,'logistic')
     [varargout{:}] = glm_invlink_logistic(f);
+  else
+    [varargout{:}] = glm_invlink_logistic2(link{2},f);
   end

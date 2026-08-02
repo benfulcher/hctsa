@@ -13,7 +13,7 @@ function [lp,dlp]=priorLogNormal(mu,s2,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<2, error('mu and s2 parameters need to be provided'), end
 if ~(isscalar(mu)&&isscalar(s2))

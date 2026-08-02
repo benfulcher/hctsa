@@ -1,6 +1,6 @@
 % demonstrate usage of regression
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2013-10-16.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2016-08-29.
 clear all, close all
 
 %% SAY WHICH CODE WE WISH TO EXERCISE
@@ -27,7 +27,7 @@ mean = {@meanSum,{@meanLinear,@meanConst}}; a = 1/5; b = 1;       % m(x) = a*x+b
 hyp0.mean = [a;b];
 
 lik_list = {'likGauss','likLaplace','likSech2','likT'};   % possible likelihoods
-inf_list = {'infExact','infLaplace','infEP','infVB','infKL'};   % inference algs
+inf_list = {'infGaussLik','infLaplace','infEP','infVB','infKL'};% inference algs
 
 Ncg = 50;                                   % number of conjugate gradient steps
 sdscale = 0.5;                  % how many sd wide should the error bars become?

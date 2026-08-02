@@ -13,7 +13,7 @@ function [lp,dlp] = priorWeibull(lam,k,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<2, error('lam and k parameters need to be provided'), end
 if ~(isscalar(lam)&&isscalar(k))

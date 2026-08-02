@@ -2,7 +2,7 @@
 %
 % See also priorDistributions.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
 clear all, close all
 
@@ -74,4 +74,4 @@ prior.multi{2} = {@priorGaussMulti,mu,s2,[1,3]};
 im = {@infPrior,@infExact,prior};                % inference method
 hyp_pN = feval(mfun, hyp, @gp, -10, im, par{:});         % optimise
 
-[unwrap(hyp), unwrap(hyp_plain), unwrap(hyp_p1), unwrap(hyp_pN)]
+[any2vec(hyp), any2vec(hyp_plain), any2vec(hyp_p1), any2vec(hyp_pN)]

@@ -1,24 +1,20 @@
 % startup script to make Octave/Matlab aware of the GPML package
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2014-11-30.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2018-08-01.
 
-% disp(['executing gpml startup script...']);
+% disp ('executing gpml startup script...')
+mydir = fileparts (mfilename ('fullpath'));        % where am I located
+addpath (mydir);
 
-OCT = exist('OCTAVE_VERSION') ~= 0;           % check if we run Matlab or Octave
+% core folders
+dirs = {'cov','doc','inf','lik','mean','prior','util'};
+for d = dirs
+  addpath (fullfile (mydir, d{1}))
+end
 
-me = mfilename;                                            % what is my filename
-mydir = which(me); mydir = mydir(1:end-2-numel(me));        % where am I located
-if OCT && numel(mydir)==2 
-  if strcmp(mydir,'./'), mydir = [pwd,mydir(2:end)]; end
-end                 % OCTAVE 3.0.x relative, MATLAB and newer have absolute path
+% minfunc folder (its precompiled/ subfolder isn't bundled here -- hctsa
+% doesn't use minimize_minfunc, only minimize()/infLaplace, and the
+% shipped binaries didn't cover this platform anyway)
+addpath (fullfile (mydir, 'util', 'minfunc'))
 
-addpath(mydir(1:end-1))
-addpath([mydir,'cov'])
-addpath([mydir,'doc'])
-addpath([mydir,'inf'])
-addpath([mydir,'lik'])
-addpath([mydir,'mean'])
-addpath([mydir,'prior'])
-addpath([mydir,'util'])
-
-clear me mydir
+addpath([mydir,'/util/sparseinv'])

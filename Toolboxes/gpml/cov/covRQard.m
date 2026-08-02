@@ -1,9 +1,11 @@
-function K = covRQard(hyp, x, z, i)
+function varargout = covRQard(varargin)
 
+% Wrapper for Rational Quadratic covariance function covRQ.m.
+%
 % Rational Quadratic covariance function with Automatic Relevance Determination
 % (ARD) distance measure. The covariance function is parameterized as:
 %
-% k(x^p,x^q) = sf^2 * [1 + (x^p - x^q)'*inv(P)*(x^p - x^q)/(2*alpha)]^(-alpha)
+% k(x,z) = sf^2 * [1 + (x-z)'*inv(P)*(x-z)/(2*alpha)]^(-alpha)
 %
 % where the P matrix is diagonal with ARD parameters ell_1^2,...,ell_D^2, where
 % D is the dimension of the input space, sf2 is the signal variance and alpha
@@ -16,49 +18,20 @@ function K = covRQard(hyp, x, z, i)
 %         log(sf)
 %         log(alpha) ]
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-08-04.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2016-10-01.
 %
-% See also COVFUNCTIONS.M.
+% See also cov/covRQ.m.
 
-if nargin<2, K = '(D+2)'; return; end              % report number of parameters
-if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
-
-[n,D] = size(x);
-ell = exp(hyp(1:D));
-sf2 = exp(2*hyp(D+1));
-alpha = exp(hyp(D+2));
-
-% precompute squared distances
-if dg                                                               % vector kxx
-  D2 = zeros(size(x,1),1);
-else
-  if xeqz                                                 % symmetric matrix Kxx
-    D2 = sq_dist(diag(1./ell)*x');
-  else                                                   % cross covariances Kxz
-    D2 = sq_dist(diag(1./ell)*x',diag(1./ell)*z');
-  end
+varargout = cell(max(1,nargout),1);
+if nargin>0                                  % restore old hyper parameter order
+  hyp = varargin{1};
+  if numel(hyp)>2, varargin{1} = hyp([1:end-2,end,end-1]); end
+end
+[varargout{:}] = covScale({'covRQ','ard',[]},varargin{:});
+if nargout>1                                 % restore old hyper parameter order
+  o2 = varargout{2}; varargout{2} = @(Q) dirder(Q,o2);
 end
 
-if nargin<4                                                        % covariances
-  K = sf2*(1+0.5*D2/alpha).^(-alpha);
-else                                                               % derivatives
-  if i<=D                                               % length scale parameter
-    if dg
-      K = D2*0;
-    else
-      if xeqz
-        K = sf2*(1+0.5*D2/alpha).^(-alpha-1).*sq_dist(x(:,i)'/ell(i));
-      else
-        K = sf2*(1+0.5*D2/alpha).^(-alpha-1).*sq_dist(x(:,i)'/ell(i),z(:,i)'/ell(i));
-      end
-    end
-  elseif i==D+1                                            % magnitude parameter
-    K = 2*sf2*(1+0.5*D2/alpha).^(-alpha);
-  elseif i==D+2
-    K = (1+0.5*D2/alpha);
-    K = sf2*K.^(-alpha).*(0.5*D2./K - alpha*log(K));
-  else
-    error('Unknown hyperparameter')
-  end
-end
+function [dKdhyp,dKdx] = dirder(Q,dK)
+  if nargout>1, [dKdhyp,dKdx] = dK(Q); else dKdhyp = dK(Q); end
+  dKdhyp = dKdhyp([1:end-2,end,end-1]);
