@@ -658,6 +658,52 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % BF_ResetSeed numeric seed support
+        %-------------------------------------------------------------
+        function test_BF_ResetSeed_NumericSeedIsReproducibleAndDistinct(testCase)
+            % BF_ResetSeed originally only accepted 'default'/'none'; a
+            % numeric scalar seed was added so surrogate-generating
+            % operations can be seeded distinctly from the fixed default.
+            BF_ResetSeed(11); a1 = rand(5,1);
+            BF_ResetSeed(11); a2 = rand(5,1);
+            testCase.verifyEqual(a1, a2, 'A numeric seed should be reproducible.');
+
+            BF_ResetSeed('default'); d1 = rand(5,1);
+            testCase.verifyNotEqual(a1, d1, ...
+                'A non-zero numeric seed should differ from the ''default'' (seed 0) state.');
+        end
+
+        %-------------------------------------------------------------
+        % SD_TSTL_surrogates (now native, no TSTOOL dependency)
+        %-------------------------------------------------------------
+        function test_SD_TSTL_surrogates_DetectsNonlinearity(testCase)
+            % SD_TSTL_surrogates used to depend on TSTOOL's signal/tc3/trev;
+            % it now generates surrogates via SD_MakeSurrogates and
+            % evaluates CO_tc3/CO_trev on each (both already TSTOOL-free
+            % reimplementations of the same expressions). Confirm the
+            % replacement still does its actual job: a linear (Gaussian
+            % noise) series should look unremarkable against its
+            % phase-randomized surrogates, while a chaotic (logistic map)
+            % series -- whose nonlinear structure phase randomization
+            % destroys -- should look highly significant.
+            rng(31);
+            yLinear = randn(500,1);
+            outLinear = SD_TSTL_surrogates(yLinear,1,50,1,'tc3','default');
+            testCase.verifyGreaterThan(outLinear.ztestp, 0.05, ...
+                'Gaussian noise should not look significantly different from its surrogates.');
+
+            N = 1000;
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = SD_TSTL_surrogates(yChaotic,1,50,1,'tc3','default');
+            testCase.verifyLessThan(outChaotic.ztestp, 1e-6, ...
+                'The logistic map''s nonlinear structure should look highly significant against its surrogates.');
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)

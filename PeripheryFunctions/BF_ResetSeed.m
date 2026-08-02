@@ -3,6 +3,12 @@ function BF_ResetSeed(resetHow)
 %
 % Allows functions using random numbers to produce repeatable results with a
 % consistent syntax.
+%
+%---INPUTS:
+% resetHow, one of:
+%           'default' -- reset to the Mersenne Twister with seed 0
+%           'none' -- don't change the seed
+%           a numeric scalar -- reset to the Mersenne Twister with this seed
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -33,6 +39,11 @@ end
 
 % ------------------------------------------------------------------------------
 % Reset the seed
+if isnumeric(resetHow) && isscalar(resetHow)
+    % Reset to a caller-specified seed (still the Mersenne Twister):
+    rng(resetHow,'twister');
+    return
+end
 switch resetHow
 case 'default'
     % Reset to the default (the Mersenne Twister with seed 0)
@@ -40,7 +51,7 @@ case 'default'
 case 'none' % don't change the seed
     return
 otherwise
-    error('Now sure how to reset using ''%s''',resetHow);
+    error('Not sure how to reset using ''%s''',resetHow);
 end
 
 end

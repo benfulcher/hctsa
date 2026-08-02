@@ -17,6 +17,9 @@ function out = SD_MakeSurrogates(x, surrMethod, numSurrs, extraParams, randomSee
 %             (i) 'RP' -- random phase surrogates
 %             (ii) 'AAFT' -- amplitude adjusted Fourier transform
 %             (iii) 'TFT' -- truncated Fourier transform
+%             (iv) 'RandPerm' -- random permutation of the samples
+%                    (destroys all temporal structure, not just nonlinear;
+%                    equivalent to TSTOOL's surrogate method 3)
 %
 % numSurrs, the number of surrogates to generate
 %
@@ -225,6 +228,18 @@ switch surrMethod
 			% Transform back into the time domain
 			xNew = real(ifft(zNew, N));
 			out(:, surri) = xNew;
+		end
+
+	case 'RandPerm'
+		% Random permutation surrogates: samples are shuffled, destroying
+		% all temporal structure (not just nonlinear structure, unlike
+		% RP/AAFT/TFT which preserve the linear/amplitude properties).
+		if beVocal
+			fprintf(1, 'Constructing %u surrogates using random permutation\n', numSurrs)
+		end
+
+		for surri = 1:numSurrs
+			out(:, surri) = x(randperm(N));
 		end
 
 	otherwise
