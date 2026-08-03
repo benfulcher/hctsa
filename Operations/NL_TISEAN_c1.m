@@ -161,7 +161,7 @@ if isempty(res)
 	error('Call to TISEAN method ''c1'' failed.');
 elseif strfind(res, 'dyld: Library not loaded')
 	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
-else
+elseif TISEANVerbose()
 	fprintf(1, 'TISEAN function ''c1'' took %s.\n', BF_TheTime(toc, 1));
 end
 

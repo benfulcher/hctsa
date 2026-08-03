@@ -110,7 +110,9 @@ end
 %% Write the file
 % ------------------------------------------------------------------------------
 filePath = BF_WriteTempFile(y);
-fprintf(1, 'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n', length(y), filePath);
+if TISEANVerbose()
+	fprintf(1, 'Wrote the input time series (N = %u) to the temporary file ''%s'' for TISEAN\n', length(y), filePath);
+end
 
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2
