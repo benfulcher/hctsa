@@ -33,6 +33,9 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 % 'numNulls' [0], the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
 %               null distribution)
+% 'doParallel' [false], whether to use parfor to speed up the (serial, per-feature)
+%               test-statistic computation across all M features -- speeds up both
+%               the real-data computation and every null shuffle.
 %
 %---EXAMPLE USAGE:
 %
@@ -75,7 +78,13 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %-------------------------------------------------------------------------------
 %% Check inputs and set defaults
 %-------------------------------------------------------------------------------
-if nargin < 1 || isempty(whatData)
+% Capture nargin/nargout up-front: bare nargin/nargout (without a function
+% argument) cannot appear anywhere in a file that contains a parfor-loop
+% (as giveMeStats below now optionally does), so use these captured copies
+% everywhere below instead:
+numInputArgs = nargin;
+numOutputArgsRequested = nargout;
+if numInputArgs < 1 || isempty(whatData)
     whatData = 'norm';
 end
 % Set other defaults later when we know what we're dealing with
@@ -96,6 +105,10 @@ addParameter(inputP,'numFeaturesDistr',default_numFeaturesDistr,@isnumeric);
 default_numNulls = 0; % by default, don't compute an empirical null distribution
                       % by randomizing class labels
 addParameter(inputP,'numNulls',default_numNulls,@isnumeric);
+% doParallel
+default_doParallel = false;
+check_doParallel = @(x) islogical(x);
+addParameter(inputP,'doParallel',default_doParallel,check_doParallel);
 
 parse(inputP,varargin{:});
 
@@ -106,6 +119,7 @@ end
 numTopFeatures = inputP.Results.numTopFeatures;
 numFeaturesDistr = inputP.Results.numFeaturesDistr;
 numNulls = inputP.Results.numNulls;
+doParallel = inputP.Results.doParallel;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
@@ -125,7 +139,7 @@ TellMeAboutLabeling(TimeSeries);
 
 %-------------------------------------------------------------------------------
 % Set defaults for the test statistic:
-if nargin < 2 || isempty(whatTestStat)
+if numInputArgs < 2 || isempty(whatTestStat)
     if numClasses == 2
         % ustat or ttest are way faster than proper prediction models
         whatTestStat = 'ustat';
@@ -136,7 +150,7 @@ if nargin < 2 || isempty(whatTestStat)
 end
 % Set cfnParams default (if using 'classification') later after loading the time series
 if strcmp(whatTestStat,'classification')
-    if nargin < 3 || isempty(fieldnames(cfnParams))
+    if numInputArgs < 3 || isempty(fieldnames(cfnParams))
         cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
         cfnParams.whatClassifier = 'fast-linear';
         cfnParams = UpdateClassifierText(cfnParams);
@@ -589,7 +603,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Don't display unused outputs to screen:
-if nargout == 0
+if numOutputArgsRequested == 0
     clear('ifeat','testStat','testStat_rand','featureClassifier');
 end
 
@@ -633,8 +647,11 @@ end
 %-------------------------------------------------------------------------------
 function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
     % Return a test statistic for each feature:
+    % (captured up-front: bare nargout isn't allowed anywhere in a file
+    % that contains a parfor-loop, see note above numInputArgs)
+    numOutArgsGiveMeStats = nargout;
     testStat = zeros(numFeatures,1);
-    if nargout==2
+    if numOutArgsGiveMeStats==2
         Mdl = cell(numFeatures,1);
     end
 
@@ -644,12 +661,49 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         Mdl = fitcsvm(dataMatrix,groupLabels,'KernelFunction','linear','Weights',InverseProbWeight(groupLabels));
         testStat = Mdl.Beta; % (code assumes bigger is better)
         testStat = testStat/max(abs(testStat)); % rescale by max-abs
+    elseif doParallel
+        % PARFOR loop (parallel), dispatched in per-worker CHUNKS rather than
+        % one feature per parfor iteration: a single per-feature test-statistic
+        % call (e.g., a ranksum test, or an in-sample linear classifier fit) is
+        % often cheaper than a single parfor task-dispatch round trip, so a
+        % naive one-feature-per-iteration parfor can end up *slower* than the
+        % plain serial loop (measured ~10x slower on a 500x7702 test dataset).
+        % Chunking amortizes that per-task overhead across many features.
+        poolObj = gcp; % ensure a parallel pool exists (starts the default pool if none)
+        numChunks = min(numFeatures,4*poolObj.NumWorkers);
+        chunkEdges = round(linspace(0,numFeatures,numChunks + 1));
+        testStatChunks = cell(numChunks,1);
+        MdlChunks = cell(numChunks,1);
+        parfor c = 1:numChunks
+            chunkFeatureIDs = (chunkEdges(c) + 1):chunkEdges(c + 1);
+            localStat = zeros(length(chunkFeatureIDs),1);
+            localMdl = cell(length(chunkFeatureIDs),1);
+            for kk = 1:length(chunkFeatureIDs)
+                k = chunkFeatureIDs(kk);
+                try
+                    if numOutArgsGiveMeStats == 2
+                        % This is slower for the fast-linear classifier (but returns a model)
+                        [localStat(kk),localMdl{kk}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+                    else
+                        localStat(kk) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+                    end
+                catch
+                    warning('Error computing %s test statistic for feature %u.',whatTestStat,k);
+                end
+            end
+            testStatChunks{c} = localStat;
+            MdlChunks{c} = localMdl;
+        end
+        testStat = vertcat(testStatChunks{:});
+        if numOutArgsGiveMeStats == 2
+            Mdl = vertcat(MdlChunks{:});
+        end
     else
         loopTimer = tic;
         BF_ProgressBar('new')
         for k = 1:numFeatures
             try
-                if nargout == 2
+                if numOutArgsGiveMeStats == 2
                     % This is slower for the fast-linear classifier (but returns a model)
                     [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
                 else
