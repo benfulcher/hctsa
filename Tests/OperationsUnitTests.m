@@ -758,6 +758,37 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % NL_TSTL_GPCorrSum (now via TISEAN d2, no TSTOOL dependency)
+        %-------------------------------------------------------------
+        function test_NL_TSTL_GPCorrSum_DiscriminatesDimension(testCase)
+            % NL_TSTL_GPCorrSum used to depend on TSTOOL's
+            % signal/corrsum; it now uses TISEAN's d2 (already relied on
+            % by NL_TISEAN_d2.m and NL_TSTL_TakensEstimator.m) instead,
+            % fitting its own robust line to d2's raw (r, C(r))
+            % correlation-sum output. Confirm the replacement still does
+            % its actual job: a logistic map (known correlation dimension
+            % ~1) should give a low-slope estimate, clearly below
+            % structureless noise's estimate at the same embedding.
+            rng(51);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_GPCorrSum(yNoise,-1,0.5,40,20,{1,3});
+            testCase.verifyGreaterThan(outNoise.robfit_a2, 2, ...
+                'Structureless noise embedded at m=3 should have a dimension estimate well above 1.');
+
+            N = 2000;
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = NL_TSTL_GPCorrSum(yChaotic,-1,0.5,40,20,{1,3});
+            testCase.verifyLessThan(outChaotic.robfit_a2, 1.5, ...
+                'The logistic map''s known correlation dimension (~1) should give a low estimate.');
+            testCase.verifyLessThan(outChaotic.robfit_a2, outNoise.robfit_a2, ...
+                'The logistic map should have a clearly lower dimension estimate than structureless noise.');
+        end
+
+        %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
         function test_MasterCodeStringHandleEquivalence(testCase)

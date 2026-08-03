@@ -15,18 +15,21 @@ function out = NL_TSTL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 %           For corrsum2, n specifies the number of pairs per bin. Default is 1,
 %           to use corrsum.
 %
-% ---OUTPUTS: basic statistics on the outputs of corrsum, including iteratively
-% re-weighted least squares linear fits to log-log plots using the robustfit
-% function in Matlab's Statistics Toolbox.
+% ---OUTPUTS: basic statistics on the correlation-sum scaling, including
+% iteratively re-weighted least squares linear fits to log-log plots using
+% the robustfit function in Matlab's Statistics Toolbox.
 %
-% Uses TSTOOL code corrsum (or corrsum2) to compute scaling of the correlation
-% sum for a time-delay reconstructed time series by the Grassberger-Proccacia
-% algorithm using fast nearest-neighbor search.
+% Uses TISEAN's d2 (rather than TSTOOL's corrsum/corrsum2, which this
+% operation used previously) to compute the correlation sum for a
+% time-delay-embedded time series by the Grassberger-Procaccia algorithm.
+% d2's raw correlation-sum output (its .c2 file, also used by
+% NL_TISEAN_d2.m) gives (ln r, C(r)) pairs directly; only doTwo = 1 (the
+% corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
+% (corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent and was
+% never used by any of this operation's own mop-file entries.
 %
 % cf. "Characterization of Strange Attractors", P. Grassberger and I. Procaccia,
 % Phys. Rev. Lett. 50(5) 346 (1983)
-%
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -102,60 +105,129 @@ if nargin < 7 || isempty(doTwo)
 	doTwo = 1; % use corrsum rather than corrsum2
 end
 
-if (Nref == -1) && (doTwo == 2)
-	% we need a *number* of pairs for corrsum2, round down from 50% of time series
-	% length
-	Nref = floor(N * 0.5);
+if doTwo == 2
+	error(['NL_TSTL_GPCorrSum: doTwo = 2 (corrsum2''s fixed-pairs-per-bin ' ...
+		   'binning) has no TISEAN equivalent and is not supported.']);
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-% Convert to embedded signal object for TSTOOL
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tau = tm(1);
+m = tm(2);
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
-	error('Embedding of the %u-sample time series failed', N)
-elseif length(data(s)) < thwin
+if (N - (m - 1) * tau) < thwin
 	warning(['Embedded time series (N = %u, m = %u, tau = %u) too short' ...
-			 ' to do a correlation sum\n'], N, embedParams{1}, embedParams{2});
+			 ' to do a correlation sum\n'], N, m, tau);
 	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
-%% Run TSTOOL function, corrsum or corrsum2
+%% Write the file for TISEAN to work with
 % ------------------------------------------------------------------------------
-me = []; % error catcher
-if doTwo == 1 % use corrsum
-	try
-		rs = corrsum(s, Nref, r, thwin, nbins);
-	catch me % DEAL WITH ERROR MESSAGE BELOW
-	end
-elseif doTwo == 2 % use corrsum2
-	try
-		rs = corrsum2(s, Nref, r, thwin, nbins);
-	catch me
-	end
+filePath = BF_WriteTempFile(y);
+
+% Map TSTOOL's Nref convention (-1 = use all points) onto TISEAN's d2
+% (-N 0 = use all pairs):
+if Nref == -1
+	NrefTISEAN = 0;
+else
+	NrefTISEAN = Nref;
 end
 
-if ~isempty(me)
-	switch me.message
-		case 'Maximal search radius must be greater than starting radius'
-			fprintf(1, 'Max search radius less than starting radius. Returning NaNs.\n');
-			out = NaN; return
-		case 'Cannot find an interpoint distance greater zero, maybe ill-conditioned data set given'
-			fprintf(1, 'Cannot find an interpoint distance greater than zero. Returning NaNs.\n');
-			out = NaN; return
-		case 'Reference indices out of range'
-			fprintf(1, 'Reference indicies out of range. Returning NaNs.\n');
-			out = NaN; return
-		otherwise
-			error('Unknown error %s', me.message);
-	end
+% Maximum search radius, in standard deviations of y (matching the
+% convention already established for NL_TSTL_TakensEstimator.m and
+% NL_TISEAN_d2.m's takens05, citing Kantz & Schreiber -- TSTOOL's own r was
+% instead a proportion of "attractor size", equivalent in spirit but not
+% numerically identical), scaled by sqrt(m): a pairwise Euclidean distance
+% in an m-dimensional embedding of (roughly independent) per-coordinate
+% scale std(y) itself scales as std(y)*sqrt(m), not std(y) alone. Without
+% this correction, small r requests at higher embedding dimensions can ask
+% for a radius smaller than the closest pairs of points in the actual
+% reconstructed phase space, leaving every bin with zero pairs (confirmed
+% empirically: for m=7 noise, the smallest radius with any pairs at all
+% was ~2.6% away from r*std(y)*sqrt(m), vs. 2.6x too large for r*std(y)
+% alone). d2's minimum epsilon is left at its own default (max data
+% interval/1000): tightening it in proportion to maxEps was tried and
+% found to shrink the useful (non-zero, non-saturated) part of the range
+% rather than help. A handful of bins with too few points to fit is
+% handled by the "not enough points" check below, same as this operation
+% has always done for degenerate cases -- much rarer now, but not
+% entirely eliminated: a small requested r can still legitimately fall
+% below the closest-pair distance for a genuinely high-dimensional,
+% unstructured series (verified: this remains possible for structureless
+% noise embedded at a high FNN-selected m, but not for real
+% low-dimensional structure, e.g. a chaotic logistic map continues to
+% give a sensible estimate at the same small r). In that regime a NaN
+% output is an honest "no reliable low-dimensional scaling could be
+% detected at this length scale", not a computation failure to paper over.
+maxEps = r * std(y) * sqrt(m);
+
+% ------------------------------------------------------------------------------
+%% Run the TISEAN code, d2
+% ------------------------------------------------------------------------------
+% d2 over embedding dimensions 1:m (only the m-th is used below). Note:
+% "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
+% a bug in this TISEAN build where it reports "0 lines read" and produces no
+% output at all; "-M1,<m>" (a genuine range, as NL_TISEAN_d2.m and
+% NL_TSTL_TakensEstimator.m already use) works correctly, so that's used
+% here too and the dimension-m block is picked out afterwards.
+[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
+						  tau, m, thwin, maxEps, NrefTISEAN, nbins, filePath));
+delete(filePath); % remove the temporary time-series data file
+if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
+if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
+if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end
+
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
+	error('Call to TISEAN function ''d2'' failed.');
 end
 
-lnr = spacing(rs);
-lnCr = data(rs);
+% ------------------------------------------------------------------------------
+%% Parse the raw correlation-sum data (.c2 file)
+% ------------------------------------------------------------------------------
+if ~exist([filePath '.c2'], 'file')
+	error('TISEAN function ''d2'' did not produce a .c2 output file.');
+end
+fid = fopen([filePath '.c2']);
+fileLines = textscan(fid, '%[^\n]');
+fclose(fid);
+delete([filePath '.c2']);
+fileLines = fileLines{1};
+
+% First line is a '#center=' header (not per-dimension); the rest is one
+% '#dim=' block per embedding dimension 1:m -- take the last one (m):
+w = strmatch('#dim=', fileLines);
+if length(w) ~= m
+	error('TISEAN function ''d2'' returned an unexpected number of data blocks.');
+end
+w(end + 1) = length(fileLines) + 1;
+ss = fileLines(w(m) + 1:w(m + 1) - 1);
+
+rc = zeros(length(ss), 2); % [ln(r), C(r)]
+nn = 0;
+for jj = 1:length(ss)
+	tmp = textscan(ss{jj}, '%f%f');
+	if all(cellfun(@isempty, tmp))
+		break % a trailing comment line
+	end
+	nn = nn + 1;
+	rc(nn, :) = horzcat(tmp{:});
+end
+rc = rc(1:nn, :);
+
+if isempty(rc)
+	fprintf(1, 'No output obtained from d2''s correlation sum.\n');
+	out = NaN; return
+end
+
+% The .c2 file stores raw r (log-spaced, not pre-logged -- confirmed by the
+% consecutive ratios of column 1 being ~constant, i.e. geometric, whereas
+% ln(r) would be arithmetic/evenly-spaced) and raw C(r) (not ln(C(r))):
+lnr = log(rc(:, 1));
+lnCr = log(rc(:, 2));
 
 if doPlot
 	figure('color', 'w'); box('on');
@@ -169,7 +241,7 @@ end
 % ------------------------------------------------------------------------------
 rGood = (isfinite(lnCr));
 if ~any(rGood)
-	fprintf(1, 'No good outputs obtained from corrsum.\n');
+	fprintf(1, 'No good outputs obtained from the correlation sum.\n');
 	out = NaN; return
 end
 
@@ -209,8 +281,12 @@ if enoughpoints
 	fit_lnCr = a(2) * lnr + a(1);
 	if doPlot, hold on; plot(lnr, fit_lnCr, 'r'); hold off; end
 
-	% Compute residuals:
-	res = lnCr - fit_lnCr';
+	% Compute residuals (lnCr and fit_lnCr are both column vectors here; a
+	% stray transpose on this line -- present in the original TSTOOL-based
+	% version of this operation too -- turned this into an N-by-N matrix
+	% via implicit broadcasting instead of an N-by-1 residual vector,
+	% making robfitresmeanabs/robfitresmeansq vectors instead of scalars):
+	res = lnCr - fit_lnCr;
 
 	out.robfitresmeanabs = mean(abs(res));
 	out.robfitresmeansq = mean(res.^2);
