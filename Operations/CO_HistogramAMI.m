@@ -20,11 +20,6 @@ function out = CO_HistogramAMI(y, tau, meth, numBins)
 %
 % ---OUTPUT: the automutual information calculated in this way.
 
-% Uses the hist2 function (renamed NK_hist2.m here) by Nedialko Krouchev, obtained
-% from Matlab Central,
-% http://www.mathworks.com/matlabcentral/fileexchange/12346-hist2-for-the-people
-% [[hist2 for the people by Nedialko Krouchev, 20 Sep 2006 (Updated 21 Sep 2006)]]
-
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -129,18 +124,14 @@ for i = 1:length(tau)
 	y2 = y(1 + tau(i):end);
 
 	% (1) Joint distribution of y1 and y2
-	pij = NK_hist2(y1, y2, b, b);
-	pij = pij(1:numBins, 1:numBins); % joint
+	% (rows index y1 bins, columns index y2 bins)
+	pij = histcounts2(y1, y2, b, b);
 	pij = pij / sum(pij(:)); % joint
-	pi = sum(pij, 1); % marginal
-	pj = sum(pij, 2); % other marginal
+	pi = sum(pij, 2); % marginal over y1 (rows)
+	pj = sum(pij, 1); % marginal over y2 (columns)
 
-	% Old-fashioned method (should give same result):
-	% pi = histc(y1,b); pi = pi(1:numBins); pi = pi/sum(pi); % marginal
-	% pj = histc(y2,b); pj= pj(1:numBins); pj = pj/sum(pj); % other marginal
-
-	pii = ones(numBins, 1) * pi;
-	pjj = pj * ones(1, numBins);
+	pii = pi * ones(1, numBins);
+	pjj = ones(numBins, 1) * pj;
 
 	r = (pij > 0); % Defining the range in this way, we set log(0) = 0
 	amis(i) = sum(pij(r) .* log(pij(r) ./ pii(r) ./ pjj(r)));
