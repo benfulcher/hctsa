@@ -4,17 +4,31 @@ function out = NL_TSTL_TakensEstimator(y, Nref, rad, past, embedParams, randomSe
 % cf. "Detecting strange attractors in turbulence", F. Takens.
 % Lect. Notes Math. 898 p366 (1981)
 %
+% Uses the TISEAN routines d2 and c2t (Takens' estimator from correlation sum
+% data) rather than TSTOOL's takens_estimator, which this operation used
+% previously. d2 estimates the correlation sum across embedding dimensions
+% 1:m (only the dimension-m block is used here); c2t then reads off Takens'
+% maximum-likelihood dimension estimate as a function of length scale from
+% that correlation-sum data, and the value at an upper length scale of rad
+% standard deviations of y is taken as the output (matching Kantz &
+% Schreiber's recommendation of using half a standard deviation, already
+% used the same way in NL_TISEAN_d2.m's takens05 -- TSTOOL's own rad
+% parameter was instead defined as a proportion of "attractor size", so this
+% is an equivalent-in-spirit but not numerically identical length-scale
+% convention).
+%
 % ---INPUTS:
 % y, the input time series
 % Nref, the number of reference points (can be -1 to use all points)
-% rad, the maximum search radius (as a proportion of the attractor size)
+% rad, the upper length scale to read off the dimension estimate, in standard
+%       deviations of y (cf. TSTOOL's rad, a proportion of attractor size)
 % past, the Theiler window
 % embedParams, the embedding parameters for BF_Embed, in the form {tau,m}
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%               (relevant if an embedding-dimension method requiring
+%               randomization is used)
 %
 % ---OUTPUT: the Taken's estimator of the correlation dimension, d2.
-%
-% Uses the TSTOOL code, takens_estimator.
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -55,7 +69,8 @@ if nargin < 2 || isempty(Nref)
 	Nref = -1; % use all points
 end
 
-% 2) Maximum search radius (as proportion of attractor size)
+% 2) Upper length scale (standard deviations of y) at which to read off the
+% dimension estimate from the correlation-sum data:
 if nargin < 3 || isempty(rad)
 	rad = 0.05;
 end
@@ -84,27 +99,91 @@ if nargin < 6
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-% Convert to embedded signal object for TSTOOL
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, randomSeed);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2, randomSeed);
+tau = tm(1);
+m = tm(2);
 
-if ~isa(s, 'signal') && isnan(s); % Embedding failed
-	fprintf('Embedding failed.\n')
-	out = NaN; return % assume an error with large time-lag or dimension
+% ------------------------------------------------------------------------------
+%% Write the file for TISEAN to work with
+% ------------------------------------------------------------------------------
+filePath = BF_WriteTempFile(y);
+
+% Map TSTOOL's Nref convention (-1 = use all points) onto TISEAN's d2
+% (-N 0 = use all pairs):
+if Nref == -1
+	NrefTISEAN = 0;
+else
+	NrefTISEAN = Nref;
 end
 
-% Check that there are enough points:
-if size(data(s), 1) < 10
-	% Too few data points:
-	out = NaN; return
+% ------------------------------------------------------------------------------
+%% Run the TISEAN codes, d2 then c2t
+% ------------------------------------------------------------------------------
+% d2 over embedding dimensions 1:m (only the m-th is used below). Note:
+% "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
+% a bug in this TISEAN build where it reports "0 lines read" and produces no
+% output at all; "-M1,<m>" (a genuine range, as NL_TISEAN_d2.m already uses)
+% works correctly, so that's used here too and the dimension-m block is
+% picked out afterwards. The swept range of length scales is left at d2's
+% default (spans the full data interval, so comfortably covers the
+% rad-standard-deviations cutoff used below):
+[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -N%u %s', tau, m, past, NrefTISEAN, filePath));
+delete(filePath); % remove the temporary time-series data file
+if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
+if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
+if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end
+
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
+	error('Call to TISEAN function ''d2'' failed.');
+end
+
+[~, res] = system(sprintf('c2t %s.c2', filePath));
+delete([filePath '.c2']);
+
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	error('Call to TISEAN function ''c2t'' failed.');
 end
 
 % ------------------------------------------------------------------------------
-%% Run the TSTOOL Taken's estimation code
+%% Parse the c2t output and read off the estimate at rad standard deviations
 % ------------------------------------------------------------------------------
-D2 = takens_estimator(s, Nref, rad, past);
+s = textscan(res, '%[^\n]'); s = s{1};
+wi = strmatch('writing to stdout', s);
+if isempty(wi)
+	error('TISEAN routine ''c2t'' returned unexpected output.');
+end
+s = s(wi + 1:end);
 
-out = D2;
+% There should be one '#m=' block per embedding dimension 1:m; take the
+% last one (dimension m, the one actually requested):
+w = strmatch('#m=', s);
+if length(w) ~= m
+	error('TISEAN routine ''c2t'' returned an unexpected number of data blocks.');
+end
+w(end + 1) = length(s) + 1;
+ss = s(w(m) + 1:w(m + 1) - 1);
+
+rc = zeros(length(ss), 2); % [length scale r, Takens estimate]
+nn = 0;
+for jj = 1:length(ss)
+	tmp = textscan(ss{jj}, '%f%f');
+	if all(cellfun(@isempty, tmp))
+		break % a trailing comment line
+	end
+	nn = nn + 1;
+	rc(nn, :) = horzcat(tmp{:});
+end
+rc = rc(1:nn, :);
+
+eup = rad * std(y); % upper length scale, in standard deviations of y
+theIndex = find(rc(:, 1) > eup, 1, 'first');
+if isempty(theIndex)
+	out = NaN;
+else
+	out = rc(theIndex, 2);
+end
 
 end
