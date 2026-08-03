@@ -980,6 +980,34 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'A periodic signal''s return times should cluster far more tightly than noise''s.');
         end
 
+        function test_TSTL_delaytime_DiscriminatesStructure(testCase)
+            % TSTL_delaytime used to depend on TSTOOL's 'delaytime'; that
+            % code turned out to be pure MATLAB itself (vendored in this
+            % repo under Toolboxes/OpenTSTOOL), so its exact algorithm is
+            % reproduced natively here rather than approximated -- with two
+            % bugs fixed in its search for the nearest-by-value neighbor
+            % above the reference rank (a missing rank offset that caused
+            % it to resample the wrong region entirely, confirmed with a
+            % concrete worked example; and taking the farthest rather than
+            % nearest passing candidate). Confirm the (corrected)
+            % replacement still does its actual job: for a periodic/smooth
+            % deterministic signal, points with similar values also tend to
+            % have similar values at nearby lags, so the reconstruction
+            % error stays low as lag grows; for structureless noise, points
+            % with similar values are only coincidentally similar, so the
+            % error quickly rises to the scale of the data's full variance.
+            rng(121);
+            yNoise = randn(2000,1);
+            outNoise = TSTL_delaytime(yNoise, 0.1, 1, 'default');
+
+            t = (1:2000)';
+            yPeriodic = sin(2*pi*t/17);
+            outPeriodic = TSTL_delaytime(yPeriodic, 0.1, 1, 'default');
+
+            testCase.verifyGreaterThan(outNoise.meantau, 10 * outPeriodic.meantau, ...
+                'Structureless noise''s reconstruction error should be far higher than a periodic signal''s.');
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------

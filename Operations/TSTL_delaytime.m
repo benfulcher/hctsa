@@ -1,10 +1,34 @@
 function out = TSTL_delaytime(y, maxDelay, past, randomSeed)
 % TSTL_delaytime    Optimal delay time using the method of Parlitz and Wichard.
 %
-% Uses the TSTOOL code delaytime (this method is specified in the TSTOOL
-% documentation but without reference).
+% Computed natively in MATLAB. TSTOOL's own 'delaytime' code
+% (tstoolbox/@signal/delaytime.m, vendored in this repo under
+% Toolboxes/OpenTSTOOL) turned out to be pure MATLAB itself -- no compiled
+% TSTOOL binary/mex involved at all -- so its exact algorithm (still
+% undocumented/uncredited beyond "method of Parlitz and Wichard", per
+% TSTOOL's own comments) is reproduced here directly, rather than
+% approximated: sort the (truncated) series by value; repeatedly (64
+% iterations) pick a random reference point by value-rank, then find its
+% nearest value-neighbors on either side (excluding a Theiler window of
+% "past" samples in time) and accumulate |x(neighbor+lag) - x(ref+lag)|
+% for lag = 0:maxDelay; the average over iterations is tau(lag+1).
 %
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Two bugs fixed relative to TSTOOL's own source's search for the
+% nearest-by-value neighbor *above* the reference rank
+% ("post = index(find(abs(index(ref+1:end)-actual) > past))"), confirmed
+% directly with a concrete worked example before fixing:
+% (1) it applies find() to the subarray index(ref+1:end) but then indexes
+%     back into the *full* index array with the resulting (subarray-
+%     relative) positions without adding ref back on -- so it actually
+%     resamples low ranks (1:length(index(ref+1:end))), the same region
+%     "pre" already searches, rather than the intended ranks above ref;
+% (2) even with that offset fixed, taking the last element of the
+%     (ascending-rank) candidates above ref gives the *farthest* passing
+%     neighbor, not the nearest -- the mirror image of how "pre" already
+%     takes its last (ascending-rank, i.e. nearest-to-ref) candidate below
+%     ref. "post" here takes the first element after offsetting, so both
+%     directions consistently return the nearest value-neighbor passing
+%     the Theiler-window exclusion.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -49,12 +73,8 @@ function out = TSTL_delaytime(y, maxDelay, past, randomSeed)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
+y = y(:); % ensure a column vector
 N = length(y); % length of time series
-try
-	s = signal(y); % convert to a signal for TSTOOL
-catch
-	error('Error converting time series to signal class using TSTOOL function ''signal''')
-end
 
 % ------------------------------------------------------------------------------
 % Check Inputs:
@@ -89,8 +109,30 @@ end
 % Control the random seed (for reproducibility):
 BF_ResetSeed(randomSeed);
 
-% Run the TSTOOL delaytime function on the signal object time series:
-tau = data(delaytime(s, maxDelay, past));
+% Reproduces TSTOOL's tstoolbox/@signal/delaytime.m directly (see header comment):
+ITERATIONS = 64;
+len = N - maxDelay;
+[~, index] = sort(y(1:len));
+
+err = zeros(maxDelay + 1, 1);
+for i = 1:ITERATIONS
+	while true
+		ref = ceil(rand(1, 1) * len);
+		actual = index(ref);
+		preCandidates = index(abs(index(1:ref - 1) - actual) > past);
+		postCandidates = index(ref + find(abs(index(ref + 1:end) - actual) > past));
+		if ~isempty(preCandidates) && ~isempty(postCandidates)
+			pre = preCandidates(end); % nearest-in-value candidate below ref
+			post = postCandidates(1); % nearest-in-value candidate above ref
+			break
+		end
+	end
+	errpre = abs(y(pre:pre + maxDelay) - y(actual:actual + maxDelay));
+	errpost = abs(y(post:post + maxDelay) - y(actual:actual + maxDelay));
+	err = err + errpre + errpost;
+end
+
+tau = err / ITERATIONS;
 
 % plot(tau);
 
