@@ -74,7 +74,7 @@ switch theTest
 
 	case 'lbq'
 		% Check that an Econometrics Toolbox license is available:
-		BF_CheckToolbox('econometrics_toolbox')
+		BF_CheckToolbox('econometrics_toolbox');
 
 		% Perform the test
 		[~, p] = lbqtest(x);

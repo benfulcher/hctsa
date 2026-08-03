@@ -320,15 +320,20 @@ function dimdat = SUB_readTISEANout(s, blocker, nc)
 	for ii = 1:maxm
 		ss = s(w(ii) + 1:w(ii + 1) - 1);
 		nn = zeros(length(ss), nc);
+		numRows = 0;
 		for jj = 1:length(ss)
 			if nc == 2
 				tmp = textscan(ss{jj}, '%n%n');
 			elseif nc == 3
 				tmp = textscan(ss{jj}, '%n%n%n');
 			end
-			nn(jj, :) = horzcat(tmp{:});
+			if all(cellfun(@isempty, tmp))
+				break % a trailing comment/blank line
+			end
+			numRows = numRows + 1;
+			nn(numRows, :) = horzcat(tmp{:});
 		end
-		dimdat{ii} = nn;
+		dimdat{ii} = nn(1:numRows, :);
 	end
 
 end
