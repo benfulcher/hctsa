@@ -16,8 +16,9 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %
 % whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
 % whatTestStat, the test statistic to quantify the goodness of each feature
-%               (e.g., 'tstat','ustat'; or set 'classification' to use classifier
-%                   described in cfnParams)
+%               (e.g., 'tstat','ustat'; set 'classification' to use classifier
+%                   described in cfnParams; or 'medianClassify' for a simple,
+%                   parameter-free multiclass nearest-median classifier)
 % cfnParams, the classification settings if using 'classification'-based selection
 %
 %---OPTIONAL extra inputs:
@@ -195,6 +196,15 @@ switch whatTestStat
         testStatText = '(multivariate) Linear SVM (in-sample) feature weight';
         statUnit = '';
         whatIsBetter = 'abs';
+    case {'medianClassify','nearestMedian'}
+        % Simple, parameter-free multiclass classifier: classify each point
+        % by whichever class's training median it's nearest to (in-sample).
+        fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
+                fn_nearestMedianClassify(XTrain,yTrain,Xtest,yTest,classLabels);
+        chanceLevel = 100/numClasses;
+        testStatText = 'Nearest-median classification accuracy';
+        statUnit = '%';
+        whatIsBetter = 'high';
     case {'ustatP','ranksumP'}
         % Approximate p-value from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
@@ -643,6 +653,22 @@ function [theStatistic,stats] = fn_tStat(d1,d2,doP)
         % t-statistic from the 2-sample Welch's t-test
         theStatistic = stats.tstat;
     end
+end
+%-------------------------------------------------------------------------------
+function accuracy = fn_nearestMedianClassify(XTrain,yTrain,XTest,yTest,classLabels)
+    % A simple, parameter-free 1-D multiclass classifier: classify each point
+    % in XTest according to whichever class's XTrain median it's nearest to,
+    % then return the percentage of correct classifications.
+    numClassesHere = length(classLabels);
+    classMedians = zeros(1,numClassesHere);
+    for ci = 1:numClassesHere
+        classMedians(ci) = median(XTrain(yTrain==classLabels{ci}),'omitnan');
+    end
+    % Distance of every test point to every class median (numTest x numClasses),
+    % then the nearest class per test point:
+    [~,nearestClassIdx] = min(abs(XTest - classMedians),[],2);
+    yPredict = categorical(classLabels(nearestClassIdx));
+    accuracy = 100*mean(yPredict(:)==yTest(:));
 end
 %-------------------------------------------------------------------------------
 function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
