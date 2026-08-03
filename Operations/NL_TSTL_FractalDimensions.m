@@ -15,12 +15,31 @@ function out = NL_TSTL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past
 %
 % ---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
-
-% Computes the fractal dimension spectrum, D(q), using moments of neighbor
-% distances for time-delay embedded time series by referencing the code,
-% fracdims, from the TSTOOL package.
 %
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Computed natively in MATLAB. This operation previously used TSTOOL's
+% 'fracdims', whose actual computation (tstoolbox/@signal/fracdims.m is
+% just a thin wrapper; the real work is in the compiled
+% mex-dev/GeneralizedDimensionEstimation/gendimest.cpp, vendored in this
+% repo under Toolboxes/OpenTSTOOL) turned out to be a well-defined,
+% published, citable method rather than an undocumented black box:
+% "Generalized Dimensions from Nearest Neighbor Information", P. Schram
+% and W. van der Water. Reproduced exactly here:
+%
+% For each of Nref reference points, find the distances to its 1st..kmax-th
+% nearest neighbors (excluding a Theiler window of "past" samples). For
+% each moment order gamma swept linearly from gstart to gend (steps
+% values), compute the gamma-th moment of the k-th-neighbor distance
+% across all reference points, for k = 1:kmax:
+%   M(k) = <r_k^gamma>^(1/gamma)   (or exp(<ln r_k>) in the gamma = 0 limit)
+% The theoretical relation under an assumed dimension D is
+%   M(k) ~ (Gamma(k + gamma/D) / Gamma(k))^(1/gamma)
+% (or exp(digamma(k)/D) as gamma -> 0), which needs only its shape -- an
+% overall scale factor is fitted separately. D(gamma) is then the value
+% that, after re-scaling, best matches this theoretical curve to the
+% measured moments M(kmin:kmax) under a robust (log(1+0.5*e^2)) error,
+% found via nested 1-D minimization (MATLAB's fminbnd stands in directly
+% for the original's hand-rolled Brent's-method minimizer -- the same
+% algorithm). Finally q(gamma) = 1 - gamma/D(gamma).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -115,44 +134,93 @@ if nargin < 9 || isempty(embedParams)
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-% Convert the scalar time series, y, to embedded signal object s for TSTOOL
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0);
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
+if isscalar(Y) && isnan(Y) % embedding failed
 	error('Embedding of the %u-sample time series failed', N)
 end
+[N_embed, m] = size(Y);
+
+if kmax >= N_embed
+	% Analogous to TSTOOL's own "too many neighbors ... requested" failure:
+	out = NaN; return
+end
 
 % ------------------------------------------------------------------------------
-%% Run the TSTOOL code, fracdims:
+%% Resolve the reference points
 % ------------------------------------------------------------------------------
-% Checks that tstoolbox/@signal/fracdims exists
-if ~exist(fullfile('tstoolbox', '@signal', 'fracdims'), 'file')
-	error(['Cannot find the code ''fracdims'' from the TSTOOL package. ' ...
-		   'Is it installed and in the Matlab path?']);
+if Nref == -1 || Nref >= N_embed
+	refIdx = 1:N_embed;
+else
+	refIdx = randperm(N_embed, Nref);
 end
-try
-	rs = fracdims(s, kmin, kmax, Nref, gstart, gend, past, steps);
-catch me
-	if strcmp(me.message, ['Fast nearest neighbour searcher : ' ...
-						   'To many neighbors for each query point are requested'])
-		out = NaN; return
-	else
-		error('Error occurred calling fracdims: %s', me.message);
+R = length(refIdx);
+
+% ------------------------------------------------------------------------------
+%% For each reference point, find distances to its 1st..kmax-th nearest
+%% neighbors (KD-tree, Theiler-window-aware, same approach as
+%% TSTL_localdensity.m/NL_TSTL_ReturnTime.m)
+% ------------------------------------------------------------------------------
+kFetch = min(N_embed - 1, kmax + 2 * past + 5);
+[idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);
+
+distances = zeros(R, kmax); % distances(i,k) = i-th reference point's distance to its k-th nearest neighbor
+for ii = 1:R
+	i = refIdx(ii);
+	validDists = dist(ii, abs(idx(ii, :) - i) > past);
+	if length(validDists) < kmax
+		allDists = sqrt(sum((Y - Y(i, :)).^2, 2));
+		allDists(abs((1:N_embed)' - i) <= past) = Inf;
+		validDists = sort(allDists)';
+		if sum(isfinite(validDists)) < kmax
+			% Not enough valid (Theiler-window-passing) neighbors exist at all:
+			out = NaN; return
+		end
 	end
+	distances(ii, :) = validDists(1:kmax);
 end
 
-Dq = data(rs);
-q = spacing(rs);
+% ------------------------------------------------------------------------------
+%% Sweep the moment order and fit a dimension D(gamma) to each
+% ------------------------------------------------------------------------------
+if (gend - gstart > 0) && (steps > 1)
+	gammas = linspace(gstart, gend, steps);
+else
+	gammas = gstart;
+end
+numGammas = length(gammas);
+
+Dq = zeros(numGammas, 1);
+q = zeros(numGammas, 1);
+% Matching gendimest.cpp's own tolerances for the outer (D) and inner
+% (scale factor) 1-D minimizations exactly:
+outerOpts = optimset('TolX', 1e-4, 'Display', 'off');
+innerOpts = optimset('TolX', 1e-5, 'Display', 'off');
+for gi = 1:numGammas
+	g = gammas(gi);
+
+	% gamma-th moment of the k-th-neighbor distance, across reference points:
+	if g == 0
+		mom = exp(mean(log(distances), 1));
+	else
+		mom = mean(distances.^g, 1).^(1 / g);
+	end
+
+	DMin = max(0.05, -g / kmin);
+	DMax = 128;
+	errFcn = @(D) SUB_DimError(D, g, kmin, kmax, mom, innerOpts);
+	Dq(gi) = fminbnd(errFcn, DMin, DMax, outerOpts);
+	q(gi) = 1 - g / Dq(gi);
+end
 
 % ------------------------------------------------------------------------------
 % Plot the results in a figure:
 % ------------------------------------------------------------------------------
 if doPlot
 	figure('color', 'w'); box('on');
-	subplot(2, 1, 1); view(rs);
-	subplot(2, 1, 2); plot(q, dq);
+	plot(q, Dq, 'o-k');
 end
 
 % ------------------------------------------------------------------------------
@@ -168,9 +236,13 @@ out.rangeq = range(q);
 out.meanq = mean(q);
 
 % ---Fit linear
-p = polyfit(q, Dq', 1);
+% q and Dq are both columns here (this used to rely on TSTOOL's spacing()
+% returning q as a row, transposing Dq to match; with q now a column too,
+% that stray transpose would turn "p_fit - Dq'" into an N-by-N broadcast
+% instead of an N-by-1 residual, so it's dropped):
+p = polyfit(q, Dq, 1);
 p_fit = q * p(1) + p(2);
-res = p_fit - Dq';
+res = p_fit - Dq;
 out.linfit_a = p(1);
 out.linfit_b = p(2);
 out.linfit_rmsqres = sqrt(mean(res.^2));
@@ -187,3 +259,34 @@ out.linfit_rmsqres = sqrt(mean(res.^2));
 % out.expfit_rmse = gof.rmse;
 
 end
+
+% ------------------------------------------------------------------------------
+function err = SUB_DimError(D, g, kmin, kmax, mom, fitOpts)
+	% Robust curve-fit error between the measured k-th-neighbor-distance
+	% moments (mom(kmin:kmax)) and the theoretical curve expected for
+	% embedding dimension D, after fitting the theoretical curve's free
+	% overall scale factor. Reproduces gendimest.cpp's Error_Function
+	% exactly (see this operation's header comment).
+	ks = kmin:kmax;
+	if g == 0
+		z = exp(psi(ks) / D); % psi = digamma function
+	else
+		z = zeros(size(ks));
+		z(1) = 1; % anchored at k = kmin
+		running = 1;
+		for ii = 1:(length(ks) - 1)
+			k = ks(ii);
+			running = running * (k + g / D) / k;
+			z(ii + 1) = running^(1 / g);
+		end
+	end
+
+	y = mom(kmin:kmax);
+
+	% Fit the free overall scale factor, a, via the same robust error:
+	scaleErrFcn = @(a) sum(log(1 + 0.5 * (y - a * z).^2));
+	a = fminbnd(scaleErrFcn, 0, 1e6, fitOpts);
+
+	err = sum(log(1 + 0.5 * (y - a * z).^2));
+end
+% ------------------------------------------------------------------------------

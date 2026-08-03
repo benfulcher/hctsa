@@ -1008,6 +1008,41 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'Structureless noise''s reconstruction error should be far higher than a periodic signal''s.');
         end
 
+        function test_NL_TSTL_FractalDimensions_DiscriminatesDimension(testCase)
+            % NL_TSTL_FractalDimensions used to depend on TSTOOL's
+            % signal/fracdims; its actual computation (fracdims.m is a thin
+            % wrapper around the compiled gendimest.cpp, vendored under
+            % Toolboxes/OpenTSTOOL) turned out to be a well-defined,
+            % published, citable method -- "Generalized Dimensions from
+            % Nearest Neighbor Information", Schram & van der Water -- so
+            % it's reproduced exactly here natively (k-th-nearest-neighbor
+            % distance moments fitted to a Gamma-function theoretical
+            % curve via nested 1-D minimization; MATLAB's fminbnd stands in
+            % directly for the original's hand-rolled Brent's-method
+            % minimizer, the same algorithm), rather than approximated, and
+            % kmin/kmax keep their original meaning throughout (see the
+            % operation's header comment). Confirm the replacement still
+            % does its actual job: a logistic map's estimated dimension
+            % (meanDq) should land close to its known true value (~1),
+            % clearly below structureless noise's.
+            rng(131);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_FractalDimensions(yNoise,2,10,-1,1,5,10,32,{1,5});
+
+            N = 2000;
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = NL_TSTL_FractalDimensions(yChaotic,2,10,-1,1,5,10,32,{1,5});
+
+            testCase.verifyLessThan(outChaotic.meanDq, 1.5, ...
+                'The logistic map''s known dimension (~1) should give a low estimate.');
+            testCase.verifyLessThan(outChaotic.meanDq, outNoise.meanDq, ...
+                'The logistic map should have a clearly lower dimension estimate than structureless noise.');
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
