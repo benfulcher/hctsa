@@ -916,6 +916,39 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(out.medianden, median(locdenBrute), 'RelTol', 1e-9);
         end
 
+        function test_NL_TSTL_dimensions_DiscriminatesDimension(testCase)
+            % NL_TSTL_dimensions used to depend on TSTOOL's
+            % signal/dimensions; it now uses TISEAN's boxcount (Q=0.0, the
+            % box-counting dimension D0) and d2 (the correlation dimension
+            % D2, matching TSTOOL's own pair-counting construction, unlike
+            % boxcount at Q=2.0) across a range of embedding dimensions
+            % 1:M. The information dimension (D1) was already disabled in
+            % the previous TSTOOL-based version and its now-dead code
+            % (which depended on TSTOOL's removed 'dimensions' output) was
+            % deleted rather than kept as an unreachable branch. Also found
+            % and fixed the same class of shape-mismatch bug as in
+            % NL_TSTL_LargestLyap.m (stray transposes in SUB_mch/
+            % SUB_ScalingRange/SUB_bestm that relied on TSTOOL's spacing()
+            % returning a row vector). Confirm the replacement still does
+            % its actual job: structureless noise should have a
+            % higher-slope correlation-dimension scaling exponent (at the
+            % resolved embedding dimension) than a logistic map.
+            rng(101);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_dimensions(yNoise,50,{1,5});
+
+            N = 2000;
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = NL_TSTL_dimensions(yChaotic,50,{1,5});
+
+            testCase.verifyGreaterThan(outNoise.scr_co_mopt_scaling_exp, outChaotic.scr_co_mopt_scaling_exp, ...
+                'Structureless noise should have a higher correlation-dimension scaling exponent than a logistic map.');
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------

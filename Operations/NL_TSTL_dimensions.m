@@ -1,12 +1,25 @@
 function out = NL_TSTL_dimensions(y, numBins, embedParams)
 % NL_TSTL_dimensions Box counting, information, and correlation dimension of a time series.
 %
-% Computes the box counting, information, and correlation dimension of a
-% time-delay embedded time series using the TSTOOL code 'dimensions'.
-% This function contains extensive code for estimating the best scaling range to
-% estimate the dimension using a penalized regression procedure.
+% Computes the box counting (D0) and correlation (D2) dimension of a
+% time-delay embedded time series across a range of embedding dimensions,
+% using TISEAN's 'boxcount' (Renyi entropy of order Q=0.0, giving raw
+% ln(N(epsilon)), the log box-count -- the direct analogue of D0) and
+% 'd2' (the classic Grassberger-Procaccia pair-counting correlation sum,
+% giving ln(C(epsilon)) -- the direct analogue of D2 and, unlike
+% 'boxcount' at Q=2.0, the same pair-counting construction TSTOOL's own
+% correlation-dimension estimate used). This operation previously used
+% TSTOOL's 'dimensions'. This function contains extensive code for
+% estimating the best scaling range to estimate the dimension using a
+% penalized regression procedure -- all of that downstream analysis code
+% is embedding-agnostic (it only consumes (logr, logN) / (logr, logC)
+% matrices) and is unchanged here.
 %
-% cf. TSTOOL, http://www.physik3.gwdg.de/tstool/
+% The information dimension (D1, Q=1) was already disabled in the
+% previous TSTOOL-based version of this operation ("there's not extra
+% information in it by these estimates") and, since that dead code
+% depended entirely on TSTOOL's now-removed 'dimensions' output, has been
+% removed rather than carried forward as an unreachable branch.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -70,81 +83,157 @@ else
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-% Convert to embedded signal object for TSTOOL
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tau = tm(1);
+mopt = tm(2); % the resolved embedding dimension, possibly < 3
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
-	error('Time-delay embedding for TSTOOL failed')
-end
+% dimension curves are always computed for m = 1:M (M >= 3, matching the
+% original re-embed-at-3 behavior, since bc_logN(:,3) etc. are used below):
+M = max(mopt, 3);
 
-if size(data(s), 2) < 3 % embedded with dimension < 3
-	% note the 'true' predicted embedding dimension
-	mopt = size(data(s), 2);
-	% embed with dimension m = 3
-	s = BF_Embed(y, embedParams{1}, 3, 1);
-	fprintf(1, 'Re-embedded with embedding dimension 3\n');
-else
-	mopt = size(data(s), 2);
-end
+filePath = BF_WriteTempFile(y);
 
 % ------------------------------------------------------------------------------
-%% Run the TSTOOL function:
+%% Run the TISEAN code, boxcount (Q=0.0), for the box-counting dimension (D0)
 % ------------------------------------------------------------------------------
-% This looks for the dimensions file in the tstoolbox/@signal/dimensions directory
-if ~exist(fullfile('tstoolbox', '@signal', 'dimensions'), 'file')
-	error('Cannot find the code ''dimensions'' from the TSTOOL package. Is it installed and in the Matlab path?');
+outFilePath = [filePath '.box'];
+[~, res] = system(sprintf('boxcount -M1,%u -d%u -Q0.0 -#%u -o %s %s', ...
+						  M, tau, numBins, outFilePath, filePath));
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist(outFilePath, 'file'), delete(outFilePath); end
+	delete(filePath);
+	error('Call to TISEAN function ''boxcount'' failed.');
 end
-try
-	[bc, ~, co] = dimensions(s, numBins);
-catch me
-	error('Error running TSTOOL code dimensions: %s', me.message);
-end
-
-% We now have the scaling of the boxcounting dimension, D0, the information
-% dimension D1, and the correlation dimension D2.
-
-% It seems like there's not extra information in the in dimension, D1, by these
-% estimates -- focus on the bc, D0 and correlation, D2.
-% Can switch this here:
-compute_in = 0;
-
-% ------------------------------------------------------------------------------
-%% Convert output to vectors
-% ------------------------------------------------------------------------------
-% calculations for each dimension up to the maximum:
-% Seems to be in units of log_2 -- log2, so actually doesn't span a very wide
-% range of length scales... -- although I think the maximum length is at 1,
-% so I think it might be referring to fractions of the 'attractor size'...
-
-% (1) Boxcounting dimension (BC)
-bc_logN = data(bc); % this is log(N(r)) -- number within radius (look for this to scale linearly)
-bc_logr = spacing(bc); % this is log(r) -- length scale
-bc_logNlogr = bc_logN ./ (ones(size(bc_logN, 2), 1) * bc_logr)'; % look for this to be constant
-
-% (2) Information dimension (IN)
-if compute_in
-	in_logl = data(in); % I think this is log(l(r)), look for this to scale linearly
-	in_logr = spacing(in);
-	in_logllogr = in_logl ./ (ones(size(in_logl, 2), 1) * in_logr)'; % look for this to be constant
+if ~exist(outFilePath, 'file')
+	delete(filePath);
+	error('TISEAN function ''boxcount'' did not produce a .box output file.');
 end
 
-% (3) Correlation dimension (CO)
-co_logC = data(co); % look for this to scale linearly
-co_logr = spacing(co);
-co_logClogr = co_logC ./ (ones(size(co_logC, 2), 1) * co_logr)'; % look for this to be constant
+fid = fopen(outFilePath);
+fileLines = textscan(fid, '%[^\n]');
+fclose(fid);
+delete(outFilePath);
+fileLines = fileLines{1};
+
+w = strmatch('#component', fileLines);
+if length(w) ~= M
+	delete(filePath);
+	error('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
+end
+w(end + 1) = length(fileLines) + 1;
+
+bc_logr = [];
+bc_logN = zeros(numBins, M); % ln(N(r)), the raw box count (Q=0 Renyi entropy) at each (length scale, embedding dim)
+for d = 1:M
+	ss = fileLines(w(d) + 1:w(d + 1) - 1);
+	r = zeros(numBins, 1); logN = zeros(numBins, 1);
+	nn = 0;
+	for jj = 1:length(ss)
+		tmp = textscan(ss{jj}, '%f%f%f');
+		if all(cellfun(@isempty, tmp))
+			break
+		end
+		nn = nn + 1;
+		r(nn) = tmp{1};
+		logN(nn) = tmp{2}; % raw H_0(epsilon) = ln(N(epsilon)) already
+	end
+	if nn ~= numBins
+		delete(filePath);
+		error('TISEAN function ''boxcount'' returned an unexpected number of length scales.');
+	end
+	if d == 1
+		bc_logr = log(r); % raw (linearly-spaced-ish) epsilon -> ln(epsilon)
+	end
+	bc_logN(:, d) = logN;
+end
+
+% ------------------------------------------------------------------------------
+%% Run the TISEAN code, d2, for the correlation dimension (D2)
+% ------------------------------------------------------------------------------
+% "-M1,M" (a genuine range) rather than "-M<M>,<M>" works around a real bug
+% in this TISEAN build where a fixed single embedding dimension reports "0
+% lines read" and produces no output (see NL_TSTL_GPCorrSum.m):
+% Length scale, in standard deviations of y scaled by sqrt(M) (the same
+% embedding-dimension correction validated in NL_TSTL_GPCorrSum.m -- a
+% pairwise distance in an M-dimensional embedding scales as std(y)*sqrt(M),
+% not std(y) alone). Unlike NL_TSTL_GPCorrSum (which only ever needs one
+% target dimension and can tolerate an occasional honest NaN there), every
+% embedding dimension 1:M needs usable data here, and the highest dimension
+% M is by far the most likely to have zero pairs at TISEAN's own default
+% minimum epsilon (data interval/1000) -- confirmed empirically: for
+% structureless noise embedded at a representative M=7, TISEAN's own
+% default left 25/50 bins with zero pairs (i.e. ln(C(r)) = -Inf) at that
+% dimension, and even minEps = maxEps/100 or /30 still left 25 or 16/50
+% zero; minEps = maxEps/10 was the first tested ratio to leave zero:
+maxEps = std(y) * sqrt(M);
+minEps = maxEps / 10;
+[~, res] = system(sprintf('d2 -d%u -M1,%u -t0 -N0 -r%g -R%g -#%u %s', ...
+						  tau, M, minEps, maxEps, numBins, filePath));
+delete(filePath); % remove the temporary time-series data file
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
+	error('Call to TISEAN function ''d2'' failed.');
+end
+if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
+if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
+if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end
+if ~exist([filePath '.c2'], 'file')
+	error('TISEAN function ''d2'' did not produce a .c2 output file.');
+end
+
+fid = fopen([filePath '.c2']);
+fileLines = textscan(fid, '%[^\n]');
+fclose(fid);
+delete([filePath '.c2']);
+fileLines = fileLines{1};
+
+w = strmatch('#dim=', fileLines);
+if length(w) ~= M
+	error('TISEAN function ''d2'' returned an unexpected number of data blocks.');
+end
+w(end + 1) = length(fileLines) + 1;
+
+co_logr = [];
+co_logC = zeros(numBins, M); % ln(C(r)), the raw correlation sum at each (length scale, embedding dim)
+for d = 1:M
+	ss = fileLines(w(d) + 1:w(d + 1) - 1);
+	r = zeros(numBins, 1); Cr = zeros(numBins, 1);
+	nn = 0;
+	for jj = 1:length(ss)
+		tmp = textscan(ss{jj}, '%f%f');
+		if all(cellfun(@isempty, tmp))
+			break
+		end
+		nn = nn + 1;
+		r(nn) = tmp{1};
+		Cr(nn) = tmp{2};
+	end
+	if nn ~= numBins
+		error('TISEAN function ''d2'' returned an unexpected number of length scales.');
+	end
+	if d == 1
+		co_logr = log(r); % .c2 stores raw (geometrically-spaced) r and C(r), both need log()
+	end
+	co_logC(:, d) = log(Cr);
+end
+
+% A zero-pair bin (Cr = 0, so log(Cr) = -Inf) would silently poison every
+% downstream mean/min/range/polyfit statistic that touches it. The minEps
+% floor above was tuned to avoid this in practice (see comment there), but
+% as a safety net for configurations it doesn't fully cover, treat a
+% residual non-finite value as an honest "not enough data to estimate a
+% correlation-dimension curve at every requested embedding dimension" and
+% bail out, rather than silently propagating -Inf/NaN into the fits below:
+if any(~isfinite(bc_logN(:))) || any(~isfinite(co_logC(:)))
+	fprintf(1, 'No good outputs obtained from the box-counting/correlation dimension curves.\n');
+	out = NaN; return
+end
 
 if doPlot
-	plot(bc_logr, bc_logNlogr, 'o-')
 	plot(bc_logr, bc_logN, 'o-')
 	input('BC')
-	if compute_in
-		plot(in_logr, in_logllogr, 'o-')
-		plot(in_logr, in_logl, 'o-')
-		input('IN')
-	end
-	plot(co_logr, co_logClogr, 'o-')
 	plot(co_logr, co_logC, 'o-')
 	input('CO')
 end
@@ -163,11 +252,6 @@ out = struct;
 
 % Box counting dimension:
 out = SUB_mch(bc_logr, bc_logN, 'bc', out);
-
-% Information dimension:
-if compute_in
-	out = SUB_mch(bc_logr, bc_logN, 'in', out);
-end
 
 % Correlation dimension:
 out = SUB_mch(co_logr, co_logC, 'co', out);
@@ -190,20 +274,6 @@ out = SUB_ScalingRange(bc_logr, bc_logN(:, 3), 'scr_bc_m3', out);
 % Box counting dimension m = chosen/given
 out = SUB_ScalingRange(bc_logr, bc_logN(:, mopt), 'scr_bc_mopt', out);
 
-if compute_in
-	% Information dimension, m = 1
-	out = SUB_ScalingRange(in_logr, in_logl(:, 1), 'scr_in_m1', out);
-
-	% Information dimension m = 2
-	out = SUB_ScalingRange(in_logr, in_logl(:, 2), 'scr_in_m2', out);
-
-	% Information dimension m = 3
-	out = SUB_ScalingRange(in_logr, in_logl(:, 3), 'scr_in_m3', out);
-
-	% Information dimension m = chosen/given
-	out = SUB_ScalingRange(in_logr, in_logl(:, mopt), 'scr_in_mopt', out);
-end
-
 % Correlation dimension, m = 1
 out = SUB_ScalingRange(co_logr, co_logC(:, 1), 'scr_co_m1', out);
 
@@ -223,11 +293,6 @@ out = SUB_ScalingRange(co_logr, co_logC(:, mopt), 'scr_co_mopt', out);
 
 % Box counting dimension
 out = SUB_bestm(bc_logr, bc_logN, 'bc', out);
-
-if compute_in
-	% Information dimension
-	out = SUB_bestm(in_logr, in_logl, 'in', out);
-end
 
 % Correlation dimension
 out = SUB_bestm(co_logr, co_logC, 'co', out);
@@ -263,10 +328,15 @@ function out = SUB_mch(logr, logN, prefix, out)
 	out.([prefix, '_meandiff']) = mean([mean(logN(:, 2)) - mean(logN(:, 1)), mean(logN(:, 3)) - mean(logN(:, 2))]);
 
 	% (v) slopes and goodness of fit across whole r range
-	[out.([prefix, '_lfitm1']), out.([prefix, '_lfitb1']), out.([prefix, '_lfitmeansqdev1'])] = subsublinfit(logr, logN(:, 1)');
-	[out.([prefix, '_lfitm2']), out.([prefix, '_lfitb2']), out.([prefix, '_lfitmeansqdev2'])] = subsublinfit(logr, logN(:, 2)');
-	[out.([prefix, '_lfitm3']), out.([prefix, '_lfitb3']), out.([prefix, '_lfitmeansqdev3'])] = subsublinfit(logr, logN(:, 3)');
-	[out.([prefix, '_lfitmmax']), out.([prefix, '_lfitbmax']), out.([prefix, '_lfitmeansqdevmax'])] = subsublinfit(logr, logN(:, end)');
+	% logr/logN are both columns here (this used to rely on TSTOOL's
+	% spacing() returning logr as a row, transposing logN(:,k) to match; with
+	% logr now a column too, that stray transpose inside subsublinfit turned
+	% "y - pfit" into an N-by-N broadcast instead of an N-by-1 residual, so
+	% it's dropped):
+	[out.([prefix, '_lfitm1']), out.([prefix, '_lfitb1']), out.([prefix, '_lfitmeansqdev1'])] = subsublinfit(logr, logN(:, 1));
+	[out.([prefix, '_lfitm2']), out.([prefix, '_lfitb2']), out.([prefix, '_lfitmeansqdev2'])] = subsublinfit(logr, logN(:, 2));
+	[out.([prefix, '_lfitm3']), out.([prefix, '_lfitb3']), out.([prefix, '_lfitmeansqdev3'])] = subsublinfit(logr, logN(:, 3));
+	[out.([prefix, '_lfitmmax']), out.([prefix, '_lfitbmax']), out.([prefix, '_lfitmeansqdevmax'])] = subsublinfit(logr, logN(:, end));
 
 	function [m, b, meansqdev] = subsublinfit(x, y)
 		p1 = polyfit(x, y, 1);
@@ -292,7 +362,9 @@ function out = SUB_ScalingRange(logr, logN, prefix, out)
 	mybad = zeros(length(stptr), length(endptr));
 	for i = 1:length(stptr)
 		for j = 1:length(endptr)
-			mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j))');
+			% logr/logN both columns here -- see SUB_mch's comment on the
+			% same stray-transpose issue:
+			mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 		end
 	end
 	[a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
@@ -308,7 +380,7 @@ function out = SUB_ScalingRange(logr, logN, prefix, out)
 
 	% Do the optimum fit again
 	x = logr(stptr(a):endptr(b));
-	y = logN(stptr(a):endptr(b))';
+	y = logN(stptr(a):endptr(b));
 	p = polyfit(x, y, 1);
 	pfit = p(1) * x + p(2);
 	res = pfit - y;
@@ -347,14 +419,16 @@ function out = SUB_bestm(logr, logNN, prefix, out)
 		mybad = zeros(length(stptr), length(endptr));
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)
-				mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j))');
+				% logr/logN both columns here -- see SUB_mch's comment on the
+				% same stray-transpose issue:
+				mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 			end
 		end
 		[a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
 
 		% Do the optimum fit again
 		x = logr(stptr(a):endptr(b));
-		y = logN(stptr(a):endptr(b))';
+		y = logN(stptr(a):endptr(b));
 		p = polyfit(x, y, 1);
 		pfit = p(1) * x + p(2);
 		res = pfit - y;
