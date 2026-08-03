@@ -109,12 +109,6 @@ addpath(fullfile(pwd,'Toolboxes','Misc'));
 fprintf(1,', catch22')
 addpath(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'));
 
-% TSTOOL
-fprintf(1,', TSTOOL')
-addpath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
-% Run the routine adds the necessary paths for OpenTSTOOL:
-settspath(fullfile(pwd,'Toolboxes','OpenTSTOOL'));
-
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
 fprintf(1,', Information dynamics toolkit, ')

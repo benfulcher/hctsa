@@ -19,7 +19,6 @@ CO_Embed2_Dist.m
 CO_Embed2_Shapes.m
 CO_HistogramAMI.m
 CO_StickAngles.m
-CO_TSTL_amutual2.m
 DN_CompareKSFit.m
 DN_Compare_zscore.m
 DN_Cumulants.m
@@ -54,10 +53,7 @@ MF_StateSpace_n4sid.m
 MF_armax.m
 NL_TISEAN_c1.m
 NL_TISEAN_d2.m
-NL_TSTL_FractalDimensions.m
-NL_TSTL_GPCorrSum.m
-NL_TSTL_PoincareSection.m
-NL_TSTL_ReturnTime.m
+NL_FractalDimensions.m
 NL_embed_PCA.m
 NW_VisibilityGraph.m
 PH_ForcePotential.m
@@ -73,7 +69,7 @@ SB_TransitionMatrix.m
 SB_TransitionpAlphabet.m
 SC_FluctAnal.m
 SD_SurrogateTest.m
-SD_TSTL_surrogates.m
+SD_surrogates.m
 SP_Summaries.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
@@ -114,8 +110,8 @@ DT_IsSeasonal.m
 EN_Randomize.m
 FC_LocalSimple.m
 FC_LoopLocalSimple.m
-NL_TSTL_FractalDimensions.m
-NL_TSTL_LargestLyap.m
+NL_FractalDimensions.m
+NL_LargestLyap.m
 NW_VisibilityGraph.m
 PD_PeriodicityWang.m
 PP_Compare.m
@@ -175,40 +171,25 @@ Michael Small Package (provided)
 NL_MS_LZcomplexity.m
 NL_MS_fnn.m
 NL_MS_nlpe.m
-NL_TSTL_BoxCorrDim.m
-NL_TSTL_PoincareSection.m
-NL_TSTL_ReturnTime.m
-NL_TSTL_TakensEstimator.m
+NL_BoxCorrDim.m
+NL_PoincareSection.m
+NL_ReturnTime.m
+NL_TakensEstimator.m
 NL_embed_PCA.m
 SD_SurrogateTest.m
 SY_TISEAN_nstat_z.m
 
 TISEAN Package (GPL; provided)
 
+NL_BoxCorrDim.m
+NL_GPCorrSum.m
+NL_LargestLyap.m
+NL_PoincareSection.m
 NL_TISEAN_c1.m
 NL_TISEAN_d2.m
+NL_TakensEstimator.m
+NL_dimensions.m
 SY_TISEAN_nstat_z.m
-
-TSTOOL Package (GPL; provided)
-
-CO_TSTL_AutoCorrMethod.m
-CO_TSTL_amutual.m
-CO_TSTL_amutual2.m
-NL_TSTL_BoxCorrDim.m
-NL_CaosMethod.m
-NL_TSTL_FractalDimensions.m
-NL_TSTL_GPCorrSum.m
-NL_TSTL_LargestLyap.m
-NL_TSTL_PoincareSection.m
-NL_TSTL_ReturnTime.m
-NL_TSTL_TakensEstimator.m
-NL_TSTL_acp.m
-NL_TSTL_dimensions.m
-NL_embed_PCA.m
-SD_TSTL_surrogates.m
-SY_TISEAN_nstat_z.m
-TSTL_delaytime.m
-TSTL_localdensity.m
 
 ARFIT Toolbox (provided)
 
@@ -227,7 +208,7 @@ MF_GP_hyperparameters.m
 
 CRP Toolbox (GPL, provided)
 
-NL_TSTL_BoxCorrDim.m
+NL_BoxCorrDim.m
 NL_crptool_fnn.m
 
 HMM Toolbox (MIT License, provided)

@@ -674,10 +674,10 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % SD_TSTL_surrogates (now native, no TSTOOL dependency)
+        % SD_surrogates (now native, no TSTOOL dependency)
         %-------------------------------------------------------------
-        function test_SD_TSTL_surrogates_DetectsNonlinearity(testCase)
-            % SD_TSTL_surrogates used to depend on TSTOOL's signal/tc3/trev;
+        function test_SD_surrogates_DetectsNonlinearity(testCase)
+            % SD_surrogates used to depend on TSTOOL's signal/tc3/trev;
             % it now generates surrogates via SD_MakeSurrogates and
             % evaluates CO_tc3/CO_trev on each (both already TSTOOL-free
             % reimplementations of the same expressions). Confirm the
@@ -688,7 +688,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % destroys -- should look highly significant.
             rng(31);
             yLinear = randn(500,1);
-            outLinear = SD_TSTL_surrogates(yLinear,1,50,1,'tc3','default');
+            outLinear = SD_surrogates(yLinear,1,50,1,'tc3','default');
             testCase.verifyGreaterThan(outLinear.ztestp, 0.05, ...
                 'Gaussian noise should not look significantly different from its surrogates.');
 
@@ -698,7 +698,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = SD_TSTL_surrogates(yChaotic,1,50,1,'tc3','default');
+            outChaotic = SD_surrogates(yChaotic,1,50,1,'tc3','default');
             testCase.verifyLessThan(outChaotic.ztestp, 1e-6, ...
                 'The logistic map''s nonlinear structure should look highly significant against its surrogates.');
         end
@@ -727,10 +727,10 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % NL_TSTL_TakensEstimator (now via TISEAN d2/c2t, no TSTOOL dependency)
+        % NL_TakensEstimator (now via TISEAN d2/c2t, no TSTOOL dependency)
         %-------------------------------------------------------------
-        function test_NL_TSTL_TakensEstimator_DiscriminatesDimension(testCase)
-            % NL_TSTL_TakensEstimator used to depend on TSTOOL's
+        function test_NL_TakensEstimator_DiscriminatesDimension(testCase)
+            % NL_TakensEstimator used to depend on TSTOOL's
             % signal/takens_estimator; it now uses TISEAN's d2 and c2t
             % (already relied on by NL_TISEAN_d2.m) instead. Confirm the
             % replacement still does its actual job: high-dimensional
@@ -740,7 +740,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % estimate close to 1, clearly distinguishing it from noise.
             rng(41);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_TakensEstimator(yNoise,-1,0.05,1,{1,3});
+            outNoise = NL_TakensEstimator(yNoise,-1,0.05,1,{1,3});
             testCase.verifyGreaterThan(outNoise, 2, ...
                 'Structureless noise embedded at m=3 should have a dimension estimate well above 1.');
 
@@ -750,7 +750,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TSTL_TakensEstimator(yChaotic,-1,0.05,1,{1,3});
+            outChaotic = NL_TakensEstimator(yChaotic,-1,0.05,1,{1,3});
             testCase.verifyLessThan(outChaotic, 1.5, ...
                 'The logistic map''s known correlation dimension (~1) should give a low estimate.');
             testCase.verifyLessThan(outChaotic, outNoise, ...
@@ -758,12 +758,12 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % NL_TSTL_GPCorrSum (now via TISEAN d2, no TSTOOL dependency)
+        % NL_GPCorrSum (now via TISEAN d2, no TSTOOL dependency)
         %-------------------------------------------------------------
-        function test_NL_TSTL_GPCorrSum_DiscriminatesDimension(testCase)
-            % NL_TSTL_GPCorrSum used to depend on TSTOOL's
+        function test_NL_GPCorrSum_DiscriminatesDimension(testCase)
+            % NL_GPCorrSum used to depend on TSTOOL's
             % signal/corrsum; it now uses TISEAN's d2 (already relied on
-            % by NL_TISEAN_d2.m and NL_TSTL_TakensEstimator.m) instead,
+            % by NL_TISEAN_d2.m and NL_TakensEstimator.m) instead,
             % fitting its own robust line to d2's raw (r, C(r))
             % correlation-sum output. Confirm the replacement still does
             % its actual job: a logistic map (known correlation dimension
@@ -771,7 +771,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % structureless noise's estimate at the same embedding.
             rng(51);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_GPCorrSum(yNoise,-1,0.5,40,20,{1,3});
+            outNoise = NL_GPCorrSum(yNoise,-1,0.5,40,20,{1,3});
             testCase.verifyGreaterThan(outNoise.robfit_a2, 2, ...
                 'Structureless noise embedded at m=3 should have a dimension estimate well above 1.');
 
@@ -781,15 +781,15 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TSTL_GPCorrSum(yChaotic,-1,0.5,40,20,{1,3});
+            outChaotic = NL_GPCorrSum(yChaotic,-1,0.5,40,20,{1,3});
             testCase.verifyLessThan(outChaotic.robfit_a2, 1.5, ...
                 'The logistic map''s known correlation dimension (~1) should give a low estimate.');
             testCase.verifyLessThan(outChaotic.robfit_a2, outNoise.robfit_a2, ...
                 'The logistic map should have a clearly lower dimension estimate than structureless noise.');
         end
 
-        function test_NL_TSTL_PoincareSection_DiscriminatesStructure(testCase)
-            % NL_TSTL_PoincareSection used to depend on TSTOOL's
+        function test_NL_PoincareSection_DiscriminatesStructure(testCase)
+            % NL_PoincareSection used to depend on TSTOOL's
             % signal/poincare, which cut a hyperplane orthogonal to the
             % local tangent vector at a chosen reference point. TISEAN's
             % poincare has no such reference-point concept -- it cuts a
@@ -803,14 +803,14 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % (lower occupancy entropy) than noise's near-uniform fill.
             rng(61);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_PoincareSection(yNoise,'max',{1,3});
+            outNoise = NL_PoincareSection(yNoise,'max',{1,3});
 
             sigma = 10; rho = 28; beta = 8/3;
             lorenzODE = @(t,v) [sigma*(v(2)-v(1)); v(1)*(rho-v(3))-v(2); v(1)*v(2)-beta*v(3)];
             [~, sol] = ode45(lorenzODE, 0:0.02:400, [1,1,1]);
             yLorenz = sol(2001:end, 1); % discard transient
             yLorenz = zscore(yLorenz(1:5:end)); % downsample
-            outLorenz = NL_TSTL_PoincareSection(yLorenz,'max',{1,3});
+            outLorenz = NL_PoincareSection(yLorenz,'max',{1,3});
 
             testCase.verifyLessThan(outLorenz.pcross, 0.5 * outNoise.pcross, ...
                 'The Lorenz flow should cross a fixed-threshold hyperplane far less often than noise.');
@@ -818,8 +818,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The Lorenz section should have lower box-occupancy entropy (more clustered) than noise.');
         end
 
-        function test_NL_TSTL_LargestLyap_DiscriminatesStructure(testCase)
-            % NL_TSTL_LargestLyap used to depend on TSTOOL's
+        function test_NL_LargestLyap_DiscriminatesStructure(testCase)
+            % NL_LargestLyap used to depend on TSTOOL's
             % signal/largelyap; it now uses TISEAN's lyap_r (Rosenstein
             % method) instead, which tracks the same kind of single-
             % nearest-neighbor divergence but has no equivalent of Nref or
@@ -832,21 +832,21 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % steps before saturating.
             rng(71);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_LargestLyap(yNoise,-1,0.1,0.01,3,{1,4});
+            outNoise = NL_LargestLyap(yNoise,-1,0.1,0.01,3,{1,4});
 
             sigma = 10; rho = 28; beta = 8/3;
             lorenzODE = @(t,v) [sigma*(v(2)-v(1)); v(1)*(rho-v(3))-v(2); v(1)*v(2)-beta*v(3)];
             [~, sol] = ode45(lorenzODE, 0:0.02:280, [1,1,1]);
             yLorenz = sol(2001:end, 1); % discard transient
             yLorenz = zscore(yLorenz);
-            outLorenz = NL_TSTL_LargestLyap(yLorenz,-1,0.1,0.01,3,{1,4});
+            outLorenz = NL_LargestLyap(yLorenz,-1,0.1,0.01,3,{1,4});
 
             testCase.verifyGreaterThan(outLorenz.to09max, 10 * outNoise.to09max, ...
                 'The Lorenz flow''s divergence curve should take far longer to saturate than noise''s.');
         end
 
-        function test_NL_TSTL_BoxCorrDim_DiscriminatesStructure(testCase)
-            % NL_TSTL_BoxCorrDim used to depend on TSTOOL's signal/corrdim;
+        function test_NL_BoxCorrDim_DiscriminatesStructure(testCase)
+            % NL_BoxCorrDim used to depend on TSTOOL's signal/corrdim;
             % it now uses TISEAN's boxcount (Renyi entropy of order Q=2.0
             % via box partitioning), taking its per-embedding-dimension
             % entropy increment as the analogue of corrdim's local-dimension
@@ -866,7 +866,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % during development showed the same qualitative shape.)
             rng(81);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_BoxCorrDim(yNoise,50,{1,5});
+            outNoise = NL_BoxCorrDim(yNoise,50,{1,5});
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -874,15 +874,15 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TSTL_BoxCorrDim(yChaotic,50,{1,5});
+            outChaotic = NL_BoxCorrDim(yChaotic,50,{1,5});
 
             testCase.verifyGreaterThan(outChaotic.mediand5, outNoise.mediand5, ...
                 ['The logistic map''s deterministic, tightly-clustered embedding should keep boxes ' ...
                  'populated to smaller length scales than noise, giving a higher median entropy increment.']);
         end
 
-        function test_TSTL_localdensity_MatchesBruteForceLoop(testCase)
-            % TSTL_localdensity used to depend on TSTOOL's 'localdensity',
+        function test_NL_localdensity_MatchesBruteForceLoop(testCase)
+            % NL_localdensity used to depend on TSTOOL's 'localdensity',
             % which the original author noted was "very poorly documented"
             % -- its exact algorithm was never confirmed. It's now a native
             % k-nearest-neighbor local density estimate (density(i) ~
@@ -898,7 +898,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             rng(91);
             y = randn(300,1);
             NNR = 4; past = 5;
-            out = TSTL_localdensity(y, NNR, past, {1,3});
+            out = NL_localdensity(y, NNR, past, {1,3});
 
             Y = BF_Embed(y, 1, 3, 0);
             N_embed = size(Y,1);
@@ -916,8 +916,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(out.medianden, median(locdenBrute), 'RelTol', 1e-9);
         end
 
-        function test_NL_TSTL_dimensions_DiscriminatesDimension(testCase)
-            % NL_TSTL_dimensions used to depend on TSTOOL's
+        function test_NL_dimensions_DiscriminatesDimension(testCase)
+            % NL_dimensions used to depend on TSTOOL's
             % signal/dimensions; it now uses TISEAN's boxcount (Q=0.0, the
             % box-counting dimension D0) and d2 (the correlation dimension
             % D2, matching TSTOOL's own pair-counting construction, unlike
@@ -927,7 +927,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % (which depended on TSTOOL's removed 'dimensions' output) was
             % deleted rather than kept as an unreachable branch. Also found
             % and fixed the same class of shape-mismatch bug as in
-            % NL_TSTL_LargestLyap.m (stray transposes in SUB_mch/
+            % NL_LargestLyap.m (stray transposes in SUB_mch/
             % SUB_ScalingRange/SUB_bestm that relied on TSTOOL's spacing()
             % returning a row vector). Confirm the replacement still does
             % its actual job: structureless noise should have a
@@ -935,7 +935,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % resolved embedding dimension) than a logistic map.
             rng(101);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_dimensions(yNoise,50,{1,5});
+            outNoise = NL_dimensions(yNoise,50,{1,5});
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -943,14 +943,14 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TSTL_dimensions(yChaotic,50,{1,5});
+            outChaotic = NL_dimensions(yChaotic,50,{1,5});
 
             testCase.verifyGreaterThan(outNoise.scr_co_mopt_scaling_exp, outChaotic.scr_co_mopt_scaling_exp, ...
                 'Structureless noise should have a higher correlation-dimension scaling exponent than a logistic map.');
         end
 
-        function test_NL_TSTL_ReturnTime_DiscriminatesPeriodicity(testCase)
-            % NL_TSTL_ReturnTime used to depend on TSTOOL's 'return_time';
+        function test_NL_ReturnTime_DiscriminatesPeriodicity(testCase)
+            % NL_ReturnTime used to depend on TSTOOL's 'return_time';
             % TISEAN has no direct equivalent (its own recurrence tool,
             % 'recurr', defines neighborhoods by a fixed epsilon radius,
             % not a nearest-neighbor count), so this is now computed
@@ -970,18 +970,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % timescale.
             rng(111);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_ReturnTime(yNoise, 5, 1, 40, -1, {1,8});
+            outNoise = NL_ReturnTime(yNoise, 5, 1, 40, -1, {1,8});
 
             t = (1:2000)';
             yPeriodic = sin(2*pi*t/17);
-            outPeriodic = NL_TSTL_ReturnTime(yPeriodic, 5, 1, 40, -1, {1,8});
+            outPeriodic = NL_ReturnTime(yPeriodic, 5, 1, 40, -1, {1,8});
 
             testCase.verifyLessThan(outPeriodic.std, 0.5 * outNoise.std, ...
                 'A periodic signal''s return times should cluster far more tightly than noise''s.');
         end
 
-        function test_TSTL_delaytime_DiscriminatesStructure(testCase)
-            % TSTL_delaytime used to depend on TSTOOL's 'delaytime'; that
+        function test_NL_delaytime_DiscriminatesStructure(testCase)
+            % NL_delaytime used to depend on TSTOOL's 'delaytime'; that
             % code turned out to be pure MATLAB itself (vendored in this
             % repo under Toolboxes/OpenTSTOOL), so its exact algorithm is
             % reproduced natively here rather than approximated -- with two
@@ -998,18 +998,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % error quickly rises to the scale of the data's full variance.
             rng(121);
             yNoise = randn(2000,1);
-            outNoise = TSTL_delaytime(yNoise, 0.1, 1, 'default');
+            outNoise = NL_delaytime(yNoise, 0.1, 1, 'default');
 
             t = (1:2000)';
             yPeriodic = sin(2*pi*t/17);
-            outPeriodic = TSTL_delaytime(yPeriodic, 0.1, 1, 'default');
+            outPeriodic = NL_delaytime(yPeriodic, 0.1, 1, 'default');
 
             testCase.verifyGreaterThan(outNoise.meantau, 10 * outPeriodic.meantau, ...
                 'Structureless noise''s reconstruction error should be far higher than a periodic signal''s.');
         end
 
-        function test_NL_TSTL_FractalDimensions_DiscriminatesDimension(testCase)
-            % NL_TSTL_FractalDimensions used to depend on TSTOOL's
+        function test_NL_FractalDimensions_DiscriminatesDimension(testCase)
+            % NL_FractalDimensions used to depend on TSTOOL's
             % signal/fracdims; its actual computation (fracdims.m is a thin
             % wrapper around the compiled gendimest.cpp, vendored under
             % Toolboxes/OpenTSTOOL) turned out to be a well-defined,
@@ -1027,7 +1027,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % clearly below structureless noise's.
             rng(131);
             yNoise = randn(2000,1);
-            outNoise = NL_TSTL_FractalDimensions(yNoise,2,10,-1,1,5,10,32,{1,5});
+            outNoise = NL_FractalDimensions(yNoise,2,10,-1,1,5,10,32,{1,5});
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -1035,7 +1035,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TSTL_FractalDimensions(yChaotic,2,10,-1,1,5,10,32,{1,5});
+            outChaotic = NL_FractalDimensions(yChaotic,2,10,-1,1,5,10,32,{1,5});
 
             testCase.verifyLessThan(outChaotic.meanDq, 1.5, ...
                 'The logistic map''s known dimension (~1) should give a low estimate.');

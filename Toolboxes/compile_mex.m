@@ -143,23 +143,6 @@ if ~anyErrors
 end
 
 % ------------------------------------------------------------------------------
-% TSTOOL routines (such a mess)
-% ------------------------------------------------------------------------------
-fprintf(1,'TSTOOL...');
-cd(fullfile(toolDir,'OpenTSTOOL','mex-dev'))
-anyErrors = false;
-try
-    makemex
-    settspath(fullfile(toolDir,'OpenTSTOOL'));
-catch emsg
-    fprintf(1,'---ERROR: %s\n',emsg.message);
-    fprintf(1,'The TSTOOL package failed to compile correctly.\n');
-end
-if ~anyErrors
-    fprintf(1,'Done!\n');
-end
-
-% ------------------------------------------------------------------------------
 % TISEAN
 % ------------------------------------------------------------------------------
 fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on your system\n' ...
