@@ -91,7 +91,6 @@ outFilePath = [filePath '.box'];
 
 [~, res] = system(sprintf('boxcount -M1,%u -d%u -Q2.0 -#%u -o %s %s', ...
 						  mMax, tau, numBins, outFilePath, filePath));
-delete(filePath); % remove the temporary time-series data file
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist(outFilePath, 'file'), delete(outFilePath); end

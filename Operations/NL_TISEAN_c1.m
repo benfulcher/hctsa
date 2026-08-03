@@ -154,7 +154,6 @@ filePath = BF_WriteTempFile(y);
 tic
 [~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s', ...
 						  tau, mmm(1), mmm(2), tsep, Nref, filePath, filePath));
-delete(filePath) % remove the temporary data file
 
 if isempty(res)
 	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output

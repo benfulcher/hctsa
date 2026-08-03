@@ -130,7 +130,6 @@ end
 % default (spans the full data interval, so comfortably covers the
 % rad-standard-deviations cutoff used below):
 [~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -N%u %s', tau, m, past, NrefTISEAN, filePath));
-delete(filePath); % remove the temporary time-series data file
 if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
 if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
 if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end

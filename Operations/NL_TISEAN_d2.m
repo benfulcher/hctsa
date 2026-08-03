@@ -118,7 +118,6 @@ end
 %% Run the TISEAN code, d2
 % ------------------------------------------------------------------------------
 [~, res] = system(sprintf('d2 -d%u -M1,%u -t%u %s', tau, maxm, theilerWin, filePath));
-delete(filePath) % remove the temporary time-series data file
 %  * extension .stat: This file shows the current status of the estimate.
 if exist([filePath '.stat'], 'file')
 	delete([filePath '.stat']); % perhaps this file has something useful in it, but it's probably not for us...

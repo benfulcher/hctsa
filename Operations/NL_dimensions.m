@@ -103,11 +103,9 @@ outFilePath = [filePath '.box'];
 						  M, tau, numBins, outFilePath, filePath));
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist(outFilePath, 'file'), delete(outFilePath); end
-	delete(filePath);
 	error('Call to TISEAN function ''boxcount'' failed.');
 end
 if ~exist(outFilePath, 'file')
-	delete(filePath);
 	error('TISEAN function ''boxcount'' did not produce a .box output file.');
 end
 
@@ -119,7 +117,6 @@ fileLines = fileLines{1};
 
 w = strmatch('#component', fileLines);
 if length(w) ~= M
-	delete(filePath);
 	error('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
 end
 w(end + 1) = length(fileLines) + 1;
@@ -140,7 +137,6 @@ for d = 1:M
 		logN(nn) = tmp{2}; % raw H_0(epsilon) = ln(N(epsilon)) already
 	end
 	if nn ~= numBins
-		delete(filePath);
 		error('TISEAN function ''boxcount'' returned an unexpected number of length scales.');
 	end
 	if d == 1
@@ -171,7 +167,6 @@ maxEps = std(y) * sqrt(M);
 minEps = maxEps / 10;
 [~, res] = system(sprintf('d2 -d%u -M1,%u -t0 -N0 -r%g -R%g -#%u %s', ...
 						  tau, M, minEps, maxEps, numBins, filePath));
-delete(filePath); % remove the temporary time-series data file
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
 	error('Call to TISEAN function ''d2'' failed.');

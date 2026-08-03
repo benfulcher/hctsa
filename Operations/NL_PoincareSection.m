@@ -111,7 +111,6 @@ outFilePath = [filePath '.poin'];
 % threshold (that coordinate's mean):
 [~, res] = system(sprintf('poincare -d%u -m%u -q%u -C%u -o %s %s', ...
 						  tau, m, m, direction, outFilePath, filePath));
-delete(filePath); % remove the temporary time-series data file
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist(outFilePath, 'file'), delete(outFilePath); end

@@ -120,7 +120,6 @@ end
 % ------------------------------------------------------------------------------
 tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s', tau, maxm, theilerWin, filePath);
 [~, res] = system(tisean_command);
-delete(filePath) % remove the temporary time-series data file
 
 % first column: the embedding dimension
 % second column: the fraction of false nearest neighbors

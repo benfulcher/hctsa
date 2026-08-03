@@ -149,7 +149,6 @@ outFilePath = [filePath '.ros'];
 
 [~, res] = system(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
 						  tau, m, past, maxtstep, outFilePath, filePath));
-delete(filePath); % remove the temporary time-series data file
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist(outFilePath, 'file'), delete(outFilePath); end

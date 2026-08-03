@@ -124,7 +124,6 @@ minNeighbors = 30; % minimum number of neighbors for fit (TISEAN's -k default)
 pstart = (m - 1) * tau;
 minSafeClength = minNeighbors + 3 * incStep + 2 * pstart - 1;
 if clength < minSafeClength
-	delete(filePath); % remove the temporary file
 	warning('Not enough neighbors to reliably estimate prediction errors with these settings');
 	out = NaN; return
 end
@@ -134,7 +133,6 @@ end
 % ------------------------------------------------------------------------------
 
 [~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s', numSeg, tau, m, filePath));
-delete(filePath) % remove the temporary file filePath
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 % ------------------------------------------------------------------------------
