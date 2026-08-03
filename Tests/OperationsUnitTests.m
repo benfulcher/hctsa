@@ -845,6 +845,42 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The Lorenz flow''s divergence curve should take far longer to saturate than noise''s.');
         end
 
+        function test_NL_TSTL_BoxCorrDim_DiscriminatesStructure(testCase)
+            % NL_TSTL_BoxCorrDim used to depend on TSTOOL's signal/corrdim;
+            % it now uses TISEAN's boxcount (Renyi entropy of order Q=2.0
+            % via box partitioning), taking its per-embedding-dimension
+            % entropy increment as the analogue of corrdim's local-dimension
+            % matrix (see the operation's header comment). Confirm the
+            % replacement still does its actual job using the same
+            % noise-vs-logistic-map contrast as the other TSTOOL-derived
+            % operations in this file. (A Lorenz-vs-noise contrast was also
+            % tried here, but at accessible series lengths the two aren't
+            % reliably distinguishable by this particular box-counting
+            % statistic -- Lorenz's true correlation dimension, ~2.05, is
+            % close enough to embedding dimension m=5 that it hits the same
+            % small-epsilon finite-sample sparsity collapse as noise does,
+            % at similar length scales; only a much lower-dimensional
+            % system like the logistic map (D~1) collapses distinctly
+            % later. This is a property of the estimator/sample size, not a
+            % migration defect -- the direct old-vs-new TSTOOL comparison
+            % during development showed the same qualitative shape.)
+            rng(81);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_BoxCorrDim(yNoise,50,{1,5});
+
+            N = 2000;
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = NL_TSTL_BoxCorrDim(yChaotic,50,{1,5});
+
+            testCase.verifyGreaterThan(outChaotic.mediand5, outNoise.mediand5, ...
+                ['The logistic map''s deterministic, tightly-clustered embedding should keep boxes ' ...
+                 'populated to smaller length scales than noise, giving a higher median entropy increment.']);
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
