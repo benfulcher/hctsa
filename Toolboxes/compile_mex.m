@@ -145,10 +145,55 @@ end
 % ------------------------------------------------------------------------------
 % TISEAN
 % ------------------------------------------------------------------------------
-fprintf(1,['NB: To use TISEAN routines, you need to compile and install them on your system\n' ...
-    'In the commandline, navigate to the Toolboxes%sTisean_3.0.1 directory\n  ''./configure'',' ...
-    ' ''make'' and ''make install'' commands\n(cf. Documentation for instructions,' ...
-    ' including implementations for Windows)...\n'],filesep);
+fprintf(1,'TISEAN nonlinear time-series analysis routines...');
+tiseanDir = fullfile(toolDir,'Tisean_3.0.1');
+cd(tiseanDir);
+if ispc
+    fprintf(1,['\nERROR: automatic compilation of TISEAN is not supported on Windows.\n' ...
+        'See Toolboxes%sTisean_3.0.1%sindex.html for manual build instructions.\n'],filesep,filesep);
+else
+    % Build against a prefix outside the repo, in case the repo lives under a
+    % path containing spaces (e.g., a Dropbox-synced folder): TISEAN's 1990s-era
+    % configure/Makefiles/install-sh don't quote paths internally, so an
+    % install prefix with spaces breaks 'make install'. Compiling itself is
+    % unaffected by spaces in the source path, so we build in place and only
+    % route the *install* step through a space-free temporary prefix, then
+    % copy the resulting binaries into place with MATLAB's own copyfile.
+    buildPrefix = tempname;
+    mkdir(fullfile(buildPrefix,'bin'));
+    % Modern C compilers (e.g., Xcode Clang) reject this package's K&R-style
+    % implicit-int/implicit-function-declaration code by default; -std=gnu89
+    % restores the old C89 semantics it was written against.
+    tiseanCC = 'gcc -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration';
+    [statusConfigure,outConfigure] = system(sprintf('CC="%s" ./configure --prefix=%s',tiseanCC,buildPrefix));
+    if statusConfigure~=0
+        fprintf(1,'\nERROR: TISEAN ./configure failed:\n%s\n',outConfigure);
+    else
+        [statusMake,outMake] = system('make');
+        if statusMake~=0
+            fprintf(1,'\nERROR: TISEAN make failed:\n%s\n',outMake);
+        else
+            % NB: 'make install' runs its own "missing" self-check that
+            % reports false positives (it probes each binary by bare name
+            % before bin/ is on PATH), so verify success directly against
+            % buildPrefix/bin instead of trusting its exit status or missing.log.
+            system('make install');
+            keyBinaries = {'c1','d2','c2d','c2g','c2t','nstat_z','false_nearest'};
+            builtOk = all(cellfun(@(f)isfile(fullfile(buildPrefix,'bin',f)),keyBinaries));
+            if builtOk
+                if ~isfolder('bin')
+                    mkdir('bin');
+                end
+                copyfile(fullfile(buildPrefix,'bin'),'bin');
+                system('chmod +x bin/*');
+                fprintf(1,' done (binaries installed to %s).\n',fullfile(tiseanDir,'bin'));
+            else
+                fprintf(1,'\nERROR: TISEAN build finished but required binaries are missing.\n');
+            end
+        end
+    end
+    rmdir(buildPrefix,'s');
+end
 
 %-------------------------------------------------------------------------------
 % CATCH22

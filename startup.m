@@ -115,21 +115,20 @@ fprintf(1,', Information dynamics toolkit, ')
 javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
-% Add path for TISEAN (ASSUMING in ~/bin directory):
+% Add path for TISEAN binaries (compiled locally into Toolboxes/Tisean_3.0.1/bin
+% by install.m; falls back to ~/bin for older manual installations):
 % ------------------------------------------------------------------------------
-[~,homeDir] = system('echo $HOME'); % get system home directory
-homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
-tiseanBinaryLocation = fullfile(homeDir,'bin');
+tiseanBinaryLocation = fullfile(pwd,'Toolboxes','Tisean_3.0.1','bin');
+if ~isfolder(tiseanBinaryLocation)
+    [~,homeDir] = system('echo $HOME'); % get system home directory
+    homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
+    tiseanBinaryLocation = fullfile(homeDir,'bin');
+end
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
     sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
     setenv('PATH', sysPath)
     fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);
 end
-
-% TISEAN also requires this DYLD path to be set (I assume this works also on
-% cygwin/Windows?):
-setenv('DYLD_LIBRARY_PATH','/usr/local/bin');
-fprintf(1,'DYLD library path (for TISEAN).');
 
 % ------------------------------------------------------------------------------
 %% Finished:
