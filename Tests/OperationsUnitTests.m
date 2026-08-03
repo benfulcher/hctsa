@@ -818,6 +818,33 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The Lorenz section should have lower box-occupancy entropy (more clustered) than noise.');
         end
 
+        function test_NL_TSTL_LargestLyap_DiscriminatesStructure(testCase)
+            % NL_TSTL_LargestLyap used to depend on TSTOOL's
+            % signal/largelyap; it now uses TISEAN's lyap_r (Rosenstein
+            % method) instead, which tracks the same kind of single-
+            % nearest-neighbor divergence but has no equivalent of Nref or
+            % NNR (always uses all points / exactly one neighbor -- see the
+            % operation's header comment). Confirm the replacement still
+            % does its actual job: structureless noise has no real
+            % correlation between "nearest neighbors", so its divergence
+            % curve saturates almost immediately, while a smooth chaotic
+            % flow (Lorenz) unfolds its divergence smoothly over many more
+            % steps before saturating.
+            rng(71);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_LargestLyap(yNoise,-1,0.1,0.01,3,{1,4});
+
+            sigma = 10; rho = 28; beta = 8/3;
+            lorenzODE = @(t,v) [sigma*(v(2)-v(1)); v(1)*(rho-v(3))-v(2); v(1)*v(2)-beta*v(3)];
+            [~, sol] = ode45(lorenzODE, 0:0.02:280, [1,1,1]);
+            yLorenz = sol(2001:end, 1); % discard transient
+            yLorenz = zscore(yLorenz);
+            outLorenz = NL_TSTL_LargestLyap(yLorenz,-1,0.1,0.01,3,{1,4});
+
+            testCase.verifyGreaterThan(outLorenz.to09max, 10 * outNoise.to09max, ...
+                'The Lorenz flow''s divergence curve should take far longer to saturate than noise''s.');
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------

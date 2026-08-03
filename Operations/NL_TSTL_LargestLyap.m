@@ -3,10 +3,13 @@ function out = NL_TSTL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %
 % ---INPUTS:
 % y, the time series to analyze
-% Nref, number of randomly-chosen reference points (-1 == all)
+% Nref, number of randomly-chosen reference points (-1 == all). Accepted for
+%       backwards compatibility but no longer affects the computation -- see
+%       below.
 % maxtstep, maximum prediction length (samples)
 % past, exclude -- Theiler window idea
-% NNR, number of nearest neighbours
+% NNR, number of nearest neighbours. Accepted for backwards compatibility but
+%      no longer affects the computation -- see below.
 % embedParams, input to BF_Embed, how to time-delay-embed the time series, in
 %               the form {tau,m}, where string specifiers can indicate standard
 %               methods of determining tau or m.
@@ -15,15 +18,31 @@ function out = NL_TSTL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % a penalized linear regression to the scaling range in an attempt to fit to as
 % much of the range of scales as possible while simultaneously achieving the
 % best possible linear fit.
-
-% Uses the TSTOOL code 'largelyap'.
 %
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Uses TISEAN's 'lyap_r' (this operation previously used TSTOOL's
+% 'largelyap'). Both track the divergence of each point's single nearest
+% neighbor forward in time -- the Rosenstein/Wolf-style construction the
+% original docstring below already describes -- unlike TISEAN's other
+% Lyapunov tool, 'lyap_k' (Kantz method), which instead averages over all
+% neighbors within a range of epsilon-radius neighborhoods, a different
+% construction with its own extra free parameter (which epsilon to use).
+% 'lyap_r' has no equivalent of Nref (it always uses every valid point as a
+% reference) or NNR (it always uses exactly one nearest neighbor per
+% reference point, with no coarser k-NN averaging option); both real
+% NL_TSTL_LargestLyap mop-file entries already use Nref = -1 (TSTOOL's own
+% "use all points" convention, which is what 'lyap_r' always does anyway),
+% so only NNR (both entries use 3) is silently downgraded to an effective
+% k = 1.
 %
-% The algorithm used (using formula (1.5) in Parlitz Nonlinear Time Series
-% Analysis book) is very similar to the Wolf algorithm:
-% "Determining Lyapunov exponents from a time series", A. Wolf et al., Physica D
-% 16(3) 285 (1985)
+% Unlike TSTOOL's largelyap, which anchored its output so p(1) = 0, TISEAN's
+% lyap_r returns the raw (unanchored) log-divergence; p is re-anchored to
+% p(1) = 0 below so that all of the "proportion of max" statistics that
+% follow (which assume p rises from ~0) keep working exactly as before.
+%
+% cf. "Determining Lyapunov exponents from a time series", A. Wolf et al.,
+% Physica D 16(3) 285 (1985); M.T. Rosenstein, J.J. Collins, C.J. De Luca,
+% "A practical method for calculating largest Lyapunov exponents from small
+% data sets", Physica D 65(1-2) 117 (1993)
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -65,15 +84,14 @@ doPlot = 0; % whether to plot outputs to a figure
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
-% (1) Nref: number of randomly-chosen reference points
+% (1) Nref: number of randomly-chosen reference points. No longer used
+% (TISEAN's lyap_r always uses every valid point as a reference -- see
+% header comment); kept and validated only for call-signature compatibility.
 if nargin < 2 || isempty(Nref)
 	Nref = 0.5; % use half the length of the time series
 end
 if Nref < 1 && Nref > 0
 	Nref = round(N * Nref); % specify a proportion of time series length
-end
-if Nref > -1
-	fprintf('This algorithm relies on stochastic sampling of %u data points.\n', Nref)
 end
 
 % (2) maxtstep: maximum prediction length
@@ -99,7 +117,9 @@ if past < 1 && past > 0
 	if past == 0, past = 1; end
 end
 
-% (4) Number of neighest neighbours
+% (4) Number of nearest neighbours. No longer used (TISEAN's lyap_r always
+% uses exactly one nearest neighbor -- see header comment); kept only for
+% call-signature compatibility.
 if nargin < 5 || isempty(NNR)
 	NNR = 3;
 end
@@ -115,28 +135,51 @@ else
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-% convert to embedded signal object for TSTOOL
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tau = tm(1);
+m = tm(2);
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
-	error('Embedding failed');
+% ------------------------------------------------------------------------------
+%% Run the TISEAN code, lyap_r
+% ------------------------------------------------------------------------------
+filePath = BF_WriteTempFile(y);
+outFilePath = [filePath '.ros'];
+
+[~, res] = system(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
+						  tau, m, past, maxtstep, outFilePath, filePath));
+delete(filePath); % remove the temporary time-series data file
+
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist(outFilePath, 'file'), delete(outFilePath); end
+	error('Call to TISEAN function ''lyap_r'' failed.');
 end
 
-% ------------------------------------------------------------------------------
-%% Run the TSTOOL code, largelyap (which is stochastic):
-% ------------------------------------------------------------------------------
-try
-	rs = largelyap(s, Nref, maxtstep, past, NNR);
-catch
-	disp('Error evaluating the TSTOOL method ''largelyap''')
-	out = NaN;
-	return
+if ~exist(outFilePath, 'file')
+	error('TISEAN function ''lyap_r'' did not produce a .ros output file.');
 end
 
-p = data(rs);
-t = spacing(rs);
+fileInfo = dir(outFilePath);
+if fileInfo.bytes == 0
+	delete(outFilePath);
+	disp('No output obtained from lyap_r');
+	out = NaN; return
+end
+
+v = dlmread(outFilePath);
+delete(outFilePath);
+t = v(:, 1);
+p = v(:, 2);
+
+if length(p) < 6
+	disp('Not enough output from lyap_r to compute statistics');
+	out = NaN; return
+end
+
+% Re-anchor to p(1) = 0, matching TSTOOL's largelyap convention (see header
+% comment) so the "proportion of max" statistics below keep working as before:
+p = p - p(1);
 
 if doPlot
 	figure('color', 'w');
@@ -145,9 +188,9 @@ if doPlot
 end
 
 % we have the prediction error p as a function of the prediction length...?
-% * function file says: output - vector of length taumax+1, x(tau) = 1/Nref *
-%                                sum(log2(dist(reference point + tau, nearest neighbor +
-%                                tau)/dist(reference point, nearest neighbor)))
+% p(tau) = mean over reference points of ln(dist(reference point + tau,
+% nearest neighbor + tau) / dist(reference point, nearest neighbor)),
+% re-anchored above so p(1) = 0.
 
 % ------------------------------------------------------------------------------
 %% Get output stats
@@ -234,14 +277,19 @@ else
 	mybad = zeros(length(stptr), length(endptr));
 	for i = 1:length(stptr)
 		for j = 1:length(endptr)
-			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j))');
+			% t_scal/p_scal are both columns here (this used to rely on
+			% TSTOOL's spacing() returning t as a row, transposing p_scal to
+			% match; with t now a column too, that stray transpose inside
+			% lfitbadness turned "pfit - y" into an N-by-N broadcast instead
+			% of an N-by-1 residual, so it's dropped):
+			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j)));
 		end
 	end
 	[a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
 
 	% Do the optimum fit again
 	t_opt = t_scal(stptr(a):endptr(b));
-	p_opt = p_scal(stptr(a):endptr(b))';
+	p_opt = p_scal(stptr(a):endptr(b));
 	pp = polyfit(t_opt, p_opt, 1);
 	pfit = pp(1) * t_opt + pp(2);
 	res = pfit - p_opt;
@@ -262,13 +310,13 @@ else
 	endptr = imin:imax; % end point is at least at 50% mark of maximum
 	mybad = zeros(length(endptr), 1);
 	for i = 1:length(endptr)
-		mybad(i) = lfitbadness(t_scal(1:endptr(i)), p_scal(1:endptr(i))');
+		mybad(i) = lfitbadness(t_scal(1:endptr(i)), p_scal(1:endptr(i)));
 	end
 	b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
 
 	% Do the optimum fit again
 	t_opt = t_scal(1:endptr(b));
-	p_opt = p_scal(1:endptr(b))';
+	p_opt = p_scal(1:endptr(b));
 	pp = polyfit(t_opt, p_opt, 1);
 	pfit = pp(1) * t_opt + pp(2);
 	res = pfit - p_opt;
@@ -289,7 +337,12 @@ s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [max(p) -0.5]);
 f = fittype('a*(1-exp(b*x))', 'options', s);
 fitWorked = 1;
 try
-	[c, gof] = fit(t', p, f);
+	% t and p are both columns here (this used to rely on TSTOOL's
+	% spacing() returning t as a row, transposed back to a column to match
+	% fit()'s requirement that X be a column; with t now a column already,
+	% that transpose instead turned it into a row, which fit() rejects, so
+	% it's dropped):
+	[c, gof] = fit(t, p, f);
 catch
 	fitWorked = 0;
 end
