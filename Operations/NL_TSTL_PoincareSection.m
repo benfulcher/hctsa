@@ -1,26 +1,35 @@
 function out = NL_TSTL_PoincareSection(y, ref, embedParams)
-% NL_TSTL_PoincareSection   Poincare sectino analysis of a time series.
+% NL_TSTL_PoincareSection   Poincare section analysis of a time series.
 %
-% Obtains a Poincare section of the time-delay embedded time series, producing a
-% set of vector points projected orthogonal to the tangential vector at the
-% specified index using TSTOOL code 'poincare'.
+% Time-delay embeds the time series and computes a Poincare section using
+% TISEAN's 'poincare', which cuts the trajectory on a fixed embedding
+% coordinate (the last, by convention) held at its own mean, in a single
+% crossing direction.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% ref: the reference point. Can be an absolute number (2 takes the second point
-%      in the (embedded) time series) or a string like 'max' or 'min' that takes
-%      the first maximum, ... in the (scalar) time series, ...
+% ref: 'max' or 'min', selecting the crossing direction. This operation
+%      previously used TSTOOL's 'poincare', which cut a hyperplane
+%      orthogonal to the local tangent vector at a chosen reference point in
+%      the time series -- a construction TISEAN has no equivalent for.
+%      'ref' is repurposed here to instead pick which of the two possible
+%      crossing directions to use: 'max' selects crossings heading toward a
+%      local maximum (ascending through the mean, TISEAN's "from below",
+%      -C0); 'min' selects crossings heading toward a local minimum
+%      (descending through the mean, "from above", -C1).
 %
 % embedParams: the usual thing to give BF_Embed for the time-delay embedding, as
-%               {tau,m}. A common choice for m is 3 -- i.e., embed in a 3
+%               {tau,m}. m is forced to 3 -- i.e., embed in a 3
 %               dimensional space so that the Poincare section is 2-dimensional.
 %
 % ---OUTPUTS: include statistics on the x- and y- components of these vectors on the
 % Poincare surface, on distances between adjacent points, distances from the
 % mean position, and the entropy of the vector cloud.
 %
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Uses TISEAN's 'poincare' (this operation previously used TSTOOL's
+% 'poincare', a different construction -- see 'ref' above).
+% TISEAN: https://www.pks.mpg.de/tisean/
 
 % Another thing that could be cool to do is to analyze variation in the plots as
 % ref changes... (not done here)
@@ -59,7 +68,7 @@ function out = NL_TSTL_PoincareSection(y, ref, embedParams)
 % ------------------------------------------------------------------------------
 
 if nargin < 2 || isempty(ref)
-	ref = 'max'; % reference point is the first maximum of the time series
+	ref = 'max';
 end
 
 if nargin < 3 || isempty(embedParams)
@@ -72,59 +81,71 @@ if embedParams{2} ~= 3
 	fprintf(1, 'Three-dimensional embedding\n');
 end
 
-% set ref
-if ischar(ref)
-	switch ref
-		case 'max'
-			% first local maximum
-			dydt = diff(y);
-			ref = find(dydt(1:end - 1) >= 0 & dydt(2:end) < 0, 1, 'first') + 1;
-
-		case 'min'
-			% first local minimum
-			dydt = diff(y);
-			ref = find(dydt(1:end - 1) <= 0 & dydt(2:end) > 0, 1, 'first') + 1;
-
-		otherwise
-			error('Unknown reference setting ''%s''', ref);
-	end
+% TISEAN's poincare has no reference-point concept (see header comment);
+% 'ref' is repurposed to select the crossing direction:
+switch ref
+	case 'max'
+		direction = 0; % crossing from below (heading toward a local maximum)
+	case 'min'
+		direction = 1; % crossing from above (heading toward a local minimum)
+	otherwise
+		error(['NL_TSTL_PoincareSection: ref must be ''max'' or ''min'' ' ...
+			   '(TISEAN''s poincare has no reference-point concept, only ' ...
+			   'a choice of crossing direction).']);
 end
-
-if isempty(ref), out = NaN; return; end % ridiculous
-if ref < 2, ref = 2; end % gives an error, uses previous value in algorithm
 
 doPlot = 0; % plot outputs to a figure
 
 % ------------------------------------------------------------------------------
-%% Do your magic, TSTOOL!:
+%% Run TISEAN's poincare
 % ------------------------------------------------------------------------------
-% time-delay embed the signal:
 N = length(y); % length of the time series
-s = BF_Embed(y, embedParams{1}, 3, 1);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tau = tm(1);
+m = tm(2);
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
-	error('Embedding failed');
+filePath = BF_WriteTempFile(y);
+outFilePath = [filePath '.poin'];
+
+% Cut on the last (m-th) embedding coordinate, at TISEAN's own default
+% threshold (that coordinate's mean):
+[~, res] = system(sprintf('poincare -d%u -m%u -q%u -C%u -o %s %s', ...
+						  tau, m, m, direction, outFilePath, filePath));
+delete(filePath); % remove the temporary time-series data file
+
+if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
+	if exist(outFilePath, 'file'), delete(outFilePath); end
+	error('Call to TISEAN function ''poincare'' failed.');
 end
 
-% Run external TSTOOL code, poincare:
-try
-	rs = poincare(s, ref);
-catch me
-	if strcmp(me.message, 'No section points found') ...
-			|| strcmp(me.identifier, 'MATLAB:badsubscript')
-		fprintf(1, 'No section points found to run NL_TSTL_PoincareSection\n');
-		out = NaN; return
-	else
-		error(me.message)
-	end
+if ~exist(outFilePath, 'file')
+	error('TISEAN function ''poincare'' did not produce a .poin output file.');
 end
 
-% Convert back to Matlab forms
-v = data(rs); % vectors on poincare surface
-NN = length(v);
+% An empty output file means no crossings were found in this direction
+% (dlmread errors on an empty file, so check first):
+fileInfo = dir(outFilePath);
+if fileInfo.bytes == 0
+	delete(outFilePath);
+	fprintf(1, 'No section points found to run NL_TSTL_PoincareSection\n');
+	out = NaN; return
+end
+
+% Columns are the two uncut embedding coordinates, followed by the
+% (interpolated) crossing time -- only the first two are point coordinates:
+v = dlmread(outFilePath);
+delete(outFilePath);
+v = v(:, 1:2);
+NN = size(v, 1);
+
+if NN < 2
+	fprintf(1, 'No section points found to run NL_TSTL_PoincareSection\n');
+	out = NaN; return
+end
+
 % Labeling poincare surface plane x-y
-x = (v(:, 1));
-y = (v(:, 2));
+x = v(:, 1);
+y = v(:, 2);
 
 if doPlot
 	figure('color', 'w'); box('on');

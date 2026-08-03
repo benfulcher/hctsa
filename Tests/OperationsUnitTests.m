@@ -788,6 +788,36 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The logistic map should have a clearly lower dimension estimate than structureless noise.');
         end
 
+        function test_NL_TSTL_PoincareSection_DiscriminatesStructure(testCase)
+            % NL_TSTL_PoincareSection used to depend on TSTOOL's
+            % signal/poincare, which cut a hyperplane orthogonal to the
+            % local tangent vector at a chosen reference point. TISEAN's
+            % poincare has no such reference-point concept -- it cuts a
+            % fixed embedding coordinate at its own mean, in one crossing
+            % direction -- so 'ref' ('max'/'min') is now repurposed to pick
+            % the crossing direction instead (see the operation's header
+            % comment). Confirm the replacement still does its actual job:
+            % a smooth chaotic flow (Lorenz) crosses a fixed-threshold
+            % hyperplane far less often, per sample, than structureless
+            % noise, and its section points cluster into fewer boxes
+            % (lower occupancy entropy) than noise's near-uniform fill.
+            rng(61);
+            yNoise = randn(2000,1);
+            outNoise = NL_TSTL_PoincareSection(yNoise,'max',{1,3});
+
+            sigma = 10; rho = 28; beta = 8/3;
+            lorenzODE = @(t,v) [sigma*(v(2)-v(1)); v(1)*(rho-v(3))-v(2); v(1)*v(2)-beta*v(3)];
+            [~, sol] = ode45(lorenzODE, 0:0.02:400, [1,1,1]);
+            yLorenz = sol(2001:end, 1); % discard transient
+            yLorenz = zscore(yLorenz(1:5:end)); % downsample
+            outLorenz = NL_TSTL_PoincareSection(yLorenz,'max',{1,3});
+
+            testCase.verifyLessThan(outLorenz.pcross, 0.5 * outNoise.pcross, ...
+                'The Lorenz flow should cross a fixed-threshold hyperplane far less often than noise.');
+            testCase.verifyLessThan(outLorenz.hboxcounts5, outNoise.hboxcounts5, ...
+                'The Lorenz section should have lower box-occupancy entropy (more clustered) than noise.');
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------
