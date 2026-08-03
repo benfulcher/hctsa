@@ -881,6 +881,41 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                  'populated to smaller length scales than noise, giving a higher median entropy increment.']);
         end
 
+        function test_TSTL_localdensity_MatchesBruteForceLoop(testCase)
+            % TSTL_localdensity used to depend on TSTOOL's 'localdensity',
+            % which the original author noted was "very poorly documented"
+            % -- its exact algorithm was never confirmed. It's now a native
+            % k-nearest-neighbor local density estimate (density(i) ~
+            % 1/r_NNR(i)^m, r_NNR(i) = distance to the NNR-th nearest
+            % neighbor outside a Theiler window of "past" samples), using a
+            % KD-tree for speed. Since there's no original TSTOOL ground
+            % truth to validate against here (unlike the other TSTOOL-
+            % derived operations in this file), the right check is that the
+            % new native implementation is itself correct: confirm its
+            % KD-tree-based fast path matches a brute-force pairwise-
+            % distance reference computation with the same Theiler-window
+            % exclusion.
+            rng(91);
+            y = randn(300,1);
+            NNR = 4; past = 5;
+            out = TSTL_localdensity(y, NNR, past, {1,3});
+
+            Y = BF_Embed(y, 1, 3, 0);
+            N_embed = size(Y,1);
+            m = size(Y,2);
+            locdenBrute = zeros(N_embed,1);
+            for i = 1:N_embed
+                d = sqrt(sum((Y - Y(i,:)).^2, 2));
+                d(abs((1:N_embed)' - i) <= past) = Inf;
+                sd = sort(d);
+                locdenBrute(i) = 1 / (sd(NNR)^m);
+            end
+
+            testCase.verifyEqual(out.meanden, mean(locdenBrute), 'RelTol', 1e-9);
+            testCase.verifyEqual(out.stdden, std(locdenBrute), 'RelTol', 1e-9);
+            testCase.verifyEqual(out.medianden, median(locdenBrute), 'RelTol', 1e-9);
+        end
+
         %-------------------------------------------------------------
         % Master-operation code string -> function handle equivalence
         %-------------------------------------------------------------

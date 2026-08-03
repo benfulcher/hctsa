@@ -1,11 +1,19 @@
 function out = TSTL_localdensity(y, NNR, past, embedParams)
 % TSTL_localdensity     Local density estimates in the time-delay embedding space
 %
-% TSTOOL code localdensity is very poorly documented in the TSTOOL
-% package, can assume it returns local density estimates in the
-% time-delay embedding space.
-%
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Computes a standard k-nearest-neighbor local density estimate at each
+% point of the time-delay embedding: density(i) is proportional to
+% 1/r_NNR(i)^m, where r_NNR(i) is the distance from point i to its NNR-th
+% nearest neighbor (excluding temporally-close points within a Theiler
+% window of "past" samples) and m is the embedding dimension. This
+% operation previously used TSTOOL's 'localdensity', which the original
+% author noted was "very poorly documented in the TSTOOL package" -- its
+% exact algorithm was never confirmed, only assumed to be some form of
+% local density estimate in the embedding space, which is what's computed
+% here natively (no toolbox dependency at all). The missing normalizing
+% constant (relating 1/r^m to a true probability density) is the same for
+% every point in a given call, so it cancels out of all of the relative
+% statistics below (min/max/std/mean/median/autocorrelation).
 %
 % ---INPUTS:
 %
@@ -69,29 +77,45 @@ if nargin < 4 || isempty(embedParams)
 end
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1);
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0);
 
-if ~isa(s, 'signal') && isnan(s); % embedding failed
+if isscalar(Y) && isnan(Y) % embedding failed
 	error('Embedding failed.')
+end
+[N_embed, m] = size(Y);
+
+if N_embed <= NNR + 2 * past
+	error('Time series too short to do a local density estimate with these parameters.')
 end
 
 % ------------------------------------------------------------------------------
-%% Run the TSTOOL function, localdensity
+%% k-nearest-neighbor local density estimate
 % ------------------------------------------------------------------------------
-rs = localdensity(s, NNR, past);
+% Over-fetch candidate neighbors via a KD-tree, then discard any within the
+% Theiler window (including the point itself); expand to a full (Theiler-
+% window-excluding) search only for the rare point where that isn't enough:
+kFetch = min(N_embed - 1, NNR + 2 * past + 5);
+[idx, dist] = knnsearch(Y, Y, 'K', kFetch + 1);
 
-% ------------------------------------------------------------------------------
-%% Convert output to data
-% ------------------------------------------------------------------------------
-locden = data(rs);
-if all(locden == 0)
+locden = zeros(N_embed, 1);
+for i = 1:N_embed
+	validDists = dist(i, abs(idx(i, :) - i) > past);
+	if length(validDists) < NNR
+		allDists = sqrt(sum((Y - Y(i, :)).^2, 2));
+		allDists(abs((1:N_embed)' - i) <= past) = Inf;
+		validDists = sort(allDists);
+	end
+	locden(i) = 1 / (validDists(NNR)^m);
+end
+
+if all(locden == 0) || any(~isfinite(locden))
 	out = NaN; return
 end
 % locden is a vector of length equal to the number of points in the
-% embedding space (length of time series - m + 1), presumably the local
-% at each point
+% embedding space (length of time series - (m-1)*tau), the local density
+% estimate at each point
 
 out.minden = min(locden);
 out.maxden = max(locden);
