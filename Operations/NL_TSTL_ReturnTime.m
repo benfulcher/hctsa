@@ -18,8 +18,18 @@ function out = NL_TSTL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
 % ---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
 %
-% Uses the code, return_time, from TSTOOL.
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
+% Computed natively in MATLAB (this operation previously used TSTOOL's
+% 'return_time'; TISEAN has no direct equivalent -- its own recurrence
+% tool, 'recurr', defines neighborhoods by a fixed epsilon radius rather
+% than a nearest-neighbor count, a parameter-type mismatch with NNR below).
+% For each of Nref reference points, the neighborhood radius is the
+% distance to its NNR-th nearest neighbor (excluding a Theiler window of
+% "past" samples, via a KD-tree, same approach as TSTL_localdensity.m);
+% starting just after that Theiler window, the series is scanned forward
+% for the first return within that radius, up to maxT samples ahead. A
+% return time of 0 is a sentinel for "no return found within maxT" (a
+% return time can never be legitimately 0, since the Theiler window
+% already excludes any offset from 0 up to "past").
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -95,36 +105,69 @@ end
 doPlot = false; % plot outputs to figures
 
 % ------------------------------------------------------------------------------
-%% Embed the signal
+%% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-s = BF_Embed(y, embedParams{1}, embedParams{2}, 1, true);
-if ~isa(s, 'signal') && isnan(s); % embedding failed
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0);
+if isscalar(Y) && isnan(Y) % embedding failed
 	warning('Embedding failed');
 	out = NaN; return
 end
-numPoints = size(data(s), 1);
-if numPoints < 10
+[N_embed, m] = size(Y);
+if N_embed < 10
 	% Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
 	warning('Time series not long enough for return time analysis')
 	out = NaN; return
 end
-
-% ------------------------------------------------------------------------------
-%% Run the code
-% ------------------------------------------------------------------------------
-try
-	rs = return_time(s, NNR, maxT, past, Nref);
-catch emsg
-	if strcmp(emsg.message, 'Index exceeds matrix dimensions.')
-		fprintf(1, 'Error evaluating return_time\n');
-		out = NaN; return
-	else
-		error(emsg.message);
-	end
+if N_embed <= NNR + 2 * past
+	warning('Time series too short to do a return-time analysis with these parameters')
+	out = NaN; return
 end
 
-Trett = data(rs);
-NN = length(Trett);
+% ------------------------------------------------------------------------------
+%% Resolve the reference points
+% ------------------------------------------------------------------------------
+if Nref == -1 || Nref >= N_embed
+	refIdx = 1:N_embed;
+else
+	refIdx = randperm(N_embed, Nref); % a random subset of reference points
+end
+NN = length(refIdx);
+
+% ------------------------------------------------------------------------------
+%% For each reference point, find its NNR-th-nearest-neighbor radius (KD-tree,
+%% Theiler-window-aware, same approach as TSTL_localdensity.m), then scan
+%% forward for the first return within that radius
+% ------------------------------------------------------------------------------
+kFetch = min(N_embed - 1, NNR + 2 * past + 5);
+[idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);
+
+Trett = zeros(NN, 1);
+for ii = 1:NN
+	i = refIdx(ii);
+
+	validDists = dist(ii, abs(idx(ii, :) - i) > past);
+	if length(validDists) < NNR
+		allDists = sqrt(sum((Y - Y(i, :)).^2, 2));
+		allDists(abs((1:N_embed)' - i) <= past) = Inf;
+		validDists = sort(allDists);
+	end
+	r_i = validDists(NNR);
+
+	winStart = i + past + 1;
+	winEnd = min(i + maxT, N_embed);
+	if winStart > winEnd
+		Trett(ii) = 0; % sentinel: no return found within maxT
+		continue
+	end
+	candidateIdx = winStart:winEnd;
+	sqDists = sum((Y(candidateIdx, :) - Y(i, :)).^2, 2);
+	firstReturn = find(sqDists <= r_i^2, 1, 'first');
+	if isempty(firstReturn)
+		Trett(ii) = 0; % sentinel: no return found within maxT
+	else
+		Trett(ii) = candidateIdx(firstReturn) - i;
+	end
+end
 
 % ------------------------------------------------------------------------------
 %% Quantify structure in output
