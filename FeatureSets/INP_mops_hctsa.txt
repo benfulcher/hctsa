@@ -957,11 +957,11 @@ NL_GPCorrSum(x_z,-1,0.1,40,20,{'ac','fnnmar'},1)	NL_GPCorrSum2_n1_01_40_20_ac_fn
 NL_GPCorrSum(x_z,-1,0.1,40,40,{'ac','fnnmar'},1)	NL_GPCorrSum2_n1_01_40_40_ac_fnnmar
 NL_delaytime(x_z,0.1,1,'default')	NL_delaytime_01_1
 NL_dimensions(x_z,50,{'ac','fnnmar'})	NL_dimensions_50_ac_fnnmar
-NL_FractalDimensions(x_z,5,20,0.2,1,10,0,32,{'ac','fnnmar'})	NL_FractalDimensions_5_20_02_1_10_0_32_ac_fnnmar
-NL_FractalDimensions(x_z,5,100,0.2,1,10,0,32,{'ac',3})	NL_FractalDimensions_5_100_02_1_10_0_32_ac_3
-NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{'ac',5})	NL_FractalDimensions_2_100_02_1_5_10_32_ac_5
-NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{1,5})	NL_FractalDimensions_2_100_02_1_5_10_32_1_5
-NL_FractalDimensions(x_z,2,10,-1,1,5,10,32,{1,5})	NL_FractalDimensions_2_10_n1_1_5_10_32_1_5
+NL_FractalDimensions(x_z,5,20,0.2,1,10,0,32,{'ac','fnnmar'},'default')	NL_FractalDimensions_5_20_02_1_10_0_32_ac_fnnmar
+NL_FractalDimensions(x_z,5,100,0.2,1,10,0,32,{'ac',3},'default')	NL_FractalDimensions_5_100_02_1_10_0_32_ac_3
+NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{'ac',5},'default')	NL_FractalDimensions_2_100_02_1_5_10_32_ac_5
+NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{1,5},'default')	NL_FractalDimensions_2_100_02_1_5_10_32_1_5
+NL_FractalDimensions(x_z,2,10,-1,1,5,10,32,{1,5},'default')	NL_FractalDimensions_2_10_n1_1_5_10_32_1_5
 NL_localdensity(x_z,5,40,{'ac','fnnmar'})	NL_localdensity_5_40_ac_fnnmar
 NL_localdensity(x_z,5,40,{'ac',2})	NL_localdensity_5_40_ac_2
 NL_localdensity(x_z,5,40,{1,3})	NL_localdensity_5_40_1_3

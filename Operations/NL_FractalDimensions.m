@@ -1,4 +1,4 @@
-function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, steps, embedParams)
+function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, steps, embedParams, randomSeed)
 % NL_FractalDimensions    Fractal dimension spectrum, D(q), of a time series.
 %
 % ---INPUTS:
@@ -12,6 +12,14 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %             index (default=0)
 % steps [opt], number of moments to calculate (default=32);
 % embedParams, how to embed the time series using a time-delay reconstruction
+% randomSeed [opt], whether (and how) to reset the random seed, using
+%             BF_ResetSeed, before choosing reference points (relevant
+%             whenever Nref ~= -1, since that involves a random subsample of
+%             points -- and, when embedParams asks for 'fnnmar', is also
+%             passed through to BF_Embed/NL_crptool_fnn, which has its own
+%             internal random sampling step). Defaults to 'default' (a fixed
+%             seed) so this operation is reproducible by default rather than
+%             genuinely stochastic run-to-run.
 %
 % ---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
@@ -133,10 +141,15 @@ if nargin < 9 || isempty(embedParams)
 	fprintf(1, 'Using default embedding parameters of autocorrelation for tau and cao method for m\n');
 end
 
+% (9) Random seed, for reproducibility of the random reference-point subsample
+if nargin < 10 || isempty(randomSeed)
+	randomSeed = 'default';
+end
+
 % ------------------------------------------------------------------------------
 %% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0);
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0, randomSeed);
 
 if isscalar(Y) && isnan(Y) % embedding failed
 	error('Embedding of the %u-sample time series failed', N)
@@ -154,6 +167,7 @@ end
 if Nref == -1 || Nref >= N_embed
 	refIdx = 1:N_embed;
 else
+	BF_ResetSeed(randomSeed); % for reproducibility of this random subsample
 	refIdx = randperm(N_embed, Nref);
 end
 R = length(refIdx);
