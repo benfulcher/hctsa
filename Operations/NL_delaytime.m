@@ -42,7 +42,7 @@ function out = NL_delaytime(y, maxDelay, past, randomSeed)
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

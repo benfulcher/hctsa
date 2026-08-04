@@ -9,7 +9,7 @@ function [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet)
 % INP_ops: the filename for an operations input file.
 
 %-------------------------------------------------------------------------------
-% Copyright (C) 2022, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
