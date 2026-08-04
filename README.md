@@ -78,7 +78,6 @@ _hctsa_ uses the following [Matlab Add-On Toolboxes](https://au.mathworks.com/pr
 The following external time-series analysis code packages are provided with the software (in the `Toolboxes` directory), and are used by our main feature-extraction algorithms to compute meaningful structural features from time series:
 
 - [_TISEAN_ package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
-- [_TSTOOL_ package for nonlinear time-series analysis, version 1.2](http://www.dpi.physik.uni-goettingen.de/tstool/) (GPL license).
 - Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
 - Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 - Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).
