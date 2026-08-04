@@ -44,6 +44,10 @@ DN_Moments(x,11)	DN_Moments_raw_11
 DN_CustomSkewness(x,'pearsonMedian')	DN_CustomSkewness_pearson_median
 DN_CustomSkewness(x,'pearsonMode')	    DN_CustomSkewness_pearson_mode
 DN_CustomSkewness(x_z,'bowley')	        DN_CustomSkewness_bowley
+DN_Cumulants(x,'skew1')	DN_Cumulants_skew1
+DN_Cumulants(x,'skew2')	DN_Cumulants_skew2
+DN_Cumulants(x,'kurt1')	DN_Cumulants_kurt1
+DN_Cumulants(x,'kurt2')	DN_Cumulants_kurt2
 DN_Withinp(x_z,0.5,'mean')	DN_Withinp_05
 DN_Withinp(x_z,1,'mean')		DN_Withinp_10
 DN_Withinp(x_z,1.5,'mean')	DN_Withinp_15
