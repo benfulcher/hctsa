@@ -247,17 +247,6 @@ AC_nl_122	        AC_nl_122	correlation,nonlinearautocorr
 AC_nl_133	        AC_nl_133	correlation,nonlinearautocorr
 AC_nl_223	        AC_nl_223	correlation,nonlinearautocorr
 AC_nl_233	        AC_nl_233	correlation,nonlinearautocorr
-CO_RM_AMInformation_0	RM_ami_0	information,correlation,AMI,distribution
-CO_RM_AMInformation_1	RM_ami_1	information,correlation,AMI
-CO_RM_AMInformation_2	RM_ami_2	information,correlation,AMI
-CO_RM_AMInformation_3	RM_ami_3	information,correlation,AMI
-CO_RM_AMInformation_4	RM_ami_4	information,correlation,AMI
-CO_RM_AMInformation_5	RM_ami_5	information,correlation,AMI
-CO_RM_AMInformation_6	RM_ami_6	information,correlation,AMI
-CO_RM_AMInformation_7	RM_ami_7	information,correlation,AMI
-CO_RM_AMInformation_8	RM_ami_8	information,correlation,AMI
-CO_RM_AMInformation_9	RM_ami_9	information,correlation,AMI
-CO_RM_AMInformation_10	RM_ami_10	information,correlation,AMI
 CO_HistogramAMI_std1_2bin.ami1        CO_HistogramAMI_std1_2bin_ami1    information,correlation,AMI
 CO_HistogramAMI_std1_2bin.ami2     CO_HistogramAMI_std1_2bin_ami2    information,correlation,AMI
 CO_HistogramAMI_std1_2bin.ami3     CO_HistogramAMI_std1_2bin_ami3    information,correlation,AMI
@@ -919,7 +908,6 @@ EN_rpde_3_ac.H_norm             EN_rpde_3_ac_H_norm             entropy
 EN_rpde_3_ac.propNonZero        EN_rpde_3_ac_propNonZero        entropy
 EN_rpde_3_ac.meanNonZero        EN_rpde_3_ac_meanNonZero        entropy
 EN_rpde_3_ac.maxRPD             EN_rpde_3_ac_maxRPD             entropy
-RM_entropy	RM_entropy	entropy
 EN_CID.CE2 EN_CID_CE2 entropy
 EN_CID.minCE1 EN_CID_minCE1 entropy,distribution
 EN_CID.minCE2 EN_CID_minCE2 entropy,distribution

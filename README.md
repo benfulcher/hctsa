@@ -89,8 +89,6 @@ The following external time-series analysis code packages are provided with the 
 - [Cross Recurrence Plot Toolbox](http://tocsy.pik-potsdam.de/CRPtoolbox/) (GPL license)
 - Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 - Danny Kaplan's Code for embedding statistics (GPL license).
-- Two-dimensional histogram code from Matlab Central (BSD license).
-- Various histogram and entropy code by Rudy Moddemeijer (unlicensed).
 
 ## Acknowledgements :wave:
 

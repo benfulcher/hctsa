@@ -66,16 +66,8 @@ fprintf(1,', ARfit toolbox')
 addpath(fullfile(pwd,'Toolboxes','ARFIT'));
 
 % Michael Small's utilities
-fprintf(1,', Michael Small')
+fprintf(1,', Michael Small\n')
 addpath(fullfile(pwd,'Toolboxes','Michael_Small'));
-
-% Code from Matlab Central
-fprintf(1,', Matlab Central code')
-addpath(fullfile(pwd,'Toolboxes','MatlabCentral'));
-
-% Rudy Moddemeijer's code
-fprintf(1,', Rudy Moddemeijer\n')
-addpath(fullfile(pwd,'Toolboxes','Rudy_Moddemeijer'));
 
 % DVV Toolbox
 fprintf(1,'DVV Toolbox')

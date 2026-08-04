@@ -219,17 +219,6 @@ CO_NonlinearAutocorr(x_z,[1,2,2],false)	        AC_nl_122
 CO_NonlinearAutocorr(x_z,[1,3,3],false)	        AC_nl_133
 CO_NonlinearAutocorr(x_z,[2,2,3],false)	        AC_nl_223
 CO_NonlinearAutocorr(x_z,[2,3,3],false)	        AC_nl_233
-CO_RM_AMInformation(x_z,0)	CO_RM_AMInformation_0
-CO_RM_AMInformation(x_z,1)	CO_RM_AMInformation_1
-CO_RM_AMInformation(x_z,2)	CO_RM_AMInformation_2
-CO_RM_AMInformation(x_z,3)	CO_RM_AMInformation_3
-CO_RM_AMInformation(x_z,4)	CO_RM_AMInformation_4
-CO_RM_AMInformation(x_z,5)	CO_RM_AMInformation_5
-CO_RM_AMInformation(x_z,6)	CO_RM_AMInformation_6
-CO_RM_AMInformation(x_z,7)	CO_RM_AMInformation_7
-CO_RM_AMInformation(x_z,8)	CO_RM_AMInformation_8
-CO_RM_AMInformation(x_z,9)	CO_RM_AMInformation_9
-CO_RM_AMInformation(x_z,10)	CO_RM_AMInformation_10
 CO_HistogramAMI(x_z,1:5,'std1',2)	CO_HistogramAMI_std1_2bin
 CO_HistogramAMI(x_z,1:5,'std1',5)	CO_HistogramAMI_std1_5bin
 CO_HistogramAMI(x_z,1:5,'std1',10)	CO_HistogramAMI_std1_10bin
@@ -537,7 +526,6 @@ EN_wentropy(x_z,'shannon')	        EN_wentropy_shannon
 EN_wentropy(x_z,'logenergy')		EN_wentropy_logenent
 EN_rpde(x_z,3,1)                EN_rpde_3_1
 EN_rpde(x_z,3,'ac')             EN_rpde_3_ac
-EN_RM_entropy(x_z)	            RM_entropy
 EN_CID(x_z)           EN_CID
 EN_DistributionEntropy(x_z,'ks',0.01,0)	EN_DistributionEntropy_ks_001_0
 EN_DistributionEntropy(x_z,'ks',0.1,0)	EN_DistributionEntropy_ks_01_0
