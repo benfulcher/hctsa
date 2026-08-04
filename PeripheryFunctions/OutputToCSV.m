@@ -51,12 +51,6 @@ if writeMasterFeatures
     MasterOperations = TS_GetFromData(whatData,'MasterOperations');
 end
 
-% Get the quality info:
-TS_Quality = TS_GetFromData(whatData,'TS_Quality');
-
-% Put NaNs in TS_DataMat where good quality is lacking (ignoring the code):
-TS_DataMat(TS_Quality~=0) = NaN;
-
 %-------------------------------------------------------------------------------
 % Output data matrix to file:
 %-------------------------------------------------------------------------------
