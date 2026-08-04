@@ -165,15 +165,10 @@ for i = 1:maxSteps
 
 	% (3) *** Sliding mean 2 ***
 	% A sliding mean of length 2
-	sm2p = zeros(N - i - 1, 1);
-	for j = 1:N - i - 1
-		seeds = yy(j:j + 1);
-		for k = 1:i % average with itself this many times
-			p = mean(seeds);
-			seeds = [seeds(2), p];
-		end
-		sm2p(j) = p;
-	end
+	% Closed-form solution of the order-2 linear recurrence p(n) = (p(n-1)+p(n-2))/2
+	% that the naive iterative averaging below converges to, avoiding the loop:
+	weights = [1 + (-1)^(i + 1)/2^i; 2 + (-1)^i/2^i]./3;
+	sm2p = [yy(1:N - i - 1), yy(2:N - i)] * weights;
 	mres = yy(i + 2:end) - sm2p;
 
 	sm2.rmserrs(i) = sqrt(mean(mres.^2));
