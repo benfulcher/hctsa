@@ -13,10 +13,10 @@ function [varargout] = likGauss(hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 if nargin<3, varargout = {'1'}; return; end   % report number of hyperparameters
 
@@ -24,7 +24,7 @@ sn2 = exp(2*hyp);
 
 if nargin<5                              % prediction mode if inf is not present
   if isempty(y),  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>3, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>3&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                                    % log probability
     lp = -(y-mu).^2./sn2/2-log(2*pi*sn2)/2; s2 = 0;
   else

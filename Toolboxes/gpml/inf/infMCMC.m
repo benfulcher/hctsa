@@ -13,7 +13,9 @@ function [post nlZ dnlZ] = infMCMC(hyp, mean, cov, lik, x, y, par)
 %   - par.Nskip     num of steps out of which one sample kept
 %   - par.Nburnin   num of burn in samples (corresponds to Nskip*Nburning steps)
 %   - par.Nais      num of AIS runs to remove finite temperature bias
-% Default values are 'sampler=hmc', Nsample=200, Nskip=40, Nburnin=10, Nais=3.
+%   - par.st        spherical Gaussian width of the posterior KDE
+% Default values are sampler=hmc, Nsample=200, Nskip=40, Nburnin=10, Nais=3,
+%                                 st=0.001*sqrt(sum(diag(K))/n).
 %
 % The Hybrid Monte Carlo Sampler (HMC) is implemented as described in the
 % technical report: Probabilistic Inference using MCMC Methods by Radford Neal,
@@ -43,22 +45,23 @@ function [post nlZ dnlZ] = infMCMC(hyp, mean, cov, lik, x, y, par)
 % Annealed Importance Sampling (AIS) to determine the marginal likelihood is
 % described in the technical report: AIS, Radford Neal, 1998.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2012-11-07.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2016-05-09.
 %
-% See also INFMETHODS.M.
+% See also infMethods.m.
 
 if nargin<7, par = []; end                         % analyse parameter structure
-if isfield(par,'sampler'),  alg=par.sampler;  else alg = 'hmc'; end
-if isfield(par,'Nsample'),  N  =par.Nsample;  else N   = 200;   end
-if isfield(par,'Nskip'),    Ns =par.Nskip;    else Ns  =  40;   end
-if isfield(par,'Nburnin'),  Nb =par.Nburnin;  else Nb  =  10;   end
-if isfield(par,'Nais'),     R  =par.Nais;     else R   =   3;   end
+if isfield(par,'sampler'), alg=par.sampler; else alg='hmc';   end
+if isfield(par,'Nsample'), N  =par.Nsample; else N  =200;     end
+if isfield(par,'Nskip'),   Ns =par.Nskip;   else Ns = 40;     end
+if isfield(par,'Nburnin'), Nb =par.Nburnin; else Nb = 10;     end
+if isfield(par,'Nais'),    R  =par.Nais;    else R  =  3;     end
 
 K = feval(cov{:}, hyp.cov, x);                  % evaluate the covariance matrix
 m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
-n = size(K,1);
-[cK,fail] = chol(K);                    % try an ordinary Cholesky decomposition
-if fail, sr2 = 1e-8*sum(diag(K))/n; cK = chol(K+sr2*eye(n)); end    % regularise
+n = size(K,1); st_def = 0.001*sqrt(sum(diag(K))/n);              % default value
+if isfield(par,'st'),      st =par.st;      else st = st_def; end
+[cK,fail] = chol(K+st^2*eye(n));        % try an ordinary Cholesky decomposition
+if fail, error('Try increasing the par.st variable.'), end
 T = (N+Nb)*Ns;                                         % overall number of steps
 [alpha,Na] = sample(K,cK,m,y,lik,hyp.lik, N,Nb,Ns, alg);  % sample w/o annealing
 post.alpha = alpha; al = sum(alpha,2)/N;
@@ -89,10 +92,27 @@ end
 
 %% choose between HMC and ESS depending on the alg string
 function [alpha,Na] = sample(K,cK,m,y,lik,hyp, N,Nb,Ns, alg, varargin)
-  if strcmpi(alg,'hmc')
-    [alpha,Na] = sample_hmc(K, m,y,lik,hyp, N,Nb,Ns, varargin{:});
+  if strcmp(lik,'likGauss')
+    [alpha,Na] = sample_gauss(K, m,y,hyp, N,Nb,Ns, varargin{:});
   else
-    [alpha,Na] = sample_ess(cK,m,y,lik,hyp, N,Nb,Ns, varargin{:});
+    if strcmpi(alg,'hmc')
+      [alpha,Na] = sample_hmc(K, m,y,lik,hyp, N,Nb,Ns, varargin{:});
+    else
+      [alpha,Na] = sample_ess(cK,m,y,lik,hyp, N,Nb,Ns, varargin{:});
+    end
+  end
+
+%% sample from Gaussian posterior
+function [alpha,Na] = sample_gauss(K, m,y,hyp, N,Nb,Ns, taus)
+  Na = (N+Nb)*Ns; sn2 = exp(2*hyp); n = size(K,1);
+  if nargin<8
+    S = K + K*K/sn2; alpha = chol(S)\randn(n,N) + repmat(S\(K*(y-m)/sn2),1,N);
+  else
+    alpha = zeros(n,N);
+    for t=1:N
+      St = K + K*K*(taus(Nb+t)/sn2);
+      alpha(:,t) = chol(St)\randn(n,1) + St\(K*(y-m)*taus(Nb+t)/sn2);
+    end
   end
 
 %% sample using elliptical slices
@@ -113,7 +133,7 @@ function [alpha,T] = sample_ess(cK,m,y,lik,hyp, N,Nb,Ns, taus)
 
 %% elliptical slice sampling: one step
 function [f,l] = sample_ess_step(f,l,r,m,y,lik,hyp,tau)
-  if nargin<7, tau=1; end, if tau>1, tau=1; end, if tau<0, tau=0; end
+  if nargin<8, tau=1; end, if tau>1, tau=1; end, if tau<0, tau=0; end
   h = log(rand) + tau*l;                                  % acceptance threshold
   a = rand*2*pi; amin = a-2*pi; amax = a;                % bracket whole ellipse
   k = 0;                                                       % emergency break

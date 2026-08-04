@@ -12,7 +12,7 @@ function [varargout] = likLogistic(hyp, y, mu, s2, inf, i)
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-09-02.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 if nargin<3, varargout = {'0'}; return; end   % report number of hyperparameters
 if nargin>1, y = sign(y); y(y==0) = 1; else y = 1; end % allow only +/- 1 values
@@ -20,7 +20,7 @@ if numel(y)==0, y = 1; end
 
 if nargin<5                              % prediction mode if inf is not present
   y = y.*ones(size(mu));                                       % make y a vector
-  s2zero = 1; if nargin>3, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>3&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                         % log probability evaluation
     yf = y.*mu;      % product latents and labels
     lp = yf; ok = -35<yf; lp(ok) = -log(1+exp(-yf(ok)));     % log of likelihood

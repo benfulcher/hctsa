@@ -13,7 +13,7 @@ function [lp,dlp] = priorLaplace(mu,s2,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-09.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<3                                                    % return a sample
   u = rand-1/2; lp = mu - sqrt(s2/2)*sign(u)*log(1-2*abs(u)); return

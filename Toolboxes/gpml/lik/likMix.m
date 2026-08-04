@@ -27,7 +27,7 @@ function [varargout] = likMix(lik, hyp, varargin)
 %
 % Copyright (c) by Hannes Nickisch and Rowan McAllister, 2013-10-23.
 %
-% See also LIKFUNCTIONS.M.
+% See also likFunctions.m.
 
 m = numel(lik);                                   % number of mixture components
 if m==0, error('We require at least one mixture component.'), end

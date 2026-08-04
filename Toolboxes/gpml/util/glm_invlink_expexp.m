@@ -1,9 +1,9 @@
 % Compute the log intensity for the inverse link function g(f) = exp(-exp(-f)).
+% Output range: 0 <= g(f) <= 1.
 %
-% The function is used in GLM likelihoods such as likPoisson, likGamma, likBeta
-% and likInvGauss.
+% The function can be used in GLM likelihoods such as likBeta.
 %
-% Copyright (c) by Hannes Nickisch, 2013-10-16.
+% Copyright (c) by Hannes Nickisch, 2016-10-04.
 
 function [lg,dlg,d2lg,d3lg] = glm_invlink_expexp(f)
   lg = -exp(-f);

@@ -1,48 +1,79 @@
-function K = covProd(cov, hyp, x, z, i)
+function [K,dK] = covProd(cov, hyp, x, z)
 
 % covProd - compose a covariance function as the product of other covariance
 % functions. This function doesn't actually compute very much on its own, it
 % merely does some bookkeeping, and calls other covariance functions to do the
 % actual work.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Note that cov = {cov1, cov2, .., false} turns of covariance matrix caching.
+% This option slows down the computations but can help out if you products of
+% many huge matrices lead to working memory shortage.
 %
-% See also COVFUNCTIONS.M.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2016-04-18.
+%
+% See also covFunctions.m.
 
 if isempty(cov), error('We require at least one factor.'), end
-for ii = 1:numel(cov)                        % iterate over covariance functions
+if isnumeric(cov{end}) || islogical(cov{end})          % detect whether to cache
+  cache = ~isequal(0,cov{end}) && ~isequal(false,cov{end});
+  cov = cov(1:end-1);                           % chop off last element from cov
+else
+  cache = true;
+end
+nc = numel(cov);                        % number of terms in covariance function
+for ii = 1:nc                                % iterate over covariance functions
   f = cov(ii); if iscell(f{:}), f = f{:}; end   % expand cell array if necessary
   j(ii) = cellstr(feval(f{:}));                          % collect number hypers
 end
 
 if nargin<3                                        % report number of parameters
-  K = char(j(1)); for ii=2:length(cov), K = [K, '+', char(j(ii))]; end, return
+  K = char(j(1)); for ii=2:nc, K = [K, '+', char(j(ii))]; end, return
 end
 if nargin<4, z = []; end                                   % make sure, z exists
-[n,D] = size(x);
+[n,D] = size(x); nh = numel(hyp);                    % number of hyperparameters
 
 v = [];               % v vector indicates to which covariance parameters belong
-for ii = 1:length(cov), v = [v repmat(ii, 1, eval(char(j(ii))))]; end
+for ii = 1:nc, v = [v repmat(ii, 1, eval(char(j(ii))))]; end
 
-if nargin<5                                                        % covariances
-  K = 1;                                                                  % init
-  for ii = 1:length(cov)                       % iteration over factor functions
-    f = cov(ii); if iscell(f{:}), f = f{:}; end % expand cell array if necessary
-    K = K .* feval(f{:}, hyp(v==ii), x, z);             % accumulate covariances
-  end
-else                                                               % derivatives
-  if i<=length(v)
-    K = 1; vi = v(i);                                % which covariance function
-    j = sum(v(1:i)==vi);                    % which parameter in that covariance
-    for ii = 1:length(cov)                     % iteration over factor functions
-      f = cov(ii); if iscell(f{:}), f = f{:}; end     % expand cell if necessary
-      if ii==vi
-        K = K .* feval(f{:}, hyp(v==ii), x, z, j);      % accumulate covariances
-      else
-        K = K .* feval(f{:}, hyp(v==ii), x, z);         % accumulate covariances
-      end
+K = 1; Ki = cell(nc,1); dKi = cell(nc,1);                               % init K
+for ii = 1:nc                                  % iteration over factor functions
+  f = cov(ii); if iscell(f{:}), f = f{:}; end   % expand cell array if necessary
+  if cache
+    if nargin>1
+      [Ki{ii},dKi{ii}] = feval(f{:}, hyp(v==ii), x, z); Kii = Ki{ii};    % track
+    else
+      Ki{ii} = feval(f{:}, hyp(v==ii), x, z); Kii = Ki{ii};
     end
   else
-    error('Unknown hyperparameter')
+    Kii = feval(f{:}, hyp(v==ii), x, z);
   end
+  K = K .* Kii;                                         % accumulate covariances
 end
+dK = @(Q) dirder(Q,Ki,dKi,v,nc,nh,cov,hyp,x,z,cache);   % directional derivative
+
+function [dhyp,dx] = dirder(Q,Ki,dKi,v,nc,nh,cov,hyp,x,z,cache)
+  dhyp = zeros(nh,1); dx = 0;
+  for ii = 1:nc
+    Qi = Q;
+    for jj=1:nc     % accumulate
+      if ii~=jj
+        if cache
+          Qi = Qi .* Ki{jj};
+        else
+          f = cov(jj); if iscell(f{:}), f = f{:}; end % expand cell if necessary
+          Qi = Qi .* feval(f{:}, hyp(v==jj), x, z);
+        end
+      end
+    end
+    if cache
+      dKii = dKi{ii};
+    else
+      f = cov(ii); if iscell(f{:}), f = f{:}; end     % expand cell if necessary
+      [junk,dKii] = feval(f{:}, hyp(v==ii), x, z);
+    end
+    if nargout==1
+      dhyp(v==ii,1) = dKii(Qi);
+    else
+      [dhyp(v==ii,1),dxi] = dKii(Qi); dx = dx+dxi;
+    end
+  end

@@ -15,7 +15,7 @@ function [lp,dlp] = priorT(mu,s2,nu,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-10-16.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<3, error('mu, s2 and nu parameters need to be provided'), end
 if ~(isscalar(mu)&&isscalar(s2)&&isscalar(nu))

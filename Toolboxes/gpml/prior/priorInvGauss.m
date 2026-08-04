@@ -1,19 +1,24 @@
 function [lp,dlp] = priorInvGauss(mu,lam,x)
-
-% Univariate Inverse Gaussian hyperparameter prior distribution.
-% Compute log-likelihood and its derivative or draw a random sample.
+% PRIORINVGAUSS Univariate Inverse Gaussian hyperparameter prior distribution.
+%
+% Random sample from the distribution
+%   r = PRIORINVGAUSS (mu, lam)
+%
+% Compute log density at location x and first derivative (w.r.t. x)
+%  [lp, dlp] = PRIORINVGAUSS (mu, lam, x)
+%
+% Call priorDistributions to get an explanation of outputs in each mode.
+%
 % The prior distribution is parameterized as:
 %
-%   p(x) = exp(-lam*(x-mu)^2/(2*mu^2*x)) / sqrt(2*pi*x^3/lam)
+%   p(x) = exp(-lam * (x-mu)^2 / (2*mu^2*x)) / sqrt(2*pi * x^3 / lam)
 %
-% where mu(1x1) is the mean parameter, lam(1x1) is the scale parameter
-% and x(1xN) contains query hyperparameters for prior evaluation.
+% where mu (1x1) is the mean parameter, lam (1x1) is the scale parameter
+% and x (1xN) contains query hyperparameters for prior evaluation.
 %
-% For more help on design of priors, try "help priorDistributions".
-%
+% See also PRIORDISTRIBUTIONS
+
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
-%
-% See also PRIORDISTRIBUTIONS.M.
 
 if nargin<2, error('mu and lam parameters need to be provided'), end
 if ~(isscalar(mu)&&isscalar(lam))

@@ -1,4 +1,4 @@
-function A = meanProd(mean, hyp, x, i)
+function [m,dm] = meanProd(mean, hyp, x)
 
 % meanProd - compose a mean function as the product of other mean functions.
 % This function doesn't actually compute very much on its own, it merely does
@@ -6,44 +6,35 @@ function A = meanProd(mean, hyp, x, i)
 %
 % m(x) = \prod_i m_i(x)
 %
-% Copyright (c) by Carl Edward Rasmussen & Hannes Nickisch 2010-08-04.
+% Copyright (c) by Carl Edward Rasmussen & Hannes Nickisch 2020-07-14.
 %
-% See also MEANFUNCTIONS.M.
+% See also meanFunctions.m.
 
-for ii = 1:numel(mean)                             % iterate over mean functions
+nm = numel(mean);
+for ii = 1:nm                                      % iterate over mean functions
   f = mean(ii); if iscell(f{:}), f = f{:}; end  % expand cell array if necessary
   j(ii) = cellstr(feval(f{:}));                          % collect number hypers
 end
 
 if nargin<3                                        % report number of parameters
-  A = char(j(1)); for ii=2:length(mean), A = [A, '+', char(j(ii))]; end; return
+  m = char(j(1)); for ii=2:nm, m = [m, '+', char(j(ii))]; end; return
 end
-
 [n,D] = size(x);
 
 v = [];                     % v vector indicates to which mean parameters belong
-for ii = 1:length(mean), v = [v repmat(ii, 1, eval(char(j(ii))))]; end
+for ii = 1:nm, v = [v repmat(ii, 1, eval(char(j(ii))))]; end
 
-A = ones(n,1);                                                  % allocate space
-if nargin==3                                               % compute mean vector
-  for ii = 1:length(mean)                     % iteration over summand functions
-    f = mean(ii); if iscell(f{:}), f = f{:}; end   % expand cell array if needed
-    A = A.*feval(f{:}, hyp(v==ii), x);                        % accumulate means
-  end
-else                                                 % compute derivative vector
-  if i<=length(v)
-    ii = v(i);                                             % which mean function
-    j = sum(v(1:i)==ii);                          % which parameter in that mean
-    for jj = 1:length(mean)
-      f = mean(jj);
-      if iscell(f{:}), f = f{:}; end       % dereference cell array if necessary
-      if jj==ii
-        A = A .* feval(f{:}, hyp(v==jj), x, j);            % multiply derivative
-      else
-        A = A .* feval(f{:}, hyp(v==jj), x);                     % multiply mean
-      end
-    end
-  else
-    A = zeros(n,1);
-  end
+m = ones(n,1); mi = cell(nm,1); dmi = cell(nm,1);               % allocate space
+for ii = 1:nm                                  % iteration over factor functions
+  f = mean(ii); if iscell(f{:}), f = f{:}; end     % expand cell array if needed
+  [mi{ii},dmi{ii}] = feval(f{:}, hyp(v==ii), x);
+  m = m.*mi{ii};                                              % accumulate means
 end
+dm = @(q) dirder(q,mi,dmi,v,nm);                        % directional derivative
+
+function dhyp = dirder(q,mi,dmi,v,nm)
+  dhyp = zeros(size(v,2),1);
+  for ii = 1:nm
+    qi = q; for jj=1:nm, if ii~=jj, qi = qi .* mi{jj}; end, end     % accumulate
+    dhyp(v==ii,1) = dmi{ii}(qi);
+  end

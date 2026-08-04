@@ -1,6 +1,7 @@
 function [post nlZ dnlZ] = infGrid(hyp, mean, cov, lik, x, y, opt)
 
-% Inference for a GP with Gaussian likelihood and covGrid covariance.
+% Inference for a GP with grid-based approximate covariance.
+%
 % The (Kronecker) covariance matrix used is given by:
 %   K = kron( kron(...,K{2}), K{1} ) = K_p x .. x K_2 x K_1.
 %
@@ -11,153 +12,187 @@ function [post nlZ dnlZ] = infGrid(hyp, mean, cov, lik, x, y, opt)
 %
 % The function takes a specified covariance function (see covFunctions.m) and
 % likelihood function (see likFunctions.m), and is designed to be used with
-% gp.m and in conjunction with covFITC and likGauss.
+% gp.m and in conjunction with apxGrid.m.
 %
-% Copyright (c) by Hannes Nickisch and Andrew Wilson, 2014-12-03.
+% In case of equispaced data points, we use Toeplitz/BTTB algebra. We use a
+% circulant embedding approach to approximate the log determinant of the
+% covariance matrix. If any of the factors K_i, i=1..p has Toeplitz or more
+% general BTTB structure (which is indicated by K.kron.factor(i).descr being
+% equal to 'toep', 'bttb2', 'bttb3', etc.), we automatically use the circulant
+% determinant approximation. The grid specification needs to reflect this.
+% There are some examples to illustrate the doubly nested curly bracket
+% formalism. See also "help apxGrid".
 %
-% See also INFMETHODS.M, COVGRID.M.
+% There are a set of options available:
+% opt.pred_var, minimum value is 20 as suggested in the Papandreou paper
+%   Instead of the data x, we can tell the engine to use x*hyp.P' to make grid
+%   methods available to higher dimensional data. We offer two ways of
+%   restricting the projection matrix hyp.P to either orthonormal matrices,
+%   where hyp.P*hyp.P'=I or normalised projections diag(hyp.P*hyp.P')=1.
+%   Negative values indicate that we are using Lanczos variance estimation
+%   as described by Pleiss et al. in https://arxiv.org/abs/1803.06058.
+% opt.proj = 'orth'; enforce orthonormal projections by working with 
+%   sqrtm(hyp.P*hyp.P')\hyp.P instead of hyp.P
+% opt.proj = 'norm'; enforce normal projections by working with 
+%   diag(1./sqrt(diag(hyp.P*hyp.P')))*hyp.P instead of hyp.P
+%
+% There are a number of options inherited from apx.m
+%   The conjugate gradient-based linear system solver has two adjustable
+%   parameters, the relative residual threshold for convergence opt.cg_tol and
+%   the maximum number of MVMs opt.cg_maxit until the process stops.
+%  opt.cg_tol,   default is 1e-6      as in Matlab's pcg function
+%  opt.cg_maxit, default is min(n,20) as in Matlab's pcg function
+%    We can tell the inference engine to make functions post.fs2 and post.ys2
+%    available in order to compute the latent and predictive variance of an
+%    unknown test data point. Precomputations for Perturb-and-MAP sampling are
+%    required for these functions.
+%  opt.stat = true returns a little bit of output summarising the exploited
+%    structure of the covariance of the grid.
+%    Please see cov/apxGrid.m for details.
+%
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch 2018-03-26.
+%
+% See also infMethods.m, cov/apxGrid.m.
 
-if iscell(lik), likstr = lik{1}; else likstr = lik; end
-if ~ischar(likstr), likstr = func2str(likstr); end
-if ~strcmp(likstr,'likGauss')               % NOTE: no explicit call to likGauss
-  error('Inference with infGrid only possible with Gaussian likelihood.');
-end
-cov1 = cov{1}; if isa(cov1, 'function_handle'), cov1 = func2str(cov1); end
-if ~strcmp(cov1,'covGrid'); error('Only covGrid supported.'), end    % check cov
-
-xg = cov{3}; p = numel(xg);                                    % underlying grid
-N = 1; D = 0; for i=1:p, N = N*size(xg{i},1); D = D+size(xg{i},2); end    % dims
-[K,M,xe] = feval(cov{:}, hyp.cov, x);     % evaluate covariance mat constituents
-xe = M*xe; n = size(xe,1);
-m = feval(mean{:}, hyp.mean, xe);                         % evaluate mean vector
-
-if nargin<=6, opt = []; end                        % make opt variable available
-if isfield(opt,'cg_tol'),   cgtol = opt.cg_tol;       % stop conjugate gradients
-else cgtol = 1e-5; end
-if isfield(opt,'cg_maxit'), cgmit = opt.cg_maxit;      % number of cg iterations
-else cgmit = min(n,20); end
-for j=1:numel(K)
-  if iscell(K{j}) && strcmp(K{j}{1},'toep'), K{j} = toeplitz(K{j}{2}); end
-end
-
-sn2 = exp(2*hyp.lik);                               % noise variance of likGauss
-V = cell(size(K)); E = cell(size(K));                 % eigenvalue decomposition
-for j=1:numel(K)
-  if iscell(K{j}) && strcmp(K{j}{1},'toep')
-       [V{j},E{j}] = eigr(toeplitz(K{j}{2}));
-  else [V{j},E{j}] = eigr(K{j});
+if nargin<7, opt = []; end                          % make sure parameter exists
+xg = cov{3}; p = numel(xg);                 % extract underlying grid parameters
+[ng,Dg] = apxGrid('size',xg); N = prod(ng); D = sum(Dg);        % dimensionality
+if isfield(opt,'proj'), proj = opt.proj; else proj = 'none'; end    % projection
+hP = 1;                                                   % no projection at all
+if isfield(hyp,'proj')                 % apply transformation matrix if provided
+  hP = hyp.proj;
+  if strncmpi(proj,'orth',4)
+    hP = sqrtm(hP*hP'+eps*eye(D))\hP;                    % orthonormal projector
+  elseif strncmpi(proj,'norm',4)
+    hP = diag(1./sqrt(diag(hP*hP')+eps))*hP;                  % normal projector
   end
 end
-e = 1; for i=1:numel(E), e = kron(diag(E{i}),e); end       % eigenvalue diagonal
-if numel(m)==N
-  s = 1./(e+sn2); ord = 1:N;                  % V*diag(s)*V' = inv(K+sn2*eye(N))
-else
-  [eord,ord] = sort(e,'descend');              % sort long vector of eigenvalues
-  s = 1./((n/N)*eord(1:n) + sn2);               % approx using top n eigenvalues
+if isfield(opt,'deg'), deg = opt.deg; else deg = 3; end       % interpol. degree
+% no of samples for covariance hyperparameter sampling approximation,
+% see Po-Ru Loh et.al.: "Contrasting regional architectures of schizophrenia and
+% other complex diseases using fast variance components analysis, biorxiv.org
+if isfield(opt,'ndcovs'), ndcovs = max(opt.ndcovs,20);
+else ndcovs = 0; end
+[K,M] = feval(cov{:}, hyp.cov, x*hP');    % evaluate covariance mat constituents
+m = feval(mean{:}, hyp.mean, x*hP');                      % evaluate mean vector
+if iscell(lik), lstr = lik{1}; else lstr = lik; end
+if isa(lstr,'function_handle'), lstr = func2str(lstr); end
+if isequal(lstr,'likGauss'), inf = @infGaussLik; else inf = @infLaplace; end
+if nargout>0
+  if nargout<3
+    [post nlZ] = inf(hyp, mean, cov, lik, x*hP', y, opt);
+  else
+    [post nlZ dnlZ] = inf(hyp, mean, cov, lik, x*hP', y, opt);
+    if isfield(hyp,'proj')
+      dnlZ.proj=deriv_proj(post.alpha,hP,K,covGrid('flatten',xg),m,mean,hyp,x);
+      if     strncmpi(proj,'orth',4), dnlZ.proj=chain_orth(hyp.proj,dnlZ.proj);
+      elseif strncmpi(proj,'norm',4), dnlZ.proj=chain_norm(hyp.proj,dnlZ.proj);
+      end
+    end
+  end
+else return, end
+
+% no of samples for perturb-and-MAP, see George Papandreou and Alan L. Yuille:
+% "Efficient Variational Inference in Large-Scale Bayesian Compressed Sensing"
+ns = 0;                       % do nothing per default, 20 is suggested in paper
+if isfield(opt,'pred_var')                              % at least default value
+  ns = sign(opt.pred_var) * max(ceil(abs(opt.pred_var)),20);
 end
-
-if numel(m)==N               % decide for Kronecker magic or conjugate gradients
-  L = @(k) kronmvm(V,repmat(-s,1,size(k,2)).*kronmvm(V,k,1));     % mvm callback
-else                                                % go for conjugate gradients
-  mvm = @(t) mvmK(t,K,sn2,M);                             % single parameter mvm
-  L = @(k) -solveMVM(k,mvm,cgtol,cgmit);
-end
-alpha = -L(y-m);
-
-post.alpha = alpha;                            % return the posterior parameters
-post.sW = ones(n,1)/sqrt(sn2);                         % sqrt of noise precision
-post.L = L;                           % function to compute inv(K+sn2*eye(N))*Ks
-
-if nargout>1                               % do we want the marginal likelihood?
-  lda = -sum(log(s));                                               % exact kron
-  % exact: lda = 2*sum(log(diag(chol(M*kronmvm(K,eye(N))*M'+sn2*eye(n)))));
-  nlZ = (y-m)'*alpha/2 + n*log(2*pi)/2 + lda/2;
-  if nargout>2                                         % do we want derivatives?
-    dnlZ = hyp;     % allocate space for derivatives, define Q=inv(M*K*M'+sn2*I)
-    Mtal = M'*alpha;                          % blow up alpha vector from n to N
-    for i = 1:numel(hyp.cov)
-      dK = feval(cov{:}, hyp.cov, x, [], i);
-      for j=1:numel(dK)                                        % expand Toeplitz
-        if iscell(dK{j}) && strcmp(dK{j}{1},'toep')
-          dK{j} = toeplitz(dK{j}{2});
+if ndcovs>0 && nargout>2                            % possibly draw more samples
+  ns = sign(ns) * max(abs(ns),ndcovs);
+end  
+Mtal = M'*post.alpha;                         % blow up alpha vector from n to N
+kronmvm = K.kronmvm;
+if ns>0
+  s = 3;                                      % Whittle embedding overlap factor
+  [V,ee,e] = apxGrid('eigkron',K,xg,s);            % perform eigen-decomposition
+  % explained variance on the grid vg=diag(Ku*M'*inv(C)*M*Ku), C=M*Ku*M'+inv(W)
+  % relative accuracy r = std(vg_est)/vg_exact = sqrt(2/ns)
+  A = sample(V,e,M,post.sW,ns,kronmvm); A = post.L(A);           % a~N(0,inv(C))
+  z = K.mvm(M'*A); vg = sum(z.*z,2)/ns;             % z ~ N(0,Ku*M'*inv(C)*M*Ku)
+  if ndcovs>0
+    dnlZ.covs = - apxGrid('dirder',K,xg,M,post.alpha,post.alpha)/2;
+    na = size(A,2);
+    for i=1:na                                % compute (E[a'*dK*a] - a'*dK*a)/2
+      dnlZ.covs = dnlZ.covs + apxGrid('dirder',K,xg,M,A(:,i),A(:,i))/(2*na);
+    end
+    if isfield(hyp,'proj')                              % data projection matrix
+      dPs = zeros(size(hyp.proj));                  % allocate memory for result
+      KMtal = K.mvm(Mtal); [M,dM]=covGrid('interp',xg,x*hP');       % precompute
+      for i = 1:size(dPs,1)
+        if equi(xg,i), wi = max(xg{i})-min(xg{i}); else wi = 1; end    % scaling
+        for j = 1:size(dPs,2)
+            dMtal = dM{i}'*(x(:,j).*post.alpha/wi);
+            dMtA  = dM{i}'*(repmat(x(:,j),1,na).*A/wi);
+            dPs(i,j) = sum(sum(dMtA.*z))/ndcovs - dMtal'*KMtal;
         end
       end
-      P = cell(size(dK));               % auxiliary Kronecker matrix P = V'*dK*V
-      for j = 1:numel(dK), P{j} = sum((V{j}'*dK{j}).*V{j}',2); end
-      p = 1; for j=1:numel(P), p = kron(P{j},p); end               % p = diag(P)
-      p = (n/N)*p(ord(1:n));        % approximate if incomplete grid observation
-      dnlZ.cov(i) = (p'*s - Mtal'*kronmvm(dK,Mtal))/2;
-    end
-    dnlZ.lik = sn2*(sum(s) - alpha'*alpha);                  % sum(s) = trace(Q)
-    for i = 1:numel(hyp.mean)
-      dnlZ.mean(i) = -feval(mean{:}, hyp.mean, xe, i)'*alpha;
+      if     strncmpi(proj,'orth',4),dnlZ.projs = chain_orth(hyp.proj,dPs);
+      elseif strncmpi(proj,'norm',4),dnlZ.projs = chain_norm(hyp.proj,dPs);
+      else                           dnlZ.projs = dPs; end
     end
   end
+elseif ns<0                                       % variance estimate using LOVE
+  v = M*K.mvm( ones(N,1)/N ); n = size(M,1); a = 1./post.sW.^2;
+  [Q,T] = apxGrid('lanczos_arpack', @(x)M*K.mvm(M'*x)+a.*x, v,min(abs(ns),n-1));
+  R = K.mvm(M'*Q)/chol(T); vg = sum(R.^2,2);
+else
+  vg = zeros(N,1);                                       % no variance explained
 end
+% add fast predictions to post structure, f|y,mu|s2
+post.predict = @(xs) predict(xs*hP',xg,K.mvm(Mtal),vg,hyp,mean,cov,lik,deg);
+% global mem, S = whos(); mem=0; for i=1:numel(S), mem=mem+S(i).bytes/1e6; end
 
-% Solve x=A*b with symmetric A(n,n), b(n,m), x(n,m) using conjugate gradients.
-% The method is along the lines of PCG but suited for matrix inputs b.
-function [x,flag,relres,iter,r] = conjgrad(A,b,tol,maxit)
-if nargin<3, tol = 1e-10; end
-if nargin<4, maxit = min(size(b,1),20); end
-x0 = zeros(size(b)); x = x0;
-if isnumeric(A), r = b-A*x; else r = b-A(x); end, r2 = sum(r.*r,1); r2new = r2;
-nb = sqrt(sum(b.*b,1)); flag = 0; iter = 1;
-relres = sqrt(r2)./nb; todo = relres>=tol; if ~any(todo), flag = 1; return, end
-on = ones(size(b,1),1); r = r(:,todo); d = r;
-for iter = 2:maxit
-  if isnumeric(A), z = A*d; else z = A(d); end
-  a = r2(todo)./sum(d.*z,1);
-  a = on*a;
-  x(:,todo) = x(:,todo) + a.*d;
-  r = r - a.*z;
-  r2new(todo) = sum(r.*r,1);
-  relres = sqrt(r2new)./nb; cnv = relres(todo)<tol; todo = relres>=tol;
-  d = d(:,~cnv); r = r(:,~cnv);                           % get rid of converged
-  if ~any(todo), flag = 1; return, end
-  b = r2new./r2;                                               % Fletcher-Reeves
-  d = r + (on*b(todo)).*d;
-  r2 = r2new;
-end
-
-% solve q = mvm(p) via conjugate gradients
-function q = solveMVM(p,mvm,varargin)
-  [q,flag,relres,iter] = conjgrad(mvm,p,varargin{:});                 % like pcg
-  if ~flag,error('Not converged after %d iterations, r=%1.2e\n',iter,relres),end
-
-% mvm so that q = M*K*M'*p + sn2*p using the Kronecker representation
-function q = mvmK(p,K,sn2,M)
-  q = M*kronmvm(K,M'*p) + sn2*p;
-
-% Perform a matrix vector multiplication b = A*x with a matrix A being a
-% Kronecker product given by A = kron( kron(...,As{2}), As{1} ).
-function b = kronmvm(As,x,transp)
-if nargin>2 && ~isempty(transp) && transp   % transposition by transposing parts
-  for i=1:numel(As), As{i} = As{i}'; end
-end
-m = zeros(numel(As),1); n = zeros(numel(As),1);                  % extract sizes
-for i=1:numel(n)
-  if iscell(As{i}) && strcmp(As{i}{1},'toep')
-    m(i) = size(As{i}{2},1); n(i) = size(As{i}{2},1);
-  else [m(i),n(i)] = size(As{i});
+% Compute latent and predictive means and variances by grid interpolation.
+function [fmu,fs2,ymu,ys2] = predict(xs,xg,Kalpha,vg,hyp,mean,cov,lik,deg)
+  Ms = apxGrid('interp',xg,xs,deg);                % obtain interpolation matrix
+  xs = apxGrid('idx2dat',xg,xs,deg);                    % deal with index vector
+  ms = feval(mean{:},hyp.mean,xs);                         % evaluate prior mean
+  fmu = ms + Ms*Kalpha;                 % combine and perform grid interpolation
+  if nargout>1
+    if norm(vg,1)>1e-10, ve = Ms*vg; else ve = 0; end    % interp grid var expl.
+    ks = feval(cov{:},hyp.cov,xs,'diag');              % evaluate prior variance
+    fs2 = max(ks-ve,0);              % combine, perform grid interpolation, clip
+    if nargout>2, [lp, ymu, ys2] = feval(lik{:},hyp.lik,[],fmu,fs2); end
   end
-end
-d = size(x,2);
-b = x;
-for i=1:numel(n)
-  a = reshape(b,[prod(m(1:i-1)), n(i), prod(n(i+1:end))*d]);    % prepare  input
-  tmp = reshape(permute(a,[1,3,2]),[],n(i))*As{i}';
-  b = permute(reshape(tmp,[size(a,1),size(a,3),m(i)]),[1,3,2]);
-end
-b = reshape(b,prod(m),d);                        % bring result in correct shape
 
-% Real eigenvalues and eigenvectors up to the rank of a real symmetric matrix.
-% Decompose A into V*D*V' with orthonormal matrix V and diagonal matrix D.
-% Diagonal entries of D obave the rank r of the matrix A as returned by
-% the call rank(A,tol) are zero.
-function [V,D] = eigr(A,tol)
-[V,D] = eig((A+A')/2); n = size(A,1);    % decomposition of strictly symmetric A
-d = max(real(diag(D)),0); [d,ord] = sort(d,'descend');        % tidy up and sort
-if nargin<2, tol = size(A,1)*eps(max(d)); end, r = sum(d>tol);     % get rank(A)
-d(r+1:n) = 0; D = diag(d);                % set junk eigenvalues to strict zeros
-V(:,1:r) = real(V(:,ord(1:r))); V(:,r+1:n) = null(V(:,1:r)'); % ortho completion
+% sample a~N(0,C), C = M*Ku*M'+inv(W), W=sW^2
+function A = sample(V,e,M,sW,ns,kronmvm)
+  [n,N] = size(M);
+  A = randn(N,ns);                                                    % a~N(0,I)
+  A = kronmvm(V,repmat(sqrt(e),1,ns).*kronmvm(V,A,1));               % a~N(0,Ku)
+  A = M*A + bsxfun(@times,1./sW,randn(n,ns));
+
+% compute derivative of neg log marginal likelihood w.r.t. projection matrix P
+function dP = deriv_proj(alpha,P,K,xg,m,mean,hyp,x)
+  xP = x*P'; [M,dM] = covGrid('interp',xg,xP); % grid interp derivative matrices
+  beta = K.mvm(M'*alpha);                          % dP(i,j) = -alpha'*dMij*beta
+  dP = zeros(size(P)); h = 1e-4;               % allocate result, num deriv step
+  for i=1:size(P,1)
+    if equi(xg,i), wi = max(xg{i})-min(xg{i}); else wi = 1; end % scaling factor
+    xP(:,i) = xP(:,i)+h;            % perturb ith component of projection matrix
+    dmi = (feval(mean{:},hyp.mean,xP)-m)/h;    % numerically estimate dm/dP(:,i)
+    xP(:,i) = xP(:,i)-h;                                     % undo perturbation
+    betai = dmi + dM{i}*beta/wi;
+    for j=1:size(P,2), dP(i,j) = -alpha'*(x(:,j).*betai); end
+  end
+
+function eq = equi(xg,i)                        % grid along dim i is equispaced
+  ni = size(xg{i},1);
+  if ni>1                              % diagnose if data is linearly increasing
+    dev = abs(diff(xg{i})-ones(ni-1,1)*(xg{i}(2,:)-xg{i}(1,:)));
+    eq = max(dev(:))<1e-9;
+  else
+    eq = true;
+  end
+
+% chain rule for the function Q = sqrtm(P*P')\P;  for d sqrtm(X) see the website
+function dQ = chain_orth(P,dP)  % http://math.stackexchange.com/questions/540361
+  [V,F] = eig(P*P'); sf = sqrt(diag(F)); S = V*diag(sf)*V';         % eig-decomp
+  H = dP'/S; G = H'*(P'/S); o = ones(size(dP,1),1);                 % chain rule
+  dQ = (H - P'*V*((V'*(G+G')*V)./(sf*o'+o*sf'))*V')';
+
+% chain rule for the function Q = diag(1./sqrt(diag(P*P')))*P;
+function dQ = chain_norm(P,dP)
+  p = 1./sqrt(diag(P*P'));
+  dQ = diag(p)*dP - diag(diag(dP*P').*p.^3)*P;

@@ -1,4 +1,4 @@
-function A = meanGP(hyp,inf,mean,cov,lik,x,y, hypz,z,i)
+function [m,dm] = meanGP(hyp,inf,mean,cov,lik,x,y, hypz,z)
 
 % Mean function being the predictive mean of a GP model:
 %
@@ -9,15 +9,12 @@ function A = meanGP(hyp,inf,mean,cov,lik,x,y, hypz,z,i)
 %
 % hypz = [ ]
 %
-% Copyright (c) by Hannes Nickisch, 2014-11-01.
+% Copyright (c) by Hannes Nickisch, 2016-04-16.
 %
-% See also MEANFUNCTIONS.M and MEANGPEXACT.M.
+% See also meanFunctions.m and meanGPexact.m.
 
 if nargin<7, error('GP must be specified.'), end           % check for dimension
-if nargin<9, A = '0'; return, end             % report number of hyperparameters
+if nargin<9, m = '0'; return, end             % report number of hyperparameters
 
-if nargin==9
-  A = gp(hyp,inf,mean,cov,lik,x,y, z);                 % evaluate posterior mean
-else
-  A = zeros(size(x,1),1);                                           % derivative
-end
+m = gp(hyp,inf,mean,cov,lik,x,y, z);                   % evaluate posterior mean
+dm = @(q) zeros(0,1);                                   % directional derivative

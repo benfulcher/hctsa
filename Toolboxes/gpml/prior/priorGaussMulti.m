@@ -13,7 +13,7 @@ function [lp,dlp] = priorGaussMulti(mu,s2,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-12.
 %
-% See also PRIORDISTRIBUTIONS.M, PRIORGAUSS.M.
+% See also priorDistributions.m, prior/priorGauss.m.
 
 if nargin<2, error('mu and s2 parameters need to be provided'), end
 if ndims(mu)~=2 || size(mu,2)~=1, error('mu needs to be (Dx1)'), end

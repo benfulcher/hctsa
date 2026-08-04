@@ -1,4 +1,4 @@
-function A = meanDiscrete(s, hyp, x, i)
+function [m,dm] = meanDiscrete(s, hyp, x)
 
 % Mean function for discrete inputs x. Given a function defined on the
 % integers 1,2,3,..,s, the mean function is parametrized as:
@@ -17,16 +17,15 @@ function A = meanDiscrete(s, hyp, x, i)
 %         ..
 %         mu_s ]
 %
-% Copyright (c) by Roman Garnett, 2014-08-14.
+% Copyright (c) by Roman Garnett and Hannes Nickisch, 2016-04-16.
 %
-% See also COVDISCRETE.M, MEANFUNCTIONS.M.
+% See also covDiscrete.m, meanFunctions.m.
 
 if nargin==0, error('s must be specified.'), end           % check for dimension
-if nargin<=2, A = num2str(s); return; end     % report number of hyperparameters
-mu = hyp(:);
-if nargin==3
-  A = mu(x(:));                                                  % evaluate mean
-else
-  A = zeros(numel(x),1);                                            % derivative
-  A(x==i) = 1;
-end
+if nargin<=2, m = num2str(s); return; end     % report number of hyperparameters
+mu = hyp(:); m = mu(x(:));                                       % evaluate mean
+dm = @(q) dirder(q,s,x);
+
+function dmdhyp = dirder(q,s,x)
+  dmdhyp = zeros(s,1);
+  for i=1:s, dmdhyp(i) = sum(q(x==i)); end

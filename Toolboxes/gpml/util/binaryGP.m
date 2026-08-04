@@ -78,20 +78,20 @@ end
 % Note, this function is just a wrapper provided for backward compatibility,
 % the functionality is now provided by the more general gp function.
 if strcmp(lik,'logistic')
-  lik = @likLogistic; 
+  lik = 'likLogistic'; 
 elseif strcmpi(lik,'cumgauss')
-  lik = @likErf; 
+  lik = 'likErf'; 
 else
   error('Allowable likelihoods: logistic and cumGauss.');
 end
 if strcmp(approx,'approxLA')
-  inf = @infLaplace; 
+  inf = 'infLaplace'; 
 elseif strcmp(approx,'approxEP')
-  inf = @infEP; 
+  inf = 'infEP'; 
 else
   error('Allowable approximations: approxLA and approxEP.');
 end
-mean = @meanZero;
+mean = 'meanZero';
 
 varargout = cell(nargout, 1);    % allocate the right number of output arguments
 hyp.cov = hyper;

@@ -1,9 +1,11 @@
 function [post, nlZ, dnlZ] = infVB(hyp, mean, cov, lik, x, y, opt)
 
 % Variational approximation to the posterior Gaussian process.
-% The function takes a specified covariance function (see covFunctions.m) and
-% likelihood function (see likFunctions.m), and is designed to be used with
-% gp.m. See also infMethods.m.
+%
+% Compute a parametrization of the posterior, the negative log marginal
+% likelihood and its derivatives w.r.t. the hyperparameters. The function takes
+% a specified covariance function (see covFunctions.m) and likelihood function
+% (see likFunctions.m), and is designed to be used with gp.m.
 %
 % Minimisation of an upper bound on the negative marginal likelihood using a
 % sequence of infLaplace calls where the smoothed likelihood
@@ -14,13 +16,16 @@ function [post, nlZ, dnlZ] = infVB(hyp, mean, cov, lik, x, y, opt)
 % The problem is convex whenever the likelihood is log-concave. At the end, the
 % optimal width W is obtained analytically.
 %
-% Copyright (c) by Hannes Nickisch 2014-03-20.
+% Copyright (c) by Hannes Nickisch 2016-10-21.
 %
-% See also INFMETHODS.M.
+% See also infMethods.m, gp.m.
 
 n = size(x,1);
-K = feval(cov{:}, hyp.cov, x);                  % evaluate the covariance matrix
-m = feval(mean{:}, hyp.mean, x);                      % evaluate the mean vector
+if nargin<=6, opt = []; end                        % make opt variable available
+if isstruct(cov), K = cov;                   % use provided covariance structure
+else K = apx(hyp,cov,x,opt); end               % set up covariance approximation
+if isnumeric(mean), m = mean;                         % use provided mean vector
+else [m,dm] = feval(mean{:}, hyp.mean, x); end           % mean vector and deriv
 if iscell(lik), likstr = lik{1}; else likstr = lik; end
 if ~ischar(likstr), likstr = func2str(likstr); end
 
@@ -34,45 +39,35 @@ else out_tol = 1e-5; end                                         % default value
 sW = ones(n,1);                                % init with some reasonable value
 opt.postL = false;                    % avoid computation of L inside infLaplace
 for i=1:out_nmax
-  U = chol(eye(n)+sW*sW'.*K)'\(repmat(sW,1,n).*K);
-  v = diag(K) - sum(U.*U,1)';             % v = diag( inv(inv(K)+diag(sW.*sW)) )
-  post = infLaplace(hyp, m, K, {@likVB,v,lik}, x, y, opt);
+  [junk,junk,dW] = K.fun(sW.*sW); v = 2*dW;
+  [post,junk,junk,alpha] = infLaplace(hyp, mean, K, {@likVB,v,lik}, x, y, opt);
   % post.sW is very different from the optimal sW for non Gaussian likelihoods
-  sW_old = sW; f = m+K*post.alpha;                              % posterior mean
-  [lp,dlp,d2lp,sW,b,z] = feval(@likVB,v,lik,hyp.lik,y,f);
+  sW_old = sW; f = K.mvm(alpha)+m;                              % posterior mean
+  [lp,junk,junk,sW,b,z] = feval(@likVB,v,lik,hyp.lik,y,f);
   if max(abs(sW-sW_old))<out_tol, break, end              % diagnose convergence
 end
 
-alpha = post.alpha; post.sW = sW;                         % posterior parameters
-post.L = chol(eye(n)+sW*sW'.*K);            % recompute L'*L = B =eye(n)+sW*K*sW
+post.sW = sW;                                             % posterior parameters
+[ldB2,solveKiW,dW,dhyp] = K.fun(sW.*sW); post.L = @(r) -K.P(solveKiW(K.Pt(r)));
 
 ga = 1./(sW.*sW); be = b+z./ga;        % variance, lower bound offset from likVB
 h = f.*(2*be-f./ga) - 2*lp - v./ga;     % h(ga) = s*(2*b-f/ga)+ h*(s) - v*(1/ga)
-c = b+(z-m)./ga; t = post.L'\(c./sW);
-nlZ = sum(log(diag(post.L))) + (sum(h) + t'*t - (be.*be)'*ga )/2;   % var. bound
+t = b.*ga+z-m; nlZ = ldB2 + (sum(h)+t'*solveKiW(t)-(be.*be)'*ga )/2; % var bound
 
 if nargout>2                                           % do we want derivatives?
-  iKtil = repmat(sW,1,n).*solve_chol(post.L,diag(sW));% sW*B^-1*sW=inv(K+inv(W))
-  dnlZ = hyp;                                   % allocate space for derivatives
-  for j=1:length(hyp.cov)                                    % covariance hypers
-    dK = feval(cov{:}, hyp.cov, x, [], j);
-    if j==1, w = iKtil*(c.*ga); end
-    dnlZ.cov(j) = sum(sum(iKtil.*dK))/2 - (w'*dK*w)/2;
-  end
+  dnlZ = dhyp(alpha);                                        % covariance hypers
+  dnlZ.lik = zeros(size(hyp.lik));                             % allocate memory
   if ~strcmp(likstr,'likGauss')                              % likelihood hypers
     for j=1:length(hyp.lik)
       sign_fmz = 2*(f-z>=0)-1;                % strict sign mapping; sign(0) = 1
       g = sign_fmz.*sqrt((f-z).^2 + v) + z;
       dhhyp = -2*feval(lik{:},hyp.lik,y,g,[],'infLaplace',j);
       dnlZ.lik(j) = sum(dhhyp)/2;
-    end
+    end  
   else                                 % special treatment for the Gaussian case
-    dnlZ.lik = sum(sum( (post.L'\eye(n)).^2 )) - exp(2*hyp.lik)*(alpha'*alpha);
+    sn2 = exp(2*hyp.lik); dnlZ.lik = -sn2*(alpha'*alpha) - 2*sum(dW)/sn2 + n;
   end
-  for j=1:length(hyp.mean)                                         % mean hypers
-    dm = feval(mean{:}, hyp.mean, x, j);
-    dnlZ.mean(j) = -alpha'*dm;
-  end
+  dnlZ.mean = -dm(alpha);                                          % mean hypers
 end
 
 % Smoothed likelihood function; instead of p(y|f)=lik(..,f,..) compute

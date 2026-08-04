@@ -1,9 +1,11 @@
-function K = covSEiso(hyp, x, z, i)
+function varargout = covSEiso(varargin)
 
+% Wrapper for Squared Exponential covariance function covSE.m.
+%
 % Squared Exponential covariance function with isotropic distance measure. The
 % covariance function is parameterized as:
 %
-% k(x^p,x^q) = sf^2 * exp(-(x^p - x^q)'*inv(P)*(x^p - x^q)/2) 
+% k(x,z) = sf^2 * exp(-(x-z)'*inv(P)*(x-z)/2) 
 %
 % where the P matrix is ell^2 times the unit matrix and sf^2 is the signal
 % variance. The hyperparameters are:
@@ -13,36 +15,9 @@ function K = covSEiso(hyp, x, z, i)
 %
 % For more help on design of covariance functions, try "help covFunctions".
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2016-04-27.
 %
-% See also COVFUNCTIONS.M.
+% See also cov/covSE.m.
 
-if nargin<2, K = '2'; return; end                  % report number of parameters
-if nargin<3, z = []; end                                   % make sure, z exists
-xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
-
-ell = exp(hyp(1));                                 % characteristic length scale
-sf2 = exp(2*hyp(2));                                           % signal variance
-
-% precompute squared distances
-if dg                                                               % vector kxx
-  K = zeros(size(x,1),1);
-else
-  if xeqz                                                 % symmetric matrix Kxx
-    K = sq_dist(x'/ell);
-  else                                                   % cross covariances Kxz
-    K = sq_dist(x'/ell,z'/ell);
-  end
-end
-
-if nargin<4                                                        % covariances
-  K = sf2*exp(-K/2);
-else                                                               % derivatives
-  if i==1
-    K = sf2*exp(-K/2).*K;
-  elseif i==2
-    K = 2*sf2*exp(-K/2);
-  else
-    error('Unknown hyperparameter')
-  end
-end
+varargout = cell(max(1,nargout),1);
+[varargout{:}] = covScale({'covSE','iso',[]},varargin{:});

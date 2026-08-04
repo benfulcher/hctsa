@@ -1,4 +1,4 @@
-function K = covDiscrete(s, hyp, x, z, i)
+function [K,dK] = covDiscrete(s, hyp, x, z)
 
 % Covariance function for discrete inputs. Given a function defined on the
 % integers 1,2,3,..,s, the covariance function is parameterized as:
@@ -34,9 +34,9 @@ function K = covDiscrete(s, hyp, x, z, i)
 %
 % For more help on design of covariance functions, try "help covFunctions".
 %
-% Copyright (c) by Roman Garnett, 2014-08-14.
+% Copyright (c) by Roman Garnett, 2016-04-18.
 %
-% See also MEANDISCRETE.M, COVFUNCTIONS.M.
+% See also meanDiscrete.m, covFunctions.m.
 
 if nargin==0, error('s must be specified.'), end           % check for dimension
 if nargin<3, K = num2str(s*(s+1)/2); return; end   % report number of parameters
@@ -47,25 +47,25 @@ if xeqz, z = x; end                                % make sure we have a valid z
 L = zeros(s); L(triu(true(s))) = hyp(:);                 % build Cholesky factor
 L(1:(s+1):end) = exp(diag(L));
 
-if nargin<5
-  A = L'*L; % A is a placeholder for K to avoid a name clash with the return arg
-  if dg
-    K = A(sub2ind(size(A),x,x));
-  else
-    K = A(x,z);
-  end
+A = L'*L;   % A is a placeholder for K to avoid a name clash with the return arg
+if dg
+  K = A(sub2ind(size(A),fix(x),fix(x)));
 else
-  col = ceil((sqrt(8*i+1)-1)/2); row = i-col*(col-1)/2;    % indices by tri-root
-  dL = zeros(s);                                 % derivative of Cholesky factor
-  if (row == col)
-    dL(row,col) = L(row,col);         % diagonal entries have exp transformation
-  else
-    dL(row,col) = 1;
-  end
-  dK = dL'*L; dK = dK+dK';                 % derivative of sxs covariance matrix
-  if dg
-    K = dK(sub2ind(size(dK),x,x));
-  else
-    K = dK(x,z);
-  end
+  K = A(fix(x),fix(z));
 end
+
+if nargout > 1
+  dK = @(Q) dirder(Q,s,L,x,z,dg);                 % directional hyper derivative
+end
+
+function [dhyp,dx] = dirder(Q,s,L,x,z,dg)
+  nx = numel(x); Ix = sparse(fix(x),1:nx,ones(nx,1),s,nx);      % K==Ix'*L'*L*Iz
+  if dg
+    B = Ix*diag(Q)*Ix';
+  else
+    nz = numel(z); Iz = sparse(fix(z),1:nz,ones(nz,1),s,nz);
+    B = Iz*Q'*Ix';
+  end
+  B = L*(B+B'); B(1:(s+1):end) = diag(B).*diag(L);         % fix exp on diagonal
+  dhyp = B(triu(true(s)));
+  if nargout > 1, dx = zeros(size(x)); end

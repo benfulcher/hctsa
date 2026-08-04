@@ -1,4 +1,4 @@
-function A = meanPoly(d, hyp, x, i)
+function [m,dm] = meanPoly(d, hyp, x)
 
 % meanPoly - compose a mean function as a polynomial.
 %
@@ -20,24 +20,20 @@ function A = meanPoly(d, hyp, x, i)
 % This function doesn't actually compute very much on its own, it merely does
 % some bookkeeping, and calls other mean function to do the actual work.
 %
-% Copyright (c) by Hannes Nickisch 2013-11-02.
+% Copyright (c) by Hannes Nickisch 2016-04-15.
 %
-% See also MEANFUNCTIONS.M.
+% See also meanFunctions.m.
 
 d = max(abs(floor(d)),1);                              % positive integer degree
-if nargin<3, A = ['D*',int2str(d)]; return; end   % report number of hyperparams 
+if nargin<3, m = ['D*',int2str(d)]; return; end   % report number of hyperparams 
 
 [n,D] = size(x);
 a = reshape(hyp,D,d);
 
-A = zeros(n,1);                                                % allocate memory
-if nargin==3                                               % compute mean vector
-  for i=1:d, A = A + (x.^i)*a(:,i); end                          % evaluate mean
-else                                                 % compute derivative vector
-  if i<=d*D
-    j = mod(i-1,D)+1;                                          % which dimension
-    A = x(:,j).^((i-j)/D+1);                                        % derivative
-  else
-    A = zeros(n,1);
-  end
-end
+m = zeros(n,1);                                                % allocate memory
+for j=1:d, m = m + (x.^j)*a(:,j); end                            % evaluate mean
+dm = @(q) dirder(q,x,a);                                % directional derivative
+
+function dhyp = dirder(q,x,a)
+  [D,d] = size(a);
+  dhyp = zeros(D*d,1); for j=1:d, dhyp((j-1)*D+(1:D)) = (x.^j)'*q(:); end

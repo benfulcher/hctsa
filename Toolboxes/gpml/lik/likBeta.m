@@ -1,6 +1,21 @@
 function [varargout] = likBeta(link, hyp, y, mu, s2, inf, i)
 
-% likBeta - Beta likelihood function for interval data y from [0,1]. 
+% likBeta Beta likelihood function for interval data Y from [0,1].
+%
+% Report number of hyperparameters
+%  s = likBeta ()
+%  s = likBeta (link)
+%
+% Prediction mode
+%   lp            = likBeta (link, hyp, y, mu)
+%  [lp, ymu, ys2] = likBeta (link, hyp, y, mu, s2)
+%
+% Inference mode
+%  [varargout] = likBeta (link, hyp, y, mu, s2, inf)
+%  [varargout] = likBeta (link, hyp, y, mu, s2, inf, i)
+%
+% Call likFunctions.m to get an explanation of outputs in each mode.
+%
 % The expression for the likelihood is
 %   likBeta(f) = 1/Z * y^(mu*phi-1) * (1-y)^((1-mu)*phi-1) with 
 % mean=mu and variance=mu*(1-mu)/(1+phi) where mu = g(f) is the Beta intensity,
@@ -23,9 +38,9 @@ function [varargout] = likBeta(link, hyp, y, mu, s2, inf, i)
 % respectively, see likFunctions.m for the details. In general, care is taken
 % to avoid numerical issues when the arguments are extreme.
 %
-% See also LIKFUNCTIONS.M.
-%
 % Copyright (c) by Hannes Nickisch, 2014-03-04.
+%
+% See also likFunctions.m.
 
 if nargin<4, varargout = {'1'}; return; end   % report number of hyperparameters
 
@@ -33,7 +48,7 @@ phi = exp(hyp);
 
 if nargin<6                              % prediction mode if inf is not present
   if numel(y)==0,  y = zeros(size(mu)); end
-  s2zero = 1; if nargin>4, if norm(s2)>0, s2zero = 0; end, end         % s2==0 ?
+  s2zero = 1; if nargin>4&&numel(s2)>0&&norm(s2)>eps, s2zero = 0; end  % s2==0 ?
   if s2zero                                                    % log probability
     lg = g(mu,link); elg = exp(lg); v = phi*elg; w = phi-v;
     a0 = gammaln(w)-gammaln(phi);

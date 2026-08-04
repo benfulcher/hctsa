@@ -26,6 +26,9 @@
 %   priorClampedMulti or - fix hyperparameter to its current value by setting
 %   priorDeltaMulti     derivatives to zero, no effect on marginal likelihood
 %
+%   priorEqualMulti or   - make several hyperparameters have the same value by
+%   priorSameMulti      same derivative, no effect on marginal likelihood
+%
 % composite prior distributions (see explanation at the bottom):
 %
 %   priorMix             - nonnegative mixture of priors
@@ -48,7 +51,9 @@
 % The function returns the log density at location t along with its first
 % derivative.
 %
-% See also doc/usagePrior.m, inf/infPrior.m.
-%
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% See also USAGEPRIOR, INFPRIOR
+
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
+
+help priorDistributions

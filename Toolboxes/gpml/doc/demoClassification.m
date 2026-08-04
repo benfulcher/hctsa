@@ -1,5 +1,5 @@
 disp('See http://www.gaussianprocess.org/gpml/code/matlab/doc/ for details.')
-disp('Hit any key to continue...'); pause
+disp('Wait 10s, then continue...'); pause(10)
 
 disp(' '); disp('clear all, close all')
 clear all, close all
@@ -50,7 +50,7 @@ colorbar
 grid
 axis([-4 4 -4 4])
 if write_fig, print -depsc f6.eps; end
-disp(' '); disp('Hit any key to continue...'); pause
+disp(' '); disp('Wait 10s, then continue...'); pause(10)
 
 disp(' ')
 disp('meanfunc = @meanConst; hyp.mean = 0;')
@@ -80,17 +80,17 @@ colorbar
 grid
 axis([-4 4 -4 4])
 if write_fig, print -depsc f7.eps; end
-disp(' '); disp('Hit any key to continue...'); pause
+disp(' '); disp('Wait 10s, then continue...'); pause(10)
 
 disp('large scale classification using the FITC approximation')
 disp('[u1,u2] = meshgrid(linspace(-2,2,5)); u = [u1(:),u2(:)];')
 [u1,u2] = meshgrid(linspace(-2,2,5)); u = [u1(:),u2(:)]; clear u1; clear u2
 disp('nu = size(u,1);')
 nu = size(u,1);
-disp('covfuncF = {@covFITC, {covfunc}, u};')
-covfuncF = {@covFITC, {covfunc}, u};
-disp('inffunc = @infFITC_Laplace;')
-inffunc = @infFITC_EP;                     % one could also use @infFITC_Laplace
+disp('covfuncF = {@apxSparse, {covfunc}, u};')
+covfuncF = {@apxSparse, {covfunc}, u};
+disp('inffunc = @infLaplace;')
+inffunc = @infLaplace;
 disp('hyp = minimize(hyp, @gp, -40, inffunc, meanfunc, covfuncF, likfunc, x, y);')
 hyp = minimize(hyp, @gp, -40, inffunc, meanfunc, covfuncF, likfunc, x, y);
 disp('[a b c d lp] = gp(hyp, inffunc, meanfunc, covfuncF, likfunc, x, y, t, ones(n,1));')

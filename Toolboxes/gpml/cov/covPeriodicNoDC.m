@@ -1,8 +1,8 @@
-function K = covPeriodicNoDC(hyp, x, z, i)
+function [K,dK] = covPeriodicNoDC(hyp, x, z)
 
 % Stationary covariance function for a smooth periodic function, with period p:
 %
-% k(x,x') = sf^2 * [k0(pi*(x-x')/p) - f(ell)] / [1 - f(ell)]
+% k(x,z) = sf^2 * [k0(pi*(x-z)/p) - f(ell)] / [1 - f(ell)]
 %        with k0(t) = exp( -2*sin^2(t)/ell^2 ) and f(ell) = \int 0..pi k0(t) dt.
 %
 % The constant (DC component) has been removed and marginal variance is sf^2.
@@ -14,9 +14,9 @@ function K = covPeriodicNoDC(hyp, x, z, i)
 %
 % Note that covPeriodicNoDC converges to covCos as ell goes to infinity.
 %
-% Copyright (c) by James Robert Lloyd and Hannes Nickisch 2013-10-21.
+% Copyright (c) by James Robert Lloyd and Hannes Nickisch 2016-04-24.
 %
-% See also COVFUNCTIONS.M, COVCOS.M.
+% See also covFunctions.m, cov/covCos.m.
 
 if nargin<2, K = '3'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
@@ -24,60 +24,69 @@ xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
 
 [n,D] = size(x);
 if D>1, error('Covariance is defined for 1d data only.'), end
-ell = exp(hyp(1));
-p   = exp(hyp(2));
-sf2 = exp(2*hyp(3));
+ell = exp(hyp(1)); p = exp(hyp(2)); sf2 = exp(2*hyp(3));   % extract hyperparams
 
-% precompute distances
-if dg                                                               % vector kxx
-  K = zeros(size(x,1),1);
+% precompute deviations and exploit symmetry of sin^2
+if dg                                                               % vector txx
+  T = zeros(size(x,1),1);
 else
-  if xeqz                                                 % symmetric matrix Kxx
-    K = sqrt(sq_dist(x'));
-  else                                                   % cross covariances Kxz
-    K = sqrt(sq_dist(x',z'));
+  if xeqz                                                 % symmetric matrix Txx
+    T = pi/p*bsxfun(@plus,x,-x');
+  else                                                   % cross covariances Txz
+    T = pi/p*bsxfun(@plus,x,-z');
   end
 end
 
-K = 2*pi*K/p;
-if nargin<4                                                        % covariances
-  K = sf2*covD(K,ell);
-else
-  if i==1
-    if ell>1e4                                            % limit for ell->infty
-      K = zeros(size(K));                  % no further progress in ell possible
-    elseif 1/ell^2<3.75
-      cK = cos(K); ecK = exp(cK/ell^2);
-      b0 = besseli(0,1/ell^2);
-      b1 = besseli(1,1/ell^2);
-      K =    2*(exp(1/ell^2)-ecK    )*b1 ...
-           - 2*(exp(1/ell^2)-ecK.*cK)*b0 ...
-           + 4*exp(2*(cos(K/2)/ell).^2).*sin(K/2).^2;
-      K = sf2/(ell*(exp(1/ell^2)-b0))^2 * K;
-    else
-      cK = cos(K); ecK = exp((cK-1)/ell^2);
-      b0 = embi0(1/ell^2);
-      b1 = embi1(1/ell^2);
-      K =    2*(1-ecK)*b1 - 2*(1-ecK.*cK)*b0 ...
-           + 4*exp(2*(cos(K/2).^2-1)/ell^2).*sin(K/2).^2;
-      K = sf2/(ell*(1-b0))^2 * K;
-    end
-  elseif i==2
-    if ell>1e4                                            % limit for ell->infty
-      K = sf2*sin(K).*K;
-    elseif 1/ell^2<3.75
-      K = exp(cos(K)/ell^2).*sin(K).*K;
-      K = sf2/ell^2/(exp(1/ell^2)-besseli(0,1/ell^2))*K;
-    else
-      K = exp((cos(K)-1)/ell^2).*sin(K).*K;
-      K = sf2/ell^2/(1-embi0(1/ell^2))*K;
-    end
-  elseif i==3
-      K = 2*sf2*covD(K,ell);
+K = covD(2*T,ell); K = sf2*K;                                       % covariance
+
+if nargout>1
+  ebi0 = embi0(1/ell^2); ebi1 = embi1(1/ell^2);
+  dK = @(Q) dirder(Q,K,T,ell,p,sf2,xeqz,x,z,ebi0,ebi1);  % directional hyp deriv
+end
+
+function [dhyp,dx] = dirder(Q,K,T,ell,p,sf2,xeqz,x,z,ebi0,ebi1)
+  S2 = (sin(T)/ell).^2;
+  if ell>1e4                                              % limit for ell->infty
+    Z = zeros(size(T));                    % no further progress in ell possible
+  elseif 1/ell^2<3.75
+    cK = cos(2*T); ecK = exp(cK/ell^2);
+    b0 = besseli(0,1/ell^2);
+    b1 = besseli(1,1/ell^2);
+    Z =    2*(exp(1/ell^2)-ecK    )*b1 ...
+         - 2*(exp(1/ell^2)-ecK.*cK)*b0 ...
+         + 4*exp(2*(cos(T)/ell).^2).*sin(T).^2;
+    Z = sf2/(ell*(exp(1/ell^2)-b0))^2 * Z;
   else
-    error('Unknown hyperparameter')
+    cK = cos(2*T); ecK = exp((cK-1)/ell^2);
+    b0 = ebi0; b1 = ebi1;
+    Z =    2*(1-ecK)*b1 - 2*(1-ecK.*cK)*b0 ...
+         + 4*exp(2*(cos(T).^2-1)/ell^2).*sin(T).^2;
+    Z = sf2/(ell*(1-b0))^2 * Z;
   end
-end
+  if ell>1e4                                              % limit for ell->infty
+    Y = 2*sf2*                         sin(2*T).*T;
+    a = 1;
+  elseif 1/ell^2<3.75
+    c = 1/(exp(1/ell^2)-b0)/ell^2;
+    Y = 2*c*sf2*exp( cos(2*T)   /ell^2).*sin(2*T).*T;
+    a = 1/(1-b0*exp(-1/ell^2))/ell^2;
+  else
+    c = 1/(1-b0)/ell^2;
+    Y = 2*c*sf2*exp((cos(2*T)-1)/ell^2).*sin(2*T).*T;
+    a = c;
+  end
+  dhyp = [Z(:)'*Q(:); Y(:)'*Q(:); 2*(Q(:)'*K(:))];
+  if nargout > 1
+    Kdc = sf2*exp( -2*S2 ); % inkl. DC component
+    R = Kdc.*sin(2*T).*Q./T; R(T==0) = 0;
+    r2 = sum(R,2); r1 = sum(R,1)';
+    if xeqz
+      y = bsxfun(@times,r1+r2,x) - (R+R')*x;
+    else
+      Rz = R*z; y = bsxfun(@times,r2,x) - Rz;
+    end
+    dx = -2*a*pi^2/p^2 * y;
+  end
 
 function K = covD(D,ell)                   % evaluate covariances from distances
   if ell>1e4                                              % limit for ell->infty

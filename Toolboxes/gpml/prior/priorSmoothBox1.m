@@ -5,13 +5,16 @@ function [lp,dlp] = priorSmoothBox1(a,b,eta,x)
 % Compute log-likelihood and its derivative or draw a random sample.
 % The prior distribution is parameterized as:
 %
-%  p(x) = sigmoid(eta*(x-a))*(1-sigmoid(eta*(x-b))),
-%         where sigmoid(z) = 1/(1+exp(-z))
+%  p(x) = 1/w*sigmoid(eta*(x-a))*(1-sigmoid(eta*(x-b))),
+%         where w = abs(b-a) and sigmoid(z) = 1/(1+exp(-z))
 %
 % a(1x1) is the lower bound parameter, b(1x1) is the upper bound parameter,
 % eta(1x1)>0 is the slope parameter and  x(1xN) contains query hyperparameters
 % for prior evaluation. Larger values of eta make the distribution more
 % box-like.
+%
+% The distribution p(x) has mean and variance given by:
+% mu = (a+b)/2 and s2 = w^2/(1-exp(-2*g))*(1+(pi/g)^2)/12, g = eta*w/2.
 %
 %          /------------\
 %         /              \
@@ -20,9 +23,9 @@ function [lp,dlp] = priorSmoothBox1(a,b,eta,x)
 %
 % For more help on design of priors, try "help priorDistributions".
 %
-% Copyright (c) by Jose Vallet and Hannes Nickisch, 2014-09-08.
+% Copyright (c) by Jose Vallet and Hannes Nickisch, 2015-03-27.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<3, error('a, b and eta parameters need to be provided'), end
 if b<=a, error('b must be greater than a.'), end

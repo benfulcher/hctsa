@@ -1,4 +1,4 @@
-function K = covEye(hyp, x, z, i)
+function [K,dK] = covEye(hyp, x, z)
 
 % Independent covariance function, i.e. "white noise", with unit variance.
 % The covariance function is specified as:
@@ -15,9 +15,9 @@ function K = covEye(hyp, x, z, i)
 %
 % For more help on design of covariance functions, try "help covFunctions".
 %
-% Copyright (c) by Hannes Nickisch, 2014-09-05.
+% Copyright (c) by Hannes Nickisch, 2016-04-18.
 %
-% See also COVFUNCTIONS.M.
+% See also covFunctions.m.
 
 tol = eps;   % threshold on the norm when two vectors are considered to be equal
 if nargin<2, K = '0'; return; end                  % report number of parameters
@@ -26,7 +26,6 @@ dg = strcmp(z,'diag');                                          % determine mode
 
 n = size(x,1);
 
-% precompute raw
 if dg                                                               % vector kxx
   K = ones(n,1);
 else
@@ -37,4 +36,9 @@ else
   end
 end
 
-if nargin==4, error('Unknown hyperparameter'), end                 % derivatives
+if nargout > 1
+  dK = @(Q) dirder(Q,x);                          % directional hyper derivative
+end
+
+function [dhyp,dx] = dirder(Q,x)
+  dhyp = zeros(0,1); if nargout > 1, dx = zeros(size(x)); end

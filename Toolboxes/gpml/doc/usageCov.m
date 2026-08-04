@@ -2,7 +2,7 @@
 %
 % See also covFunctions.m.
 %
-% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2014-12-08.
+% Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2022-04-04.
 %                                      File automatically generated using noweb.
 clear all, close all
 n = 5; D = 3; x = randn(n,D); xs = randn(3,D);  % create a data set
@@ -39,11 +39,11 @@ hypds = L(triu(true(s))); xd = randi([1,s],[n,1]); xsd = [1;3;6];
 cfa = {@covSEfact,2}; hypfa = randn(D*2,1);       % factor analysis
 
 % set up composite i.e. meta covariance functions
-csc = {'covScale',{cgu}};    hypsc = [log(3); hypgu];  % scale by 9
+csc = {'covScale',cgu};      hypsc = [log(3); hypgu];  % scale by 9
 csu = {'covSum',{cn,cc,cl}}; hypsu = [hypn; hypc; hypl];      % sum
 cpr = {@covProd,{cc,cci}};   hyppr = [hypc; hypcc];       % product
 mask = [0,1,0]; %   binary mask excluding all but the 2nd component
-cma = {'covMask',{mask,cgi{:}}}; hypma = hypgi;
+cma = {'covMask',mask,cgi{:}}; hypma = hypgi;
 % isotropic periodic rational quadratic
 cpi = {'covPERiso',{@covRQiso}};
 % periodic Matern with ARD
@@ -67,11 +67,8 @@ cov = cds; hyp = hypds; x = xd; xs = xsd;
 feval(cov{:})
 
 % 2) evaluate the function on x
-feval(cov{:},hyp,x)
+[K,dK] = feval(cov{:},hyp,x)
 
 % 3) evaluate the function on x and xs to get cross-terms
-kss = feval(cov{:},hyp,xs,'diag')
-Ks  = feval(cov{:},hyp,x,xs)
-
-% 4) compute the derivatives w.r.t. to hyperparameter i
-i = 1; feval(cov{:},hyp,x,[],i)
+[kss,dkss] = feval(cov{:},hyp,xs,'diag')
+[Ks, dKs ] = feval(cov{:},hyp,x,xs)

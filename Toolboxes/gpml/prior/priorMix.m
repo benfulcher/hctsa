@@ -14,7 +14,7 @@ function [lp,dlp] = priorMix(w,priors,x)
 %
 % Copyright (c) by Roman Garnett and Hannes Nickisch, 2014-09-08.
 %
-% See also PRIORDISTRIBUTIONS.M.
+% See also priorDistributions.m.
 
 if nargin<2, error('specification of w and priors required'), end
 n = numel(w); w = w(:);
