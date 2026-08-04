@@ -13,7 +13,7 @@ function SQL_AddChunked(dbc,insertString,dataSet,chunkSize)
 %          tweaked depend on the value of max_allowed_packet on the mySQL server)
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

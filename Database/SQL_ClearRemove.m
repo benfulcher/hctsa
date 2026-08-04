@@ -27,7 +27,7 @@ function SQL_ClearRemove(tsOrOps,idRange,doRemove,doLog)
 % Removes COMPLETELY the selected ts_ids or op_ids from the Database.
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

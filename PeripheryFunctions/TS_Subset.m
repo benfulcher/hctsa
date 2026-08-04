@@ -19,7 +19,7 @@ function [TS_DataMat,TimeSeries,Operations] = TS_Subset(whatData,ts_ids_keep,op_
 % >> TS_Subset('norm',1:100,[],1,'HCTSA_subset.mat');
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

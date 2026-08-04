@@ -44,7 +44,7 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % "A practical method for calculating largest Lyapunov exponents from small
 % data sets", Physica D 65(1-2) 117 (1993)
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:

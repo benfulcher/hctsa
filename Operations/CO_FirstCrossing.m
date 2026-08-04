@@ -10,7 +10,7 @@ function out = CO_FirstCrossing(y, corrFun, threshold, whatOut)
 % threshold, to cross. Examples: 0 [first zero crossing], 1/exp(1) [first 1/e crossing].
 
 % ------------------------------------------------------------------------------
-% Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
 %
 % If you use this code for your research, please cite the following two papers:
