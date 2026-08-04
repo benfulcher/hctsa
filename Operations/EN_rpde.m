@@ -60,7 +60,7 @@ end
 
 % Specified a way of determining m and/or tau, use BF_Embed to estimate:
 if ischar(tau) || ischar(m)
-	tauAndM = BF_Embed(x, tau, m, 2);
+	tauAndM = BF_Embed(x, tau, m, true);
 	tau = tauAndM(1);
 	m = tauAndM(2);
 end

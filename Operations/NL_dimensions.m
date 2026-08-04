@@ -85,7 +85,7 @@ end
 % ------------------------------------------------------------------------------
 %% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1);
 mopt = tm(2); % the resolved embedding dimension, possibly < 3
 

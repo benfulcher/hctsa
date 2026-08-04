@@ -100,7 +100,7 @@ doPlot = 0; % plot outputs to a figure
 %% Run TISEAN's poincare
 % ------------------------------------------------------------------------------
 N = length(y); % length of the time series
-tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1);
 m = tm(2);
 

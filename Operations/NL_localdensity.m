@@ -79,7 +79,7 @@ end
 % ------------------------------------------------------------------------------
 %% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0);
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, false);
 
 if isscalar(Y) && isnan(Y) % embedding failed
 	error('Embedding failed.')

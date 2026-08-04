@@ -1,4 +1,4 @@
-function y_embed = BF_Embed(y,tau,m,makeSignal,randomSeed,beVocal)
+function y_embed = BF_Embed(y,tau,m,justGiveMeParams,randomSeed,beVocal)
 % BF_Embed  Time-delay embedding
 %
 % Returns a time-delay embedding of the input time series into an m dimensional
@@ -12,17 +12,13 @@ function y_embed = BF_Embed(y,tau,m,makeSignal,randomSeed,beVocal)
 % m, the embedding dimension. Must be a cell specifying method and parameters,
 %    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
 %
-% makeSignal [opt], if 1, uses TSTOOL to embed and returns a signal object.
-%           (default = 0, i.e., not to do this and instead return matrix).
-%           If 2, returns a vector of [tau,m] rather than doing any actual embedding.
+% justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
+%           actual embedding (default = 0, i.e., do the embedding).
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
-%
-% The makeSignal option uses the TSTOOL code 'embed'
-% TSTOOL: http://www.physik3.gwdg.de/tstool/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2020, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -160,10 +156,10 @@ end
 %% Do the embedding
 % ------------------------------------------------------------------------------
 if nargin < 4
-    makeSignal = 0; % Don't return a signal object, return a matrix
+    justGiveMeParams = false; % Don't return a signal object, return a matrix
 end
 
-if makeSignal == 2 % Just return the embedding parameters
+if justGiveMeParams % Just return the embedding parameters
     y_embed = [tau, m];
     return
 end
@@ -173,39 +169,18 @@ if size(y,2) > size(y,1)
     y = y';
 end
 
-if makeSignal
-    % Use the TSTOOL embed function:
-    try
-        y_embed = embed(signal(y),m,tau);
-    catch me
-        if strcmp(me.message,'Time series to short for chosen embedding parameters')
-            fprintf(1,'Time series (N = %u) too short to embed\n',N);
-            y_embed = NaN; return
-        else
-            % Could always try optimizing my own routine (below) so TSTOOL is not required for this step...
-            error('Embedding time series using TSTOOL function ''embed'' failed: %s',me.message)
-        end
-    end
+% Matlab-based matrix embedding:
+N_embed = N-(m-1)*tau;
+if N_embed <=0
+    error('Time Series (N = %u) too short to embed with these embedding parameters',N);
+end
 
-    % if ~makeSignal
-    %    y_embed = data(y_embed);
-    %    % this is actually faster than my implementation, which is commented out below
-    % end
+% Each embedding vector is a row (of length m columns)
+% Number of embedding vectors is N_embed = N - (m-1)*tau
+y_embed = zeros(N_embed,m);
 
-else
-    % Use a Matlab-based implementation:
-    N_embed = N-(m-1)*tau;
-    if N_embed <=0
-        error('Time Series (N = %u) too short to embed with these embedding parameters',N);
-    end
-
-    % Each embedding vector is a row (of length m columns)
-    % Number of ebmedding vectors is N_embed = N - (m-1)*tau
-    y_embed = zeros(N_embed,m);
-
-    for i = 1:m
-       y_embed(:,i) = y(1+(i-1)*tau:N_embed+(i-1)*tau);
-    end
+for i = 1:m
+   y_embed(:,i) = y(1+(i-1)*tau:N_embed+(i-1)*tau);
 end
 
 % Tell me about it:

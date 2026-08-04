@@ -149,7 +149,7 @@ end
 % ------------------------------------------------------------------------------
 %% Embed the signal (native MATLAB matrix embedding, not a TSTOOL/TISEAN call)
 % ------------------------------------------------------------------------------
-Y = BF_Embed(y, embedParams{1}, embedParams{2}, 0, randomSeed);
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, false, randomSeed);
 
 if isscalar(Y) && isnan(Y) % embedding failed
 	error('Embedding of the %u-sample time series failed', N)

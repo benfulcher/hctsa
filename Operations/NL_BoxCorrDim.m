@@ -79,7 +79,7 @@ end
 % ------------------------------------------------------------------------------
 %% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
-tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1);
 mMax = tm(2);
 

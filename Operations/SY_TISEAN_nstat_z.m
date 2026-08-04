@@ -93,7 +93,7 @@ filePath = BF_WriteTempFile(y);
 % fprintf(1,'Wrote temporary data file ''%s'' for TISEAN.\n',filePath)
 
 % Get embedding parameters:
-tm = BF_Embed(y, embedParams{1}, embedParams{2}, 2);
+tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1); % time delay
 m = tm(2); % embedding dimension
 

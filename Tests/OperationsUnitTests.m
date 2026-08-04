@@ -467,7 +467,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             m = 4;
             tau = 1;
 
-            x = BF_Embed(y,tau,m,0);
+            x = BF_Embed(y,tau,m,false);
             Nx = size(x,1);
             permList = perms(1:m);
             numPerms = length(permList);
@@ -944,7 +944,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             NNR = 4; past = 5;
             out = NL_localdensity(y, NNR, past, {1,3});
 
-            Y = BF_Embed(y, 1, 3, 0);
+            Y = BF_Embed(y, 1, 3, false);
             N_embed = size(Y,1);
             m = size(Y,2);
             locdenBrute = zeros(N_embed,1);
