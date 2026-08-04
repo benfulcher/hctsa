@@ -226,6 +226,20 @@ int main(int argc,char **argv)
     series=(double**)get_multi_series(infile,&length,exclude,&comp,column,
 				      dimset,verbosity);
 
+  /* Guard against unsigned underflow below (length-(maxemb+1)*delay and
+     length-maxemb*delay, both computed as unsigned arithmetic): if the
+     requested embedding dimension times the delay is not comfortably
+     smaller than the data length, those subtractions wrap around to a
+     huge positive value instead of going negative, and the main loops
+     then index nearest[]/series[][] far out of bounds. Fail cleanly
+     instead. */
+  if ((unsigned long)(maxemb+1)*delay >= length) {
+    fprintf(stderr,"false_nearest: maximal embedding dimension (%u) times "
+	    "delay (%u) is too large for the data length (%lu). Reduce -M "
+	    "or -d, or supply more data.\n",maxemb,delay,length);
+    exit(FALSE_NEAREST_NOT_ENOUGH_POINTS);
+  }
+
   for (i=0;i<comp;i++) {
     rescale_data(series[i],length,&min,&ind_inter);
     variance(series[i],length,&av,&ind_var);

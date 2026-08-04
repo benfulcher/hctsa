@@ -1,4 +1,4 @@
-function out = NL_TISEAN_fnn(y, tau, maxm, theilerWin, justBest, bestp)
+function out = NL_TISEAN_fnn(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % NL_TISEAN_fnn     False nearest neighbors of a time series.
 %
 % ---INPUTS:
@@ -9,6 +9,15 @@ function out = NL_TISEAN_fnn(y, tau, maxm, theilerWin, justBest, bestp)
 % justBest, if 1 just outputs a scalar estimate of embedding dimension
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %                dimension
+% escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
+%                its R_tol-like false-neighbor threshold: a candidate neighbor
+%                is "false" if its distance grows by more than this factor
+%                after one more embedding dimension). Default is TISEAN's own
+%                internal default of 2.0 (matches false_nearest's behavior when
+%                -f is omitted). Note this is notably stricter than the
+%                analogous 'th' parameter of MS_fnn/NL_MS_fnn, whose default
+%                is 5 -- at matched escapeFactor values the two methods give
+%                closely comparable per-dimension false-neighbor profiles.
 %
 % ---OUTPUTS: individual false nearest neighbors proportions, as well as
 % summaries of neighborhood size, and embedding dimensions at which the
@@ -107,6 +116,12 @@ if nargin < 6
 	bestp = 0.4; % stop when under 40% false nearest neighbors
 end
 
+% Escape factor (TISEAN's '-f'; omitted here to preserve false_nearest's own
+% internal default of 2.0 unless explicitly overridden):
+if nargin < 7 || isempty(escapeFactor)
+	escapeFactor = [];
+end
+
 % ------------------------------------------------------------------------------
 %% Write the file
 % ------------------------------------------------------------------------------
@@ -118,7 +133,11 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, false_nearest
 % ------------------------------------------------------------------------------
-tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s', tau, maxm, theilerWin, filePath);
+if isempty(escapeFactor)
+	tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -V0 %s', tau, maxm, theilerWin, filePath);
+else
+	tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -f%g -V0 %s', tau, maxm, theilerWin, escapeFactor, filePath);
+end
 [~, res] = system(tisean_command);
 
 % first column: the embedding dimension
