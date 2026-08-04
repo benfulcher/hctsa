@@ -93,12 +93,8 @@ addpath(fullfile(pwd,'Toolboxes','Max_Little','rpde'));
 fprintf(1,', nsamdf,\n');
 addpath(fullfile(pwd,'Toolboxes','nsamdf'));
 
-% Misc code
-fprintf(1,'misc')
-addpath(fullfile(pwd,'Toolboxes','Misc'));
-
 % catch22
-fprintf(1,', catch22')
+fprintf(1,'catch22')
 addpath(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'));
 
 % Java information dynamics toolkit written by Joseph Lizier

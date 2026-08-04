@@ -21,9 +21,11 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 %           (ii) 'horiz': uses only horizonatal lines to link nodes/datums
 %
 % maxL, the maximum number of samples to consider. Due to memory constraints,
-%               only the first maxL (6000 by default) points of time series are
+%               only the first maxL (5000 by default) points of time series are
 %               analyzed. Longer time series are reduced to their first maxL
-%               samples.
+%               samples. Set to 'full' to analyze the entire time series with
+%               no cropping (a warning is raised, but no cropping occurs, if
+%               the series exceeds 10000 samples, since computation may be slow).
 %
 % ---OUTPUTS:
 %
@@ -69,11 +71,18 @@ if nargin < 2
 	% compute the horizontal visibility graph by default
 	meth = 'horiz';
 end
-if nargin < 3
+if nargin < 3 || isempty(maxL)
 	maxL = 5000; % crops time series longer than this maximum length
 end
 
-if N > maxL % too long to store in memory
+if ischar(maxL) && strcmp(maxL, 'full')
+	% No cropping -- but flag potentially slow computations for very long series:
+	slowThreshold = 10000;
+	if N > slowThreshold
+		warning(sprintf(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
+						 'visibility graph computation may be slow'], N, slowThreshold));
+	end
+elseif N > maxL % too long to store in memory
 	% ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
 	% could alter to take different subsets, or set a maximum distance range
 	% allowed to make a link (using sparse), etc.
@@ -90,8 +99,32 @@ y = y - min(y); % adjust so that minimum of y is at zero
 % ------------------------------------------------------------------------------
 switch meth
 	case 'norm'
-		% Normal visibility graph:
-		A = EZ_VisibilityGraph(y);
+		% Normal (natural) visibility graph (Lacasa et al., 2008).
+		% Original code by Enyu Zhuang (Zoey), 23/9/13; substantially
+		% modified by Ben Fulcher, 26-8-2015; inlined here and reduced
+		% from an N x N gradient matrix to a single reused row vector
+		% (only the current row i was ever read), 4/8/2026.
+		A = zeros(N, N);
+		s = zeros(1, N); % gradient from i to each subsequent point j (reused per i)
+		for i = 1:(N - 1)
+			for j = i + 1:N
+				s(j) = (y(j) - y(i)) / (j - i);
+				if j == i + 1
+					A(i, j) = 1; % always visible to the next point
+				else
+					% Visible iff the gradient to every intermediate point
+					% is lower than the gradient straight to j:
+					for k = i + 1:j - 1
+						if s(k) >= s(j)
+							break;
+						elseif k == j - 1
+							A(i, j) = 1;
+						end
+					end
+				end
+			end
+		end
+		A = symmetrize(A);
 
 	case 'horiz'
 		% Horizontal visibility graph
@@ -263,24 +296,12 @@ out.kac2 = CO_AutoCorr(k, 2, 'Fourier');
 out.kac3 = CO_AutoCorr(k, 3, 'Fourier');
 out.ktau = CO_FirstCrossing(k, 'ac', 0, 'continuous');
 
+end
+
 % -------------------------------------------------------------------------------
 function A = symmetrize(A)
 	% Symmetrize an upper triangular matrix:
 	At = A';
 	lowerT = logical(tril(ones(size(A))));
 	A(lowerT) = At(lowerT);
-end
-
-function ind = findFirst(vector, threshold)
-	% Find index of the first time a vector exceeds a threshold
-	% -- not used because just as fast to use find(x,1,'first')
-	for k = 1:length(vector)
-		if vector(k) > threshold
-			ind = k;
-			return;
-		end
-	end
-	ind = length(vector);
-end
-
 end

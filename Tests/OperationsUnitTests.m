@@ -331,6 +331,50 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(out.modek, mode(kExpected), 'AbsTol', 1e-10);
         end
 
+        function test_NW_VisibilityGraph_Norm_MatchesDenseGradientMatrix(testCase)
+            % NW_VisibilityGraph's 'norm' method used to compute all pairwise
+            % gradients into an N x N matrix S, even though for a fixed row i
+            % only S(i,:) is ever read; it now reuses a single row vector.
+            % Cross-check the resulting degree distribution against an
+            % independent reimplementation using the original N x N matrix.
+            rng(11);
+            N = 200;
+            y = randn(N,1);
+            y = y - min(y);
+
+            % Brute-force reimplementation with the original N x N gradient matrix:
+            Aexpected = zeros(N,N);
+            S = zeros(N,N);
+            for i = 1:(N-1)
+                for j = i+1:N
+                    S(i,j) = (y(j)-y(i))/(j-i);
+                    if j == i+1
+                        Aexpected(i,j) = 1;
+                    else
+                        for k = i+1:j-1
+                            if S(i,k) >= S(i,j)
+                                break;
+                            elseif k == (j-1)
+                                Aexpected(i,j) = 1;
+                            end
+                        end
+                    end
+                end
+            end
+            At = Aexpected';
+            lowerT = logical(tril(ones(N,N)));
+            Aexpected(lowerT) = At(lowerT);
+            kExpected = sum(Aexpected);
+
+            out = NW_VisibilityGraph(y,'norm');
+
+            testCase.verifyEqual(out.meank, mean(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.maxk, max(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.mink, min(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.stdk, std(kExpected), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.modek, mode(kExpected), 'AbsTol', 1e-10);
+        end
+
         %-------------------------------------------------------------
         % CO_Embed2_Shapes
         %-------------------------------------------------------------
