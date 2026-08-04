@@ -125,7 +125,10 @@ if ~isfolder(tiseanBinaryLocation)
     tiseanBinaryLocation = fullfile(homeDir,'bin');
 end
 if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
-    sysPath = [getenv('PATH'),':',tiseanBinaryLocation];
+    % Prepend (not append): an older manual install may already sit in
+    % ~/bin (e.g., via a generic $HOME/bin PATH entry in .bash_profile
+    % unrelated to TISEAN), which must not shadow the locally-built version.
+    sysPath = [tiseanBinaryLocation,':',getenv('PATH')];
     setenv('PATH', sysPath)
     fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);
 end
