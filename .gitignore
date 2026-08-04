@@ -34,5 +34,8 @@ plugininstall_*.m
 # TISEAN generates platform-specific files:
 /Toolboxes/Tisean_3.0.1/
 
+# Generated test/benchmark logs:
+/Tests/*.txt
+
 # Windows-compiled Physionet file
 sampen_mex.exp
