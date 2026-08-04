@@ -15,11 +15,9 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % randomSeed [opt], whether (and how) to reset the random seed, using
 %             BF_ResetSeed, before choosing reference points (relevant
 %             whenever Nref ~= -1, since that involves a random subsample of
-%             points -- and, when embedParams asks for 'fnnmar', is also
-%             passed through to BF_Embed/NL_crptool_fnn, which has its own
-%             internal random sampling step). Defaults to 'default' (a fixed
-%             seed) so this operation is reproducible by default rather than
-%             genuinely stochastic run-to-run.
+%             points). Defaults to 'default' (a fixed seed) so this operation
+%             is reproducible by default rather than genuinely stochastic
+%             run-to-run.
 %
 % ---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
 % and an exponential fit of the form D(q) = Aexp(Bq) + C.
@@ -137,7 +135,7 @@ end
 
 % (8) Embedding parameters
 if nargin < 9 || isempty(embedParams)
-	embedParams = {'ac', 'fnnmar'};
+	embedParams = {'ac', 'fnn'};
 	fprintf(1, 'Using default embedding parameters of autocorrelation for tau and cao method for m\n');
 end
 

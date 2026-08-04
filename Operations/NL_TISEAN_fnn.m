@@ -213,6 +213,11 @@ out.firstunder005 = firstunderf(0.05, mDim, pNN); % 5%
 % Maximum step-wise change across p
 out.max1stepchange = max(abs(diff(pNN)));
 
+% Curve shape across dimensions (mean signed per-step change, and the
+% proportion of m -> m+1 steps for which pfnn decreased):
+out.mdrop = mean(diff(pNN));
+out.pdrop = -mean(sign(diff(pNN)));
+
 % ------------------------------------------------------------------------------
 function firsti = firstunderf(x, m, p)
 	%% Find m for the first time p goes under x%

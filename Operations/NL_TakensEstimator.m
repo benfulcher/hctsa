@@ -85,7 +85,7 @@ end
 
 % 4) Embedding parameters
 if nargin < 5 || isempty(embedParams)
-	embedParams = {'ac', 'fnnmar'};
+	embedParams = {'ac', 'fnn'};
 	fprintf(1, 'Using default time-delay embedding using autocorrelation and fnn-mar\n');
 else
 	if length(embedParams) ~= 2

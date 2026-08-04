@@ -8,7 +8,7 @@ function out = NL_MS_nlpe(y, de, tau, maxN)
 % y, the input time series
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the
 %       point where the proportion of false nearest neighbors falls below 5%
-%       using NL_MS_fnn)
+%       using NL_TISEAN_fnn)
 % tau, the time-delay (can be an integer or 'ac' to be the first zero-crossing
 %       of the ACF or 'mi' to be the first minimum of the automutual information
 %       function)
@@ -101,8 +101,9 @@ end
 
 % -------------------------------------------------------------------------------
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
+% (escapeFactor=5 matches the convention used elsewhere for this test):
 if strcmp(de, 'fnn')
-	de = NL_MS_fnn(y, 1:10, tau, 5, 1, 1, 0.05);
+	de = NL_TISEAN_fnn(y, tau, 10, 0.05, 1, 0.05, 5);
 end
 
 % -------------------------------------------------------------------------------

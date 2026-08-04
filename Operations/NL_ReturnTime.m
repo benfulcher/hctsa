@@ -98,7 +98,7 @@ end
 
 % embed parameters
 if nargin < 6 || isempty(embedParams)
-	embedParams = {'ac', 'fnnmar'};
+	embedParams = {'ac', 'fnn'};
 	fprintf(1, 'Using default embedding using autocorrelation and cao\n');
 end
 

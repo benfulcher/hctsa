@@ -15,7 +15,10 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,randomSeed,beVocal)
 % justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
 %           actual embedding (default = 0, i.e., do the embedding).
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed [currently unused], the sole remaining embedding-dimension
+%           method ('tisean') is deterministic given its inputs, so this
+%           parameter has no effect; kept only so existing positional calls
+%           don't need updating.
 %
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
@@ -101,18 +104,27 @@ else % use a routine to inform m
     if ~iscell(m), m = {m}; end
     if ischar(m{1})
         switch m{1}
-            case 'tisean'
-                % Uses TISEAN false_nearest code
+            case 'fnn'
+                % Selects an embedding dimension via false nearest neighbors,
+                % using TISEAN's false_nearest code. escapeFactor=5 matches
+                % the false-neighbor escape-ratio threshold conventionally
+                % used for this kind of test (TISEAN's own internal default
+                % of 2.0 is considerably stricter and was found, in practice,
+                % to make the test look like it never converges even for
+                % textbook low-dimensional systems).
                 if length(m) == 1
                     th = 0.4;
                 else
                     th = m{2};
                 end
-                m = NL_TISEAN_fnn(y,tau,10,0.05,1,th);
-                ssm = sprintf('by TISEAN false_nearest code with 5% theiler window and threshold %f to m = %u',th,m);
+                escapeFactor = 5;
+                m = NL_TISEAN_fnn(y,tau,10,0.05,1,th,escapeFactor);
+                ssm = sprintf('by TISEAN false_nearest code with 5%% theiler window and threshold %f to m = %u',th,m);
 
             case 'fnnsmall'
-                % uses Michael Small's fnn code
+                % Uses Michael Small's fnn code. Not used by any operation in
+                % the current hctsa feature set (standardized on 'fnn'
+                % above), but kept available as an alternative.
                 if length(m) == 1
                     th = 0.01;
                 else
@@ -120,27 +132,6 @@ else % use a routine to inform m
                 end
                 m = MS_unfolding(y,th,1:10,tau);
                 ssm = sprintf('by Michael Small''s FNN code with threshold %f to m = %u',th,m);
-
-            case 'fnnmar'
-                % uses Marwin's fnn code in CRPToolbox
-                % should specify threshold for proportion of fnn
-                % default is 0.1
-                % e.g., {'fnnmar',0.2} would use a threshold of 0.2
-                % uses time delay determined above
-
-                if length(m) == 1 % no threshold specified
-                    th = 0.4; % set default threshold 0.4
-                else
-                    th = m{2};
-                end
-                try
-                    m = NL_crptool_fnn(y,10,2,tau,th,randomSeed);
-                catch
-                    fprintf(1,'Error with FNN code');
-                    y_embed = NaN;
-                    return
-                end
-                ssm = sprintf('by N. Marwan''s CRPtoolbox (GPL) ''fnn'' code with threshold %f to m = %u',th,m);
 
             otherwise
                 error('Embedding dimension, m, incorrectly specified.')

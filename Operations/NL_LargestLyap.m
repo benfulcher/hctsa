@@ -126,7 +126,7 @@ end
 
 % (5) Embedding parameters, embedParams
 if nargin < 6 || isempty(embedParams)
-	embedParams = {'ac', 'fnnmar'};
+	embedParams = {'ac', 'fnn'};
 	disp('using default embedding using autocorrelation and cao')
 else
 	if length(embedParams) ~= 2

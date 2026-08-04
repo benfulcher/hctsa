@@ -48,10 +48,6 @@ fprintf(1,'Adding external time-series toolboxes...')
 fprintf(1,' Danny Kaplan')
 addpath(fullfile(pwd,'Toolboxes','Danny_Kaplan'));
 
-% Code by Marwan, from CRP Toolbox version 5.17  (R28.16)
-fprintf(1,', Marwan')
-addpath(fullfile(pwd,'Toolboxes','Marwan_crptool'));
-
 % Gaussian Process Toolbox, gpml, by Carl Edward Rasmussen & Hannes Nickisch:
 fprintf(1,', Gaussian Process Code\n')
 addpath(fullfile(pwd,'Toolboxes','gpml'));

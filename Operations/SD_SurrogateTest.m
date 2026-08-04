@@ -225,12 +225,13 @@ end
 if ismember('fnn', theTestStat)
 	warning('fnn takes like *literally forever*...')
 
-	% false nearest neighbours at d=2;
-	tmp = NL_MS_fnn(x, 2, 1, 5, 1);
+	% false nearest neighbours at d=2 (escapeFactor=5 matches the convention
+	% used elsewhere for this test):
+	tmp = NL_TISEAN_fnn(x, 1, 2, 0.05, 0, [], 5);
 	fnnx = tmp.pfnn_2;
 	fnnsurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
-		tmp = NL_MS_fnn(z(:, i), 2, 1, 5, 1);
+		tmp = NL_TISEAN_fnn(z(:, i), 1, 2, 0.05, 0, [], 5);
 		fnnsurr(i) = tmp.pfnn_2;
 	end
 

@@ -169,7 +169,6 @@ EXTERNAL TOOLBOXES (PROVIDED)
 Michael Small Package (provided)
 
 NL_MS_LZcomplexity.m
-NL_MS_fnn.m
 NL_MS_nlpe.m
 NL_BoxCorrDim.m
 NL_PoincareSection.m
@@ -205,11 +204,6 @@ MF_GP_FitAcross.m
 MF_GP_LearnHyperp.m
 MF_GP_LocalPrediction.m
 MF_GP_hyperparameters.m
-
-CRP Toolbox (GPL, provided)
-
-NL_BoxCorrDim.m
-NL_crptool_fnn.m
 
 HMM Toolbox (MIT License, provided)
 
