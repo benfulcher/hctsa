@@ -135,15 +135,15 @@ switch windowStat
 		end
 	case 'mom3' % Third moment
 		for i = 1:numSteps
-			qs(i) = DN_Moments(y(getWindow(i)), 3);
+			qs(i) = DN_Moments(y(getWindow(i)), 3, true);
 		end
 	case 'mom4' % Fourth moment
 		for i = 1:numSteps
-			qs(i) = DN_Moments(y(getWindow(i)), 4);
+			qs(i) = DN_Moments(y(getWindow(i)), 4, true);
 		end
 	case 'mom5' % Fifth moment
 		for i = 1:numSteps
-			qs(i) = DN_Moments(y(getWindow(i)), 5);
+			qs(i) = DN_Moments(y(getWindow(i)), 5, true);
 		end
 	case 'lillie' % Lilliefors test
 		for i = 1:numSteps

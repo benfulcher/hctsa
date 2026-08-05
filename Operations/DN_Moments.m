@@ -1,12 +1,23 @@
-function out = DN_Moments(y, theMom)
+function out = DN_Moments(y, theMom, doNormalize)
 % DN_Moments    A moment of the distribution of the input time series.
-%
-% Normalizes by the standard deviation
-% Uses the moment function from Matlab's Statistics Toolbox
 %
 % ---INPUTS:
 % y, the input data vector
 % theMom, the moment to calculate (a scalar)
+% doNormalize, whether to normalize by std(y)^theMom, giving the proper
+%              scale-invariant standardized moment (true, default -- e.g.,
+%              theMom=3 is skewness, theMom=4 is kurtosis), or to return
+%              the raw, unnormalized central moment (false).
+%
+% Uses the moment function from Matlab's Statistics Toolbox.
+%
+% NOTE: prior to 2026-08, this always divided by std(y)^1 regardless of
+% theMom, which is neither the raw central moment nor a scale-invariant
+% standardized moment -- it has no statistical meaning beyond the special
+% case where y is already unit-variance (where it happens to coincide
+% with the standardized moment, since std(y)^1 = std(y)^theMom = 1). Any
+% code relying on that specific (unintended) behavior on non-unit-variance
+% input should now pass doNormalize=false and account for the change.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -37,6 +48,14 @@ function out = DN_Moments(y, theMom)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-out = moment(y, theMom) / std(y); % normalized
+if nargin < 3 || isempty(doNormalize)
+    doNormalize = true;
+end
+
+if doNormalize
+    out = moment(y, theMom) / std(y)^theMom; % scale-invariant standardized moment
+else
+    out = moment(y, theMom); % raw central moment
+end
 
 end

@@ -249,7 +249,7 @@ out.logstd = std(logS);
 out.mean = mean(S);
 out.logmean = mean(logS);
 for i = 3:5
-	out.(sprintf('mom%u', i)) = DN_Moments(S, i);
+	out.(sprintf('mom%u', i)) = DN_Moments(S, i, true);
 end
 
 % Autocorrelation of amplitude spectrum:
