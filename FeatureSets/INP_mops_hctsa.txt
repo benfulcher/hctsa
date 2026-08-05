@@ -787,6 +787,7 @@ CO_Embed2_Shapes(x_z,'tau','circle',0.1)	CO_Embed2_Shapes_tau_circle_01
 CO_Embed2_Shapes(x_z,'tau','circle',1)	CO_Embed2_Shapes_tau_circle_1
 NW_VisibilityGraph(x_z,'horiz','full')	NW_VisibilityGraph_horiz_full
 NW_VisibilityGraph(x_z,'norm',5000)	    NW_VisibilityGraph_norm_5000
+NW_OrdinalPartitionNetwork(x_z,4,1)	NW_OrdinalPartitionNetwork_4_1
 SY_DynWin(x_z,10)	SY_DynWin10
 FC_Surprise(x_z,'dist',5,2,'quantile',500,'default')	FC_Surprise_dist_5_2_q_500
 FC_Surprise(x_z,'dist',20,2,'quantile',500,'default')	FC_Surprise_dist_20_2_q_500
