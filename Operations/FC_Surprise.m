@@ -31,8 +31,10 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 % coarseGrainMethod, the coarse-graining, or symbolization method:
 %          (i) 'quantile': an equiprobable alphabet by the value of each
 %                          time-series datapoint,
-%          (ii) 'updown': an equiprobable alphabet by the value of incremental
-%                         changes in the time-series values, and
+%          (ii) 'diff': an equiprobable alphabet by the value of incremental
+%                       changes in the time-series values (previously called
+%                       'updown' -- renamed since it's not a literal
+%                       sign(diff)>0 split; see SB_CoarseGrain.m), and
 %          (iii) 'embed2quadrants': 4-letter alphabet of the quadrant each data
 %                            point resides in a two-dimensional embedding space.
 %
@@ -115,7 +117,7 @@ end
 % ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y, coarseGrainMethod, numGroups); % a coarse-grained time series using the numbers 1:numGroups
 
-N = length(yth); % will be the same as y, for 'quantile', and 'updown'
+N = length(yth); % will be the same as y, for 'quantile', and 'diff'
 
 % Select random samples to test:
 BF_ResetSeed(randomSeed); % control random seed (for reproducibility)

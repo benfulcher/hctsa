@@ -4,13 +4,22 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 % ---INPUTS:
 % howtocg, the method of coarse-graining:
 %       (i) 'quantile': an equiprobable alphabet by the value of each point
-%       (ii) 'updown': as 'quantile', but applied to the increments diff(y) --
-%            NOT a literal sign(diff)>0 split (see note at its case below)
-%       (iii) 'embed2quadrants'/'embed2octants': alphabet by quadrant/octant
+%       (ii) 'diff': as 'quantile', but applied to the increments diff(y) --
+%            an equiprobable alphabet by the *value* of each increment, NOT
+%            a literal sign(diff)>0 split (that's 'updown', below). Was
+%            previously (confusingly) called 'updown'; renamed so 'updown'
+%            can mean what its name suggests.
+%       (iii) 'updown': a true binary up/down split by the raw sign of each
+%            increment (diff(y) > 0), i.e. numGroups is required to be 2 --
+%            unlike every other method here, this is NOT equiprobable, and
+%            its two states can be arbitrarily imbalanced for a
+%            drifting/trending series.
+%       (iv) 'embed2quadrants'/'embed2octants': alphabet by quadrant/octant
 %             of a 2-D time-delay embedding
 %
-% numGroups, either specifies the size of the alphabet for 'quantile' and 'updown'
-%       or sets the time delay for the embedding subroutines
+% numGroups, either specifies the size of the alphabet for 'quantile' and
+%       'diff' (must be 2 for 'updown'), or sets the time delay for the
+%       embedding subroutines
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,25 +61,33 @@ end
 
 N = length(y); % length of the input sequence
 
-if ~ismember(howtocg, {'updown', 'quantile', 'embed2quadrants', 'embed2octants'})
+if ~ismember(howtocg, {'updown', 'diff', 'quantile', 'embed2quadrants', 'embed2octants'})
 	error('Unknown coarse-graining method ''%s''', howtocg);
+end
+
+if strcmp(howtocg, 'updown') && numGroups ~= 2
+	error('''updown'' is a true binary up/down split -- numGroups must be 2 (got %d). Use ''diff'' for a multi-level equiprobable alphabet of the increments.', numGroups);
 end
 
 % ------------------------------------------------------------------------------
 % Some coarse-graining/symbolization methods require initial processing:
 % ------------------------------------------------------------------------------
 switch howtocg
-	case 'updown'
-		% Despite the name, this is NOT a literal sign(diff)>0 up/down split --
-		% it takes an EQUIPROBABLE quantile alphabet of the increments, same as
-		% the 'quantile' case below but applied to diff(y) instead of y. For
-		% numGroups=2 this splits at the *median* increment, which only equals
-		% a true up/down (positive/negative) split when the median increment
-		% happens to be zero (e.g. non-trending series) -- for a drifting
-		% series, some small positive increments will fall in the "down" bin.
+	case 'diff'
+		% Equiprobable quantile alphabet of the increments (previously called
+		% 'updown', which was a misleading name -- see 'updown' below for the
+		% literal sign-based split that name now implies).
 		y = diff(y);
 		N = N - 1; % the time series is one value shorter than the input because of differencing
 		howtocg = 'quantile'; % successive differences and then quantiles
+
+	case 'updown'
+		% True binary up/down split: 2 if the increment is positive, 1
+		% otherwise. Unlike 'diff'/'quantile', this is NOT equiprobable --
+		% the two states can be arbitrarily imbalanced for a drifting series.
+		y = diff(y);
+		N = N - 1;
+		yth = 1 + double(y > 0);
 
 	case {'embed2quadrants', 'embed2octants'}
 		% Construct the embedding

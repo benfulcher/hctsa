@@ -14,8 +14,11 @@ function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
 % ---INPUTS:
 % y, the input time series
 %
-% howtocg, the method of discretization (currently 'quantile' is the only
-%           option; could incorporate SB_CoarseGrain for more options in future)
+% howtocg, the method of discretization: 'quantile' (equiprobable, the
+%           default) or 'updown' (a true binary up/down split by the sign of
+%           each increment -- NOT equiprobable, and requires numGroups=2; see
+%           SB_CoarseGrain.m). Other SB_CoarseGrain methods could be
+%           incorporated in future.
 %
 % numGroups: number of groups in the course-graining
 %
@@ -85,8 +88,6 @@ if tau > 1 % calculate transition matrix at a non-unit lag
 	y = resample(y, 1, tau);
 end
 
-N = length(y); % time-series length
-
 % ------------------------------------------------------------------------------
 %% (((1))) Discretize the time series to a symbolic string
 % ------------------------------------------------------------------------------
@@ -98,6 +99,12 @@ yth = SB_CoarseGrain(y, howtocg, numGroups);
 if size(yth, 2) > size(yth, 1)
 	yth = yth';
 end
+
+% N is taken AFTER coarse-graining, not length(y): some coarse-graining
+% methods (e.g. 'updown', which internally differences the series) return a
+% yth shorter than y, and using length(y) here would silently mis-normalize
+% T below.
+N = length(yth);
 
 % ------------------------------------------------------------------------------
 %% (((2))) Compute the tau-step transition matrix
@@ -150,6 +157,20 @@ out.symdiff = sum(sum(abs((T - T')))); % sum of differences of individual elemen
 out.symsumdiff = sum(sum(tril(T, -1))) - sum(sum(triu(T, +1))); % difference in sums of upper and lower
 % triangular parts of T
 
+% Kullback-Leibler divergence between T and its transpose T': a
+% reversal-asymmetry ("irreversibility") measure with a direct
+% information-theoretic interpretation (related to entropy production rate
+% for a Markov chain), zero iff T satisfies detailed balance (T(i,j)=T(j,i)
+% for all i,j, i.e. forward and backward transition rates match exactly).
+% Restricted to pairs where both T(i,j) and T(j,i) are nonzero (a one-sided
+% pair, observed one direction but never the other, would otherwise give an
+% infinite contribution) -- this keeps the measure finite and well-behaved
+% for the small numGroups used here, at the cost of (deliberately)
+% understating asymmetry from never-observed reverse transitions.
+Tt = T'; % Tt(i,j) = T(j,i), the reverse-direction transition probability
+klMask = (T > 0) & (Tt > 0);
+out.transKLdiv = sum(T(klMask) .* log(T(klMask) ./ Tt(klMask)));
+
 % (iv) Measures from eigenvalues of T
 eigT = eig(T);
 out.stdeig = std(eigT); % std of eigenvalues
@@ -159,16 +180,17 @@ out.mineig = min(real(eigT)); % minimum eigenvalue
 % (ought to be always zero? Not necessary to measure:)
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 
-% Second-largest eigenvalue and spectral gap: for the 'quantile'/'updown'
-% coarse-grainings (equiprobable by construction, and the only ones currently
-% registered as mops for this operation), the marginal (row/column sums) is
+% Second-largest eigenvalue and spectral gap: for the 'quantile' coarse-
+% graining (equiprobable by construction), the marginal (row/column sums) is
 % close to uniform, which pins the leading eigenvalue near 1/numGroups
 % regardless of temporal structure -- it's the second-largest eigenvalue that
 % reflects the Markov chain's mixing rate (a smaller gap indicates slower
 % relaxation, i.e. longer memory). This doesn't hold for SB_CoarseGrain's
-% non-equiprobable methods ('embed2quadrants'/'embed2octants'), where the
-% marginal (and hence the leading eigenvalue) can vary meaningfully with the
-% data.
+% non-equiprobable methods ('updown', 'embed2quadrants'/'embed2octants'),
+% where the marginal (and hence the leading eigenvalue) can vary meaningfully
+% with the data -- these fields aren't registered for the numGroups=2 case
+% regardless of coarse-graining method (see the mops file: for 'quantile' it
+% would duplicate SB_MotifTwo_median, for 'updown' SB_MotifTwo_diff).
 realEig = sort(real(eigT), 'descend');
 if numGroups >= 2
 	out.secondeig = realEig(2);
