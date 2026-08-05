@@ -930,6 +930,7 @@ SC_MMA(x_z,0,[],[-5,5]) SC_MMA_0__n5_5
 SP_Summaries(x_z,'periodogram','hamming',[],false)	SP_Summaries_pgram_hamm
 SP_Summaries(x_z,'welch','rect',[],false)	            SP_Summaries_welch_rect
 SP_Summaries(x_z,'fft',[],[],false)	                SP_Summaries_fft
+SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 NL_TISEAN_fnn(x_z,'ac',10,0.05,0,[],5)     NL_TISEAN_fnn_ac_10_005_f5
 NL_TISEAN_fnn(x_z,'mi',10,0.05,0,[],5)     NL_TISEAN_fnn_mi_10_005_f5
 NL_TISEAN_fnn(x_z,1,10,0.05,0,[],5)     NL_TISEAN_fnn_1_10_005_f5

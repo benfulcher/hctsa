@@ -97,6 +97,7 @@ SB_TransitionMatrix.m
 SB_TransitionpAlphabet.m
 SC_FluctAnal.m
 SP_Summaries.m
+SP_SpectralTimeFreq.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
 
