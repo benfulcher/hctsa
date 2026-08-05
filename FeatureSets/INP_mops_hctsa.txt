@@ -897,6 +897,8 @@ EX_MovingThreshold(x_z,1,0.02)	EX_MovingThreshold_1_002
 SB_BinaryStats(x_z,'mean')	    SB_BinaryStats_mean
 SB_BinaryStats(x_z,'diff')	    SB_BinaryStats_diff
 SB_BinaryStats(x_z,'iqr')	    SB_BinaryStats_iqr
+SB_BinaryStats_AR1(x_z,'mean')	    SB_BinaryStats_AR1_mean
+SB_BinaryStats_AR1(x_z,'diff')	    SB_BinaryStats_AR1_diff
 SB_MotifTwo(x_z,'diff')	        SB_MotifTwo_diff
 SB_MotifTwo(x_z,'mean')	        SB_MotifTwo_mean
 SB_MotifTwo(x_z,'median')	    SB_MotifTwo_median
