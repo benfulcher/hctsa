@@ -23,6 +23,11 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 %               (viii) 'AC1', the lag-1 autocorrelation
 %               (ix) 'apen', Approximate Entropy, ApEn(1,0.2)
 %               (ix) 'sampen', Sample Entropy, SampEn(2,0.1)
+%               (x) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within
+%                   the window -- a nonlinear, time-asymmetric variant of
+%                   AC1 (cf. SY_RampingWindows.m, which trends this same
+%                   statistic across segments rather than summarizing its
+%                   spread across windows as done here)
 %
 % acrossWinStat, controls how the obtained sequence of local estimates is
 %                   compared (as a ratio to the full time series):
@@ -152,6 +157,11 @@ switch windowStat
 	case 'AC1' % Lag-1 autocorrelation
 		for i = 1:numSteps
 			qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
+		end
+	case 'asymAC1' % Asymmetric, nonlinear AC1 variant: mean(x_t*x_{t+1}^2), z-scored per window
+		for i = 1:numSteps
+			zw = zscore(y(getWindow(i)));
+			qs(i) = mean(zw(1:end - 1) .* zw(2:end).^2);
 		end
 	otherwise
 		error('Unknown statistic ''%s''', windowStat)

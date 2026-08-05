@@ -403,6 +403,11 @@ SY_SlidingWindow(x_z,'AC1','ent',2,10)		SY_SlidingWindow_ac1_ent2_10
 SY_SlidingWindow(x_z,'AC1','ent',10,1)		SY_SlidingWindow_ac1_ent10_1
 SY_SlidingWindow(x_z,'AC1','ent',10,2)		SY_SlidingWindow_ac1_ent10_2
 SY_SlidingWindow(x_z,'AC1','ent',10,10)		SY_SlidingWindow_ac1_ent10_10
+SY_SlidingWindow(x_z,'asymAC1','std',2,1)		SY_SlidingWindow_asymac1_s2_1
+SY_SlidingWindow(x_z,'asymAC1','std',10,1)	SY_SlidingWindow_asymac1_s10_1
+SY_SlidingWindow(x_z,'asymAC1','ent',2,1)		SY_SlidingWindow_asymac1_ent2_1
+SY_SlidingWindow(x_z,'asymAC1','ent',10,1)	SY_SlidingWindow_asymac1_ent10_1
+SY_SlidingWindow(x_z,'asymAC1','sampen',10,2)	SY_SlidingWindow_asymac1_sampen10_2
 SY_RampingWindows(x_z,10)	SY_RampingWindows_10
 SY_Trend(x_z)	    SY_Trend
 SY_StdNthDer(x_z,1)	SY_StdNthDer_1
