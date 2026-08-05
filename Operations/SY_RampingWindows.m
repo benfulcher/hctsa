@@ -27,19 +27,31 @@ function out = SY_RampingWindows(y, numSeg)
 % ---OUTPUTS: Kendall's rank correlation tau, and Pearson's linear
 % correlation r (each with its p-value), between segment index and each
 % windowed statistic, for the mean, variance, standardized
-% skewness/kurtosis, and AC1. Kendall's tau is scale-invariant and
-% detects any monotonic trend, not just a linear one -- matching
-% "ramping" more directly than a slope would, and more robust to outlying
-% segments. Pearson's r is included alongside it as a complementary,
-% effect-size-like measure of specifically *linear* ramping (r^2 is the
-% fraction of across-segment variance explained by a linear trend);
-% expect the two to agree closely for a clean linear ramp and diverge for
-% a monotonic-but-nonlinear one (e.g. a ramp that plateaus). Skewness/
-% kurtosis are standardized in the usual sense (normalized by std^3/std^4
-% respectively, i.e., Matlab's skewness/kurtosis, not DN_Moments'
-% convention of normalizing by std^1 regardless of moment order) so that
-% a shape trend isn't conflated with the (separately tracked) scale trend
-% in segVar.
+% skewness/kurtosis, AC1, and asymAC1 (see below). Kendall's tau is
+% scale-invariant and detects any monotonic trend, not just a linear one
+% -- matching "ramping" more directly than a slope would, and more
+% robust to outlying segments. Pearson's r is included alongside it as a
+% complementary, effect-size-like measure of specifically *linear*
+% ramping (r^2 is the fraction of across-segment variance explained by a
+% linear trend); expect the two to agree closely for a clean linear ramp
+% and diverge for a monotonic-but-nonlinear one (e.g. a ramp that
+% plateaus). Skewness/kurtosis are standardized in the usual sense
+% (normalized by std^3/std^4 respectively, i.e., Matlab's skewness/
+% kurtosis, not DN_Moments' convention of normalizing by std^1 regardless
+% of moment order) so that a shape trend isn't conflated with the
+% (separately tracked) scale trend in segVar.
+%
+% asymAC1 is a nonlinear, asymmetric variant of the lag-1 autocorrelation:
+% mean(x_t * x_{t+1}^2), with x z-scored *within* each segment (unlike the
+% other statistics above, this one needs the explicit per-segment
+% z-scoring, since it's neither scale-invariant like AC1/skewness/
+% kurtosis nor a raw moment tracked deliberately like mean/variance).
+% It's zero in expectation for any time-reversible linear process (same
+% spirit as CO_trev's third-moment reversibility statistic, computed
+% densely at a single lag over the whole series rather than trended
+% across segments), so a ramp in asymAC1 flags a trend specifically in
+% the series' local time-asymmetry/nonlinearity, distinct from a trend in
+% any of the other (symmetric) segment statistics above.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -109,8 +121,11 @@ segVar = var(z);
 segSkew = skewness(z);
 segKurt = kurtosis(z);
 segAC1 = zeros(1, numSeg);
+segAsymAC1 = zeros(1, numSeg);
 for i = 1:numSeg
     segAC1(i) = CO_AutoCorr(z(:, i), 1, 'Fourier');
+    zseg = zscore(z(:, i)); % z-scored *within* this segment
+    segAsymAC1(i) = mean(zseg(1:end - 1) .* zseg(2:end).^2);
 end
 
 % ------------------------------------------------------------------------------
@@ -123,12 +138,14 @@ segIdx = (1:numSeg)';
 [out.skew_tau, out.skew_p] = SUB_trend(segIdx, segSkew, 'Kendall');
 [out.kurt_tau, out.kurt_p] = SUB_trend(segIdx, segKurt, 'Kendall');
 [out.ac1_tau, out.ac1_p] = SUB_trend(segIdx, segAC1, 'Kendall');
+[out.asymac1_tau, out.asymac1_p] = SUB_trend(segIdx, segAsymAC1, 'Kendall');
 
 [out.mean_pearson_r, out.mean_pearson_p] = SUB_trend(segIdx, segMean, 'Pearson');
 [out.var_pearson_r, out.var_pearson_p] = SUB_trend(segIdx, segVar, 'Pearson');
 [out.skew_pearson_r, out.skew_pearson_p] = SUB_trend(segIdx, segSkew, 'Pearson');
 [out.kurt_pearson_r, out.kurt_pearson_p] = SUB_trend(segIdx, segKurt, 'Pearson');
 [out.ac1_pearson_r, out.ac1_pearson_p] = SUB_trend(segIdx, segAC1, 'Pearson');
+[out.asymac1_pearson_r, out.asymac1_pearson_p] = SUB_trend(segIdx, segAsymAC1, 'Pearson');
 
 % ------------------------------------------------------------------------------
 function [rho, pval] = SUB_trend(idx, x, corrType)
