@@ -43,8 +43,24 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 % ---OUTPUTS: summaries of this series of information gains, including the
-%            minimum, maximum, mean, median, lower and upper quartiles, and
-%            standard deviation.
+%            minimum, maximum, mean, lower and upper quartiles, standard
+%            deviation, and a t-statistic against an information gain of 1;
+%            plus propUnseen, the proportion of test points whose antecedent
+%            pattern (the current symbol itself for 'dist'; the preceding
+%            1 or 2 symbols for 'T1'/'T2') was never observed anywhere in
+%            the memory window.
+%
+% The estimated probability p at each test point uses Krichevsky-Trofimov-
+% style additive smoothing, (numMatches + 0.5) / (nAntecedent + 0.5*numGroups),
+% rather than a raw frequency ratio. This matters because a raw ratio is
+% either undefined (0/0) or exactly 0 whenever the antecedent pattern was
+% never observed in memory -- and a naive fix of treating "no information"
+% as "certainty" (i.e. artificially setting p=1, so log(1/p)=0 "surprise")
+% is backwards: a never-before-seen antecedent should be *maximally*
+% surprising if it then occurs, not minimally. The smoothed estimate stays
+% strictly in (0,1) (so information gain -log(p) is always finite and
+% positive) and degrades gracefully to the uniform prior 1/numGroups when
+% nAntecedent=0, rather than to a false certainty.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -128,14 +144,16 @@ rs = sort(rs(1:min(numIters, end))); % Just use a random sample of numIters poin
 % Compute empirical probabilities from time series
 % -------------------------------------------------------------------------------
 store = zeros(numIters, 1); % store probabilities
+nAntecedent = zeros(numIters, 1); % how many times the antecedent pattern was seen in memory
 for i = 1:length(rs)
 	switch whatPrior
 		case 'dist'
-			% Uses the distribution up to memory to inform the next point
-
-			% Calculate probability of this given past memory
-			p = sum(yth(rs(i) - memory:rs(i) - 1) == yth(rs(i))) / memory;
-			store(i) = p;
+			% Uses the distribution up to memory to inform the next point:
+			% the "antecedent" here is trivially the whole memory window
+			% (always fully observed, memory samples), so nAntecedent is
+			% always memory and propUnseen will always be 0 for this prior.
+			numMatches = sum(yth(rs(i) - memory:rs(i) - 1) == yth(rs(i)));
+			nAntecedent(i) = memory;
 
 		case 'T1'
 			% Uses one-point correlations in memory to inform the next point
@@ -146,12 +164,12 @@ for i = 1:length(rs)
 			memoryData = yth(rs(i) - memory:rs(i) - 1);
 			% Previous value observed in memory here:
 			inmem = find(memoryData(1:end - 1) == yth(rs(i) - 1));
+			nAntecedent(i) = length(inmem);
 			if isempty(inmem)
-				p = 0;
+				numMatches = 0;
 			else
-				p = mean(memoryData(inmem + 1) == yth(rs(i)));
+				numMatches = sum(memoryData(inmem + 1) == yth(rs(i)));
 			end
-			store(i) = p;
 
 		case 'T2'
 			% Uses two-point correlations in memory to inform the next point
@@ -160,23 +178,27 @@ for i = 1:length(rs)
 			% Previous value observed in memory here:
 			inmem1 = find(memoryData(2:end - 1) == yth(rs(i) - 1)); % the 2:end makes the next line ok...?
 			inmem2 = find(memoryData(inmem1) == yth(rs(i) - 2));
+			nAntecedent(i) = length(inmem2);
 			if isempty(inmem2)
-				p = 0;
+				numMatches = 0;
 			else
-				p = sum(memoryData(inmem2 + 2) == yth(rs(i))) / length(inmem2);
+				numMatches = sum(memoryData(inmem2 + 2) == yth(rs(i)));
 			end
-			store(i) = p;
 
 		otherwise
 			error('Unknown method ''%s''', whatPrior);
 	end
+	% Krichevsky-Trofimov-style smoothed probability estimate: always in
+	% (0,1), degrading to the uniform prior 1/numGroups when nAntecedent=0
+	% (no information) rather than a false certainty.
+	store(i) = (numMatches + 0.5) / (nAntecedent(i) + 0.5 * numGroups);
 end
 
 % -------------------------------------------------------------------------------
 % Information gained from next observation is log(1/p) = -log(p)
 % -------------------------------------------------------------------------------
-store(store == 0) = 1; % so that we set log(0)==0
-store = -log(store); % transform to surprises/information gains
+out.propUnseen = mean(nAntecedent == 0); % proportion of never-before-observed antecedents
+store = -log(store); % transform to surprises/information gains (always finite: 0 < store < 1)
 % histogram(store)
 
 if any(store > 0)
