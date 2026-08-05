@@ -214,25 +214,17 @@ y_d = zscore(y_d);
 
 % (a) StatAv
 out.statav2 = SY_StatAv(y_d, 'seg', 2) / SY_StatAv(y, 'seg', 2);
-out.statav4 = SY_StatAv(y_d, 'seg', 4) / SY_StatAv(y, 'seg', 4);
-out.statav6 = SY_StatAv(y_d, 'seg', 6) / SY_StatAv(y, 'seg', 6);
-out.statav8 = SY_StatAv(y_d, 'seg', 8) / SY_StatAv(y, 'seg', 8);
 out.statav10 = SY_StatAv(y_d, 'seg', 10) / SY_StatAv(y, 'seg', 10);
 
 % (b) Sliding window mean
 out.swms2_2 = SY_SlidingWindow(y_d, 'mean', 'std', 2, 2) / SY_SlidingWindow(y, 'mean', 'std', 2, 2);
 out.swms5_1 = SY_SlidingWindow(y_d, 'mean', 'std', 5, 1) / SY_SlidingWindow(y, 'mean', 'std', 5, 1);
-out.swms5_2 = SY_SlidingWindow(y_d, 'mean', 'std', 5, 2) / SY_SlidingWindow(y, 'mean', 'std', 5, 2);
 out.swms10_1 = SY_SlidingWindow(y_d, 'mean', 'std', 10, 1) / SY_SlidingWindow(y, 'mean', 'std', 10, 1);
-out.swms10_1 = SY_SlidingWindow(y_d, 'mean', 'std', 10, 2) / SY_SlidingWindow(y, 'mean', 'std', 10, 2);
 
 % (c) Sliding window std
 out.swss2_1 = SY_SlidingWindow(y_d, 'std', 'std', 2, 1) / SY_SlidingWindow(y, 'std', 'std', 2, 1);
-out.swss2_2 = SY_SlidingWindow(y_d, 'std', 'std', 2, 2) / SY_SlidingWindow(y, 'std', 'std', 2, 2);
 out.swss5_1 = SY_SlidingWindow(y_d, 'std', 'std', 5, 1) / SY_SlidingWindow(y, 'std', 'std', 5, 1);
-out.swss5_2 = SY_SlidingWindow(y_d, 'std', 'std', 5, 2) / SY_SlidingWindow(y, 'std', 'std', 5, 2);
 out.swss10_1 = SY_SlidingWindow(y_d, 'std', 'std', 10, 1) / SY_SlidingWindow(y, 'std', 'std', 10, 1);
-out.swss10_2 = SY_SlidingWindow(y_d, 'std', 'std', 10, 2) / SY_SlidingWindow(y, 'std', 'std', 10, 2);
 
 % 2) Gaussianity
 % (a) kernel density fit
@@ -241,38 +233,26 @@ me2 = DN_SimpleFit(y, 'gauss1', 0); % kernel density fit to 1-peak gaussian
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	% fitting gaussian failed -- returns a NaN rather than a structure
 	out.gauss1_kd_r2 = NaN;
-	out.gauss1_kd_adjr2 = NaN;
-	out.gauss1_kd_rmse = NaN;
 	out.gauss1_kd_resAC1 = NaN;
-	out.gauss1_kd_resAC2 = NaN;
 	out.gauss1_kd_resruns = NaN;
 else
 	out.gauss1_kd_r2 = me1.r2 / me2.r2;
-	out.gauss1_kd_adjr2 = me1.adjr2 / me2.adjr2;
-	out.gauss1_kd_rmse = me1.rmse / me2.rmse;
 	out.gauss1_kd_resAC1 = me1.resAC1 / me2.resAC1;
-	out.gauss1_kd_resAC2 = me1.resAC2 / me2.resAC2;
 	out.gauss1_kd_resruns = me1.resruns / me2.resruns;
 end
 
-% (c) compare distribution to fitted normal distribution
+% (b) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d, 'norm');
 me2 = DN_CompareKSFit(y, 'norm');
 
-out.kscn_adiff = me1.adiff / me2.adiff;
 out.kscn_peaksepy = me1.peaksepy / me2.peaksepy;
 out.kscn_peaksepx = me1.peaksepx / me2.peaksepx;
 out.kscn_olapint = me1.olapint / me2.olapint;
 out.kscn_relent = me1.relent / me2.relent;
 
-% (d) p-values from gof tests
-out.htdt_chi2n = HT_DistributionTest(y_d, 'chi2gof', 'norm', 10) / HT_DistributionTest(y, 'chi2gof', 'norm', 10); % chi2
-out.htdt_ksn = HT_DistributionTest(y_d, 'ks', 'norm') / HT_DistributionTest(y, 'ks', 'norm'); % Kolmogorov-Smirnov
-
 % 3) Outliers
 out.olbt_m2 = DN_OutlierTest(y_d, 2, 'mean') / DN_OutlierTest(y, 2, 'mean');
 out.olbt_m5 = DN_OutlierTest(y_d, 5, 'mean') / DN_OutlierTest(y, 5, 'mean');
-out.olbt_s2 = DN_OutlierTest(y_d, 2, 'std') / DN_OutlierTest(y, 2, 'std');
 out.olbt_s5 = DN_OutlierTest(y_d, 5, 'std') / DN_OutlierTest(y, 5, 'std');
 
 end
