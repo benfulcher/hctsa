@@ -1,4 +1,4 @@
-function out = SB_MotifThree(y, cgHow)
+function out = SB_MotifThree(y, cgHow, tau)
 % SB_MotifThree     Motifs in a coarse-graining of a time series to a 3-letter alphabet
 %
 % (As SB_MotifTwo but with a 3-letter alphabet)
@@ -8,6 +8,13 @@ function out = SB_MotifThree(y, cgHow)
 % cgHow, the coarse-graining method to use:
 %       (i) 'quantile': equiprobable alphabet by time-series value
 %       (ii) 'diffquant': equiprobably alphabet by time-series increments
+%
+% tau, the time-delay to symbolize consecutive words at (default: 1, i.e.,
+%      consecutive samples). Can also set tau to 'ac' to use the first
+%      zero-crossing of the autocorrelation function, matching the lag
+%      used by SB_TransitionMatrix -- useful since words at consecutive
+%      samples of a smooth, oversampled signal can be dominated by trivial
+%      local structure.
 %
 % ---OUTPUTS:
 % Statistics on words of length 1, 2, 3, and 4.
@@ -43,6 +50,18 @@ function out = SB_MotifThree(y, cgHow)
 
 if nargin < 2 || isempty(cgHow)
 	cgHow = 'quantile';
+end
+if nargin < 3 || isempty(tau)
+	tau = 1;
+end
+if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+end
+if isnan(tau)
+	error('Time series too short to estimate tau');
+end
+if tau > 1 % symbolize words at this lag by downsampling first
+	y = resample(y, 1, tau);
 end
 
 % -------------------------------------------------------------------------------

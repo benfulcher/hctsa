@@ -159,6 +159,32 @@ out.mineig = min(real(eigT)); % minimum eigenvalue
 % (ought to be always zero? Not necessary to measure:)
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 
+% Second-largest eigenvalue and spectral gap: for the 'quantile'/'updown'
+% coarse-grainings (equiprobable by construction, and the only ones currently
+% registered as mops for this operation), the marginal (row/column sums) is
+% close to uniform, which pins the leading eigenvalue near 1/numGroups
+% regardless of temporal structure -- it's the second-largest eigenvalue that
+% reflects the Markov chain's mixing rate (a smaller gap indicates slower
+% relaxation, i.e. longer memory). This doesn't hold for SB_CoarseGrain's
+% non-equiprobable methods ('embed2quadrants'/'embed2octants'), where the
+% marginal (and hence the leading eigenvalue) can vary meaningfully with the
+% data.
+realEig = sort(real(eigT), 'descend');
+if numGroups >= 2
+	out.secondeig = realEig(2);
+	out.specgap = out.maxeig - out.secondeig;
+else
+	out.secondeig = NaN;
+	out.specgap = NaN;
+end
+
+% (vii) Transition (conditional) entropy rate, H(X_{t+1}|X_t), treating T as a
+% first-order Markov approximation: H(joint) - H(marginal)
+rowSums = sum(T, 2); % marginal distribution over states at time t
+Hjoint = -sum(T(T > 0) .* log(T(T > 0)));
+Hmarginal = -sum(rowSums(rowSums > 0) .* log(rowSums(rowSums > 0)));
+out.transEntropy = Hjoint - Hmarginal;
+
 % -------------------------------------------------------------------------------
 % (v) Measures from covariance matrix:
 covT = cov(T);

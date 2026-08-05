@@ -904,8 +904,13 @@ SB_BinaryStats_AR1(x_z,'diff')	    SB_BinaryStats_AR1_diff
 SB_MotifTwo(x_z,'diff')	        SB_MotifTwo_diff
 SB_MotifTwo(x_z,'mean')	        SB_MotifTwo_mean
 SB_MotifTwo(x_z,'median')	    SB_MotifTwo_median
+SB_MotifTwo(x_z,'diff','ac')	SB_MotifTwo_diff_ac
+SB_MotifTwo(x_z,'mean','ac')	SB_MotifTwo_mean_ac
+SB_MotifTwo(x_z,'median','ac')	SB_MotifTwo_median_ac
 SB_MotifThree(x_z,'quantile')	SB_MotifThree_quantile
 SB_MotifThree(x_z,'diffquant')	SB_MotifThree_diffquant
+SB_MotifThree(x_z,'quantile','ac')	SB_MotifThree_quantile_ac
+SB_MotifThree(x_z,'diffquant','ac')	SB_MotifThree_diffquant_ac
 MF_AR_arcov(x_z,1)	        MF_AR_arcov_1
 MF_AR_arcov(x_z,2)	        MF_AR_arcov_2
 MF_AR_arcov(x_z,3)	        MF_AR_arcov_3

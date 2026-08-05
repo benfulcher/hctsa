@@ -1,4 +1,4 @@
-function out = SB_MotifTwo(y, binarizeHow)
+function out = SB_MotifTwo(y, binarizeHow, tau)
 % SB_MotifTwo   Local motifs in a binary symbolization of the time series
 %
 % Coarse-graining is performed by a given binarization method.
@@ -12,6 +12,13 @@ function out = SB_MotifTwo(y, binarizeHow)
 %                    below the mean are 0,
 %       (iii) 'median': time-series values above the median are given 1, and
 %       those below the median 0.
+%
+% tau, the time-delay to symbolize consecutive words at (default: 1, i.e.,
+%      consecutive samples). Can also set tau to 'ac' to use the first
+%      zero-crossing of the autocorrelation function, matching the lag
+%      used by SB_TransitionMatrix -- useful since 'diff'/'mean'/'median'
+%      words at consecutive samples of a smooth, oversampled signal can be
+%      dominated by trivial local structure.
 %
 % ---OUTPUTS:
 % Probabilities of words in the binary alphabet of lengths 1, 2, 3, and 4, and
@@ -49,6 +56,18 @@ function out = SB_MotifTwo(y, binarizeHow)
 if nargin < 2 || isempty(binarizeHow)
 	% Use changes in the time series as the basis for the transformation
 	binarizeHow = 'diff';
+end
+if nargin < 3 || isempty(tau)
+	tau = 1;
+end
+if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+end
+if isnan(tau)
+	error('Time series too short to estimate tau');
+end
+if tau > 1 % symbolize words at this lag by downsampling first
+	y = resample(y, 1, tau);
 end
 
 % Generate a binarized version of the input time series:

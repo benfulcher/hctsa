@@ -2,7 +2,12 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 % SB_CoarseGrain   Coarse-grains a continuous time series to a discrete alphabet.
 %
 % ---INPUTS:
-% howtocg, the method of coarse-graining
+% howtocg, the method of coarse-graining:
+%       (i) 'quantile': an equiprobable alphabet by the value of each point
+%       (ii) 'updown': as 'quantile', but applied to the increments diff(y) --
+%            NOT a literal sign(diff)>0 split (see note at its case below)
+%       (iii) 'embed2quadrants'/'embed2octants': alphabet by quadrant/octant
+%             of a 2-D time-delay embedding
 %
 % numGroups, either specifies the size of the alphabet for 'quantile' and 'updown'
 %       or sets the time delay for the embedding subroutines
@@ -56,6 +61,13 @@ end
 % ------------------------------------------------------------------------------
 switch howtocg
 	case 'updown'
+		% Despite the name, this is NOT a literal sign(diff)>0 up/down split --
+		% it takes an EQUIPROBABLE quantile alphabet of the increments, same as
+		% the 'quantile' case below but applied to diff(y) instead of y. For
+		% numGroups=2 this splits at the *median* increment, which only equals
+		% a true up/down (positive/negative) split when the median increment
+		% happens to be zero (e.g. non-trending series) -- for a drifting
+		% series, some small positive increments will fall in the "down" bin.
 		y = diff(y);
 		N = N - 1; % the time series is one value shorter than the input because of differencing
 		howtocg = 'quantile'; % successive differences and then quantiles
