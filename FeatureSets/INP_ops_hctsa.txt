@@ -785,6 +785,16 @@ SY_SlidingWindow_ac1_ent5_10	SY_SlidingWindow_ac1_ent5_10	stationarity
 SY_SlidingWindow_ac1_ent10_1	SY_SlidingWindow_ac1_ent10_1	stationarity
 SY_SlidingWindow_ac1_ent10_2	SY_SlidingWindow_ac1_ent10_2	stationarity
 SY_SlidingWindow_ac1_ent10_10	SY_SlidingWindow_ac1_ent10_10	stationarity
+SY_RampingWindows_10.mean_tau	SY_RampingWindows_10_mean_tau	stationarity,trend
+SY_RampingWindows_10.mean_p	SY_RampingWindows_10_mean_p	stationarity,trend
+SY_RampingWindows_10.var_tau	SY_RampingWindows_10_var_tau	stationarity,trend
+SY_RampingWindows_10.var_p	SY_RampingWindows_10_var_p	stationarity,trend
+SY_RampingWindows_10.skew_tau	SY_RampingWindows_10_skew_tau	stationarity,trend
+SY_RampingWindows_10.skew_p	SY_RampingWindows_10_skew_p	stationarity,trend
+SY_RampingWindows_10.kurt_tau	SY_RampingWindows_10_kurt_tau	stationarity,trend
+SY_RampingWindows_10.kurt_p	SY_RampingWindows_10_kurt_p	stationarity,trend
+SY_RampingWindows_10.ac1_tau	SY_RampingWindows_10_ac1_tau	stationarity,trend,correlation
+SY_RampingWindows_10.ac1_p	SY_RampingWindows_10_ac1_p	stationarity,trend,correlation
 SY_Trend.stdRatio       SY_Trend_stdRatio       stationarity
 SY_Trend.gradient       SY_Trend_gradient       stationarity
 SY_Trend.intercept      SY_Trend_intercept      stationarity

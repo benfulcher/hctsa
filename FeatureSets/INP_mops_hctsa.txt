@@ -485,6 +485,7 @@ SY_SlidingWindow(x_z,'AC1','ent',5,10)		SY_SlidingWindow_ac1_ent5_10
 SY_SlidingWindow(x_z,'AC1','ent',10,1)		SY_SlidingWindow_ac1_ent10_1
 SY_SlidingWindow(x_z,'AC1','ent',10,2)		SY_SlidingWindow_ac1_ent10_2
 SY_SlidingWindow(x_z,'AC1','ent',10,10)		SY_SlidingWindow_ac1_ent10_10
+SY_RampingWindows(x_z,10)	SY_RampingWindows_10
 SY_Trend(x_z)	    SY_Trend
 SY_StdNthDer(x_z,1)	SY_StdNthDer_1
 SY_StdNthDer(x_z,2)	SY_StdNthDer_2
