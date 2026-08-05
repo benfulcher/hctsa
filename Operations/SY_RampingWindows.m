@@ -24,17 +24,22 @@ function out = SY_RampingWindows(y, numSeg)
 %         would inflate the apparent monotonic trend independent of any
 %         real ramping in the data.
 %
-% ---OUTPUTS: Kendall's rank correlation tau (and its p-value) between
-% segment index and each windowed statistic, for the mean, variance,
-% standardized skewness/kurtosis, and AC1. Kendall's tau is used rather
-% than a linear-regression slope since it is scale-invariant (comparable
-% across statistics with different units) and detects any monotonic
-% trend, not just a linear one -- matching "ramping" more directly than a
-% slope would. Skewness/kurtosis are standardized in the usual sense
-% (normalized by std^3/std^4 respectively, i.e., Matlab's skewness/
-% kurtosis, not DN_Moments' convention of normalizing by std^1 regardless
-% of moment order) so that a shape trend isn't conflated with the
-% (separately tracked) scale trend in segVar.
+% ---OUTPUTS: Kendall's rank correlation tau, and Pearson's linear
+% correlation r (each with its p-value), between segment index and each
+% windowed statistic, for the mean, variance, standardized
+% skewness/kurtosis, and AC1. Kendall's tau is scale-invariant and
+% detects any monotonic trend, not just a linear one -- matching
+% "ramping" more directly than a slope would, and more robust to outlying
+% segments. Pearson's r is included alongside it as a complementary,
+% effect-size-like measure of specifically *linear* ramping (r^2 is the
+% fraction of across-segment variance explained by a linear trend);
+% expect the two to agree closely for a clean linear ramp and diverge for
+% a monotonic-but-nonlinear one (e.g. a ramp that plateaus). Skewness/
+% kurtosis are standardized in the usual sense (normalized by std^3/std^4
+% respectively, i.e., Matlab's skewness/kurtosis, not DN_Moments'
+% convention of normalizing by std^1 regardless of moment order) so that
+% a shape trend isn't conflated with the (separately tracked) scale trend
+% in segVar.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -109,19 +114,25 @@ for i = 1:numSeg
 end
 
 % ------------------------------------------------------------------------------
-%% Kendall's tau (and p-value) for each statistic against segment index
+%% Kendall's tau and Pearson's r (each with p-value) against segment index
 % ------------------------------------------------------------------------------
 segIdx = (1:numSeg)';
 
-[out.mean_tau, out.mean_p] = SUB_kendallTrend(segIdx, segMean);
-[out.var_tau, out.var_p] = SUB_kendallTrend(segIdx, segVar);
-[out.skew_tau, out.skew_p] = SUB_kendallTrend(segIdx, segSkew);
-[out.kurt_tau, out.kurt_p] = SUB_kendallTrend(segIdx, segKurt);
-[out.ac1_tau, out.ac1_p] = SUB_kendallTrend(segIdx, segAC1);
+[out.mean_tau, out.mean_p] = SUB_trend(segIdx, segMean, 'Kendall');
+[out.var_tau, out.var_p] = SUB_trend(segIdx, segVar, 'Kendall');
+[out.skew_tau, out.skew_p] = SUB_trend(segIdx, segSkew, 'Kendall');
+[out.kurt_tau, out.kurt_p] = SUB_trend(segIdx, segKurt, 'Kendall');
+[out.ac1_tau, out.ac1_p] = SUB_trend(segIdx, segAC1, 'Kendall');
+
+[out.mean_pearson_r, out.mean_pearson_p] = SUB_trend(segIdx, segMean, 'Pearson');
+[out.var_pearson_r, out.var_pearson_p] = SUB_trend(segIdx, segVar, 'Pearson');
+[out.skew_pearson_r, out.skew_pearson_p] = SUB_trend(segIdx, segSkew, 'Pearson');
+[out.kurt_pearson_r, out.kurt_pearson_p] = SUB_trend(segIdx, segKurt, 'Pearson');
+[out.ac1_pearson_r, out.ac1_pearson_p] = SUB_trend(segIdx, segAC1, 'Pearson');
 
 % ------------------------------------------------------------------------------
-function [tau, pval] = SUB_kendallTrend(idx, x)
-    [tau, pval] = corr(idx, x(:), 'type', 'Kendall');
+function [rho, pval] = SUB_trend(idx, x, corrType)
+    [rho, pval] = corr(idx, x(:), 'type', corrType);
 end
 % ------------------------------------------------------------------------------
 

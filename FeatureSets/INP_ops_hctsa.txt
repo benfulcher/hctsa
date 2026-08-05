@@ -795,6 +795,16 @@ SY_RampingWindows_10.kurt_tau	SY_RampingWindows_10_kurt_tau	stationarity,trend
 SY_RampingWindows_10.kurt_p	SY_RampingWindows_10_kurt_p	stationarity,trend
 SY_RampingWindows_10.ac1_tau	SY_RampingWindows_10_ac1_tau	stationarity,trend,correlation
 SY_RampingWindows_10.ac1_p	SY_RampingWindows_10_ac1_p	stationarity,trend,correlation
+SY_RampingWindows_10.mean_pearson_r	SY_RampingWindows_10_mean_pearson_r	stationarity,trend
+SY_RampingWindows_10.mean_pearson_p	SY_RampingWindows_10_mean_pearson_p	stationarity,trend
+SY_RampingWindows_10.var_pearson_r	SY_RampingWindows_10_var_pearson_r	stationarity,trend
+SY_RampingWindows_10.var_pearson_p	SY_RampingWindows_10_var_pearson_p	stationarity,trend
+SY_RampingWindows_10.skew_pearson_r	SY_RampingWindows_10_skew_pearson_r	stationarity,trend
+SY_RampingWindows_10.skew_pearson_p	SY_RampingWindows_10_skew_pearson_p	stationarity,trend
+SY_RampingWindows_10.kurt_pearson_r	SY_RampingWindows_10_kurt_pearson_r	stationarity,trend
+SY_RampingWindows_10.kurt_pearson_p	SY_RampingWindows_10_kurt_pearson_p	stationarity,trend
+SY_RampingWindows_10.ac1_pearson_r	SY_RampingWindows_10_ac1_pearson_r	stationarity,trend,correlation
+SY_RampingWindows_10.ac1_pearson_p	SY_RampingWindows_10_ac1_pearson_p	stationarity,trend,correlation
 SY_Trend.stdRatio       SY_Trend_stdRatio       stationarity
 SY_Trend.gradient       SY_Trend_gradient       stationarity
 SY_Trend.intercept      SY_Trend_intercept      stationarity
