@@ -12,12 +12,25 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % translation variables (p_c,q_c) in the plane:
 %   p_c(n) = sum_{j=1}^{n} y(j)*cos(j*c),  q_c(n) = sum_{j=1}^{n} y(j)*sin(j*c)
 % and the growth rate of the (mean-corrected) mean-square displacement
-% M_c(n) of (p_c,q_c) is summarized by K_c, the correlation coefficient
-% between n and M_c(n): K_c near 0 means (p_c,q_c) is bounded (periodic
-% dynamics underlying y), K_c near 1 means it grows diffusively/without
-% bound (chaotic dynamics underlying y). The reported K is the median of
-% K_c over numC choices of c (avoiding resonant values of c near integer
-% multiples of pi).
+% M_c(n) of (p_c,q_c) is summarized two ways: K_c, the correlation
+% coefficient between n and M_c(n) (K_c near 0 means (p_c,q_c) is bounded
+% -- periodic dynamics underlying y; K_c near 1 means it grows
+% diffusively/without bound -- chaotic or stochastic dynamics underlying
+% y); and D_c, the linear-regression slope of M_c(n) against n (the
+% *rate* at which (p_c,q_c) diffuses, given that it does -- see D below).
+% K and D are each summarized by their median (and Kstd/Dstd, their
+% spread) over numC choices of c (avoiding resonant values of c near
+% integer multiples of pi).
+%
+% K and D answer different questions: K asks only whether (p_c,q_c) is
+% bounded or not, while D asks how fast it grows given that it isn't
+% bounded -- e.g. white noise and a strongly autocorrelated AR(1) process
+% are both classified as unbounded by K (K ~ 1 for both, since both
+% eventually drive an unbounded random walk in the (p,q) plane), but D is
+% an order of magnitude smaller for the AR(1) process in validation on
+% synthetic data (the AR(1) process's smaller innovation variance per
+% step directly slows the (p,q) random walk, even though total series
+% variance is matched by z-scoring).
 %
 % ---CAVEAT (important, and the reason for the paper below): this test
 % alone cannot distinguish deterministic chaos from stochastic noise --
@@ -60,6 +73,15 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % Kstd, the standard deviation of K_c across the numC frequencies -- a
 %       large spread indicates the test is unstable/ambiguous for this
 %       particular series (e.g. residual resonance contamination)
+% D, the median of D_c across the numC frequencies -- the diffusion rate
+%       of (p_c,q_c) given that it is unbounded (near 0 for bounded
+%       dynamics too, same as D_c is ~flat when K_c is ~0)
+% Dstd, the standard deviation of D_c across the numC frequencies -- can
+%       be heavy-tailed for complex/near-resonant dynamics (a handful of
+%       c values giving an anomalously large slope estimate), validated
+%       as a genuine signal rather than a numerical artifact (e.g. the
+%       synthetic Duffing-van der Pol series in the Empirical1000
+%       validation set, whose own Kstd is also elevated)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -135,6 +157,7 @@ mphi = mean(y);
 cs = linspace(pi/5, 4*pi/5, numC)';
 
 Kc = zeros(numC, 1);
+Dc = zeros(numC, 1);
 for k = 1:numC
     c = cs(k);
     p = cumsum(y .* cos(j * c));
@@ -147,7 +170,10 @@ for k = 1:numC
     % Subtract the oscillatory contribution from a nonzero series mean,
     % which would otherwise cause (p,q) to grow even for perfectly periodic y:
     Vosc = mphi^2 * (1 - cos(nvec * c)) / (1 - cos(c));
-    Kc(k) = corr(nvec, Mc - Vosc);
+    Mc_mod = Mc - Vosc;
+    Kc(k) = corr(nvec, Mc_mod);
+    pFit = polyfit(nvec, Mc_mod, 1);
+    Dc(k) = pFit(1);
 end
 
 % ------------------------------------------------------------------------------
@@ -155,5 +181,7 @@ end
 % ------------------------------------------------------------------------------
 out.K = median(Kc);
 out.Kstd = std(Kc);
+out.D = median(Dc);
+out.Dstd = std(Dc);
 
 end
