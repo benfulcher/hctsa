@@ -6543,7 +6543,9 @@ WL_coeffs_db3_max.wb10m	WL_coeffs_db3_max_wb10m	wavelet
 WL_coeffs_db3_max.wb1m	WL_coeffs_db3_max_wb1m	wavelet
 WL_fBM.H_deriv2	WL_fBM_H_deriv2	wavelet
 WL_fBM.H_deriv2Wavelet	WL_fBM_H_deriv2Wavelet	wavelet
-WL_fBM.H_varLevel	WL_fBM_H_varLevel	wavelet
+WL_modwtvar_db3_5.scalingFrac	WL_modwtvar_db3_5_scalingFrac	wavelet,modwt
+WL_modwtvar_db3_5.domlevel	WL_modwtvar_db3_5_domlevel	wavelet,modwt
+WL_modwtvar_db3_5.decaySlope	WL_modwtvar_db3_5_decaySlope	wavelet,modwt
 WL_dwtcoeff_db3_5.maxd_l1	WL_dwtcoeff_db3_5_maxd_l1	wavelet,dwt
 WL_dwtcoeff_db3_5.mind_l1	WL_dwtcoeff_db3_5_mind_l1	wavelet,dwt
 WL_dwtcoeff_db3_5.stdd_l1	WL_dwtcoeff_db3_5_stdd_l1	wavelet,dwt

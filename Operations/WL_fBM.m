@@ -6,10 +6,14 @@ function out = WL_fBM(y)
 % ---INPUT:
 % y, the time series to analyze.
 %
-% ---OUTPUTS: three Hurst-exponent estimates from wfbmesti's three internal
-% estimators: a second-order-derivative estimate (H_deriv2), a wavelet-based
-% version of the same (H_deriv2Wavelet, using a sym5 filter), and a
-% wavelet-variance-vs-level regression estimate (H_varLevel).
+% ---OUTPUTS: two Hurst-exponent estimates from wfbmesti's second-order-
+% derivative estimators: a plain version (H_deriv2) and a wavelet-based
+% version of the same (H_deriv2Wavelet, using a fixed sym5 filter).
+% wfbmesti's third estimator (a wavelet-variance-vs-level regression, fixed
+% to a Haar decomposition regardless of the wavelet used elsewhere in this
+% codebase) is not returned here: WL_modwtvar's decaySlope estimates the
+% same quantity via the MODWT's unbiased, boundary-corrected variance
+% decomposition, a more principled route to the same scaling exponent.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,6 +53,5 @@ BF_CheckToolbox('wavelet_toolbox');
 hest = wfbmesti(y);
 out.H_deriv2 = hest(1); % second-order discrete-derivative estimate
 out.H_deriv2Wavelet = hest(2); % second-order discrete derivative, wavelet (sym5) version
-out.H_varLevel = hest(3); % wavelet-variance-vs-level regression estimate
 
 end
