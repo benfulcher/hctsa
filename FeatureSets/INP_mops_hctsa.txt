@@ -857,6 +857,7 @@ SC_MMA(x_z,0,[],[-5,5]) SC_MMA_0__n5_5
 SP_Summaries(x_z,'periodogram','hamming',[],false)	SP_Summaries_pgram_hamm
 SP_Summaries(x_z,'welch','rect',[],false)	            SP_Summaries_welch_rect
 SP_Summaries(x_z,'fft',[],[],false)	                SP_Summaries_fft
+SP_SummariesPhase(x_z)	SP_SummariesPhase
 SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 NL_TISEAN_fnn(x_z,'ac',10,0.05,0,[],5)     NL_TISEAN_fnn_ac_10_005_f5
 NL_TISEAN_fnn(x_z,'mi',10,0.05,0,[],5)     NL_TISEAN_fnn_mi_10_005_f5
@@ -887,6 +888,7 @@ NL_PoincareSection(x_z,'max',{'ac',3})	NL_PoincareSection_max_ac
 NL_PoincareSection(x_z,'max',{1,3})	NL_PoincareSection_max_1
 NL_LargestLyap(x_z,-1,0.1,0.01,3,{'mi','fnn'})	NL_LargestLyap_n1_01_001_3_mi_fnn
 NL_LargestLyap(x_z,-1,0.1,0.01,3,{1,4})	NL_LargestLyap_n1_01_001_3_1_4
+NL_LyapSpec(x_z,'mi',3,30,'full')	NL_LyapSpec_mi_3_30_full
 NL_ReturnTime(x_z,10,1,1,-1,{'ac',8})	NL_ReturnTime_10_1_1_n1_ac_8
 NL_ReturnTime(x_z,5,1,40,-1,{1,8})	NL_ReturnTime_5_1_40_n1_1_8
 NL_ReturnTime(x_z,0.05,1,0.05,-1,{1,3})	NL_ReturnTime_005_1_005_n1_1_3
