@@ -1003,7 +1003,7 @@ MF_GP_LocalPrediction(x_z,{'covSum',{'covSEiso','covNoise'}},10,3,20,'frombefore
 MF_GP_LocalPrediction(x_z,{'covSum',{'covSEiso','covNoise'}},10,3,20,'randomgap','default')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_randomgap
 MF_GP_FitAcross(x_z,{'covSum',{'covSEiso','covNoise'}},20)	MF_GP_FitAcross_covSEiso_covNoise_20
 WL_cwt(x_z,'db3',32)	WL_cwt_db3_32
-WL_cwt(x_z,'sym2',32)	WL_cwt_sym2_32
+WL_cwt(x_z,'morl',32)	WL_cwt_morl_32
 WL_scal2frq(x_z,'db3','max',1)	WL_scal2frq_db3_max_1
 WL_DetailCoeffs(x_z,'db3','max')	WL_DetailCoeffs_db3_max
 WL_coeffs(x_z,'db3',1)	WL_coeffs_db3_1
