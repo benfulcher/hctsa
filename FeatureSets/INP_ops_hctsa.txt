@@ -4674,8 +4674,6 @@ SP_Summaries_pgram_hamm.std     SP_Summaries_pgram_hamm_std    FourierSpectrum
 SP_Summaries_pgram_hamm.stdlog      SP_Summaries_pgram_hamm_stdlog    FourierSpectrum
 SP_Summaries_pgram_hamm.logstd      SP_Summaries_pgram_hamm_logstd    FourierSpectrum
 SP_Summaries_pgram_hamm.mom3        SP_Summaries_pgram_hamm_mom3    FourierSpectrum
-SP_Summaries_pgram_hamm.mom4        SP_Summaries_pgram_hamm_mom4    FourierSpectrum
-SP_Summaries_pgram_hamm.mom5        SP_Summaries_pgram_hamm_mom5    FourierSpectrum
 SP_Summaries_pgram_hamm.ac1     SP_Summaries_pgram_hamm_ac1    FourierSpectrum
 SP_Summaries_pgram_hamm.ac2     SP_Summaries_pgram_hamm_ac2    FourierSpectrum
 SP_Summaries_pgram_hamm.tau     SP_Summaries_pgram_hamm_tau    FourierSpectrum
@@ -4766,8 +4764,6 @@ SP_Summaries_welch_rect.std     SP_Summaries_welch_rect_std    FourierSpectrum
 SP_Summaries_welch_rect.stdlog      SP_Summaries_welch_rect_stdlog    FourierSpectrum
 SP_Summaries_welch_rect.logstd      SP_Summaries_welch_rect_logstd    FourierSpectrum
 SP_Summaries_welch_rect.mom3        SP_Summaries_welch_rect_mom3    FourierSpectrum
-SP_Summaries_welch_rect.mom4        SP_Summaries_welch_rect_mom4    FourierSpectrum
-SP_Summaries_welch_rect.mom5        SP_Summaries_welch_rect_mom5    FourierSpectrum
 SP_Summaries_welch_rect.ac1     SP_Summaries_welch_rect_ac1    FourierSpectrum
 SP_Summaries_welch_rect.ac2     SP_Summaries_welch_rect_ac2    FourierSpectrum
 SP_Summaries_welch_rect.tau     SP_Summaries_welch_rect_tau    FourierSpectrum
@@ -4858,8 +4854,6 @@ SP_Summaries_fft.std     SP_Summaries_fft_std    FourierSpectrum
 SP_Summaries_fft.stdlog      SP_Summaries_fft_stdlog    FourierSpectrum
 SP_Summaries_fft.logstd      SP_Summaries_fft_logstd    FourierSpectrum
 SP_Summaries_fft.mom3        SP_Summaries_fft_mom3    FourierSpectrum
-SP_Summaries_fft.mom4        SP_Summaries_fft_mom4    FourierSpectrum
-SP_Summaries_fft.mom5        SP_Summaries_fft_mom5    FourierSpectrum
 SP_Summaries_fft.ac1     SP_Summaries_fft_ac1    FourierSpectrum
 SP_Summaries_fft.ac2     SP_Summaries_fft_ac2    FourierSpectrum
 SP_Summaries_fft.tau     SP_Summaries_fft_tau    FourierSpectrum
