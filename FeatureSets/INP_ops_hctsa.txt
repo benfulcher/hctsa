@@ -4677,6 +4677,10 @@ SP_Summaries_pgram_hamm.wmax_75     SP_Summaries_pgram_hamm_wmax_75    FourierSp
 SP_Summaries_pgram_hamm.wmax_90     SP_Summaries_pgram_hamm_wmax_90    FourierSpectrum
 SP_Summaries_pgram_hamm.wmax_95     SP_Summaries_pgram_hamm_wmax_95    FourierSpectrum
 SP_Summaries_pgram_hamm.wmax_99     SP_Summaries_pgram_hamm_wmax_99    FourierSpectrum
+SP_Summaries_pgram_hamm.specCentroid     SP_Summaries_pgram_hamm_specCentroid    FourierSpectrum
+SP_Summaries_pgram_hamm.specSpread     SP_Summaries_pgram_hamm_specSpread    FourierSpectrum
+SP_Summaries_pgram_hamm.specSkew     SP_Summaries_pgram_hamm_specSkew    FourierSpectrum
+SP_Summaries_pgram_hamm.specKurt     SP_Summaries_pgram_hamm_specKurt    FourierSpectrum
 SP_Summaries_pgram_hamm.fpoly2csS_p1        SP_Summaries_pgram_hamm_fpoly2csS_p1    FourierSpectrum
 SP_Summaries_pgram_hamm.fpoly2csS_p2        SP_Summaries_pgram_hamm_fpoly2csS_p2    FourierSpectrum
 SP_Summaries_pgram_hamm.fpoly2csS_p3        SP_Summaries_pgram_hamm_fpoly2csS_p3    FourierSpectrum
@@ -4776,6 +4780,10 @@ SP_Summaries_welch_rect.wmax_75     SP_Summaries_welch_rect_wmax_75    FourierSp
 SP_Summaries_welch_rect.wmax_90     SP_Summaries_welch_rect_wmax_90    FourierSpectrum
 SP_Summaries_welch_rect.wmax_95     SP_Summaries_welch_rect_wmax_95    FourierSpectrum
 SP_Summaries_welch_rect.wmax_99     SP_Summaries_welch_rect_wmax_99    FourierSpectrum
+SP_Summaries_welch_rect.specCentroid     SP_Summaries_welch_rect_specCentroid    FourierSpectrum
+SP_Summaries_welch_rect.specSpread     SP_Summaries_welch_rect_specSpread    FourierSpectrum
+SP_Summaries_welch_rect.specSkew     SP_Summaries_welch_rect_specSkew    FourierSpectrum
+SP_Summaries_welch_rect.specKurt     SP_Summaries_welch_rect_specKurt    FourierSpectrum
 SP_Summaries_welch_rect.fpoly2csS_p1        SP_Summaries_welch_rect_fpoly2csS_p1    FourierSpectrum
 SP_Summaries_welch_rect.fpoly2csS_p2        SP_Summaries_welch_rect_fpoly2csS_p2    FourierSpectrum
 SP_Summaries_welch_rect.fpoly2csS_p3        SP_Summaries_welch_rect_fpoly2csS_p3    FourierSpectrum
@@ -4861,6 +4869,10 @@ SP_Summaries_fft.wmax_75     SP_Summaries_fft_wmax_75    FourierSpectrum
 SP_Summaries_fft.wmax_90     SP_Summaries_fft_wmax_90    FourierSpectrum
 SP_Summaries_fft.wmax_95     SP_Summaries_fft_wmax_95    FourierSpectrum
 SP_Summaries_fft.wmax_99     SP_Summaries_fft_wmax_99    FourierSpectrum
+SP_Summaries_fft.specCentroid     SP_Summaries_fft_specCentroid    FourierSpectrum
+SP_Summaries_fft.specSpread     SP_Summaries_fft_specSpread    FourierSpectrum
+SP_Summaries_fft.specSkew     SP_Summaries_fft_specSkew    FourierSpectrum
+SP_Summaries_fft.specKurt     SP_Summaries_fft_specKurt    FourierSpectrum
 SP_Summaries_fft.fpoly2csS_p1        SP_Summaries_fft_fpoly2csS_p1    FourierSpectrum
 SP_Summaries_fft.fpoly2csS_p2        SP_Summaries_fft_fpoly2csS_p2    FourierSpectrum
 SP_Summaries_fft.fpoly2csS_p3        SP_Summaries_fft_fpoly2csS_p3    FourierSpectrum

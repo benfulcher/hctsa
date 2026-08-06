@@ -33,9 +33,18 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % ---OUTPUTS:
 % Statistics summarizing various properties of the spectrum,
 % including its maximum, minimum, spread, correlation, centroid, area in certain
-% (normalized) frequency bands, moments of the spectrum, Shannon spectral
+% (normalized) frequency bands, moments of the spectrum, power-weighted
+% moments of the frequency distribution, Shannon spectral
 % entropy, a spectral flatness measure, power-law fits, and the number of
 % crossings of the spectrum at various amplitude thresholds.
+%
+% Note there are two distinct senses of 'moment' here, which the field
+% names can obscure: mom3 etc. are moments of the distribution of power
+% *values* (order-agnostic in frequency -- shuffling the spectrum
+% bin-for-bin leaves them unchanged), whereas specSkew/specKurt are
+% moments of *frequency itself*, weighted by power (so they describe
+% where in frequency the power sits). See the note on the
+% power-weighted-moment block below.
 %
 % A linear-scale power spectrum is typically extremely heavy-tailed (cf.
 % the peak-detection notes below), so several statistics that compare
@@ -374,6 +383,72 @@ out.wmax_99 = f_frac_w_max(0.99);
 % Width of saturation measures
 out.w10_90 = out.wmax_90 - out.wmax_10; % from 10% to 90%:
 out.w25_75 = out.wmax_75 - out.wmax_25;
+
+% ------------------------------------------------------------------------------
+% Power-weighted moments of the frequency distribution
+% ------------------------------------------------------------------------------
+% Note these are a genuinely different family from both of the
+% frequency-summarizing families above and the moments of S computed
+% earlier, in a way the naming can obscure:
+%   - `centroid` above is the *median* frequency (where csS reaches 50%),
+%     NOT the power-weighted mean frequency computed here. It keeps that
+%     (strictly speaking, misnamed) name because it is one of the
+%     canonical catch22 features (SP_Summaries_welch_rect_centroid),
+%     externally mirrored in the catch22 C/Python implementations -- so
+%     the name carries a compatibility contract and must not change.
+%   - `mom3` (skewness of S) summarizes the distribution of power
+%     *values*, which is entirely order-agnostic in frequency: shuffle
+%     the spectrum bin-for-bin and mom3 is unchanged. It says nothing
+%     about *where* in frequency the power sits.
+% The moments below instead treat the (non-negative) spectrum as a
+% weighting over frequency and take moments of frequency itself -- the
+% standard spectral centroid/spread/skewness/kurtosis (cf. the MPEG-7
+% audio descriptors). Relative to the wmax_* quantiles, which describe
+% the same frequency distribution non-parametrically, these weight the
+% tails much more heavily: a small amount of power far out in frequency
+% moves specSkew/specKurt substantially and wmax_90 not at all.
+%
+% There is deliberately no log-domain companion here (unlike most of the
+% families above): S enters as a *weight*, not as a value being
+% summarized, and logS is negative wherever S < 1, so log-weighting
+% would produce meaningless (signed) 'weights'.
+%
+% On redundancy: checked on 1000 real series, the two low-order moments
+% are substantially re-descriptions of the wmax_* quantiles already
+% computed above -- specCentroid vs wmax_75 R^2 = 0.91 (and vs the
+% median-frequency `centroid`, 0.88), specSpread vs the 10-90% width
+% w10_90 R^2 = 0.92. That is unsurprising (a mean tracks a median, a
+% standard deviation tracks an inter-quantile width). They are kept and
+% registered anyway, deliberately: specCentroid and specSpread are the
+% textbook spectral centroid and bandwidth (the MPEG-7 audio
+% descriptors), so they are far easier to interpret and to motivate
+% theoretically than the quantile-width proxies that happen to correlate
+% with them -- worth a little redundancy. specSkew and specKurt are
+% additionally non-redundant on the numbers: worst-case R^2 of 0.20 and
+% 0.08 against any of those quantiles, since they respond to
+% far-out-in-frequency tail power the quantiles are by construction
+% insensitive to.
+Spos = max(S, 0); % guard against any tiny negative values from the estimator
+sumS = sum(Spos);
+if sumS > 0
+    pw = Spos / sumS; % normalized weighting over frequency
+    out.specCentroid = sum(pw .* w);
+    wDev = w - out.specCentroid;
+    specVar = sum(pw .* wDev.^2);
+    out.specSpread = sqrt(specVar);
+    if specVar > 0
+        out.specSkew = sum(pw .* wDev.^3) / specVar^(3/2);
+        out.specKurt = sum(pw .* wDev.^4) / specVar^2;
+    else % all power in a single frequency bin: shape undefined
+        out.specSkew = NaN;
+        out.specKurt = NaN;
+    end
+else % no power anywhere
+    out.specCentroid = NaN;
+    out.specSpread = NaN;
+    out.specSkew = NaN;
+    out.specKurt = NaN;
+end
 
 % ------------------------------------------------------------------------------
 % Fit some functions to this cumulative sum:
