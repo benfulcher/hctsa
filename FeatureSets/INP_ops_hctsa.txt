@@ -4666,6 +4666,7 @@ SP_Summaries_pgram_hamm.w_weighted_peak_prom     SP_Summaries_pgram_hamm_w_weigh
 SP_Summaries_pgram_hamm.numPeaks_50power        SP_Summaries_pgram_hamm_numPeaks_50power    FourierSpectrum
 SP_Summaries_pgram_hamm.peakpower_1     SP_Summaries_pgram_hamm_peakpower_1    FourierSpectrum
 SP_Summaries_pgram_hamm.logiqr      SP_Summaries_pgram_hamm_logiqr    FourierSpectrum
+SP_Summaries_pgram_hamm.iqr      SP_Summaries_pgram_hamm_iqr    FourierSpectrum
 SP_Summaries_pgram_hamm.q25     SP_Summaries_pgram_hamm_q25    FourierSpectrum
 SP_Summaries_pgram_hamm.median      SP_Summaries_pgram_hamm_median    FourierSpectrum
 SP_Summaries_pgram_hamm.q75     SP_Summaries_pgram_hamm_q75    FourierSpectrum
@@ -4785,6 +4786,7 @@ SP_Summaries_welch_rect.w_weighted_peak_prom     SP_Summaries_welch_rect_w_weigh
 SP_Summaries_welch_rect.numPeaks_50power        SP_Summaries_welch_rect_numPeaks_50power    FourierSpectrum
 SP_Summaries_welch_rect.peakpower_1     SP_Summaries_welch_rect_peakpower_1    FourierSpectrum
 SP_Summaries_welch_rect.logiqr      SP_Summaries_welch_rect_logiqr    FourierSpectrum
+SP_Summaries_welch_rect.iqr      SP_Summaries_welch_rect_iqr    FourierSpectrum
 SP_Summaries_welch_rect.q25     SP_Summaries_welch_rect_q25    FourierSpectrum
 SP_Summaries_welch_rect.median      SP_Summaries_welch_rect_median    FourierSpectrum
 SP_Summaries_welch_rect.q75     SP_Summaries_welch_rect_q75    FourierSpectrum
@@ -4904,6 +4906,7 @@ SP_Summaries_fft.w_weighted_peak_prom     SP_Summaries_fft_w_weighted_peak_prom 
 SP_Summaries_fft.numPeaks_50power        SP_Summaries_fft_numPeaks_50power    FourierSpectrum
 SP_Summaries_fft.peakpower_1     SP_Summaries_fft_peakpower_1    FourierSpectrum
 SP_Summaries_fft.logiqr      SP_Summaries_fft_logiqr    FourierSpectrum
+SP_Summaries_fft.iqr      SP_Summaries_fft_iqr    FourierSpectrum
 SP_Summaries_fft.q25     SP_Summaries_fft_q25    FourierSpectrum
 SP_Summaries_fft.median      SP_Summaries_fft_median    FourierSpectrum
 SP_Summaries_fft.q75     SP_Summaries_fft_q75    FourierSpectrum
