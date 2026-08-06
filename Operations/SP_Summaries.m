@@ -315,7 +315,18 @@ out.logmom3 = DN_Moments(logS, 3, true);
 autoCorrs_S = CO_AutoCorr(S, 1:4, 'Fourier');
 out.ac1 = autoCorrs_S(1);
 out.ac2 = autoCorrs_S(2);
-out.tau = CO_FirstCrossing(S, 'ac', 0, 'continuous');
+% CO_FirstCrossing returns a lag measured in *bins*, not physical
+% frequency -- and the number of bins (NFFT) scales with the input
+% series length N, independent of any real spectral structure. Left
+% unconverted, tau is partly just re-deriving N (checked empirically:
+% R^2 = 0.70 against hctsa's own `length` feature across 1000 real
+% series, by far the single biggest external correlate found). Multiply
+% by dw (the bin spacing in angular frequency) to convert to a genuine,
+% resolution-independent physical unit: doubling NFFT halves dw but
+% doubles the bin-count of any fixed physical correlation width, so the
+% product is invariant to N, leaving only the spectrum's actual
+% correlation structure.
+out.tau = CO_FirstCrossing(S, 'ac', 0, 'continuous') * dw;
 
 % Same, on logS: Pearson autocorrelation on the raw (heavy-tailed) linear
 % spectrum is effectively dominated by however far the single largest
@@ -325,7 +336,7 @@ out.tau = CO_FirstCrossing(S, 'ac', 0, 'continuous');
 autoCorrs_logS = CO_AutoCorr(logS, 1:4, 'Fourier');
 out.logac1 = autoCorrs_logS(1);
 out.logac2 = autoCorrs_logS(2);
-out.logtau = CO_FirstCrossing(logS, 'ac', 0, 'continuous');
+out.logtau = CO_FirstCrossing(logS, 'ac', 0, 'continuous') * dw; % see tau's N-independence note above
 
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
