@@ -236,7 +236,10 @@ if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
 	out = NaN; return
 end
 
-out.rmserr = mean(sqrt((y - mu).^2));
+% Root-mean-square error of the mean function, mu.
+% (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
+%  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
+out.rmserr = sqrt(mean((y - mu).^2));
 % Better to look at mean distance away in units of std
 out.mabserr_std = mean(abs((y - mu) ./ sqrt(S2)));
 out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
@@ -247,10 +250,10 @@ out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 % Statistics on variance:
 xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
-S = sqrt(S2);
-out.maxS = max(S); % maximum variance
-out.minS = min(S); % minimum variance
-out.meanS = mean(S); % mean variance
+S = sqrt(S2); % standard deviation function (S2 is the variance)
+out.maxS = max(S); % maximum predictive standard deviation
+out.minS = min(S); % minimum predictive standard deviation
+out.meanS = mean(S); % mean predictive standard deviation
 
 % ------------------------------------------------------------------------------
 function t = SUB_settimeindex(N, squishorsquash)

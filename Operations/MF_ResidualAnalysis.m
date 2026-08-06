@@ -64,7 +64,15 @@ out.meanabs = mean(abs(e));
 out.rmse = sqrt(mean(e.^2));
 out.stde = std(e);
 out.mms = abs(mean(e)) + abs(std(e));
-out.maxonmean = max(e) / abs(mean(e));
+% Weight of the largest residual, in units of the residual standard deviation.
+% (Note: this replaces maxonmean = max(e)/abs(mean(e)), which divided by a quantity that is
+%  approximately zero by construction for a fitted model -- it spanned twenty orders of
+%  magnitude across real time series, and went negative when every residual was negative.)
+if std(e) == 0
+	out.maxonstd = 0;
+else
+	out.maxonstd = max(abs(e)) / std(e);
+end
 
 if std(e) == 0
 	e = zeros(length(e), 1);

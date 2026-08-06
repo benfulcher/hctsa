@@ -195,7 +195,11 @@ out.res_siglev = siglev;
 % (2) Correlation test of residuals
 % error margins are within 1.96/sqrt(N);
 out.res_ac1 = CO_AutoCorr(res, 1, 'Fourier');
-out.res_ac1_norm = CO_AutoCorr(res, 1, 'Fourier') / sqrt(N); % normalize by sqrt(N)
+% Express the residual autocorrelation in units of its ~1/sqrt(N) null standard error, as
+% MF_ResidualAnalysis does for ac1n. This is O(1) regardless of series length.
+% (Note: this previously *divided* by sqrt(N), which made the statistic shrink as 1/N and
+%  left it carrying no information beyond res_ac1 and the series length.)
+out.res_ac1_norm = abs(CO_AutoCorr(res, 1, 'Fourier')) * sqrt(N);
 
 % Calculate correlations up to 20, return how many exceed significance threshold
 acf = CO_AutoCorr(res, 1:20, 'Fourier');
