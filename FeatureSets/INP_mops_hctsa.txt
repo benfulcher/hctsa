@@ -190,6 +190,18 @@ CO_NonlinearAutocorr(x_z,[5,5],false)	        AC_nl_55
 CO_NonlinearAutocorr(x_z,[5,5],true)	        AC_nl_55_abs
 CO_NonlinearAutocorr(x_z,[6,6],false)	        AC_nl_66
 CO_NonlinearAutocorr(x_z,[6,6],true)	        AC_nl_66_abs
+CO_NonlinearAutocorr(x_z,[0,1],false)	        AC_nl_01
+CO_NonlinearAutocorr(x_z,[0,1],true)	        AC_nl_01_abs
+CO_NonlinearAutocorr(x_z,[0,2],false)	        AC_nl_02
+CO_NonlinearAutocorr(x_z,[0,2],true)	        AC_nl_02_abs
+CO_NonlinearAutocorr(x_z,[0,3],false)	        AC_nl_03
+CO_NonlinearAutocorr(x_z,[0,3],true)	        AC_nl_03_abs
+CO_NonlinearAutocorr(x_z,[0,4],false)	        AC_nl_04
+CO_NonlinearAutocorr(x_z,[0,4],true)	        AC_nl_04_abs
+CO_NonlinearAutocorr(x_z,[0,5],false)	        AC_nl_05
+CO_NonlinearAutocorr(x_z,[0,5],true)	        AC_nl_05_abs
+CO_NonlinearAutocorr(x_z,[0,6],false)	        AC_nl_06
+CO_NonlinearAutocorr(x_z,[0,6],true)	        AC_nl_06_abs
 CO_NonlinearAutocorr(x_z,[0,1,1],false)	        AC_nl_011
 CO_NonlinearAutocorr(x_z,[0,2,2],false)	        AC_nl_022
 CO_NonlinearAutocorr(x_z,[0,3,3],false)	        AC_nl_033
@@ -688,6 +700,7 @@ SB_TransitionpAlphabet(x_z,2:40,1)	SB_TransitionpAlphabet_40_1
 SB_TransitionpAlphabet(x_z,2:20,'ac')	SB_TransitionpAlphabet_20_ac
 CO_AutoCorrShape(x_z,'drown')	CO_AutoCorrShape_drown
 CO_AutoCorrShape(x_z,'posDrown')  CO_AutoCorrShape_posDrown
+CO_AutoCorrX2Shape(x_z,'doubleDrown')	CO_AutoCorrX2Shape_doubleDrown
 CO_Embed2_Basic(x_z,1)	CO_Embed2_Basic_1
 CO_Embed2_Basic(x_z,'tau')	CO_Embed2_Basic_tau
 PD_PeriodicityWang(x_z)	PD_PeriodicityWang
