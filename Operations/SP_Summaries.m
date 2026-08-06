@@ -214,33 +214,50 @@ if isempty(out.maxWidth)
 	out.maxWidth = 0;
 end
 
-% Characterize all peaks using findpeaks function:
-% Minimum angular separation of 0.02...?
+% Characterize all peaks using findpeaks function, run on logS rather than S:
+% a linear-scale power spectrum is typically extremely heavy-tailed (a single
+% dominant peak can be >100x the mean level -- cf. the SP_Summaries curation
+% notes), so prominence-based peak detection on raw S systematically buries
+% smaller-but-genuine peaks (e.g. harmonics) under the dominant one, and
+% findpeaks' fixed prominence thresholds below are only meaningfully
+% calibrated on the log scale. This also matches Matlab's own convention:
+% periodogram/pwelch plot in dB (log power) by default, not linear power.
+%
+% These prominence thresholds are calibrated specifically for a
+% Welch-smoothed logS (i.e. psdMeth = 'welch'): a raw single-segment
+% periodogram/fft estimate is a statistically inconsistent spectral
+% estimator (per-bin variance doesn't shrink with more data), so its
+% logS has a much noisier, less-calibrated peak structure -- validated via
+% a white-noise null model (Welch-smoothed: 99th-percentile max spurious
+% log-prominence ~3.5 across series lengths 500-10000; unsmoothed: ~12,
+% overlapping real harmonic peaks almost entirely). For 'fft'/'periodogram',
+% these fields are therefore left uncalibrated (computed for code-path
+% uniformity only) and are deliberately NOT registered as hctsa features
+% for those two psdMeth variants -- only for 'welch'.
 minDist_w = 0.02;
 ptsPerw = length(S) / pi;
 minPkDist = ceil(minDist_w * ptsPerw);
-[pkHeight, pkLoc, pkWidth, pkProm] = findpeaks(S, 'SortStr', 'descend', 'minPeakDistance', minPkDist);
+[pkHeight, pkLoc, pkWidth, pkProm] = findpeaks(logS, 'SortStr', 'descend', 'minPeakDistance', minPkDist);
 pkWidth = pkWidth / ptsPerw;
 pkLoc = pkLoc / ptsPerw;
 
-% Characterize mean peak prominence
-% (use prominence threshold of 2...?)
+% Characterize mean peak prominence (thresholds in log-power units; see note above)
 out.numPeaks = length(pkHeight); % total number of peaks
-out.numPromPeaks_1 = sum(pkProm > 1); % number of peaks with prominence of at least 1
-out.numPromPeaks_2 = sum(pkProm > 2); % number of peaks with prominence of at least 2
-out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with prominence of at least 5
+out.numPromPeaks_3 = sum(pkProm > 3); % number of peaks with log-prominence of at least 3 (~90-95th pctile of the white-noise null)
+out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with log-prominence of at least 5 (clearly above the null's observed max of ~3.8)
+out.numPromPeaks_8 = sum(pkProm > 8); % number of peaks with log-prominence of at least 8 (matches the weakest peak in a validated harmonic-series test signal)
 out.numPeaks_overmean = sum(pkProm > mean(pkProm)); % number of peaks with prominence greater than the mean (low for skewed distn)
 out.maxProm = max(pkProm); % maximum prominence of any peak
-out.meanProm_2 = mean(pkProm(pkProm > 2)); % mean peak prominence of those with prominence of at least 2
+out.meanProm_5 = mean(pkProm(pkProm > 5)); % mean peak prominence of those with log-prominence of at least 5
 
-out.meanPeakWidth_prom2 = mean(pkWidth(pkProm > 2)); % mean peak width of peaks with prominence of at least 2
+out.meanPeakWidth_prom5 = mean(pkWidth(pkProm > 5)); % mean peak width of peaks with log-prominence of at least 5
 out.width_weighted_prom = sum(pkWidth .* pkProm) / sum(pkProm);
 
 % Power in top N peaks:
 nn = @(x) 1:min(x, out.numPeaks);
 out.peakPower_2 = sum(pkHeight(nn(2)) .* pkWidth(nn(2)));
 out.peakPower_5 = sum(pkHeight(nn(5)) .* pkWidth(nn(5)));
-out.peakPower_prom2 = sum(pkHeight(pkProm > 2) .* pkWidth(pkProm > 2)); % power in peaks with prominence of at least 2
+out.peakPower_prom5 = sum(pkHeight(pkProm > 5) .* pkWidth(pkProm > 5)); % power in peaks with log-prominence of at least 5
 out.w_weighted_peak_prom = sum(pkLoc .* pkProm) / sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
 out.w_weighted_peak_height = sum(pkLoc .* pkHeight) / sum(pkHeight); % where are prominent peaks located on average (weighted by height)
 
