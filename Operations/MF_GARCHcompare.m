@@ -265,8 +265,8 @@ out.bestpAIC = pr(a);
 out.bestqAIC = qr(b);
 
 [a, b] = find(BICs == min(BICs(:)), 1, 'first');
-out.bestpAIC = pr(a);
-out.bestqAIC = qr(b);
+out.bestpBIC = pr(a);
+out.bestqBIC = qr(b);
 
 % 'trends' in each direction -- i.e., how much effect on the statistics
 % does changing the order (either p or q) have. Sometimes changing q will

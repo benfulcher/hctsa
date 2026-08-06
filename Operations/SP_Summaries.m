@@ -270,9 +270,7 @@ out.stdlog = log(out.std);
 out.logstd = std(logS);
 out.mean = mean(S);
 out.logmean = mean(logS);
-for i = 3:5
-	out.(sprintf('mom%u', i)) = DN_Moments(S, i, true);
-end
+out.mom3 = DN_Moments(S, 3, true);
 
 % Autocorrelation of amplitude spectrum:
 autoCorrs_S = CO_AutoCorr(S, 1:4, 'Fourier');
