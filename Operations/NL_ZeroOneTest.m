@@ -46,8 +46,12 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 %
 % maxN, the maximum number of samples to consider. Time series longer
 %       than this are cropped to their first maxN points (default:
-%       10000), since the computation cost of this operation scales with
-%       time series length (cf. NL_RQA's maxN, same rationale)
+%       10000), since the computation cost of this operation scales
+%       roughly as N^2 (tcut = N/10 window lengths are each averaged
+%       over ~N points, per c value; cf. NL_RQA's maxN, same rationale).
+%       Set to 'full' to disable cropping (a warning is given above N =
+%       50000, where run time starts to become substantial -- around 10s
+%       at N = 50000-60000 with the default numC)
 %
 % ---OUTPUTS:
 % K, the median of K_c across the numC frequencies -- the chaos
@@ -98,7 +102,14 @@ end
 
 y = y(:);
 N = length(y);
-if N > maxN
+if ischar(maxN) && strcmp(maxN, 'full')
+    % No cropping -- but flag potentially slow computations for very long series
+    % (cost scales roughly as N^2, similar in spirit to NL_RQA's rr*N^2):
+    slowThreshold = 50000;
+    if N > slowThreshold
+        warning('Time series (%u samples) exceeds %u with maxN=''full''; computation may be slow', N, slowThreshold);
+    end
+elseif N > maxN
     warning('Time series (%u samples) exceeds maxN = %u; analyzing the first %u samples', N, maxN, maxN);
     y = y(1:maxN);
     N = maxN;
