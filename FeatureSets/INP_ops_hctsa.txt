@@ -732,6 +732,11 @@ SY_RampingWindows_10.asymac1_tau	SY_RampingWindows_10_asymac1_tau	stationarity,t
 SY_RampingWindows_10.asymac1_p	SY_RampingWindows_10_asymac1_p	stationarity,trend,correlation,nonlinear
 SY_RampingWindows_10.asymac1_pearson_r	SY_RampingWindows_10_asymac1_pearson_r	stationarity,trend,correlation,nonlinear
 SY_RampingWindows_10.asymac1_pearson_p	SY_RampingWindows_10_asymac1_pearson_p	stationarity,trend,correlation,nonlinear
+SY_SlowFeatureAnalysis_20.eta1	SY_SlowFeatureAnalysis_20_eta1	stationarity
+SY_SlowFeatureAnalysis_20.etaEnd	SY_SlowFeatureAnalysis_20_etaEnd	stationarity
+SY_SlowFeatureAnalysis_20.etaStd	SY_SlowFeatureAnalysis_20_etaStd	stationarity
+SY_SlowFeatureAnalysis_20.pc1VarFrac	SY_SlowFeatureAnalysis_20_pc1VarFrac	stationarity,pca
+SY_SlowFeatureAnalysis_20.slowPCA1corr	SY_SlowFeatureAnalysis_20_slowPCA1corr	stationarity,pca
 SY_Trend.stdRatio       SY_Trend_stdRatio       stationarity
 SY_Trend.gradient       SY_Trend_gradient       stationarity
 SY_Trend.intercept      SY_Trend_intercept      stationarity
