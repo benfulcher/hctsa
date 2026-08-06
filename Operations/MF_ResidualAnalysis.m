@@ -63,7 +63,8 @@ out.meane = mean(e);
 out.meanabs = mean(abs(e));
 out.rmse = sqrt(mean(e.^2));
 out.stde = std(e);
-out.mms = abs(mean(e)) + abs(std(e));
+% (Dropped: mms = abs(mean(e)) + abs(std(e)). It is an exact function of meane and stde,
+%  both of which are output above, so it carried no independent information.)
 % Weight of the largest residual, in units of the residual standard deviation.
 % (Note: this replaces maxonmean = max(e)/abs(mean(e)), which divided by a quantity that is
 %  approximately zero by construction for a fitted model -- it spanned twenty orders of
@@ -94,13 +95,15 @@ gS = g.Spectrumdata(:);
 % this is like normalizing the residuals to unit variance
 gS = gS / (sum(gS) * (gf(2) - gf(1)));
 
-% Look at proportion of power in fifths
+% Look at proportion of power in fifths.
+% Only the first four are output: the five are normalized to sum to 1, so the fifth is
+% exactly determined by the other four (verified to machine precision on 1500 real time
+% series) and carries no independent information.
 b = round(linspace(0, length(gf), 6));
 out.p1_5 = sum(gS(b(1) + 1:b(2))) * (gf(2) - gf(1));
 out.p2_5 = sum(gS(b(2) + 1:b(3))) * (gf(2) - gf(1));
 out.p3_5 = sum(gS(b(3) + 1:b(4))) * (gf(2) - gf(1));
 out.p4_5 = sum(gS(b(4) + 1:b(5))) * (gf(2) - gf(1));
-out.p5_5 = sum(gS(b(5) + 1:b(6))) * (gf(2) - gf(1));
 
 % ------------------------------------------------------------------------------
 %% Analyze autocorrelation in residuals

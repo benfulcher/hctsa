@@ -132,7 +132,9 @@ out.lossfn = m.EstimationInfo.LossFcn;
 out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 
 % out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in iteration
-out.aic = aic(m); % ~ log(fpe)
+% (Dropped: aic = aic(m). It is rank-identical to fpe -- Spearman 1.0000 on both the
+%  Bonn EEG (500 series) and Empirical1000 (1000 series) datasets -- so only fpe is kept,
+%  matching the choice made in MF_arfit and MF_FitSubsegments.)
 
 % ------------------------------------------------------------------------------
 %% Prediction

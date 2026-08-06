@@ -120,7 +120,8 @@ out.meanA = mean(Aest);
 out.stdA = std(Aest);
 out.sumA = sum(Aest);
 out.rmsA = sqrt(sum(Aest.^2));
-out.sumsqA = sum(Aest.^2);
+% (Dropped: sumsqA = sum(Aest.^2). rmsA is its square root, a strictly monotone transform,
+%  so the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 % (3) Noise covariance matrix, Cest

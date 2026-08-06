@@ -193,12 +193,12 @@ hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
-hyper = exp(logHyper);
-
-% Output the hyperparameters and log-hyperparameters
+% Output the log-hyperparameters.
+% (Dropped: h%u = exp(logh%u). Hyperparameters are positive, so exp is strictly monotone and
+%  the two are rank-identical by construction. Only one GP master operation ever registered
+%  the raw h%u alongside logh%u; the other four already used logh%u alone.)
 for i = 1:numHPs
 	% Set up structure output
-	out.(sprintf('h%u', i)) = hyper(i);
 	out.(sprintf('logh%u', i)) = logHyper(i);
 end
 

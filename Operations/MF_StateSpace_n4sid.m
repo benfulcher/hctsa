@@ -135,7 +135,8 @@ out.m_Ts = m.Ts;
 out.m_noisevar = m.NoiseVariance; % a scalar number, basically the fpe
 out.m_lossfn = m.EstimationInfo.LossFcn; % basically the fpe
 out.m_fpe = m.EstimationInfo.FPE;
-out.m_aic = aic(m);
+% (Dropped: m_aic = aic(m). Rank-identical to m_fpe -- Spearman 1.0000 on both the Bonn EEG
+%  and Empirical1000 datasets -- so only m_fpe is kept, as in MF_armax.)
 
 % ------------------------------------------------------------------------------
 %% Prediction
