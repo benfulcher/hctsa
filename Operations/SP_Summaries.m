@@ -102,19 +102,36 @@ Ny = length(y); % time-series length
 % Set window (for periodogram and welch):
 % -------------------------------------------------------------------------------
 if ismember(psdMeth, {'periodogram', 'welch'})
+	% Welch's method needs a window *shorter* than the full series so pwelch
+	% actually splits it into multiple overlapping segments to average over --
+	% that segment-averaging (trading frequency resolution for reduced
+	% estimate variance) is the entire point of the method. A window spanning
+	% the whole series (as used below for periodogram, a genuine
+	% single-segment, whole-series estimate) would silently collapse Welch's
+	% method to a single "segment" with no averaging at all, making it
+	% numerically near-indistinguishable from an unwindowed periodogram: an
+	% actual bug found and fixed here (validated on HCTSA_Empirical1000.mat,
+	% where the un-fixed version had r=1.000 with the 'fft' method's output
+	% across 97.6% of fields). noverlap is left at pwelch's own default (50%
+	% of window length) below.
+	if strcmp(psdMeth, 'welch')
+		winLength = max(round(Ny / 4), 16); % 4 segments at 50% overlap: a standard Welch setting
+	else
+		winLength = Ny;
+	end
 	switch windowType % method to use for the window
 		case 'none'
 			window = [];
 		case 'hamming'
-			window = hamming(Ny);
+			window = hamming(winLength);
 		case 'hann'
-			window = hann(Ny);
+			window = hann(winLength);
 		case 'bartlett'
-			window = bartlett(Ny);
+			window = bartlett(winLength);
 		case 'boxcar'
-			window = boxcar(Ny);
+			window = boxcar(winLength);
 		case 'rect'
-			window = rectwin(Ny);
+			window = rectwin(winLength);
 		otherwise
 			% There are other options, but these aren't implemented here
 			error('Unknown window, ''%s''', windowType);

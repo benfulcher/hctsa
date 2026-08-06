@@ -4673,7 +4673,6 @@ SP_Summaries_pgram_hamm.q75     SP_Summaries_pgram_hamm_q75    FourierSpectrum
 SP_Summaries_pgram_hamm.std     SP_Summaries_pgram_hamm_std    FourierSpectrum
 SP_Summaries_pgram_hamm.stdlog      SP_Summaries_pgram_hamm_stdlog    FourierSpectrum
 SP_Summaries_pgram_hamm.logstd      SP_Summaries_pgram_hamm_logstd    FourierSpectrum
-SP_Summaries_pgram_hamm.mean        SP_Summaries_pgram_hamm_mean    FourierSpectrum
 SP_Summaries_pgram_hamm.mom3        SP_Summaries_pgram_hamm_mom3    FourierSpectrum
 SP_Summaries_pgram_hamm.mom4        SP_Summaries_pgram_hamm_mom4    FourierSpectrum
 SP_Summaries_pgram_hamm.mom5        SP_Summaries_pgram_hamm_mom5    FourierSpectrum
@@ -4766,7 +4765,6 @@ SP_Summaries_welch_rect.q75     SP_Summaries_welch_rect_q75    FourierSpectrum
 SP_Summaries_welch_rect.std     SP_Summaries_welch_rect_std    FourierSpectrum
 SP_Summaries_welch_rect.stdlog      SP_Summaries_welch_rect_stdlog    FourierSpectrum
 SP_Summaries_welch_rect.logstd      SP_Summaries_welch_rect_logstd    FourierSpectrum
-SP_Summaries_welch_rect.mean        SP_Summaries_welch_rect_mean    FourierSpectrum
 SP_Summaries_welch_rect.mom3        SP_Summaries_welch_rect_mom3    FourierSpectrum
 SP_Summaries_welch_rect.mom4        SP_Summaries_welch_rect_mom4    FourierSpectrum
 SP_Summaries_welch_rect.mom5        SP_Summaries_welch_rect_mom5    FourierSpectrum
@@ -4859,7 +4857,6 @@ SP_Summaries_fft.q75     SP_Summaries_fft_q75    FourierSpectrum
 SP_Summaries_fft.std     SP_Summaries_fft_std    FourierSpectrum
 SP_Summaries_fft.stdlog      SP_Summaries_fft_stdlog    FourierSpectrum
 SP_Summaries_fft.logstd      SP_Summaries_fft_logstd    FourierSpectrum
-SP_Summaries_fft.mean        SP_Summaries_fft_mean    FourierSpectrum
 SP_Summaries_fft.mom3        SP_Summaries_fft_mom3    FourierSpectrum
 SP_Summaries_fft.mom4        SP_Summaries_fft_mom4    FourierSpectrum
 SP_Summaries_fft.mom5        SP_Summaries_fft_mom5    FourierSpectrum
