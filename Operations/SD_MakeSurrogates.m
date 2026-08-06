@@ -61,6 +61,13 @@ beVocal = false; % Display text information/commentary to screen
 % ------------------------------------------------------------------------------
 % Check Inputs:
 % ------------------------------------------------------------------------------
+if size(x, 2) > size(x, 1)
+	x = x'; % Time series must be a column vector -- SUB_RandomPhase's
+			% Hermitian-symmetric phase construction (relied on by 'RP',
+			% 'AAFT' and 'TFT' below) silently breaks for row-vector input
+			% otherwise.
+end
+
 % Number of surrogates to generate:
 if nargin < 3 || isempty(numSurrs)
 	numSurrs = 1; % just create a single surrogate
@@ -90,42 +97,14 @@ switch surrMethod
 		% Random Phase Surrogates
 		% Surrogates maintain linear correlations in the data, but any
 		% nonlinear structure is destroyed by the phase randomization
-
 		if beVocal
 			fprintf(1, 'Constructing %u surrogates using the Random Phase Method\n', numSurrs)
 			fprintf(1, ['Linear correlations are maintained but nonlinear structure will be ' ...
 						'destroyed by the phase randomization\n'])
 		end
 
-		% We've lost a datapoint if odd length time series
-		if rem(N, 2) == 0
-			n2 = N / 2;
-		else
-			n2 = (N - 1) / 2;
-		end
-
 		for surri = 1:numSurrs
-			% (*) Compute Fourier Transform of x => z
-			z = fft(x, 2 * n2);
-
-			% (*) Randomize Phases
-			zMag = abs(z); % magnitude
-			zPhase = angle(z); % phase
-
-			randphase = 2 * pi * rand(n2 - 1, 1); % compute random phases
-
-			% ensure phi(1)=0, and all others are in [0,2*pi]
-			% (not quite sure what the zPhase(n2+1) is there for)...
-			% negative phases to ensure complex conjugates -- IFT will be
-			% real.
-			newPhase = [0; randphase; zPhase(n2 + 1); -flipud(randphase)];
-
-			% zNew is like z, but with randomized phases:
-			zNew = [zMag(1:n2 + 1)', flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
-
-			% Transform back into the time domain
-			xNew = real(ifft(zNew, N));
-			out(:, surri) = xNew;
+			out(:, surri) = SUB_RandomPhase(x);
 		end
 
 	case 'AAFT'
@@ -140,42 +119,16 @@ switch surrMethod
 		[xSorted, ix] = sort(x);
 		[~, xRO] = sort(ix); % rank ordered permutation
 
-		% lost a datapoint if odd
-		if rem(N, 2) == 0
-			n2 = N / 2;
-		else
-			n2 = (N - 1) / 2;
-		end
-
 		for surri = 1:numSurrs
 			% Rand order white Gaussian-distributed noise
 			nSort = sort(randn(N, 1));
 			y = nSort(xRO); % sorted Guassian white noise reordered as x
 
-			% ------- Apply the RP method applied to y:
-			% (*) Compute Fourier Transform of y => z
-			z = fft(y, 2 * n2);
+			% Random-phase surrogate of y (phase-randomized version of
+			% random noise rank-ordered as x):
+			yRP = SUB_RandomPhase(y);
 
-			% (*) Randomize Phases
-			zMag = abs(z); % magnitude
-			zPhase = angle(z); % phase
-
-			randphase = 2 * pi * rand(n2 - 1, 1); % compute random phases
-
-			% ensure phi(1)=0, and all others are in [0,2*pi]
-			% (not quite sure what the zPhase(n2+1) is there for)...
-			% negative phases to ensure complex conjugates -- IFT will be
-			% real.
-			newPhase = [0; randphase; zPhase(n2 + 1); -flipud(randphase)];
-
-			% zNew is like z, but with randomized phases:
-			zNew = [zMag(1:n2 + 1)', flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
-
-			% Transform back into the time domain
-			% phase-randomized version of random noise rank-ordered as x
-			yRP = real(ifft(zNew, N));
-
-			% --------- rank order x with respect to yRP
+			% Rank order x with respect to yRP:
 			[~, ixyRP] = sort(yRP);
 			[~, yRO] = sort(ixyRP);
 			out(:, surri) = xSorted(yRO);
@@ -198,36 +151,8 @@ switch surrMethod
 			end
 		end
 
-		% lost a datapoint if odd
-		if rem(N, 2) == 0
-			n2 = N / 2;
-		else
-			n2 = (N - 1) / 2;
-		end
-
 		for surri = 1:numSurrs
-			% (*) Compute Fourier Transform of x => z
-			z = fft(x, 2 * n2);
-
-			% (*) Randomize Phases
-			zMag = abs(z); % magnitude
-			zPhase = angle(z); % phase
-
-			randphase = pi * rand(n2 - 1, 1); % compute random phases in (0,pi)
-			randphase(1:fc) = zPhase(1:fc);
-
-			% ensure phi(1)=0, and all others are in [0,2*pi]
-			% (not quite sure what the zPhase(n2+1) is there for)...
-			% negative phases to ensure complex conjugates -- IFT will be
-			% real.
-			newPhase = [0; randphase; zPhase(n2 + 1); -flipud(randphase)];
-
-			% zNew is like z, but with randomized phases:
-			zNew = [zMag(1:n2 + 1)' flipud(zMag(2:n2))']' .* exp(newPhase .* 1i);
-
-			% Transform back into the time domain
-			xNew = real(ifft(zNew, N));
-			out(:, surri) = xNew;
+			out(:, surri) = SUB_RandomPhase(x, fc);
 		end
 
 	case 'RandPerm'
@@ -251,4 +176,58 @@ if beVocal
 	fprintf(1, 'Generated %u %s surrogates in %s.\n', numSurrs, surrMethod, BF_TheTime(toc, 1))
 end
 
+end
+
+% ------------------------------------------------------------------------------
+function xNew = SUB_RandomPhase(x, fc)
+	% Random-phase-Fourier-transform surrogate of column vector x.
+	%
+	% Preserves the magnitude spectrum exactly (reusing abs(fft(x)) as-is,
+	% rather than manually re-assembling it from a half-spectrum slice --
+	% that reassembly is what broke for row-vector input in an earlier
+	% version of this code, since flipud() silently no-ops on a row
+	% vector instead of reversing it) and randomizes every phase except
+	% the DC and (for even N) Nyquist bins, which are preserved rather
+	% than zeroed: for a real signal both are necessarily exactly 0 or pi,
+	% and forcing them to 0 (as an earlier version did for the DC bin)
+	% flips the sign of the surrogate's mean whenever x has a negative
+	% mean. Randomized phases are mirrored (negated) onto the
+	% conjugate-symmetric half of the spectrum so the result is real by
+	% construction for any N, even or odd -- no truncation of x is needed
+	% either way (an earlier version dropped the last sample for odd N,
+	% then mismatched the FFT/IFFT lengths, distorting the magnitude
+	% spectrum it was supposed to preserve).
+	%
+	% If fc (a bin count) is given, phases up to and including bin fc are
+	% also preserved rather than randomized -- a truncated Fourier
+	% transform (TFT) surrogate, for dealing with non-stationarity by
+	% only randomizing high-frequency phases.
+	if nargin < 2 || isempty(fc)
+		fc = 0;
+	end
+
+	N = length(x);
+	z = fft(x);
+	zMag = abs(z);
+	zPhase = angle(z);
+
+	if mod(N, 2) == 0
+		nFree = N / 2 - 1; % bins 2..N/2 (excludes DC at 1 and Nyquist at N/2+1)
+	else
+		nFree = (N - 1) / 2; % bins 2..(N+1)/2 (no separate Nyquist bin when N is odd)
+	end
+	freeBins = (2:nFree + 1)';
+
+	randPhase = 2 * pi * rand(nFree, 1);
+	nKeep = min(fc, nFree);
+	randPhase(1:nKeep) = zPhase(freeBins(1:nKeep)); % preserve low-frequency phases (TFT)
+
+	if mod(N, 2) == 0
+		newPhase = [zPhase(1); randPhase; zPhase(N / 2 + 1); -flipud(randPhase)];
+	else
+		newPhase = [zPhase(1); randPhase; -flipud(randPhase)];
+	end
+
+	zNew = zMag .* exp(newPhase * 1i);
+	xNew = real(ifft(zNew));
 end
