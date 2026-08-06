@@ -1014,6 +1014,7 @@ WL_coeffs(x_z,'db3',5)	WL_coeffs_db3_5
 WL_coeffs(x_z,'db3','max')	WL_coeffs_db3_max
 WL_fBM(x_z)	WL_fBM
 WL_modwtvar(x_z,'db3',5)	WL_modwtvar_db3_5
+WL_wpdBestTree(x_z,'db3',5)	WL_wpdBestTree_db3_5
 WL_dwtcoeff(x_z,'db3',5)	WL_dwtcoeff_db3_5
 WL_dwtcoeff(x_z,'sym2',5)	WL_dwtcoeff_sym2_5
 MF_arfit(x_z,1,8,'sbc')	MF_arfit_1_8_sbc
