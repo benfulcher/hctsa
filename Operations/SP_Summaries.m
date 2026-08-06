@@ -229,8 +229,13 @@ out.w_weighted_peak_height = sum(pkLoc .* pkHeight) / sum(pkHeight); % where are
 
 % Number of peaks required to get to 50% of power in peaks
 peakPower = pkHeight .* pkWidth;
-out.numPeaks_50power = find(cumsum(peakPower) > 0.5 * sum(peakPower), 1, 'first');
-out.peakpower_1 = peakPower(1) / sum(peakPower);
+if isempty(peakPower) % no peaks at all (e.g. a monotonic power spectrum)
+    out.numPeaks_50power = NaN;
+    out.peakpower_1 = NaN;
+else
+    out.numPeaks_50power = find(cumsum(peakPower) > 0.5 * sum(peakPower), 1, 'first');
+    out.peakpower_1 = peakPower(1) / sum(peakPower);
+end
 
 % -------------------------------------------------------------------------------
 % Distribution
@@ -423,7 +428,7 @@ ncrossfn_rel = @(f) sum(BF_SignChange(S - f * max(S)));
 out.ncross_f05 = ncrossfn_rel(0.05);
 out.ncross_f01 = ncrossfn_rel(0.1);
 out.ncross_f02 = ncrossfn_rel(0.2);
-out.ncross_f05 = ncrossfn_rel(0.5);
+out.ncross_f50 = ncrossfn_rel(0.5);
 
 % -------------------------------------------------------------------------------
 % function mel = w2mel(w) % convert to mel spectrum
