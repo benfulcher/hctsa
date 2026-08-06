@@ -39,18 +39,34 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 %
 % A linear-scale power spectrum is typically extremely heavy-tailed (cf.
 % the peak-detection notes below), so several statistics that compare
-% values or thresholds across the whole spectrum -- crossing counts
-% (ncross), spectral autocorrelation (ac1/ac2/tau), quantiles
-% (q25/median/q75), skewness (mom3), and the per-band stationarity
-% measures (statav2..5) -- end up dominated by wherever the single
-% largest value sits, rather than reflecting the spectrum's broader
-% shape. Each of these has a log-domain companion (ncross_log_*, logac1/
-% logac2/logtau, logq25/logmedian/logq75, logmom3, logstatav2..5) that
-% applies the same statistic to logS instead: empirically validated to
-% capture genuinely different information (|r| < 0.8 against the linear
-% counterpart on two independent real datasets, mostly 0.2-0.5, and
-% ncross_log essentially uncorrelated with linear ncross) rather than
-% being a near-duplicate.
+% values or thresholds across the whole spectrum -- spectral
+% autocorrelation (ac1/ac2/tau), quantiles (q25/median/q75), skewness
+% (mom3), and the per-band stationarity measures (statav2_s/statav5_s)
+% -- end up dominated by wherever the single largest value sits, rather
+% than reflecting the spectrum's broader shape. Each of these has a
+% log-domain companion (logac1/logac2/logtau, logq25/logmedian/logq75,
+% logmom3, logstatav2_s/logstatav5_s) that applies the same statistic to
+% logS instead: empirically validated to capture genuinely different
+% information (|r| < 0.8 against the linear counterpart on two
+% independent real datasets, mostly 0.2-0.5) rather than being a
+% near-duplicate.
+%
+% Two families originally had both a linear and log-domain version --
+% crossing counts (ncross) and the per-band mean-stationarity measures
+% (statav2_m/statav5_m) -- but were cut back to log-only after a
+% broader check: correlating every candidate against all ~7300 other
+% hctsa features (not just a hand-picked "trivial" set) on 1000 real
+% series showed the *linear* versions consistently had the lowest
+% correlation with anything else in hctsa (R^2 ~ 0.1-0.3, vs ~0.2-0.6 for
+% their log counterparts, which tended to land near existing
+% autocorrelation/model-fit features -- i.e. real structure). Low
+% redundancy with existing features is necessary but not sufficient for
+% a feature to be useful (it's equally consistent with "just noise"), so
+% this was a judgment call, not a statistical proof -- made here in
+% favor of dropping the linear versions, consistent with them not having
+% been observed to be useful in practice. ncross_f*/statav2_m/statav5_m
+% are therefore no longer computed at all; only their logS counterparts
+% remain.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -449,12 +465,15 @@ out.area_2_1 = sum(split(:, 1)) * dw;
 out.logarea_2_1 = sum(log(split(:, 1))) * dw;
 out.area_2_2 = sum(split(:, 2)) * dw;
 out.logarea_2_2 = sum(log(split(:, 2))) * dw;
-out.statav2_m = std(mean(split)) / std(S);
 out.statav2_s = std(std(split)) / std(S);
 % Same on logS: whichever band happens to contain the dominant peak
 % swamps std(mean(split))/std(std(split)) on the raw linear spectrum, so
 % this is essentially "which band has the peak" rather than a nuanced
-% measure of stationarity across the spectrum's shape.
+% measure of stationarity across the spectrum's shape. (The mean-based
+% version, statav2_m, was dropped entirely -- see the note at the top of
+% this file; std(mean(split))/std(S) checked out as the least-redundant-
+% with-anything candidate in the same cross-hctsa audit that flagged
+% ncross, i.e. noise rather than novel structure.)
 splitLog = buffer(logS, floor(N / 2));
 if size(splitLog, 2) > 2, splitLog = splitLog(:, 1:2); end
 out.logstatav2_m = std(mean(splitLog)) / std(logS);
@@ -507,7 +526,6 @@ out.area_5_4 = sum(split(:, 4)) * dw;
 out.logarea_5_4 = sum(log(split(:, 4))) * dw;
 out.area_5_5 = sum(split(:, 5)) * dw;
 out.logarea_5_5 = sum(log(split(:, 5))) * dw;
-out.statav5_m = std(mean(split)) / std(S);
 out.statav5_s = std(std(split)) / std(S);
 splitLog = buffer(logS, floor(N / 5));
 if size(splitLog, 2) > 5, splitLog = splitLog(:, 1:5); end
@@ -518,22 +536,19 @@ out.logstatav5_s = std(std(splitLog)) / std(logS);
 % Count crossings:
 % Get a horizontal line and count the number of crossings with the power spectrum
 % ------------------------------------------------------------------------------
-ncrossfn_rel = @(f) sum(BF_SignChange(S - f * max(S)));
-
-out.ncross_f05 = ncrossfn_rel(0.05);
-out.ncross_f01 = ncrossfn_rel(0.1);
-out.ncross_f02 = ncrossfn_rel(0.2);
-out.ncross_f50 = ncrossfn_rel(0.5);
-
-% Same idea on logS: a threshold that's a fixed fraction of max(S) sits
-% far above the noise floor whenever there's one dominant peak (the same
-% heavy-tailed-spectrum problem that motivated moving peak detection to
-% logS), so crossing counts end up governed almost entirely by the
-% shape immediately around that one peak. In log space, differences
-% correspond to power *ratios* (dB), so a threshold set as a fraction of
-% the full [min(logS), max(logS)] range is a genuinely relative "how far
-% up from the noise floor" level, not just "how close to the single
-% biggest value":
+% A threshold that's a fixed fraction of max(S) sits far above the noise
+% floor whenever there's one dominant peak (the same heavy-tailed-
+% spectrum problem that motivated moving peak detection to logS), so
+% crossing counts on the raw linear spectrum end up governed almost
+% entirely by the shape immediately around that one peak -- and,
+% checked empirically against ~7300 other hctsa features on 1000 real
+% series, ended up the least redundant with anything else in hctsa of
+% any candidate checked (R^2 ~ 0.1-0.3), consistent with that being
+% noise rather than novel structure. Dropped in favor of the logS-only
+% version below, where differences correspond to power *ratios* (dB), so
+% a threshold set as a fraction of the full [min(logS), max(logS)] range
+% is a genuinely relative "how far up from the noise floor" level, not
+% just "how close to the single biggest value":
 logRange = max(logS) - min(logS);
 ncrossfn_rel_log = @(f) sum(BF_SignChange(logS - (min(logS) + f * logRange)));
 

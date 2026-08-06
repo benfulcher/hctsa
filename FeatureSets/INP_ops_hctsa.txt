@@ -4712,7 +4712,6 @@ SP_Summaries_pgram_hamm.area_2_1        SP_Summaries_pgram_hamm_area_2_1    Four
 SP_Summaries_pgram_hamm.logarea_2_1     SP_Summaries_pgram_hamm_logarea_2_1    FourierSpectrum
 SP_Summaries_pgram_hamm.area_2_2        SP_Summaries_pgram_hamm_area_2_2    FourierSpectrum
 SP_Summaries_pgram_hamm.logarea_2_2     SP_Summaries_pgram_hamm_logarea_2_2    FourierSpectrum
-SP_Summaries_pgram_hamm.statav2_m       SP_Summaries_pgram_hamm_statav2_m    FourierSpectrum
 SP_Summaries_pgram_hamm.statav2_s       SP_Summaries_pgram_hamm_statav2_s    FourierSpectrum
 SP_Summaries_pgram_hamm.area_5_1        SP_Summaries_pgram_hamm_area_5_1    FourierSpectrum
 SP_Summaries_pgram_hamm.logarea_5_1     SP_Summaries_pgram_hamm_logarea_5_1    FourierSpectrum
@@ -4724,12 +4723,7 @@ SP_Summaries_pgram_hamm.area_5_4        SP_Summaries_pgram_hamm_area_5_4    Four
 SP_Summaries_pgram_hamm.logarea_5_4     SP_Summaries_pgram_hamm_logarea_5_4    FourierSpectrum
 SP_Summaries_pgram_hamm.area_5_5        SP_Summaries_pgram_hamm_area_5_5    FourierSpectrum
 SP_Summaries_pgram_hamm.logarea_5_5     SP_Summaries_pgram_hamm_logarea_5_5    FourierSpectrum
-SP_Summaries_pgram_hamm.statav5_m       SP_Summaries_pgram_hamm_statav5_m    FourierSpectrum
 SP_Summaries_pgram_hamm.statav5_s       SP_Summaries_pgram_hamm_statav5_s    FourierSpectrum
-SP_Summaries_pgram_hamm.ncross_f05      SP_Summaries_pgram_hamm_ncross_f05    FourierSpectrum
-SP_Summaries_pgram_hamm.ncross_f01      SP_Summaries_pgram_hamm_ncross_f01    FourierSpectrum
-SP_Summaries_pgram_hamm.ncross_f02      SP_Summaries_pgram_hamm_ncross_f02    FourierSpectrum
-SP_Summaries_pgram_hamm.ncross_f50      SP_Summaries_pgram_hamm_ncross_f50    FourierSpectrum
 SP_Summaries_pgram_hamm.ncross_log_f05      SP_Summaries_pgram_hamm_ncross_log_f05    FourierSpectrum
 SP_Summaries_pgram_hamm.ncross_log_f10      SP_Summaries_pgram_hamm_ncross_log_f10    FourierSpectrum
 SP_Summaries_pgram_hamm.ncross_log_f20      SP_Summaries_pgram_hamm_ncross_log_f20    FourierSpectrum
@@ -4817,7 +4811,6 @@ SP_Summaries_welch_rect.area_2_1        SP_Summaries_welch_rect_area_2_1    Four
 SP_Summaries_welch_rect.logarea_2_1     SP_Summaries_welch_rect_logarea_2_1    FourierSpectrum
 SP_Summaries_welch_rect.area_2_2        SP_Summaries_welch_rect_area_2_2    FourierSpectrum
 SP_Summaries_welch_rect.logarea_2_2     SP_Summaries_welch_rect_logarea_2_2    FourierSpectrum
-SP_Summaries_welch_rect.statav2_m       SP_Summaries_welch_rect_statav2_m    FourierSpectrum
 SP_Summaries_welch_rect.statav2_s       SP_Summaries_welch_rect_statav2_s    FourierSpectrum
 SP_Summaries_welch_rect.area_5_1        SP_Summaries_welch_rect_area_5_1    FourierSpectrum
 SP_Summaries_welch_rect.logarea_5_1     SP_Summaries_welch_rect_logarea_5_1    FourierSpectrum
@@ -4829,12 +4822,7 @@ SP_Summaries_welch_rect.area_5_4        SP_Summaries_welch_rect_area_5_4    Four
 SP_Summaries_welch_rect.logarea_5_4     SP_Summaries_welch_rect_logarea_5_4    FourierSpectrum
 SP_Summaries_welch_rect.area_5_5        SP_Summaries_welch_rect_area_5_5    FourierSpectrum
 SP_Summaries_welch_rect.logarea_5_5     SP_Summaries_welch_rect_logarea_5_5    FourierSpectrum
-SP_Summaries_welch_rect.statav5_m       SP_Summaries_welch_rect_statav5_m    FourierSpectrum
 SP_Summaries_welch_rect.statav5_s       SP_Summaries_welch_rect_statav5_s    FourierSpectrum
-SP_Summaries_welch_rect.ncross_f05      SP_Summaries_welch_rect_ncross_f05    FourierSpectrum
-SP_Summaries_welch_rect.ncross_f01      SP_Summaries_welch_rect_ncross_f01    FourierSpectrum
-SP_Summaries_welch_rect.ncross_f02      SP_Summaries_welch_rect_ncross_f02    FourierSpectrum
-SP_Summaries_welch_rect.ncross_f50      SP_Summaries_welch_rect_ncross_f50    FourierSpectrum
 SP_Summaries_welch_rect.ncross_log_f05      SP_Summaries_welch_rect_ncross_log_f05    FourierSpectrum
 SP_Summaries_welch_rect.ncross_log_f10      SP_Summaries_welch_rect_ncross_log_f10    FourierSpectrum
 SP_Summaries_welch_rect.ncross_log_f20      SP_Summaries_welch_rect_ncross_log_f20    FourierSpectrum
@@ -4908,7 +4896,6 @@ SP_Summaries_fft.area_2_1        SP_Summaries_fft_area_2_1    FourierSpectrum
 SP_Summaries_fft.logarea_2_1     SP_Summaries_fft_logarea_2_1    FourierSpectrum
 SP_Summaries_fft.area_2_2        SP_Summaries_fft_area_2_2    FourierSpectrum
 SP_Summaries_fft.logarea_2_2     SP_Summaries_fft_logarea_2_2    FourierSpectrum
-SP_Summaries_fft.statav2_m       SP_Summaries_fft_statav2_m    FourierSpectrum
 SP_Summaries_fft.statav2_s       SP_Summaries_fft_statav2_s    FourierSpectrum
 SP_Summaries_fft.area_5_1        SP_Summaries_fft_area_5_1    FourierSpectrum
 SP_Summaries_fft.logarea_5_1     SP_Summaries_fft_logarea_5_1    FourierSpectrum
@@ -4920,12 +4907,7 @@ SP_Summaries_fft.area_5_4        SP_Summaries_fft_area_5_4    FourierSpectrum
 SP_Summaries_fft.logarea_5_4     SP_Summaries_fft_logarea_5_4    FourierSpectrum
 SP_Summaries_fft.area_5_5        SP_Summaries_fft_area_5_5    FourierSpectrum
 SP_Summaries_fft.logarea_5_5     SP_Summaries_fft_logarea_5_5    FourierSpectrum
-SP_Summaries_fft.statav5_m       SP_Summaries_fft_statav5_m    FourierSpectrum
 SP_Summaries_fft.statav5_s       SP_Summaries_fft_statav5_s    FourierSpectrum
-SP_Summaries_fft.ncross_f05      SP_Summaries_fft_ncross_f05    FourierSpectrum
-SP_Summaries_fft.ncross_f01      SP_Summaries_fft_ncross_f01    FourierSpectrum
-SP_Summaries_fft.ncross_f02      SP_Summaries_fft_ncross_f02    FourierSpectrum
-SP_Summaries_fft.ncross_f50      SP_Summaries_fft_ncross_f50    FourierSpectrum
 SP_Summaries_fft.ncross_log_f05      SP_Summaries_fft_ncross_log_f05    FourierSpectrum
 SP_Summaries_fft.ncross_log_f10      SP_Summaries_fft_ncross_log_f10    FourierSpectrum
 SP_Summaries_fft.ncross_log_f20      SP_Summaries_fft_ncross_log_f20    FourierSpectrum
