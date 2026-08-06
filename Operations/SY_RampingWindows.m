@@ -42,14 +42,18 @@ function out = SY_RampingWindows(y, numSeg)
 % (separately tracked) scale trend in segVar.
 %
 % asymAC1 is a nonlinear, asymmetric variant of the lag-1 autocorrelation:
-% mean(x_t * x_{t+1}^2), with x z-scored *within* each segment (unlike the
-% other statistics above, this one needs the explicit per-segment
-% z-scoring, since it's neither scale-invariant like AC1/skewness/
-% kurtosis nor a raw moment tracked deliberately like mean/variance).
-% It's zero in expectation for any time-reversible linear process (same
-% spirit as CO_trev's third-moment reversibility statistic, computed
-% densely at a single lag over the whole series rather than trended
-% across segments), so a ramp in asymAC1 flags a trend specifically in
+% mean(x_t * x_{t+1} * (x_{t+1} - x_t)), with x z-scored *within* each
+% segment (unlike the other statistics above, this one needs the explicit
+% per-segment z-scoring, since it's neither scale-invariant like AC1/
+% skewness/kurtosis nor a raw moment tracked deliberately like
+% mean/variance). This is the difference between the statistic computed
+% forwards (mean(x_t * x_{t+1}^2)) and on the time-reversed segment
+% (mean(x_{t+1} * x_t^2)): swapping x_t <-> x_{t+1} negates the
+% expression, so it is manifestly antisymmetric under time reversal and
+% hence zero in expectation for any time-reversible process (same spirit
+% as CO_trev's third-moment reversibility statistic, computed densely at
+% a single lag over the whole series rather than trended across
+% segments). A ramp in asymAC1 therefore flags a trend specifically in
 % the series' local time-asymmetry/nonlinearity, distinct from a trend in
 % any of the other (symmetric) segment statistics above.
 
@@ -125,7 +129,7 @@ segAsymAC1 = zeros(1, numSeg);
 for i = 1:numSeg
     segAC1(i) = CO_AutoCorr(z(:, i), 1, 'Fourier');
     zseg = zscore(z(:, i)); % z-scored *within* this segment
-    segAsymAC1(i) = mean(zseg(1:end - 1) .* zseg(2:end).^2);
+    segAsymAC1(i) = mean(zseg(1:end - 1) .* zseg(2:end) .* (zseg(2:end) - zseg(1:end - 1)));
 end
 
 % ------------------------------------------------------------------------------
