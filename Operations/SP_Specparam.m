@@ -1,4 +1,4 @@
-function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidthLimits)
+function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidthLimits, segLength, maxSegments)
 % SP_Specparam   Separates the power spectrum into aperiodic (1/f) and periodic (oscillatory) components
 %
 % Parameterizes the power spectrum as a smooth aperiodic '1/f' background
@@ -62,45 +62,52 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 % periodic component and the fraction of spectral power it accounts for;
 % and the quality of the combined fit (R^2 and mean absolute error).
 %
-% ---WHICH OUTPUTS ARE REGISTERED, AND WHY MOST ARE NOT:
-% Only apExponent, numPeaks, maxPeakFreq and maxPeakPower are registered
-% as hctsa features. The rest are computed (several are needed to produce
-% those four) but excluded, on measurements rather than taste:
+% ---WHICH OUTPUTS ARE REGISTERED, AND WHY:
+% Seven of the ten are registered: apExponent, apOffset, numPeaks,
+% maxPeakFreq, maxPeakPower, maxPeakBW and periodicFraction. The
+% exclusions are measured rather than assumed:
 %
-%   * Strongly length-dependent, tested by running an *identical*
-%     generating process at N = 1000-10000 and measuring eta^2 against N:
-%     apOffset (0.46-0.84), maxPeakBW (0.69), periodicFraction (0.83),
-%     modelR2 (0.68-0.83), modelMAE (0.89-0.94), and apKnee (0.83). A
-%     feature that moves this much with series length alone cannot be
-%     compared across a dataset of mixed lengths. The cause is structural:
-%     the fitted frequency range starts at minCyclesPerSegment/winLength
-%     and so shifts with N, which moves an extrapolated intercept
-%     (apOffset), rescales widths measured in log-frequency (maxPeakBW),
-%     and changes the residual budget the fit-quality terms are measured
-%     against. The four registered fields are by contrast essentially
-%     length-invariant (eta^2 = 0.003-0.22); maxPeakFreq in particular
-%     recovers a peak planted at f = 0.100 as 0.0981 at every N tested.
-%   * totalPeakPower is excluded as near-duplicate: R^2 = 0.85 with
-%     maxPeakPower across 1000 real series (they coincide exactly whenever
-%     only one peak is found, which is the common case), and numPeaks
-%     already carries the 'how many' information separately.
+%   * modelR2 and modelMAE are genuinely length-dependent (eta^2 against N
+%     of 0.50-0.76 and 0.60-0.61) and consistently so across three
+%     different generating processes, including a stationary AR(1). This
+%     is intrinsic to what they measure: goodness of fit depends on how
+%     noisy the spectral estimate is, which depends on how many segments
+%     there are to average, which depends on N. They cannot be compared
+%     across a dataset of mixed lengths.
+%   * apKnee reaches eta^2 = 0.69 on AR(1) -- whose spectrum is a
+%     Lorentzian, i.e. exactly the knee model, so the knee is genuinely
+%     identifiable there and its estimate is correspondingly sensitive to
+%     how much data is available. Since it is the only field unique to
+%     'knee' mode, only the 'fixed' variant is registered; 'knee' remains
+%     callable and does fit real knees well (recovering a planted knee of
+%     1e-3 as 1.01e-3, R^2 0.996 vs 0.945 for the 'fixed' form) but costs
+%     ~4x more.
+%   * totalPeakPower is excluded as a near-duplicate of maxPeakPower
+%     (R^2 = 0.85 across 1000 real series; they coincide exactly whenever
+%     only one peak is found, which is the common case), with numPeaks
+%     already carrying the 'how many' information.
 %
-% Because apKnee is the only field unique to 'knee' mode and it does not
-% survive the length-dependence check, only the 'fixed' variant is
-% registered; 'knee' remains available (and does fit genuine knees well --
-% it recovers a planted knee of 1e-3 as 1.01e-3, with R^2 0.996 against
-% 0.945 for the 'fixed' form on the same data) but costs ~4x more.
+% Measuring length-dependence needs care, and getting it wrong initially
+% led this operation to discard six fields that were in fact fine.
+% Generating a fresh realization at each N is *not* a valid test for a
+% 1/f-type process: a longer realization contains lower frequencies, so
+% the process itself changes with N and the resulting eta^2 conflates that
+% with any bias in the operation. The correct design, used for the figures
+% above, is to draw one long realization per replicate and take prefixes
+% of it, which varies the observation length while holding the process
+% fixed.
 %
-% On novelty of what remains: across 1000 real series, numPeaks reaches a
-% maximum R^2 of only 0.24 against any of the ~7700 other hctsa features,
-% and 0.17 against SP_Summaries' own spectral-peak fields specifically --
-% i.e. counting peaks *relative to a fitted aperiodic background* really
-% is different from counting them by absolute prominence, which was the
-% motivating claim for this operation. maxPeakFreq likewise peaks at 0.36.
-% apExponent is the most redundant of the four (R^2 = 0.76 against
-% SP_Summaries' linfitloglog_all_a2, and 0.79 against linfitsemilog_all_a2)
-% but is the better-motivated estimator of the same quantity, being both
-% peak-corrected and fitted to a segment-averaged spectrum.
+% On novelty: across 1000 real series, periodicFraction reaches a maximum
+% R^2 of only 0.17 against any of the ~7700 other hctsa features, and
+% numPeaks 0.24 (and only 0.17 against SP_Summaries' own spectral-peak
+% fields) -- i.e. counting peaks *relative to a fitted aperiodic
+% background* really is different from counting them by absolute
+% prominence, which was the motivating claim for this operation.
+% apExponent is much the most redundant (R^2 = 0.76 against
+% SP_Summaries' linfitloglog_all_a2 and 0.79 against
+% linfitsemilog_all_a2) but is the better-motivated estimator of that same
+% quantity, being both peak-corrected and fitted to a segment-averaged
+% spectrum.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -158,11 +165,26 @@ end
 if nargin < 5 || isempty(peakWidthLimits)
     peakWidthLimits = [0.02, 0.5];
 end
+if nargin < 6
+    segLength = []; % [] = adapt to the series length (see below)
+end
+if nargin < 7 || isempty(maxSegments)
+    maxSegments = Inf; % Inf = use all the available data
+end
 
 N = length(y);
-minLength = 64; % need enough data for a meaningful segment-averaged spectrum
+if isempty(segLength)
+    % Scale the segment length with the series, so that longer series buy
+    % both finer frequency resolution and more segments to average over.
+    % Holding it fixed instead was tried and measurably rejected: see the
+    % note on the spectral estimate below.
+    segLength = max(round(N / 8), 32);
+end
+minSegments = 4; % need several segments to average over for a usable estimate
+minLength = segLength + (minSegments - 1) * floor(segLength / 2);
 if N < minLength
-    warning('Time series (N = %u) too short for a spectral parameterization (need >= %u)', N, minLength);
+    warning(['Time series (N = %u) too short for a spectral parameterization with ' ...
+             'segLength = %u (need >= %u)'], N, segLength, minLength);
     out = NaN; return
 end
 if all(y == y(1))
@@ -180,7 +202,28 @@ end
 % SP_Summaries' peak-detection thresholds to be calibrated on Welch
 % estimates only. Hence Welch's method (segment-averaged) is used here
 % unconditionally rather than being left to the caller.
-winLength = max(round(N / 8), 32); % 8 segments at 50% overlap: more averaging than SP_Summaries' 4
+% The segment length scales with N by default, and all available data is
+% used. Holding both fixed instead (so that every series yields a
+% statistically identical spectral estimate, and hence perfectly
+% length-invariant parameters) is available via the segLength and
+% maxSegments arguments, but was tried as the default and rejected on
+% measurement: fixing segLength = 256 and capping at 15 segments starved
+% the estimate badly enough that the exponent recovered from a known 1/f
+% process degraded (chi = 1.0 recovered as 1.040 rather than 1.001), the
+% white-noise false-peak rate rose from 2% to 12%, the knee model began
+% misfitting pure power-law data (returning a spurious knee of 1e-2 and
+% an exponent of 1.22 instead of 1.0), and -- decisively -- the
+% peak-corrected exponent went from twice as accurate as a naive
+% log-log slope fit to six times *worse* than it, because the naive
+% comparator still gets to use the whole series. Length-invariance
+% bought at the price of discarding most of the data is not worth having
+% here; the length-dependent outputs are excluded from registration
+% instead.
+winLength = segLength;
+maxSamples = winLength + (maxSegments - 1) * floor(winLength / 2);
+if N > maxSamples
+    y = y(1:maxSamples); % use a fixed amount of data so features stay comparable
+end
 NFFT = 2^nextpow2(winLength);
 [S, f] = pwelch(y, hamming(winLength), [], NFFT, 1);
 
@@ -270,7 +313,16 @@ end
 apFinal = SUB_FitAperiodic(fv, logF, logS - peakSum, aperiodicMode);
 
 out.apExponent = apFinal.exponent;
-out.apOffset = apFinal.offset;
+% Report the background level at a reference frequency *inside* the fitted
+% band, rather than the raw intercept. The intercept is the fitted value at
+% log10(f) = 0, i.e. f = 1 -- above the Nyquist frequency of 0.5, so it is
+% a pure extrapolation whose value swings with both the fitted slope and
+% wherever the fitted range happens to start. Evaluating the same fitted
+% curve at a frequency actually covered by the data removes that
+% sensitivity while describing the same thing (how much power the
+% aperiodic background carries).
+refFreq = 0.1;
+out.apOffset = SUB_EvalAperiodic(apFinal, refFreq);
 if strcmp(aperiodicMode, 'knee')
     out.apKnee = apFinal.knee;
 end
@@ -314,6 +366,16 @@ else
 end
 out.modelMAE = mean(abs(residFinal));
 
+end
+
+% ------------------------------------------------------------------------------
+function v = SUB_EvalAperiodic(ap, fq)
+    % Value of the fitted aperiodic curve at frequency fq.
+    if isfield(ap, 'knee') && ap.knee > 0
+        v = ap.offset - log10(ap.knee + fq^ap.exponent);
+    else
+        v = ap.offset - ap.exponent * log10(fq);
+    end
 end
 
 % ------------------------------------------------------------------------------
