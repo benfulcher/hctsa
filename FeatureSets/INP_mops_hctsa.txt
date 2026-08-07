@@ -877,6 +877,7 @@ SP_SummariesPhase(x_z)	SP_SummariesPhase
 SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 SP_Bicoherence(x_z,64,'full',25)	SP_Bicoherence_64_full_25
 SP_Cepstrum(x_z,100,4)	SP_Cepstrum_100_4
+SP_Specparam(x_z,'fixed',4,1,[0.02,0.5])	SP_Specparam_fixed_4_1
 NL_TISEAN_fnn(x_z,'ac',10,0.05,0,[],5)     NL_TISEAN_fnn_ac_10_005_f5
 NL_TISEAN_fnn(x_z,'mi',10,0.05,0,[],5)     NL_TISEAN_fnn_mi_10_005_f5
 NL_TISEAN_fnn(x_z,1,10,0.05,0,[],5)     NL_TISEAN_fnn_1_10_005_f5
