@@ -887,12 +887,6 @@ EN_DistributionEntropy_ks__005	        EN_DistributionEntropy_ks__005	    entrop
 EN_DistributionEntropy_ks__01	        EN_DistributionEntropy_ks__01	    entropy
 EN_DistributionEntropy_ks__02	        EN_DistributionEntropy_ks__02	    entropy
 EN_DistributionEntropy_ks__03	        EN_DistributionEntropy_ks__03	    entropy
-EN_DistributionEntropy_raw_ks__001	    EN_DistributionEntropy_raw_ks__001	entropy,raw,spreadDependent
-EN_DistributionEntropy_raw_ks__002	    EN_DistributionEntropy_raw_ks__002	entropy,raw,spreadDependent
-EN_DistributionEntropy_raw_ks__005	    EN_DistributionEntropy_raw_ks__005	entropy,raw,spreadDependent
-EN_DistributionEntropy_raw_ks__01	    EN_DistributionEntropy_raw_ks__01	entropy,raw,spreadDependent
-EN_DistributionEntropy_raw_ks__02	    EN_DistributionEntropy_raw_ks__02	entropy,raw,spreadDependent
-EN_DistributionEntropy_raw_ks__03	    EN_DistributionEntropy_raw_ks__03	entropy,raw,spreadDependent
 EN_DistributionEntropy_hist_5_0		    EN_DistributionEntropy_hist_5_0	    entropy
 EN_DistributionEntropy_hist_10_0		EN_DistributionEntropy_hist_10_0	entropy
 EN_DistributionEntropy_hist_20_0		EN_DistributionEntropy_hist_20_0	entropy
