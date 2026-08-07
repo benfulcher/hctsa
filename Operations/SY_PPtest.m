@@ -94,10 +94,17 @@ if nout == 1
 	out.pvalue = pValue;
 	out.stat = stat;
 	out.coeff1 = reg.coeff(1); % could be multiple, depending on the model
-	out.loglikelihood = reg.LL;
-	out.AIC = reg.AIC;
-	out.BIC = reg.BIC;
-	out.HQC = reg.HQC;
+	% Log-likelihood and the information criteria are extensive: they are sums
+	% over observations, so they grow in direct proportion to the time-series
+	% length regardless of how well the model fits (minBIC measured eta^2 = 0.973
+	% against N in the length-dependence audit). Reported per observation, which
+	% is the standard intensive form and the quantity model comparison actually
+	% depends on.
+	numObs = length(y);
+	out.loglikelihood = reg.LL / numObs;
+	out.AIC = reg.AIC / numObs;
+	out.BIC = reg.BIC / numObs;
+	out.HQC = reg.HQC / numObs;
 	out.rmse = reg.RMSE;
 
 else
@@ -117,10 +124,12 @@ else
 
 	% Some regression statistics
 	% These are all highly correlated; hctsa library records just minBIC by default
-	out.meanloglikelihood = mean(vertcat(reg.LL));
-	out.minAIC = min(vertcat(reg.AIC));
-	out.minBIC = min(vertcat(reg.BIC));
-	out.minHQC = min(vertcat(reg.HQC));
+	% Per observation -- see the note in the single-test branch above.
+	numObs = length(y);
+	out.meanloglikelihood = mean(vertcat(reg.LL)) / numObs;
+	out.minAIC = min(vertcat(reg.AIC)) / numObs;
+	out.minBIC = min(vertcat(reg.BIC)) / numObs;
+	out.minHQC = min(vertcat(reg.HQC)) / numObs;
 
 	% Somehow these are highly correlated, only minrmse is included in hctsa
 	% library by default
