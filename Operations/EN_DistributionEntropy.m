@@ -106,18 +106,42 @@ switch histOrKS
 		binWidths = diff(binEdges);
 
 	case 'ks' % Use ksdensity to calculate pdf
+		% Evaluate on an explicit, length-stable grid.
+		%
+		% ksdensity's default grid spans the observed data range, and the range
+		% of a sample grows with N (as ~sqrt(2*log(N)) for Gaussian data), so
+		% the grid -- and with it the log(binWidth) term in the entropy sum
+		% below -- widened with time-series length regardless of the underlying
+		% distribution. Anchoring the grid to extreme *quantiles* instead fixes
+		% that: quantiles are consistent estimators, so the interval converges
+		% as N grows rather than expanding.
+		numGridPts = 200;
+		lo = quantile(y, 0.001);
+		hi = quantile(y, 0.999);
+		if ~(hi > lo) % degenerate (near-constant) input
+			out = NaN; return
+		end
+		pad = 0.1 * (hi - lo); % a little headroom beyond the quantile range
+		xGrid = linspace(lo - pad, hi + pad, numGridPts);
 		if isempty(numBins)
-			[px, xr] = ksdensity(y, 'function', 'pdf'); % selects optimal width
+			[px, xr] = ksdensity(y, xGrid, 'function', 'pdf'); % selects optimal width
 		else
-			[px, xr] = ksdensity(y, 'width', numBins, 'function', 'pdf'); % uses specified width
+			% NB: a *fixed* absolute bandwidth makes the density estimate
+			% inconsistent -- for consistency the bandwidth must shrink with
+			% sample size (Silverman: h ~ N^(-1/5)) -- so the smoothness of the
+			% estimated density, and hence its entropy, drifts with N whatever
+			% the underlying distribution. Measured eta^2 against length was
+			% 0.56-0.97 for fixed bandwidths against 0.08 for the automatic
+			% selection, so the fixed-bandwidth variants are no longer
+			% registered as hctsa features. The option is kept for callers who
+			% want a specific smoothing scale.
+			[px, xr] = ksdensity(y, xGrid, 'width', numBins, 'function', 'pdf'); % uses specified width
 		end
 		binWidths = ones(1, length(px)) * (xr(2) - xr(1));
 		% ksdensity returns a *density* evaluated on a grid, whereas the entropy
 		% sum below (shared with the 'hist' branch) expects probability mass per
 		% cell. Using the raw density there left sum(px) ~= 1, so the result was
-		% neither a discrete nor a differential entropy, and it inherited the
-		% growth of ksdensity's grid -- which spans the data range, and hence
-		% widens as ~sqrt(2*log(N)) for z-scored data. Convert to probability
+		% neither a discrete nor a differential entropy. Convert to probability
 		% mass and renormalize (the grid truncates a little tail mass).
 		px = px .* binWidths;
 		px = px / sum(px);

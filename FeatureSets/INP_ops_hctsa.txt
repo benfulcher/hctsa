@@ -881,10 +881,6 @@ EN_CID.minCE1 EN_CID_minCE1 entropy,distribution
 EN_CID.minCE2 EN_CID_minCE2 entropy,distribution
 EN_CID.CE1_norm EN_CID_CE1_norm entropy
 EN_CID.CE2_norm EN_CID_CE2_norm entropy
-EN_DistributionEntropy_ks_001_0	        EN_DistributionEntropy_ks_001_0	    entropy
-EN_DistributionEntropy_ks_01_0	        EN_DistributionEntropy_ks_01_0	    entropy
-EN_DistributionEntropy_ks_05_0	        EN_DistributionEntropy_ks_05_0	    entropy
-EN_DistributionEntropy_ks_1_0	        EN_DistributionEntropy_ks_1_0	    entropy
 EN_DistributionEntropy_ks__001	        EN_DistributionEntropy_ks__001	    entropy
 EN_DistributionEntropy_ks__002	        EN_DistributionEntropy_ks__002	    entropy
 EN_DistributionEntropy_ks__005	        EN_DistributionEntropy_ks__005	    entropy
