@@ -184,7 +184,16 @@ for i = 1:numPreds
 	hyp.cov = [];
 
 	% loghyper = MF_GP_LearnHyperp(covFunc,-50,tt,yt);
-	hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
+	try
+		hyp = MF_GP_LearnHyperp(tt, yt, covFunc, meanFunc, likFunc, infAlg, nfevals, hyp);
+	catch emsg
+		fprintf(1, 'Unable to learn hyperparameters for this time series\n');
+		out = NaN; return
+	end
+	if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data isn't suited to GP fitting
+		fprintf(1, 'Unable to learn hyperparameters for this time series\n');
+		out = NaN; return
+	end
 	loghyper = hyp.cov;
 
 	if isnan(loghyper)

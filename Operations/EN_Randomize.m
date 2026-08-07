@@ -138,8 +138,9 @@ for i = 1:N * randp_max
 			% randomize by swapping elements of the time series so that
 			% the distribution remains static; only temporal properties will change
 			randis = randi(N, [2, 1]);
+			tmp = y_rand(randis(1));
 			y_rand(randis(1)) = y_rand(randis(2));
-			y_rand(randis(2)) = y_rand(randis(1));
+			y_rand(randis(2)) = tmp;
 
 		otherwise
 			error('Unknown randomization method ''%s''.', randomizeHow);

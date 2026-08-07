@@ -93,6 +93,10 @@ try
 catch emsg
 	error('Error learning hyperparameters for time series')
 end
+if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data isn't suited to GP fitting
+	out = NaN;
+	return
+end
 loghyper = hyp.cov;
 if isnan(loghyper)
 	out = NaN;

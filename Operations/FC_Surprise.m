@@ -184,13 +184,14 @@ for i = 1:numTest
 
 			memoryData = yth(rs(i) - memory:rs(i) - 1);
 			% Previous value observed in memory here:
-			inmem1 = find(memoryData(2:end - 1) == yth(rs(i) - 1)); % the 2:end makes the next line ok...?
+			inmem1 = find(memoryData(2:end - 1) == yth(rs(i) - 1)); % the 2:end makes the next line ok
 			inmem2 = find(memoryData(inmem1) == yth(rs(i) - 2));
 			nAntecedent(i) = length(inmem2);
 			if isempty(inmem2)
 				numMatches = 0;
 			else
-				numMatches = sum(memoryData(inmem2 + 2) == yth(rs(i)));
+				% inmem2 indexes into inmem1, not directly into memoryData:
+				numMatches = sum(memoryData(inmem1(inmem2) + 2) == yth(rs(i)));
 			end
 
 		otherwise

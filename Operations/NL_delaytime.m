@@ -97,6 +97,11 @@ if maxDelay >= N / 2
 	out = NaN; return
 end
 
+% (2) Theiler window, past
+if nargin < 3 || isempty(past)
+	past = maxDelay; % exclude a window as wide as maxDelay by default
+end
+
 % randomSeed: how to treat the randomization
 if nargin < 4
 	randomSeed = [];

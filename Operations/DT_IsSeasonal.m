@@ -66,7 +66,7 @@ th_fit = 0.3; % r2 > th_fit
 % Condition 2: amplitude is not too small
 th_ampl = 0.5; % a1 > th_ampl
 
-if gof.rsquare > th_fit && abs(cfun.a1 > th_ampl)
+if gof.rsquare > th_fit && abs(cfun.a1) > th_ampl
 	out = 1; % test thinks the time series has strong periodicities
 else
 	out = 0; % test thinks the time series doesn't have any strong periodicities

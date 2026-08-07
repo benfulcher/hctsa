@@ -225,7 +225,7 @@ delete([filePath '.d2']); % delete the file
 % (3) -------------- H2 -------------
 
 fid_h2 = fopen([filePath '.h2']);
-s = textscan(fid_d2, '%[^\n]');
+s = textscan(fid_h2, '%[^\n]');
 s = s{1};
 % FEED THIS INTO SUBROUTINE
 h2dat = SUB_readTISEANout(s, maxm, '#dim=', 2);

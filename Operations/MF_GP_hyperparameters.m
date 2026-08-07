@@ -192,7 +192,16 @@ likFunc = @likGauss; hyp.lik = log(0.1);
 % Maximum number of allowed function evaluations
 numfevals = -50; % (specified as the negative)
 
-hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
+try
+	hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
+catch emsg
+	out = NaN;
+	return
+end
+if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data isn't suited to GP fitting
+	out = NaN;
+	return
+end
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;

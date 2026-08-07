@@ -111,6 +111,7 @@ if isempty(stretch1) % all 0s (almost impossible to actually occur)
 	out.meanstretch1 = 0;
 	out.meanstretch1norm = 0;
 	out.stdstretch1 = NaN;
+	out.stdstretch1norm = NaN;
 else
 	out.longstretch1 = max(stretch1); % longest consecutive stretch of ones
 	out.longstretch1norm = max(stretch1) / N; % longest consecutive stretch of ones as proportion of the time-series length
