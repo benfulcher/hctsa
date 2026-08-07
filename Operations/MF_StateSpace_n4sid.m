@@ -173,7 +173,7 @@ mresiduals = ytest.y - yp.y;
 % -------------------------------------------------------------------------------
 % Statistics on residuals
 % -------------------------------------------------------------------------------
-residout = MF_ResidualAnalysis(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals, ytest.y, 'full');
 
 % Convert these to local outputs in quick loop
 fields = fieldnames(residout);

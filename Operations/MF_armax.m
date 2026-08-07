@@ -159,7 +159,7 @@ mresiduals = ytest.y - yp.y;
 % ------------------------------------------------------------------------------
 % Get statistics on residuals
 % ------------------------------------------------------------------------------
-residout = MF_ResidualAnalysis(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals, ytest.y, 'full');
 
 % Convert these to local outputs in quick loop
 % Note that default hctsa library does not include rmse field, which is highly

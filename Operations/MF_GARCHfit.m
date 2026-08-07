@@ -321,7 +321,7 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 
 % Use MF_ResidualAnalysis on the standardized innovations
 % 1) Get statistics on standardized innovations
-residout = MF_ResidualAnalysis(stde);
+residout = MF_ResidualAnalysis(stde, y, 'full');
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
