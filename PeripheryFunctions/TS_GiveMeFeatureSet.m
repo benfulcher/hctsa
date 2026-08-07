@@ -57,6 +57,20 @@ case 'catch22'
     matchByName = true;
     % The catch22 feature set (EXCLUDES MEAN/SPREAD-DEPENDENT FEATURES)
     % cf. https://github.com/chlubba/catch22
+    %
+    % NOTE -- two of these features have been renamed in hctsa and now diverge from the
+    % upstream catch22 naming. The cell entries below accept both spellings, so lookup here
+    % resolves 22/22 against old and new datasets alike, but hctsa *reports* the new names:
+    %
+    %     upstream catch22                 hctsa (current)
+    %     FC_LocalSimple_mean1_tauresrat   FC_LocalSimple_mean1_taurat
+    %     FC_LocalSimple_mean3_stderr      FC_LocalSimple_mean3_stde
+    %
+    % This was a deliberate choice: the model-fitting audit gave the whole family one
+    % vocabulary (stde for a residual standard deviation, taurat for a timescale ratio), and
+    % internal consistency was preferred over matching upstream. Joining hctsa output to
+    % catch22 output *by feature name* will therefore miss these two until catch22 is
+    % updated to match.
     featureNames = {'DN_HistogramMode_5', ...
                     'DN_HistogramMode_10', ...
                     {'firstCrossing_1e_acf_tau', 'first1e_acf_tau', 'first_1e_ac'}, ... % [new name(s)]
