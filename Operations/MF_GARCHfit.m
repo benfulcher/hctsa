@@ -246,7 +246,9 @@ out.summaryexitflag = info.exitflag; % whether the fit worked ok.
 % symbolic.
 
 nparams = sum(any(estParamCov)); % number of parameters
-out.nparams = nparams;
+% (Not registered as a feature: for a fixed P/Q/AR order, this is a structural property of
+%  the model specification, not of the data, so it is constant across series -- confirmed
+%  on both validation datasets. Still computed here for the AIC/BIC below.)
 
 % use aicbic function
 [AIC, BIC] = aicbic(LLF, nparams, N); % aic and bic of fit

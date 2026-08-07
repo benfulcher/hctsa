@@ -7171,7 +7171,6 @@ MF_GARCHfit_ar_P1_Q1.ARCH_1	MF_GARCHfit_ar_P1_Q1_ARCH_1	model
 MF_GARCHfit_ar_P1_Q1.ARCHerr_1	MF_GARCHfit_ar_P1_Q1_ARCHerr_1	model
 MF_GARCHfit_ar_P1_Q1.LLF	MF_GARCHfit_ar_P1_Q1_LLF	model
 MF_GARCHfit_ar_P1_Q1.summaryexitflag	MF_GARCHfit_ar_P1_Q1_summaryexitflag	model
-MF_GARCHfit_ar_P1_Q1.nparams	MF_GARCHfit_ar_P1_Q1_nparams	model
 MF_GARCHfit_ar_P1_Q1.maxsigma	MF_GARCHfit_ar_P1_Q1_maxsigma	model
 MF_GARCHfit_ar_P1_Q1.minsigma	MF_GARCHfit_ar_P1_Q1_minsigma	model
 MF_GARCHfit_ar_P1_Q1.rangesigma	MF_GARCHfit_ar_P1_Q1_rangesigma	model
@@ -7217,7 +7216,6 @@ MF_GARCHfit_ar_P1_Q2.ARCH_2    MF_GARCHfit_ar_P1_Q2_ARCH_2    model
 MF_GARCHfit_ar_P1_Q2.ARCHerr_2    MF_GARCHfit_ar_P1_Q2_ARCHerr_2    model
 MF_GARCHfit_ar_P1_Q2.LLF	MF_GARCHfit_ar_P1_Q2_LLF	model
 MF_GARCHfit_ar_P1_Q2.summaryexitflag	MF_GARCHfit_ar_P1_Q2_summaryexitflag	model
-MF_GARCHfit_ar_P1_Q2.nparams	MF_GARCHfit_ar_P1_Q2_nparams	model
 MF_GARCHfit_ar_P1_Q2.maxsigma	MF_GARCHfit_ar_P1_Q2_maxsigma	model
 MF_GARCHfit_ar_P1_Q2.minsigma	MF_GARCHfit_ar_P1_Q2_minsigma	model
 MF_GARCHfit_ar_P1_Q2.rangesigma	MF_GARCHfit_ar_P1_Q2_rangesigma	model

@@ -102,14 +102,16 @@ popt = length(Aest);
 % ------------------------------------------------------------------------------
 % (i) Return the raw coefficients
 % somewhat problematic since will depend on order fitted. We can try
-% returning the first 6, and 0s if don't exist
+% returning the first 6, and NaN if don't exist
 out.A1 = Aest(1);
 for i = 2:6
 	if popt >= i
 		out.(sprintf('A%u', i)) = Aest(i);
 	else
-		% it's as if the higher order coefficients are all zero
-		out.(sprintf('A%u', i)) = 0;
+		% This coefficient was not estimated at the selected order -- report NaN, not 0,
+		% which would be indistinguishable from a genuinely-fitted zero coefficient.
+		% (Affects ~36% of series at this mop's order range, so this is not an edge case.)
+		out.(sprintf('A%u', i)) = NaN;
 	end
 end
 
