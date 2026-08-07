@@ -95,11 +95,11 @@ for i = 1:numFeatureSets
             featureIDs{i} = Operations.ID;
             featureSetNames{i} = sprintf('hctsa (%u)',height(Operations));
             theColors{i} = [233,129,126]/255;
-        case {'catch22','sarab16','linearAutoCorrs','quantiles','linearAutoCorrsAndQuantiles'}
+        case {'catch22','linearAutoCorrs','quantiles','linearAutoCorrsAndQuantiles'}
             featureIDs{i} = TS_GiveMeFeatureSet(whatFeatureSets{i},Operations);
             featureSetNames{i} = sprintf('%s (%u)',whatFeatureSets{i},length(featureIDs{i}));
             switch whatFeatureSets{i}
-            case {'catch22','sarab16'}
+            case 'catch22'
                 theColors{i} = [151,205,104]/255;
             case 'linearAutoCorrs'
                 theColors{i} = [80,80,204]/255;
