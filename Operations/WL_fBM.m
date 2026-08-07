@@ -6,7 +6,14 @@ function out = WL_fBM(y)
 % ---INPUT:
 % y, the time series to analyze.
 %
-% ---OUTPUTS: All three outputs of wfbmesti are returned from this function.
+% ---OUTPUTS: two Hurst-exponent estimates from wfbmesti's second-order-
+% derivative estimators: a plain version (H_deriv2) and a wavelet-based
+% version of the same (H_deriv2Wavelet, using a fixed sym5 filter).
+% wfbmesti's third estimator (a wavelet-variance-vs-level regression, fixed
+% to a Haar decomposition regardless of the wavelet used elsewhere in this
+% codebase) is not returned here: WL_modwtvar's decaySlope estimates the
+% same quantity via the MODWT's unbiased, boundary-corrected variance
+% decomposition, a more principled route to the same scaling exponent.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,8 +51,7 @@ BF_CheckToolbox('wavelet_toolbox');
 
 % Parameter estimation of fractional Brownian motion
 hest = wfbmesti(y);
-out.p1 = hest(1);
-out.p2 = hest(2);
-out.p3 = hest(3);
+out.H_deriv2 = hest(1); % second-order discrete-derivative estimate
+out.H_deriv2Wavelet = hest(2); % second-order discrete derivative, wavelet (sym5) version
 
 end

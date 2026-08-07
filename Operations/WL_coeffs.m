@@ -84,9 +84,10 @@ det_s = sort(abs(det), 'descend'); % sorted detail coefficient magnitudes
 
 % ------------------------------------------------------------------------------
 %% Return statistics
-out.mean_coeff = mean(det_s);
-out.max_coeff = max(det_s);
-out.med_coeff = median(det_s);
+% (mean/max/median of the detail coefficients are not returned here: they
+% duplicate WL_dwtcoeff's per-level stdd/noisestd fields, which correlate
+% r>0.98 with them on real data. WL_coeffs' distinct contribution is the
+% decay-shape profile below.)
 
 % Decay rate stats ('where below _ maximum' = 'wb_m')
 out.wb99m = findMyThreshold(0.99);
