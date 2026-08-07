@@ -229,8 +229,13 @@ for i = 1:length(numPartitions)
 	out.(sprintf('zerospbox%u', numPartitions(i))) = sum(pbox(:) == 0);
 	out.(sprintf('meanpbox%u', numPartitions(i))) = mean(pbox(:));
 	out.(sprintf('rangepbox%u', numPartitions(i))) = range(pbox(:));
-	% This probably needs to be normalized:
-	out.(sprintf('hboxcounts%u', numPartitions(i))) = -sum(pbox(pbox > 0) .* log(pbox(pbox > 0)));
+	% Box-occupancy entropy, Miller-Madow corrected: the plug-in estimator
+	% -sum(p.*log(p)) is biased low by (M-1)/(2n) for M occupied boxes and n
+	% points on the section, which makes the raw value track NN (and hence the
+	% time-series length) as much as the geometry of the section.
+	occupied = (pbox > 0);
+	out.(sprintf('hboxcounts%u', numPartitions(i))) = ...
+		-sum(pbox(occupied) .* log(pbox(occupied))) + (sum(occupied(:)) - 1) / (2 * NN);
 	out.(sprintf('tracepbox%u', numPartitions(i))) = sum(diag(pbox)); % trace
 end
 

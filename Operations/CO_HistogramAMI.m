@@ -135,6 +135,26 @@ for i = 1:length(tau)
 
 	r = (pij > 0); % Defining the range in this way, we set log(0) = 0
 	amis(i) = sum(pij(r) .* log(pij(r) ./ pii(r) ./ pjj(r)));
+
+	% Miller-Madow (Panzeri-Treves) bias correction.
+	%
+	% The plug-in estimator above is biased *upwards* by approximately
+	% (Mxy - Mx - My + 1)/(2n) nats, where the M are the numbers of *occupied*
+	% joint and marginal bins and n is the sample size. For 10 bins that is
+	% about 81/(2n): +0.41 nats at n=100 against +0.013 at n=3200. Since the
+	% true AMI of an independent series is zero, the whole measured value was
+	% this bias, decaying as 1/n -- i.e. the field tracked time-series length
+	% rather than any property of the data. Subtracting the correction removes
+	% the leading 1/n term.
+	%
+	% The result is deliberately not clamped at zero: for genuinely independent
+	% data the corrected estimate should scatter symmetrically about 0, whereas
+	% clamping would pile such series up on a single value.
+	nSamples = numel(y1);
+	Mxy = sum(r(:)); % occupied joint bins
+	Mx = sum(pi > 0); % occupied y1 marginal bins
+	My = sum(pj > 0); % occupied y2 marginal bins
+	amis(i) = amis(i) - (Mxy - Mx - My + 1) / (2 * nSamples);
 end
 
 if length(tau) == 1

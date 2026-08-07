@@ -95,7 +95,7 @@ r0 = (yBin == 0);
 out.u = mean(r1); % proportion 1 (corresponds to a movement up for 'diff')
 out.d = mean(r0); % proportion 0 (corresponds to a movement down for 'diff')
 pp = [out.d, out.u];
-out.h = f_entropy(pp);
+out.h = f_entropy(pp, N); % Miller-Madow corrected
 
 % -------------------------------------------------------------------------------
 %% Binary sequences of length 2:
@@ -120,7 +120,7 @@ out.ud = mean(r10); % up, down
 out.uu = mean(r11); % up, up
 
 pp = [out.dd, out.du, out.ud, out.uu];
-out.hh = f_entropy(pp);
+out.hh = f_entropy(pp, N - 1); % Miller-Madow corrected
 
 % ------------------------------------------------------------------------------
 %% 3
@@ -159,7 +159,7 @@ out.uud = mean(r110);
 out.uuu = mean(r111);
 
 ppp = [out.ddd, out.ddu, out.dud, out.duu, out.udd, out.udu, out.uud, out.uuu];
-out.hhh = f_entropy(ppp);
+out.hhh = f_entropy(ppp, N - 2); % Miller-Madow corrected
 
 % ------------------------------------------------------------------------------
 %% 4
@@ -227,12 +227,21 @@ out.uuuu = mean(r1111);
 
 pppp = [out.dddd, out.dddu, out.ddud, out.dduu, out.dudd, out.dudu, out.duud, out.duuu, out.uddd, ...
 		out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
-out.hhhh = f_entropy(pppp);
+out.hhhh = f_entropy(pppp, N - 3); % Miller-Madow corrected
 
 % -------------------------------------------------------------------------------
-function h = f_entropy(x)
-	% entropy of a set of counts, log(0)=0
-	h = -sum(x(x > 0) .* log(x(x > 0)));
+function h = f_entropy(p, numSamples)
+	% Miller-Madow-corrected entropy of a probability array, in nats (log(0)=0).
+	%
+	% The naive plug-in estimator -sum(p.*log(p)) is biased downwards by roughly
+	% (M-1)/(2n) for M occupied bins and n samples -- a bias that is a direct
+	% function of time-series length and grows with the alphabet, so without the
+	% correction the longer words track N more than they track the data.
+	r = (p > 0);
+	h = -sum(p(r) .* log(p(r)));
+	if nargin > 1 && numSamples > 0
+		h = h + (sum(r(:)) - 1) / (2 * numSamples);
+	end
 end
 
 end

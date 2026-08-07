@@ -143,9 +143,17 @@ rs = sort(rs(1:min(numIters, end))); % Just use a random sample of numIters poin
 % -------------------------------------------------------------------------------
 % Compute empirical probabilities from time series
 % -------------------------------------------------------------------------------
-store = zeros(numIters, 1); % store probabilities
-nAntecedent = zeros(numIters, 1); % how many times the antecedent pattern was seen in memory
-for i = 1:length(rs)
+% Preallocate to the number of test points actually available, numTest, which is
+% min(numIters, N-memory) -- NOT numIters. Sizing these to numIters left the
+% trailing entries at zero whenever N-memory < numIters (i.e. short time series),
+% and those spurious zeros then contaminated every output: nAntecedent==0 counted
+% them as unseen antecedents (inflating propUnseen by exactly the padding
+% fraction), and -log(0) turned them into +Inf in store (making mean/median/
+% quantiles/max/sum Inf and std/tstat NaN for any N < memory+numIters).
+numTest = length(rs);
+store = zeros(numTest, 1); % store probabilities
+nAntecedent = zeros(numTest, 1); % how many times the antecedent pattern was seen in memory
+for i = 1:numTest
 	switch whatPrior
 		case 'dist'
 			% Uses the distribution up to memory to inform the next point:
@@ -218,7 +226,7 @@ out.std = std(store); % standard deviation
 if out.std == 0
 	out.tstat = NaN; % can't compute this if there is no variation
 else
-	out.tstat = abs((out.mean - 1) / (out.std / sqrt(numIters)));
+	out.tstat = abs((out.mean - 1) / (out.std / sqrt(numTest)));
 end
 
 end

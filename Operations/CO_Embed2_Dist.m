@@ -103,7 +103,11 @@ out.d_cv = mean(d) / std(d); % Coefficient of variation of distances
 % Empirical distance distribution often fits Exponential distribution quite well
 % Fit to all values (often some extreme outliers, but oh well)
 l = expfit(d);
-nlogL = explike(l, d);
+% explike returns the negative log-likelihood summed over all distances, which
+% is extensive (it grows in proportion to numel(d), and hence to the
+% time-series length). Report the mean NLL per distance, which measures
+% goodness-of-fit per observation independently of how many were observed.
+nlogL = explike(l, d) / numel(d);
 out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:

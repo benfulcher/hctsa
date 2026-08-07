@@ -273,17 +273,24 @@ end
 % ------------------------------------------------------------------------------
 %% Using likelihood now:
 % ------------------------------------------------------------------------------
+% normlike/explike/evlike return the negative log-likelihood *summed* over the
+% degree sequence, which is extensive: it grows in direct proportion to the
+% number of nodes (and hence to the time-series length), swamping any
+% distributional information. Report the mean NLL per node instead, which is
+% the intensive quantity these fields were always meant to capture.
+numNodes = length(k);
+
 % Gaussian
-out.gaussnlogL = normlike([mean(k), std(k)], k);
+out.gaussnlogL = normlike([mean(k), std(k)], k) / numNodes;
 
 % Exp
-out.expnlogL = explike(mean(k), k);
+out.expnlogL = explike(mean(k), k) / numNodes;
 
 % Extreme Value Distribution
 paramhat = evfit(k);
 out.evparam1 = paramhat(1);
 out.evparam2 = paramhat(2);
-out.evnlogL = evlike(paramhat, k);
+out.evnlogL = evlike(paramhat, k) / numNodes;
 
 % ------------------------------------------------------------------------------
 %% Entropy of distribution:

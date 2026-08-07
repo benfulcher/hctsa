@@ -248,11 +248,26 @@ dw = w(2) - w(1); % spacing increment in w
 % Maximum, and max peak width:
 [out.maxS, i_maxS] = max(S);
 out.maxw = w(i_maxS);
-out.maxWidth = w(i_maxS + find(S(i_maxS + 1:end) < out.maxS, 1, 'first')) - ...
-					w(find(S(1:i_maxS - 1) < out.maxS, 1, 'last'));
-if isempty(out.maxWidth)
-	out.maxWidth = 0;
+
+% Half-power (-3 dB) bandwidth of the dominant peak: the frequency interval
+% around the maximum over which the spectrum stays above half its peak value.
+%
+% This previously thresholded against out.maxS itself. Since maxS *is* the
+% maximum, every neighbouring bin satisfies S < maxS, so the search always
+% terminated on the immediately adjacent bins and the field was identically
+% 2*dw = 4*pi/nfft -- a pure function of the transform length carrying no
+% information about the data (verified against an AR(2) resonance of known
+% intrinsic width, where it still returned exactly 2*dw at every N).
+halfPower = out.maxS / 2;
+iUpper = i_maxS + find(S(i_maxS + 1:end) < halfPower, 1, 'first');
+if isempty(iUpper) % never drops below half power above the peak
+	iUpper = length(S);
 end
+iLower = find(S(1:i_maxS - 1) < halfPower, 1, 'last');
+if isempty(iLower) % never drops below half power below the peak
+	iLower = 1;
+end
+out.maxWidth = w(iUpper) - w(iLower);
 
 % Characterize all peaks using findpeaks function, run on logS rather than S:
 % a linear-scale power spectrum is typically extremely heavy-tailed (a single

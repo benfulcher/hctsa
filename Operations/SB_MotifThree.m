@@ -94,7 +94,7 @@ end
 out.a = out1(1); % proportion of a
 out.b = out1(2); % proportion of b
 out.c = out1(3); % proportion of c
-out.h = f_entropy(out1); % entropy of this result
+out.h = f_entropy(out1, N); % entropy of this result (Miller-Madow corrected)
 
 % ------------------------------------------------------------------------------
 %% Words of length 2
@@ -120,7 +120,7 @@ out.aa = out2(1, 1); out.ab = out2(1, 2); out.ac = out2(1, 3);
 out.ba = out2(2, 1); out.bb = out2(2, 2); out.bc = out2(2, 3);
 out.ca = out2(3, 1); out.cb = out2(3, 2); out.cc = out2(3, 3);
 
-out.hh = f_entropy(out2); % entropy of this result
+out.hh = f_entropy(out2, N - 1); % entropy of this result (Miller-Madow corrected)
 
 % ------------------------------------------------------------------------------
 %% Words of length 3
@@ -156,7 +156,7 @@ out.caa = out3(3, 1, 1); out.cab = out3(3, 1, 2); out.cac = out3(3, 1, 3);
 out.cba = out3(3, 2, 1); out.cbb = out3(3, 2, 2); out.cbc = out3(3, 2, 3);
 out.cca = out3(3, 3, 1); out.ccb = out3(3, 3, 2); out.ccc = out3(3, 3, 3);
 
-out.hhh = f_entropy(out3); % entropy of this result
+out.hhh = f_entropy(out3, N - 2); % entropy of this result (Miller-Madow corrected)
 
 % ------------------------------------------------------------------------------
 %% Words of length 4
@@ -222,13 +222,24 @@ out.ccaa = out4(3, 3, 1, 1); out.ccab = out4(3, 3, 1, 2); out.ccac = out4(3, 3, 
 out.ccba = out4(3, 3, 2, 1); out.ccbb = out4(3, 3, 2, 2); out.ccbc = out4(3, 3, 2, 3);
 out.ccca = out4(3, 3, 3, 1); out.cccb = out4(3, 3, 3, 2); out.cccc = out4(3, 3, 3, 3);
 
-out.hhhh = f_entropy(out4); % entropy of this result
+out.hhhh = f_entropy(out4, N - 3); % entropy of this result (Miller-Madow corrected)
 
 % -------------------------------------------------------------------------------
-function h = f_entropy(x)
-	% entropy of a set of counts, log(0)=0
-	r = (x > 0);
-	h = -sum(x(r) .* log(x(r)));
+function h = f_entropy(p, numSamples)
+	% Miller-Madow-corrected entropy of a probability array, in nats (log(0)=0).
+	%
+	% The naive plug-in estimator -sum(p.*log(p)) is biased *downwards* by
+	% approximately (M-1)/(2n), where M is the number of occupied bins and n the
+	% number of samples the probabilities were estimated from. That bias is a
+	% direct function of time-series length, and it grows with the alphabet: for
+	% the 81 words of length 4 it is about -0.40 nats at n=100 against -0.013 at
+	% n=3200, so the field mostly tracks N rather than the data. Adding the
+	% Miller-Madow term removes this leading 1/n contribution.
+	r = (p > 0);
+	h = -sum(p(r) .* log(p(r)));
+	if nargin > 1 && numSamples > 0
+		h = h + (sum(r(:)) - 1) / (2 * numSamples);
+	end
 end
 
 end

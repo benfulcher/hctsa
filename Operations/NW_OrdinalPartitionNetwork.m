@@ -160,7 +160,18 @@ out.density = m / n^2; % fraction of all n^2 possible directed edges (self-loops
 A = sparse(pairs(:, 1), pairs(:, 2), true, n, n);
 out.reciprocity = full(sum(sum(A & A'))) / m;
 
-out.meanEdgeWeight = mean(weights); % equivalently (Nx-1)/m: average repeat count per unique edge
-out.maxEdgeWeight = max(weights); % the most frequently repeated single transition
+% Edge weights are raw repeat counts, so they grow in direct proportion to the
+% number of transitions: with d fixed there are at most factorial(d)^2 possible
+% edges, so m saturates while the transition count keeps growing with N. Divide
+% through by the total number of transitions to get edge *probabilities*, which
+% are intensive.
+numTransitions = sum(weights); % = length(s)-1, the number of observed transitions
+
+% NB: with this normalization meanEdgeWeight is identically 1/m, so it carries
+% no information beyond the edge count m already summarized by meanDegree (m/n)
+% and density (m/n^2). It is retained here only so the field set is unchanged;
+% it is a candidate for deregistration on redundancy grounds.
+out.meanEdgeWeight = mean(weights) / numTransitions; % mean edge probability (== 1/m)
+out.maxEdgeWeight = max(weights) / numTransitions; % probability of the most frequent single transition
 
 end

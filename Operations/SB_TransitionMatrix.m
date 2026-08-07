@@ -205,7 +205,14 @@ end
 rowSums = sum(T, 2); % marginal distribution over states at time t
 Hjoint = -sum(T(T > 0) .* log(T(T > 0)));
 Hmarginal = -sum(rowSums(rowSums > 0) .* log(rowSums(rowSums > 0)));
-out.transEntropy = Hjoint - Hmarginal;
+% Miller-Madow correction. Each plug-in entropy is biased low by (M-1)/(2n) for
+% M occupied bins, so their difference carries a residual bias of
+% -(Mjoint - Mmarginal)/(2n) -- a pure function of the number of transitions,
+% and hence of time-series length. Adding it back removes the leading 1/n term.
+numTransitions = N - 1; % T was normalized by N-1 above
+Mjoint = sum(T(:) > 0);
+Mmarginal = sum(rowSums > 0);
+out.transEntropy = Hjoint - Hmarginal + (Mjoint - Mmarginal) / (2 * numTransitions);
 
 % -------------------------------------------------------------------------------
 % (v) Measures from covariance matrix:

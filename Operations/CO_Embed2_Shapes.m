@@ -128,6 +128,19 @@ if all(counts == 0)
 end
 
 % ------------------------------------------------------------------------------
+% Normalize counts to a local density
+% ------------------------------------------------------------------------------
+% Raw neighbour counts are extensive: the embedding is z-scored, so point
+% density -- and hence the expected number of points inside a fixed radius r --
+% grows in direct proportion to N. Dividing by the number of *other* points
+% gives the fraction of the embedding lying within r of each point, i.e. the
+% pointwise correlation sum, which is intensive and bounded in [0,1].
+% This rescales max/std/median/mean/iqr/mode; the scale-invariant outputs
+% (ac1-3, tau, iqronrange, hist_ent, mode_val, statav5_*) are unaffected, since
+% they are ratios or are computed from a histogram whose shape is unchanged.
+counts = counts / (N - 1);
+
+% ------------------------------------------------------------------------------
 % Return basic statistics on the counts
 % ------------------------------------------------------------------------------
 out.ac1 = CO_AutoCorr(counts, 1, 'Fourier');
