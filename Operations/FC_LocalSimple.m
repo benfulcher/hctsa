@@ -111,13 +111,19 @@ end
 % Report the residuals through the shared contract, at the cheap 'core' level. This
 % replaces the hand-rolled meanerr, stderr, meanabserr, sws, swm, ac1, ac2, taures and
 % tauresrat, which are now meane, stde, meanabs, sws, swm, ac1, ac2 and taurat -- the same
-% quantities under the names the rest of the model-fitting family uses. taures itself is
-% dropped: it correlates 0.90-0.99 with ac1, whereas its ratio form taurat does not.
+% quantities under the names the rest of the model-fitting family uses.
 residOut = MF_ResidualAnalysis(res, y, 'core');
 fields = fieldnames(residOut);
 for k = 1:length(fields)
 	out.(fields{k}) = residOut.(fields{k});
 end
+
+% Residual decorrelation time. Kept as an FC_LocalSimple-specific field even though it
+% correlates 0.90-0.99 with ac1: the 'sarab16' feature set in TS_GiveMeFeatureSet refers to
+% FC_LocalSimple_mean1_taures and FC_LocalSimple_lfittau_taures by name, and a named,
+% published feature set outranks a correlation that never met the >=0.999 bar this audit
+% used for dropping fields anyway.
+out.taures = CO_FirstCrossing(res, 'ac', 0, 'continuous');
 
 % Normality of the residuals, as the r-squared of a Gaussian fit to their distribution.
 % (Renamed from gofr2, which read as a goodness-of-fit measure for the *forecast*; it is
