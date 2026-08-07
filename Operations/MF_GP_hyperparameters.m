@@ -242,9 +242,9 @@ end
 % Root-mean-square error of the mean function, mu.
 % (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
 %  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
-out.rmserr = sqrt(mean((y - mu).^2));
+out.stde = sqrt(mean((y - mu).^2));
 % Better to look at mean distance away in units of std
-out.mabserr_std = mean(abs((y - mu) ./ sqrt(S2)));
+out.meanabs_std = mean(abs((y - mu) ./ sqrt(S2)));
 out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
 % (if not close to one, means a problem with
 % fitting)

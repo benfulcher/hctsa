@@ -133,7 +133,7 @@ end
 
 % No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:numFields
-	out.(sprintf('rmserrrat_%s', fields{i})) = statstore.rmserr(i) / statstore.rmserr(1);
+	out.(sprintf('stderat_%s', fields{i})) = statstore.rmserr(i) / statstore.rmserr(1);
 end
 % In fact, greater error in this case means a better detrending in some
 % sense -- it's remobed more of the 'obvious' linear structure (assuming

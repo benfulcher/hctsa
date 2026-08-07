@@ -253,34 +253,34 @@ end
 % ------------------------------------------------------------------------------
 
 % RMS errors, rmserrs
-out.rmserr_mean = mean(rmserrs);
-out.rmserr_median = median(rmserrs);
-out.rmserr_std = std(rmserrs);
-out.rmserr_iqr = iqr(rmserrs);
+out.stde_mean = mean(rmserrs);
+out.stde_median = median(rmserrs);
+out.stde_std = std(rmserrs);
+out.stde_iqr = iqr(rmserrs);
 
 % mean absolute errors, mabserrs
-out.mabserr_mean = mean(mabserrs);
-out.mabserr_median = median(mabserrs);
-out.mabserr_std = std(mabserrs);
-out.mabserr_iqr = iqr(mabserrs);
+out.meanabs_mean = mean(mabserrs);
+out.meanabs_median = median(mabserrs);
+out.meanabs_std = std(mabserrs);
+out.meanabs_iqr = iqr(mabserrs);
 
 % Autocorrelations at lag 1, ac1s
 % NOT absolute values of ac1s... absolute values of operations on *raw* ac1s...
-out.ac1s_mean = abs(mean(ac1s));
-out.ac1s_median = abs(median(ac1s));
-out.ac1s_std = std(ac1s);
-out.ac1s_iqr = iqr(ac1s);
+out.ac1_mean = abs(mean(ac1s));
+out.ac1_median = abs(median(ac1s));
+out.ac1_std = std(ac1s);
+out.ac1_iqr = iqr(ac1s);
 
 % Differences in mean between two series
-out.meandiffs_mean = mean(meandiffs);
-out.meandiffs_median = median(meandiffs);
-out.meandiffs_std = std(meandiffs);
-out.meandiffs_iqr = iqr(meandiffs);
+out.meane_mean = mean(meandiffs);
+out.meane_median = median(meandiffs);
+out.meane_std = std(meandiffs);
+out.meane_iqr = iqr(meandiffs);
 
 % Ratio of standard deviations between two series
-out.stdrats_mean = mean(stdrats);
-out.stdrats_median = median(stdrats);
-out.stdrats_std = std(stdrats);
-out.stdrats_iqr = iqr(stdrats);
+out.stdrat_mean = mean(stdrats);
+out.stdrat_median = median(stdrats);
+out.stdrat_std = std(stdrats);
+out.stdrat_iqr = iqr(stdrats);
 
 end
