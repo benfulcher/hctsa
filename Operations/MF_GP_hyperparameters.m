@@ -112,6 +112,9 @@ infAlg = @infLaplace;
 if (maxN > 0) && (N > maxN)
 	switch resampleHow
 		case 'resample' % resamples the whole time series down
+			% resample is from the Signal Processing Toolbox. The check sits here rather
+			% than at the top of the file because only this downsampling branch needs it:
+			BF_CheckToolbox('signal_toolbox');
 			f = maxN / N;
 			y = resample(y, ceil(f * 10000), 10000);
 			if length(y) > maxN
@@ -193,12 +196,12 @@ hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
-hyper = exp(logHyper);
-
-% Output the hyperparameters and log-hyperparameters
+% Output the log-hyperparameters.
+% (Dropped: h%u = exp(logh%u). Hyperparameters are positive, so exp is strictly monotone and
+%  the two are rank-identical by construction. Only one GP master operation ever registered
+%  the raw h%u alongside logh%u; the other four already used logh%u alone.)
 for i = 1:numHPs
 	% Set up structure output
-	out.(sprintf('h%u', i)) = hyper(i);
 	out.(sprintf('logh%u', i)) = logHyper(i);
 end
 
@@ -236,9 +239,12 @@ if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
 	out = NaN; return
 end
 
-out.rmserr = mean(sqrt((y - mu).^2));
+% Root-mean-square error of the mean function, mu.
+% (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
+%  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
+out.stde = sqrt(mean((y - mu).^2));
 % Better to look at mean distance away in units of std
-out.mabserr_std = mean(abs((y - mu) ./ sqrt(S2)));
+out.meanabs_std = mean(abs((y - mu) ./ sqrt(S2)));
 out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
 % (if not close to one, means a problem with
 % fitting)
@@ -247,10 +253,10 @@ out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 % Statistics on variance:
 xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gpr(logHyper, covFunc, t, y, xstar); % evaluate at datapoints
-S = sqrt(S2);
-out.maxS = max(S); % maximum variance
-out.minS = min(S); % minimum variance
-out.meanS = mean(S); % mean variance
+S = sqrt(S2); % standard deviation function (S2 is the variance)
+out.maxS = max(S); % maximum predictive standard deviation
+out.minS = min(S); % minimum predictive standard deviation
+out.meanS = mean(S); % mean predictive standard deviation
 
 % ------------------------------------------------------------------------------
 function t = SUB_settimeindex(N, squishorsquash)

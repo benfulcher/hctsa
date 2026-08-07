@@ -108,29 +108,26 @@ end
 % Output statistics on the residuals, res
 % ------------------------------------------------------------------------------
 
-% Mean residual (mean error/bias):
-out.meanerr = mean(res);
-
-% Spread of residuals:
-out.stderr = std(res);
-out.meanabserr = mean(abs(res));
-
-% Stationarity of residuals:
-out.sws = SY_SlidingWindow(res, 'std', 'std', 5, 1); % across five non-overlapping segments
-out.swm = SY_SlidingWindow(res, 'mean', 'std', 5, 1); % across five non-overlapping segments
-
-% Normality of residuals:
-tmp = DN_SimpleFit(res, 'gauss1', 0);
-if ~isstruct(tmp) && isnan(tmp) % fitting failed
-	out.gofr2 = NaN;
-else
-	out.gofr2 = tmp.r2; % r-squared
+% Report the residuals through the shared contract, at the cheap 'core' level. This
+% replaces the hand-rolled meanerr, stderr, meanabserr, sws, swm, ac1, ac2, taures and
+% tauresrat, which are now meane, stde, meanabs, sws, swm, ac1, ac2 and taurat -- the same
+% quantities under the names the rest of the model-fitting family uses. taures itself is
+% dropped: it correlates 0.90-0.99 with ac1, whereas its ratio form taurat does not.
+residOut = MF_ResidualAnalysis(res, y, 'core');
+fields = fieldnames(residOut);
+for k = 1:length(fields)
+	out.(fields{k}) = residOut.(fields{k});
 end
 
-% Autocorrelation structure of the residuals:
-out.ac1 = CO_AutoCorr(res, 1, 'Fourier');
-out.ac2 = CO_AutoCorr(res, 2, 'Fourier');
-out.taures = CO_FirstCrossing(res, 'ac', 0, 'continuous');
-out.tauresrat = CO_FirstCrossing(res, 'ac', 0, 'continuous') / CO_FirstCrossing(y, 'ac', 0, 'continuous');
+% Normality of the residuals, as the r-squared of a Gaussian fit to their distribution.
+% (Renamed from gofr2, which read as a goodness-of-fit measure for the *forecast*; it is
+% not -- it is a distributional statistic, so it sits alongside the contract's normksstat
+% rather than alongside stde.)
+tmp = DN_SimpleFit(res, 'gauss1', 0);
+if ~isstruct(tmp) && isnan(tmp) % fitting failed
+	out.normr2 = NaN;
+else
+	out.normr2 = tmp.r2; % r-squared
+end
 
 end

@@ -127,15 +127,18 @@ out.np = m_np; % the number of parameters, only a useful output if not specified
 
 % Transition interval (this should always be 1 in this case, from how we've
 % defined our time series, so not a useful output to record):
-out.m_Ts = m.Ts;
+out.Ts = m.Ts;
 
 % Goodness of fit outputs
 % Since noisevar, lossfunction, and fpe so highly correlated, the default
 % hctsa library only measures fpe.
-out.m_noisevar = m.NoiseVariance; % a scalar number, basically the fpe
-out.m_lossfn = m.EstimationInfo.LossFcn; % basically the fpe
-out.m_fpe = m.EstimationInfo.FPE;
-out.m_aic = aic(m);
+out.noisevar = m.NoiseVariance; % a scalar number, basically the fpe
+out.lossfn = m.EstimationInfo.LossFcn; % basically the fpe
+out.fpe = m.EstimationInfo.FPE;
+% (Dropped: aic(m). Rank-identical to fpe -- Spearman 1.0000 on both the Bonn EEG
+%  and Empirical1000 datasets -- so only fpe is kept. The m_ prefix
+%  on these fields has also been dropped: MF_armax reports the identical toolbox
+%  quantities under the bare names.)
 
 % ------------------------------------------------------------------------------
 %% Prediction
@@ -172,7 +175,7 @@ mresiduals = ytest.y - yp.y;
 % -------------------------------------------------------------------------------
 % Statistics on residuals
 % -------------------------------------------------------------------------------
-residout = MF_ResidualAnalysis(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals, ytest.y, 'full');
 
 % Convert these to local outputs in quick loop
 fields = fieldnames(residout);

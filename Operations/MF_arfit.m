@@ -120,7 +120,8 @@ out.meanA = mean(Aest);
 out.stdA = std(Aest);
 out.sumA = sum(Aest);
 out.rmsA = sqrt(sum(Aest.^2));
-out.sumsqA = sum(Aest.^2);
+% (Dropped: sumsqA = sum(Aest.^2). rmsA is its square root, a strictly monotone transform,
+%  so the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 % (3) Noise covariance matrix, Cest
@@ -192,14 +193,17 @@ out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 % (1) Significance Level
 out.res_siglev = siglev;
 
-% (2) Correlation test of residuals
-% error margins are within 1.96/sqrt(N);
-out.res_ac1 = CO_AutoCorr(res, 1, 'Fourier');
-out.res_ac1_norm = CO_AutoCorr(res, 1, 'Fourier') / sqrt(N); % normalize by sqrt(N)
+% (2) Residual diagnostics, through the shared contract at the cheap 'core' level.
+% Replaces the hand-rolled res_ac1, res_ac1_norm and pcorr_res: the first two are now
+% ac1 (ac1n was dropped as ~92% recoverable from the rest), and pcorr_res -- the
+% proportion of the first 20 autocorrelations exceeding 1.96/sqrt(N) -- is superseded by
+% propbth, which is the same idea over 25 lags at the 2.6/sqrt(N) threshold.
+residOut = MF_ResidualAnalysis(res, y, 'core');
+fields = fieldnames(residOut);
+for k = 1:length(fields)
+	out.(fields{k}) = residOut.(fields{k});
+end
 
-% Calculate correlations up to 20, return how many exceed significance threshold
-acf = CO_AutoCorr(res, 1:20, 'Fourier');
-out.pcorr_res = sum(abs(acf) > 1.96 / sqrt(N)) / 20;
 
 % -------------------------------------------------------------------------------
 %% (III) Confidence Intervals

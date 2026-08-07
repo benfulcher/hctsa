@@ -120,7 +120,7 @@ out.msqerr = mean(res.^2);
 
 % Use MF_ResidualAnalysis on the residuals
 % 1) Get statistics on residuals
-residstats = MF_ResidualAnalysis(res);
+residstats = MF_ResidualAnalysis(res, y, 'full');
 
 % Convert output of residual analysis to local outputs in quick loop
 fields = fieldnames(residstats);

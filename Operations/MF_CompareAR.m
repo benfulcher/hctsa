@@ -142,7 +142,10 @@ out.best_n = nn;
 
 [nn, vmodaic] = selstruc(V, 'aic'); % minimize Akaike's Information Criterion (AIC)
 out.aic_n = nn; % optimum model order minimizing AIC in the range given
-out.bestaic = vmodaic(nn == min(nn));
+% vmodaic is [2 x numOrders]: row 1 holds the AIC of each candidate model, row 2 the orders.
+% (Note: the previous form, vmodaic(nn == min(nn)), indexed with a logical scalar and so
+%  always returned element 1 -- the AIC of the *first* model, not the best one.)
+out.bestaic = min(vmodaic(1, :));
 
 % Using minimum description length is basically the same as using AIC:
 % [nn, vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)

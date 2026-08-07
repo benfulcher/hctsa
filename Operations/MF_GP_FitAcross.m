@@ -135,9 +135,11 @@ end
 %% Output statistics
 % ------------------------------------------------------------------------------
 S = sqrt(S2); % standard deviation function, S
-% rms error from mean function, mu
-out.rmserr = mean(sqrt((y(ts) - mu).^2));
-out.meanstderr = mean(abs(y(ts) - mu) ./ S);
+% Root-mean-square error of the mean function, mu.
+% (Note: this was previously mean(sqrt((y(ts)-mu).^2)), which cancels pointwise to
+%  mean(abs(y(ts)-mu)) -- a mean absolute error, not an RMSE.)
+out.stde = sqrt(mean((y(ts) - mu).^2));
+out.meanabs_std = mean(abs(y(ts) - mu) ./ S);
 out.stdmu = std(mu);
 out.meanS = mean(S);
 out.stdS = std(S);

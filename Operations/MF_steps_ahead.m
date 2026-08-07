@@ -197,23 +197,23 @@ for i = 1:maxSteps
 	mirms = mf.rmserrs(i) / min([sm1.rmserrs(i), sm2.rmserrs(i), sminf.rmserr]); % rms error
 	miabs = mf.mabserrs(i) / min([sm1.mabserrs(i), sm2.mabserrs(i), sminf.mabserr]); % absolute error
 
-	out.(sprintf('rmserr_%u', i)) = mirms;
-	out.(sprintf('mabserr_%u', i)) = miabs;
+	out.(sprintf('stde_h%u', i)) = mirms;
+	out.(sprintf('meanabs_h%u', i)) = miabs;
 
 	% raw ac1 values -- ratios don't really make sense
 	makeItSo = abs(mf.ac1s(i));
-	out.(sprintf('ac1_%u', i)) = makeItSo;
+	out.(sprintf('ac1_h%u', i)) = makeItSo;
 end
 
-out.meandiffrmsabs = abs(mean(mf.rmserrs - mf.mabserrs));
+out.stde_meanabs_diff = abs(mean(mf.rmserrs - mf.mabserrs));
 
 % ------------------------------------------------------------------------------
 % Quantify shape:
 % ------------------------------------------------------------------------------
 % Other than being a boring increasing curve
-out.meandiffrms = mean(diff(mf.rmserrs));
-out.maxdiffrms = max(diff(mf.rmserrs));
-out.stddiffrms = std(diff(mf.rmserrs));
-out.ndown = sum(diff(mf.rmserrs) < 0);
+out.stde_meandiff = mean(diff(mf.rmserrs));
+out.stde_maxdiff = max(diff(mf.rmserrs));
+out.stde_stddiff = std(diff(mf.rmserrs));
+out.stde_ndown = sum(diff(mf.rmserrs) < 0);
 
 end

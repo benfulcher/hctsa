@@ -258,16 +258,16 @@ allstderrs = abs(mus - yss) ./ stderrs;
 % ---
 
 % largest error:
-out.maxstderr = max(allstderrs(:));
-out.maxabserr = max(allabserrs(:));
+out.maxabs_std = max(allstderrs(:));
+out.maxabs = max(allabserrs(:));
 
 % smallest error:
-out.minstderr = min(allstderrs(:));
-out.minabserr = min(allabserrs(:));
+out.minabs_std = min(allstderrs(:));
+out.minabs = min(allabserrs(:));
 
 % mean error (across all):
-out.meanstderr = mean(allstderrs(:));
-out.meanabserr = mean(allabserrs(:));
+out.meanabs_std = mean(allstderrs(:));
+out.meanabs = mean(allabserrs(:));
 
 % ---
 % * Stats on errors per run
@@ -278,16 +278,16 @@ stderr_run = mean(allstderrs);
 abserr_run = mean(allabserrs);
 
 % Mean error for a run
-out.meanstderr_run = mean(stderr_run);
-out.meanabserr_run = mean(abserr_run);
+out.meanabs_std_run = mean(stderr_run);
+out.meanabs_run = mean(abserr_run);
 
 % Max error for a run
-out.maxstderr_run = max(stderr_run);
-out.maxabserr_run = max(abserr_run);
+out.maxabs_std_run = max(stderr_run);
+out.maxabs_run = max(abserr_run);
 
 % Min error for a run
-out.minstderr_run = min(stderr_run);
-out.minabserr_run = min(abserr_run);
+out.minabs_std_run = min(stderr_run);
+out.minabs_run = min(abserr_run);
 
 % Error bar stats:
 out.maxerrbar = max(stderrs(:)); % largest error bar

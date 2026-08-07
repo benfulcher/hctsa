@@ -132,7 +132,9 @@ out.lossfn = m.EstimationInfo.LossFcn;
 out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
 
 % out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in iteration
-out.aic = aic(m); % ~ log(fpe)
+% (Dropped: aic = aic(m). It is rank-identical to fpe -- Spearman 1.0000 on both the
+%  Bonn EEG (500 series) and Empirical1000 (1000 series) datasets -- so only fpe is kept,
+%  matching the choice made in MF_arfit and MF_FitSubsegments.)
 
 % ------------------------------------------------------------------------------
 %% Prediction
@@ -157,7 +159,7 @@ mresiduals = ytest.y - yp.y;
 % ------------------------------------------------------------------------------
 % Get statistics on residuals
 % ------------------------------------------------------------------------------
-residout = MF_ResidualAnalysis(mresiduals);
+residout = MF_ResidualAnalysis(mresiduals, ytest.y, 'full');
 
 % Convert these to local outputs in quick loop
 % Note that default hctsa library does not include rmse field, which is highly

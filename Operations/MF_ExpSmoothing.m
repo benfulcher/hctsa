@@ -267,7 +267,7 @@ e = yp - xp; % residuals
 
 % -------------------------------------------------------------------------------
 % Get statistics on residuals using MF_ResidualAnalysis
-residout = MF_ResidualAnalysis(e);
+residout = MF_ResidualAnalysis(e, xp, 'full');
 
 % Convert these to local outputs in quick loop:
 fields = fieldnames(residout);
