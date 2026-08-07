@@ -93,6 +93,21 @@ else
 	out.meanstat = mean(stat);
 	out.maxstat = max(stat);
 	out.minstat = min(stat);
+
+	% The variance ratio itself, which is the effect size behind the test.
+	%
+	% pValue and stat are both power-like: the test statistic is asymptotically
+	% N(0,1) under the null and grows as sqrt(n) under any alternative, so both
+	% track time-series length rather than the process. Note that swapping stat
+	% for pValue does NOT help -- p = Phi(stat) is a monotone transform, so a
+	% rank-based measure of length dependence is mathematically identical for
+	% the two, and the audit measured exactly that (eta^2 0.970/0.916 for both
+	% SY_VarRatioTest_2_0_pValue and _stat, to three decimals). The ratio, by
+	% contrast, converges to a fixed population value and measured
+	% eta^2 = 0.147/0.033.
+	out.meanratio = mean(ratio);
+	out.maxratio = max(ratio);
+	out.minratio = min(ratio);
 end
 
 end
