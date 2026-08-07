@@ -310,24 +310,21 @@ pkLoc = pkLoc / ptsPerw;
 % thresholded counts below are the calibrated, length-stable versions:
 % numPromPeaks_3 returns exactly 0 for white noise and exactly 3 for the 3-tone
 % signal at every length tested.
-out.numPeaks = length(pkHeight); % total number of peaks (unregistered; see above)
+numPeaks = length(pkHeight); % local only: needed for the peakPower_* fields below, not itself an output
 out.numPromPeaks_3 = sum(pkProm > 3); % number of peaks with log-prominence of at least 3 (~90-95th pctile of the white-noise null)
 out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with log-prominence of at least 5 (clearly above the null's observed max of ~3.8)
 out.numPromPeaks_8 = sum(pkProm > 8); % number of peaks with log-prominence of at least 8 (matches the weakest peak in a validated harmonic-series test signal)
-out.numPeaks_overmean = sum(pkProm > mean(pkProm)); % (unregistered; see note above)
-out.maxProm = max(pkProm); % maximum prominence of any peak
 out.meanProm_5 = mean(pkProm(pkProm > 5)); % mean peak prominence of those with log-prominence of at least 5
 
 out.meanPeakWidth_prom5 = mean(pkWidth(pkProm > 5)); % mean peak width of peaks with log-prominence of at least 5
 out.width_weighted_prom = sum(pkWidth .* pkProm) / sum(pkProm);
 
 % Power in top N peaks:
-nn = @(x) 1:min(x, out.numPeaks);
+nn = @(x) 1:min(x, numPeaks);
 out.peakPower_2 = sum(pkHeight(nn(2)) .* pkWidth(nn(2)));
 out.peakPower_5 = sum(pkHeight(nn(5)) .* pkWidth(nn(5)));
 out.peakPower_prom5 = sum(pkHeight(pkProm > 5) .* pkWidth(pkProm > 5)); % power in peaks with log-prominence of at least 5
 out.w_weighted_peak_prom = sum(pkLoc .* pkProm) / sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
-out.w_weighted_peak_height = sum(pkLoc .* pkHeight) / sum(pkHeight); % where are prominent peaks located on average (weighted by height)
 
 % Number of peaks required to get to 50% of power in peaks
 peakPower = pkHeight .* pkWidth;
@@ -359,8 +356,6 @@ out.logq75 = quantile(logS, 0.75);
 out.std = std(S);
 out.stdlog = log(out.std);
 out.logstd = std(logS);
-out.mean = mean(S);
-out.logmean = mean(logS);
 out.mom3 = DN_Moments(S, 3, true);
 out.logmom3 = DN_Moments(logS, 3, true);
 
@@ -407,10 +402,6 @@ out.wmax_75 = f_frac_w_max(0.75);
 out.wmax_90 = f_frac_w_max(0.9);
 out.wmax_95 = f_frac_w_max(0.95);
 out.wmax_99 = f_frac_w_max(0.99);
-
-% Width of saturation measures
-out.w10_90 = out.wmax_90 - out.wmax_10; % from 10% to 90%:
-out.w25_75 = out.wmax_75 - out.wmax_25;
 
 % ------------------------------------------------------------------------------
 % Power-weighted moments of the frequency distribution
@@ -534,23 +525,23 @@ warning('off', 'stats:robustfit:RankDeficient')
 
 % (1): Across full range
 r_all = (w > 0); % avoid -Inf for log(0) when w = 0;
-out = giveMeRobustStats(log(w(r_all)), log(S(r_all)), 'linfitloglog_all', out);
+out = giveMeRobustStats(log(w(r_all)), log(S(r_all)), 'linfitloglog_all', out, {'a1','a2','sigrat','sigma','sea1'});
 
 % (2): First half (low frequency)
 r_lf = (w > 0); % w(1) = 0 -> log(0) = -Inf
 r_lf(floor(N / 2) + 1:end) = 0; % remove second half of angular frequenciesf
-out = giveMeRobustStats(log(w(r_lf)), log(S(r_lf)), 'linfitloglog_lf', out);
+out = giveMeRobustStats(log(w(r_lf)), log(S(r_lf)), 'linfitloglog_lf', out, {'a2'});
 
 % (3): Second half (high frequency)
 r_hf = floor(N / 2) + 1:N;
-out = giveMeRobustStats(log(w(r_hf)), log(S(r_hf)), 'linfitloglog_hf', out);
+out = giveMeRobustStats(log(w(r_hf)), log(S(r_hf)), 'linfitloglog_hf', out, {'a1','a2','sigrat','sigma','sea1'});
 
 % (4): Middle half (mid-frequencies)
 r_mf = round(N / 4):round(N * 3 / 4);
-out = giveMeRobustStats(log(w(r_mf)), log(S(r_mf)), 'linfitloglog_mf', out);
+out = giveMeRobustStats(log(w(r_mf)), log(S(r_mf)), 'linfitloglog_mf', out, {'a2'});
 
 % (5) Fit linear to semilog plot (across full range)
-out = giveMeRobustStats(w, log(S), 'linfitsemilog_all', out);
+out = giveMeRobustStats(w, log(S), 'linfitsemilog_all', out, {'a1','sigrat','sigma','sea1'});
 
 % Turn the rank-deficient warnings back on
 warning('on', 'stats:robustfit:RankDeficient')
@@ -581,40 +572,6 @@ splitLog = buffer(logS, floor(N / 2));
 if size(splitLog, 2) > 2, splitLog = splitLog(:, 1:2); end
 out.logstatav2_m = std(mean(splitLog)) / std(logS);
 out.logstatav2_s = std(std(splitLog)) / std(logS);
-
-% 3 bands
-split = buffer(S, floor(N / 3));
-if size(split, 2) > 3, split = split(:, 1:3); end
-out.area_3_1 = sum(split(:, 1)) * dw;
-out.logarea_3_1 = sum(log(split(:, 1))) * dw;
-out.area_3_2 = sum(split(:, 2)) * dw;
-out.logarea_3_2 = sum(log(split(:, 2))) * dw;
-out.area_3_3 = sum(split(:, 3)) * dw;
-out.logarea_3_3 = sum(log(split(:, 3))) * dw;
-out.statav3_m = std(mean(split)) / std(S);
-out.statav3_s = std(std(split)) / std(S);
-splitLog = buffer(logS, floor(N / 3));
-if size(splitLog, 2) > 3, splitLog = splitLog(:, 1:3); end
-out.logstatav3_m = std(mean(splitLog)) / std(logS);
-out.logstatav3_s = std(std(splitLog)) / std(logS);
-
-% 4 bands
-split = buffer(S, floor(N / 4));
-if size(split, 2) > 4, split = split(:, 1:4); end
-out.area_4_1 = sum(split(:, 1)) * dw;
-out.logarea_4_1 = sum(log(split(:, 1))) * dw;
-out.area_4_2 = sum(split(:, 2)) * dw;
-out.logarea_4_2 = sum(log(split(:, 2))) * dw;
-out.area_4_3 = sum(split(:, 3)) * dw;
-out.logarea_4_3 = sum(log(split(:, 3))) * dw;
-out.area_4_4 = sum(split(:, 4)) * dw;
-out.logarea_4_4 = sum(log(split(:, 4))) * dw;
-out.statav4_m = std(mean(split)) / std(S);
-out.statav4_s = std(std(split)) / std(S);
-splitLog = buffer(logS, floor(N / 4));
-if size(splitLog, 2) > 4, splitLog = splitLog(:, 1:4); end
-out.logstatav4_m = std(mean(splitLog)) / std(logS);
-out.logstatav4_s = std(std(splitLog)) / std(logS);
 
 % 5 bands
 split = buffer(S, floor(N / 5));
@@ -665,22 +622,40 @@ out.ncross_log_f50 = ncrossfn_rel_log(0.5);
 %     mel = 1127*log(w/(1400*pi)+1);
 % end
 
-function out = giveMeRobustStats(xData, yData, textID, out)
+function out = giveMeRobustStats(xData, yData, textID, out, whichStats)
 	% Add statistics to the output structure from a robust linear fit
-	% between xData and yData
+	% between xData and yData.
+	%
+	% whichStats selects which of the six available statistics to emit.
+	% It exists because the full set was previously emitted for every fit
+	% range, but only a subset of those were ever registered as hctsa
+	% features -- for the 'lf' and 'mf' ranges only the gradient was --
+	% leaving 14 fields computed and returned but never used by anything.
 
 	% Perform the fit:
 	[a, stats] = robustfit(xData, yData);
 
-	% Add the statistics to the output structure:
-	out.(sprintf('%s_a1', textID)) = a(1); % robust intercept
-	out.(sprintf('%s_a2', textID)) = a(2); % robust gradient
-	% ratio of sigma estimates between ordinary least squares (ols) and the robust fit:
-	out.(sprintf('%s_sigrat', textID)) = stats.ols_s / stats.robust_s;
-	% esimate of sigma as the larger of robust_s and a weighted average of ols_s and robust_s:
-	out.(sprintf('%s_sigma', textID)) = stats.s;
-	out.(sprintf('%s_sea1', textID)) = stats.se(1); % standard error of 1st coefficient estimate
-	out.(sprintf('%s_sea2', textID)) = stats.se(2); % standard error of 2nd coefficient estimate
+	% Add the requested statistics to the output structure:
+	if ismember('a1', whichStats)
+		out.(sprintf('%s_a1', textID)) = a(1); % robust intercept
+	end
+	if ismember('a2', whichStats)
+		out.(sprintf('%s_a2', textID)) = a(2); % robust gradient
+	end
+	if ismember('sigrat', whichStats)
+		% ratio of sigma estimates between ordinary least squares (ols) and the robust fit:
+		out.(sprintf('%s_sigrat', textID)) = stats.ols_s / stats.robust_s;
+	end
+	if ismember('sigma', whichStats)
+		% esimate of sigma as the larger of robust_s and a weighted average of ols_s and robust_s:
+		out.(sprintf('%s_sigma', textID)) = stats.s;
+	end
+	if ismember('sea1', whichStats)
+		out.(sprintf('%s_sea1', textID)) = stats.se(1); % standard error of 1st coefficient estimate
+	end
+	if ismember('sea2', whichStats)
+		out.(sprintf('%s_sea2', textID)) = stats.se(2); % standard error of 2nd coefficient estimate
+	end
 end
 
 end
