@@ -24,7 +24,7 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 %
 % ---OUTPUTS:
 %
-% core (9 fields):
+% core (11 fields):
 %   meane      mean residual
 %   meanabs    mean absolute residual (near-redundant with stde for ordinary
 %              residuals, but the informative shape statistic when the residuals have
@@ -35,11 +35,11 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 %   propbth    proportion of the first 25 autocorrelations below the ~2.6/sqrt(N)
 %              significance threshold
 %   taurat     residual decorrelation time / data decorrelation time
+%   sws,swm    stationarity of the residual std and mean across 5 windows
 %
-% full (core + 6):
+% full (core + 4):
 %   ftbth      first lag at which the autocorrelation drops below significance
 %   normksstat Kolmogorov-Smirnov statistic against a normal distribution
-%   sws,swm    stationarity of the residual std and mean across 5 windows
 %   popt       order of an AR model fitted to the residuals (SBC-selected)
 %   minsbc     the corresponding Schwarz criterion
 % ------------------------------------------------------------------------------
@@ -148,12 +148,19 @@ else
 	end
 end
 
+% ------------------------------------------------------------------------------
+%% Stationarity of the residuals
+% ------------------------------------------------------------------------------
+% Cheap (no test, no model fit), so these belong in core:
+out.sws = SY_SlidingWindow(e, 'std', 'std', 5, 1);
+out.swm = SY_SlidingWindow(e, 'mean', 'std', 5, 1);
+
 if strcmp(summaryLevel, 'core')
 	return
 end
 
 % ------------------------------------------------------------------------------
-%% (full only) Whiteness, normality, stationarity, and an AR fit to the residuals
+%% (full only) Whiteness, normality, and an AR fit to the residuals
 % ------------------------------------------------------------------------------
 
 % First lag to fall below the significance threshold (maxLag+1 if it never does):
@@ -168,10 +175,6 @@ end
 % of the statistic and N, and was 99.1% recoverable, so it is not reported):
 [~, ~, ksstat] = kstest(eZ);
 out.normksstat = ksstat;
-
-% Are the residuals stationary? Spread of the windowed std and mean across 5 windows:
-out.sws = SY_SlidingWindow(e, 'std', 'std', 5, 1);
-out.swm = SY_SlidingWindow(e, 'mean', 'std', 5, 1);
 
 % Does an AR model still find structure in the residuals?
 emsg = '';

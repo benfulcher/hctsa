@@ -53,7 +53,9 @@ end
 % -------------------------------------------------------------------------------
 [a, e] = arcov(y, p);
 
-out.e = e; % variance
+% Variance of the white noise driving the fitted AR process. Named noisevar to match
+% MF_armax and MF_StateSpace_n4sid, which report the same quantity:
+out.noisevar = e;
 
 % Output fitted parameters up to order, p (+1)
 for i = 1:p + 1
@@ -66,9 +68,13 @@ end
 y_est = filter([0, -a(2:end)], 1, y);
 err = y - y_est; % residuals
 
-out.res_mu = mean(err); % mean error
-out.res_std = std(err); % std of error
-out.res_AC1 = CO_AutoCorr(err, 1, 'Fourier'); % autocorrelation of residuals at lag 1
-out.res_AC2 = CO_AutoCorr(err, 2, 'Fourier'); % autocorrelation of residuals at lag 2
+% Report the residuals through the shared contract, at the cheap 'core' level (this
+% operation is meant to stay cheap). Replaces the four hand-rolled statistics res_mu,
+% res_std, res_AC1 and res_AC2, which are now meane, stde, ac1 and ac2.
+residOut = MF_ResidualAnalysis(err, y, 'core');
+fields = fieldnames(residOut);
+for k = 1:length(fields)
+	out.(fields{k}) = residOut.(fields{k});
+end
 
 end

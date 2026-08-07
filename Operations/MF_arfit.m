@@ -193,18 +193,17 @@ out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 % (1) Significance Level
 out.res_siglev = siglev;
 
-% (2) Correlation test of residuals
-% error margins are within 1.96/sqrt(N);
-out.res_ac1 = CO_AutoCorr(res, 1, 'Fourier');
-% Express the residual autocorrelation in units of its ~1/sqrt(N) null standard error, as
-% MF_ResidualAnalysis does for ac1n. This is O(1) regardless of series length.
-% (Note: this previously *divided* by sqrt(N), which made the statistic shrink as 1/N and
-%  left it carrying no information beyond res_ac1 and the series length.)
-out.res_ac1_norm = abs(CO_AutoCorr(res, 1, 'Fourier')) * sqrt(N);
+% (2) Residual diagnostics, through the shared contract at the cheap 'core' level.
+% Replaces the hand-rolled res_ac1, res_ac1_norm and pcorr_res: the first two are now
+% ac1 (ac1n was dropped as ~92% recoverable from the rest), and pcorr_res -- the
+% proportion of the first 20 autocorrelations exceeding 1.96/sqrt(N) -- is superseded by
+% propbth, which is the same idea over 25 lags at the 2.6/sqrt(N) threshold.
+residOut = MF_ResidualAnalysis(res, y, 'core');
+fields = fieldnames(residOut);
+for k = 1:length(fields)
+	out.(fields{k}) = residOut.(fields{k});
+end
 
-% Calculate correlations up to 20, return how many exceed significance threshold
-acf = CO_AutoCorr(res, 1:20, 'Fourier');
-out.pcorr_res = sum(abs(acf) > 1.96 / sqrt(N)) / 20;
 
 % -------------------------------------------------------------------------------
 %% (III) Confidence Intervals

@@ -320,13 +320,14 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 % [PACF,Lags_pacf,bounds_pacf] = parcorr(e,20,[],[]);
 
 % Use MF_ResidualAnalysis on the standardized innovations
-% 1) Get statistics on standardized innovations
+% 1) Get statistics on the standardized innovations, prefixed zres_ (the old stde_
+%    prefix produced field names like stde_stde)
 residout = MF_ResidualAnalysis(stde, y, 'full');
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
 for k = 1:length(fields);
-	out.(sprintf('stde_%s', fields{k})) = residout.(fields{k});
+	out.(sprintf('zres_%s', fields{k})) = residout.(fields{k});
 end
 
 out.ac1_stde2 = CO_AutoCorr(stde2, 1, 'Fourier');
