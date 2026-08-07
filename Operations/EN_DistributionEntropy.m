@@ -112,6 +112,15 @@ switch histOrKS
 			[px, xr] = ksdensity(y, 'width', numBins, 'function', 'pdf'); % uses specified width
 		end
 		binWidths = ones(1, length(px)) * (xr(2) - xr(1));
+		% ksdensity returns a *density* evaluated on a grid, whereas the entropy
+		% sum below (shared with the 'hist' branch) expects probability mass per
+		% cell. Using the raw density there left sum(px) ~= 1, so the result was
+		% neither a discrete nor a differential entropy, and it inherited the
+		% growth of ksdensity's grid -- which spans the data range, and hence
+		% widens as ~sqrt(2*log(N)) for z-scored data. Convert to probability
+		% mass and renormalize (the grid truncates a little tail mass).
+		px = px .* binWidths;
+		px = px / sum(px);
 
 	otherwise
 		error('Unknown distribution method -- specify ''ks'' or ''hist''') % error; must specify 'ks' or 'hist'
@@ -126,6 +135,17 @@ end
 % (3) Compute the entropy sum and return it as output
 % ------------------------------------------------------------------------------
 % 0*log0 = 0:
+% -sum(p.*log(p./binWidth)) = H_discrete + mean log binWidth, i.e. the standard
+% discretized differential entropy.
 out = -sum(px(px > 0) .* log(px(px > 0) ./ binWidths(px > 0)));
+
+% Miller-Madow correction to the discrete part, for the histogram estimator
+% only: the plug-in entropy is biased low by (M-1)/(2n) for M occupied bins and
+% n samples, which made the finer binnings (20 and 50 bins) track time-series
+% length more than the distribution. Kernel density estimates are smoothed
+% rather than plug-in, so the discrete-bin correction does not apply to them.
+if strcmp(histOrKS, 'hist')
+	out = out + (sum(px > 0) - 1) / (2 * length(y));
+end
 
 end

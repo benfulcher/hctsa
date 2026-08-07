@@ -4779,11 +4779,9 @@ SP_Summaries_pgram_hamm.logstatav5_s      SP_Summaries_pgram_hamm_logstatav5_s  
 SP_Summaries_welch_rect.maxS        SP_Summaries_welch_rect_maxS    FourierSpectrum
 SP_Summaries_welch_rect.maxw        SP_Summaries_welch_rect_maxw    FourierSpectrum
 SP_Summaries_welch_rect.maxWidth        SP_Summaries_welch_rect_maxWidth    FourierSpectrum
-SP_Summaries_welch_rect.numPeaks        SP_Summaries_welch_rect_numPeaks    FourierSpectrum
 SP_Summaries_welch_rect.numPromPeaks_3      SP_Summaries_welch_rect_numPromPeaks_3    FourierSpectrum
 SP_Summaries_welch_rect.numPromPeaks_5      SP_Summaries_welch_rect_numPromPeaks_5    FourierSpectrum
 SP_Summaries_welch_rect.numPromPeaks_8      SP_Summaries_welch_rect_numPromPeaks_8    FourierSpectrum
-SP_Summaries_welch_rect.numPeaks_overmean       SP_Summaries_welch_rect_numPeaks_overmean    FourierSpectrum
 SP_Summaries_welch_rect.meanProm_5      SP_Summaries_welch_rect_meanProm_5    FourierSpectrum
 SP_Summaries_welch_rect.meanPeakWidth_prom5     SP_Summaries_welch_rect_meanPeakWidth_prom5    FourierSpectrum
 SP_Summaries_welch_rect.width_weighted_prom     SP_Summaries_welch_rect_width_weighted_prom    FourierSpectrum

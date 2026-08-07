@@ -297,11 +297,24 @@ pkWidth = pkWidth / ptsPerw;
 pkLoc = pkLoc / ptsPerw;
 
 % Characterize mean peak prominence (thresholds in log-power units; see note above)
-out.numPeaks = length(pkHeight); % total number of peaks
+%
+% numPeaks and numPeaks_overmean are computed (numPeaks is needed below) but are
+% deliberately NOT registered as hctsa features, for the same reason the
+% fft/periodogram peak fields above are not: they apply no prominence threshold,
+% so they count noise-floor ripple and therefore measure spectral resolution
+% rather than the data. On white noise numPeaks runs 16 -> 105 across
+% N = 200..6400, and numPeaks_overmean returns essentially identical values for
+% white noise (7 -> 53) and for a clear 3-tone signal (6 -> 43) -- i.e. no
+% discriminative content. Normalizing by the number of resolvable peak slots
+% does not fix this (0.12 -> 0.69 over the same range). The prominence-
+% thresholded counts below are the calibrated, length-stable versions:
+% numPromPeaks_3 returns exactly 0 for white noise and exactly 3 for the 3-tone
+% signal at every length tested.
+out.numPeaks = length(pkHeight); % total number of peaks (unregistered; see above)
 out.numPromPeaks_3 = sum(pkProm > 3); % number of peaks with log-prominence of at least 3 (~90-95th pctile of the white-noise null)
 out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with log-prominence of at least 5 (clearly above the null's observed max of ~3.8)
 out.numPromPeaks_8 = sum(pkProm > 8); % number of peaks with log-prominence of at least 8 (matches the weakest peak in a validated harmonic-series test signal)
-out.numPeaks_overmean = sum(pkProm > mean(pkProm)); % number of peaks with prominence greater than the mean (low for skewed distn)
+out.numPeaks_overmean = sum(pkProm > mean(pkProm)); % (unregistered; see note above)
 out.maxProm = max(pkProm); % maximum prominence of any peak
 out.meanProm_5 = mean(pkProm(pkProm > 5)); % mean peak prominence of those with log-prominence of at least 5
 
