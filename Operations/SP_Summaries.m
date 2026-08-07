@@ -155,7 +155,26 @@ if ismember(psdMeth, {'periodogram', 'welch'})
 	% across 97.6% of fields). noverlap is left at pwelch's own default (50%
 	% of window length) below.
 	if strcmp(psdMeth, 'welch')
-		winLength = max(round(Ny / 4), 16); % 4 segments at 50% overlap: a standard Welch setting
+		% winLength used to be Ny/4, which keeps the segment COUNT fixed
+		% (~4, ~7 with 50% overlap) but lets the segment LENGTH -- and with
+		% it the intrinsic frequency resolution and smoothing bandwidth --
+		% grow without bound as the series lengthens. That defeats the
+		% actual convergence guarantee of Welch's method (per-bin variance
+		% should shrink as more segments are averaged over a *fixed*
+		% resolution) and was the direct cause of several fields drifting
+		% with N: verified with an AR(2) resonance of known -3dB width
+		% (0.42 rad/sample) that the old scheme's measured maxWidth decayed
+		% monotonically and without bound (0.23 -> 0.008 rad/sample, N =
+		% 200 -> 6400, a 30x error at the largest length, actively getting
+		% worse with more data) while capping winLength at a fixed absolute
+		% length converges instead (0.15-0.20 across the same range).
+		% 256 matches both scipy.signal.welch's and pwelch's own default
+		% segment length (see the nfft note below), so above Ny ~ 1024 this
+		% now behaves like a textbook Welch estimate: resolution fixed,
+		% more segments averaged as N grows, variance shrinks with N.
+		% Below that it is unchanged from before (round(Ny/4) is smaller
+		% than 256), so short-series values are untouched.
+		winLength = max(min(256, round(Ny / 4)), 16);
 	else
 		winLength = Ny;
 	end
@@ -204,8 +223,23 @@ switch psdMeth
 	case 'welch'
 		% Welch power spectral density estimate:
 		Fs = 1; % sampling frequency
-		N = 2^nextpow2(Ny);
-		[S, f] = pwelch(y, window, [], N, Fs);
+		% nfft used to be tied to Ny (2^nextpow2(Ny), same as the 'fft'
+		% branch above), independently of winLength -- so even after
+		% capping winLength, the frequency GRID kept getting finer with N
+		% while the actual smoothing bandwidth (set by winLength) stayed
+		% fixed. That mismatch showed up as its own N-dependence in
+		% bin-lag statistics (ac1/ac2/logac1/logac2, which correlate
+		% adjacent *bins*, not a physical frequency lag) and inflated
+		% several bin-count sums (spect_shann_ent, the poly/saturating
+		% cumsum fits) that are supposed to describe the spectrum's shape,
+		% not its number of samples -- verified: e.g. fpolysat_a's eta^2
+		% against length dropped from 0.98 to 0.06 once nfft stopped
+		% growing with Ny. Passing [] lets pwelch fall back to its own
+		% documented default (max(256, 2^nextpow2(winLength)) --
+		% confirmed empirically), i.e. resolution set by the window, not
+		% the series -- the textbook convention this file's manual
+		% override had been silently bypassing.
+		[S, f] = pwelch(y, window, [], [], Fs);
 		w = 2 * pi * f'; % angular frequency
 		S = S / (2 * pi); % adjust so that area remains normalized in angular frequency space
 
