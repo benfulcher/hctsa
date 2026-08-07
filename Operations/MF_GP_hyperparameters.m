@@ -112,6 +112,9 @@ infAlg = @infLaplace;
 if (maxN > 0) && (N > maxN)
 	switch resampleHow
 		case 'resample' % resamples the whole time series down
+			% resample is from the Signal Processing Toolbox. The check sits here rather
+			% than at the top of the file because only this downsampling branch needs it:
+			BF_CheckToolbox('signal_toolbox');
 			f = maxN / N;
 			y = resample(y, ceil(f * 10000), 10000);
 			if length(y) > maxN

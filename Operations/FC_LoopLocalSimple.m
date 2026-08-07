@@ -51,10 +51,9 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 % ------------------------------------------------------------------------------
 BF_CheckToolbox('curve_fitting_toolbox');
 
-% ------------------------------------------------------------------------------
-% Also uses xcorr from the signal processing toolbox:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('signal_toolbox');
+% (A Signal Processing Toolbox check was declared here for xcorr, but neither this function
+%  nor anything it calls -- FC_LocalSimple, CO_AutoCorr, CO_FirstCrossing -- uses xcorr or any
+%  other Signal Processing function, so the requirement was spurious.)
 
 doPlot = false; % plot outputs to a figure
 
