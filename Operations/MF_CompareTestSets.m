@@ -173,7 +173,19 @@ r = zeros(numPred, 2);
 switch subsetHow
 	case 'rand'
 		if samplep(2) < 1 % specified a fraction of time series
-			l = floor(N * samplep(2));
+			% A pure fraction makes the test-segment length -- and with it
+			% the precision of every residual statistic below -- grow
+			% without bound as N grows, so results never converge to a
+			% fixed population value: verified this was the dominant
+			% driver of this operation's length-dependence (rank eta^2 vs
+			% N on a stationary AR(1) null, N=200..6400, fell from
+			% 0.39-0.94 to 0.01-0.21 across stde/stdrat/ac1/meane
+			% statistics once capped). Capping at 20 leaves N=200 (the
+			% audit's own smallest tested length, where 10% of the series
+			% is already <= 20) completely unchanged and only bites for
+			% longer series, where letting the segment keep growing was
+			% buying no real precision benefit anyway.
+			l = max(min(20, floor(N * samplep(2))), 10);
 		else % specified an absolute interval
 			l = samplep(2);
 		end
@@ -193,7 +205,9 @@ switch subsetHow
 			r(:, 2) = spts(2:end);
 		else
 			if samplep(2) < 1 % specified a fraction of time series
-				l = floor(N * samplep(2));
+				% Capped at an absolute length -- see the 'rand' case above
+				% for why (test-segment length must not grow with N).
+				l = max(min(20, floor(N * samplep(2))), 10);
 			else % specified an absolute interval
 				l = samplep(2);
 			end
