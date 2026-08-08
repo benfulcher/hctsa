@@ -8,11 +8,14 @@ function out = DN_HighLowMu(y)
 % y, the input data vector
 
 % ---NOTES:
-% Somehow measures the same information as SB_MotifTwo(y,'mean') -> u, i.e.,
-% contains the same information as the proportion of the data that is above the
-% mean. This indicates that you cannot independently control the proportion of
-% data that is above the mean and the ratio of the means of the data above and
-% below the mean. This is not immediately obvious...
+% Deregistered 2026-08-08: with n_hi/n_lo the counts of points above/below the
+% mean and u = n_hi/(n_hi+n_lo) the proportion above (SB_MotifTwo(y,'mean').u),
+% the definition of the mean gives n_hi*(mhi-mu) = n_lo*(mu-mlo) exactly, so
+% this statistic equals n_lo/n_hi = 1/u - 1 whenever no points land exactly on
+% the mean. That's a deterministic monotonic function of u, so up to ties at
+% the mean (negligible for continuous data, occasionally material for
+% quantized/discrete series) this carries no information SB_MotifTwo_mean_u
+% doesn't already provide as a free byproduct of its motif analysis.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

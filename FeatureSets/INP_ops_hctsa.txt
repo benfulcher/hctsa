@@ -98,7 +98,6 @@ DN_Quantile_96	quantile_96	distribution
 DN_Quantile_97	quantile_97	distribution
 DN_Quantile_98	quantile_98	distribution
 DN_Quantile_99	quantile_99	distribution
-DN_HighLowMu	HighLowMu	distribution,raw,locationDependent,spreadDependent
 DN_Unique       propUnique  distribution,raw
 ST_SimpleStats_zcross	ST_SimpleStats_zcross	noisiness
 ST_SimpleStats_pmcross	ST_SimpleStats_pmcross	noisiness

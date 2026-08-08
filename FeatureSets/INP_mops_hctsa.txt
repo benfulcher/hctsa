@@ -91,7 +91,6 @@ DN_Quantile(x_z,0.98)	DN_Quantile_98
 DN_Quantile(x_z,0.99)	DN_Quantile_99
 DN_cv(x,1)	DN_cv_1
 DN_cv(x,2)	DN_cv_2
-DN_HighLowMu(x)	DN_HighLowMu
 DN_Unique(x) DN_Unique
 ST_SimpleStats(x_z,'zcross')	ST_SimpleStats_zcross
 ST_SimpleStats(x_z,'pmcross')	ST_SimpleStats_pmcross
