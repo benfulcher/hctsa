@@ -956,7 +956,6 @@ DK_timerev_4	                DK_timerev_4	nonlinearity
 HT_HypothesisTest_signtest		signtest	hypothesistest,signtest,distribution
 HT_HypothesisTest_runstest	    runstest	hypothesistest,randomness,raw
 HT_HypothesisTest_lbqtest		lbqtest	    hypothesistest,randomness
-HT_HypothesisTest_lbqtestraw	lbqtestraw	hypothesistest,randomness,raw
 HT_HypothesisTest_ztest		    ztest	    hypothesistest
 HT_HypothesisTest_signrank		signrank	hypothesistest,distribution
 HT_HypothesisTest_jbtest		jbtest	    hypothesistest,raw,distribution
@@ -1822,7 +1821,6 @@ DN_RemovePoints_absfar_01_saturate.ac3rat	DN_RemovePoints_absfar_01_saturate_ac3
 DN_RemovePoints_absfar_01_saturate.ac3diff	DN_RemovePoints_absfar_01_saturate_ac3diff	correlation,outliers
 DN_RemovePoints_absfar_01_saturate.sumabsacfdiff	DN_RemovePoints_absfar_01_saturate_sumabsacfdiff	correlation,outliers
 DN_RemovePoints_absfar_01_saturate.mean	DN_RemovePoints_absfar_01_saturate_mean	correlation,outliers
-DN_RemovePoints_absfar_01_saturate.median	DN_RemovePoints_absfar_01_saturate_median	correlation,outliers
 DN_RemovePoints_absfar_01_saturate.std	DN_RemovePoints_absfar_01_saturate_std	correlation,outliers
 DN_RemovePoints_absfar_01_saturate.skewnessrat	DN_RemovePoints_absfar_01_saturate_skewnessrat	correlation,outliers,distribution
 DN_RemovePoints_absfar_01_saturate.kurtosisrat	DN_RemovePoints_absfar_01_saturate_kurtosisrat	correlation,outliers,distribution

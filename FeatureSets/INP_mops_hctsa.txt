@@ -522,7 +522,6 @@ DK_timerev(x_z,4)	DK_timerev_4
 HT_HypothesisTest(x_z,'signtest')	    HT_HypothesisTest_signtest
 HT_HypothesisTest(x,'runstest')	    HT_HypothesisTest_runstest
 HT_HypothesisTest(x_z,'lbq')			HT_HypothesisTest_lbqtest
-HT_HypothesisTest(x,'lbq')			HT_HypothesisTest_lbqtestraw
 HT_HypothesisTest(x_z,'ztest')		HT_HypothesisTest_ztest
 HT_HypothesisTest(x_z,'signrank')	HT_HypothesisTest_signrank
 HT_HypothesisTest(x,'jbtest')		HT_HypothesisTest_jbtest
