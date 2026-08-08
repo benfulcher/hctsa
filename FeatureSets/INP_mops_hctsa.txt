@@ -958,6 +958,9 @@ NL_MS_nlpe(x_z,'fnn','mi')	NL_MS_nlpe_fnn_mi
 NL_embed_PCA(x_z,'mi',10)	NL_embed_PCA_mi_10
 NL_embed_PCA(x_z,1,10)	NL_embed_PCA_1_10
 NL_embed_PCA(x_z,'ac',3)	NL_embed_PCA_ac_3
+NL_embed_KernelPCA(x_z,'mi',10,2000)	NL_embed_KernelPCA_mi_10_2000
+NL_embed_KernelPCA(x_z,1,10,2000)	NL_embed_KernelPCA_1_10_2000
+NL_embed_KernelPCA(x_z,'ac',3,2000)	NL_embed_KernelPCA_ac_3_2000
 PP_ModelFit(x_z,'ar',2,'default')	PP_ModelFit_ar_2
 MF_steps_ahead(x_z,'ar',2,6)	MF_steps_ahead_ar_2_6
 MF_steps_ahead(x_z,'ar','best',6)	MF_steps_ahead_ar_best_6

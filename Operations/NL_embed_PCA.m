@@ -2,8 +2,8 @@ function out = NL_embed_PCA(y, tau, m)
 % NL_embed_PCA  Principal Components analysis of a time series in an embedding space.
 %
 % Reconstructs the time series as a time-delay embedding, and performs Principal
-% Components Analysis on the result using princomp code from
-% Matlab's Bioinformatics Toolbox.
+% Components Analysis on the result using Matlab's Statistics and Machine
+% Learning Toolbox pca() function.
 %
 % This technique is known as singular spectrum analysis.
 %
@@ -76,8 +76,15 @@ if isnan(y_embed);
 end
 
 % ------------------------------------------------------------------------------
-% Do the pca using Statistics toolbox function, 'princomp'
+% Do the pca using Statistics toolbox function, 'pca'
 % ------------------------------------------------------------------------------
+% pca() returns at most min(size(y_embed,1)-1, m) components; need m of them
+% (and at least 2 for out.top2 below) or the loop indexing below is invalid:
+if size(y_embed,1) - 1 < m || m < 2
+	fprintf(1, 'Not enough embedding vectors (%u) for a rank-%u PCA\n', size(y_embed,1), m);
+	out = NaN; return
+end
+
 [~, ~, latent] = pca(y_embed);
 
 perc = latent / sum(latent); % proportion of variance explained
