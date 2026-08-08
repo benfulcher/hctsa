@@ -73,7 +73,7 @@ else
 	lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
 evalr = lp + 1:N; % range over which to evaluate the forecast
-if isempty(evalr)
+if isnan(lp) || isempty(evalr)
 	warning('This time series is too short for forecasting');
 	out = NaN;
 	return

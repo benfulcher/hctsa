@@ -67,6 +67,9 @@ end
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau, 'tau'),
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		out = NaN; return
+	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > length(y) / 10
 		tau = floor(length(y) / 10);

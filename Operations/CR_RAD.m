@@ -36,6 +36,9 @@ end
 if ischar(tau) && strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(x, 'ac', 0, 'discrete');
+	if isnan(tau)
+		f = NaN; return
+	end
 end
 % -------------------------------------------------------------------------------
 

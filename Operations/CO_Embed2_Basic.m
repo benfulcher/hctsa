@@ -52,6 +52,9 @@ if strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
+if isnan(tau)
+	out = NaN; return
+end
 
 xt = y(1:end - tau); % part of the time series
 xtp = y(1 + tau:end); % time-lagged time series

@@ -142,7 +142,7 @@ switch whatMethod
 		else % return a specific set of values
 			out = zeros(length(tau), 1);
 			for i = 1:length(tau)
-				if (tau(i) > length(acf) - 1) || (tau(i) < 0)
+				if isnan(tau(i)) || (tau(i) > length(acf) - 1) || (tau(i) < 0)
 					out(i) = NaN;
 				else
 					out(i) = acf(tau(i) + 1);

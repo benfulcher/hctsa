@@ -57,6 +57,9 @@ end
 % Set tau to first zero-crossing of the autocorrelation function with the input 'tau'
 if strcmp(tau, 'tau')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		glscf = NaN; return
+	end
 end
 
 % Take magnitudes of time-delayed versions of the time series. abs(y) is

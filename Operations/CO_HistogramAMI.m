@@ -58,6 +58,9 @@ if nargin < 2 || isempty(tau)
 end
 if ischar(tau) && ismember(tau, {'ac', 'tau'})
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		out = NaN; return
+	end
 end
 
 if nargin < 3 || isempty(meth)

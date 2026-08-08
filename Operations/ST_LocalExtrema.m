@@ -82,7 +82,7 @@ switch howToWindow
 		error('Unknown method ''%s''', howToWindow);
 end
 
-if (windowLength > N) || (windowLength <= 1)
+if isnan(windowLength) || (windowLength > N) || (windowLength <= 1)
 	% This feature is unsuitable if the window length exceeds ts
 	fprintf(1, 'The window length is longer than the time-series length!\n');
 	out = NaN;

@@ -66,7 +66,7 @@ N = length(y); % time-series length
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)
-		error('Time series too short to estimate tau');
+		out = NaN; return
 	end
 	if tau > N / 50 % for highly-correlated signals
 		tau = floor(N / 50);

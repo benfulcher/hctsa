@@ -103,7 +103,7 @@ elseif strcmp(tau, 'mi')
 	tau = CO_FirstMin(y, 'mi');
 end
 if isnan(tau)
-	error('Time series cannot be embedded (too short?)');
+	out = NaN; return
 end
 
 % Min/max embedding dimension, mmm

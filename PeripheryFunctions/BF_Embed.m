@@ -143,6 +143,10 @@ else % use a routine to inform m
         ssm = sprintf('by user to %u',m);
     end
 end
+if isnan(m)
+    % Could not determine an embedding dimension (time series too short/degenerate?)
+    y_embed = NaN; return
+end
 % we now have an integral embedding dimension, m
 
 % ------------------------------------------------------------------------------

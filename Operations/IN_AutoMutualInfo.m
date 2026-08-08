@@ -89,8 +89,9 @@ end
 
 for k = 1:numTimeDelays
 
-	% Check enough samples to compute an automutual information
-	if timeDelay(k) > N - minSamples
+	% Check enough samples to compute an automutual information (isnan catches
+	% an unresolvable 'ac'/'tau' delay from a degenerate, e.g. constant, series)
+	if isnan(timeDelay(k)) || timeDelay(k) > N - minSamples
 		% Time series is too short -- keep the remaining values as NaNs
 		break
 	end

@@ -53,6 +53,9 @@ if nargin < 2 || isempty(tau)
 end
 if strcmp(tau, 'tau'),
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		out = NaN; return
+	end
 	if tau > N / 10
 		tau = floor(N / 10);
 	end

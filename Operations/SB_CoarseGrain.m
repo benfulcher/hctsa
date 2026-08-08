@@ -95,6 +95,9 @@ switch howtocg
 		if strcmp(numGroups, 'tau')
 			% First zero-crossing of the autocorrelation function
 			tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+			if isnan(tau)
+				yth = NaN; return
+			end
 		else
 			tau = numGroups;
 		end

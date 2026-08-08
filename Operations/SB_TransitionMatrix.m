@@ -80,7 +80,7 @@ if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end
 if isnan(tau)
-	error('Time series too short to estimate tau');
+	out = NaN; return
 end
 
 if tau > 1 % calculate transition matrix at a non-unit lag
