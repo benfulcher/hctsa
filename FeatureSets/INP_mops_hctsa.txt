@@ -658,6 +658,8 @@ CO_trev(x_z,'ac')	CO_trev_ac
 CO_trev(x_z,'mi')	CO_trev_mi
 CO_JointNonGaussianity(x_z,'ac',2,1,10000)	CO_JointNonGaussianity_ac_2_1_10000
 CO_JointNonGaussianity(x_z,'ac',3,1,10000)	CO_JointNonGaussianity_ac_3_1_10000
+CO_TimeRevKLD(x_z,'ac',2,3,1,'full')	CO_TimeRevKLD_ac_2_3_1_full
+CO_TimeRevKLD(x_z,'ac',3,3,1,'full')	CO_TimeRevKLD_ac_3_3_1_full
 IN_AutoMutualInfoStats(x_z,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
 IN_AutoMutualInfoStats(x_z,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(x_z),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
