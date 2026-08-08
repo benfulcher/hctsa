@@ -1,4 +1,9 @@
 % INSTALL   Installs the hctsa code package from scratch.
+%
+%---INPUTS:
+% silentInstall, (binary) set true to run non-interactively (no 'Press any
+%                key to continue' prompts), e.g., for scripted/CI installs.
+%                Defaults to false.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -34,7 +39,8 @@ fprintf(1,['This script will set up the Highly Comparative Time-Series ' ...
 fprintf(1,['We will:' ...
             '\n-1- Add the paths needed for the repository,' ...
             '\n-2- Check toolboxes,' ...
-            '\n-3- Compile the external time-series toolboxes for this system.\n\n']);
+            '\n-3- Compile the external time-series toolboxes for this system,' ...
+            '\n-4- Run a quick smoke test.\n\n']);
 
 % ------------------------------------------------------------------------------
 % 0. Check that the latest git submodules are loaded (catch22)
@@ -103,7 +109,7 @@ end
 % ------------------------------------------------------------------------------
 %% 3. Attempt to compile the executables required by the periphery Toolboxes:
 % ------------------------------------------------------------------------------
-fprintf(1,['\n-2- Compile the binary executables needed for evaluating ' ...
+fprintf(1,['\n-3- Compile the binary executables needed for evaluating ' ...
                                                 'some operations.\n']);
 fprintf(1,['Please make sure that mex is set up with the right compilers for' ...
                                                             ' this system.\n']);
@@ -116,11 +122,29 @@ cd Toolboxes
 compile_mex
 cd('../');
 
-%-------------------------------------------------------------------------------
-%
-fprintf(1,'Hope everything compiled ok?!\n\n');
+% ------------------------------------------------------------------------------
+%% 4. Smoke test: compute a feature vector for a synthetic time series to check
+%% that the core pipeline actually runs end-to-end (not just that things compiled):
+% ------------------------------------------------------------------------------
+fprintf(1,'\n-4- Running a quick smoke test (computing features for a synthetic time series)...\n');
+try
+    t = (0:499)/100;
+    x = sin(2*pi*10*t) + 0.1*randn(1,500);
+    % doParallel = false: don't depend on the (optional) Parallel Computing Toolbox here.
+    featVector = TS_CalculateFeatureVector(x',false);
+    numGood = sum(~isnan(featVector));
+    if numGood==0
+        fprintf(1,['WARNING: smoke test ran but no features were computed successfully -- ' ...
+                                        'something may be misconfigured.\n']);
+    else
+        fprintf(1,'Smoke test passed: %u/%u features computed successfully.\n',numGood,numel(featVector));
+    end
+catch emsg
+    fprintf(1,['WARNING: smoke test failed to run (%s).\nThis may indicate a problem with one of ' ...
+                                'the compiled binaries above.\n'],emsg.message);
+end
 
-fprintf(1,['All done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
+fprintf(1,['\nAll done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
                             'e.g.: TS_Init(''INP_test_ts.mat'')\n']);
 
 % Attempt to add a time series

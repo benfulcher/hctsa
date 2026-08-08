@@ -162,6 +162,19 @@ if ispc
     ok = false;
     fprintf(1,['\nERROR: automatic compilation of TISEAN is not supported on Windows.\n' ...
         'See Toolboxes%sTisean_3.0.1%sindex.html for manual build instructions.\n'],filesep,filesep);
+elseif system('which gcc >/dev/null 2>&1')~=0 || system('which make >/dev/null 2>&1')~=0
+    % Check for a C compiler and make up front, rather than letting TISEAN's
+    % ./configure fail and dump a wall of cryptic autoconf output:
+    ok = false;
+    if ismac
+        fprintf(1,['\nERROR: no C compiler (gcc/clang) or ''make'' found on the system PATH.\n' ...
+            'Install the Xcode Command Line Tools with: xcode-select --install\n' ...
+            'then re-run compile_mex.m.\n']);
+    else
+        fprintf(1,['\nERROR: no C compiler (gcc) or ''make'' found on the system PATH.\n' ...
+            'On Debian/Ubuntu: sudo apt-get install build-essential\n' ...
+            'then re-run compile_mex.m.\n']);
+    end
 else
     % Build against a prefix outside the repo, in case the repo lives under a
     % path containing spaces (e.g., a Dropbox-synced folder): TISEAN's 1990s-era
