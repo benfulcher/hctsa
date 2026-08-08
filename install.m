@@ -78,8 +78,8 @@ end
 % Desirable (needed for some hctsa features):
 toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','identification_toolbox',...
                     'wavelet_toolbox','econometrics_toolbox','financial_toolbox'};
-flags = zeros(8,1);
-names = cell(8,1);
+flags = zeros(length(toolboxCodes),1);
+names = cell(length(toolboxCodes),1);
 for i = 1:length(toolboxCodes)
     [flags(i),names{i}] = BF_CheckToolbox(toolboxCodes{i},true,true);
 end

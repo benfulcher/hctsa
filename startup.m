@@ -23,8 +23,12 @@ function startup()
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
+% Resolve paths relative to this file's own location (not the current
+% working directory), so startup works regardless of where it's called from:
+hctsaDir = fileparts(mfilename('fullpath'));
+
 % We use this function a bit:
-addfcn = @(x) addpath(fullfile(pwd,x));
+addfcn = @(x) addpath(fullfile(hctsaDir,x));
 
 fprintf(1,'Adding paths for the highly comparative time-series analysis package...\n')
 
@@ -46,63 +50,63 @@ fprintf(1,'Core directories added.\n')
 fprintf(1,'Adding external time-series toolboxes...')
 % Kaplan's routines:
 fprintf(1,' Danny Kaplan')
-addpath(fullfile(pwd,'Toolboxes','Danny_Kaplan'));
+addpath(fullfile(hctsaDir,'Toolboxes','Danny_Kaplan'));
 
 % Gaussian Process Toolbox, gpml, by Carl Edward Rasmussen & Hannes Nickisch:
 fprintf(1,', Gaussian Process Code\n')
-addpath(fullfile(pwd,'Toolboxes','gpml'));
+addpath(fullfile(hctsaDir,'Toolboxes','gpml'));
 GP_startup % add nested directories
 
 % Zoubin Gharamani's hmm toolbox, ZG_hmm
 fprintf(1,'HMM toolbox')
-addpath(fullfile(pwd,'Toolboxes','ZG_hmm'));
+addpath(fullfile(hctsaDir,'Toolboxes','ZG_hmm'));
 
 % ARFIT Toolbox
 fprintf(1,', ARfit toolbox')
-addpath(fullfile(pwd,'Toolboxes','ARFIT'));
+addpath(fullfile(hctsaDir,'Toolboxes','ARFIT'));
 
 % Michael Small's utilities
 fprintf(1,', Michael Small\n')
-addpath(fullfile(pwd,'Toolboxes','Michael_Small'));
+addpath(fullfile(hctsaDir,'Toolboxes','Michael_Small'));
 
 % DVV Toolbox
 fprintf(1,'DVV Toolbox')
-addpath(fullfile(pwd,'Toolboxes','DVV_Toolbox'));
+addpath(fullfile(hctsaDir,'Toolboxes','DVV_Toolbox'));
 
 % Physionet
 fprintf(1,', Physionet');
-addpath(fullfile(pwd,'Toolboxes','Physionet'));
+addpath(fullfile(hctsaDir,'Toolboxes','Physionet'));
 
 % Max Little's steps/bumps toolbox
 fprintf(1,', Max Little''s steps_bumps toolkit')
-addpath(fullfile(pwd,'Toolboxes','Max_Little','steps_bumps_toolkit'));
+addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','steps_bumps_toolkit'));
 
 % Max Little's fastdfa code
 fprintf(1,', fastdfa')
-addpath(fullfile(pwd,'Toolboxes','Max_Little','fastdfa'));
+addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','fastdfa'));
 
 % Max Little's rpde code
 fprintf(1,', rpde')
-addpath(fullfile(pwd,'Toolboxes','Max_Little','rpde'));
+addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','rpde'));
 
 % nsamdf
 fprintf(1,', nsamdf,\n');
-addpath(fullfile(pwd,'Toolboxes','nsamdf'));
+addpath(fullfile(hctsaDir,'Toolboxes','nsamdf'));
 
 % catch22
 fprintf(1,'catch22')
-addpath(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'));
+addpath(fullfile(hctsaDir,'Toolboxes','catch22','wrap_Matlab'));
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
 fprintf(1,', Information dynamics toolkit, ')
-javaaddpath(fullfile(pwd,'Toolboxes','infodynamics-dist','infodynamics.jar'));
+javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
 % Add path for TISEAN binaries (compiled locally into Toolboxes/Tisean_3.0.1/bin
 % by install.m; falls back to ~/bin for older manual installations):
 % ------------------------------------------------------------------------------
-tiseanBinaryLocation = fullfile(pwd,'Toolboxes','Tisean_3.0.1','bin');
+tiseanBinaryLocation = fullfile(hctsaDir,'Toolboxes','Tisean_3.0.1','bin');
 if ~isfolder(tiseanBinaryLocation)
     [~,homeDir] = system('echo $HOME'); % get system home directory
     homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
