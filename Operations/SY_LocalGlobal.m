@@ -124,12 +124,28 @@ end
 out.absmean = abs(mean(y(r))); % /mean(y); % Makes sense without normalization if y is z-scored
 out.std = std(y(r)); % /std(y); % Makes sense without normalization if y is z-scored
 out.median = median(y(r)); % /median(y); % if median is very small then normalization could be very noisy
-out.iqr = abs(1 - iqr(y(r)) / iqr(y));
-out.skewness = abs(1 - skewness(y(r)) / skewness(y)); % how far from true
-out.kurtosis = abs(1 - kurtosis(y(r)) / kurtosis(y)); % how far from true
-out.ac1 = abs(1 - CO_AutoCorr(y(r), 1, 'Fourier') / CO_AutoCorr(y, 1, 'Fourier')); % how far from true
+
+% Ratios below are undefined when the global statistic is exactly zero
+% (e.g., skewness = 0 for any symmetric distribution, a common case --
+% not a rare edge case) -- guard each rather than silently producing Inf/NaN.
+globalIQR = iqr(y);
+if globalIQR == 0, out.iqr = NaN; else, out.iqr = abs(1 - iqr(y(r)) / globalIQR); end
+
+globalSkewness = skewness(y);
+if globalSkewness == 0, out.skewness = NaN; else, out.skewness = abs(1 - skewness(y(r)) / globalSkewness); end % how far from true
+
+globalKurtosis = kurtosis(y);
+if globalKurtosis == 0, out.kurtosis = NaN; else, out.kurtosis = abs(1 - kurtosis(y(r)) / globalKurtosis); end % how far from true
+
+globalAC1 = CO_AutoCorr(y, 1, 'Fourier');
+if globalAC1 == 0, out.ac1 = NaN; else, out.ac1 = abs(1 - CO_AutoCorr(y(r), 1, 'Fourier') / globalAC1); end % how far from true
+
 sampEn_struct_r = EN_SampEn(y(r), 1, 0.1);
 sampEn_struct = EN_SampEn(y, 1, 0.1);
-out.sampen101 = sampEn_struct_r.sampen1 / sampEn_struct.sampen1;
+if sampEn_struct.sampen1 == 0
+	out.sampen101 = NaN;
+else
+	out.sampen101 = sampEn_struct_r.sampen1 / sampEn_struct.sampen1;
+end
 
 end

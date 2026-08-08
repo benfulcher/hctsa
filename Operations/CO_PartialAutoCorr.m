@@ -58,9 +58,7 @@ end
 % -------------------------------------------------------------------------------
 N = length(y); % time-series length
 
-assert(maxTau > 0)
-
-if maxTau < 0
+if maxTau <= 0
 	error('Negative time lags not applicable')
 end
 

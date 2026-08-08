@@ -62,7 +62,7 @@ switch cumWhatMay
 		out = kurtosis(y, 0);
 
 	otherwise
-		error('Unknown cumulant ''%s'' specified: should be ''skew1'', ''skew2'', ''kurt1'', or ''kur2''', cumWhatMay)
+		error('Unknown cumulant ''%s'' specified: should be ''skew1'', ''skew2'', ''kurt1'', or ''kurt2''', cumWhatMay)
 end
 
 end

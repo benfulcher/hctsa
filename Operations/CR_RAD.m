@@ -8,8 +8,8 @@ function f = CR_RAD(x, tau, doAbs)
 
 % ---INPUTS:
 %   x:        The input time series (vector).
-%   doAbs:    Whether to centre the time series at 0 then take absolute values (logical flag)
 %   tau:      The embedding and differencing delay in units of the timestep (integer)
+%   doAbs:    Whether to centre the time series at 0 then take absolute values (logical flag)
 %
 % ---OUTPUTS:
 %   f:        The RAD feature value

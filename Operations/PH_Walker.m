@@ -185,14 +185,17 @@ if doPlot
 	plot(y, '.-k', 'LineWidth', lw); % original time series
 	plot(w, '.-', 'color', c{1}, 'LineWidth', lw); % walker
 	plot([1, length(w)], ones(2, 1) * mean(w), 'color', c{2}, 'LineWidth', 2); % mean
-	% running variance:
-	stds = nan(N, 2);
-	for i = wl + 1:N
-		stds(i, 1) = std(y(i - wl:i));
-		stds(i, 2) = std(w(i - wl:i));
+	if strcmp(walkerRule, 'runningvar')
+		% running variance (only defined for the 'runningvar' walker rule, which is
+		% the only case that sets a window length, wl):
+		stds = nan(N, 2);
+		for i = wl + 1:N
+			stds(i, 1) = std(y(i - wl:i));
+			stds(i, 2) = std(w(i - wl:i));
+		end
+		% plot(stds(:,1),':r'); % this is the time series
+		plot(stds(:, 1) ./ stds(:, 2), 'color', c{3}, 'LineWidth', lw); % this is the adjustment factor
 	end
-	% plot(stds(:,1),':r'); % this is the time series
-	plot(stds(:, 1) ./ stds(:, 2), 'color', c{3}, 'LineWidth', lw); % this is the adjustment factor
 	% means = zeros(N,1);
 	% for i = 1:N
 	%     means(i) = mean(w(1:i));

@@ -183,7 +183,7 @@ for i = 1:length(thr)
 
 	numValid = numValid + 1;
 	msDt(numValid, 1) = meanDt;
-	msDt(numValid, 2) = std(Dt_exc) / sqrt(length(r)); % error on the mean
+	msDt(numValid, 2) = std(Dt_exc) / sqrt(length(Dt_exc)); % error on the mean
 	msDt(numValid, 3) = propIncluded;
 	% ~~~~~~~~~~~~
 	% Statistics on the indices of over-threshold events:
@@ -247,27 +247,54 @@ end
 % ------------------------------------------------------------------------------
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [120, -1, -16]);
 f = fittype('a*exp(b*x)+c', 'options', s);
-[c, gof] = fit(thr', msDt(:, 3), f);
+emsg = '';
+try
+	[c, gof] = fit(thr', msDt(:, 3), f);
+catch emsg
+	fprintf(1, 'DN_OutlierInclude: error fitting exponential decay to valid proportion: %s\n', emsg);
+end
 
-out.nfexpa = c.a;
-out.nfexpb = c.b;
-out.nfexpc = c.c; % (is linearly anticorrelated with c.a)
-out.nfexpr2 = gof.rsquare;
-out.nfexpadjr2 = gof.adjrsquare;
-out.nfexprmse = gof.rmse;
+if isempty(emsg)
+	out.nfexpa = c.a;
+	out.nfexpb = c.b;
+	out.nfexpc = c.c; % (is linearly anticorrelated with c.a)
+	out.nfexpr2 = gof.rsquare;
+	out.nfexpadjr2 = gof.adjrsquare;
+	out.nfexprmse = gof.rmse;
+else
+	out.nfexpa = NaN;
+	out.nfexpb = NaN;
+	out.nfexpc = NaN;
+	out.nfexpr2 = NaN;
+	out.nfexpadjr2 = NaN;
+	out.nfexprmse = NaN;
+end
 
 % ------------------------------------------------------------------------------
 %% Fit an linear trend to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [-40, 100]);
 f = fittype('a*x+b', 'options', s);
-[c, gof] = fit(thr', msDt(:, 3), f);
+emsg = '';
+try
+	[c, gof] = fit(thr', msDt(:, 3), f);
+catch emsg
+	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to valid proportion: %s\n', emsg);
+end
 
-out.nfla = c.a;
-out.nflb = c.b;
-out.nflr2 = gof.rsquare;
-out.nfladjr2 = gof.adjrsquare;
-out.nflrmse = gof.rmse;
+if isempty(emsg)
+	out.nfla = c.a;
+	out.nflb = c.b;
+	out.nflr2 = gof.rsquare;
+	out.nfladjr2 = gof.adjrsquare;
+	out.nflrmse = gof.rmse;
+else
+	out.nfla = NaN;
+	out.nflb = NaN;
+	out.nflr2 = NaN;
+	out.nfladjr2 = NaN;
+	out.nflrmse = NaN;
+end
 
 % ------------------------------------------------------------------------------
 %% Stationarity metrics
@@ -326,13 +353,26 @@ end
 % ------------------------------------------------------------------------------
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [40, 4]);
 f = fittype('a*x +b', 'options', s);
-[c, gof] = fit(thr', msDt(:, 6), f);
+emsg = '';
+try
+	[c, gof] = fit(thr', msDt(:, 6), f);
+catch emsg
+	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to std: %s\n', emsg);
+end
 
-out.stdrfla = c.a;
-out.stdrflb = c.b;
-out.stdrflr2 = gof.rsquare;
-out.stdrfladjr2 = gof.adjrsquare;
-out.stdrflrmse = gof.rmse;
+if isempty(emsg)
+	out.stdrfla = c.a;
+	out.stdrflb = c.b;
+	out.stdrflr2 = gof.rsquare;
+	out.stdrfladjr2 = gof.adjrsquare;
+	out.stdrflrmse = gof.rmse;
+else
+	out.stdrfla = NaN;
+	out.stdrflb = NaN;
+	out.stdrflr2 = NaN;
+	out.stdrfladjr2 = NaN;
+	out.stdrflrmse = NaN;
+end
 
 if doPlot
 	figure('color', 'w')

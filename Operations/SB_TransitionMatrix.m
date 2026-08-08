@@ -191,14 +191,10 @@ out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 % with the data -- these fields aren't registered for the numGroups=2 case
 % regardless of coarse-graining method (see the mops file: for 'quantile' it
 % would duplicate SB_MotifTwo_median, for 'updown' SB_MotifTwo_diff).
+% numGroups < 2 is already rejected above, so a second eigenvalue always exists:
 realEig = sort(real(eigT), 'descend');
-if numGroups >= 2
-	out.secondeig = realEig(2);
-	out.specgap = out.maxeig - out.secondeig;
-else
-	out.secondeig = NaN;
-	out.specgap = NaN;
-end
+out.secondeig = realEig(2);
+out.specgap = out.maxeig - out.secondeig;
 
 % (vii) Transition (conditional) entropy rate, H(X_{t+1}|X_t), treating T as a
 % first-order Markov approximation: H(joint) - H(marginal)

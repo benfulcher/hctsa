@@ -118,6 +118,8 @@ try
 catch emsg
 	if strcmp(emsg.identifier, 'MATLAB:nomem')
 		error('Not enough memory.');
+	else
+		rethrow(emsg);
 	end
 end
 

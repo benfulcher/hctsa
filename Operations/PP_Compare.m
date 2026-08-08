@@ -165,12 +165,12 @@ elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9), 'resample_')
 	if ~isempty(ss{2})
 		p = ss{2};
 	else
-		return
+		error('Invalid ''resample_p_q'' detrending specification: ''%s''', detrndmeth)
 	end
 	if ~isempty(ss{3})
 		q = ss{3};
 	else
-		return
+		error('Invalid ''resample_p_q'' detrending specification: ''%s''', detrndmeth)
 	end
 	y_d = resample(y, p, q);
 
@@ -193,7 +193,7 @@ elseif strcmp(detrndmeth, 'boxcox')
 		return % return all NaNs
 	end
 else
-	error('Invalid detrending method ''%s''', detrendmeth)
+	error('Invalid detrending method ''%s''', detrndmeth)
 end
 
 % -------------------------------------------------------------------------------

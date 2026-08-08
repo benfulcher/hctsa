@@ -154,6 +154,12 @@ out.corrcoef_max_medians = r(1, 2);
 % ------------------------------------------------------------------------------
 function meIsGorilla = SUB_slosr(xx)
 	theMaxLevel = length(xx);
+	if theMaxLevel < 3
+		% Too few wavelet levels (short series relative to the wavelet) to
+		% define a meaningful split point between "left" and "right":
+		meIsGorilla = NaN;
+		return
+	end
 	slosr = zeros(theMaxLevel - 2, 1);
 	for i = 2:theMaxLevel - 1
 		slosr(i - 1) = sum(xx(1:i - 1)) / sum(xx(i + 1:end));

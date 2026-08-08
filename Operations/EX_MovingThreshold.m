@@ -124,8 +124,9 @@ out.stdq = std(q);
 out.meanqover = mean(q - y);
 
 % Kicks (when the barrier is changed due to extreme event)
-out.pkick = sum(kicks) / (N - 1); % probability of a kick
-fkicks = find(kicks);
+fkicks = find(kicks); % indices of kicks (steps where an extreme event increased the barrier)
+out.pkick = length(fkicks) / (N - 1); % probability of a kick
+out.meankicksize = mean(kicks(fkicks)); % mean size of the barrier jump, when a kick occurs
 I_kick = diff(fkicks); % time intervals between successive kicks
 out.stdkickf = std(I_kick);
 out.meankickf = mean(I_kick);

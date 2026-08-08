@@ -64,7 +64,7 @@ if nargin < 6
 	degree = 7;
 end
 if nargin < 7
-	doPlot = false
+	doPlot = false;
 end
 
 % -------------------------------------------------------------------------------

@@ -83,6 +83,7 @@ numThresholds = length(ths); % the number of thresholds
 
 numPolyPieces = 2; % number of polynomial pieces in the spline
 splineOrder = 4; % order of the spline
+y_or = y; % the original (pre-detrended) series, kept for plotting
 spline = spap2(numPolyPieces, splineOrder, 1:N, y); % just a single middle knot with cubic interpolants
 y_spl = fnval(spline, 1:N); % evaluated at the 1:N time intervals
 y = y - y_spl';

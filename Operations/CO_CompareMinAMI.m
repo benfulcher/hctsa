@@ -108,7 +108,7 @@ out.nunique = length(unique(amiMins));
 out.modef = out.modef / numBinsRange;
 
 % Converged value?
-out.conv4 = mean(amiMins(end - 4:end));
+out.conv4 = mean(amiMins(max(1, end - 4):end));
 
 % -------------------------------------------------------------------------------
 % Look for peaks (local maxima)

@@ -297,13 +297,14 @@ function g = doYourTestThing(f)
 	% (3) is it linear?
 	try
 		[cfun, gof] = fit((1:length(f))', f, 'poly1');
+		% The gradient of the line
+		g(3) = cfun.p1;
 	catch emsg
 		if ~(strcmp(emsg.message, 'Inf computed by model function.') || strcmp(emsg.message, 'NaN computed by model function.'))
 			return
 		end
+		g(3) = NaN; % fit failed on Inf/NaN model output
 	end
-	% The gradient of the line
-	g(3) = cfun.p1;
 end
 % ------------------------------------------------------------------------------
 end

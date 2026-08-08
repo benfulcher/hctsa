@@ -150,19 +150,33 @@ end
 % [muhat,sigmahat] = normfit(tc3_surr);
 muhat = mean(tc3_surr);
 sigmahat = std(tc3_surr);
-% probability of data given Guassian surrogates
-out.normpatponmax = normpdf(tc3_y, muhat, sigmahat) / normpdf(muhat, muhat, sigmahat);
 
-% Probability at least that distance from mean, using ztest:
+if sigmahat == 0
+	% All surrogates give an identical value of this statistic: cannot
+	% meaningfully assess how many stds/z the data value is from them.
+	out.normpatponmax = NaN;
+	out.stdfrommean = NaN;
+	out.ztestp = NaN;
+else
+	% probability of data given Guassian surrogates
+	out.normpatponmax = normpdf(tc3_y, muhat, sigmahat) / normpdf(muhat, muhat, sigmahat);
 
-% 2) stds from mean
-out.stdfrommean = abs(tc3_y - mean(tc3_surr)) / std(tc3_surr);
-% (~equivalent to a z-test:)
-[~, out.ztestp] = ztest(tc3_y, muhat, sigmahat);
-% (both of these stats are a monotonic function of normpatponmax)
+	% Probability at least that distance from mean, using ztest:
+
+	% 2) stds from mean
+	out.stdfrommean = abs(tc3_y - mean(tc3_surr)) / sigmahat;
+	% (~equivalent to a z-test:)
+	[~, out.ztestp] = ztest(tc3_y, muhat, sigmahat);
+	% (both of these stats are a monotonic function of normpatponmax)
+end
 
 % iqrs from median
-out.iqrsfrommedian = abs(tc3_y - median(tc3_surr)) / iqr(tc3_surr);
+iqrsurr = iqr(tc3_surr);
+if iqrsurr == 0
+	out.iqrsfrommedian = NaN;
+else
+	out.iqrsfrommedian = abs(tc3_y - median(tc3_surr)) / iqrsurr;
+end
 
 % 3) basic info on surrogates
 out.stdsurr = sigmahat;
@@ -188,6 +202,10 @@ end
 
 % iqrs from mode
 imode = find(ksf == max(ksf), 1, 'first');
-out.ksiqrsfrommode = abs(ksx(imode) - tc3_y) / iqr(tc3_surr);
+if iqrsurr == 0
+	out.ksiqrsfrommode = NaN;
+else
+	out.ksiqrsfrommode = abs(ksx(imode) - tc3_y) / iqrsurr;
+end
 
 end

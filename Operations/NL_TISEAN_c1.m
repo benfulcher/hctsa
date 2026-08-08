@@ -368,8 +368,8 @@ function results = findscalingr_ind(x)
 	% finds constant regions in VECTOR x
 	% if x a matrix, finds scaling regions requiring all columns to
 	% match up. (i.e., to exhibit scaling at the same time)
-	% starting point must be in first half of data
-	% end point must be in last half of data
+	% starting point must be in the first quarter of data
+	% end point must be in the last three quarters of data
 
 	l = length(x); % number of distance/scaling points per dimension
 	gamma = 0.005; % regularization parameter, chosen empirically

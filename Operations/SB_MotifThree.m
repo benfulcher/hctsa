@@ -73,7 +73,7 @@ switch cgHow
 	case 'diffquant'
 		yt = SB_CoarseGrain(diff(y), 'quantile', numLetters);
 	otherwise
-		error('Unknown coarse-graining method ''%s''');
+		error('Unknown coarse-graining method ''%s''', cgHow);
 end
 % So we have a vector yt with entries in {1,2,3}
 

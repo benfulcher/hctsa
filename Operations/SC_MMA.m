@@ -192,7 +192,11 @@ for si = 1:length(sList)
 	for qi = 1:length(qList)
 		qit = qList(qi);
 
-		fitTemp = fqsll(fqsll(:, 1) == qit & fqsll(:, 2) >= sit & fqsll(:, 2) <= 5 * sit, :);
+		% qit comes from a separately-generated (coarser-step) q range than the
+		% one used to build fqsll, so an exact floating-point == match is not
+		% reliable even when the two ranges are mathematically compatible steps
+		% (confirmed empirically to miss for some qRange values):
+		fitTemp = fqsll(abs(fqsll(:, 1) - qit) < 1e-8 & fqsll(:, 2) >= sit & fqsll(:, 2) <= 5 * sit, :);
 		hTemp = polyfit(fitTemp(:, 3), fitTemp(:, 4), 1);
 
 		hqs(qi, si) = hTemp(1);

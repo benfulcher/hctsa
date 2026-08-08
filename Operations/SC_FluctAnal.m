@@ -265,27 +265,39 @@ end
 % Determine the errors
 sserr = nan(numTimeScales, 1); % don't choose the end points
 minPoints = 6;
-for i = minPoints:numTimeScales - minPoints
-	r1 = 1:i;
-	p1 = polyfit(logtt(r1), logFF(r1), 1);
-	r2 = i:numTimeScales;
-	p2 = polyfit(logtt(r2), logFF(r2), 1);
-	% Sum of errors from fitting lines to both segments:
-	sserr(i) = norm(polyval(p1, logtt(r1)) - logFF(r1)) + norm(polyval(p2, logtt(r2)) - logFF(r2));
+if numTimeScales >= 2 * minPoints
+	for i = minPoints:numTimeScales - minPoints
+		r1 = 1:i;
+		p1 = polyfit(logtt(r1), logFF(r1), 1);
+		r2 = i:numTimeScales;
+		p2 = polyfit(logtt(r2), logFF(r2), 1);
+		% Sum of errors from fitting lines to both segments:
+		sserr(i) = norm(polyval(p1, logtt(r1)) - logFF(r1)) + norm(polyval(p2, logtt(r2)) - logFF(r2));
+	end
 end
 
-% breakPt is the point where it's best to fit a line before and another line after
-breakPt = find(sserr == min(sserr), 1, 'first');
-r1 = 1:breakPt;
-r2 = breakPt:numTimeScales;
+if all(isnan(sserr))
+	% Too few timescales to fit two distinct linear regimes meaningfully
+	r1 = []; r2 = [];
+	out.prop_r1 = NaN;
+	out.logtausplit = NaN;
+	out.ratsplitminerr = NaN;
+	out.meanssr = NaN;
+	out.stdssr = NaN;
+else
+	% breakPt is the point where it's best to fit a line before and another line after
+	breakPt = find(sserr == min(sserr), 1, 'first');
+	r1 = 1:breakPt;
+	r2 = breakPt:numTimeScales;
 
-% Proportion of the domain of timescales corresponding to the first good linear fit
-out.prop_r1 = length(r1) / numTimeScales;
+	% Proportion of the domain of timescales corresponding to the first good linear fit
+	out.prop_r1 = length(r1) / numTimeScales;
 
-out.logtausplit = logtt(breakPt);
-out.ratsplitminerr = min(sserr) / out.ssr;
-out.meanssr = nanmean(sserr);
-out.stdssr = nanstd(sserr);
+	out.logtausplit = logtt(breakPt);
+	out.ratsplitminerr = min(sserr) / out.ssr;
+	out.meanssr = nanmean(sserr);
+	out.stdssr = nanstd(sserr);
+end
 
 if doPlot
 	subplot(3, 1, 1)

@@ -186,7 +186,7 @@ else
 		end
 
 		% We're at a local maximum:
-		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % minimum at previous i
+		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % maximum at previous i
 			out = i - 1; % I found the first maximum!
 			return
 		end

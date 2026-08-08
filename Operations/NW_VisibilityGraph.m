@@ -183,7 +183,7 @@ k = sum(A); % the degree distribution
 k = full(k);
 
 out.modek = mode(k); % mode of degree distribution
-out.propmode = sum(k == mode(k)) / sum(k);
+out.propmode = sum(k == mode(k)) / length(k); % proportion of nodes at the modal degree
 out.meank = mean(k); % mean number of links per node
 out.mediank = median(k); % median number of links per node
 out.stdk = std(k); % std of k

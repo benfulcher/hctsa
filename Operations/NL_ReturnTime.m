@@ -173,10 +173,10 @@ end
 %% Quantify structure in output
 % ------------------------------------------------------------------------------
 out.max = max(Trett);
-out.std = std(Trett);
+out.std = std(Trett(Trett > 0)); % exclude the "no return found" sentinel
 out.pzeros = sum(Trett == 0) / NN;
 out.pg05 = sum(Trett > max(Trett) * 0.5) / NN;
-out.iqr = iqr(Trett);
+out.iqr = iqr(Trett(Trett > 0)); % exclude the "no return found" sentinel
 
 % recurrent peaks:
 icross05 = find((Trett(1:end - 1) - 0.5 * max(Trett)) .* (Trett(2:end) - 0.5 * max(Trett)) < 0);
@@ -197,8 +197,13 @@ else
 	out.stdpeaksep = NaN;
 end
 
-out.statrtys = std(Trett(1:floor(end / 2))) / std(Trett(floor(end / 2) + 1:end));
-out.statrtym = mean(Trett(1:floor(end / 2))) / mean(Trett(floor(end / 2) + 1:end));
+% exclude the "no return found" sentinel from each half before comparing:
+TrettFirstHalf = Trett(1:floor(end / 2));
+TrettFirstHalf = TrettFirstHalf(TrettFirstHalf > 0);
+TrettSecondHalf = Trett(floor(end / 2) + 1:end);
+TrettSecondHalf = TrettSecondHalf(TrettSecondHalf > 0);
+out.statrtys = std(TrettFirstHalf) / std(TrettSecondHalf);
+out.statrtym = mean(TrettFirstHalf) / mean(TrettSecondHalf);
 
 out.hhist = -sum(Trett(Trett > 0) .* log(Trett(Trett > 0)));
 
@@ -230,7 +235,7 @@ if doPlot
 	plot(binCenters, nhist, 'o-k')
 end
 out.maxhisthist = max(nhist);
-out.phisthistmin = nhist(1); % this is the same as maxhisthist
+out.phisthistmin = nhist(1); % probability in the first (smallest-return-time) bin
 out.hhisthist = -sum(nhist(nhist > 0) .* log(nhist(nhist > 0)));
 
 end

@@ -135,6 +135,11 @@ if doLogAbs % a boolean
 	y = log(abs(y));
 end
 
+if all(y == y(1)) % constant series has an all-zero spectrum -> log(0)
+	warning('Constant time series has no spectral structure');
+	out = NaN; return
+end
+
 doPlot = false; % plot outputs
 Ny = length(y); % time-series length
 

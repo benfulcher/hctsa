@@ -252,7 +252,10 @@ out.peaksepy = max2 - max1;
 [~, i2] = max(ffit);
 out.peaksepx = xi(i2) - xi(i1);
 
-% OLAPINT: returns the overlap integral between the two curves; normalized by variance
+% OLAPINT: returns the overlap integral between the two curves; multiplying by
+% std(x) makes this scale-invariant (a PDF's overlap integral scales as 1/std
+% under rescaling of x, so this cancels that out -- multiplying by var(x)
+% instead would not be scale-invariant)
 out.olapint = sum(f .* ffit * (xi(2) - xi(1))) * std(x);
 
 % RELENT: returns the relative entropy of the two distributions
