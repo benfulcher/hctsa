@@ -259,7 +259,10 @@ out.peaksepx = xi(i2) - xi(i1);
 out.olapint = sum(f .* ffit * (xi(2) - xi(1))) * std(x);
 
 % RELENT: returns the relative entropy of the two distributions
-r = (ffit ~= 0);
+% By convention 0*log(0/y) := 0, so also exclude points where f == 0 -- otherwise
+% log(0/ffit) = -Inf and 0*(-Inf) evaluates to NaN, which propagated into a real fraction
+% of series (up to ~9% for some distributions) rather than contributing zero as intended.
+r = (ffit ~= 0) & (f ~= 0);
 out.relent = sum(f(r) .* log(f(r) ./ ffit(r)) * (xi(2) - xi(1)));
 
 end

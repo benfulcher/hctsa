@@ -134,9 +134,10 @@ end
 % ------------------------------------------------------------------------------
 %% Compute the outputs into a structure
 % ------------------------------------------------------------------------------
-% Not included in hctsa library (redundancy with rmse):
-out.r2 = gof.rsquare; % rsquared
-out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsqured
+out.r2 = gof.rsquare; % rsquared (registered for the distribution-model mops; not for the
+                       % time-series-model mops sin1/sin2/sin3, which register rmse instead)
+out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
+                             % by any mop -- redundant with r2 for these fixed-order fits)
 
 out.rmse = gof.rmse; % root mean square error
 out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
