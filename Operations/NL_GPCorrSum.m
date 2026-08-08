@@ -115,6 +115,10 @@ end
 % ------------------------------------------------------------------------------
 tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1);
+if isnan(tau)
+	warning('Could not determine embedding parameters for this time series');
+	out = NaN; return
+end
 m = tm(2);
 
 if (N - (m - 1) * tau) < thwin

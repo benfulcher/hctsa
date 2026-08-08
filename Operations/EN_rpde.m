@@ -62,6 +62,10 @@ end
 if ischar(tau) || ischar(m)
 	tauAndM = BF_Embed(x, tau, m, true);
 	tau = tauAndM(1);
+	if isnan(tau)
+		warning('Could not determine embedding parameters for this time series');
+		out = NaN; return
+	end
 	m = tauAndM(2);
 end
 

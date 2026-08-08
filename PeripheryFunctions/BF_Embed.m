@@ -75,14 +75,16 @@ else
             case 'mi' % first minimum of mutual information function
                 tau = CO_FirstMin(y,'mi');
                 if isnan(tau)
-                    error('Could not get time delay by mutual information (time series too short?)');
+                    % Could not get time delay by mutual information (time series too short?)
+                    y_embed = NaN; return
                 end
                 sstau = sprintf('by first minimum of mutual information to tau = ');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_FirstCrossing(y,'ac',0,'discrete');
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = ');
                 if isnan(tau)
-                    error('Could not get time delay by ACF (time series too short?)');
+                    % Could not get time delay by ACF (time series too short?)
+                    y_embed = NaN; return
                 end
             otherwise
                 error('Invalid time-delay method ''%s''.',tau)
@@ -163,7 +165,8 @@ end
 % Matlab-based matrix embedding:
 N_embed = N-(m-1)*tau;
 if N_embed <=0
-    error('Time Series (N = %u) too short to embed with these embedding parameters',N);
+    % Time series too short to embed with these embedding parameters
+    y_embed = NaN; return
 end
 
 % Each embedding vector is a row (of length m columns)

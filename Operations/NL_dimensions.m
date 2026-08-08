@@ -87,6 +87,10 @@ end
 % ------------------------------------------------------------------------------
 tm = BF_Embed(y, embedParams{1}, embedParams{2}, true);
 tau = tm(1);
+if isnan(tau)
+	warning('Could not determine embedding parameters for this time series');
+	out = NaN; return
+end
 mopt = tm(2); % the resolved embedding dimension, possibly < 3
 
 % dimension curves are always computed for m = 1:M (M >= 3, matching the
