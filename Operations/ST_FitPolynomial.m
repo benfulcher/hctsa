@@ -58,7 +58,7 @@ cf = polyfit(t, y, k);
 warning('on', 'MATLAB:polyfit:RepeatedPointsOrRescale');
 
 f = polyval(cf, t);
-out = mean((y - f).^2); % mean RMS ERROR OF FIT
+out = sqrt(mean((y - f).^2)); % RMS error of fit (was mean squared error, undocumented)
 
 % ------------------------------------------------------------------------------
 % Plot
