@@ -154,7 +154,7 @@ results(end+1) = struct('name','Physionet sample entropy','ok',ok);
 % ------------------------------------------------------------------------------
 % TISEAN
 % ------------------------------------------------------------------------------
-fprintf(1,'TISEAN nonlinear time-series analysis routines...');
+fprintf(1,'TISEAN nonlinear time-series analysis routines... (not mex, compilation, be patient...)');
 tiseanDir = fullfile(toolDir,'Tisean_3.0.1');
 cd(tiseanDir);
 ok = true;
@@ -162,9 +162,17 @@ if ispc
     ok = false;
     fprintf(1,['\nERROR: automatic compilation of TISEAN is not supported on Windows.\n' ...
         'See Toolboxes%sTisean_3.0.1%sindex.html for manual build instructions.\n'],filesep,filesep);
-elseif system('which gcc >/dev/null 2>&1')~=0 || system('which make >/dev/null 2>&1')~=0
+elseif ~compilerOnPath('gcc') || ~compilerOnPath('make')
     % Check for a C compiler and make up front, rather than letting TISEAN's
-    % ./configure fail and dump a wall of cryptic autoconf output:
+    % ./configure fail and dump a wall of cryptic autoconf output.
+    % NB: don't check via 'which'/'command -v' + shell redirection -- MATLAB's
+    % system() runs the command through $SHELL, and on clusters that's often
+    % csh/tcsh, which understands neither sh's '2>&1' redirect syntax ("Ambiguous
+    % output redirect") nor the 'command -v' builtin (sh/bash-only). Both give a
+    % false "no compiler found" even when gcc/make are genuinely on PATH.
+    % Instead, actually try to run the compiler and check the exit status;
+    % suppress its output via system()'s own second return value (captured at
+    % the MATLAB level, not via shell redirection), which works under any shell.
     ok = false;
     if ismac
         fprintf(1,['\nERROR: no C compiler (gcc/clang) or ''make'' found on the system PATH.\n' ...
@@ -175,6 +183,17 @@ elseif system('which gcc >/dev/null 2>&1')~=0 || system('which make >/dev/null 2
             'On Debian/Ubuntu: sudo apt-get install build-essential\n' ...
             'then re-run compile_mex.m.\n']);
     end
+    % If gcc/make are on PATH in an interactive terminal but not here, MATLAB's
+    % subprocess environment differs from your shell's -- common on clusters when
+    % MATLAB runs on a different node (e.g., a batch job landed on a compute node
+    % lacking build tools) or a job scheduler didn't export your full environment.
+    % Print what MATLAB itself sees so that mismatch is diagnosable without
+    % needing to reproduce it interactively:
+    [~,hostnameOut] = system('hostname');
+    [~,pathOut] = system('echo $PATH');
+    fprintf(1,['\nDiagnostics (compare against your interactive terminal on the same node):\n' ...
+        '  hostname: %s' ...
+        '  PATH:     %s\n'],hostnameOut,pathOut);
 else
     % Build against a prefix outside the repo, in case the repo lives under a
     % path containing spaces (e.g., a Dropbox-synced folder): TISEAN's 1990s-era
@@ -188,8 +207,17 @@ else
     % Modern C compilers (e.g., Xcode Clang) reject this package's K&R-style
     % implicit-int/implicit-function-declaration code by default; -std=gnu89
     % restores the old C89 semantics it was written against.
+    % Set CC via MATLAB's own setenv rather than shell syntax like 'CC="..." cmd'
+    % -- that inline-assignment form is sh/bash-only and errors under csh/tcsh
+    % (which MATLAB's system() uses when $SHELL is csh-family), since csh has no
+    % such syntax and instead tries to run "CC=..." as a literal command name.
+    % setenv() sets the process environment directly, so configure (itself a
+    % #!/bin/sh script) inherits CC correctly regardless of the caller's shell.
+    oldCC = getenv('CC');
     tiseanCC = 'gcc -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration';
-    [statusConfigure,outConfigure] = system(sprintf('CC="%s" ./configure --prefix=%s',tiseanCC,buildPrefix));
+    setenv('CC',tiseanCC);
+    [statusConfigure,outConfigure] = system(sprintf('./configure --prefix=%s',buildPrefix));
+    setenv('CC',oldCC);
     if statusConfigure~=0
         ok = false;
         fprintf(1,'\nERROR: TISEAN ./configure failed:\n%s\n',outConfigure);
@@ -257,4 +285,15 @@ fprintf(1,'%u/%u components compiled successfully.\n',numOk,length(results));
 if numOk < length(results)
     fprintf(1,['Some components failed to compile -- hctsa will still run, but operations that ' ...
         'depend on a failed component will not work. See the ERROR messages above for details.\n']);
+end
+
+function tf = compilerOnPath(cmdName)
+    % Checks whether cmdName is actually invocable, without relying on
+    % 'which'/'command -v' or shell redirection syntax -- both differ between
+    % sh and csh/tcsh, and MATLAB's system() uses $SHELL. Just run the tool
+    % with --version and check the exit status; the two-output form of
+    % system() captures (and suppresses) output at the MATLAB level, so no
+    % shell-specific redirection is needed.
+    [status,~] = system([cmdName,' --version']);
+    tf = (status==0);
 end

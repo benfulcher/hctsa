@@ -133,6 +133,20 @@ end
 % ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y, coarseGrainMethod, numGroups); % a coarse-grained time series using the numbers 1:numGroups
 
+% The alphabet size for the Krichevsky-Trofimov smoothing below. Usually this
+% is just numGroups, but for 'embed2quadrants'/'embed2octants', numGroups is
+% instead repurposed as SB_CoarseGrain's embedding time delay (numeric, or the
+% string 'tau' to auto-select it) -- the alphabet size there is fixed by the
+% number of quadrants/octants, not by that argument.
+switch coarseGrainMethod
+	case 'embed2quadrants'
+		numSymbols = 4;
+	case 'embed2octants'
+		numSymbols = 8;
+	otherwise
+		numSymbols = numGroups;
+end
+
 N = length(yth); % will be the same as y, for 'quantile', and 'diff'
 
 % Select random samples to test:
@@ -200,7 +214,7 @@ for i = 1:numTest
 	% Krichevsky-Trofimov-style smoothed probability estimate: always in
 	% (0,1), degrading to the uniform prior 1/numGroups when nAntecedent=0
 	% (no information) rather than a false certainty.
-	store(i) = (numMatches + 0.5) / (nAntecedent(i) + 0.5 * numGroups);
+	store(i) = (numMatches + 0.5) / (nAntecedent(i) + 0.5 * numSymbols);
 end
 
 % -------------------------------------------------------------------------------

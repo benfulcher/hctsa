@@ -123,25 +123,37 @@ compile_mex
 cd('../');
 
 % ------------------------------------------------------------------------------
-%% 4. Smoke test: compute a feature vector for a synthetic time series to check
-%% that the core pipeline actually runs end-to-end (not just that things compiled):
+%% 4. Optional smoke test: compute a feature vector for a synthetic time series
+%% to check that the core pipeline actually runs end-to-end (not just that
+%% things compiled). Takes about a minute, so it's opt-in rather than forced.
 % ------------------------------------------------------------------------------
-fprintf(1,'\n-4- Running a quick smoke test (computing features for a synthetic time series)...\n');
-try
-    t = (0:499)/100;
-    x = sin(2*pi*10*t) + 0.1*randn(1,500);
-    % doParallel = false: don't depend on the (optional) Parallel Computing Toolbox here.
-    featVector = TS_CalculateFeatureVector(x',false);
-    numGood = sum(~isnan(featVector));
-    if numGood==0
-        fprintf(1,['WARNING: smoke test ran but no features were computed successfully -- ' ...
-                                        'something may be misconfigured.\n']);
-    else
-        fprintf(1,'Smoke test passed: %u/%u features computed successfully.\n',numGood,numel(featVector));
+smokeTestCode = ['t = (0:499)/100; x = sin(2*pi*10*t) + 0.1*randn(1,500); ' ...
+    'featVector = TS_CalculateFeatureVector(x'',false); sum(~isnan(featVector))'];
+fprintf(1,'\n-4- Optional smoke test (computes features for a synthetic time series, ~1 minute).\n');
+runSmokeTest = false;
+if ~silentInstall
+    response = input('Run it now to verify the pipeline end-to-end? [y/N] ','s');
+    runSmokeTest = ~isempty(response) && any(lower(response(1))=='y');
+end
+if runSmokeTest
+    try
+        t = (0:499)/100;
+        x = sin(2*pi*10*t) + 0.1*randn(1,500);
+        % doParallel = false: don't depend on the (optional) Parallel Computing Toolbox here.
+        featVector = TS_CalculateFeatureVector(x',false);
+        numGood = sum(~isnan(featVector));
+        if numGood==0
+            fprintf(1,['WARNING: smoke test ran but no features were computed successfully -- ' ...
+                                            'something may be misconfigured.\n']);
+        else
+            fprintf(1,'Smoke test passed: %u/%u features computed successfully.\n',numGood,numel(featVector));
+        end
+    catch emsg
+        fprintf(1,['WARNING: smoke test failed to run (%s).\nThis may indicate a problem with one of ' ...
+                                    'the compiled binaries above.\n'],emsg.message);
     end
-catch emsg
-    fprintf(1,['WARNING: smoke test failed to run (%s).\nThis may indicate a problem with one of ' ...
-                                'the compiled binaries above.\n'],emsg.message);
+else
+    fprintf(1,'Skipping smoke test. To run it yourself later:\n  %s\n',smokeTestCode);
 end
 
 fprintf(1,['\nAll done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
