@@ -87,7 +87,21 @@ bool issubstring(unsigned short s[], const int ns, const int nq)
 {
 	int k,i;
 	bool same;
-	for (i=0; i<=(ns-nq); i++)
+	/* SQpi = s[0..ns+nq-2] (S concatenated with Q, less Q's last symbol), so a
+	 * length-nq window can start anywhere from i=0 up to i=ns-1 inclusive
+	 * (window [i, i+nq-1] must fit within SQpi, i.e. i+nq-1 <= ns+nq-2, i.e.
+	 * i <= ns-1). The original bound here, i<=(ns-nq), was tighter than this
+	 * whenever nq>1: it restricted the search to strictly within S, never
+	 * allowing Q to match against the part of itself already matched so far.
+	 * That silently implemented a different (self-overlap-forbidden) measure
+	 * than the SQpi-referential Kaspar-Schuster (1987) complexity this
+	 * function's own comment describes, which systematically overcounted
+	 * phrases (and so overstated complexity) for periodic/self-similar
+	 * sequences -- e.g. 20 periods of '01' (n=40) gave c=5 instead of the
+	 * correct c=2. Verified against an independent reference implementation
+	 * of the SQpi-self-referential algorithm and the classic Kaspar & Schuster
+	 * (1987) worked example ("1001111011000010", c=6). */
+	for (i=0; i<ns; i++)
 	{
 		same=1;
 		for (k=0; k<nq; k++)
