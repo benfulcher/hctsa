@@ -3,11 +3,11 @@ function [X, fX, i] = minimize(X, f, length, varargin)
 % Minimize a differentiable multivariate function using conjugate gradients.
 %
 % Usage: [X, fX, i] = minimize(X, f, length, P1, P2, P3, ... )
-% 
+%
 % X       initial guess; may be of any type, including struct and cell array
 % f       the name or pointer to the function to be minimized. The function
 %         f must return two arguments, the value of the function, and it's
-%         partial derivatives wrt the elements of X. The partial derivative  
+%         partial derivatives wrt the elements of X. The partial derivative
 %         must have the same type as X.
 % length  length of the run; if it is positive, it gives the maximum number of
 %         line searches, if negative its absolute gives the maximum allowed
@@ -18,7 +18,7 @@ function [X, fX, i] = minimize(X, f, length, varargin)
 %
 % X       the returned solution
 % fX      vector of function values indicating progress made
-% i       number of iterations (line searches or function evaluations, 
+% i       number of iterations (line searches or function evaluations,
 %         depending on the sign of "length") used at termination.
 %
 % The function returns when either its length is up, or if no further progress
@@ -35,7 +35,7 @@ function [X, fX, i] = minimize(X, f, length, varargin)
 % of checks are made to make sure that exploration is taking place and that
 % extrapolation will not be unboundedly large.
 %
-% See also: checkgrad 
+% See also: checkgrad
 %
 % Copyright (C) 2001 - 2010 by Carl Edward Rasmussen, 2010-01-03
 
@@ -70,14 +70,19 @@ SIG = 0.1; RHO = SIG/2; % SIG and RHO are the constants controlling the Wolfe-
 %    gracefully.
 
 if max(size(length)) == 2, red=length(2); length=length(1); else red=1; end
-if length>0, S='Linesearch'; else S='Function evaluation'; end 
+if length>0, S='Linesearch'; else S='Function evaluation'; end
+
+% Don't be verbose (but can flag back on to debug):
+beVerbose = false;
 
 i = 0;                                            % zero the run length counter
 ls_failed = 0;                             % no previous line search has failed
 [f0 df0] = feval(f, X, varargin{:});          % get function value and gradient
 Z = X; X = unwrap(X); df0 = unwrap(df0);
-fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
-if exist('fflush','builtin') fflush(stdout); end
+if beVerbose
+  fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
+  if exist('fflush','builtin') fflush(stdout); end
+end
 fX = f0;
 i = i + (length<0);                                            % count epochs?!
 s = -df0; d0 = -s'*s;           % initial search direction (steepest) and slope
@@ -95,7 +100,7 @@ while i < abs(length)                                      % while not finished
     while ~success && M > 0
       try
         M = M - 1; i = i + (length<0);                         % count epochs?!
-        
+
         [f3 df3] = feval(f, rewrap(Z,X+x3*s), varargin{:});
         df3 = unwrap(df3);
         if isnan(f3) || isinf(f3) || any(isnan(df3)+isinf(df3)), error(' '),end
@@ -130,7 +135,7 @@ while i < abs(length)                                      % while not finished
     else
       x2 = x3; f2 = f3; d2 = d3;                      % move point 3 to point 2
     end
-    if f4 > f0           
+    if f4 > f0
       x3 = x2-(0.5*d2*(x4-x2)^2)/(f4-f2-d2*(x4-x2));  % quadratic interpolation
     else
       A = 6*(f2-f4)/(x4-x2)+3*(d4+d2);                    % cubic interpolation
@@ -150,8 +155,10 @@ while i < abs(length)                                      % while not finished
 
   if abs(d3) < -SIG*d0 && f3 < f0+x3*RHO*d0          % if line search succeeded
     X = X+x3*s; f0 = f3; fX = [fX' f0]';                     % update variables
-    fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
-    if exist('fflush','builtin') fflush(stdout); end
+    if beVerbose
+      fprintf('%s %6i;  Value %4.6e\r', S, i, f0);
+      if exist('fflush','builtin') fflush(stdout); end
+    end
     s = (df3'*df3-df0'*df3)/(df0'*df0)*s - df3;   % Polack-Ribiere CG direction
     df0 = df3;                                               % swap derivatives
     d3 = d0; d0 = df0'*s;
@@ -166,18 +173,21 @@ while i < abs(length)                                      % while not finished
       break;                             % or we ran out of time, so we give up
     end
     s = -df0; d0 = -s'*s;                                        % try steepest
-    x3 = 1/(1-d0);                     
+    x3 = 1/(1-d0);
     ls_failed = 1;                                    % this line search failed
   end
 end
-X = rewrap(Z,X); 
-fprintf('\n'); if exist('fflush','builtin') fflush(stdout); end
+X = rewrap(Z,X);
+if beVerbose
+  fprintf('\n');
+  if exist('fflush','builtin') fflush(stdout); end
+end
 
 function v = unwrap(s)
 % Extract the numerical values from "s" into the column vector "v". The
 % variable "s" can be of any type, including struct and cell array.
-% Non-numerical elements are ignored. See also the reverse rewrap.m. 
-v = [];   
+% Non-numerical elements are ignored. See also the reverse rewrap.m.
+v = [];
 if isnumeric(s)
   v = s(:);                        % numeric values are recast to column vector
 elseif isstruct(s)
@@ -198,7 +208,7 @@ if isnumeric(s)
   end
   s = reshape(v(1:numel(s)), size(s));            % numeric values are reshaped
   v = v(numel(s)+1:end);                        % remaining arguments passed on
-elseif isstruct(s) 
+elseif isstruct(s)
   [s p] = orderfields(s); p(p) = 1:numel(p);      % alphabetize, store ordering
   [t v] = rewrap(struct2cell(s), v);                 % convert to cell, recurse
   s = orderfields(cell2struct(t,fieldnames(s),1),p);  % conv to struct, reorder

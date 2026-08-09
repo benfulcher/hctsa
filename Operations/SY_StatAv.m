@@ -84,7 +84,7 @@ switch whatType
 				M(j) = mean(y((j - 1) * n + 1:j * n));
 			end
 		else
-			fprintf(1, 'This time series (N = %u) is too short for StatAv(%s,''%u'')\n', N, whatType, n);
+			% This time series is too short for this StatAv measure to be meaningful
 			out = NaN; return
 		end
 	otherwise

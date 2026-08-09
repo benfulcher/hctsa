@@ -91,9 +91,23 @@ end
 % ------------------------------------------------------------------------------
 % Spectral kurtosis: kurtosis across windows, per frequency bin
 % ------------------------------------------------------------------------------
-[kurt, spread, centroid, thresh, fout] = spectralKurtosis(y, Fs, ...
-			'Window', window, 'OverlapLength', noverlap, ...
-			'Scaled', false, 'ConfidenceLevel', 0.95);
+% MATLAB version compatibility: spectralKurtosis output signatures vary across
+% releases (e.g., older releases can return fewer outputs).
+try
+	[kurt, spread, centroid, thresh, fout] = spectralKurtosis(y, Fs, ...
+				'Window', window, 'OverlapLength', noverlap, ...
+				'Scaled', false, 'ConfidenceLevel', 0.95);
+catch emsg
+	if contains(emsg.message, 'Too many output arguments')
+		% Older MATLAB signatures: keep core outputs and mark unavailable ones NaN.
+		[kurt, fout] = spectralKurtosis(y, Fs, 'Window', window, 'OverlapLength', noverlap);
+        spread = NaN;
+        centroid = NaN;
+        thresh = NaN;
+	else
+		rethrow(emsg)
+	end
+end
 
 out.sk_max = max(kurt);
 out.sk_mean = mean(kurt);
@@ -102,8 +116,16 @@ out.sk_range = max(kurt) - min(kurt);
 out.sk_fracAboveThresh = mean(kurt > thresh); % fraction of frequencies with non-Gaussian, bursty behavior
 [~, i_max] = max(kurt);
 out.sk_freqAtMax = 2 * pi * fout(i_max); % angular frequency, matching SP_Summaries convention
-out.sk_meanSpread = mean(spread);
-out.sk_meanCentroid = 2 * pi * mean(centroid);
+if all(isnan(spread))
+	out.sk_meanSpread = NaN;
+else
+	out.sk_meanSpread = mean(spread);
+end
+if all(isnan(centroid))
+	out.sk_meanCentroid = NaN;
+else
+	out.sk_meanCentroid = 2 * pi * mean(centroid);
+end
 
 % ------------------------------------------------------------------------------
 % Instantaneous spectral entropy: entropy per window, across windows

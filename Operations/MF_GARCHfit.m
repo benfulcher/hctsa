@@ -151,11 +151,11 @@ N = length(y);
 [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 
 % (iii) Correlation in time series: autocorrelation
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, NumLags = 20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, NumLags = 20);
+[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
+[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, NumLags = 20);
+[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
