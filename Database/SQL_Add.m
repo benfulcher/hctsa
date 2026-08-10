@@ -50,7 +50,7 @@ end
 % inputFile
 if nargin < 2 || isempty(inputFile)
     % Default filenames:
-    switch inputFile
+    switch addWhat
     case 'ts'
         inputFile = 'INP_ts.txt';
     case 'ops'
