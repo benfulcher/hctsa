@@ -22,6 +22,23 @@ function out = MF_ARMA_orders(y, pr, qr)
 % when it comes to the MA order.
 % (2) May want to do some prediction and get more statistics on quality of
 % model rather than just in-sample FPE/AIC...
+%
+% ---NOTES:
+% Deregistered 2026-08-10 (was pr=1:6,qr=1:4, 24-cell grid): by far the most
+% expensive operation in hctsa (~13% of one time series' total feature-vector
+% compute time on its own), and its own grid-search optimization turned out to
+% be fragile -- individual armax(p,q) fits can land in genuinely different
+% local optima depending on arbitrary implementation choices (e.g. whether/how
+% a neighbouring cell's fit is used to warm-start the next), swinging AIC by
+% non-trivial amounts. On top of that, redundancy-checked against existing
+% cheaper hctsa features on Bonn EEG (500 series) and Empirical1000 (1000
+% series): the 7 registered outputs already collapse internally to ~2-3
+% independent dimensions (std_all_aics vs meanstd_aicsp: r=0.9999 on
+% Empirical1000), and every one of them correlates substantially
+% (|r|=0.42-0.995 across the two datasets) with existing, far cheaper
+% operations already in the feature set (MF_AR_arcov's closed-form AR fits,
+% MF_armax's 3 fixed-point ARMA fits, MF_StateSpaceCompOrder's own order-
+% selection sweep). Not worth the cost for what it adds.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

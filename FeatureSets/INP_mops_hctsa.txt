@@ -616,7 +616,6 @@ MF_AR_arcov(x_z,3)	        MF_AR_arcov_3
 MF_AR_arcov(x_z,4)	        MF_AR_arcov_4
 MF_AR_arcov(x_z,5)	        MF_AR_arcov_5
 MF_arfit(x_z,1,8,'sbc')	MF_arfit_1_8_sbc
-MF_ARMA_orders(x_z,1:6,1:4)	MF_ARMA_orders_1_6_1_4
 MF_armax(x_z,[1,1],0.5,1)	MF_armax_1_1_05_1
 MF_armax(x_z,[2,2],0.5,1)	MF_armax_2_2_05_1
 MF_armax(x_z,[3,1],0.5,1)	MF_armax_3_1_05_1
