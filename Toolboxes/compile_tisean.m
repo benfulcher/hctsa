@@ -76,16 +76,21 @@ elseif ~compilerOnPath('gcc') || ~compilerOnPath('make')
             'then re-run compile_tisean.m.\n']);
     end
     printPathDiagnostics();
-elseif ~compilerOnPath('gfortran') && ~compilerOnPath('g77')
+elseif isempty(findFortranCompiler())
     % Also required: 4 of the 7 binaries hctsa depends on (c1, c2d, c2g, c2t)
     % are Fortran, not C (TISEAN's source_f/, not source_c/), so a C-only
     % toolchain isn't sufficient for a complete build.
     ok = false;
     if ismac
-        fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH.\n' ...
+        fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH ' ...
+            '(also checked the standard Homebrew install locations directly).\n' ...
             'TISEAN needs this in addition to a C compiler: 4 of the binaries hctsa\n' ...
             'depends on (c1, c2d, c2g, c2t) are Fortran, not C.\n' ...
-            'Install gfortran (e.g. via Homebrew: brew install gcc), then re-run compile_tisean.m.\n']);
+            'Install gfortran (e.g. via Homebrew: brew install gcc), then re-run compile_tisean.m.\n' ...
+            'If it''s already installed via Homebrew but still not found: MATLAB launched from\n' ...
+            'Finder/Dock does not inherit your shell profile''s PATH, which is where Homebrew adds\n' ...
+            'itself -- this check already looks in /opt/homebrew/bin and /usr/local/bin directly to\n' ...
+            'cover that, so if it''s still not found, your gfortran may be somewhere else.\n']);
     else
         fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH.\n' ...
             'TISEAN needs this in addition to a C compiler: 4 of the binaries hctsa\n' ...
@@ -117,10 +122,7 @@ else
     oldCC = getenv('CC');
     oldFC = getenv('FC');
     tiseanCC = 'gcc -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration';
-    tiseanFC = 'gfortran';
-    if ~compilerOnPath('gfortran')
-        tiseanFC = 'g77';
-    end
+    tiseanFC = findFortranCompiler(); % may be an absolute path (see findFortranCompiler)
     setenv('CC',tiseanCC);
     setenv('FC',tiseanFC);
     % Clear any cached configure results from a previous run (e.g. one that
@@ -178,6 +180,46 @@ function tf = compilerOnPath(cmdName)
     % shell-specific redirection is needed.
     [status,~] = system([cmdName,' --version']);
     tf = (status==0);
+end
+
+% ------------------------------------------------------------------------------
+function fc = findFortranCompiler()
+    % Looks for gfortran, then g77: first via PATH (as gcc/make are checked),
+    % then -- on macOS only -- directly in the two standard Homebrew install
+    % prefixes (/opt/homebrew for Apple Silicon, /usr/local for Intel).
+    %
+    % The Homebrew-prefix fallback covers a common, well-documented macOS
+    % gotcha, not a machine-specific assumption: MATLAB launched from
+    % Finder/Dock (rather than a terminal) runs outside a login shell, so it
+    % never sources the PATH additions Homebrew's installer appends to
+    % ~/.zprofile -- a genuinely-installed Homebrew gfortran can therefore be
+    % invisible to MATLAB's system() even though `gfortran --version` works
+    % fine in an interactive terminal. This isn't needed for gcc/make, which
+    % come from Xcode Command Line Tools and install to /usr/bin -- part of
+    % the OS-level default PATH regardless of how the process was launched.
+    fc = '';
+    candidates = {'gfortran','g77'};
+    for i = 1:numel(candidates)
+        if compilerOnPath(candidates{i})
+            fc = candidates{i};
+            return
+        end
+    end
+    if ismac
+        homebrewPrefixes = {'/opt/homebrew/bin','/usr/local/bin'};
+        for i = 1:numel(homebrewPrefixes)
+            for j = 1:numel(candidates)
+                candidatePath = fullfile(homebrewPrefixes{i},candidates{j});
+                if isfile(candidatePath)
+                    [status,~] = system(['"',candidatePath,'" --version']);
+                    if status==0
+                        fc = candidatePath;
+                        return
+                    end
+                end
+            end
+        end
+    end
 end
 
 % ------------------------------------------------------------------------------
