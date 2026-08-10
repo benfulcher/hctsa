@@ -31,10 +31,10 @@ install: do_install missing
 	@echo "browse index.html for documentation"
 
 do_install:
-	@rm -f install.log 
+	@rm -f install.log
 	@test -d ${BINDIR} || (echo "${BINDIR} does not exist")
-	@test -d ${BINDIR} -a -n "${FC}" && (cd source_f && $(MAKE) install)
-	@test -d ${BINDIR} -a -n "${CC}" &&  (cd source_c && $(MAKE) install)
+	-@test -d ${BINDIR} -a -n "${FC}" && (cd source_f && $(MAKE) install)
+	-@test -d ${BINDIR} -a -n "${CC}" &&  (cd source_c && $(MAKE) install)
 
 missing:
 	@rm -f missing.log
