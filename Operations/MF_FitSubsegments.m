@@ -40,6 +40,22 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %               (for when subsetHow is 'rand')
 %
 % ---OUTPUTS: depend on the model, as described above.
+%
+% ---NOTES:
+% The 'arma' registration (order=[2,2], 25 uniform 10%-length subsegments) was
+% deregistered 2026-08-10: redundancy-checked its 21 output fields against
+% cheaper existing hctsa operations on Bonn EEG (500 series) and Empirical1000
+% (1000 series). The 13 AR-driven fields (fpe_*, p_1_*, p_2_*) correlate at
+% |r|=0.69-0.99 with the much cheaper 'ar' registration of this same function
+% (identical subsegment scheme, plain AR(2) instead of ARMA(2,2) -- AR fitting
+% is closed-form, no iterative optimization needed). The 8 MA-driven fields
+% (q_1_*, q_2_*) correlate more weakly on Bonn EEG (|r| up to 0.71) but more
+% strongly on the more diverse Empirical1000 (|r| up to 0.87) -- consistent
+% with [[mf-arma-orders-deregistered]]'s finding that MA-component estimates
+% from short (~100-point) segments are prone to landing in noisy/unstable
+% local optima rather than capturing real structure, rather than being a
+% genuinely independent signal. The 'ar'/'arsbc'/'ss' registrations of this
+% function are unaffected and remain registered.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
