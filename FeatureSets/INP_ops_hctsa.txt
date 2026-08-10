@@ -3642,8 +3642,6 @@ NL_DVV_3_100_2_50_10_default.stdDiff                NL_DVV_3_100_2_50_10_default
 NL_DVV_3_100_2_50_10_default.trendDiff              NL_DVV_3_100_2_50_10_default_trendDiff          delayVectorVariance
 NL_DVV_3_100_2_50_10_default.rmsDiffSurr            NL_DVV_3_100_2_50_10_default_rmsDiffSurr        delayVectorVariance
 NL_DVV_3_100_2_50_10_default.meanDiffSurr           NL_DVV_3_100_2_50_10_default_meanDiffSurr       delayVectorVariance
-NL_DVV_3_100_2_50_10_default.dataSurrCorr           NL_DVV_3_100_2_50_10_default_dataSurrCorr       delayVectorVariance
-NL_DVV_3_100_2_50_10_default.trendDataSurr          NL_DVV_3_100_2_50_10_default_trendDataSurr      delayVectorVariance
 NL_DVV_3_100_2_50_10_default.numZeroCrossings       NL_DVV_3_100_2_50_10_default_numZeroCrossings   delayVectorVariance
 NL_DVV_3_100_2_50_10_default.trendSurr              NL_DVV_3_100_2_50_10_default_trendSurr          delayVectorVariance
 NL_DVV_3_100_2_50_10_default.meanDiffTrendSurr      NL_DVV_3_100_2_50_10_default_meanDiffTrendSurr  delayVectorVariance

@@ -30,6 +30,31 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
 % vanilla IAAFT), accounting for ~85% of this operation's runtime for no
 % benefit. See DVV_surrogate.m's own docstring for details of the fix.
 %
+% Whether this operation actually detects real structure was checked
+% directly 2026-08-11: on chaotic generators (logistic map, Henon map,
+% Lorenz) vs linear-stochastic controls (AR(2), white noise), several
+% surrogate-comparison fields (rmsDiffSurr, meanDiffSurr, meanDiffTrendSurr,
+% meanNormCDF, numZeroCrossings, trendSurr) separate the two groups cleanly
+% (p<0.002, n=15/group) with exactly the sign the method predicts (real
+% data sits below the surrogate ensemble for genuinely deterministic
+% systems). Not simply redundant with CO_tc3/CO_trev/SD_surrogates/
+% SD_SurrogateTest either (|r| mostly <0.5 on Bonn EEG + Empirical1000).
+%
+% Two fields dropped from registration (out.trendDataSurr and
+% out.dataSurrCorr are still computed here but no longer exposed as
+% features -- removed from INP_ops_hctsa.txt only):
+% - trendDataSurr: showed no discrimination at all in the chaotic-vs-linear
+%   test (p=0.72).
+% - dataSurrCorr: fundamentally ill-conditioned, not just noisy. It's
+%   Pearson correlation between the real and surrogate-mean DVV curves
+%   across Ntv points; whenever either curve is close to flat (always true
+%   for linear/noise data by design, and often true for the 10-surrogate
+%   mean curve even for genuinely chaotic data, just by which surrogates
+%   got drawn), the correlation becomes numerically unstable and can flip
+%   sign for the SAME underlying generator (verified directly: 10 Henon
+%   realizations gave dataSurrCorr in [-0.29, 0.91] depending only on
+%   whether that realization's surrogate-mean curve happened to be flat).
+%
 % A Delay Vector Variance (DVV) toolbox for MATLAB
 % (c) Copyright Danilo P. Mandic 2008
 % http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm
