@@ -68,9 +68,9 @@ c read at most nmax points, return nmax
       character*(*) file
 
       if(icol.le.9) then
-         write(file(index(file," "):index(file," ")+1),'(1h,,i1)') icol
-      else 
-         write(file(index(file," "):index(file," ")+2),'(1h,,i2)') icol
+         write(file(index(file," "):index(file," ")+1),'(",",i1)') icol
+      else
+         write(file(index(file," "):index(file," ")+2),'(",",i2)') icol
       endif
       end
 

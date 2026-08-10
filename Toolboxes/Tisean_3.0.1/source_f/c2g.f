@@ -51,7 +51,7 @@ c===========================================================================
       e(me)=log(ee)
       c(me)=log(cc)
       goto 2
- 3    write(iunit2,'(4h#m= ,i5)') m
+ 3    write(iunit2,'("#m= ",i5)') m
       call indexx(me,e,lw)
       call index2sort(me,e,lw)
       call index2sort(me,c,lw)

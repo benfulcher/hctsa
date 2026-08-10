@@ -51,7 +51,7 @@ c===========================================================================
       e(me)=log(ee)
       c(me)=log(cc)
       goto 2
- 3    write(iunit2,'(4h#m= ,i5)') m
+ 3    write(iunit2,'("#m= ",i5)') m
       do 30 j=iav+1,me-iav
          call slope(e(j-iav),c(j-iav),2*iav+1,s)
  30      if(s.gt.0.) write(iunit2,*) exp(0.5*(e(j+iav)+e(j-iav))),  s

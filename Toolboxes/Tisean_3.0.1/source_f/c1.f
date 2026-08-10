@@ -55,7 +55,7 @@ c===========================================================================
       if(isout.eq.1) call addsuff(fout,file,"_c1")
       call outfile(fout,iunit,iverb)
       do 10 m=mfrom,mto
-         write(iunit,'(4h#m= ,i5)') m
+         write(iunit,'("#m= ",i5)') m
          pr=0.
 C          Ben Fulcher, 2015-03-06 requires a fix to integer do loop for some compilers
          do 20 pl=log(1./(nmax-(m-1)*id)),0.,resl

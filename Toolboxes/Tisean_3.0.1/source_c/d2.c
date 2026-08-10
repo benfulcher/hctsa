@@ -157,7 +157,7 @@ void scramble(void)
   check_alloc(schelp=(double*)malloc(sizeof(double)*hlength));
 
   for (i=0;i<hlength;i++)
-    rz[i]=(double)(rnd=rnd*rndf+1)/ULONG_MAX;
+    rz[i]=(double)(rnd=rnd*rndf+1)/(double)ULONG_MAX;
   
   for (i=0;i<SCBOX;i++)
     scbox[i]= -1;

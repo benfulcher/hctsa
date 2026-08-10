@@ -181,7 +181,7 @@ void start_box(void)
   double epsinv,norm,p;
   unsigned int **act;
   int *found,hf;
-  void next_dim();
+  void next_dim(int wd,int n,unsigned int *first);
   
   epsinv=(double)epsi;
   norm=(double)length;

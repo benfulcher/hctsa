@@ -10,9 +10,14 @@ function ok = compile_tisean()
 % re-running (and re-compiling) every other component compile_mex.m
 % handles.
 %
+% Only builds the specific TISEAN binaries hctsa actually calls (grepped
+% from Operations/*.m), not the full ~70-tool TISEAN suite -- see the
+% comment above the build step for why.
+%
 % ---OUTPUTS:
-% ok, true if TISEAN compiled and all binaries hctsa depends on
-%     (c1, d2, c2d, c2g, c2t, nstat_z, false_nearest) were installed.
+% ok, true if TISEAN compiled and all binaries hctsa depends on (c1, c2d,
+%     c2g, c2t, d2, nstat_z, false_nearest, boxcount, lyap_r, lyap_spec,
+%     poincare) were installed.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -77,14 +82,14 @@ elseif ~compilerOnPath('gcc') || ~compilerOnPath('make')
     end
     printPathDiagnostics();
 elseif isempty(findFortranCompiler())
-    % Also required: 4 of the 7 binaries hctsa depends on (c1, c2d, c2g, c2t)
+    % Also required: 4 of the 11 binaries hctsa depends on (c1, c2d, c2g, c2t)
     % are Fortran, not C (TISEAN's source_f/, not source_c/), so a C-only
     % toolchain isn't sufficient for a complete build.
     ok = false;
     if ismac
         fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH ' ...
             '(also checked the standard Homebrew install locations directly).\n' ...
-            'TISEAN needs this in addition to a C compiler: 4 of the binaries hctsa\n' ...
+            'TISEAN needs this in addition to a C compiler: 4 of the 11 binaries hctsa\n' ...
             'depends on (c1, c2d, c2g, c2t) are Fortran, not C.\n' ...
             'Install gfortran (e.g. via Homebrew: brew install gcc), then re-run compile_tisean.m.\n' ...
             'If it''s already installed via Homebrew but still not found: MATLAB launched from\n' ...
@@ -93,25 +98,33 @@ elseif isempty(findFortranCompiler())
             'cover that, so if it''s still not found, your gfortran may be somewhere else.\n']);
     else
         fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH.\n' ...
-            'TISEAN needs this in addition to a C compiler: 4 of the binaries hctsa\n' ...
+            'TISEAN needs this in addition to a C compiler: 4 of the 11 binaries hctsa\n' ...
             'depends on (c1, c2d, c2g, c2t) are Fortran, not C.\n' ...
             'On Debian/Ubuntu: sudo apt-get install gfortran\n' ...
             'then re-run compile_tisean.m.\n']);
     end
     printPathDiagnostics();
 else
-    % Build against a prefix outside the repo, in case the repo lives under a
-    % path containing spaces (e.g., a Dropbox-synced folder): TISEAN's 1990s-era
-    % configure/Makefiles/install-sh don't quote paths internally, so an
-    % install prefix with spaces breaks 'make install'. Compiling itself is
-    % unaffected by spaces in the source path, so we build in place and only
-    % route the *install* step through a space-free temporary prefix, then
-    % copy the resulting binaries into place with MATLAB's own copyfile.
-    buildPrefix = tempname;
-    mkdir(fullfile(buildPrefix,'bin'));
+    % Only build the specific TISEAN binaries hctsa actually calls (grepped
+    % from Operations/*.m: 4 Fortran, 7 C), rather than all ~70 tools TISEAN
+    % ships. This isn't just faster -- most of TISEAN's other tools are
+    % 1990s-era code that produces (mostly harmless, legacy-syntax) compiler
+    % warnings under modern compilers, and one (cluster.f) outright fails to
+    % compile on modern gfortran (a bad Fortran format string that older
+    % gfortran tolerated as an extension but current versions reject). None
+    % of that matters if those files are simply never compiled.
+    fortranBins = {'c1','c2d','c2g','c2t'};
+    cBins = {'d2','nstat_z','false_nearest','boxcount','lyap_r','lyap_spec','poincare'};
+
     % Modern C compilers (e.g., Xcode Clang) reject this package's K&R-style
     % implicit-int/implicit-function-declaration code by default; -std=gnu89
-    % restores the old C89 semantics it was written against.
+    % restores the old C89 semantics it was written against. -std=legacy is
+    % the Fortran analogue: without it, modern gfortran emits a warning for
+    % every old-style shared/labeled DO-loop termination in this 1990s F77
+    % code (a large but functionally harmless volume, given -std=legacy
+    % still fully supports these constructs as a GNU extension -- it isn't
+    % suppressing anything at risk of being silently wrong, just silencing
+    % pedantry about outdated-but-supported syntax).
     % Set CC/FC via MATLAB's own setenv rather than shell syntax like
     % 'CC="..." cmd' -- that inline-assignment form is sh/bash-only and
     % errors under csh/tcsh (which MATLAB's system() uses when $SHELL is
@@ -122,7 +135,7 @@ else
     oldCC = getenv('CC');
     oldFC = getenv('FC');
     tiseanCC = 'gcc -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration';
-    tiseanFC = findFortranCompiler(); % may be an absolute path (see findFortranCompiler)
+    tiseanFC = [findFortranCompiler(),' -std=legacy']; % may be an absolute path (see findFortranCompiler)
     setenv('CC',tiseanCC);
     setenv('FC',tiseanFC);
     % Clear any cached configure results from a previous run (e.g. one that
@@ -131,40 +144,43 @@ else
     if isfile('config.cache')
         delete('config.cache');
     end
-    [statusConfigure,outConfigure] = system(sprintf('./configure --prefix=%s',buildPrefix));
+    % --prefix is required by configure but never actually used below (we
+    % copy binaries directly from source_c//source_f/ ourselves, bypassing
+    % 'make install' entirely -- see below), so a nonexistent placeholder is
+    % fine:
+    [statusConfigure,outConfigure] = system(sprintf('./configure --prefix=%s',tempname));
     setenv('CC',oldCC);
     setenv('FC',oldFC);
     if statusConfigure~=0
         ok = false;
         fprintf(1,'\nERROR: TISEAN ./configure failed:\n%s\n',outConfigure);
     else
-        [statusMake,outMake] = system('make');
-        if statusMake~=0
-            ok = false;
-            fprintf(1,'\nERROR: TISEAN make failed:\n%s\n',outMake);
-        else
-            % NB: 'make install' runs its own "missing" self-check that
-            % reports false positives (it probes each binary by bare name
-            % before bin/ is on PATH), so verify success directly against
-            % buildPrefix/bin instead of trusting its exit status or missing.log.
-            system('make install');
-            keyBinaries = {'c1','d2','c2d','c2g','c2t','nstat_z','false_nearest'};
-            gotBinary = cellfun(@(f)isfile(fullfile(buildPrefix,'bin',f)),keyBinaries);
-            if all(gotBinary)
-                if ~isfolder('bin')
-                    mkdir('bin');
-                end
-                copyfile(fullfile(buildPrefix,'bin'),'bin');
-                system('chmod +x bin/*');
-                fprintf(1,' done (binaries installed to %s).\n',fullfile(tiseanDir,'bin'));
-            else
-                ok = false;
-                fprintf(1,'\nERROR: TISEAN build finished but required binaries are missing: %s\n', ...
-                    strjoin(keyBinaries(~gotBinary),', '));
+        [~,outMakeF] = system(['make -C source_f ',strjoin(fortranBins,' ')]);
+        [~,outMakeC] = system(['make -C source_c ',strjoin(cBins,' ')]);
+        % NB: TISEAN's own per-binary compile recipes are '-'-prefixed (make
+        % ignores a failed individual compile and continues), so neither
+        % make's exit status nor missing.log-style self-checks are reliable
+        % -- verify success directly by checking each binary actually exists
+        % where it was just built:
+        keyBinaries = [fortranBins,cBins];
+        builtPath = [cellfun(@(f)fullfile('source_f',f),fortranBins,'UniformOutput',false), ...
+            cellfun(@(f)fullfile('source_c',f),cBins,'UniformOutput',false)];
+        gotBinary = cellfun(@isfile,builtPath);
+        if all(gotBinary)
+            if ~isfolder('bin')
+                mkdir('bin');
             end
+            for i = 1:numel(builtPath)
+                copyfile(builtPath{i},fullfile('bin',keyBinaries{i}));
+            end
+            system('chmod +x bin/*');
+            fprintf(1,' done\n(binaries installed to %s).\n',fullfile(tiseanDir,'bin'));
+        else
+            ok = false;
+            fprintf(1,'\nERROR: TISEAN build finished but required binaries are missing: %s\n%s%s', ...
+                strjoin(keyBinaries(~gotBinary),', '),outMakeF,outMakeC);
         end
     end
-    rmdir(buildPrefix,'s');
 end
 cd(toolDir);
 

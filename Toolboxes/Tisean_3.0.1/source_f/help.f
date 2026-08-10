@@ -55,7 +55,7 @@ c===========================================================================
       subroutine popt(c,text)
       character*(*) c,text
 
-      write(istderr(),'(5h    -,a,x,1h<,a,1h>)') c, text
+      write(istderr(),'("    -",a,x,"<",a,">")') c, text
       end
 
       subroutine ptext(text)
@@ -67,7 +67,7 @@ c===========================================================================
       subroutine pout(text)
       character*(*) text
 
-      write(istderr(),'(8h    -o <,a,a,1h>)') 
+      write(istderr(),'("    -o <",a,a,">")')
      .   "output file name, just -o means ", text
       end
 
