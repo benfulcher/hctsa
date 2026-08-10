@@ -1,4 +1,4 @@
-function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,howVocal)
+function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,howVocal,beVerbose)
 % TS_Compute    Computes missing elements of TS_DataMat
 %
 %---EXAMPLE USAGE:
@@ -14,6 +14,8 @@ function TS_Compute(doParallel,ts_id_range,op_id_range,computeWhat,customFile,ho
 % 				ALSO retry any result that previously did not return a good value ('bad')
 % customFile: reads in and writes to a custom output file
 % howVocal:   {'fast','minimal','full'}: how much output to show about the calculation of operations.
+% beVerbose:  [default: false] whether to show text output (fprintf/warning messages)
+% 				generated inside individual Operations, rather than suppressing it.
 %
 %---OUTPUTS:
 % Writes output to customFile (HCTSA.mat by default)
@@ -75,6 +77,11 @@ end
 if nargin < 6
     howVocal = 'full'; % Write back full information on all calculations to screen
     % prints every piece of code evaluated (nice for error checking)
+end
+
+% Show text output generated inside individual Operations?
+if nargin < 7 || isempty(beVerbose)
+    beVerbose = false;
 end
 
 % --------------------------------------------------------------------------
@@ -167,7 +174,10 @@ end
 % --------------------------------------------------------------------------
 %% Computation
 % --------------------------------------------------------------------------
-if strcmp(howVocal,'fast')
+% (beVerbose's per-feature messages, propagated down from TS_CalculateFeatureVector,
+% don't mix well with an animated progress bar, so skip it in that case)
+showProgressBar = strcmp(howVocal,'fast') && ~beVerbose;
+if showProgressBar
     % Just show a progress bar over time series (not across features for a given time series)
     % makes sense for, say, catch22, where computations are super fast
     BF_ProgressBar('new')
@@ -221,7 +231,7 @@ for i = 1:numTimeSeries
     if numCalc > 0 % some to calculate
 		try
 	        [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(TimeSeries(tsInd,:),...
-								doParallel,Operations(toCalc,:),MasterOperations,true,howVocal);
+								doParallel,Operations(toCalc,:),MasterOperations,true,howVocal,beVerbose);
 		catch ME
 			% Skip to the next time series; the entries for this time series in TS_DataMat etc. will remain NaNs
 			warning('Calculation for time series %u / %u failed:\n%s',i,numTimeSeries,ME.message)
@@ -246,7 +256,14 @@ for i = 1:numTimeSeries
     % Update progress to the user
     switch howVocal
     case 'fast'
-        BF_ProgressBar(i/numTimeSeries)
+        if showProgressBar
+            % (a time-based ETA is a poor estimate here: Operations are computed
+            % in file order, and the cheap ones are clustered first -- so a
+            % linear extrapolation from elapsed time is systematically optimistic
+            % until the slow operations near the end. Percentage complete is
+            % exact, so isn't subject to that bias.)
+            BF_ProgressBar(i/numTimeSeries,[],[],sprintf(' %.0f%% complete',100*i/numTimeSeries))
+        end
     case 'minimal'
 
     case 'full'
@@ -270,7 +287,9 @@ end
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
 if strcmp(howVocal,'fast')
-    BF_ProgressBar('close')
+    if showProgressBar
+        BF_ProgressBar('close')
+    end
     fprintf(1,'Calculations complete in a total of %s.\n',BF_TheTime(sum(times),1));
 else
     fprintf(1,'!! !! !! !! !! !! Calculation completed !! !! !! !! !!\n');

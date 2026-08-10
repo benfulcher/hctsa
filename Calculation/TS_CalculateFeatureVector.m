@@ -1,4 +1,4 @@
-function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,howVocal)
+function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,howVocal,beVerbose)
 % TS_CalculateFeatureVector	Compute a feature vector from an input time series
 %
 %---INPUTS:
@@ -16,6 +16,15 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % 				codeSpecial = true: featureVector is all real numbers, and is set to
 % 							     zero where any special-valued outputs occur.
 % howVocal, {'fast', 'minimal', or 'full'}: how to give user feedback on the computation.
+% beVerbose, [default: false] whether to show text output (e.g., fprintf/warning
+% 				messages) generated *inside* individual Operations -- many
+% 				Operations print ad hoc diagnostics (e.g. "data are not positive,
+% 				but Log-Normal is a positive-only distribution") that otherwise
+% 				flood the screen regardless of howVocal. When false (default),
+% 				this output is suppressed and howVocal's usual progress bar/summary
+% 				behaviour is unaffected. When true, an animated progress bar isn't
+% 				used (it doesn't mix well with interleaved messages); instead each
+% 				master operation gets its own line, followed by any output it produced.
 %
 %---OUTPUTS:
 % featureVector, the feature vector obtained by running MasterOperations and
@@ -97,6 +106,11 @@ end
 % Whether to give information out to screen
 if nargin < 6
 	howVocal = 'minimal';
+end
+
+% Whether to show text output generated inside individual Operations
+if nargin < 7 || isempty(beVerbose)
+	beVerbose = false;
 end
 
 %-------------------------------------------------------------------------------
@@ -239,23 +253,40 @@ if doParallel
 	parfor jj = 1:numMopsToCalc
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
+				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
 	end
 else
     % Normal FOR Loop (serial)
-    if strcmp(howVocal,'minimal')
+    % (the animated progress bar doesn't mix well with beVerbose's interleaved
+    % messages, so skip it in that case -- TS_ComputeMasterLoop prints its own
+    % per-operation line instead)
+    showProgressBar = strcmp(howVocal,'minimal') && ~beVerbose;
+    if showProgressBar
         BF_ProgressBar('new');
     end
 	for jj = 1:numMopsToCalc
+        if showProgressBar
+            % Show *before* the call, not after, so the bar names whichever
+            % operation is currently running (most useful for spotting which
+            % one a slow calculation is stuck on) rather than the one that
+            % just finished. (percentage complete, not a time-based ETA:
+            % master operations are evaluated in file order, with cheap ones
+            % clustered first, so a linear extrapolation from elapsed time is
+            % systematically optimistic until the slow operations near the
+            % end -- see TS_Compute.m for the same reasoning)
+            currentCode = par_MasterOpCodeCalc{jj};
+            if length(currentCode) > 35
+                currentCode = [currentCode(1:34),'~']; % truncate long code strings (some run to 100+ chars)
+            end
+            BF_ProgressBar((jj-1)/numMopsToCalc,[],[],sprintf(' %.0f%% %s',100*(jj-1)/numMopsToCalc,currentCode));
+        end
+
 		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj);
-
-        if strcmp(howVocal,'minimal')
-            BF_ProgressBar(jj/numMopsToCalc);
-        end
+				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
 	end
-    if strcmp(howVocal,'minimal')
+    if showProgressBar
+        BF_ProgressBar(1,[],[],' 100% complete');
         BF_ProgressBar('close');
     end
 end
