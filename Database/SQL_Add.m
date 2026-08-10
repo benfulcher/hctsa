@@ -579,7 +579,7 @@ case 'ops'
     theTable = Operations;
 end
 if ~forDatabase
-    fprintf(1,'Returning a table with metadata for %u %s.\n',height(theTable),theWhat);
+    fprintf(1,'Using %u %s.\n',height(theTable),theWhat);
     return
 end
 
