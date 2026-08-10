@@ -21,9 +21,31 @@ function out = EX_ExtremeEventOrder(y, extremeThresh)
 %       inter-event intervals of the combined (both-direction) event
 %       sequence -- how bursty extreme events are overall, irrespective of
 %       direction.
+% meanIntervalPos, cvIntervalPos, meanIntervalNeg, cvIntervalNeg: the same,
+%       but computed separately within each direction's own event
+%       sub-sequence (e.g. meanIntervalPos is the mean gap between
+%       consecutive positive-direction events, ignoring any negative
+%       events that occur in between) -- this is a different question from
+%       the combined interval stats above: a series can have very bursty
+%       positive extremes and very regular negative extremes even while
+%       the combined (direction-blind) event stream looks unremarkable.
 % alternationRate: proportion of consecutive event pairs whose direction
 %       differs -- 1 means the sequence strictly alternates sign, 0 means
 %       same-direction events always cluster together.
+% propPN, propNP: alternationRate split by switch direction -- the
+%       proportion of consecutive event pairs that switch positive-to-
+%       negative, and negative-to-positive, respectively (propPN+propNP ==
+%       alternationRate). Mirrors CO_PosNegAsymmetry's propPN/propNP.
+% meanIntervalPN, cvIntervalPN, meanIntervalNP, cvIntervalNP: mean and
+%       coefficient of variation of the gaps between successive PN
+%       switches (and, separately, successive NP switches), timestamped at
+%       the later (post-switch) event. Different question again from
+%       meanIntervalPos/Neg above: those count every event of a given
+%       direction; these count only the (rarer) moments the direction
+%       actually flips, e.g. a series alternating in bursts P,P,P,N,N,N,...
+%       has short meanIntervalPos/Neg (events of a given type are close
+%       together within a burst) but long meanIntervalPN/NP (switches
+%       between bursts are rare).
 % lzComplexity: normalized Lempel-Ziv complexity (via Michael Small's
 %       MS_complexitybs, called directly on the true 0/1 label sequence --
 %       NOT via MS_complexity/EN_MS_LZcomplexity, whose equiprobable
@@ -95,29 +117,34 @@ out.numEvents = numEvents;
 out.propPosEvents = mean(eventType);
 
 % ------------------------------------------------------------------------------
-% Overall event timing (both directions combined)
+% Event timing: combined (both directions), and separately within each
+% direction's own sub-sequence of events (posIdx/negIdx are already sorted,
+% since find() returns indices in increasing order).
 % ------------------------------------------------------------------------------
-if numEvents >= 2
-	intervals = diff(eventIdx);
-	out.meanInterval = mean(intervals);
-	if out.meanInterval > 0
-		out.cvInterval = std(intervals) / out.meanInterval;
-	else
-		out.cvInterval = NaN;
-	end
-else
-	out.meanInterval = NaN;
-	out.cvInterval = NaN;
-end
+[out.meanInterval, out.cvInterval] = SUB_intervalStats(eventIdx);
+[out.meanIntervalPos, out.cvIntervalPos] = SUB_intervalStats(posIdx);
+[out.meanIntervalNeg, out.cvIntervalNeg] = SUB_intervalStats(negIdx);
 
 % ------------------------------------------------------------------------------
 % Ordering of event direction: alternation rate and Lempel-Ziv complexity
 % ------------------------------------------------------------------------------
 if numEvents >= 2
-	out.alternationRate = mean(diff(eventType) ~= 0);
+	typeChange = diff(eventType); % +1 = N-to-P switch, -1 = P-to-N switch, 0 = no switch
+	out.alternationRate = mean(typeChange ~= 0);
+	out.propPN = mean(typeChange == -1);
+	out.propNP = mean(typeChange == 1);
+	% Timestamp each switch at the later (post-switch) event:
+	pnSwitchIdx = eventIdx(find(typeChange == -1) + 1);
+	npSwitchIdx = eventIdx(find(typeChange == 1) + 1);
 else
 	out.alternationRate = NaN;
+	out.propPN = NaN;
+	out.propNP = NaN;
+	pnSwitchIdx = [];
+	npSwitchIdx = [];
 end
+[out.meanIntervalPN, out.cvIntervalPN] = SUB_intervalStats(pnSwitchIdx);
+[out.meanIntervalNP, out.cvIntervalNP] = SUB_intervalStats(npSwitchIdx);
 
 % Below ~10 symbols, normalized LZ complexity (itself an asymptotic
 % comparison against the expected count for a noise sequence) becomes
@@ -142,4 +169,22 @@ else
 	out.lzComplexity = NaN;
 end
 
+end
+
+% ------------------------------------------------------------------------------
+function [meanI, cvI] = SUB_intervalStats(idx)
+	% Mean and coefficient of variation of the gaps between consecutive
+	% (already time-sorted) event indices in idx.
+	if length(idx) >= 2
+		intervals = diff(idx);
+		meanI = mean(intervals);
+		if meanI > 0
+			cvI = std(intervals) / meanI;
+		else
+			cvI = NaN;
+		end
+	else
+		meanI = NaN;
+		cvI = NaN;
+	end
 end
