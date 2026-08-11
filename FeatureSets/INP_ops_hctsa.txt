@@ -1499,7 +1499,6 @@ EN_MSE_1-10_2_015.sampen_s7         EN_MSE_1-10_2_015_sampen_s7         entropy
 EN_MSE_1-10_2_015.sampen_s8         EN_MSE_1-10_2_015_sampen_s8         entropy
 EN_MSE_1-10_2_015.sampen_s9         EN_MSE_1-10_2_015_sampen_s9         entropy
 EN_MSE_1-10_2_015.sampen_s10        EN_MSE_1-10_2_015_sampen_s10        entropy
-EN_MSE_1-10_2_015.maxSampEn         EN_MSE_1-10_2_015_maxSampEn         entropy
 EN_MSE_1-10_2_015.maxScale          EN_MSE_1-10_2_015_maxScale          entropy
 EN_MSE_1-10_2_015.minSampEn         EN_MSE_1-10_2_015_minSampEn         entropy
 EN_MSE_1-10_2_015.minScale          EN_MSE_1-10_2_015_minScale          entropy
@@ -1517,7 +1516,6 @@ EN_MSE_1-10_2_015_diff1.sampen_s7         EN_MSE_1-10_2_015_diff1_sampen_s7     
 EN_MSE_1-10_2_015_diff1.sampen_s8         EN_MSE_1-10_2_015_diff1_sampen_s8         entropy
 EN_MSE_1-10_2_015_diff1.sampen_s9         EN_MSE_1-10_2_015_diff1_sampen_s9         entropy
 EN_MSE_1-10_2_015_diff1.sampen_s10        EN_MSE_1-10_2_015_diff1_sampen_s10        entropy
-EN_MSE_1-10_2_015_diff1.maxSampEn         EN_MSE_1-10_2_015_diff1_maxSampEn         entropy
 EN_MSE_1-10_2_015_diff1.maxScale          EN_MSE_1-10_2_015_diff1_maxScale          entropy
 EN_MSE_1-10_2_015_diff1.minSampEn         EN_MSE_1-10_2_015_diff1_minSampEn         entropy
 EN_MSE_1-10_2_015_diff1.minScale          EN_MSE_1-10_2_015_diff1_minScale          entropy
@@ -1535,7 +1533,6 @@ EN_MSE_1-10_2_015_rescale_tau.sampen_s7         EN_MSE_1-10_2_015_rescale_tau_sa
 EN_MSE_1-10_2_015_rescale_tau.sampen_s8         EN_MSE_1-10_2_015_rescale_tau_sampen_s8         entropy
 EN_MSE_1-10_2_015_rescale_tau.sampen_s9         EN_MSE_1-10_2_015_rescale_tau_sampen_s9         entropy
 EN_MSE_1-10_2_015_rescale_tau.sampen_s10        EN_MSE_1-10_2_015_rescale_tau_sampen_s10        entropy
-EN_MSE_1-10_2_015_rescale_tau.maxSampEn         EN_MSE_1-10_2_015_rescale_tau_maxSampEn         entropy
 EN_MSE_1-10_2_015_rescale_tau.maxScale          EN_MSE_1-10_2_015_rescale_tau_maxScale          entropy
 EN_MSE_1-10_2_015_rescale_tau.minSampEn         EN_MSE_1-10_2_015_rescale_tau_minSampEn         entropy
 EN_MSE_1-10_2_015_rescale_tau.minScale          EN_MSE_1-10_2_015_rescale_tau_minScale          entropy

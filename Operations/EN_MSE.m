@@ -43,6 +43,23 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow)
 % the demonstrated instability -- across 2200 offset x scale combinations
 % on real data, 0% Inf and only 2% NaN (from too-short coarse-grained
 % segments), both already handled safely.
+%
+% Also audited the summary-statistic set (maxSampEn/maxScale/minSampEn/
+% minScale/meanSampEn/stdSampEn/cvSampEn/meanch), checking on two
+% independent datasets (Bonn EEG, Empirical1000) rather than one -- the
+% first (EEG-only) pass looked alarming (several field pairs r>0.9) but most
+% of that turned out to be an artifact of EEG's narrow domain, not general
+% redundancy (e.g. stdSampEn~meanch dropped from r=0.93 on EEG to r=-0.35 on
+% Empirical1000; minScale looked degenerate -- constant at 1 across all 500
+% EEG series -- but is well-distributed on Empirical1000, so it was kept).
+% One redundancy held up on both datasets: maxSampEn~meanSampEn (r=0.94 EEG,
+% r=0.95 Empirical1000) -- dropped maxSampEn, kept meanSampEn (Costa's own
+% "Complexity Index" is essentially this field) and maxScale (peak
+% location, distinct from peak height). Also considered replacing meanch
+% with a more principled robust-linear-fit slope of SampEn vs. scale, but
+% it correlates with the already-registered meanch at r=0.83-0.93 on BOTH
+% datasets (not an EEG artifact) -- essentially the same trend signal via a
+% fancier estimator, not added.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
