@@ -47,6 +47,23 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed)
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for pre-processing: PP_PreProcess)
+%
+% ---NOTES:
+% Only the P=1,Q=1 registration (MF_GARCHfit_ar_P1_Q1) remains; the P=1,Q=2
+% registration was dropped 2026-08-11 after confirming on Bonn EEG and
+% Empirical1000 that it was almost entirely redundant with P=1,Q=1 (r=0.9-1.0
+% across nearly every output field) -- adding a second ARCH lag barely
+% changes the fitted model's character on real data. MF_GARCHcompare, which
+% actually varies P and Q over a grid, is not redundant with either and is
+% unaffected by this.
+%
+% Added 2026-08-11: persistence (sum of ARCH+GARCH coefficients) and
+% uncondVar (implied long-run/unconditional variance). These are standard
+% GARCH diagnostics that were previously entirely absent -- persistence
+% close to 1 signals near-integrated (IGARCH-like) volatility clustering
+% that was otherwise invisible in this feature set. See the inline comment
+% at their computation for why uncondVar is NaN'd near the boundary rather
+% than only when persistence >= 1.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -254,6 +271,24 @@ nparams = sum(any(estParamCov)); % number of parameters
 [AIC, BIC] = aicbic(LLF, nparams, N); % aic and bic of fit
 out.aic = AIC;
 out.bic = BIC;
+
+% Persistence (sum of ARCH + GARCH coefficients) and implied long-run
+% (unconditional) variance = Constant/(1-persistence). Persistence close to
+% 1 indicates near-integrated (IGARCH-like) volatility clustering; >= 1
+% would mean no finite unconditional variance exists. In practice the
+% estimate() optimizer enforces a stationarity constraint with a small
+% internal tolerance, so near-boundary fits land just under 1 (observed
+% exactly 0.9999998 on real data) rather than at/over it -- uncondVar is
+% NaN'd out here rather than only guarding on persistence>=1, since a
+% denominator that small makes the value numerically meaningless (dominated
+% by the optimizer's boundary tolerance, not the data) well before
+% persistence formally reaches 1.
+out.persistence = sum(cellfun(@(c) c, Gfit.GARCH)) + sum(cellfun(@(c) c, Gfit.ARCH));
+if out.persistence < 0.999
+	out.uncondVar = Gfit.Constant / (1 - out.persistence);
+else
+	out.uncondVar = NaN;
+end
 
 % ------------------------------------------------------------------------------
 %% Sigmas, the time series of conditional variances

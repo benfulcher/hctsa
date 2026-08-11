@@ -31,6 +31,18 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % ---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
 % Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
+%
+% ---NOTES:
+% Fixed 2026-08-11: bestpLLF/bestqLLF selected the order with the MINIMUM
+% log-likelihood (found via find(LLFs==min(LLFs(:)))), the opposite of what
+% "best" should mean for a log-likelihood -- it should be maximized, unlike
+% AIC/BIC which are correctly minimized elsewhere in this function. In
+% practice this meant bestpLLF/bestqLLF almost always just returned the
+% lowest-complexity corner of the (pr,qr) grid regardless of fit quality,
+% confirmed directly on 5 real series (Bonn EEG): the buggy min-based
+% selection picked p=1,q=1 or q=2 every time, while max-based selection
+% tracked bestpAIC/bestqAIC closely (exact match in 3/5 series), as
+% expected since richer models almost always have higher raw likelihood.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -256,7 +268,7 @@ out.max_maxlbqps = max(maxlbqps(:));
 out.mean_maxlbqps = nanmean(maxlbqps(:));
 
 % 'bests' (orders)
-[a, b] = find(LLFs == min(LLFs(:)), 1, 'first');
+[a, b] = find(LLFs == max(LLFs(:)), 1, 'first');
 out.bestpLLF = pr(a);
 out.bestqLLF = qr(b);
 
