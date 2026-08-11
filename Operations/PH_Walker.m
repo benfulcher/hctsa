@@ -165,7 +165,10 @@ switch walkerRule
 			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
 			w_mom = w_inert + (y(i) - w_inert) / m; % dissipative term from time series
 			if i > wl
-				w(i) = w_mom * (std(y(i - wl:i)) / std(w(i - wl:i))); % adjust by local standard deviation
+				% NB: w(i) is not yet computed at this point, so the local std of the
+				% walker must be built from its provisional value, w_mom, rather than
+				% from w(i) itself (which would still hold its zeros(N,1) initial value)
+				w(i) = w_mom * (std(y(i - wl:i)) / std([w(i - wl:i - 1); w_mom])); % adjust by local standard deviation
 			else
 				w(i) = w_mom;
 			end
@@ -217,7 +220,7 @@ out.w_ac2 = CO_AutoCorr(w, 2, 'Fourier');
 out.w_tau = CO_FirstCrossing(w, 'ac', 0, 'continuous');
 out.w_min = min(w);
 out.w_max = max(w);
-% fraction of time series length that walker crosses time series:
+% fraction of time series length that the walker crosses zero:
 out.w_propzcross = sum(w(1:end - 1) .* w(2:end) < 0) / (N - 1);
 
 % (ii) Differences between the walk at signal
