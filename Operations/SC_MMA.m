@@ -73,19 +73,35 @@ if nargin < 2 || isempty(doOverlap)
 end
 
 if nargin < 3 || isempty(scaleRange)
-	scaleRange = [10, round(N / 40)];
 	% minimal s scale used, when calculating Fq(s) functions family (default 10)
-	% maximal s scale used, when calculating Fq(s) functions family, has to be multiple of 5 (default 600; in general should be near to N/50, where N is a time series length)
+	% maximal s scale used, when calculating Fq(s) functions family, has to be multiple of 5
+	% (should be near N/40, but floored at 100 = 10*minScale: below that the
+	% validity check further down always failed, so this operation silently
+	% returned NaN for essentially every series shorter than ~2000 samples,
+	% even though multiscale multifractal analysis is perfectly computable on
+	% much shorter series. A floor of exactly 5*minScale=50 (the bare minimum
+	% to pass the validity check) was tried first but collapses sList -- the
+	% scale-axis used for scaleHurstStd/scaleHurstTrend/min-maxHurstScale/
+	% stdStdHurstScale below -- to a single point (since it samples the range
+	% [minScale, maxScale/5], which is zero-width exactly at that boundary),
+	% making those fields degenerate. 100 keeps [minScale, maxScale/5]=[10,20]
+	% wide enough for an 11-point scale axis. The floor only changes behaviour
+	% for N below ~4000; for longer series round(N/40) already exceeds 100 and
+	% this is a no-op.
+	scaleRange = [10, max(100, round(N / 40))];
 end
 minScale = scaleRange(1);
 maxScale = scaleRange(2);
-if (maxScale / 5) < minScale
+if maxScale > N
+	warning('Time-series (N=%u) too short for multiscale multifractal analysis (maxScale=%u exceeds N)', N, maxScale);
+	out = NaN;
+	return
+elseif (maxScale / 5) < minScale
 	warning('Time-series (N=%u) too short for multiscale multifractal analysis', N);
 	out = NaN;
 	return
 elseif rem(maxScale, 5) ~= 0
 	maxScale = round(maxScale / 5) * 5;
-	fprintf(1, 'adjusted maxScale to %u\n', maxScale);
 end
 
 if nargin < 4 || isempty(qRange)
@@ -131,7 +147,17 @@ for s = sListFull
 		coordinates = reshape(ind2(1:(size(prof, 1) - mod(size(prof, 1), s))), s, (size(prof, 1) - mod(size(prof, 1), s)) / s)';
 	end
 
-	segments = prof(coordinates);
+	% reshape (not just index) explicitly to [numSegments x s]: when there's
+	% exactly one segment (s close to N, only reachable now that maxScale can
+	% approach N for short series), coordinates is itself a 1xs row vector,
+	% and Matlab's "vector indexed by vector" rule then returns prof(coordinates)
+	% shaped like prof (a column, since the input series is a column vector)
+	% rather than shaped like coordinates -- silently transposing a single
+	% segment into an sx1 column and breaking every segments(ni,:) below.
+	% reshape forces the intended [numSegments x s] shape regardless of that
+	% quirk (values stay in the same order either way, so this is a pure
+	% shape fix, not a data change).
+	segments = reshape(prof(coordinates), size(coordinates));
 	xbase = [1:1:s];
 	% Preallocate f2nis instead of growing it with f2nis(end+1) per segment:
 	numSegments = size(segments, 1);

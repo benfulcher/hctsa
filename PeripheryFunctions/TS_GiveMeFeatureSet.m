@@ -71,6 +71,18 @@ case 'catch22'
     % internal consistency was preferred over matching upstream. Joining hctsa output to
     % catch22 output *by feature name* will therefore miss these two until catch22 is
     % updated to match.
+    %
+    % NOTE -- 'SC_FluctAnal_2_rsrangefit_50_1_logi_prop_r1' and
+    % 'SC_FluctAnal_2_dfa_50_1_2_logi_prop_r1' keep their upstream names here (no
+    % renaming), but their *value* now diverges from upstream catch22 and from
+    % catch22's own vendored C implementation (Toolboxes/catch22/C/SC_FluctAnal.c):
+    % both the old hctsa code and catch22's C port shared an identical bug in the
+    % two-regime split-point search (a fixed minPoints=6 with no penalty for
+    % segment length let the search always land at the edge of its range, so
+    % prop_r1 mostly reported "shortest allowed segment" rather than any genuine
+    % scaling-regime crossover -- confirmed via ground-truth fGn and AR(1)
+    % crossover tests, see SC_ family audit). hctsa's SC_FluctAnal.m was fixed;
+    % catch22's C code (a third-party vendored copy) was left as-is.
     featureNames = {'DN_HistogramMode_5', ...
                     'DN_HistogramMode_10', ...
                     {'firstCrossing_1e_acf_tau', 'first1e_acf_tau', 'first_1e_ac'}, ... % [new name(s)]
@@ -95,6 +107,10 @@ case 'catch22'
                     {'FC_LocalSimple_mean3_stde','FC_LocalSimple_mean3_stderr'}}; % [new name first]
 case 'catchaMouse16'
     matchByName = true;
+    % NOTE -- 'SC_FluctAnal_2_dfa_50_2_logi_r2_se2' keeps its upstream name here,
+    % but its value diverges from upstream catchaMouse16 for the same reason
+    % documented under the catch22 case above (shared split-point-search bug,
+    % fixed in hctsa's SC_FluctAnal.m, left as-is in catch22's vendored C code).
     featureNames = {'SY_DriftingMean50_min',...
                     'MF_CompareAR_1_10_05_stddiff',...
                     'SC_FluctAnal_2_dfa_50_2_logi_r2_se2',...
