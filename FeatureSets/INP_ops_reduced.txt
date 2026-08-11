@@ -3,7 +3,6 @@
 # cf. Fulcher and Jones, IEEE KDE, 2014
 # ------------------------------------------------------------------------------
 # Features for the Synthetic Control dataset:
-PH_ForcePotential_sine_10_004_10.median	PH_ForcePotential_sine_10_004_10_median	dynsys,sine
 SP_Summaries_pgram_hamm.q90mel	SP_Summaries_pgram_hamm_q90mel	powerspectrum
 
 # Features for Gunpoint dataset:
@@ -169,8 +168,6 @@ PH_ForcePotential_dblwell_1_05_02.mean	PH_ForcePotential_dblwell_1_05_02_mean	dy
 PH_ForcePotential_dblwell_2_005_02.mean	PH_ForcePotential_dblwell_2_005_02_mean	dynsys,dblwell
 PH_ForcePotential_dblwell_2_005_02.pcross	PH_ForcePotential_dblwell_2_005_02_pcross	dynsys,dblwell
 PH_ForcePotential_dblwell_3_001_01.pcross	PH_ForcePotential_dblwell_3_001_01_pcross	dynsys,dblwell
-PH_ForcePotential_sine_3_05_1.tau	PH_ForcePotential_sine_3_05_1_tau	dynsys,sine
-PH_ForcePotential_sine_10_004_10.proppos	PH_ForcePotential_sine_10_004_10_proppos	dynsys,sine
 DN_RemovePoints_absfar_08_remove.median	DN_RemovePoints_absfar_08_remove_median	correlation,outliers
 DN_RemovePoints_min_01_saturate.skewnessrat	DN_RemovePoints_min_01_saturate_skewnessrat	correlation,outliers,distribution
 DN_RemovePoints_min_08_saturate.ac3diff	DN_RemovePoints_min_08_saturate_ac3diff	correlation,outliers
