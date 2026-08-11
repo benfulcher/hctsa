@@ -632,6 +632,8 @@ MF_FitSubsegments(x_z,'arsbc',[],'rand',[25,0.1],'default')	MF_FitSubsegments_ar
 MF_FitSubsegments(x_z,'arsbc',[],'uniform',[25,0.1])	MF_FitSubsegments_arsbc_uniform_25_01
 MF_FitSubsegments(x_z,'ss',2,'uniform',[25,0.1])	MF_FitSubsegments_ss_2_uniform_25_01
 MF_GARCHfit(x_z,'ar',1,1)    MF_GARCHfit_ar_P1_Q1
+MF_GARCHfit(x_z,'ar',1,1,'default','gjr','gaussian')    MF_GARCHfit_ar_P1_Q1_gjr
+MF_GARCHfit(x_z,'ar',1,1,'default','garch','t')    MF_GARCHfit_ar_P1_Q1_t
 MF_GP_FitAcross(x_z,{'covSum',{'covSEiso','covNoise'}},20)	MF_GP_FitAcross_covSEiso_covNoise_20
 MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covNoise'}},1,50,'random_i','default')	MF_GP_hyperparameters_covSEiso_covNoise_1_50_random_i
 MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_first
