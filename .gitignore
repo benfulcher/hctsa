@@ -16,9 +16,6 @@ HCTSA*.mat
 # Any .mat data files:
 *.mat
 
-# Database configuration
-sql_settings.conf
-
 # Platform-specific mexed files
 *.mexw32
 *.mexw64

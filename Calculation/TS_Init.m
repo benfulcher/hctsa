@@ -1,8 +1,6 @@
 function TS_Init(INP_ts,whatFeatureSet,beVocal,outputFile)
 % TS_Init  Produces a formatted HCTSA .mat file from input files
 %
-% This function is used instead to run hctsa analysis without a linked mySQL database.
-%
 %---EXAMPLE USAGE:
 % Initiate an HCTSA.mat file on a custom time-series dataset using the hctsa
 % feature library, using a formatted input file, 'my_TS_INP_file.mat'
@@ -104,19 +102,19 @@ end
 % ------------------------------------------------------------------------------
 % Get time series, operations, master operations into structure arrays
 % ------------------------------------------------------------------------------
-TimeSeries = SQL_Add('ts',INP_ts,false,beVocal(1));
+TimeSeries = TS_ReadInputFile('ts',INP_ts,beVocal(1));
 numTS = height(TimeSeries);
 if numTS==0
     return; % The user did not approve of the set of inputs
 end
 
-MasterOperations = SQL_Add('mops',INP_mops,false,beVocal(2));
+MasterOperations = TS_ReadInputFile('mops',INP_mops,beVocal(2));
 numMops = height(MasterOperations);
 if numMops==0
     return; % The user did not approve of the set of inputs
 end
 
-Operations = SQL_Add('ops',INP_ops,false,beVocal(3));
+Operations = TS_ReadInputFile('ops',INP_ops,beVocal(3));
 numOps = height(Operations);
 if numOps==0
     return; % The user did not approve of the set of inputs

@@ -7,7 +7,7 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % doParallel, (binary) whether to compute the features using parallel processing
 % Operations, an hctsa-style table of Operations
 % MasterOperations, an hctsa-style table of MasterOperations
-% codeSpecial, whether to code special values with quality labels (for mySQL database)
+% codeSpecial, whether to code special values with quality labels;
 % 				this makes sure the featureVector is all real numbers, and any
 %				special values (like NaNs, Infs, etc.) are coded with corresponding
 % 				labels in calcQuality.
@@ -82,10 +82,10 @@ end
 if nargin < 3 || isempty(Operations)
     fprintf(1,'Importing the default hctsa set of time-series features!\n');
     theINPfile = 'INP_ops_hctsa.txt';
-    Operations = SQL_Add('ops',theINPfile,false,false);
+    Operations = TS_ReadInputFile('ops',theINPfile,false);
 elseif ischar(Operations)
     theINPfile = Operations;
-    Operations = SQL_Add('ops',theINPfile,false,false);
+    Operations = TS_ReadInputFile('ops',theINPfile,false);
 end
 if isnumeric(Operations)
 	error('Provide an input file or a structure array of Operations.');
@@ -93,7 +93,7 @@ end
 
 if nargin < 4 || isempty(MasterOperations)
 	% Use the default library:
-	MasterOperations = SQL_Add('mops','INP_mops_hctsa.txt',false,false);
+	MasterOperations = TS_ReadInputFile('mops','INP_mops_hctsa.txt',false);
 	% Need to link operations to masters if not already supplied:
 	[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 end
