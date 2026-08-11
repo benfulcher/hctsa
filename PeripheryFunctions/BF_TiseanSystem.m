@@ -16,16 +16,40 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % unbounded system() call -- identical to every caller's previous
 % behavior -- rather than hard-requiring a new dependency.
 %
+% The default (600s) is deliberately generous, not tight: most of the
+% Operations calling this have no length cap on their input (unlike
+% NL_RQA/NL_LyapSpec's explicit maxN), so a legitimately long series can
+% legitimately take a while, and a timeout that fires on a merely-slow (not
+% hung) call would be worse than the bug this fixes -- it would silently
+% truncate mid-computation rather than erroring outright (see below).
+% Measured directly: NL_c1, the slowest of the 16 TISEAN-calling operations
+% tested, took 38s at N=10000 (already longer than any series in this
+% toolbox's two standard validation datasets) and 88s at N=30000 -- cost
+% flattens with N rather than exploding, so 600s leaves a wide margin
+% without being effectively unbounded.
+%
+% A call that fails this way -- status 124 (this wrapper's own timeout),
+% or 126/127 (the shell's reserved "found but not executable"/"command not
+% found" codes, i.e. TISEAN never ran at all) -- errors immediately rather
+% than returning res to the caller. This is deliberate: a caller expecting
+% to parse numeric rows out of res could otherwise misinterpret a partially
+% flushed line (captured right before a timeout kill) as real, if
+% incomplete, TISEAN output, producing a silently wrong feature value
+% instead of a diagnosable failure. Any other exit code means the TISEAN
+% binary itself ran to completion (whether cleanly or with its own
+% terse refusal, e.g. false_nearest's exit 54 for "too large" -- see
+% NL_FNN.m) and is passed through as before for the caller to interpret.
+%
 %---INPUTS:
 % tiseanCommand, the TISEAN command-line string to run (as previously
 %                 passed directly to system())
-% timeoutSecs [opt], wall-clock time limit in seconds (default: 120)
+% timeoutSecs [opt], wall-clock time limit in seconds (default: 600)
 %
 %---OUTPUTS:
-% status, the exit status, as returned by system(). If the call is actually
-%          killed by the timeout (rather than exiting under its own steam),
-%          this is 124 -- GNU timeout's own reserved code for that case, so
-%          existing/future status checks can test for it directly.
+% status, the exit status, as returned by system() for the TISEAN binary's
+%          own exit (this function already errors on 124/126/127, so a
+%          caller only ever sees a status the binary itself chose to exit
+%          with).
 % res, the captured stdout+stderr text.
 
 % ------------------------------------------------------------------------------
@@ -64,13 +88,30 @@ if isempty(timeoutCmd)
 end
 
 if nargin < 2 || isempty(timeoutSecs)
-    timeoutSecs = 120;
+    timeoutSecs = 600;
 end
 
 if isempty(timeoutCmd)
     [status, res] = system(tiseanCommand);
 else
     [status, res] = system(sprintf('%s %g %s', timeoutCmd, timeoutSecs, tiseanCommand));
+end
+
+% See the header comment: any of these three means TISEAN never produced a
+% real answer, so error() immediately rather than letting a caller's own
+% parsing logic risk mistaking truncated/absent output for a real one.
+if any(status == [124, 126, 127])
+    switch status
+        case 124
+            reason = sprintf('timed out after %g seconds', timeoutSecs);
+        case 126
+            reason = 'found but not executable';
+        case 127
+            reason = 'not found on the system path -- is TISEAN installed and compiled? (see install.m)';
+    end
+    error('BF_TiseanSystem:tiseanFailed', ...
+        'TISEAN command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
+        reason, tiseanCommand, res);
 end
 
 end
