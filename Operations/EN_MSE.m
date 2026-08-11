@@ -188,4 +188,21 @@ out.cvSampEn = out.stdSampEn / out.meanSampEn;
 % Mean change across the range of scales:
 out.meanch = nanmean(diff(sampEns));
 
+% Trend across scales: robust linear fit of SampEn vs. scale (a more
+% principled alternative to meanch's raw adjacent-scale averaging -- uses
+% all valid scales at once, and comes with its own standard error).
+% Superseded meanch (dropped from registration, still computed above):
+% correlated at r=0.83-0.93 across two independent datasets, and slope is
+% the more complete summary of the same underlying trend.
+scaleCol = scaleRange(:);
+goodScales = ~isnan(sampEns);
+if sum(goodScales) >= 4
+	[linfit, linstats] = robustfit(scaleCol(goodScales), sampEns(goodScales));
+	out.slope = linfit(2);
+	out.slopeSE = linstats.se(2);
+else
+	out.slope = NaN;
+	out.slopeSE = NaN;
+end
+
 end

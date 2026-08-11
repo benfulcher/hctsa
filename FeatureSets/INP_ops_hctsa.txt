@@ -1505,7 +1505,8 @@ EN_MSE_1-10_2_015.minScale          EN_MSE_1-10_2_015_minScale          entropy
 EN_MSE_1-10_2_015.meanSampEn        EN_MSE_1-10_2_015_meanSampEn        entropy
 EN_MSE_1-10_2_015.stdSampEn         EN_MSE_1-10_2_015_stdSampEn         entropy
 EN_MSE_1-10_2_015.cvSampEn          EN_MSE_1-10_2_015_cvSampEn          entropy
-EN_MSE_1-10_2_015.meanch            EN_MSE_1-10_2_015_meanch            entropy
+EN_MSE_1-10_2_015.slope            EN_MSE_1-10_2_015_slope            entropy
+EN_MSE_1-10_2_015.slopeSE            EN_MSE_1-10_2_015_slopeSE            entropy
 EN_MSE_1-10_2_015_diff1.sampen_s1         EN_MSE_1-10_2_015_diff1_sampen_s1         entropy
 EN_MSE_1-10_2_015_diff1.sampen_s2         EN_MSE_1-10_2_015_diff1_sampen_s2         entropy
 EN_MSE_1-10_2_015_diff1.sampen_s3         EN_MSE_1-10_2_015_diff1_sampen_s3         entropy
@@ -1522,7 +1523,8 @@ EN_MSE_1-10_2_015_diff1.minScale          EN_MSE_1-10_2_015_diff1_minScale      
 EN_MSE_1-10_2_015_diff1.meanSampEn        EN_MSE_1-10_2_015_diff1_meanSampEn        entropy
 EN_MSE_1-10_2_015_diff1.stdSampEn         EN_MSE_1-10_2_015_diff1_stdSampEn         entropy
 EN_MSE_1-10_2_015_diff1.cvSampEn          EN_MSE_1-10_2_015_diff1_cvSampEn          entropy
-EN_MSE_1-10_2_015_diff1.meanch            EN_MSE_1-10_2_015_diff1_meanch            entropy
+EN_MSE_1-10_2_015_diff1.slope            EN_MSE_1-10_2_015_diff1_slope            entropy
+EN_MSE_1-10_2_015_diff1.slopeSE            EN_MSE_1-10_2_015_diff1_slopeSE            entropy
 EN_MSE_1-10_2_015_rescale_tau.sampen_s1         EN_MSE_1-10_2_015_rescale_tau_sampen_s1         entropy
 EN_MSE_1-10_2_015_rescale_tau.sampen_s2         EN_MSE_1-10_2_015_rescale_tau_sampen_s2         entropy
 EN_MSE_1-10_2_015_rescale_tau.sampen_s3         EN_MSE_1-10_2_015_rescale_tau_sampen_s3         entropy
@@ -1539,7 +1541,8 @@ EN_MSE_1-10_2_015_rescale_tau.minScale          EN_MSE_1-10_2_015_rescale_tau_mi
 EN_MSE_1-10_2_015_rescale_tau.meanSampEn        EN_MSE_1-10_2_015_rescale_tau_meanSampEn        entropy
 EN_MSE_1-10_2_015_rescale_tau.stdSampEn         EN_MSE_1-10_2_015_rescale_tau_stdSampEn         entropy
 EN_MSE_1-10_2_015_rescale_tau.cvSampEn          EN_MSE_1-10_2_015_rescale_tau_cvSampEn          entropy
-EN_MSE_1-10_2_015_rescale_tau.meanch            EN_MSE_1-10_2_015_rescale_tau_meanch            entropy
+EN_MSE_1-10_2_015_rescale_tau.slope            EN_MSE_1-10_2_015_rescale_tau_slope            entropy
+EN_MSE_1-10_2_015_rescale_tau.slopeSE            EN_MSE_1-10_2_015_rescale_tau_slopeSE            entropy
 EN_PermEn_2_1.normPermEn            EN_PermEn_2_1_normPermEn            entropy
 EN_PermEn_2_2.normPermEn            EN_PermEn_2_2_normPermEn            entropy
 EN_PermEn_2_ac.normPermEn            EN_PermEn_2_ac_normPermEn            entropy
