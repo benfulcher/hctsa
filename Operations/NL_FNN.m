@@ -138,7 +138,22 @@ if isempty(escapeFactor)
 else
 	tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -f%g -V0 %s', tau, maxm, theilerWin, escapeFactor, filePath);
 end
-[~, res] = system(tisean_command);
+[status, res] = system(tisean_command);
+
+% status 126/127 are the shell's own reserved codes for "found but not
+% executable" / "command not found" (POSIX-standard across sh/bash/zsh) --
+% i.e. TISEAN itself never ran. That is a real environment/installation
+% problem, not a data-dependent one, so it must error() loudly rather than
+% silently return NaN (a NaN here would look identical to a legitimate
+% "this series is unsuitable" result and could hide a broken TISEAN setup
+% across an entire batch run). Any other exit code means the false_nearest
+% binary itself executed and is the one printing to res (whether success or
+% its own refusal message below), which is the data-dependent case.
+if any(status == [126, 127])
+	error(['TISEAN routine ''false_nearest'' could not be run (shell status %d) -- ' ...
+		'is TISEAN installed and compiled, and its bin/ directory on the system PATH? ' ...
+		'(see install.m). Raw output: %s'], status, res);
+end
 
 % first column: the embedding dimension
 % second column: the fraction of false nearest neighbors
