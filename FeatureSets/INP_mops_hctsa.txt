@@ -640,6 +640,8 @@ MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covNoise'}},1,200,'first')	MF_G
 MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covNoise_1_200_resample
 MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_first
 MF_GP_hyperparameters(x_z,{'covSum',{'covSEiso','covPeriodic','covNoise'}},1,200,'resample')	MF_GP_hyperparameters_covSEiso_covPeriodic_covNoise_1_200_resample
+MF_GP_hyperparameters(x_z,{'covSum',{{'covMaterniso',3},'covNoise'}},1,200,'first')	MF_GP_hyperparameters_covMaterniso3_covNoise_1_200_first
+MF_GP_hyperparameters(x_z,{'covSum',{'covRQiso','covNoise'}},1,200,'first')	MF_GP_hyperparameters_covRQiso_covNoise_1_200_first
 MF_GP_LocalPrediction(x_z,{'covSum',{'covSEiso','covNoise'}},5,3,10,'beforeafter')	MF_GP_LocalPrediction_covSEiso_covNoise_5_3_10_beforeafter
 MF_GP_LocalPrediction(x_z,{'covSum',{'covSEiso','covNoise'}},10,3,20,'frombefore')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_frombefore
 MF_GP_LocalPrediction(x_z,{'covSum',{'covSEiso','covNoise'}},10,3,20,'randomgap','default')	MF_GP_LocalPrediction_covSEiso_covNoise_10_3_20_randomgap
