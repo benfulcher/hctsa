@@ -147,7 +147,7 @@ switch walkerRule
 		for i = 3:N
 			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
 			%             w(i)=w_inert+(y(i-1)-w(i-1))/m; % dissipative term
-			w(i) = w_inert + (y(i) - w_inert) / m; % dissipative term
+			w(i) = w_inert + (y(i - 1) - w_inert) / m; % dissipative term
 			% equation of motion (s-s_0=ut+F/m*t^2)
 			% where the 'force' F is the change in the original time series
 			% at that point
@@ -163,7 +163,7 @@ switch walkerRule
 		w(2) = y(2);
 		for i = 3:N
 			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
-			w_mom = w_inert + (y(i) - w_inert) / m; % dissipative term from time series
+			w_mom = w_inert + (y(i - 1) - w_inert) / m; % dissipative term from time series
 			if i > wl
 				% NB: w(i) is not yet computed at this point, so the local std of the
 				% walker must be built from its provisional value, w_mom, rather than
