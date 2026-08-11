@@ -93,7 +93,7 @@ mMax = tm(2);
 filePath = BF_WriteTempFile(y);
 outFilePath = [filePath '.box'];
 
-[~, res] = system(sprintf('boxcount -M1,%u -d%u -Q2.0 -#%u -o %s %s', ...
+[~, res] = BF_TiseanSystem(sprintf('boxcount -M1,%u -d%u -Q2.0 -#%u -o %s %s', ...
 						  mMax, tau, numBins, outFilePath, filePath));
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))

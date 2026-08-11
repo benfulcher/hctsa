@@ -136,7 +136,7 @@ end
 %% Do the calculation in the commandline
 % ------------------------------------------------------------------------------
 
-[~, res] = system(sprintf('nstat_z -# %u -d%u -m%u %s', numSeg, tau, m, filePath));
+[~, res] = BF_TiseanSystem(sprintf('nstat_z -# %u -d%u -m%u %s', numSeg, tau, m, filePath));
 if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 
 % ------------------------------------------------------------------------------

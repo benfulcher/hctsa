@@ -151,7 +151,7 @@ m = tm(2);
 filePath = BF_WriteTempFile(y);
 outFilePath = [filePath '.ros'];
 
-[~, res] = system(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
+[~, res] = BF_TiseanSystem(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
 						  tau, m, past, maxtstep, outFilePath, filePath));
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))

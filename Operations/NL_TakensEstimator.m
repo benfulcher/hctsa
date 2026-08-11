@@ -133,7 +133,7 @@ end
 % picked out afterwards. The swept range of length scales is left at d2's
 % default (spans the full data interval, so comfortably covers the
 % rad-standard-deviations cutoff used below):
-[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -N%u %s', tau, m, past, NrefTISEAN, filePath));
+[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -N%u %s', tau, m, past, NrefTISEAN, filePath));
 if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
 if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
 if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end
@@ -143,7 +143,7 @@ if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	error('Call to TISEAN function ''d2'' failed.');
 end
 
-[~, res] = system(sprintf('c2t %s.c2', filePath));
+[~, res] = BF_TiseanSystem(sprintf('c2t %s.c2', filePath));
 delete([filePath '.c2']);
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))

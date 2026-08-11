@@ -117,7 +117,7 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2
 % ------------------------------------------------------------------------------
-[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u %s', tau, maxm, theilerWin, filePath));
+[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u %s', tau, maxm, theilerWin, filePath));
 %  * extension .stat: This file shows the current status of the estimate.
 if exist([filePath '.stat'], 'file')
 	delete([filePath '.stat']); % perhaps this file has something useful in it, but it's probably not for us...
@@ -175,7 +175,7 @@ end
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
-[~, res] = system(sprintf('c2g %s.c2', filePath));
+[~, res] = BF_TiseanSystem(sprintf('c2g %s.c2', filePath));
 % output is in res -- check it
 s = textscan(res, '%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout', s);
@@ -197,7 +197,7 @@ end
 % ----- TAKENS MAXIMUM LIKELIHOOD ESTIMATOR FROM CORRELATION SUMS ----
 % The integral is computed from the discrete values of C(r) by assuming an
 % exact power law between the available points.
-[~, res] = system(sprintf('c2t %s.c2', filePath));
+[~, res] = BF_TiseanSystem(sprintf('c2t %s.c2', filePath));
 % output is in res
 s = textscan(res, '%[^\n]'); s = s{1};
 wi = strmatch('writing to stdout', s);

@@ -177,7 +177,7 @@ maxEps = r * std(y) * sqrt(m);
 % output at all; "-M1,<m>" (a genuine range, as NL_d2.m and
 % NL_TakensEstimator.m already use) works correctly, so that's used
 % here too and the dimension-m block is picked out afterwards.
-[~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
+[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
 						  tau, m, thwin, maxEps, NrefTISEAN, nbins, filePath));
 if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
 if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end

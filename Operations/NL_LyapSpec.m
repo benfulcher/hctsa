@@ -178,7 +178,7 @@ end
 filePath = BF_WriteTempFile(y);
 outFilePath = [filePath '.lyaps'];
 
-[~, res] = system(sprintf('lyap_spec -m1,%u -d%u -k%u -o %s %s', ...
+[~, res] = BF_TiseanSystem(sprintf('lyap_spec -m1,%u -d%u -k%u -o %s %s', ...
                           m, tau, kNN, outFilePath, filePath));
 
 if exist(filePath, 'file'), delete(filePath); end

@@ -113,7 +113,7 @@ outFilePath = [filePath '.poin'];
 
 % Cut on the last (m-th) embedding coordinate, at TISEAN's own default
 % threshold (that coordinate's mean):
-[~, res] = system(sprintf('poincare -d%u -m%u -q%u -C%u -o %s %s', ...
+[~, res] = BF_TiseanSystem(sprintf('poincare -d%u -m%u -q%u -C%u -o %s %s', ...
 						  tau, m, m, direction, outFilePath, filePath));
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))

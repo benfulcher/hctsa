@@ -152,7 +152,7 @@ filePath = BF_WriteTempFile(y);
 % ------------------------------------------------------------------------------
 % run c1 code
 tic
-[~, res] = system(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s', ...
+[~, res] = BF_TiseanSystem(sprintf('c1 -d%u -m%u -M%u -t%u -n%u -o %s.c1 %s', ...
 						  tau, mmm(1), mmm(2), tsep, Nref, filePath, filePath));
 
 if isempty(res)
@@ -169,7 +169,7 @@ if ~exist([filePath '.c1'], 'file')
 end
 
 % Get local slopes from c1 file output of previous call
-[~, res] = system(sprintf('c2d -a2 %s.c1', filePath));
+[~, res] = BF_TiseanSystem(sprintf('c2d -a2 %s.c1', filePath));
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once')) % nothing came out??
 	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
