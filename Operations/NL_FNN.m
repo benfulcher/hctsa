@@ -146,8 +146,15 @@ end
 % fourth column: the average of the squared size of the neighborhood
 
 % Read TISEAN output:
+% (data-dependent failure, not a code error: e.g. a large ACF-based tau on a
+% strongly-autocorrelated/near-unit-root series -- such as a random walk --
+% can require (maxm-1)*tau points, more than N provides, so TISEAN refuses
+% and prints an explanatory message to stdout instead of data rows. Return
+% NaN rather than error(), matching the rest of the codebase's convention;
+% BF_Embed and its callers already guard for a NaN embedding dimension.)
 if isempty(res)
-	error('No output from TISEAN routine false_nearest on the data');
+	warning('No output from TISEAN routine false_nearest on the data');
+	out = NaN; return
 end
 data = textscan(res, '%u%f%f%f');
 
@@ -158,7 +165,8 @@ nHoodSize2 = data{4}; % average squared size of the neighbourhood
 
 % Check that some data exists:
 if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
-	error('Error running TISEAN false_nearest on input data');
+	warning('TISEAN false_nearest produced no usable output for this data (e.g. requested embedding dimension/delay too large for the series length)');
+	out = NaN; return
 end
 
 if doPlot
