@@ -13,9 +13,13 @@ function out = CO_Embed2_Shapes(y, tau, shape, r)
 %
 % ---OUTPUTS:
 % The constructed time series of the number of nearby points, and
-% include the autocorrelation, maximum, median, mode, a Poisson fit to the
-% distribution, histogram entropy, and stationarity over fifths of the time
-% series.
+% include the autocorrelation, spread (std, IQR), median, mode, histogram
+% entropy, and stationarity over fifths of the time series.
+%
+% ---NOTES:
+% `max` was dropped 2026-08-11: redundancy-checked against `mean`/`std` on
+% Bonn EEG (500 series) and Empirical1000 (1000 series), |r|>=0.9 with both
+% on both datasets, in both registered radii (r=0.1 and r=1).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -138,7 +142,7 @@ end
 % grows in direct proportion to N. Dividing by the number of *other* points
 % gives the fraction of the embedding lying within r of each point, i.e. the
 % pointwise correlation sum, which is intensive and bounded in [0,1].
-% This rescales max/std/median/mean/iqr/mode; the scale-invariant outputs
+% This rescales std/median/mean/iqr/mode; the scale-invariant outputs
 % (ac1-3, tau, iqronrange, hist_ent, mode_val, statav5_*) are unaffected, since
 % they are ratios or are computed from a histogram whose shape is unchanged.
 counts = counts / (N - 1);
@@ -150,7 +154,6 @@ out.ac1 = CO_AutoCorr(counts, 1, 'Fourier');
 out.ac2 = CO_AutoCorr(counts, 2, 'Fourier');
 out.ac3 = CO_AutoCorr(counts, 3, 'Fourier');
 out.tau = CO_FirstCrossing(counts, 'ac', 0, 'continuous');
-out.max = max(counts);
 out.std = std(counts);
 out.median = median(counts);
 out.mean = mean(counts);
@@ -167,8 +170,7 @@ out.mode = binCentres(mix);
 out.hist_ent = sum(binP(binP > 0) .* log(binP(binP > 0)));
 
 if doPlot
-	plot(binCentres, poisspdf(binCentres, l), 'g'); hold on;
-	plot(binCentres, n, 'k'); hold off
+	bar(binCentres, binP);
 end
 
 % --- Stationarity measure for fifths of the time series

@@ -399,11 +399,13 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 countsExpected(i) = sum(m_c_d <= r^2);
             end
             countsExpected = countsExpected - 1;
+            % CO_Embed2_Shapes normalizes counts to a density (counts / (Nm-1))
+            % before computing summary statistics -- match that here:
+            countsExpected = countsExpected / (Nm - 1);
 
             out = CO_Embed2_Shapes(y,tau,'circle',r);
 
             testCase.verifyEqual(out.mean, mean(countsExpected), 'AbsTol', 1e-10);
-            testCase.verifyEqual(out.max, max(countsExpected), 'AbsTol', 1e-10);
             testCase.verifyEqual(out.median, median(countsExpected), 'AbsTol', 1e-10);
             testCase.verifyEqual(out.std, std(countsExpected), 'AbsTol', 1e-10);
         end
