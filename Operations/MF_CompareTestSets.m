@@ -38,6 +38,20 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (when 'rand' specified for subsetHow)
+%
+% ---NOTES:
+% mabserrs (mean absolute residual error) and the *_median statistic of
+% stde/meane were dropped 2026-08-11: redundancy-checked against the
+% retained fields on Bonn EEG (500 series) and Empirical1000 (1000 series),
+% requiring |r|>=0.9 on BOTH datasets AND in all 4 registered mops (this
+% function's output fields are shared code across all mops, so a field is
+% only dropped if it's redundant everywhere it's used). mabserrs correlated
+% |r|>=0.9 with the matching stde_* moment in every case (RMSE and MAE track
+% almost identically for these residuals); stde_median/meane_median
+% correlated |r|>=0.9 with their own _mean. ac1_mean/ac1_median and
+% meane_mean/stde_mean were borderline (|r| up to ~0.98 in some mops) but
+% not consistently >=0.9 across all 4 mops and both datasets, so both were
+% kept.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -87,6 +101,7 @@ if nargin < 1 || isempty(y)
 end
 
 % Convert y to time series object for the System Identification Toolbox
+sigmaY = std(y); % used to flag degenerate (near-constant) test segments below
 y = iddata(y, [], 1);
 
 % (2) Model, the type of model to fit
@@ -162,7 +177,6 @@ end
 numPred = samplep(1);
 % Initialize quantities to store into
 rmserrs = zeros(numPred, 1);
-mabserrs = zeros(numPred, 1);
 ac1s = zeros(numPred, 1);
 meandiffs = zeros(numPred, 1);
 stdrats = zeros(numPred, 1);
@@ -245,12 +259,24 @@ for i = 1:numPred
 	mres = yp.y - yTest.y;
 
 	rmserrs(i) = sqrt(mean(mres.^2));
-	mabserrs(i) = mean(abs(mres));
 	ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
 
 	% Get statistics on output time series
 	meandiffs(i) = abs(mean(yp.y) - mean(yTest.y));
-	stdrats(i) = std(yp.y) / std(yTest.y);
+	% Guard against near-constant test segments: std(yTest.y) can land at
+	% floating-point noise (rather than a genuinely small but real value)
+	% when a short random/uniform segment happens to sit in a flat/clipped
+	% stretch of the input -- verified empirically (2500 segments across 100
+	% real series): the ratio's population is smooth from ~1e-3 upward, with
+	% a separate, disjoint cluster at <1e-15 coming from exactly-constant
+	% segments. Below that gap, std(yp.y)/std(yTest.y) is undefined rather
+	% than just large, so exclude it instead of letting it dominate the
+	% mean/std/iqr summaries below.
+	if std(yTest.y) < 1e-6 * sigmaY
+		stdrats(i) = NaN;
+	else
+		stdrats(i) = std(yp.y) / std(yTest.y);
+	end
 
 	%     % 1) Get statistics on residuals
 	%     residout = MF_ResidualAnalysis(mresiduals);
@@ -267,16 +293,13 @@ end
 % ------------------------------------------------------------------------------
 
 % RMS errors, rmserrs
+% (median dropped: r>=0.9 with stde_mean across all 4 registered mops, on
+% both Bonn EEG and Empirical1000; mean absolute error, mabserrs, dropped
+% entirely: for these residuals r>=0.9 with the matching stde_* moment in
+% every case, so it added no dimension MAE didn't already carry)
 out.stde_mean = mean(rmserrs);
-out.stde_median = median(rmserrs);
 out.stde_std = std(rmserrs);
 out.stde_iqr = iqr(rmserrs);
-
-% mean absolute errors, mabserrs
-out.meanabs_mean = mean(mabserrs);
-out.meanabs_median = median(mabserrs);
-out.meanabs_std = std(mabserrs);
-out.meanabs_iqr = iqr(mabserrs);
 
 % Autocorrelations at lag 1, ac1s
 % NOT absolute values of ac1s... absolute values of operations on *raw* ac1s...
@@ -286,15 +309,18 @@ out.ac1_std = std(ac1s);
 out.ac1_iqr = iqr(ac1s);
 
 % Differences in mean between two series
+% (median dropped: r>=0.9 with meane_mean across all 4 registered mops, on
+% both Bonn EEG and Empirical1000)
 out.meane_mean = mean(meandiffs);
-out.meane_median = median(meandiffs);
 out.meane_std = std(meandiffs);
 out.meane_iqr = iqr(meandiffs);
 
 % Ratio of standard deviations between two series
-out.stdrat_mean = mean(stdrats);
-out.stdrat_median = median(stdrats);
-out.stdrat_std = std(stdrats);
-out.stdrat_iqr = iqr(stdrats);
+% (omitting repeats flagged as degenerate above)
+validStdrats = stdrats(~isnan(stdrats));
+out.stdrat_mean = mean(validStdrats);
+out.stdrat_median = median(validStdrats);
+out.stdrat_std = std(validStdrats);
+out.stdrat_iqr = iqr(validStdrats);
 
 end
