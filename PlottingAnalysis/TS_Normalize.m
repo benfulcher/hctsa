@@ -89,12 +89,6 @@ if keepCalcTime
     TS_CalcTime = TS_GetFromData(fileName_HCTSA,'TS_Quality');
 end
 
-% Check that fromDatabase exists (legacy)
-fromDatabase = TS_GetFromData(fileName_HCTSA,'fromDatabase');
-if isempty(fromDatabase)
-    fromDatabase = true; % (legacy)
-end
-
 % Maybe we kept the git repository info
 gitInfo = TS_GetFromData(fileName_HCTSA,'gitInfo');
 
@@ -314,11 +308,11 @@ outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 fprintf(1,'Saving the trimmed, normalized data to %s...',outputFileName);
 if keepCalcTime
     save(outputFileName,'TS_DataMat','TS_Quality','TS_CalcTime','TimeSeries',...
-            'Operations','MasterOperations','fromDatabase','normalizationInfo',...
+            'Operations','MasterOperations','normalizationInfo',...
             'gitInfo','ts_clust','op_clust','-v7.3');
 else
     save(outputFileName,'TS_DataMat','TS_Quality','TimeSeries',...
-            'Operations','MasterOperations','fromDatabase','normalizationInfo',...
+            'Operations','MasterOperations','normalizationInfo',...
             'gitInfo','ts_clust','op_clust','-v7.3');
 end
 fprintf(1,' Done.\n');

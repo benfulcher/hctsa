@@ -62,12 +62,6 @@ end
 numTimeSeries = height(TimeSeries);
 numOperations = height(Operations);
 
-fromDatabase = TS_GetFromData(dataFile,'fromDatabase');
-if fromDatabase
-    error(['Shouldn''t be re-indexing data from a mySQL database, as it will' ...
-                    ' no longer be matched to the database index']);
-end
-
 %-------------------------------------------------------------------------------
 % Reindex:
 %-------------------------------------------------------------------------------

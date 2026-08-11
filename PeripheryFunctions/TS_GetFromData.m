@@ -13,7 +13,6 @@ function result = TS_GetFromData(dataSource,dataField)
 %           on the type of dataSource)
 %
 %---EXAMPLE USAGE:
-% fromDatabase = TS_GetFromData('HCTSA_EEGDataset.mat','fromDatabase');
 % MasterOperations = TS_GetFromData('HCTSA_EEGDataset.mat','MasterOperations');
 
 % ------------------------------------------------------------------------------
