@@ -1,4 +1,4 @@
-function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN)
+function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 % NL_RQA    Recurrence quantification analysis (RQA).
 %
 % Embeds the time series in an m-dimensional delay space and computes
@@ -35,6 +35,10 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN)
 %       time series are reduced to their first maxN points (default:
 %       10000). Set to 'full' to disable cropping (a warning is given
 %       above N = 20000, where run time starts to become substantial).
+%
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%             (the neighborhood radius is set from a random subsample of
+%             pairwise distances when Nemb exceeds 500; default: 'default')
 %
 % ---OUTPUTS: recurrence rate, determinism, average/maximum diagonal line
 % length, diagonal line-length entropy, laminarity, trapping time, and
@@ -111,6 +115,9 @@ end
 if nargin < 8 || isempty(maxN)
     maxN = 10000; % crops time series longer than this maximum length
 end
+if nargin < 9 || isempty(randomSeed)
+    randomSeed = 'default'; % for reproducibility of the random subsample below
+end
 
 if ischar(maxN) && strcmp(maxN, 'full')
     % No cropping -- but flag potentially slow computations for very long series:
@@ -151,6 +158,7 @@ end
 %% distance matrix just to pick a threshold)
 % ------------------------------------------------------------------------------
 nSub = min(500, Nemb);
+BF_ResetSeed(randomSeed); % for reproducibility of this random subsample
 subIdx = randperm(Nemb, nSub);
 Dsub = pdist(Y(subIdx, :));
 radius = quantile(Dsub, rr);

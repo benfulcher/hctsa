@@ -40,7 +40,9 @@ switch whatFeatureSet
 case 'noLengthLocationSpread'
     matchByName = false;
     % Remove length, location, spread-dependent features
-    doOld = true;
+    % Old datasets may still use the pre-rename keywords ('lengthdep', etc.);
+    % detect which convention is present rather than assuming:
+    doOld = isempty(TS_GetIDs('lengthDependent',Operations,'ops','Keywords'));
     if doOld
         lengthIDs = TS_GetIDs('lengthdep',Operations,'ops','Keywords');
         locIDs = TS_GetIDs('locdep',Operations,'ops','Keywords');

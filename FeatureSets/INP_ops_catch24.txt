@@ -3,7 +3,7 @@ catch22_DN_OutlierInclude_p_001_mdrmd                   outlier_timing_pos	    d
 catch22_DN_HistogramMode_5                              mode_5                  distribution,location
 catch22_DN_HistogramMode_10                             mode_10                 distribution,location
 catch22_SC_FluctAnal_2_dfa_50_1_2_logi_prop_r1          dfa	                    scaling
-catch22_SB_TransitionMatrix_3ac_sumdiagcov              transition_variance     symbolic,transitionmat
+catch22_SB_TransitionMatrix_3ac_sumdiagcov              transition_variance     symbolic,transitionMatrix
 catch22_FC_LocalSimple_mean1_tauresrat                  whiten_timescale	    forecasting
 catch22_SB_MotifThree_quantile_hh                       entropy_pairs	        symbolic,motifs
 catch22_CO_HistogramAMI_even_2_5                        ami2                    information,correlation,AMI
@@ -12,8 +12,8 @@ catch22_SB_BinaryStats_diff_longstretch0                stretch_decreasing	    d
 catch22_MD_hrv_classic_pnn40                            high_fluctuation        medical
 catch22_SB_BinaryStats_mean_longstretch1                stretch_high            distribution,stationarity
 catch22_FC_LocalSimple_mean3_stderr                     forecast_error	        forecasting
-catch22_SP_Summaries_welch_rect_area_5_1                low_freq_power          FourierSpectrum
-catch22_SP_Summaries_welch_rect_centroid                centroid_freq           FourierSpectrum
+catch22_SP_Summaries_welch_rect_area_5_1                low_freq_power          fourierSpectrum
+catch22_SP_Summaries_welch_rect_centroid                centroid_freq           fourierSpectrum
 catch22_CO_f1ecac                                       acf_timescale           correlation,timescale
 catch22_CO_FirstMin_ac                                  acf_first_min           correlation,timescale
 catch22_IN_AutoMutualInfoStats_40_gaussian_fmmi         ami_timescale           information,correlation,AMI

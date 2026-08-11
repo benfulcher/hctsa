@@ -701,7 +701,7 @@ NL_PoincareSection(x_z,'max',{'mi',3})	NL_PoincareSection_max_mi
 NL_ReturnTime(x_z,0.05,1,0.05,-1,{1,3})	NL_ReturnTime_005_1_005_n1_1_3
 NL_ReturnTime(x_z,5,1,40,-1,{1,8})	NL_ReturnTime_5_1_40_n1_1_8
 NL_ReturnTime(x_z,10,1,1,-1,{'ac',8})	NL_ReturnTime_10_1_1_n1_ac_8
-NL_RQA(x_z,'mi','fnn',0.01,0.1,2,2,'full')	NL_RQA_mi_fnn_001_01_2_2_full
+NL_RQA(x_z,'mi','fnn',0.01,0.1,2,2,'full','default')	NL_RQA_mi_fnn_001_01_2_2_full
 NL_TakensEstimator(x_z,-1,0.1,0.05,{1,10})	NL_TakensEstimator_n1_01_005_1_10
 NL_TakensEstimator(x_z,-1,0.05,0.05,{1,3})	NL_TakensEstimator_n1_005_005_1_3
 NL_TakensEstimator(x_z,-1,0.05,0.05,{1,8})	NL_TakensEstimator_n1_005_005_1_8
