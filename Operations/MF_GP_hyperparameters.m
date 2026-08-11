@@ -28,6 +28,18 @@ function out = MF_GP_hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
 %             for settings of resampleHow that involve random number generation
+%
+% ---NOTES:
+% GARCH-suite-style audit, 2026-08-11. Two issues found and fixed for the
+% covSEiso+covPeriodic+covNoise variants:
+% (1) The installed gpml (v4.2)'s covPeriodic takes 3 hyperparameters (period,
+%     length-scale, magnitude), giving this covariance combination 6
+%     hyperparameters total -- but only logh1-logh5 were registered in
+%     FeatureSets/INP_ops_hctsa.txt (logh6, the noise term, was computed every
+%     call and silently discarded). Now registered.
+% (2) See MF_GP_LearnHyperp.m NOTES -- fixed a poor-initialization bug that
+%     was independently degrading the fit quality of this same covariance
+%     combination.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
