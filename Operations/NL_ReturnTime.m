@@ -24,7 +24,7 @@ function out = NL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
 % than a nearest-neighbor count, a parameter-type mismatch with NNR below).
 % For each of Nref reference points, the neighborhood radius is the
 % distance to its NNR-th nearest neighbor (excluding a Theiler window of
-% "past" samples, via a KD-tree, same approach as NL_localdensity.m);
+% "past" samples, via a KD-tree, same approach as NL_LocalDensity.m);
 % starting just after that Theiler window, the series is scanned forward
 % for the first return within that radius, up to maxT samples ahead. A
 % return time of 0 is a sentinel for "no return found within maxT" (a
@@ -135,7 +135,7 @@ NN = length(refIdx);
 
 % ------------------------------------------------------------------------------
 %% For each reference point, find its NNR-th-nearest-neighbor radius (KD-tree,
-%% Theiler-window-aware, same approach as NL_localdensity.m), then scan
+%% Theiler-window-aware, same approach as NL_LocalDensity.m), then scan
 %% forward for the first return within that radius
 % ------------------------------------------------------------------------------
 kFetch = min(N_embed - 1, NNR + 2 * past + 5);

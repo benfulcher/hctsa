@@ -187,11 +187,11 @@ end
 if ismember('tc3', theTestStat)
 	% TC3 statistic -- another time-reversal asymmetry measure
 	tau = 1;
-	tmp = CO_tc3(x, tau);
+	tmp = CO_TC3(x, tau);
 	tc3x = tmp.raw;
 	tc3surr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
-		tmp = CO_tc3(z(:, i), tau);
+		tmp = CO_TC3(z(:, i), tau);
 		tc3surr(i) = tmp.raw;
 	end
 
@@ -206,7 +206,7 @@ if ismember('nlpe', theTestStat)
 	% Locally constant phase space prediction error
 	warning('''nlpe'' can be very time consuming...')
 	de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-	tmp = NL_MS_nlpe(x, de, tau);
+	tmp = NL_nlpe(x, de, tau);
 	nlpex = tmp.msqerr;
 	nlpesurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
@@ -227,11 +227,11 @@ if ismember('fnn', theTestStat)
 
 	% false nearest neighbours at d=2 (escapeFactor=5 matches the convention
 	% used elsewhere for this test):
-	tmp = NL_TISEAN_fnn(x, 1, 2, 0.05, 0, [], 5);
+	tmp = NL_FNN(x, 1, 2, 0.05, 0, [], 5);
 	fnnx = tmp.pfnn_2;
 	fnnsurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
-		tmp = NL_TISEAN_fnn(z(:, i), 1, 2, 0.05, 0, [], 5);
+		tmp = NL_FNN(z(:, i), 1, 2, 0.05, 0, [], 5);
 		fnnsurr(i) = tmp.pfnn_2;
 	end
 

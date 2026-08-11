@@ -7,14 +7,14 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % multivariate Gaussian.
 %
 % cf. existing Gaussianity tests acting on marginal distribution
-% (HT_DistributionTest, DN_CompareKSFit, DN_nlogL_norm), which all
+% (HT_DistributionTest, DN_CompareKSFit, DN_NLogLNorm), which all
 % A linear (e.g., AR(1)) Gaussian process has a Gaussian marginal
 % *and* a Gaussian joint embedding distribution;
 % a nonlinear or non-reversible process can look
 % Gaussian marginally while its lagged joint distribution is visibly
 % non-elliptical (curved, multimodal, or heavy/light-tailed along
 % directions the marginal alone cannot see).
-% cf. also time-irreversibility metrics like CO_trev/CO_tc3
+% cf. also time-irreversibility metrics like CO_trev/CO_TC3
 % (which use a single third-moment statistic of lagged
 % pairs/triples as a nonlinearity probe) but this is perhaps more general as
 % : it tests the whole joint shape rather than one moment combination.
@@ -45,7 +45,7 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % coordinates and are therefore strongly autocorrelated, which inflates
 % the naive asymptotic test statistics (empirically, up to ~30% false
 % positives at a nominal 5% level on a purely linear-Gaussian AR(1)
-% process, worse at higher m). This is the same reason CO_trev/CO_tc3
+% process, worse at higher m). This is the same reason CO_trev/CO_TC3
 % report raw statistics rather than p-values; for significance
 % testing against a null that respects the series' own autocorrelation
 % structure, compare these statistics to their distribution over

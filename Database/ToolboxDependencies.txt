@@ -33,8 +33,8 @@ DN_RemovePoints.m
 DN_SimpleFit.m
 DN_Spread.m
 DN_TrimmedMean.m
-DN_nlogL_norm.m
-DN_pleft.m
+DN_NLogLNorm.m
+DN_PLeft.m
 EN_DistributionEntropy.m
 EN_Randomize.m
 EX_MovingThreshold.m
@@ -51,10 +51,10 @@ MF_GARCHfit.m
 MF_ResidualAnalysis.m
 MF_StateSpace_n4sid.m
 MF_armax.m
-NL_TISEAN_c1.m
-NL_TISEAN_d2.m
+NL_c1.m
+NL_d2.m
 NL_FractalDimensions.m
-NL_embed_PCA.m
+NL_EmbedPCA.m
 NW_VisibilityGraph.m
 PH_ForcePotential.m
 PH_Walker.m
@@ -66,10 +66,10 @@ SB_BinaryStats.m
 SB_CoarseGrain.m
 SB_MotifThree.m
 SB_TransitionMatrix.m
-SB_TransitionpAlphabet.m
+SB_TransitionPAlphabet.m
 SC_FluctAnal.m
 SD_SurrogateTest.m
-SD_surrogates.m
+SD_Surrogates.m
 SP_Summaries.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
@@ -90,11 +90,11 @@ EN_Randomize.m
 FC_LoopLocalSimple.m
 MD_hrv_classic.m
 MF_AR_arcov.m
-MF_GP_hyperparameters.m
+MF_GP_Hyperparameters.m
 PP_Compare.m
 PP_Iterate.m
 SB_TransitionMatrix.m
-SB_TransitionpAlphabet.m
+SB_TransitionPAlphabet.m
 SC_FluctAnal.m
 SP_Summaries.m
 SP_SpectralTimeFreq.m
@@ -117,13 +117,13 @@ NW_VisibilityGraph.m
 PD_PeriodicityWang.m
 PP_Compare.m
 PP_Iterate.m
-SB_TransitionpAlphabet.m
+SB_TransitionPAlphabet.m
 SP_Summaries.m
 SY_StdNthDerChange.m
 
 System Identification Toolbox (Matlab Toolbox)
 
-MF_ARMA_orders.m
+MF_ARMAOrders.m
 MF_CompareAR.m
 MF_CompareTestSets.m
 MF_ExpSmoothing.m
@@ -141,12 +141,12 @@ SD_SurrogateTest.m
 
 Wavelet Toolbox (Matlab Toolbox)
 
-CP_wavelet_varchg.m
+CP_WaveletVarChg.m
 EN_wentropy.m
 WL_DetailCoeffs.m
-WL_coeffs.m
+WL_Coeffs.m
 WL_cwt.m
-WL_dwtcoeff.m
+WL_DWTCoeff.m
 WL_fBM.m
 WL_scal2frq.m
 
@@ -170,14 +170,14 @@ EXTERNAL TOOLBOXES (PROVIDED)
 Michael Small Package (provided)
 
 NL_MS_LZcomplexity.m
-NL_MS_nlpe.m
+NL_nlpe.m
 NL_BoxCorrDim.m
 NL_PoincareSection.m
 NL_ReturnTime.m
 NL_TakensEstimator.m
-NL_embed_PCA.m
+NL_EmbedPCA.m
 SD_SurrogateTest.m
-SY_TISEAN_nstat_z.m
+SY_nstat_z.m
 
 TISEAN Package (GPL; provided)
 
@@ -185,18 +185,18 @@ NL_BoxCorrDim.m
 NL_GPCorrSum.m
 NL_LargestLyap.m
 NL_PoincareSection.m
-NL_TISEAN_c1.m
-NL_TISEAN_d2.m
+NL_c1.m
+NL_d2.m
 NL_TakensEstimator.m
-NL_dimensions.m
-SY_TISEAN_nstat_z.m
+NL_Dimensions.m
+SY_nstat_z.m
 
 ARFIT Toolbox (provided)
 
 MF_StateSpace_n4sid.m
 MF_arfit.m
 MF_steps_ahead.m
-NL_MS_nlpe.m
+NL_nlpe.m
 SD_SurrogateTest.m
 
 gpml Toolbox (FreeBSD License, provided)
@@ -204,9 +204,9 @@ gpml Toolbox (FreeBSD License, provided)
 MF_GP_FitAcross.m
 MF_GP_LearnHyperp.m
 MF_GP_LocalPrediction.m
-MF_GP_hyperparameters.m
+MF_GP_Hyperparameters.m
 
 HMM Toolbox (MIT License, provided)
 
 MF_hmm_CompareNStates.m
-MF_hmm_fit.m
+MF_hmm_Fit.m

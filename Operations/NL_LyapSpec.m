@@ -50,7 +50,7 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN)
 %       for the first zero-crossing of the autocorrelation function or
 %       first minimum of the automutual information (default: 'mi', as
 %       used elsewhere for delay-embedding-based operations, e.g.
-%       NL_embed_PCA)
+%       NL_EmbedPCA)
 %
 % m, the embedding dimension, and hence the number of Lyapunov exponents
 %       estimated (default: 3 -- the minimum dimension in which a flow

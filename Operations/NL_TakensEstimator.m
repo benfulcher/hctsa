@@ -12,7 +12,7 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % that correlation-sum data, and the value at an upper length scale of rad
 % standard deviations of y is taken as the output (matching Kantz &
 % Schreiber's recommendation of using half a standard deviation, already
-% used the same way in NL_TISEAN_d2.m's takens05 -- TSTOOL's own rad
+% used the same way in NL_d2.m's takens05 -- TSTOOL's own rad
 % parameter was instead defined as a proportion of "attractor size", so this
 % is an equivalent-in-spirit but not numerically identical length-scale
 % convention).
@@ -128,7 +128,7 @@ end
 % d2 over embedding dimensions 1:m (only the m-th is used below). Note:
 % "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
 % a bug in this TISEAN build where it reports "0 lines read" and produces no
-% output at all; "-M1,<m>" (a genuine range, as NL_TISEAN_d2.m already uses)
+% output at all; "-M1,<m>" (a genuine range, as NL_d2.m already uses)
 % works correctly, so that's used here too and the dimension-m block is
 % picked out afterwards. The swept range of length scales is left at d2's
 % default (spans the full data interval, so comfortably covers the

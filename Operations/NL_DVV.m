@@ -37,7 +37,7 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
 % meanNormCDF, numZeroCrossings, trendSurr) separate the two groups cleanly
 % (p<0.002, n=15/group) with exactly the sign the method predicts (real
 % data sits below the surrogate ensemble for genuinely deterministic
-% systems). Not simply redundant with CO_tc3/CO_trev/SD_surrogates/
+% systems). Not simply redundant with CO_TC3/CO_trev/SD_Surrogates/
 % SD_SurrogateTest either (|r| mostly <0.5 on Bonn EEG + Empirical1000).
 %
 % Two fields dropped from registration (out.trendDataSurr and

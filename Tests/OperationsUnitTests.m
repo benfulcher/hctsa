@@ -25,7 +25,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % just the recomputation but also any warning() side effect the
             % computation would have raised, which a couple of tests below
             % check for directly).
-            clear CO_AutoCorr CO_FirstMin BF_CheckToolbox CO_glscf
+            clear CO_AutoCorr CO_FirstMin BF_CheckToolbox CO_GLSCF
         end
     end
 
@@ -632,13 +632,13 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % CO_glscf caching
+        % CO_GLSCF caching
         %-------------------------------------------------------------
-        function test_CO_glscf_CacheDoesNotCrossContaminate(testCase)
-            % CO_glscf caches abs(y) (keyed on an exact, NaN-safe match of
+        function test_CO_GLSCF_CacheDoesNotCrossContaminate(testCase)
+            % CO_GLSCF caches abs(y) (keyed on an exact, NaN-safe match of
             % y), since it's called ~31 times directly (as separate master
             % operations with different alpha/beta/tau on the same series)
-            % plus repeatedly from CO_fzcglscf's internal loop. Confirm
+            % plus repeatedly from CO_FZCGLSCF's internal loop. Confirm
             % interleaved calls with different series/parameters don't get
             % confused with each other's cached values, against an
             % independent reference computation.
@@ -649,9 +649,9 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
 
             referenceGlscf = @(y) refGlscf(y,alpha,beta,tau);
 
-            out1a = CO_glscf(y1,alpha,beta,tau);
-            out2 = CO_glscf(y2,alpha,beta,tau);
-            out1b = CO_glscf(y1,alpha,beta,tau); % should hit the cache
+            out1a = CO_GLSCF(y1,alpha,beta,tau);
+            out2 = CO_GLSCF(y2,alpha,beta,tau);
+            out1b = CO_GLSCF(y1,alpha,beta,tau); % should hit the cache
 
             testCase.verifyEqual(out1a, referenceGlscf(y1), 'AbsTol', 1e-10);
             testCase.verifyEqual(out2, referenceGlscf(y2), 'AbsTol', 1e-10);
@@ -676,12 +676,12 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % SD_surrogates (now native, no TSTOOL dependency)
+        % SD_Surrogates (now native, no TSTOOL dependency)
         %-------------------------------------------------------------
-        function test_SD_surrogates_DetectsNonlinearity(testCase)
-            % SD_surrogates used to depend on TSTOOL's signal/tc3/trev;
+        function test_SD_Surrogates_DetectsNonlinearity(testCase)
+            % SD_Surrogates used to depend on TSTOOL's signal/tc3/trev;
             % it now generates surrogates via SD_MakeSurrogates and
-            % evaluates CO_tc3/CO_trev on each (both already TSTOOL-free
+            % evaluates CO_TC3/CO_trev on each (both already TSTOOL-free
             % reimplementations of the same expressions). Confirm the
             % replacement still does its actual job: a linear (Gaussian
             % noise) series should look unremarkable against its
@@ -690,7 +690,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % destroys -- should look highly significant.
             rng(31);
             yLinear = randn(500,1);
-            outLinear = SD_surrogates(yLinear,1,50,1,'tc3','default');
+            outLinear = SD_Surrogates(yLinear,1,50,1,'tc3','default');
             testCase.verifyGreaterThan(outLinear.ztestp, 0.05, ...
                 'Gaussian noise should not look significantly different from its surrogates.');
 
@@ -700,7 +700,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = SD_surrogates(yChaotic,1,50,1,'tc3','default');
+            outChaotic = SD_Surrogates(yChaotic,1,50,1,'tc3','default');
             testCase.verifyLessThan(outChaotic.ztestp, 1e-6, ...
                 'The logistic map''s nonlinear structure should look highly significant against its surrogates.');
         end
@@ -734,7 +734,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         function test_NL_TakensEstimator_DiscriminatesDimension(testCase)
             % NL_TakensEstimator used to depend on TSTOOL's
             % signal/takens_estimator; it now uses TISEAN's d2 and c2t
-            % (already relied on by NL_TISEAN_d2.m) instead. Confirm the
+            % (already relied on by NL_d2.m) instead. Confirm the
             % replacement still does its actual job: high-dimensional
             % (structureless) noise embedded at m should give a dimension
             % estimate close to m, while a logistic map (a classic 1-D
@@ -765,7 +765,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         function test_NL_GPCorrSum_DiscriminatesDimension(testCase)
             % NL_GPCorrSum used to depend on TSTOOL's
             % signal/corrsum; it now uses TISEAN's d2 (already relied on
-            % by NL_TISEAN_d2.m and NL_TakensEstimator.m) instead,
+            % by NL_d2.m and NL_TakensEstimator.m) instead,
             % fitting its own robust line to d2's raw (r, C(r))
             % correlation-sum output. Confirm the replacement still does
             % its actual job: a logistic map (known correlation dimension
@@ -883,8 +883,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                  'populated to smaller length scales than noise, giving a higher median entropy increment.']);
         end
 
-        function test_NL_localdensity_MatchesBruteForceLoop(testCase)
-            % NL_localdensity used to depend on TSTOOL's 'localdensity',
+        function test_NL_LocalDensity_MatchesBruteForceLoop(testCase)
+            % NL_LocalDensity used to depend on TSTOOL's 'localdensity',
             % which the original author noted was "very poorly documented"
             % -- its exact algorithm was never confirmed. It's now a native
             % k-nearest-neighbor local density estimate (density(i) ~
@@ -900,7 +900,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             rng(91);
             y = randn(300,1);
             NNR = 4; past = 5;
-            out = NL_localdensity(y, NNR, past, {1,3});
+            out = NL_LocalDensity(y, NNR, past, {1,3});
 
             Y = BF_Embed(y, 1, 3, false);
             N_embed = size(Y,1);
@@ -918,8 +918,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(out.medianden, median(locdenBrute), 'RelTol', 1e-9);
         end
 
-        function test_NL_dimensions_DiscriminatesDimension(testCase)
-            % NL_dimensions used to depend on TSTOOL's
+        function test_NL_Dimensions_DiscriminatesDimension(testCase)
+            % NL_Dimensions used to depend on TSTOOL's
             % signal/dimensions; it now uses TISEAN's boxcount (Q=0.0, the
             % box-counting dimension D0) and d2 (the correlation dimension
             % D2, matching TSTOOL's own pair-counting construction, unlike
@@ -937,7 +937,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % resolved embedding dimension) than a logistic map.
             rng(101);
             yNoise = randn(2000,1);
-            outNoise = NL_dimensions(yNoise,50,{1,5});
+            outNoise = NL_Dimensions(yNoise,50,{1,5});
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -945,7 +945,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_dimensions(yChaotic,50,{1,5});
+            outChaotic = NL_Dimensions(yChaotic,50,{1,5});
 
             testCase.verifyGreaterThan(outNoise.scr_co_mopt_scaling_exp, outChaotic.scr_co_mopt_scaling_exp, ...
                 'Structureless noise should have a higher correlation-dimension scaling exponent than a logistic map.');
@@ -982,8 +982,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'A periodic signal''s return times should cluster far more tightly than noise''s.');
         end
 
-        function test_NL_delaytime_DiscriminatesStructure(testCase)
-            % NL_delaytime used to depend on TSTOOL's 'delaytime'; that
+        function test_NL_DelayTime_DiscriminatesStructure(testCase)
+            % NL_DelayTime used to depend on TSTOOL's 'delaytime'; that
             % code turned out to be pure MATLAB itself (vendored in this
             % repo under Toolboxes/OpenTSTOOL), so its exact algorithm is
             % reproduced natively here rather than approximated -- with two
@@ -1000,11 +1000,11 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % error quickly rises to the scale of the data's full variance.
             rng(121);
             yNoise = randn(2000,1);
-            outNoise = NL_delaytime(yNoise, 0.1, 1, 'default');
+            outNoise = NL_DelayTime(yNoise, 0.1, 1, 'default');
 
             t = (1:2000)';
             yPeriodic = sin(2*pi*t/17);
-            outPeriodic = NL_delaytime(yPeriodic, 0.1, 1, 'default');
+            outPeriodic = NL_DelayTime(yPeriodic, 0.1, 1, 'default');
 
             testCase.verifyGreaterThan(outNoise.meantau, 10 * outPeriodic.meantau, ...
                 'Structureless noise''s reconstruction error should be far higher than a periodic signal''s.');
@@ -1179,9 +1179,9 @@ function acf = referenceFourierACF(y)
 end
 
 function glscf = refGlscf(y,alpha,beta,tau)
-    % Independent reference implementation of CO_glscf (the original,
+    % Independent reference implementation of CO_GLSCF (the original,
     % uncached algorithm: abs(y) recomputed directly, no caching), used to
-    % verify CO_glscf's cache doesn't cross-contaminate results between
+    % verify CO_GLSCF's cache doesn't cross-contaminate results between
     % different series.
     y1 = abs(y(1:end-tau));
     y2 = abs(y(1+tau:end));

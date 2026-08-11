@@ -1,0 +1,334 @@
+function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed)
+% MF_GP_Hyperparameters    Gaussian Process time-series model parameters and goodness of fit
+%
+% Uses GP fitting code from the gpml toolbox, which is available here:
+% http://gaussianprocess.org/gpml/code.
+%
+% The code can accomodate a range of covariance functions, e.g.:
+% (i) a sum of squared exponential and noise terms, and
+% (ii) a sum of squared exponential, periodic, and noise terms.
+%
+% The model is fitted to <> samples from the time series, which are
+% chosen by:
+% (i) resampling the time series down to this many data points,
+% (ii) taking the first 200 samples from the time series, or
+% (iii) taking random samples from the time series.
+%
+% ---INPUTS:
+% y, the input time series
+%
+% covFunc, the covariance function, in the standard form of the gmpl package
+%
+% squishorsquash, whether to squash onto the unit interval, or spread across 1:N
+%
+% maxN, the maximum length of time series to consider -- inputs greater than
+%           this length are resampled down to maxN
+%
+% resampleHow, specifies the method of how to resample time series longer than maxN
+%
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
+%             for settings of resampleHow that involve random number generation
+%
+% ---NOTES:
+% GARCH-suite-style audit, 2026-08-11. Two issues found and fixed for the
+% covSEiso+covPeriodic+covNoise variants:
+% (1) The installed gpml (v4.2)'s covPeriodic takes 3 hyperparameters (period,
+%     length-scale, magnitude), giving this covariance combination 6
+%     hyperparameters total -- but only logh1-logh5 were registered in
+%     FeatureSets/INP_ops_hctsa.txt (logh6, the noise term, was computed every
+%     call and silently discarded). Now registered.
+% (2) See MF_GP_LearnHyperp.m NOTES -- fixed a poor-initialization bug that
+%     was independently degrading the fit quality of this same covariance
+%     combination.
+%
+% Also fixed: the "statistics on variance" block below called the legacy
+% gpml v3.2 gpr() function directly on logHyper, rather than the modern
+% gp()/hyp-struct API used everywhere else in this file. gpr()'s own
+% hyperparameter-counting logic assumes every covSum component is a plain
+% string and crashes on degree-parameterized components like
+% {'covMaterniso',3} -- exactly what's needed below. Replaced with gp().
+%
+% Covariance-function coverage was previously narrow: covSEiso (+ optional
+% covPeriodic) only, despite the gpml toolbox already shipping Matern and
+% Rational Quadratic. Added covMaterniso(3) [smoothness/roughness class,
+% distinct from SE's infinite differentiability] and covRQiso [scale-mixture
+% of length-scales, for multi-scale structure]. Both validated on synthetic
+% ground truth (matching the discrimination-test methodology used for the
+% GARCH leverage/fat-tails additions) rather than a real-data correlation
+% check alone:
+%   - Matern: fit covMaterniso(3)+noise and covSEiso+noise to data generated
+%     from a genuinely rough (Matern d=1) process vs. a genuinely smooth (SE)
+%     process. The relative fit-quality advantage (mlik_SE - mlik_Matern)
+%     cleanly separated the two groups (t=4.88, p<4e-5, n=15 realizations
+%     each). On real Bonn EEG data, Matern(3) fits substantially and
+%     consistently better than SE (mlik advantage 170-565 nlZ units across
+%     15 series, no exceptions) -- a genuine, consistent finding that EEG is
+%     not well-described by SE's infinite-smoothness assumption.
+%   - Rational Quadratic: fit covRQiso+noise to data generated as a mixture
+%     of two SE processes at very different length-scales (genuinely
+%     multi-scale) vs. a single SE process (matched total variance). The
+%     fitted shape parameter alpha (logh3) cleanly separated the two groups
+%     (t=-3.56, p=0.0013, n=15 each; low alpha = heavier-tailed length-scale
+%     mixture = more multi-scale, alpha->inf recovers exact SE).
+% Registered minimally (one sampling-method variant each, 'first'), not
+% replicated across all three MF_GP_Hyperparameters sampling methods --
+% learned from the MF_GARCHfit_ar_P1_Q2 redundancy lesson (see
+% garch-suite-audit): add the minimum needed to test the finding, not every
+% combinatorial variant.
+
+% ------------------------------------------------------------------------------
+% Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite the following two papers:
+%
+% (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
+% Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems 5: 527 (2017).
+% DOI: 10.1016/j.cels.2017.10.001
+%
+% (2) B.D. Fulcher, M.A. Little, N.S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2013).
+% DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+%
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+% details.
+%
+% You should have received a copy of the GNU General Public License along with
+% this program. If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
+%% Preliminaries
+% ------------------------------------------------------------------------------
+doPlot = 0; % plot basic outputs
+beVocal = 0; % display commentary to command line
+N = length(y); % time-series length
+
+% ------------------------------------------------------------------------------
+%% Check Inputs
+% ------------------------------------------------------------------------------
+if size(y, 2) > size(y, 1);
+	y = y'; % ensure a column vector input
+end
+% Make sure that y is indeed zscored
+if ~BF_iszscored(y)
+	warning('The input time series is not, but should be z-scored')
+end
+
+if nargin < 2 || isempty(covFunc),
+	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
+	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
+end
+
+if nargin < 3 || isempty(squishorsquash)
+	squishorsquash = 1;
+end
+
+if nargin < 4 || isempty(maxN)
+	maxN = 500; % maximum length time series we do this for --
+	% resample longer time series
+	% maxN = 0 --> include the whole thing
+end
+if (maxN > 0) && (maxN < 1)
+	% Specify a proportion of the time series length, N
+	maxN = ceil(N * maxN);
+end
+
+if nargin < 5 || isempty(resampleHow)
+	resampleHow = 'resample';
+end
+
+if nargin < 6
+	randomSeed = [];
+end
+
+% Inference algorithm -- use the Laplace approximation:
+infAlg = @infLaplace;
+
+% ------------------------------------------------------------------------------
+%% Downsample long time series
+% ------------------------------------------------------------------------------
+if (maxN > 0) && (N > maxN)
+	switch resampleHow
+		case 'resample' % resamples the whole time series down
+			% resample is from the Signal Processing Toolbox. The check sits here rather
+			% than at the top of the file because only this downsampling branch needs it:
+			BF_CheckToolbox('signal_toolbox');
+			f = maxN / N;
+			y = resample(y, ceil(f * 10000), 10000);
+			if length(y) > maxN
+				y = y(1:maxN);
+			end
+			if beVocal
+				fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN);
+			end
+			N = length(y); % update time series length (should be maxN)
+			t = SUB_settimeindex(N, squishorsquash); % set time index
+
+		case 'random_i' % takes maxN random indicies in the time series
+			% Set time index
+			t = SUB_settimeindex(N, squishorsquash);
+			% Control the random seed (for reproducibility):
+			BF_ResetSeed(randomSeed);
+			% Now take samples (unevenly spaced!!)
+			ii = randsample(N, maxN);
+			ii = sort(ii, 'ascend');
+			t = t(ii);
+			t = (t - min(t)) / max(t) * (maxN - 1) + 1; % respace from 1:maxN
+			y = y(ii);
+
+		case 'random_consec' % takes maxN consecutive indicies from a random position in the time series
+			% Control the random seed (for reproducibility):
+			BF_ResetSeed(randomSeed);
+			sind = randi(N - maxN + 1); % start index
+			y = y(sind:sind + maxN - 1); % take this bit
+			t = SUB_settimeindex(maxN, squishorsquash); % set time index
+
+		case 'first' % takes first maxN indicies from the time series
+			y = y(1:maxN); % take this bit
+			t = SUB_settimeindex(maxN, squishorsquash); % set time index
+
+		case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
+			% Control the random seed (for reproducibility):
+			BF_ResetSeed(randomSeed);
+			% Take sample from random position in time series
+			sind = randi(N - maxN + 1); % start index
+			y = y(sind:sind + maxN - 1); % take this bit
+			N = length(y); % update time series length (should be maxN)
+			t = SUB_settimeindex(N, squishorsquash); % set time index
+			% Now take samples (unevenly spaced!!)
+			ii = randsample(N, ceil(maxN / 5)); % This 5 is really a parameter...
+			ii = sort(ii, 'ascend');
+			t = t(ii);
+			y = y(ii);
+
+		otherwise
+			error('Invalid sampling method ''%s''.', resampleHow)
+	end
+else
+	t = SUB_settimeindex(N, squishorsquash); % set time index
+end
+
+% ------------------------------------------------------------------------------
+%% Learn the hyperparameters
+% ------------------------------------------------------------------------------
+
+% (1) Determine the number of hyperparameters, numHPs
+s = feval(covFunc{:}); % string in form '2+1', ... tells how many
+% hyperparameters for each contribution to the
+% covariance function
+numHPs = eval(s); % number of hyperparameters
+
+% (2) Intialize hyperparameters before optimization and perform the optimization
+hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
+
+% Mean function (mean zero process):
+meanFunc = {'meanZero'}; hyp.mean = [];
+
+% Likelihood (Gaussian):
+likFunc = @likGauss; hyp.lik = log(0.1);
+
+% Maximum number of allowed function evaluations
+numfevals = -50; % (specified as the negative)
+
+try
+	hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
+catch emsg
+	out = NaN;
+	return
+end
+if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data isn't suited to GP fitting
+	out = NaN;
+	return
+end
+
+% Get non-logarithmic hyperparameters
+logHyper = hyp.cov;
+% Output the log-hyperparameters.
+% (Dropped: h%u = exp(logh%u). Hyperparameters are positive, so exp is strictly monotone and
+%  the two are rank-identical by construction. Only one GP master operation ever registered
+%  the raw h%u alongside logh%u; the other four already used logh%u alone.)
+for i = 1:numHPs
+	% Set up structure output
+	out.(sprintf('logh%u', i)) = logHyper(i);
+end
+
+% ------------------------------------------------------------------------------
+%% For Plotting
+% ------------------------------------------------------------------------------
+if doPlot
+	xstar = t;
+	% xstar = linspace(min(t),max(t),1000)';
+	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar);
+	% S2p = S2 - exp(2*logHyper(3)); % remove noise from predictions
+	S2p = S2;
+
+	figure('color', 'w');
+	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
+	fill([xstar; flipdim(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
+	hold on;
+	plot(xstar, mu, 'k-', 'LineWidth', 2); % mean function
+	plot(t, y, '.-k'); % original data
+end
+
+% ------------------------------------------------------------------------------
+%% Other statistics???
+% ------------------------------------------------------------------------------
+
+% Negative log marginal likelihood using optimized hyperparameters
+out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y);
+
+% Mean error from fit
+[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
+% [mu, S2] = gpr(logHyper, covFunc, t, y, t); % evaluate at datapoints
+
+if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
+	fprintf(1, 'This time series is not suited to Gaussian Process fitting\n');
+	out = NaN; return
+end
+
+% Root-mean-square error of the mean function, mu.
+% (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
+%  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
+out.stde = sqrt(mean((y - mu).^2));
+% Better to look at mean distance away in units of std
+out.meanabs_std = mean(abs((y - mu) ./ sqrt(S2)));
+out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
+% (if not close to one, means a problem with
+% fitting)
+out.std_S_data = std(sqrt(S2)); % should vary a fair bit
+
+% Statistics on variance:
+xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
+[~, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar); % evaluate at datapoints
+% (was gpr(logHyper,...), the legacy gpml v3.2 API -- broke for degree-
+% parameterized covariance components like {'covMaterniso',3}, since gpr's
+% own hyperparameter-counting logic assumes each component is a plain string)
+S = sqrt(S2); % standard deviation function (S2 is the variance)
+out.maxS = max(S); % maximum predictive standard deviation
+out.minS = min(S); % minimum predictive standard deviation
+out.meanS = mean(S); % mean predictive standard deviation
+
+% ------------------------------------------------------------------------------
+function t = SUB_settimeindex(N, squishorsquash)
+	%% Set time index
+	% Difficult for processes on different time scales -- to squash them all
+	% into one time 'window' with linspace, or spread them all out into a
+	% single 'sampling rate' with 1:N...?
+	if squishorsquash
+		t = (1:N)';
+	else
+		t = linspace(0, 1, N)';
+	end
+end
+% ------------------------------------------------------------------------------
+
+end

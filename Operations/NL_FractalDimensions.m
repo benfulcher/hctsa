@@ -173,7 +173,7 @@ R = length(refIdx);
 % ------------------------------------------------------------------------------
 %% For each reference point, find distances to its 1st..kmax-th nearest
 %% neighbors (KD-tree, Theiler-window-aware, same approach as
-%% NL_localdensity.m/NL_ReturnTime.m)
+%% NL_LocalDensity.m/NL_ReturnTime.m)
 % ------------------------------------------------------------------------------
 kFetch = min(N_embed - 1, kmax + 2 * past + 5);
 [idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);

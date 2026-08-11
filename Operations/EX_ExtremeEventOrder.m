@@ -48,7 +48,7 @@ function out = EX_ExtremeEventOrder(y, extremeThresh)
 %       between bursts are rare).
 % lzComplexity: normalized Lempel-Ziv complexity (via Michael Small's
 %       MS_complexitybs, called directly on the true 0/1 label sequence --
-%       NOT via MS_complexity/EN_MS_LZcomplexity, whose equiprobable
+%       NOT via MS_complexity/EN_LZComplexity, whose equiprobable
 %       re-binning would relabel points to force equal counts per symbol,
 %       corrupting the true P/N assignment whenever propPosEvents differs
 %       from 0.5) of the event-direction sequence: captures patterning

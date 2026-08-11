@@ -10,7 +10,7 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 % process, these two distributions coincide and the divergence is zero in
 % the population; departures reflect time-irreversibility.
 %
-% cf. CO_trev/CO_tc3, which probe irreversibility via a single third-moment
+% cf. CO_trev/CO_TC3, which probe irreversibility via a single third-moment
 % statistic of lagged pairs/triples; this is the natural full-density
 % generalization (in the same sense that CO_JointNonGaussianity generalizes
 % DN_Moments' skewness/kurtosis to the whole joint embedding shape), able to
@@ -28,7 +28,7 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 % remains usable at hctsa-scale sample sizes in m = 2 or 3 dimensions.
 %
 % The k-NN search follows the same over-fetch-then-Theiler-filter pattern as
-% NL_localdensity: candidate neighbors are fetched via a KD-tree and any
+% NL_LocalDensity: candidate neighbors are fetched via a KD-tree and any
 % within a Theiler window of the query point's time index are discarded (a
 % point and its temporal neighbors are strongly autocorrelated, so treating
 % them as informative near-neighbors would understate the local spread);
@@ -47,7 +47,7 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 %
 % NOTE ON SIGNIFICANCE: only a raw divergence estimate is returned, not a
 % p-value -- consecutive embedded points overlap in m-1 coordinates and are
-% not independent, the same reason CO_trev/CO_tc3/CO_JointNonGaussianity
+% not independent, the same reason CO_trev/CO_TC3/CO_JointNonGaussianity
 % report raw statistics only. For significance testing against a null that
 % respects the series' own autocorrelation structure, compare this
 % statistic to its distribution over surrogates (cf. SD_MakeSurrogates,
@@ -64,7 +64,7 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 %    triple-wise joint distribution (x_t,x_{t+tau},x_{t+2tau}).
 %
 % k, the number of nearest neighbors used by the k-NN divergence estimator.
-%    Default: 3 (matches NL_localdensity's default).
+%    Default: 3 (matches NL_LocalDensity's default).
 %
 % theilerWin, the number of temporally-adjacent points excluded from both
 %             the within-set and cross-set neighbor searches (|i-j| <=

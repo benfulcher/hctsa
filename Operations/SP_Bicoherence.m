@@ -12,7 +12,7 @@ function out = SP_Bicoherence(y, segLength, maxN, numSurr)
 % bounded in [0,1] by the Cauchy-Schwarz inequality.
 %
 % This is a different quantity from other 3rd-moment
-% asymmetry/nonlinearity statistics (CO_trev, CO_tc3, SY_RampingWindows'
+% asymmetry/nonlinearity statistics (CO_trev, CO_TC3, SY_RampingWindows'
 % asymAC1) which collapse all frequency structure into a single
 % time-domain number per lag, so nonlinear coupling that's localized to a
 % specific pair of frequency bands can average out to near zero. The
@@ -56,7 +56,7 @@ function out = SP_Bicoherence(y, segLength, maxN, numSurr)
 % bicoherence over the non-redundant principal domain of frequency pairs
 % (0 < f1 <= f2, f1 + f2 <= Nyquist); the mean squared bicoherence
 % restricted to the self-coupling diagonal f1 = f2 (quadratic harmonic
-% distortion -- the frequency-resolved analogue of CO_trev/CO_tc3's
+% distortion -- the frequency-resolved analogue of CO_trev/CO_TC3's
 % single time-domain statistics); the proportion of frequency pairs
 % exceeding a surrogate-calibrated 95% significance threshold for
 % quadratic phase coupling; the ratio of that empirical threshold to the

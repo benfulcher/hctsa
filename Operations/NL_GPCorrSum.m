@@ -23,7 +23,7 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % operation used previously) to compute the correlation sum for a
 % time-delay-embedded time series by the Grassberger-Procaccia algorithm.
 % d2's raw correlation-sum output (its .c2 file, also used by
-% NL_TISEAN_d2.m) gives (ln r, C(r)) pairs directly; only doTwo = 1 (the
+% NL_d2.m) gives (ln r, C(r)) pairs directly; only doTwo = 1 (the
 % corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
 % (corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent and was
 % never used by any of this operation's own mop-file entries.
@@ -142,7 +142,7 @@ end
 
 % Maximum search radius, in standard deviations of y (matching the
 % convention already established for NL_TakensEstimator.m and
-% NL_TISEAN_d2.m's takens05, citing Kantz & Schreiber -- TSTOOL's own r was
+% NL_d2.m's takens05, citing Kantz & Schreiber -- TSTOOL's own r was
 % instead a proportion of "attractor size", equivalent in spirit but not
 % numerically identical), scaled by sqrt(m): a pairwise Euclidean distance
 % in an m-dimensional embedding of (roughly independent) per-coordinate
@@ -174,7 +174,7 @@ maxEps = r * std(y) * sqrt(m);
 % d2 over embedding dimensions 1:m (only the m-th is used below). Note:
 % "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
 % a bug in this TISEAN build where it reports "0 lines read" and produces no
-% output at all; "-M1,<m>" (a genuine range, as NL_TISEAN_d2.m and
+% output at all; "-M1,<m>" (a genuine range, as NL_d2.m and
 % NL_TakensEstimator.m already use) works correctly, so that's used
 % here too and the dimension-m block is picked out afterwards.
 [~, res] = system(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...

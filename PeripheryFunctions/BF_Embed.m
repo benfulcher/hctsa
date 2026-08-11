@@ -120,7 +120,7 @@ else % use a routine to inform m
                     th = m{2};
                 end
                 escapeFactor = 5;
-                m = NL_TISEAN_fnn(y,tau,10,0.05,1,th,escapeFactor);
+                m = NL_FNN(y,tau,10,0.05,1,th,escapeFactor);
                 ssm = sprintf('by TISEAN false_nearest code with 5%% theiler window and threshold %f to m = %u',th,m);
 
             case 'fnnsmall'
