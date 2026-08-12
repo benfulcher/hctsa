@@ -22,8 +22,13 @@ function MakeTableOfFunctions()
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-% Read in INP_mops.txt to get a list of functions
-fid = fopen('INP_mops.txt');
+% Read in INP_mops_hctsa.txt to get a list of functions
+% (FeatureSets is on the Matlab path via startup.m, so the bare filename resolves)
+mopsFile = 'INP_mops_hctsa.txt';
+fid = fopen(mopsFile);
+if fid==-1
+    error('Could not open master-operations input file ''%s''',mopsFile);
+end
 Mops = textscan(fid,'%s %s','CommentStyle','#','CollectOutput',1);
 fclose(fid);
 Mops = Mops{1};

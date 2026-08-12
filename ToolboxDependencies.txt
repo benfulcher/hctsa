@@ -33,7 +33,6 @@ DN_RemovePoints.m
 DN_SimpleFit.m
 DN_Spread.m
 DN_TrimmedMean.m
-DN_NLogLNorm.m
 DN_PLeft.m
 EN_DistributionEntropy.m
 EN_Randomize.m
@@ -123,7 +122,6 @@ SY_StdNthDerChange.m
 
 System Identification Toolbox (Matlab Toolbox)
 
-MF_ARMAOrders.m
 MF_CompareAR.m
 MF_CompareTestSets.m
 MF_ExpSmoothing.m

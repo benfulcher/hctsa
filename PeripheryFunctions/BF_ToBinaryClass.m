@@ -1,4 +1,4 @@
-function binMatrix = BF_Binarize(groupLabels,numClasses,makeLogical)
+function binMatrix = BF_ToBinaryClass(groupLabels,numClasses,makeLogical)
 % BF_ToBinaryClass Converts a group vector to a binary class coded matrix
 %
 % Columns code observations, rows represent classes

@@ -7,7 +7,7 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % multivariate Gaussian.
 %
 % cf. existing Gaussianity tests acting on marginal distribution
-% (HT_DistributionTest, DN_CompareKSFit, DN_NLogLNorm), which all
+% (HT_DistributionTest, DN_CompareKSFit), which all
 % A linear (e.g., AR(1)) Gaussian process has a Gaussian marginal
 % *and* a Gaussian joint embedding distribution;
 % a nonlinear or non-reversible process can look
