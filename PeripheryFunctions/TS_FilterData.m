@@ -67,11 +67,6 @@ end
 % May be feeding in a loaded data structure:
 TS_Quality = TS_GetFromData(whatData,'TS_Quality');
 MasterOperations = TS_GetFromData(whatData,'MasterOperations');
-% First check that fromDatabase exists (for back-compatability):
-fromDatabase = TS_GetFromData(whatData,'fromDatabase');
-if isempty(fromDatabase)
-    fromDatabase = true; % (set to true if doesn't exist; for legacy compatability)
-end
 % Check that we have the classLabels if already assigned labels:
 if ismember('Group',TimeSeries.Properties.VariableNames)
     classLabels = categories(TimeSeries.Group);
@@ -141,7 +136,7 @@ if isempty(newFileName)
 end
 fprintf(1,'Saving the filtered data to %s...',newFileName);
 save(newFileName,'TS_DataMat','TS_Quality','TimeSeries','Operations', ...
-        'MasterOperations','fromDatabase','classLabels','normalizationInfo',...
+        'MasterOperations','classLabels','normalizationInfo',...
         'ts_clust','op_clust','-v7.3');
 fprintf(1,'Done.\n');
 

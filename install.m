@@ -159,7 +159,4 @@ end
 fprintf(1,['\nAll done! Ready when you are to initiate hctsa analysis\nusing a time-series dataset: ' ...
                             'e.g.: TS_Init(''INP_test_ts.mat'')\n']);
 
-% Attempt to add a time series
-% SQL_Add('ts','INP_test_ts.txt')
-
 end
