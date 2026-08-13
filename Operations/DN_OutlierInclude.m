@@ -1,4 +1,4 @@
-function out = DN_OutlierInclude(y, thresholdHow, inc)
+function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
 % DN_OutlierInclude     How statistics depend on distributional outliers.
 %
 % Measures a range of different statistics about the time series as more and
@@ -24,7 +24,17 @@ function out = DN_OutlierInclude(y, thresholdHow, inc)
 %     (iii) 'neg': outliers are the greatest negative deviations from the mean.
 %
 % inc, the increment to move through (fraction of std if input time series is
-%       z-scored)
+%       z-scored). Unused when fixedThresh is given.
+%
+% fixedThresh [opt], if given, skips the threshold sweep entirely and
+%       instead evaluates the same event/interval statistics at this single
+%       threshold (a scalar, in the same units as inc, e.g. 2 for two
+%       standard deviations of a z-scored series). Returns a small,
+%       curve-fit-free struct (meanDt, seDt, propIncluded, and the
+%       median/mean/std of event timing) rather than the swept exponential/
+%       linear trend fits below, which measure something different: how
+%       those quantities *change* as the threshold rises, not their value
+%       at one threshold.
 %
 % Most of the outputs measure either exponential [f(x) = Aexp(Bx) + C] or
 % linear [f(x) = Ax + B] fits to the sequence of statistics obtained in
@@ -66,9 +76,6 @@ function out = DN_OutlierInclude(y, thresholdHow, inc)
 %% Preliminaries
 % ------------------------------------------------------------------------------
 
-% Check a Curve Fitting toolbox license is available
-BF_CheckToolbox('curve_fitting_toolbox');
-
 doPlot = false; % Plot some outputs
 
 % ------------------------------------------------------------------------------
@@ -92,7 +99,64 @@ if nargin < 2 || isempty(thresholdHow)
 	thresholdHow = 'abs'; % Analyze absolute value deviations in the time series by default
 end
 
-if nargin < 3
+if nargin < 4
+	fixedThresh = [];
+end
+
+% ------------------------------------------------------------------------------
+%% Fixed-threshold fast path
+% ------------------------------------------------------------------------------
+% Bypasses the sweep-and-curve-fit machinery below entirely: no Curve Fitting
+% toolbox needed, no NLS convergence to worry about. Evaluates the same
+% exceedance/interval statistics the sweep loop computes at each threshold,
+% but at just this one threshold, and returns them directly rather than
+% fitting a trend to how they change across many thresholds.
+if ~isempty(fixedThresh)
+	switch thresholdHow
+		case 'abs'
+			r = find(abs(y) >= fixedThresh);
+			tot = N;
+		case 'pos'
+			r = find(y >= fixedThresh);
+			tot = sum(y >= 0);
+		case 'neg'
+			r = find(y <= -fixedThresh);
+			tot = sum(y <= 0);
+		otherwise
+			error('Error thresholding with ''%s''. Must select either ''abs'', ''pos'', or ''neg''.', thresholdHow)
+	end
+
+	Dt_exc = diff(r);
+	meanDt = mean(Dt_exc);
+	propIncluded = length(Dt_exc) / tot * 100;
+
+	% Same "too few events to say anything meaningful" bar as the sweep loop
+	% (trimthr = 2%) below, so results from the two modes stay comparable:
+	if isnan(meanDt) || propIncluded <= 2
+		out.meanDt = NaN;
+		out.seDt = NaN;
+		out.propIncluded = propIncluded;
+		out.medianRelTime = NaN;
+		out.meanRelTime = NaN;
+		out.stdRelTime = NaN;
+		return
+	end
+
+	out.meanDt = meanDt;
+	out.seDt = std(Dt_exc) / sqrt(length(Dt_exc));
+	out.propIncluded = propIncluded;
+	out.medianRelTime = median(r) / (N / 2) - 1; % median event timing, relative to middle (N/2)
+	out.meanRelTime = mean(r) / (N / 2) - 1; % mean event timing, relative to middle (N/2)
+	out.stdRelTime = std(r) / sqrt(length(r));
+	return
+end
+
+% Check a Curve Fitting toolbox license is available (only needed for the
+% sweep-and-fit path below; the fixed-threshold path above has already
+% returned by this point):
+BF_CheckToolbox('curve_fitting_toolbox');
+
+if nargin < 3 || isempty(inc)
 	inc = 0.01; % increment through z-scored time-series values
 end
 

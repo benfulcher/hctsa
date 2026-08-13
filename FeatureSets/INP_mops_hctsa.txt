@@ -325,6 +325,9 @@ DN_Moments(x,11,false)	DN_Moments_raw_11
 DN_OutlierInclude(x_z,'abs',0.01)	DN_OutlierInclude_abs_001
 DN_OutlierInclude(x_z,'neg',0.01)	DN_OutlierInclude_n_001
 DN_OutlierInclude(x_z,'pos',0.01)	DN_OutlierInclude_p_001
+DN_OutlierInclude(x_z,'abs',0.01,2)	DN_OutlierInclude_abs_thr2
+DN_OutlierInclude(x_z,'neg',0.01,2)	DN_OutlierInclude_n_thr2
+DN_OutlierInclude(x_z,'pos',0.01,2)	DN_OutlierInclude_p_thr2
 DN_OutlierTest(x_z,2)  	DN_OutlierTest2
 DN_OutlierTest(x_z,5)  	DN_OutlierTest5
 DN_OutlierTest(x_z,10)  	DN_OutlierTest10
