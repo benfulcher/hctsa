@@ -628,6 +628,7 @@ MF_CompareTestSets(x_z,'ss',2,'uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_2_un
 MF_CompareTestSets(x_z,'ss','best','uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_best_uniform_25_01_1
 MF_ExpSmoothing(x_z,0.5,'best')	MF_ExpSmoothing_05_best
 MF_FitSubsegments(x_z,'ar',2,'uniform',[25,0.1])	MF_FitSubsegments_ar_2_uniform_25_01
+MF_FitSubsegments(x_z,'arcrosspred',2,'uniform',5)	MF_FitSubsegments_arcrosspred_2_uniform_5
 MF_FitSubsegments(x_z,'arsbc',[],'rand',[25,0.1],'default')	MF_FitSubsegments_arsbc_rand_25_01
 MF_FitSubsegments(x_z,'arsbc',[],'uniform',[25,0.1])	MF_FitSubsegments_arsbc_uniform_25_01
 MF_FitSubsegments(x_z,'ss',2,'uniform',[25,0.1])	MF_FitSubsegments_ss_2_uniform_25_01

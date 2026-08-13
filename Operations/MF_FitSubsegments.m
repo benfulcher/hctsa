@@ -27,6 +27,22 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %           'arma': fits an ARMA model using armax code from Matlab's System
 %                   Identification Toolbox. Outputs are statistics on the FPE,
 %                   and fitted AR and MA parameters.
+%           'arcrosspred': splits the series into samplep non-overlapping
+%                   segments, fits an AR model of the given order to each,
+%                   and uses every segment's model to 1-step-ahead predict
+%                   every other segment (including itself), forming an
+%                   samplep x samplep cross-prediction RMSE matrix -- a
+%                   linear-model analogue of SY_nstat_z's nonlinear
+%                   zeroth-order cross-prediction matrix. Only spread/
+%                   off-diagonal statistics of that matrix are returned
+%                   (see NOTES): the level statistics (trace, mean, min,
+%                   max, ...) were checked and are redundant with this
+%                   same function's cheaper 'ar' fpe_* fields.
+%                   Requires subsetHow = 'uniform' and a scalar samplep
+%                   (a segment count, not [nsamples,length]), since
+%                   cross-prediction needs a genuine non-overlapping
+%                   partition of the series, not resampled/overlapping
+%                   segments.
 %
 % subsetHow, how to choose segments from the time series, either 'uniform'
 %               (uniformly) or 'rand' (at random).
@@ -34,7 +50,9 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % samplep, a two-vector specifying how many segments to take and of what length.
 %           Of the form [nsamples, length], where length can be a proportion of
 %           the time-series length. e.g., [20,0.1] takes 20 segments of 10% the
-%           time-series length.
+%           time-series length. For model = 'arcrosspred', must instead be a
+%           scalar giving the number of non-overlapping segments to partition
+%           the whole series into.
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for when subsetHow is 'rand')
@@ -42,6 +60,27 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % ---OUTPUTS: depend on the model, as described above.
 %
 % ---NOTES:
+% 'arcrosspred' (added 2026-08-13): prompted by checking whether hctsa had
+% enough cross-prediction-based stationarity metrics, given SY_nstat_z
+% already covers this with a nonlinear model. Prototyped the full 26-field
+% stat menu SY_nstat_z uses (level stats: trace/mean/median/min/max/
+% min{lower,upper,offdiag}/eigenvalue-level stats; spread stats: std/range/
+% iqr/*offdiag/stdmean/rangemean/stdmedian/rangemedian/mineig/rangerange/
+% rangestd/stdstd) on 150 series each from Bonn EEG and Empirical1000, at
+% order=2, numSeg=5 (matching SY_nstat_z_5_1_3's segment count). The level
+% stats correlated |r|=0.89-0.98 with this function's own 'ar' registration
+% fpe_mean/min/max fields on BOTH datasets (unsurprising: the overall size
+% of cross-prediction error is dominated by each segment's in-sample AR fit
+% quality, which fpe_* already captures directly at a fraction of the cost
+% -- no O(numSeg^2) cross-prediction needed). Dropped all of them. The
+% spread/off-diagonal stats correlated only |r|=0.4-0.88 with fpe_*/a_1_*
+% and, notably, also only |r|=0.4-0.85 with SY_nstat_z's own spread stats
+% (the linear and nonlinear cross-prediction spread signals don't collapse
+% onto each other either) -- kept all of these as the genuinely novel
+% signal: whether segment i's model transfers to segment j, which neither
+% the parameter/FPE-variance view ('ar') nor the nonlinear model
+% (SY_nstat_z) directly measures.
+%
 % The 'arma' registration (order=[2,2], 25 uniform 10%-length subsegments) was
 % deregistered 2026-08-10: redundancy-checked its 21 output fields against
 % cheaper existing hctsa operations on Bonn EEG (500 series) and Empirical1000
@@ -125,6 +164,12 @@ end
 % (6) randomSeed: how to treat the randomization
 if nargin < 6
 	randomSeed = [];
+end
+
+% 'arcrosspred' needs a genuine non-overlapping partition of the series
+% (not resampled/overlapping segments) for cross-prediction to make sense:
+if strcmp(model, 'arcrosspred') && (~strcmp(subsetHow, 'uniform') || numel(samplep) ~= 1)
+	error('''arcrosspred'' requires subsetHow = ''uniform'' and a scalar samplep (a non-overlapping segment count)');
 end
 
 % ------------------------------------------------------------------------------
@@ -256,6 +301,74 @@ switch model
 			% eval(sprintf('out.a_%u_max = max(as(:,%u+1));',i,i));
 			% eval(sprintf('out.a_%u_min = min(as(:,%u+1));',i,i));
 		end
+
+	case 'arcrosspred'
+		%% Fit an AR model to each of numPred non-overlapping segments, then
+		%% use every segment's model to 1-step-ahead predict every segment
+		%% (including itself), forming a numPred x numPred cross-prediction
+		%% RMSE matrix. Only its spread/off-diagonal statistics are
+		%% returned -- see NOTES for why the level statistics are omitted.
+
+		%% Check that a System Identification Toolbox license is available:
+		BF_CheckToolbox('identification_toolbox');
+
+		minSegLength = 5 * (order + 1); % need enough points to fit AR(order) and predict meaningfully
+		if any(r(:, 2) - r(:, 1) + 1 < minSegLength)
+			warning('Segments too short to reliably cross-predict with an AR(%u) model', order);
+			out = NaN; return
+		end
+
+		try
+			segs = cell(numPred, 1);
+			models = cell(numPred, 1);
+			for i = 1:numPred
+				segs{i} = y(r(i, 1):r(i, 2));
+				models{i} = ar(segs{i}, order);
+			end
+			xperr = zeros(numPred); % cross-prediction RMSE from using segment i's model on segment j
+			for i = 1:numPred
+				for j = 1:numPred
+					yp = predict(models{i}, segs{j}, 1);
+					res = yp.y - segs{j}.y;
+					xperr(i, j) = sqrt(mean(res.^2));
+				end
+			end
+		catch
+			% A segment was degenerate (e.g. near-constant) for AR fitting/prediction
+			out = NaN; return
+		end
+
+		out.std = std(xperr(:));
+		out.range = range(xperr(:));
+		out.iqr = iqr(xperr(:));
+
+		lowertri = tril(xperr, -1); lowertri = lowertri(lowertri > 0);
+		uppertri = triu(xperr, 1); uppertri = uppertri(uppertri > 0);
+		offdiag = [lowertri; uppertri];
+		if isempty(offdiag)
+			out.iqroffdiag = NaN;
+			out.stdoffdiag = NaN;
+			out.rangeoffdiag = NaN;
+		else
+			out.iqroffdiag = iqr(offdiag);
+			out.stdoffdiag = std(offdiag);
+			out.rangeoffdiag = range(offdiag);
+		end
+
+		% Comparing columns/rows (i.e., how differently each segment's model
+		% behaves as a predictor vs. as a target)
+		out.stdmean = std(mean(xperr));
+		out.rangemean = range(mean(xperr));
+		out.stdmedian = std(median(xperr));
+		out.rangemedian = range(median(xperr));
+		out.rangerange = range(range(xperr));
+		out.stdrange = std(range(xperr));
+		out.rangestd = range(std(xperr));
+		out.stdstd = std(std(xperr));
+
+		% Eigenvalues
+		realEigs = real(eig(xperr));
+		out.mineig = min(realEigs);
 
 	case 'ss'
 		%% Fit state space models of specified order
