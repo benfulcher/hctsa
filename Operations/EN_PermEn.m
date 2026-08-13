@@ -60,7 +60,9 @@ end
 x = BF_Embed(y, tau, m, false);
 Nx = size(x, 1); % number of embedding vectors produced
 if Nx < 5 % need at least 5 embedding vectors to actually do a computation
-	error('Time series too short to embed');
+	% Data-dependent (series too short for the requested tau/m), not a code error.
+	warning('Time series too short to embed');
+	out = NaN; return
 end
 % Generate permutations up to the embedding dimension, m:
 permList = perms(1:m);

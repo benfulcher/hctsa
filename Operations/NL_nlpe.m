@@ -104,6 +104,12 @@ end
 % (escapeFactor=5 matches the convention used elsewhere for this test):
 if strcmp(de, 'fnn')
 	de = NL_FNN(y, tau, 10, 0.05, 1, 0.05, 5);
+	if isnan(de)
+		% NL_FNN already signals a data-dependent embedding-dimension failure
+		% (e.g. series too short for the requested tau) via NaN; propagate it
+		% here rather than passing a NaN de into MS_nlpe below.
+		out = NaN; return
+	end
 end
 
 % -------------------------------------------------------------------------------

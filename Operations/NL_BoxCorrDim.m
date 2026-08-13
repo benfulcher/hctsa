@@ -114,7 +114,10 @@ fileLines = fileLines{1};
 % One '#component = 1 embedding = <d>' block per embedding dimension d = 1:mMax:
 w = strmatch('#component', fileLines);
 if length(w) ~= mMax
-	error('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
+	% Data-dependent: TISEAN couldn't produce output at every requested embedding
+	% dimension for this series (e.g. too short relative to mMax/tau).
+	warning('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
+	out = NaN; return
 end
 w(end + 1) = length(fileLines) + 1;
 

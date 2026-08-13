@@ -150,7 +150,11 @@ end
 Y = BF_Embed(y, embedParams{1}, embedParams{2}, false, randomSeed);
 
 if isscalar(Y) && isnan(Y) % embedding failed
-	error('Embedding of the %u-sample time series failed', N)
+	% BF_Embed already signals data-dependent embedding failure via NaN
+	% (e.g. series too short for the requested tau/m); propagate that here
+	% rather than escalating it to an error.
+	warning('Embedding of the %u-sample time series failed', N)
+	out = NaN; return
 end
 [N_embed, m] = size(Y);
 
