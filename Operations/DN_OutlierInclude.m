@@ -295,14 +295,12 @@ if isempty(emsg)
 	out.mfexpb = c.b;
 	out.mfexpc = c.c;
 	out.mfexpr2 = gof.rsquare;
-	out.mfexpadjr2 = gof.adjrsquare;
 	out.mfexprmse = gof.rmse;
 else
 	out.mfexpa = NaN;
 	out.mfexpb = NaN;
 	out.mfexpc = NaN;
 	out.mfexpr2 = NaN;
-	out.mfexpadjr2 = NaN;
 	out.mfexprmse = NaN;
 end
 
@@ -323,14 +321,12 @@ if isempty(emsg)
 	out.nfexpb = c.b;
 	out.nfexpc = c.c; % (is linearly anticorrelated with c.a)
 	out.nfexpr2 = gof.rsquare;
-	out.nfexpadjr2 = gof.adjrsquare;
 	out.nfexprmse = gof.rmse;
 else
 	out.nfexpa = NaN;
 	out.nfexpb = NaN;
 	out.nfexpc = NaN;
 	out.nfexpr2 = NaN;
-	out.nfexpadjr2 = NaN;
 	out.nfexprmse = NaN;
 end
 
@@ -350,13 +346,11 @@ if isempty(emsg)
 	out.nfla = c.a;
 	out.nflb = c.b;
 	out.nflr2 = gof.rsquare;
-	out.nfladjr2 = gof.adjrsquare;
 	out.nflrmse = gof.rmse;
 else
 	out.nfla = NaN;
 	out.nflb = NaN;
 	out.nflr2 = NaN;
-	out.nfladjr2 = NaN;
 	out.nflrmse = NaN;
 end
 
@@ -401,14 +395,12 @@ if isempty(emsg)
 	out.stdrfexpb = c.b;
 	out.stdrfexpc = c.c;
 	out.stdrfexpr2 = gof.rsquare;
-	out.stdrfexpadjr2 = gof.adjrsquare;
 	out.stdrfexprmse = gof.rmse;
 else
 	out.stdrfexpa = NaN;
 	out.stdrfexpb = NaN;
 	out.stdrfexpc = NaN;
 	out.stdrfexpr2 = NaN;
-	out.stdrfexpadjr2 = NaN;
 	out.stdrfexprmse = NaN;
 end
 
@@ -428,13 +420,11 @@ if isempty(emsg)
 	out.stdrfla = c.a;
 	out.stdrflb = c.b;
 	out.stdrflr2 = gof.rsquare;
-	out.stdrfladjr2 = gof.adjrsquare;
 	out.stdrflrmse = gof.rmse;
 else
 	out.stdrfla = NaN;
 	out.stdrflb = NaN;
 	out.stdrflr2 = NaN;
-	out.stdrfladjr2 = NaN;
 	out.stdrflrmse = NaN;
 end
 
