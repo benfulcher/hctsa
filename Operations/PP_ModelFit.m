@@ -17,6 +17,12 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % (iii) removal of piece-wise polynomial trends, and
 % (iv) rank mapping the values of the time series to a Gaussian distribution.
 %
+% Only one representative preprocessing per PP_PreProcess.m family is fit
+% (d1, d2, peaks_08, p1_20, p2_5, rmgd): a redundancy check on 100 real
+% series (Bonn EEG + Empirical1000) found the other candidates in
+% PP_PreProcess.m's output each correlate at r>=0.95 with one of these, so
+% fitting all of them just repeats the same handful of AR refits.
+%
 % ---INPUTS:
 %
 % y, the input time series
@@ -85,9 +91,11 @@ end
 yp = PP_PreProcess(y, '', [], [], [], randomSeed);
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
-%% ____________________FIT MODEL TO ALL:_______________________ %%
+%% ____________________FIT MODEL TO A CURATED SUBSET:_______________________ %%
 
-fields = fieldnames(yp);
+% 'nothing' must stay first (it's the ratio denominator below); the rest are
+% the 6 non-redundant representatives (see header note):
+fields = {'nothing', 'd1', 'd2', 'peaks_08', 'p1_20', 'p2_5', 'rmgd'};
 numFields = length(fields);
 % statstore = struct('fpes',{});
 
@@ -141,70 +149,5 @@ end
 
 % could also return statistics on other things like prediction error, but
 % not alot of point, I think.
-
-%
-%     function ydt =  SUB_remps(y,n,method)
-%         % Removes the first n (proportion) of power spectrum
-%         % Based on my deseasonalize1.m code
-%
-%
-%         %% Take the Fourier Transform
-%
-%         Ny = length(y); % number of samples in y
-% %         t = linspace(0,1,Ny); % time vector
-%         NFFT = 2^nextpow2(Ny); % next power of 2
-%         Fy = fft(y,NFFT); % fast fourier transform of y
-%         Fy1 = Fy(1:NFFT/2+1);
-% %         f = 1/2*linspace(0,1,NFFT/2+1); % frequency vector
-%
-%         %% Remove this range
-%         % set it to (mean of the rest) across this range
-%         switch method
-%             case 'lf'
-%                 cullr = 1:floor(length(Fy1)*n);
-%             case 'biggest'
-%                 cullr = find(abs(Fy1)>quantile(abs(Fy1),n));
-%         end
-%
-%         meanrest = mean(abs(Fy1(setxor(1:end,cullr))));
-% %         meanrest = 0;
-%         FyF = Fy;
-%         FyF(cullr)=meanrest;
-%         FyF(end-cullr+2)=meanrest;
-%
-%
-%         % PLOT
-% %         plot(abs(Fy)),hold on; plot(abs(FyF),'--r'); hold off
-% %         input('Here''s the filtered one...')
-% %         plot(abs(FyF),'k');
-% %         input('Again on it''s own...')
-%
-%
-%         %% Inverse Fourier Transform
-%         ydt = ifft(FyF,NFFT);
-%         ydt = zscore(ydt(1:Ny)); % crop to desired length
-%
-%
-%         % PLOT
-% %         plot(zscore(ydt),'b'); hold on; plot(y,'r'); hold off;
-% %         input(['Mean difference is ' num2str(mean(y-ydt))])
-%
-%     end
-%
-%     function ydt = SUB_rempt(y,order,nbits)
-%         N = length(y);
-%         ydt = zeros(N,1);
-%         bits = round(linspace(0,N,nbits+1));
-%         for k=1:nbits
-%             r = bits(k)+1 : bits(k+1); % range defined by adjacent 'bits'
-%             x = (1:length(r))'; % faux x-range
-%             ybit = y(r); % y-range
-%             p = polyfit(x,ybit,order);
-%             ydt(r) = ybit-polyval(p,x);
-%         end
-%         ydt = zscore(ydt);
-% %         plot(y,'b'); hold on; plot(ydt,'r');
-% %         input('here we are')
-%     end
 
 end

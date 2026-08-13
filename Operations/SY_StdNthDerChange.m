@@ -19,6 +19,16 @@ function out = SY_StdNthDerChange(y, maxd)
 %
 % Typically an excellent fit to exponential: regular signals decrease, irregular
 % signals increase...?
+%
+% NOTE: this exponential-decay/growth picture only holds when std(diff(y,n))
+% is monotonic across n. Many real (especially oversampled/smooth) series
+% instead show successive differencing REDUCE std up to some order (removing
+% trend/nonstationary drift) before over-differencing increases it again --
+% a classic Box-Jenkins ARIMA-order-selection U-shape that a monotonic
+% exponential cannot represent (on a 20-series sample of the Bonn EEG
+% dataset, 20/20 showed this interior minimum, with a median exponential-fit
+% r^2 of only 0.11). The minOrder/minOrderInterp/isInterior/overDiffRatio
+% outputs below characterize this directly, alongside the exponential fit.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -81,5 +91,31 @@ out.fexp_b = c.b; % this is important
 out.fexp_r2 = gof.rsquare; % this is more important!
 out.fexp_adjr2 = gof.adjrsquare;
 out.fexp_rmse = gof.rmse;
+
+% ------------------------------------------------------------------------------
+%% Directly characterize the minimum-variance differencing order
+% ------------------------------------------------------------------------------
+% (complements the exponential fit above, which can't represent a U-shaped
+% curve -- see NOTE in the header)
+[minStd, minInd] = min(ms);
+out.minOrder = minInd;
+out.minRatio = minStd / ms(1); % how much differencing helped, relative to order 1
+out.overDiffRatio = ms(end) / minStd; % how much std rises again past the optimum
+out.isInterior = double(minInd > 1 && minInd < maxd); % genuine U-shape vs. monotonic
+
+% Sub-integer refinement of the minimizing order via parabolic interpolation
+% of the three points straddling the discrete minimum -- a cheap, smarter
+% alternative to repeating the sweep with fractional-order differencing:
+if out.isInterior
+	y0 = ms(minInd - 1); y1 = ms(minInd); y2 = ms(minInd + 1);
+	denom = y0 - 2 * y1 + y2;
+	if denom ~= 0
+		out.minOrderInterp = minInd + 0.5 * (y0 - y2) / denom;
+	else
+		out.minOrderInterp = minInd;
+	end
+else
+	out.minOrderInterp = minInd;
+end
 
 end
