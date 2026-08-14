@@ -1572,6 +1572,12 @@ EN_PermEn_4_ac.normPermEn            EN_PermEn_4_ac_normPermEn            entrop
 EN_PermEn_5_1.normPermEn            EN_PermEn_5_1_normPermEn            entropy
 EN_PermEn_5_2.normPermEn            EN_PermEn_5_2_normPermEn            entropy
 EN_PermEn_5_ac.normPermEn            EN_PermEn_5_ac_normPermEn            entropy
+EN_PermEnComplexity_4_1.jsComplexity            EN_PermEnComplexity_4_1_jsComplexity            entropy
+EN_PermEnComplexity_4_2.jsComplexity            EN_PermEnComplexity_4_2_jsComplexity            entropy
+EN_PermEnComplexity_4_ac.jsComplexity            EN_PermEnComplexity_4_ac_jsComplexity            entropy
+EN_PermEnComplexity_5_1.jsComplexity            EN_PermEnComplexity_5_1_jsComplexity            entropy
+EN_PermEnComplexity_5_2.jsComplexity            EN_PermEnComplexity_5_2_jsComplexity            entropy
+EN_PermEnComplexity_5_ac.jsComplexity            EN_PermEnComplexity_5_ac_jsComplexity            entropy
 EN_Randomize_dyndist.xcn1fexpa	EN_Randomize_dyndist_xcn1fexpa	entropy,slow
 EN_Randomize_dyndist.xcn1fexpb	EN_Randomize_dyndist_xcn1fexpb	entropy,slow
 EN_Randomize_dyndist.xcn1fexpr2	EN_Randomize_dyndist_xcn1fexpr2	entropy,slow

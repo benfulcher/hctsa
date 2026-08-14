@@ -469,6 +469,12 @@ EN_PermEn(x_z,4,'ac')        EN_PermEn_4_ac
 EN_PermEn(x_z,5,1)        EN_PermEn_5_1
 EN_PermEn(x_z,5,2)        EN_PermEn_5_2
 EN_PermEn(x_z,5,'ac')        EN_PermEn_5_ac
+EN_PermEnComplexity(x_z,4,1)        EN_PermEnComplexity_4_1
+EN_PermEnComplexity(x_z,4,2)        EN_PermEnComplexity_4_2
+EN_PermEnComplexity(x_z,4,'ac')        EN_PermEnComplexity_4_ac
+EN_PermEnComplexity(x_z,5,1)        EN_PermEnComplexity_5_1
+EN_PermEnComplexity(x_z,5,2)        EN_PermEnComplexity_5_2
+EN_PermEnComplexity(x_z,5,'ac')        EN_PermEnComplexity_5_ac
 EN_Randomize(x_z,'dyndist','default')	EN_Randomize_dyndist
 EN_Randomize(x_z,'permute','default')	EN_Randomize_permute
 EN_Randomize(x_z,'statdist','default')	EN_Randomize_statdist
