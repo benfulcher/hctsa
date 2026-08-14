@@ -248,6 +248,7 @@ CO_trev(x_z,2)	CO_trev_2
 CO_trev(x_z,3)	CO_trev_3
 CO_trev(x_z,'ac')	CO_trev_ac
 CO_trev(x_z,'mi')	CO_trev_mi
+CO_Oversampling(x_z)	CO_Oversampling
 CP_l1pwc_SweepLambda(x_z,0:0.05:0.95)	CP_l1pwc_SweepLambda_0_005_095
 CP_ML_StepDetect(x_z,'l1pwc',0.2)	CP_ML_StepDetect_l1pwc_02
 CP_ML_StepDetect(x_z,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
