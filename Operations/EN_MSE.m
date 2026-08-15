@@ -56,10 +56,12 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow)
 % r=0.95 Empirical1000) -- dropped maxSampEn, kept meanSampEn (Costa's own
 % "Complexity Index" is essentially this field) and maxScale (peak
 % location, distinct from peak height). Also considered replacing meanch
-% with a more principled robust-linear-fit slope of SampEn vs. scale, but
-% it correlates with the already-registered meanch at r=0.83-0.93 on BOTH
-% datasets (not an EEG artifact) -- essentially the same trend signal via a
-% fancier estimator, not added.
+% with a more principled robust-linear-fit slope of SampEn vs. scale: it
+% correlates with meanch at r=0.83-0.93 on BOTH datasets (not an EEG
+% artifact) -- essentially the same trend signal via a fancier estimator --
+% so meanch was dropped from registration in favour of slope/slopeSE (uses
+% all valid scales at once, and comes with its own standard error), rather
+% than the reverse.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

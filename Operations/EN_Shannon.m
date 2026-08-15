@@ -89,7 +89,7 @@ elseif binRangeSize > 1
 		% Range over bins specified in the vector numBin; return statistics on results
 		ents = zeros(binRangeSize, 1);
 		for i = 1:binRangeSize
-			ents(i) = MS_shannon(y, numBin(i), depth);
+			ents(i) = MS_shannon(y, numBin(i), depth) / depth;
 		end
 		out.maxent = max(ents);
 		out.minent = min(ents);

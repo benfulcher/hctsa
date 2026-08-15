@@ -260,7 +260,11 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 		[c, gof] = fit(r, dataVector, f);
 	catch
 		warning('Exponential fit failed :(')
-		c = struct('a', NaN, 'b', NaN, 'c', NaN);
+		if addOffset
+			c = struct('a', NaN, 'b', NaN, 'c', NaN);
+		else
+			c = struct('a', NaN, 'b', NaN);
+		end
 		gof = struct('rsquare', NaN, 'rmse', NaN);
 	end
 	if doPlot;
