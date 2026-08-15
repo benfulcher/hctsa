@@ -689,6 +689,8 @@ NL_EmbedKernelPCA(x_z,'mi',10,2000)	NL_EmbedKernelPCA_mi_10_2000
 NL_EmbedPCA(x_z,1,10)	NL_EmbedPCA_1_10
 NL_EmbedPCA(x_z,'ac',3)	NL_EmbedPCA_ac_3
 NL_EmbedPCA(x_z,'mi',10)	NL_EmbedPCA_mi_10
+NL_EVTLocalDim(x_z,'ac',3,0.98,0.01,200,5,10000,'default')	NL_EVTLocalDim_ac_3_098_001_200_5_10000
+NL_EVTLocalDim(x_z,'mi',5,0.98,0.01,200,5,10000,'default')	NL_EVTLocalDim_mi_5_098_001_200_5_10000
 NL_FractalDimensions(x_z,2,10,-1,1,5,10,32,{1,5},'default')	NL_FractalDimensions_2_10_n1_1_5_10_32_1_5
 NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{1,5},'default')	NL_FractalDimensions_2_100_02_1_5_10_32_1_5
 NL_FractalDimensions(x_z,2,100,0.2,1,5,10,32,{'ac',5},'default')	NL_FractalDimensions_2_100_02_1_5_10_32_ac_5
