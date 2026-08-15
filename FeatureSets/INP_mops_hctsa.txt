@@ -618,6 +618,7 @@ MD_PolVar(x_z,0.5,3)	MD_PolVar_05_3
 MD_PolVar(x_z,0.5,4)	MD_PolVar_05_4
 MD_PolVar(x_z,0.5,5)	MD_PolVar_05_5
 MD_PolVar(x_z,0.5,6)	MD_PolVar_05_6
+MD_Porta(x_z,6)	MD_Porta
 MD_RawHRVMeas(x)	MD_RawHRVMeas
 MF_AR_arcov(x_z,1)	        MF_AR_arcov_1
 MF_AR_arcov(x_z,2)	        MF_AR_arcov_2

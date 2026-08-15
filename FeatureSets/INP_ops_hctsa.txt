@@ -2576,6 +2576,11 @@ MD_RawHRVMeas.tri20	    MD_RawHRVMeas_tri20	    distribution,raw
 MD_RawHRVMeas.trisqrt	MD_RawHRVMeas_trisqrt	distribution,raw
 MD_RawHRVMeas.SD1	    MD_RawHRVMeas_SD1	    medical,raw,spreadDependent
 MD_RawHRVMeas.SD2	    MD_RawHRVMeas_SD2	    medical,raw,spreadDependent
+MD_RawHRVMeas.CVI	    MD_RawHRVMeas_CVI	    medical,raw,spreadDependent
+MD_Porta.pV0	        MD_Porta_pV0	        medical,symbolic
+MD_Porta.pV1	        MD_Porta_pV1	        medical,symbolic
+MD_Porta.pV2LV	        MD_Porta_pV2LV	        medical,symbolic
+MD_Porta.pV2UV	        MD_Porta_pV2UV	        medical,symbolic
 MF_AR_arcov_1.meane	MF_AR_arcov_1_meane	model,GOF
 MF_AR_arcov_1.meanabs	MF_AR_arcov_1_meanabs	model,GOF
 MF_AR_arcov_1.stde	MF_AR_arcov_1_stde	model,GOF

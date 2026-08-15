@@ -70,4 +70,13 @@ out.SD2 = sqrt(2 * var(x) - 0.5 * std(diffx)^2) * 1000;
 % NOTE: the SD1 measure is the same (up to a rescaling)
 %       as the implementation in DN_Spread(diff(x),'std');
 
+% CVI: Cardiac Vagal Index, derived from the Poincare plot
+% cf. Toichi et al., "A new method of assessing cardiac autonomic function
+% and its comparison with spectral analysis and coefficient of variation
+% of R-R interval", J. Auton. Nerv. Syst. 62(1-2) 79 (1997)
+% (CSI = SD2/SD1, the companion Cardiac Sympathetic Index, was tested but
+% found highly redundant (r > 0.95 on 2 independent datasets) with
+% existing hctsa features and was not included.)
+out.CVI = log10(out.SD1 * out.SD2 * 16);
+
 end
