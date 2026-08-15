@@ -822,6 +822,7 @@ SD_Surrogates(x_z,'mi',100,3,'trev','default')	SD_Surrogates_mi_100_3_trev
 SD_SurrogateTest(x_z,'RP',99,[],{'ami1','fmmi','o3','tc3'},'default')	SD_SurrogateTest_RP_99
 SP_Bicoherence(x_z,64,'full',25)	SP_Bicoherence_64_full_25
 SP_Cepstrum(x_z,100,4)	SP_Cepstrum_100_4
+SP_PhaseAmpCoupling(x_z,5,'full',18)	SP_PhaseAmpCoupling_5_full_18
 SP_Specparam(x_z,'fixed',4,1,[0.02,0.5],[],Inf)	SP_Specparam_fixed_4_1
 SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 SP_Summaries(x_z,'fft',[],[],false)	                SP_Summaries_fft
