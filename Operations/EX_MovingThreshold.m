@@ -68,7 +68,7 @@ if nargin < 2 || isempty(a)
 	a = 1; % set default
 end
 
-if nargin < 2 || isempty(b)
+if nargin < 3 || isempty(b)
 	b = 0.1; % set default
 end
 if (b < 0) || (b > 1)

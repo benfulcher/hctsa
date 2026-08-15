@@ -15,8 +15,11 @@ function out = EX_ExtremeEventOrder(y, extremeThresh)
 %       'extreme' (default: 0.05, i.e., the most extreme 5% each way)
 %
 % ---OUTPUTS:
-% numEvents, propPosEvents: how many extreme events there are in total, and
-%       what proportion of them are positive-direction.
+% propPosEvents: what proportion of extreme events are positive-direction.
+%       (the total event count itself is not reported here: with events
+%       defined by a fixed quantile threshold, numEvents is just
+%       extremeThresh*2*N up to tie noise -- a near-exact re-encoding of
+%       series length, not a property of the dynamics.)
 % meanInterval, cvInterval: mean and coefficient of variation of the
 %       inter-event intervals of the combined (both-direction) event
 %       sequence -- how bursty extreme events are overall, irrespective of
@@ -113,7 +116,6 @@ eventType = [ones(length(posIdx), 1); zeros(length(negIdx), 1)]; % 1 = positive,
 eventType = eventType(sortOrder);
 
 numEvents = length(eventIdx);
-out.numEvents = numEvents;
 out.propPosEvents = mean(eventType);
 
 % ------------------------------------------------------------------------------
