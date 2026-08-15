@@ -139,64 +139,60 @@ end
 % ------------------------------------------------------------------------------
 %% WRITE OUTPUT
 % ------------------------------------------------------------------------------
+% Note: the 'lin' statistic (slope of a linear fit to the across-iteration
+% profile) is dropped throughout -- it correlates with 'trend' (sum of
+% differences across the same profile) at r=0.84-0.99 across all 7 measured
+% categories on real EEG data, since both are point-estimators of the same
+% underlying "is this short profile increasing" question.
+
 % 1) StatAv_5
 out.statav5_trend = stats(1, 1);
 out.statav5_jump = stats(1, 2);
-out.statav5_lin = stats(1, 3);
 % out.statav5_exp = stats(1,4);
 
 % 2) Sliding Window Mean
 out.swms5_2_trend = stats(2, 1);
 out.swms5_2_jump = stats(2, 2);
-out.swms5_2_lin = stats(2, 3);
 % out.swms5_2_exp = stats(2,4);
 
 % 3) Sliding Window std
 out.swss5_2_trend = stats(3, 1);
 out.swss5_2_jump = stats(3, 2);
-out.swss5_2_lin = stats(3, 3);
 % out.swss5_2_exp = stats(3,4);
 
 % 4) Gaussian kernel density fit, rmse
 out.gauss1_kd_trend = stats(4, 1);
 out.gauss1_kd_jump = stats(4, 2);
-out.gauss1_kd_lin = stats(4, 3);
 % out.gauss1_kd_exp = stats(4,4);
 
 % 5) Gaussian 10-bin histogram fit, rmse
 out.gauss1_hsqrt_trend = stats(5, 1);
 out.gauss1_hsqrt_jump = stats(5, 2);
-out.gauss1_hsqrt_lin = stats(5, 3);
 % out.gauss1_h10_exp = stats(5,4);
 
 % 6) Compare normal fit
 out.norm_kscomp_trend = stats(6, 1);
 out.norm_kscomp_jump = stats(6, 2);
-out.norm_kscomp_lin = stats(6, 3);
 % out.norm_kscomp_exp = stats(6,4);
 
 % 7) Outliers: ben test
 out.ol_trend = stats(7, 1);
 out.ol_jump = stats(7, 2);
-out.ol_lin = stats(7, 3);
 % out.ol_exp = stats(7,4);
 
 % 8) Cross correlation to original signal (-1)
 out.xcn1_trend = stats(8, 1);
 out.xcn1_jump = stats(8, 2);
-out.xcn1_lin = stats(8, 3);
 % out.xcn1_exp = stats(8,4);
 
 % 9) Cross correlation to original signal (+1)
 out.xc1_trend = stats(9, 1);
 out.xc1_jump = stats(9, 2);
-out.xc1_lin = stats(9, 3);
 % out.xc1_exp = stats(9,4);
 
 % 10) Norm of differences to original and processed signals
 out.normdiff_trend = stats(10, 1);
 out.normdiff_jump = stats(10, 2);
-out.normdiff_lin = stats(10, 3);
 % out.normdiff_exp = stats(10,4);
 
 % ------------------------------------------------------------------------------

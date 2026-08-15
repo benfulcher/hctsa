@@ -18,10 +18,10 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % (iv) rank mapping the values of the time series to a Gaussian distribution.
 %
 % Only one representative preprocessing per PP_PreProcess.m family is fit
-% (d1, d2, peaks_08, p1_20, p2_5, rmgd): a redundancy check on 100 real
-% series (Bonn EEG + Empirical1000) found the other candidates in
-% PP_PreProcess.m's output each correlate at r>=0.95 with one of these, so
-% fitting all of them just repeats the same handful of AR refits.
+% (d1, d2, p1_20, p2_5, rmgd): a redundancy check on 100 real series (Bonn
+% EEG + Empirical1000) found the other candidates in PP_PreProcess.m's
+% output each correlate at r>=0.95 with one of these, so fitting all of
+% them just repeats the same handful of AR refits.
 %
 % ---INPUTS:
 %
@@ -94,8 +94,10 @@ yp = PP_PreProcess(y, '', [], [], [], randomSeed);
 %% ____________________FIT MODEL TO A CURATED SUBSET:_______________________ %%
 
 % 'nothing' must stay first (it's the ratio denominator below); the rest are
-% the 6 non-redundant representatives (see header note):
-fields = {'nothing', 'd1', 'd2', 'peaks_08', 'p1_20', 'p2_5', 'rmgd'};
+% the 5 non-redundant representatives (see header note). 'peaks_08' was
+% dropped 2026-08-15: r=0.985 with 'd2' on real EEG data, and 'd2' (simple
+% 2nd-order differencing) is the more standard/interpretable of the pair.
+fields = {'nothing', 'd1', 'd2', 'p1_20', 'p2_5', 'rmgd'};
 numFields = length(fields);
 % statstore = struct('fpes',{});
 

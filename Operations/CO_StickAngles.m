@@ -92,11 +92,11 @@ end
 %% Basic stats?
 % ------------------------------------------------------------------------------
 % on raw values
-out.std_p = std(angles{1});
+% std_p/std_n dropped: r=0.98 with CO_PosNegAsymmetry's volPos/volNeg on
+% real EEG data, which measures regime-conditional volatility more directly.
 out.mean_p = mean(angles{1});
 out.median_p = median(angles{1});
 
-out.std_n = std(angles{2});
 out.mean_n = mean(angles{2});
 out.median_n = median(angles{2});
 
@@ -217,17 +217,17 @@ end
 % StatAv2
 [statav_m, statav_s] = SUB_statav(zallAngles, 2);
 out.statav2_all_m = statav_m;
-out.statav2_all_s = statav_s;
+% statav2_all_s/statav3_all_s/statav4_all_s dropped: mutually r=0.97-0.98
+% with statav5_all_s (and each other) on real EEG data, so only one
+% representative of the StatAv-spread-of-all-angles family is kept.
 
 % StatAv3
 [statav_m, statav_s] = SUB_statav(zallAngles, 3);
 out.statav3_all_m = statav_m;
-out.statav3_all_s = statav_s;
 
 % StatAv4
 [statav_m, statav_s] = SUB_statav(zallAngles, 4);
 out.statav4_all_m = statav_m;
-out.statav4_all_s = statav_s;
 
 % StatAv5
 [statav_m, statav_s] = SUB_statav(zallAngles, 5);
@@ -235,25 +235,23 @@ out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
 %% correlations?
+% Note: ac2_p/ac2_n/ac2_all dropped (r=0.96-0.99 with the corresponding
+% ac1_*), and tau_all/ac1_all dropped (each r=0.95-0.97 with its own p/n
+% split) -- keeping the p/n split (rather than the pooled 'all') preserves
+% the asymmetry signal that's the actual point of this feature.
 if ~isempty(zangles{1});
 	out.tau_p = CO_FirstCrossing(zangles{1}, 'ac', 0, 'continuous');
 	out.ac1_p = CO_AutoCorr(zangles{1}, 1, 'Fourier');
-	out.ac2_p = CO_AutoCorr(zangles{1}, 2, 'Fourier');
 else
-	out.tau_p = NaN; out.ac1_p = NaN; out.ac2_p = NaN;
+	out.tau_p = NaN; out.ac1_p = NaN;
 end
 
 if ~isempty(zangles{2});
 	out.tau_n = CO_FirstCrossing(zangles{2}, 'ac', 0, 'continuous');
 	out.ac1_n = CO_AutoCorr(zangles{2}, 1, 'Fourier');
-	out.ac2_n = CO_AutoCorr(zangles{2}, 2, 'Fourier');
 else
-	out.tau_n = NaN; out.ac1_n = NaN; out.ac2_n = NaN;
+	out.tau_n = NaN; out.ac1_n = NaN;
 end
-
-out.tau_all = CO_FirstCrossing(zallAngles, 'ac', 0, 'continuous');
-out.ac1_all = CO_AutoCorr(zallAngles, 1, 'Fourier');
-out.ac2_all = CO_AutoCorr(zallAngles, 2, 'Fourier');
 
 % ------------------------------------------------------------------------------
 %% What does the distribution look like?

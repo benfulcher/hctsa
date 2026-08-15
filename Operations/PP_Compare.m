@@ -214,7 +214,6 @@ y_d = zscore(y_d);
 
 % (a) StatAv
 out.statav2 = SY_StatAv(y_d, 'seg', 2) / SY_StatAv(y, 'seg', 2);
-out.statav10 = SY_StatAv(y_d, 'seg', 10) / SY_StatAv(y, 'seg', 10);
 
 % (b) Sliding window mean
 out.swms2_2 = SY_SlidingWindow(y_d, 'mean', 'std', 2, 2) / SY_SlidingWindow(y, 'mean', 'std', 2, 2);
