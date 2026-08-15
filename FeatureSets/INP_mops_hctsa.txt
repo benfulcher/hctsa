@@ -806,6 +806,7 @@ SC_FluctAnal(x_z,2,'std',50,[],[],true)	SC_FluctAnal_2_std_50_logi
 SC_FluctAnal(zscore(abs(x_z)),2,'dfa',50,2,[],true)	SC_FluctAnal_mag_2_dfa_50_2_logi
 SC_FluctAnal(zscore(sign(x_z)),2,'dfa',50,2,[],true)	SC_FluctAnal_sign_2_dfa_50_2_logi
 SC_MMA(x_z,0,[],[-5,5]) SC_MMA_0__n5_5
+SC_MFDFA(x_z,[],[-5,5],1)	SC_MFDFA__n5_5_1
 SD_Surrogates(x_z,1,100,1,'tc3','default')	SD_Surrogates_1_100_1_tc3
 SD_Surrogates(x_z,1,100,1,'trev','default')	SD_Surrogates_1_100_1_trev
 SD_Surrogates(x_z,1,100,2,'tc3','default')	SD_Surrogates_1_100_2_tc3

@@ -6291,6 +6291,14 @@ SC_MMA_0__n5_5.minHurstQ                SC_MMA_0__n5_5_minHurstQ                
 SC_MMA_0__n5_5.minHurstScale            SC_MMA_0__n5_5_minHurstScale            scaling,fractal
 SC_MMA_0__n5_5.stdStdHurstQ             SC_MMA_0__n5_5_stdStdHurstQ             scaling,fractal
 SC_MMA_0__n5_5.stdStdHurstScale         SC_MMA_0__n5_5_stdStdHurstScale         scaling,fractal
+SC_MFDFA__n5_5_1.meanR2                 SC_MFDFA__n5_5_1_meanR2                 scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.h2                     SC_MFDFA__n5_5_1_h2                     scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.alphaMin               SC_MFDFA__n5_5_1_alphaMin               scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.alphaMax               SC_MFDFA__n5_5_1_alphaMax               scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.alphaWidth             SC_MFDFA__n5_5_1_alphaWidth             scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.fAlphaMax              SC_MFDFA__n5_5_1_fAlphaMax              scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.alpha0                 SC_MFDFA__n5_5_1_alpha0                 scaling,fractal,multifractal
+SC_MFDFA__n5_5_1.spectrumAsymmetry      SC_MFDFA__n5_5_1_spectrumAsymmetry      scaling,fractal,multifractal
 SD_Surrogates_1_100_1_tc3.normpatponmax	SD_Surrogates_1_100_1_tc3_normpatponmax	nonlinear,correlation,surrogate
 SD_Surrogates_1_100_1_tc3.iqrsfrommedian	SD_Surrogates_1_100_1_tc3_iqrsfrommedian	nonlinear,correlation,surrogate
 SD_Surrogates_1_100_1_tc3.stdsurr	SD_Surrogates_1_100_1_tc3_stdsurr	nonlinear,correlation,surrogate
