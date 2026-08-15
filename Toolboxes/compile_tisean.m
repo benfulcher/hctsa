@@ -17,7 +17,7 @@ function ok = compile_tisean()
 % ---OUTPUTS:
 % ok, true if TISEAN compiled and all binaries hctsa depends on (c1, c2d,
 %     c2g, c2t, d2, nstat_z, false_nearest, boxcount, lyap_r, lyap_spec,
-%     poincare) were installed.
+%     poincare, nrlazy) were installed.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -82,14 +82,14 @@ elseif ~compilerOnPath('gcc') || ~compilerOnPath('make')
     end
     printPathDiagnostics();
 elseif isempty(findFortranCompiler())
-    % Also required: 4 of the 11 binaries hctsa depends on (c1, c2d, c2g, c2t)
+    % Also required: 4 of the 12 binaries hctsa depends on (c1, c2d, c2g, c2t)
     % are Fortran, not C (TISEAN's source_f/, not source_c/), so a C-only
     % toolchain isn't sufficient for a complete build.
     ok = false;
     if ismac
         fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH ' ...
             '(also checked the standard Homebrew install locations directly).\n' ...
-            'TISEAN needs this in addition to a C compiler: 4 of the 11 binaries hctsa\n' ...
+            'TISEAN needs this in addition to a C compiler: 4 of the 12 binaries hctsa\n' ...
             'depends on (c1, c2d, c2g, c2t) are Fortran, not C.\n' ...
             'Install gfortran (e.g. via Homebrew: brew install gcc), then re-run compile_tisean.m.\n' ...
             'If it''s already installed via Homebrew but still not found: MATLAB launched from\n' ...
@@ -98,7 +98,7 @@ elseif isempty(findFortranCompiler())
             'cover that, so if it''s still not found, your gfortran may be somewhere else.\n']);
     else
         fprintf(1,['\nERROR: no Fortran compiler (gfortran/g77) found on the system PATH.\n' ...
-            'TISEAN needs this in addition to a C compiler: 4 of the 11 binaries hctsa\n' ...
+            'TISEAN needs this in addition to a C compiler: 4 of the 12 binaries hctsa\n' ...
             'depends on (c1, c2d, c2g, c2t) are Fortran, not C.\n' ...
             'On Debian/Ubuntu: sudo apt-get install gfortran\n' ...
             'then re-run compile_tisean.m.\n']);
@@ -106,7 +106,7 @@ elseif isempty(findFortranCompiler())
     printPathDiagnostics();
 else
     % Only build the specific TISEAN binaries hctsa actually calls (grepped
-    % from Operations/*.m: 4 Fortran, 7 C), rather than all ~70 tools TISEAN
+    % from Operations/*.m: 4 Fortran, 8 C), rather than all ~70 tools TISEAN
     % ships. This isn't just faster -- most of TISEAN's other tools are
     % 1990s-era code that produces (mostly harmless, legacy-syntax) compiler
     % warnings under modern compilers, and one (cluster.f) outright fails to
@@ -114,7 +114,7 @@ else
     % gfortran tolerated as an extension but current versions reject). None
     % of that matters if those files are simply never compiled.
     fortranBins = {'c1','c2d','c2g','c2t'};
-    cBins = {'d2','nstat_z','false_nearest','boxcount','lyap_r','lyap_spec','poincare'};
+    cBins = {'d2','nstat_z','false_nearest','boxcount','lyap_r','lyap_spec','poincare','nrlazy'};
 
     % Modern C compilers (e.g., Xcode Clang) reject this package's K&R-style
     % implicit-int/implicit-function-declaration code by default; -std=gnu89

@@ -759,6 +759,8 @@ PP_Compare(x,'sin1')			PP_Compare_sin1
 PP_Compare(x,'spline24')		PP_Compare_spline24
 PP_Iterate(x,'diff')			PP_Iterate_diff
 PP_ModelFit(x_z,'ar',2,'default')	PP_ModelFit_ar_2
+PP_SchreiberDenoise(x_z,5,1,1,0.3)	PP_SchreiberDenoise_5_1_1_03
+PP_SchreiberDenoise(x_z,5,1,4,0.3)	PP_SchreiberDenoise_5_1_4_03
 SB_BinaryStats_AR1(x_z,'diff')	    SB_BinaryStats_AR1_diff
 SB_BinaryStats_AR1(x_z,'mean')	    SB_BinaryStats_AR1_mean
 SB_BinaryStats(x_z,'diff')	    SB_BinaryStats_diff
