@@ -98,25 +98,24 @@ end
 %% Preliminaries
 % -------------------------------------------------------------------------------
 
-% Generate noise:
-BF_ResetSeed(randomSeed); % reset the random seed if specified
-noise = randn(size(y)); % generate uncorrelated additive noise
-
 % Set up noise range:
+BF_ResetSeed(randomSeed); % reset the random seed if specified
 noiseRange = linspace(0, 3, 50); % compare properties across this noise range
 numRepeats = length(noiseRange);
 
 % ------------------------------------------------------------------------------
 %% Compute the automutual information across a range of noise levels
 % ------------------------------------------------------------------------------
-% The *same* noise vector, noise, is added to the signal, with increasing
-% standard deviation (one could imagine repeating the calculation with different
-% random seeds)...
+% An independent, uncorrelated Gaussian noise vector is drawn at each noise
+% level, so that each point on the curve is an independent sample of the
+% AMI-vs-noise relationship rather than all points sharing one noise draw's
+% idiosyncrasies (rescaled by increasing standard deviation).
 amis = zeros(numRepeats, 1); % preassign
 switch amiMethod
 	case {'std1', 'std2', 'quantiles', 'even'}
 		% histogram-based methods using my naive implementation in CO_Histogram
 		for i = 1:numRepeats
+			noise = randn(size(y)); % fresh uncorrelated additive noise at this level
 			amis(i) = CO_HistogramAMI(y + noiseRange(i) * noise, tau, amiMethod, extraParam);
 			if isnan(amis(i))
 				error('Error computing AMI: Time series too short (?)');
@@ -124,6 +123,7 @@ switch amiMethod
 		end
 	case {'gaussian', 'kernel', 'kraskov1', 'kraskov2'}
 		for i = 1:numRepeats
+			noise = randn(size(y)); % fresh uncorrelated additive noise at this level
 			amis(i) = IN_AutoMutualInfo(y + noiseRange(i) * noise, tau, amiMethod, extraParam);
 			if isnan(amis(i))
 				error('Error computing AMI: Time series too short (?)');
