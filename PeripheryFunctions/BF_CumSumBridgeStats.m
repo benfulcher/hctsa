@@ -102,4 +102,40 @@ else
 	out.residStdRatio = NaN;
 end
 
+%-------------------------------------------------------------------------------
+%% Variance-standardized residual trend: maxBridge/posMaxBridge summarize the
+%% bridge's amplitude and peak location, but even under a stationary null the
+%% bridge is *not* white -- it's a (detrended) cumulative sum, so it has the
+%% known Brownian-bridge variance envelope Var(bridge(t)) = var(p).t.(Np-t)/Np
+%% (an arch shape, zero at the endpoints, peaked in the middle) purely from
+%% being an integral, regardless of any real drift. Dividing out that envelope
+%% gives a locally-standardized residual, stdResid(t) = bridge(t)^2 / nullVar(t),
+%% which is ~chi-square(1) (mean 1) under the null; its trend over t asks a
+%% different question to maxBridge's peak-amplitude test -- whether the excess
+%% wandering grows/shrinks systematically across the series, e.g. for a
+%% gradually ramping variance (validated on synthetic ramping-variance vs.
+%% null series: trend ~0.45 vs ~0.01). t = Np is excluded: bridge(Np) = 0
+%% exactly by construction, and nullVar(Np) = 0, giving an uninformative 0/0.
+%%
+%% A companion mean-level statistic (mean(stdResid), nominally ~1 under the
+%% null) and a differenced-AC1 statistic were also tried and dropped: the
+%% mean turned out to react strongly to genuine mean drift alone (not
+%% variance-specific -- e.g. 398 on a pure mean-ramp synthetic series with no
+%% variance change, likely redundant with maxBridge) and to have a masking
+%% problem for localized bursts (global var(p) in the denominator absorbs
+%% part of the anomaly it's meant to detect); the differenced-AC1 statistic
+%% didn't discriminate between burst-type and ramp-type variance structure
+%% in the same synthetic tests.
+%-------------------------------------------------------------------------------
+varP = var(p);
+if varP > 0 && Np > 21
+	tInterior = t(1:end - 1);
+	nullVar = varP * tInterior .* (Np - tInterior) / Np;
+	stdResid = bridge(1:end - 1).^2 ./ nullVar; % ~chi-square(1), mean 1, under the null
+	logStdResid = log(stdResid + eps); % chi-square(1) is heavy-tailed; log stabilizes the trend estimate
+	out.varRatioTrend = corr(tInterior, logStdResid, 'type', 'Kendall');
+else
+	out.varRatioTrend = NaN;
+end
+
 end
