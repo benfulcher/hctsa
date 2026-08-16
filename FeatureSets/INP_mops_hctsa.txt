@@ -867,11 +867,14 @@ SY_StatAv(x_z,'len',500)	StatAvl500
 SY_StatAv(x_z,'len',1000)	StatAvl1000
 SY_DriftingAutoCorr(x_z,1)	SY_DriftingAutoCorr_1
 SY_DriftingAutoCorr(x_z,2)	SY_DriftingAutoCorr_2
+SY_DriftingAutoCorr(x_z,1,'asymmetry')	SY_DriftingAutoCorr_1_asym
+SY_DriftingAutoCorr(x_z,2,'asymmetry')	SY_DriftingAutoCorr_2_asym
 SY_DriftingMean(x_z,'fix',20)	SY_DriftingMean20
 SY_DriftingMean(x_z,'fix',50)	SY_DriftingMean50
 SY_DriftingMean(x_z,'fix',100)	SY_DriftingMean100
 SY_DriftingMean(x_z,'num',5)	SY_DriftingMeann5
 SY_DriftingMean(x_z,'num',10)	SY_DriftingMeann10
+SY_DriftingMeanCUSUM(x_z)	SY_DriftingMeanCUSUM
 SY_DynWin(x_z,10)	SY_DynWin10
 SY_KPSStest(x_z,0)	SY_KPSStest_0
 SY_KPSStest(x_z,0:10)	SY_KPSStest_0_10
