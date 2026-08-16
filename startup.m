@@ -121,6 +121,17 @@ if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
 end
 
 % ------------------------------------------------------------------------------
+% Add path for the ripser binary (compiled locally into Toolboxes/ripser/bin
+% by install.m):
+% ------------------------------------------------------------------------------
+ripserBinaryLocation = fullfile(hctsaDir,'Toolboxes','ripser','bin');
+if isempty(regexp(getenv('PATH'),ripserBinaryLocation,'once'))
+    sysPath = [ripserBinaryLocation,':',getenv('PATH')];
+    setenv('PATH', sysPath)
+    fprintf(1,'System path to ripser binary: %s\n',ripserBinaryLocation);
+end
+
+% ------------------------------------------------------------------------------
 %% Finished:
 % ------------------------------------------------------------------------------
 fprintf(1,'\n---Done.\n')

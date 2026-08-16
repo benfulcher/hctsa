@@ -166,6 +166,19 @@ if ~ok
 end
 results(end+1) = struct('name','TISEAN','ok',ok);
 
+% ------------------------------------------------------------------------------
+% ripser
+% ------------------------------------------------------------------------------
+% (its own function, compile_ripser.m, for the same reason as TISEAN above)
+cd(toolDir);
+ok = compile_ripser();
+if ~ok
+    fprintf(1,['If ripser was the only component that failed above, fix the issue and just ' ...
+        're-run compile_ripser (rather than the whole of compile_mex, which would ' ...
+        're-compile everything else too).\n']);
+end
+results(end+1) = struct('name','ripser','ok',ok);
+
 %-------------------------------------------------------------------------------
 % CATCH22
 %-------------------------------------------------------------------------------

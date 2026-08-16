@@ -87,6 +87,7 @@ The following external time-series analysis code packages are provided with the 
 - Danilo P. Mandic's [delay vector variance code](http://www.commsp.ee.ic.ac.uk/~mandic/dvv.htm) (GPL license).
 - Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 - Danny Kaplan's Code for embedding statistics (GPL license).
+- Ulrich Bauer's [_ripser_ persistent homology tool, version 1.2.1](https://github.com/Ripser/ripser) (MIT license).
 
 ## Acknowledgements :wave:
 

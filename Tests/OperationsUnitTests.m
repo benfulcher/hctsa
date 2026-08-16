@@ -762,6 +762,93 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
+        % NL_PersistentHomology (ripser-based TDA on a delay embedding)
+        %-------------------------------------------------------------
+        function test_NL_PersistentHomology_DiscriminatesPeriodicity(testCase)
+            % A clean periodic orbit traces a loop in delay-embedding space,
+            % which should show up as one strongly persistent H1 topological
+            % feature; noise and chaotic (non-orbit-forming) dynamics
+            % shouldn't. Verified directly during development: with the
+            % default tau='mi' embedding, a clean sine wave gives
+            % maxPersistenceH1 ~0.55, versus ~0.01-0.06 for white noise /
+            % noisy sine / a chaotic logistic map -- an order of magnitude
+            % apart.
+            rng(41);
+            N = 500;
+            t = (1:N)';
+
+            outSine = NL_PersistentHomology(sin(2*pi*t/20));
+            outNoise = NL_PersistentHomology(randn(N,1));
+            testCase.verifyGreaterThan(outSine.maxPersistenceH1, 5*outNoise.maxPersistenceH1, ...
+                'The periodic orbit''s loop persistence should be far larger than noise''s.');
+            testCase.verifyGreaterThan(outSine.maxPersistenceH1, 0.25, ...
+                'A clean periodic orbit should register one strongly persistent H1 loop.');
+
+            yChaotic = zeros(N,1);
+            yChaotic(1) = 0.4;
+            for i = 2:N
+                yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
+            end
+            outChaotic = NL_PersistentHomology(yChaotic);
+            testCase.verifyLessThan(outChaotic.maxPersistenceH1, 0.25, ...
+                'The logistic map does not trace a loop in delay-embedding space.');
+        end
+
+        function test_NL_PersistentHomology_DegenerateInputsReturnNaN(testCase)
+            % Data-inapplicable cases (constant series, too short to embed)
+            % should return NaN, not error -- consistent with the rest of
+            % the codebase's NaN-vs-error convention.
+            testCase.verifyTrue(isscalar(NL_PersistentHomology(ones(500,1))) && ...
+                isnan(NL_PersistentHomology(ones(500,1))), ...
+                'A constant series cannot be meaningfully embedded/analyzed.');
+            testCase.verifyTrue(isscalar(NL_PersistentHomology(randn(5,1))) && ...
+                isnan(NL_PersistentHomology(randn(5,1))), ...
+                'A too-short series cannot be meaningfully embedded/analyzed.');
+        end
+
+        function test_NL_PersistentHomology_periodWelchTooShortFallsBackNotErrors(testCase)
+            % Regression test: pwelch() errors outright (rather than
+            % degrading gracefully) on series below ~8 samples with default
+            % windowing. SUB_periodNormalizedTau must guard against this and
+            % fall back to 'mi' (itself NaN-safe via BF_Embed) rather than
+            % letting the error propagate.
+            testCase.verifyTrue(isscalar(NL_PersistentHomology(randn(5,1), 'periodWelch', 2)) && ...
+                isnan(NL_PersistentHomology(randn(5,1), 'periodWelch', 2)), ...
+                'A too-short series under tau=''periodWelch'' should fall back to NaN, not error.');
+        end
+
+        function test_NL_PersistentHomology_m2CatchesPhaseShapeSpectrumMisses(testCase)
+            % Motivating case for the deliberately under-embedded m=2 mop
+            % (NL_PersistentHomology_periodWelch_2): two-harmonic signals
+            % that differ only in the phase of the second harmonic are
+            % indistinguishable to any phase-blind spectral feature (|FFT|
+            % depends only on harmonic amplitude, not phase), but their
+            % delay-embedded shape differs -- at the Takens-safe default
+            % m=3 the gap nearly vanishes, since the effect is tied to the
+            % specific 2D projection rather than the (here, truly
+            % 1-dimensional) attractor's intrinsic topology.
+            %
+            % tau='periodWelch' (not 'mi', despite 'mi' showing a larger raw
+            % gap here) -- a tau sweep over this same construction showed
+            % 'mi' getting the right answer for largely lucky reasons (see
+            % the m-parameter docstring note in NL_PersistentHomology.m for
+            % the full story); periodWelch is the mechanism actually
+            % registered. Verified directly: mean ratio 1.28 (std 0.04,
+            % min 1.22 across 15 reps) -- smaller than 'mi''s but reliably
+            % and consistently above 1.
+            rng(7);
+            N = 1000;
+            t = (1:N)';
+            noiseLevel = 0.05;
+
+            outA = NL_PersistentHomology(sin(t) + 0.6*sin(2*t + 0) + noiseLevel*randn(N,1), 'periodWelch', 2);
+            outB = NL_PersistentHomology(sin(t) + 0.6*sin(2*t + 1.4) + noiseLevel*randn(N,1), 'periodWelch', 2);
+
+            testCase.verifyGreaterThan(outB.maxPersistenceH1, 1.15*outA.maxPersistenceH1, ...
+                'phi=1.4 should show a markedly larger dominant H1 loop than phi=0 at m=2.');
+        end
+
+        %-------------------------------------------------------------
         % NL_GPCorrSum (now via TISEAN d2, no TSTOOL dependency)
         %-------------------------------------------------------------
         function test_NL_GPCorrSum_DiscriminatesDimension(testCase)

@@ -712,6 +712,8 @@ NL_nlpe(x_z,3,'ac')	NL_nlpe_3_ac
 NL_nlpe(x_z,'fnn','mi')	NL_nlpe_fnn_mi
 NL_NSAMDF(x,1,14,0.5,1,7,false)     NL_NSAMDF_1_14_05_1_7
 NL_NSAMDF(x_z,1,14,0.5,1,7,false)     NL_NSAMDF_z_1_14_05_1_7
+NL_PersistentHomology(x_z)	NL_PersistentHomology
+NL_PersistentHomology(x_z,'periodWelch',2)	NL_PersistentHomology_periodWelch_2
 NL_PoincareSection(x_z,'max',{1,3})	NL_PoincareSection_max_1
 NL_PoincareSection(x_z,'max',{'ac',3})	NL_PoincareSection_max_ac
 NL_PoincareSection(x_z,'max',{'mi',3})	NL_PoincareSection_max_mi

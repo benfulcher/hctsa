@@ -31,6 +31,9 @@ plugininstall_*.m
 # TISEAN generates platform-specific files:
 /Toolboxes/Tisean_3.0.1/
 
+# ripser build output (source/LICENSE/README are committed, the compiled binary is not):
+/Toolboxes/ripser/bin/
+
 # Generated test/benchmark logs:
 /Tests/*.txt
 
