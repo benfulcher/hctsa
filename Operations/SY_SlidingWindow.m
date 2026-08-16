@@ -19,11 +19,23 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 %               (iv) 'mom3', skewness
 %               (v) 'mom4', kurtosis
 %               (vi) 'mom5', the fifth moment of the distribution
-%               (vii) 'lillie', the p-value for a Lilliefors Gaussianity test
+%               (vii) 'lillie', the Lilliefors test statistic (KS-type distance
+%                   from a Gaussian CDF) -- not its p-value, which MATLAB clips
+%                   to a lookup-table boundary once data is clearly non-Gaussian
 %               (viii) 'AC1', the lag-1 autocorrelation
-%               (ix) 'apen', Approximate Entropy, ApEn(1,0.2)
-%               (ix) 'sampen', Sample Entropy, SampEn(2,0.1)
-%               (x) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within
+%               (ix) 'permen', normalized Permutation Entropy, PermEn(3,1)
+%                   -- a single ordinal/dynamical-complexity entropy measure,
+%                   used in place of ApEn/SampEn: those are biased on the
+%                   short windows this function typically operates on
+%                   (numSeg=10 segments), whereas permutation entropy's
+%                   pattern-count estimator degrades more gracefully at
+%                   small sample sizes
+%               (x) 'specen', normalized Shannon spectral entropy of the
+%                   window's power spectrum (window mean removed before the
+%                   FFT) -- captures whether the *frequency content* drifts
+%                   across the record, distinct from all the above
+%                   time-domain measures
+%               (xi) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within
 %                   the window -- a nonlinear, time-asymmetric variant of
 %                   AC1 (cf. SY_RampingWindows.m, which trends this same
 %                   statistic across segments rather than summarizing its
@@ -33,8 +45,8 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 %                   compared (as a ratio to the full time series):
 %                       (i) 'std': standard deviation
 %                       (ii) 'ent' (kernel-smoothed) distributional entropy
-%                       (iii) 'apen': Approximate Entropy, ApEn(1,0.2)
-%                       (iii) 'sampen': Sample Entropy, SampEn(2,0.1)
+%                       (iii) 'permen': normalized Permutation Entropy, PermEn(3,1)
+%                           of the sequence of local estimates
 %
 % numSeg, the number of segments to divide the time series up into, thus
 %       controlling the window length
@@ -129,14 +141,27 @@ switch windowStat
 		for i = 1:numSteps
 			qs(i) = EN_DistributionEntropy(y(getWindow(i)), 'ks', []);
 		end
-	case 'apen' % Sliding window ApEn
+	case 'permen' % Sliding window normalized Permutation Entropy, PermEn(3,1)
 		for i = 1:numSteps
-			qs(i) = EN_ApEn(y(getWindow(i)), 1, 0.2);
+			permEn_struct = EN_PermEn(y(getWindow(i)), 3, 1);
+			if isstruct(permEn_struct)
+				qs(i) = permEn_struct.normPermEn;
+			else
+				qs(i) = NaN;
+			end
 		end
-	case 'sampen' % Sliding window SampEn
+	case 'specen' % Sliding window normalized Shannon spectral entropy
 		for i = 1:numSteps
-			sampEn_struct = EN_SampEn(y(getWindow(i)), 1, 0.1);
-			qs(i) = sampEn_struct.sampen1;
+			yWin = y(getWindow(i));
+			Fy = fft(yWin - mean(yWin));
+			Py = abs(Fy(1:floor(end / 2) + 1)).^2; % one-sided power spectrum
+			Py = Py(Py > 0); % avoid log(0)
+			if length(Py) < 2 || sum(Py) == 0
+				qs(i) = NaN;
+			else
+				Py = Py / sum(Py);
+				qs(i) = -sum(Py .* log2(Py)) / log2(length(Py)); % normalized to [0,1]
+			end
 		end
 	case 'mom3' % Third moment
 		for i = 1:numSteps
@@ -150,10 +175,18 @@ switch windowStat
 		for i = 1:numSteps
 			qs(i) = DN_Moments(y(getWindow(i)), 5, true);
 		end
-	case 'lillie' % Lilliefors test
+	case 'lillie' % Lilliefors test statistic (KS-type distance from a Gaussian CDF)
+		% Uses lillietest's raw kstat output directly rather than going via
+		% HT_DistributionTest's p-value: MATLAB's lillietest interpolates p from a
+		% simulated lookup table and clips to its boundary once the data is clearly
+		% non-Gaussian, which saturates the p-value to an identical constant across
+		% many real (non-Gaussian) windows. kstat is the underlying continuous
+		% statistic the p-value is derived from, so it doesn't have this problem.
+		warning('off', 'stats:lillietest:OutOfRangePLow'); warning('off', 'stats:lillietest:OutOfRangePHigh');
 		for i = 1:numSteps
-			qs(i) = HT_DistributionTest(y(getWindow(i)), 'lillie', 'norm');
+			[~, ~, qs(i)] = lillietest(y(getWindow(i)), 0.05, 'norm');
 		end
+		warning('on', 'stats:lillietest:OutOfRangePLow'); warning('on', 'stats:lillietest:OutOfRangePHigh');
 	case 'AC1' % Lag-1 autocorrelation
 		for i = 1:numSteps
 			qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
@@ -189,11 +222,13 @@ switch acrossWinStat
 	case 'std'
 		% normalized by std of full time series
 		out = std(qs) / std(y);
-	case 'apen'
-		out = EN_ApEn(qs, 1, 0.2); % ApEn of the sliding window measures
-	case 'sampen'
-		sampEn_struct = EN_SampEn(qs, 2, 0.15);
-		out = sampEn_struct.quadSampEn1;
+	case 'permen'
+		permEn_struct = EN_PermEn(qs, 3, 1); % normalized PermEn of the sliding window measures
+		if isstruct(permEn_struct)
+			out = permEn_struct.normPermEn;
+		else
+			out = NaN;
+		end
 	case 'ent'
 		% get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
 		kssimpouts = DN_FitKernelSmooth(qs);
