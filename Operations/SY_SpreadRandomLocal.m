@@ -3,7 +3,7 @@ function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
 %
 % numSegs time-series segments of length l are selected at random from the time
 % series and in each segment some statistic is calculated: mean, standard
-% deviation, skewness, kurtosis, ApEn(1,0.2), SampEn(1,0.2), AC(1), AC(2), and the
+% deviation, skewness, kurtosis, PermEn(3,1), AC(1), AC(2), and the
 % first zero-crossing of the autocorrelation function.
 % Outputs summarize how these quantities vary in different local segments of the
 % time series.
@@ -20,8 +20,10 @@ function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
 %
 % randomSeed, the input to BF_ResetSeed to control reproducibility
 %
-% ---OUTPUTS: the mean and also the standard deviation of this set of 100 local
-% estimates.
+% ---OUTPUTS: the standard deviation of this set of local estimates (how much
+% each statistic varies across segments) -- the mean of the set is not
+% output, since it just re-estimates the corresponding global statistic
+% (already covered elsewhere in hctsa) rather than measuring stationarity.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -118,8 +120,12 @@ for j = 1:numSegs
 	qs(j, 2) = std(ySub); % standard deviation
 	qs(j, 3) = skewness(ySub); % skewness
 	qs(j, 4) = kurtosis(ySub); % kurtosis
-	entropyStruct = EN_SampEn(ySub, 1, 0.15);
-	qs(j, 5) = entropyStruct.quadSampEn1; % SampEn_1_015
+	permEn_struct = EN_PermEn(ySub, 3, 1); % normalized PermEn(3,1) -- cheaper and more
+	if isstruct(permEn_struct)         % stable than SampEn on these short random segments
+		qs(j, 5) = permEn_struct.normPermEn;
+	else
+		qs(j, 5) = NaN;
+	end
 	qs(j, 6) = CO_AutoCorr(ySub, 1, 'Fourier'); % AC1
 	qs(j, 7) = CO_AutoCorr(ySub, 2, 'Fourier'); % AC2
 	qs(j, 8) = CO_FirstCrossing(ySub, 'ac', 0, 'continuous'); % first zero crossing
@@ -147,20 +153,14 @@ fs = zeros(numFeat, 2);
 fs(:, 1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
 fs(:, 2) = nanstd(qs); % the spread of the feature across subsegments of the time series
 
-out.meanmean = fs(1, 1);
-out.meanstd = fs(2, 1);
-out.meanskew = fs(3, 1);
-out.meankurt = fs(4, 1);
-out.meansampen1_015 = fs(5, 1);
-out.meanac1 = fs(6, 1);
-out.meanac2 = fs(7, 1);
-out.meantaul = fs(8, 1);
-
+% mean* fields dropped: they re-estimate global summary statistics (already
+% covered elsewhere in hctsa) rather than measuring local variability/
+% stationarity; only the across-segment spread (std*) is kept.
 out.stdmean = fs(1, 2);
 out.stdstd = fs(2, 2);
 out.stdskew = fs(3, 2);
 out.stdkurt = fs(4, 2);
-out.stdsampen1_015 = fs(5, 2);
+out.stdpermen = fs(5, 2);
 out.stdac1 = fs(6, 2);
 out.stdac2 = fs(7, 2);
 out.stdtaul = fs(8, 2);

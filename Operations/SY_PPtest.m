@@ -108,33 +108,25 @@ if nout == 1
 	out.rmse = reg.RMSE;
 
 else
-	% Return statistics on the set of outputs
-	out.maxpValue = max(pValue);
+	% Return statistics on the set of outputs. maxpValue/stdpValue dropped
+	% (r >= 0.98 with meanpValue on Empirical1000); maxstat/minstat dropped
+	% (r >= 0.97 with meanstat).
 	out.minpValue = min(pValue);
 	out.meanpValue = mean(pValue);
-	out.stdpValue = std(pValue);
 	imaxp = find(pValue == max(pValue), 1, 'first');
 	iminp = find(pValue == min(pValue), 1, 'first');
 	out.lagmaxp = lags(imaxp);
 	out.lagminp = lags(iminp);
 
 	out.meanstat = mean(stat);
-	out.maxstat = max(stat);
-	out.minstat = min(stat);
 
-	% Some regression statistics
-	% These are all highly correlated; hctsa library records just minBIC by default
-	% Per observation -- see the note in the single-test branch above.
+	% Regression statistics: meanloglikelihood/minAIC/minHQC/minrmse/maxrmse
+	% dropped -- confirmed r >= 0.998 with minBIC (and with each other) on
+	% Empirical1000, matching this function's own longstanding comment that
+	% these are all highly correlated. Per observation -- see the note in
+	% the single-test branch above.
 	numObs = length(y);
-	out.meanloglikelihood = mean(vertcat(reg.LL)) / numObs;
-	out.minAIC = min(vertcat(reg.AIC)) / numObs;
 	out.minBIC = min(vertcat(reg.BIC)) / numObs;
-	out.minHQC = min(vertcat(reg.HQC)) / numObs;
-
-	% Somehow these are highly correlated, only minrmse is included in hctsa
-	% library by default
-	out.minrmse = min(vertcat(reg.RMSE));
-	out.maxrmse = max(vertcat(reg.RMSE));
 end
 
 end

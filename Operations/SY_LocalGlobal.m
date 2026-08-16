@@ -17,7 +17,7 @@ function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
 % 'randcg' input
 %
 % ---OUTPUTS: the mean, standard deviation, median, interquartile range,
-% skewness, kurtosis, AC(1), and SampEn(1,0.1).
+% skewness, kurtosis, AC(1), and PermEn(3,1).
 %
 % This is not the most reliable or systematic operation because only a single
 % sample is taken from the time series and compared to the full time series.
@@ -140,12 +140,14 @@ if globalKurtosis == 0, out.kurtosis = NaN; else, out.kurtosis = abs(1 - kurtosi
 globalAC1 = CO_AutoCorr(y, 1, 'Fourier');
 if globalAC1 == 0, out.ac1 = NaN; else, out.ac1 = abs(1 - CO_AutoCorr(y(r), 1, 'Fourier') / globalAC1); end % how far from true
 
-sampEn_struct_r = EN_SampEn(y(r), 1, 0.1);
-sampEn_struct = EN_SampEn(y, 1, 0.1);
-if sampEn_struct.sampen1 == 0
-	out.sampen101 = NaN;
+% PermEn(3,1) in place of SampEn(1,0.1): cheaper and more stable on the
+% short subsets ('l' with small n, or small 'p') this operation can produce.
+permEn_struct_r = EN_PermEn(y(r), 3, 1);
+permEn_struct = EN_PermEn(y, 3, 1);
+if ~isstruct(permEn_struct_r) || ~isstruct(permEn_struct) || permEn_struct.normPermEn == 0
+	out.permen = NaN;
 else
-	out.sampen101 = sampEn_struct_r.sampen1 / sampEn_struct.sampen1;
+	out.permen = permEn_struct_r.normPermEn / permEn_struct.normPermEn;
 end
 
 end

@@ -89,7 +89,8 @@ f = fittype('a*exp(b*x)', 'options', s);
 out.fexp_a = c.a;
 out.fexp_b = c.b; % this is important
 out.fexp_r2 = gof.rsquare; % this is more important!
-out.fexp_adjr2 = gof.adjrsquare;
+% fexp_adjr2 dropped: near-duplicate of fexp_r2 (adjustment is for 2 free
+% parameters against maxd=10 data points, so it barely moves).
 out.fexp_rmse = gof.rmse;
 
 % ------------------------------------------------------------------------------

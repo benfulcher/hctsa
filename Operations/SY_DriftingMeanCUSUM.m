@@ -12,8 +12,13 @@ function out = SY_DriftingMeanCUSUM(y)
 % Note that the basic cumsum trend statistics (meanYC, gradient, intercept,
 % meanYC12, meanYC22) duplicate what SY_Trend already computes on y's own
 % cumsum (confirmed by |r| >= 0.79 on real EEG data, several essentially
-% exact), so are dropped here -- only the CUSUM-bridge and robust-vs-OLS
-% comparison statistics, which SY_Trend does not provide, are returned.
+% exact), so are dropped here. stdBridge is also dropped: since the input is
+% always z-scored (mean exactly 0), the linear detrending step barely
+% changes anything for the raw-y case (the fitted slope is ~mean(y) ~ 0), so
+% std(bridge) tracks SY_Trend_stdYC almost exactly (r = 1.000 on
+% Empirical1000) rather than adding new information. Only maxBridge,
+% posMaxBridge, and the robust-vs-OLS comparison statistics, which SY_Trend
+% does not provide, are returned.
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored)
@@ -53,7 +58,7 @@ end
 
 out = BF_CumSumBridgeStats(y);
 if isstruct(out)
-	out = rmfield(out, {'meanYC', 'gradient', 'intercept', 'meanYC12', 'meanYC22'});
+	out = rmfield(out, {'meanYC', 'gradient', 'intercept', 'meanYC12', 'meanYC22', 'stdBridge'});
 end
 
 end

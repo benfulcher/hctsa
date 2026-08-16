@@ -135,11 +135,9 @@ end
 
 % -------------------------------------------------------------------------------
 % Return basic statistics on differences in distributions in different
-% segments of the time series
+% segments of the time series. mediandiv/mindiv/maxdiv dropped: each
+% correlates r >= 0.95 with meandiv on Empirical1000.
 out.meandiv = mean(divs);
-out.mediandiv = median(divs);
-out.mindiv = min(divs);
-out.maxdiv = max(divs);
 out.stddiv = std(divs);
 
 end
