@@ -100,21 +100,29 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
 			for i = 1:N
 				acf(i) = full_acf(i); % *** NOTE THIS! *** acf vector indicies are not lags
 				if (i > 1) && (abs(acf(i)) < th)
-					Ndrown = i;
+					Ndrown = i - 1; % convert from index to the corresponding lag
 					acf = acf(1:i);
 					break
 				end
+			end
+			if Ndrown == 0
+				% ACF never entered the significance band across available lags
+				Ndrown = N - 1;
 			end
 		case 'doubleDrown'
 			% Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
 			for i = 1:N
 				acf(i) = full_acf(i); % *** NOTE acf vector indicies are not lags
-				if (Ndrown > 0) && (i == Ndrown * 2)
+				if (Ndrown > 0) && (i == 2 * Ndrown + 1)
 					acf = acf(1:i);
 					break
 				elseif (i > 1) && (abs(acf(i)) < th)
-					Ndrown = i;
+					Ndrown = i - 1; % convert from index to the corresponding lag
 				end
+			end
+			if Ndrown == 0
+				% ACF never entered the significance band across available lags
+				Ndrown = N - 1;
 			end
 		otherwise
 			error('Unknown ACF decay criterion: ''%s''', stopWhen);
