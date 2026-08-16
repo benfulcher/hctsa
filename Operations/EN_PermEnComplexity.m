@@ -93,21 +93,9 @@ if Nx < 5 % need at least 5 embedding vectors to actually do a computation
 	return
 end
 
-permList = perms(1:m);
-numPerms = length(permList); % = m!
-
-countPerms = zeros(numPerms, 1);
-permKeys = cell(numPerms, 1);
-for k = 1:numPerms
-	permKeys{k} = sprintf('%d,', permList(k, :));
-end
-permIndexMap = containers.Map(permKeys, num2cell(1:numPerms));
-
-for j = 1:Nx
-	[~, ix] = sort(x(j, :));
-	thisPerm = permIndexMap(sprintf('%d,', ix));
-	countPerms(thisPerm) = countPerms(thisPerm) + 1;
-end
+numPerms = factorial(m); % = m!
+permIdx = BF_OrdinalPatternRank(x); % index in 1:m! for each embedding vector; cf. EN_PermEn.m
+countPerms = accumarray(permIdx, 1, [numPerms, 1]);
 
 p = countPerms / Nx; % ordinal-pattern probability distribution, P
 

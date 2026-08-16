@@ -97,31 +97,18 @@ if Nx < 30
 end
 
 % ------------------------------------------------------------------------------
-%% Symbolize: assign each window an ordinal-pattern ID, assigned dynamically
-%% (only for patterns actually observed -- avoids ever enumerating all d!
-%% possible permutations, which matters since only a small fraction are
-%% typically visited)
+%% Symbolize: assign each window an ordinal-pattern ID, compacted to only
+%% the patterns actually observed (avoids ever enumerating all d! possible
+%% permutations, which matters since only a small fraction are typically
+%% visited). Node labels carry no meaning beyond identity -- every measure
+%% below is invariant to how observed patterns are numbered -- so patterns
+%% are ranked (cf. EN_PermEn.m, which uses the same ranking without the
+%% compaction step below, since it needs all d! bins) and then compacted
+%% with unique():
 % ------------------------------------------------------------------------------
-patternMap = containers.Map('KeyType', 'char', 'ValueType', 'double');
-s = zeros(Nx, 1);
-nextID = 1;
-for i = 1:Nx
-    [~, ix] = sort(X(i, :));
-    key = sprintf('%d,', ix);
-    if isKey(patternMap, key)
-        s(i) = patternMap(key);
-    else
-        patternMap(key) = nextID;
-        s(i) = nextID;
-        nextID = nextID + 1;
-    end
-end
-% Count is a uint64; cast to double immediately, since any arithmetic
-% mixing a uint64 with a double elsewhere below would otherwise silently
-% round to the nearest integer (MATLAB coerces double/uint64 operations
-% into integer arithmetic) -- corrupting meanDegree and every other ratio
-% computed from n.
-n = double(patternMap.Count); % number of unique ordinal patterns observed (network nodes)
+patternIdx = BF_OrdinalPatternRank(X); % index in 1:d! for each window
+[~, ~, s] = unique(patternIdx); % compact to 1:n, n = number of observed patterns
+n = double(max(s)); % number of unique ordinal patterns observed (network nodes)
 
 % ------------------------------------------------------------------------------
 %% Build the directed transition network from consecutive symbols
