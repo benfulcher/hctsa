@@ -114,6 +114,11 @@ else
 	out.fmmi = min(minimai);
 end
 
+% Integrated AMI up to the first minimum: how much automutual information
+% accumulates before the series first decorrelates, as opposed to mami's
+% flat average over the whole (often plateaued) lag range:
+out.sumami_fmmi = sum(ami(1:out.fmmi));
+
 % ----Look for periodicities in local maxima
 maximai = find(dami(1:end - 1) > 0 & dami(2:end) < 0) + 1;
 dmaximai = diff(maximai);
