@@ -75,7 +75,10 @@ if ismember(estMethod, {'kraskov1', 'kraskov2'})
 		end
 		miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
 	else
-		miCalc.setProperty('k', '3'); % use 3 nearest neighbors for KSG estimator as default
+		miCalc.setProperty('k', '4'); % use 4 nearest neighbors for KSG estimator as default
+		% (empirically the best of k=2/3/4 on ground-truth AR(1) and periodic
+		% test signals -- lowest RMSE/variance, no bias cost -- and matches
+		% what every registered hctsa feature already hard-codes)
 	end
 end
 

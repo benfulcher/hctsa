@@ -102,6 +102,15 @@ summe = (p_ixp_j > 0 & p_ij > 0);
 % Do a matrix-sum mutual information calculation:
 if any(summe(:) == 1)
     mi = sum(p_ij(summe).*log(p_ij(summe)./p_ixp_j(summe)));
+
+    % Miller-Madow bias correction (cf. CO_HistogramAMI.m): the plug-in
+    % estimator above is biased upwards by ~(Mxy-Mx-My+1)/(2N) nats, where the
+    % M are numbers of *occupied* joint/marginal bins. Without it, MI of
+    % independent data decays toward 0 as 1/N rather than scattering around it.
+    Mxy = sum(summe(:));
+    Mx = sum(p_i > 0);
+    My = sum(p_j > 0);
+    mi = mi - (Mxy - Mx - My + 1) / (2 * N);
 else
     fprintf(1,['The histograms aren''t catching any points?? ' ...
             'Perhaps due to an inappropriate custom range for binning the data...\n']);

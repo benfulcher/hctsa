@@ -103,10 +103,15 @@ out.stdami = std(ami);
 dami = diff(ami);
 extremai = find(dami(1:end - 1) .* dami(2:end) < 0);
 out.pextrema = length(extremai) / (lami - 1);
-if isempty(extremai)
-	out.fmmi = lami; % actually represents lag, because indexes don't but diff delays by 1
+
+% First local MINIMUM specifically (extremai above contains both minima and
+% maxima; a minimum is where ami is still decreasing into the sign change,
+% i.e., dami(i) < 0, and it occurs at ami-index i+1 since dami(i) = ami(i+1)-ami(i)):
+minimai = extremai(dami(extremai) < 0) + 1;
+if isempty(minimai)
+	out.fmmi = lami; % no local minimum found in this range
 else
-	out.fmmi = min(extremai);
+	out.fmmi = min(minimai);
 end
 
 % ----Look for periodicities in local maxima
