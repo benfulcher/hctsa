@@ -7,14 +7,18 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 % generic wrapper so that this addition doesn't touch BF_TiseanSystem.m, an
 % already-tested shared dependency of ~16 existing operations.
 %
-% A call that fails this way -- status 124 (this wrapper's own timeout), or
+% A call that fails this way -- status 124 (this wrapper's own timeout),
 % 126/127 (the shell's reserved "found but not executable"/"command not
-% found" codes, i.e. ripser never ran at all) -- errors immediately rather
-% than returning res to the caller, for the same reason as BF_TiseanSystem:
-% a caller parsing persistence intervals out of res could otherwise
-% misinterpret partially flushed output as a complete (if small) diagram.
-% Any other exit code means ripser itself ran to completion and is passed
-% through as before for the caller to interpret.
+% found" codes, i.e. ripser never ran at all), or any other nonzero status
+% (ripser itself erroring out, e.g. a bad argument, an unreadable file, or a
+% crash) -- errors immediately rather than returning res to the caller.
+% Unlike BF_TiseanSystem's siblings, ripser has no legitimate nonzero-but-
+% successful exit path (checked against ripser.cpp: every non-help exit
+% point other than 0 is a genuine failure), so status==0 is required here
+% rather than just excluding the shell-reserved codes -- a caller parsing
+% persistence intervals out of res could otherwise misinterpret partially
+% flushed output (e.g. from a crash mid-computation) as a complete (if
+% small) diagram.
 %
 %---INPUTS:
 % ripserCommand, the ripser command-line string to run (as previously passed
@@ -22,10 +26,8 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 % timeoutSecs [opt], wall-clock time limit in seconds (default: 600)
 %
 %---OUTPUTS:
-% status, the exit status, as returned by system() for the ripser binary's
-%          own exit (this function already errors on 124/126/127, so a
-%          caller only ever sees a status the binary itself chose to exit
-%          with).
+% status, always 0 (this function now errors on any nonzero status, so a
+%          caller only ever sees a successful run).
 % res, the captured stdout+stderr text.
 
 % ------------------------------------------------------------------------------
@@ -69,12 +71,27 @@ if nargin < 2 || isempty(timeoutSecs)
 end
 
 if isempty(timeoutCmd)
-    [status, res] = system(ripserCommand);
+    fullCommand = ripserCommand;
 else
-    [status, res] = system(sprintf('%s %g %s', timeoutCmd, timeoutSecs, ripserCommand));
+    fullCommand = sprintf('%s %g %s', timeoutCmd, timeoutSecs, ripserCommand);
 end
 
-if any(status == [124, 126, 127])
+if isunix && ~ismac
+    % MATLAB on Linux prepends its own bundled (older) libstdc++.so.6 to
+    % LD_LIBRARY_PATH, which then shadows the system's newer one for any
+    % subprocess launched via system() -- ripser, freshly compiled by the
+    % system compiler against the system libstdc++, then fails to load
+    % ("version `GLIBCXX_3.4.3x' not found") before it ever runs. Clearing
+    % LD_LIBRARY_PATH just for this subprocess (not MATLAB's own process)
+    % lets the dynamic linker fall back to the normal system search paths.
+    % Not needed on macOS, which uses DYLD_LIBRARY_PATH and doesn't hit
+    % this; confirmed unaffected in local testing.
+    fullCommand = ['LD_LIBRARY_PATH= ', fullCommand];
+end
+
+[status, res] = system(fullCommand);
+
+if status ~= 0
     switch status
         case 124
             reason = sprintf('timed out after %g seconds', timeoutSecs);
@@ -82,6 +99,8 @@ if any(status == [124, 126, 127])
             reason = 'found but not executable';
         case 127
             reason = 'not found on the system path -- is ripser installed and compiled? (see install.m / compile_ripser.m)';
+        otherwise
+            reason = sprintf('exited with status %d', status);
     end
     error('BF_RipserSystem:ripserFailed', ...
         'ripser command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
