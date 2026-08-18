@@ -605,6 +605,8 @@ IN_AutoMutualInfoStats(x_z,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
 IN_AutoMutualInfoStats(x_z,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(x_z),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
 IN_AutoMutualInfoStats(diff(x_z),20,'kraskov1','4') IN_AutoMutualInfoStats_diff_20_kraskov1_4
+IN_MultivariateAMI(x_z,'ac','gaussian') IN_MultivariateAMI_ac_gaussian
+IN_MultivariateAMI(x_z,'ac','kraskov2') IN_MultivariateAMI_ac_kraskov2
 MD_hrv_classic(x_z)	MD_hrv_classic
 MD_pNN(x)	MD_pNN_raw
 MD_PolVar(x_z,1,3)	MD_PolVar_1_3
