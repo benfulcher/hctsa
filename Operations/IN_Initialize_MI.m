@@ -1,4 +1,4 @@
-function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise)
+function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise, y)
 % IN_Initialize_MI  Initialize Information Dynamics Toolkit object for MI computation.
 %
 % ---INPUTS:
@@ -8,6 +8,9 @@ function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise)
 %           (*) 'kernel'
 %           (*) 'kraskov1'
 %           (*) 'kraskov2'
+%
+% y: (optional) the data about to be analyzed, used only to check for a high
+%    proportion of repeated values when addNoise is false (see below).
 %
 % cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
@@ -47,6 +50,9 @@ end
 if nargin < 3
 	addNoise = false; % deterministic by default
 end
+if nargin < 4
+	y = [];
+end
 
 % ------------------------------------------------------------------------------
 switch estMethod
@@ -82,12 +88,33 @@ if ismember(estMethod, {'kraskov1', 'kraskov2'})
 	end
 end
 
-% Make deterministic is kraskov1 or 2 (which add a small amount of noise to the signal by default):
+% Make deterministic if kraskov1 or 2 (which add a small amount of noise to the signal by default):
 if ~addNoise && ismember(estMethod, {'kraskov1', 'kraskov2'})
-	miCalc.setProperty('NOISE_LEVEL_TO_ADD', '0');
+	% The KSG estimator assumes points are in general position (no exact ties);
+	% with zero noise, data with a high proportion of repeated values (e.g., a
+	% quantized/periodic-orbit series) can produce degenerate nearest-neighbor
+	% distances and wildly unreliable estimates. Guard against this with a
+	% noise level too small to affect any well-behaved continuous series
+	% (~1e-10 x the data's own std), only switched on when repeats are common:
+	tieNoiseLevel = BF_TieBreakNoiseLevel(y);
+	miCalc.setProperty('NOISE_LEVEL_TO_ADD', num2str(tieNoiseLevel));
 end
 
 % Specify a univariate calculation:
 miCalc.initialise(1, 1);
 
+end
+
+% ------------------------------------------------------------------------------
+function noiseLevel = BF_TieBreakNoiseLevel(y)
+% Returns 0 unless y has a high proportion of repeated values, in which case
+% returns a noise standard deviation tiny enough to only break exact ties.
+	noiseLevel = 0;
+	if isempty(y) || numel(y) < 2
+		return
+	end
+	uniqueFrac = numel(unique(y)) / numel(y);
+	if uniqueFrac < 0.9 && std(y) > 0
+		noiseLevel = 1e-10 * std(y);
+	end
 end
