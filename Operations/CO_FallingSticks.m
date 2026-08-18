@@ -31,7 +31,8 @@ function out = CO_FallingSticks(y)
 % or more sticks to hit a farther one -- and the two ways a hit can occur
 % -- trunk-strike (case 1) vs. tip-strike/topple-over (case 2).
 %
-% Adapted from a Python 'FALLstick' reference implementation.
+% Adapted from a Python 'FALLstick' reference implementation by Eugene Chon
+% <eugenechon04@gmail.com>.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
