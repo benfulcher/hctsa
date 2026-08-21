@@ -76,7 +76,8 @@ else
     fullCommand = sprintf('%s %g %s', timeoutCmd, timeoutSecs, ripserCommand);
 end
 
-if isunix && ~ismac
+clearLdLibraryPath = isunix && ~ismac;
+if clearLdLibraryPath
     % MATLAB on Linux prepends its own bundled (older) libstdc++.so.6 to
     % LD_LIBRARY_PATH, which then shadows the system's newer one for any
     % subprocess launched via system() -- ripser, freshly compiled by the
@@ -86,10 +87,24 @@ if isunix && ~ismac
     % lets the dynamic linker fall back to the normal system search paths.
     % Not needed on macOS, which uses DYLD_LIBRARY_PATH and doesn't hit
     % this; confirmed unaffected in local testing.
-    fullCommand = ['LD_LIBRARY_PATH= ', fullCommand];
+    %
+    % Set via setenv/getenv rather than shell syntax like 'VAR= cmd' -- that
+    % inline-assignment form is sh/bash-only and errors under csh/tcsh
+    % (which MATLAB's system() uses when $SHELL is csh-family: csh has no
+    % such syntax and instead tries to run "LD_LIBRARY_PATH=" as a literal
+    % command name, producing "LD_LIBRARY_PATH=: Command not found." and
+    % masking the real failure). setenv() sets the process environment
+    % directly, so the subprocess inherits the cleared value regardless of
+    % the caller's shell -- same fix as compile_tisean.m applies to CC/FC.
+    oldLdLibraryPath = getenv('LD_LIBRARY_PATH');
+    setenv('LD_LIBRARY_PATH','');
 end
 
 [status, res] = system(fullCommand);
+
+if clearLdLibraryPath
+    setenv('LD_LIBRARY_PATH', oldLdLibraryPath);
+end
 
 if status ~= 0
     switch status

@@ -92,9 +92,35 @@ if nargin < 2 || isempty(timeoutSecs)
 end
 
 if isempty(timeoutCmd)
-    [status, res] = system(tiseanCommand);
+    fullCommand = tiseanCommand;
 else
-    [status, res] = system(sprintf('%s %g %s', timeoutCmd, timeoutSecs, tiseanCommand));
+    fullCommand = sprintf('%s %g %s', timeoutCmd, timeoutSecs, tiseanCommand);
+end
+
+clearLdLibraryPath = isunix && ~ismac;
+if clearLdLibraryPath
+    % Same fix as BF_RipserSystem.m: MATLAB on Linux prepends its own
+    % bundled (older) shared libraries (libgcc_s, libgfortran, etc.) to
+    % LD_LIBRARY_PATH, which can shadow the system versions for any
+    % subprocess launched via system() -- these TISEAN binaries, freshly
+    % compiled by the system C/Fortran compilers, can then fail to load at
+    % runtime (running but producing no output) before ever touching the
+    % input series. Clearing LD_LIBRARY_PATH just for this subprocess lets
+    % the dynamic linker fall back to the normal system search paths. Not
+    % needed on macOS, which uses DYLD_LIBRARY_PATH and doesn't hit this.
+    %
+    % Set via setenv/getenv rather than shell syntax like 'VAR= cmd' -- that
+    % inline-assignment form is sh/bash-only and errors under csh/tcsh
+    % (which MATLAB's system() uses when $SHELL is csh-family), same as
+    % compile_tisean.m already documents for its CC/FC handling.
+    oldLdLibraryPath = getenv('LD_LIBRARY_PATH');
+    setenv('LD_LIBRARY_PATH','');
+end
+
+[status, res] = system(fullCommand);
+
+if clearLdLibraryPath
+    setenv('LD_LIBRARY_PATH', oldLdLibraryPath);
 end
 
 % See the header comment: any of these three means TISEAN never produced a

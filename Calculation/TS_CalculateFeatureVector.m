@@ -239,6 +239,7 @@ par_mop_ids = MasterOperations.ID(Master_ind_calc); % mop_id for each master ope
 % Store in temporary variables for parfor loop then map back later
 MasterOutput_tmp = cell(numMopsToCalc,1);
 MasterCalcTime_tmp = zeros(numMopsToCalc,1);
+MasterErrorMsg_tmp = repmat({''},numMopsToCalc,1); % '' unless that master operation errored
 
 % ----
 % Evaluate all the master operations
@@ -251,7 +252,7 @@ masterTimer = tic;
 if doParallel
     % PARFOR Loop (parallel)
 	parfor jj = 1:numMopsToCalc
-		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
+		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
 	end
@@ -281,13 +282,29 @@ else
             BF_ProgressBar((jj-1)/numMopsToCalc,[],[],sprintf(' %.0f%% %s',100*(jj-1)/numMopsToCalc,currentCode));
         end
 
-		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj)] = ...
+		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
 			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
 				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
 	end
     if showProgressBar
         BF_ProgressBar(1,[],[],' 100% complete');
         BF_ProgressBar('close');
+    end
+end
+
+% When errors were suppressed above to avoid interrupting the progress bar
+% (howVocal=='minimal' and ~beVerbose -- see TS_ComputeMasterLoop.m), report
+% them all together now instead of silently dropping them: the summary line
+% below already gives an error *count*, but not what actually went wrong.
+if strcmp(howVocal,'minimal') && ~beVerbose
+    erroredInd = find(~cellfun(@isempty,MasterErrorMsg_tmp));
+    if ~isempty(erroredInd)
+        fprintf(1,'\n--- %u master operation error(s): ---\n',length(erroredInd));
+        for k = 1:length(erroredInd)
+            jj = erroredInd(k);
+            fprintf(1,'---Error evaluating %s:\n%s.\n',par_MasterOpCodeCalc{jj},MasterErrorMsg_tmp{jj});
+        end
+        fprintf(1,'\n');
     end
 end
 
