@@ -43,16 +43,6 @@ fprintf(1,['We will:' ...
             '\n-4- Run a quick smoke test.\n\n']);
 
 % ------------------------------------------------------------------------------
-% 0. Check that the latest git submodules are loaded (catch22)
-% ------------------------------------------------------------------------------
-if exist(fullfile(pwd,'Toolboxes','catch22','wrap_Matlab'),'dir')==0
-    if ~silentInstall
-        input('You may not have added the git submodule for catch22... Press any key to attempt this now...')
-    end
-    system('git submodule update --init --recursive');
-end
-
-% ------------------------------------------------------------------------------
 %% 1. Add the paths:
 % ------------------------------------------------------------------------------
 fprintf(1,'-1- Adding paths needed for the repository...\n');

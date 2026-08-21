@@ -30,6 +30,28 @@ hctsaDir = fileparts(mfilename('fullpath'));
 % We use this function a bit:
 addfcn = @(x) addpath(fullfile(hctsaDir,x));
 
+% ------------------------------------------------------------------------------
+% Make sure the catch22 git submodule has been fetched. A fresh `git clone`
+% without --recurse-submodules leaves this directory empty, so fetch it
+% automatically rather than leaving the user to hit an addpath warning below:
+% ------------------------------------------------------------------------------
+catch22Dir = fullfile(hctsaDir,'Toolboxes','catch22','wrap_Matlab');
+if ~isfolder(catch22Dir)
+    fprintf(1,'catch22 submodule not found -- fetching it automatically now (this can take a minute)...\n');
+    ownerDir = pwd;
+    cd(hctsaDir);
+    % '-echo' streams git's own progress output live, so this doesn't look hung:
+    gitStatus = system('git submodule update --init --recursive','-echo');
+    cd(ownerDir);
+    if gitStatus==0 && isfolder(catch22Dir)
+        fprintf(1,'catch22 submodule fetched successfully.\n');
+    else
+        fprintf(1,['Could not fetch the catch22 submodule automatically (see output above).\n' ...
+            'If you downloaded a ZIP rather than using git, please instead clone the\n' ...
+            'repository (or run: git submodule update --init --recursive from the hctsa root).\n']);
+    end
+end
+
 fprintf(1,'Adding paths for the highly comparative time-series analysis package...\n')
 
 % ------------------------------------------------------------------------------
@@ -98,13 +120,14 @@ addpath(fullfile(hctsaDir,'Toolboxes','catch22','wrap_Matlab'));
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
-fprintf(1,', Information dynamics toolkit, ')
+fprintf(1,', Information dynamics toolkit')
 javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
 % Add path for TISEAN binaries (compiled locally into Toolboxes/Tisean_3.0.1/bin
 % by install.m; falls back to ~/bin for older manual installations):
 % ------------------------------------------------------------------------------
+fprintf(1,', TISEAN')
 tiseanBinaryLocation = fullfile(hctsaDir,'Toolboxes','Tisean_3.0.1','bin');
 if ~isfolder(tiseanBinaryLocation)
     [~,homeDir] = system('echo $HOME'); % get system home directory
@@ -117,18 +140,17 @@ if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
     % unrelated to TISEAN), which must not shadow the locally-built version.
     sysPath = [tiseanBinaryLocation,':',getenv('PATH')];
     setenv('PATH', sysPath)
-    fprintf(1,'System path to TISEAN binaries: %s\n',tiseanBinaryLocation);
 end
 
 % ------------------------------------------------------------------------------
 % Add path for the ripser binary (compiled locally into Toolboxes/ripser/bin
 % by install.m):
 % ------------------------------------------------------------------------------
+fprintf(1,', ripser\n')
 ripserBinaryLocation = fullfile(hctsaDir,'Toolboxes','ripser','bin');
 if isempty(regexp(getenv('PATH'),ripserBinaryLocation,'once'))
     sysPath = [ripserBinaryLocation,':',getenv('PATH')];
     setenv('PATH', sysPath)
-    fprintf(1,'System path to ripser binary: %s\n',ripserBinaryLocation);
 end
 
 % ------------------------------------------------------------------------------
