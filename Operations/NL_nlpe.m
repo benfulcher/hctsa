@@ -13,6 +13,11 @@ function out = NL_nlpe(y, de, tau, maxN)
 %       of the ACF or 'mi' to be the first minimum of the automutual information
 %       function)
 %
+% maxN, the maximum time-series length to analyze; longer series are cropped
+%       to their first maxN points (default: 5000, due to memory constraints
+%       with longer time series). Set to 'full' to disable, with a warning
+%       above 20000 points.
+%
 % ---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
 %
@@ -87,7 +92,13 @@ end
 
 % nlpe can cause memory pains for long time series
 % Let's do this dirty cheat
-if N > maxN
+if ischar(maxN) && strcmp(maxN, 'full')
+	slowThreshold = 20000;
+	if N > slowThreshold
+		warning(['Time series (%u samples) exceeds %u with maxN=''full''; nlpe can ' ...
+				 'use substantial memory for long time series'], N, slowThreshold);
+	end
+elseif N > maxN
 	% Crop the time series to the first maxN samples:
 	y = y(1:maxN);
 	fprintf(1, ['Michael Small''s ''nlpe'' code is only being evaluated ' ...

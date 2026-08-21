@@ -34,11 +34,12 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 %       searching for the BIC-optimal component count (default: 4)
 %
 % maxN, the maximum number of embedded points used to fit the mixture models.
-%       Longer embeddings are reduced to their first maxN points (default:
-%       2000; a warning is issued whenever this cropping actually happens,
-%       since separation estimates are still noisy at this size and keep
-%       sharpening with more -- this is a memory/time cap, not a convergence
-%       point). Can be set to 'full' to disable.
+%       Defaults to 'full' (no cropping) -- measured cost is cheap and scales
+%       mildly with N, unlike hctsa's O(N^3)-type operations. Set to a number
+%       to reduce longer embeddings to their first maxN points instead (a
+%       warning is issued whenever that cropping actually happens, since
+%       separation estimates are still noisy at small N and keep sharpening
+%       with more -- it would be a memory/time cap, not a convergence point).
 %
 % ---OUTPUTS:
 % bestK, the BIC-optimal number of mixture components over 1:kMax
@@ -132,7 +133,11 @@ if nargin < 4 || isempty(kMax)
 end
 
 if nargin < 5 || isempty(maxN)
-	maxN = 2000; % caps the cost of repeated EM fits
+	% Defaults to no cropping: measured cost is cheap and scales mildly
+	% (0.66s at N=10000, 0.89s at N=20000 -- fitgmdist's per-iteration cost
+	% is O(N*d*k), no O(N^2) memory footprint), so cropping by default isn't
+	% warranted the way it is for e.g. NL_EmbedKernelPCA's O(N^3) eigendecomp.
+	maxN = 'full';
 end
 
 % ------------------------------------------------------------------------------
