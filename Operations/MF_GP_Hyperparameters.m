@@ -22,7 +22,10 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % squishorsquash, whether to squash onto the unit interval, or spread across 1:N
 %
 % maxN, the maximum length of time series to consider -- inputs greater than
-%           this length are resampled down to maxN
+%           this length are resampled down to maxN. Can be set to 0 or
+%           'full' to disable resampling and use the whole series (GP
+%           hyperparameter fitting is O(N^3), so this can get slow well
+%           before reaching hctsa's other, more generous maxN caps).
 %
 % resampleHow, specifies the method of how to resample time series longer than maxN
 %
@@ -137,6 +140,9 @@ if nargin < 4 || isempty(maxN)
 	% resample longer time series
 	% maxN = 0 --> include the whole thing
 end
+if ischar(maxN) && strcmpi(maxN, 'full')
+	maxN = 0; % 'full' is an alias for the pre-existing maxN=0 "no resampling" convention
+end
 if (maxN > 0) && (maxN < 1)
 	% Specify a proportion of the time series length, N
 	maxN = ceil(N * maxN);
@@ -156,7 +162,14 @@ infAlg = @infLaplace;
 % ------------------------------------------------------------------------------
 %% Downsample long time series
 % ------------------------------------------------------------------------------
-if (maxN > 0) && (N > maxN)
+if maxN == 0
+	slowThreshold = 2000;
+	if N > slowThreshold
+		warning(['Time series (%u samples) exceeds %u with maxN=0/''full''; GP ' ...
+				 'hyperparameter fitting is O(N^3) and may be slow'], N, slowThreshold);
+	end
+	t = SUB_settimeindex(N, squishorsquash); % set time index (no resampling requested)
+elseif (maxN > 0) && (N > maxN)
 	switch resampleHow
 		case 'resample' % resamples the whole time series down
 			% resample is from the Signal Processing Toolbox. The check sits here rather

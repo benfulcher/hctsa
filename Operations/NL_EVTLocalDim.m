@@ -64,7 +64,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %         given exceedance as "isolated" (default: 5, following Caby et al.)
 %
 % maxN, maximum number of samples to consider; longer series are cropped
-%       to their first maxN points (default: 10000)
+%       to their first maxN points (default: 10000). Set to 'full' to
+%       disable cropping (a warning is given above N = 50000, since cost is
+%       O(nPoles*Nemb) and starts to add up at that scale).
 %
 % randomSeed, whether (and how) to reset the random seed, using
 %             BF_ResetSeed, before sampling the poles (default: 'default')
@@ -134,7 +136,13 @@ if nargin < 9 || isempty(randomSeed)
     randomSeed = 'default';
 end
 
-if N > maxN
+if ischar(maxN) && strcmp(maxN, 'full')
+    slowThreshold = 50000;
+    if N > slowThreshold
+        warning('Time series (%u samples) exceeds %u with maxN=''full''; computation may be slow', N, slowThreshold);
+    end
+elseif N > maxN
+    warning('Time series (%u samples) exceeds maxN = %u; analyzing the first %u samples', N, maxN, maxN);
     y = y(1:maxN);
     N = length(y);
 end

@@ -78,7 +78,11 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %       attractor rather than just an early time window, unlike e.g. NL_RQA's
 %       maxN, which crops the raw series instead (RQA's per-pair cost is what
 %       forces that choice there; here the embedding itself is cheap and only
-%       the point count handed to ripser needs capping).
+%       the point count handed to ripser needs capping). Can be set to 'full'
+%       to disable, with a warning above 4000 points, where cost (per the
+%       profile below) is already into the tens of seconds and grows steeply
+%       from there -- empirically, ~12000 points is enough to exceed
+%       BF_RipserSystem's own 600s subprocess timeout outright.
 %
 %---OUTPUTS: summary statistics of the H1 (loop) persistence diagram --
 % maximum persistence (strength of the single most persistent loop), total
@@ -175,7 +179,21 @@ if Nemb < 20
     out = NaN; return
 end
 
-if Nemb > maxN
+if ischar(maxN) && strcmpi(maxN, 'full')
+    slowThreshold = 4000;
+    if Nemb > slowThreshold
+        % Empirically (not just extrapolated from the header's profile):
+        % 11994 points timed out BF_RipserSystem's own 600s subprocess cap
+        % outright, so cost at this scale is worse than the header profile's
+        % ~N^2.25 fit would suggest -- "tens of seconds" undersells it badly
+        % above ~5000-10000 points.
+        warning(['%u embedded points exceeds %u with maxN=''full''; ripser cost ' ...
+                 'grows steeply with point-cloud size (see the cost profile in the ' ...
+                 'header comment) and may take minutes, or exceed ' ...
+                 'BF_RipserSystem''s default 600s subprocess timeout and fail outright'], ...
+                Nemb, slowThreshold);
+    end
+elseif Nemb > maxN
     % Evenly-spaced subsample over the full embedded point cloud (see header
     % comment for why this differs from a simple crop-to-first-maxN):
     idx = round(linspace(1, Nemb, maxN));
