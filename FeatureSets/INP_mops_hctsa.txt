@@ -217,17 +217,8 @@ CO_GLSCF(x_z,2,5,4)	CO_GLSCF_2_5_4
 CO_GLSCF(x_z,2,5,5)	CO_GLSCF_2_5_5
 CO_GLSCF(x_z,2,5,'tau')	CO_GLSCF_2_5_tau
 CO_HistogramAMI(x_z,1:5,'even',2)    CO_HistogramAMI_even_2bin
-CO_HistogramAMI(x_z,1:5,'even',5)    CO_HistogramAMI_even_5bin
-CO_HistogramAMI(x_z,1:5,'even',10)    CO_HistogramAMI_even_10bin
-CO_HistogramAMI(x_z,1:5,'quantiles',2)    CO_HistogramAMI_quantiles_2bin
-CO_HistogramAMI(x_z,1:5,'quantiles',5)    CO_HistogramAMI_quantiles_5bin
-CO_HistogramAMI(x_z,1:5,'quantiles',10)    CO_HistogramAMI_quantiles_10bin
 CO_HistogramAMI(x_z,1:5,'std1',2)	CO_HistogramAMI_std1_2bin
-CO_HistogramAMI(x_z,1:5,'std1',5)	CO_HistogramAMI_std1_5bin
-CO_HistogramAMI(x_z,1:5,'std1',10)	CO_HistogramAMI_std1_10bin
 CO_HistogramAMI(x_z,1:5,'std2',2)	CO_HistogramAMI_std2_2bin
-CO_HistogramAMI(x_z,1:5,'std2',5)	CO_HistogramAMI_std2_5bin
-CO_HistogramAMI(x_z,1:5,'std2',10)	CO_HistogramAMI_std2_10bin
 CO_JointNonGaussianity(x_z,'ac',2,1,10000)	CO_JointNonGaussianity_ac_2_1_10000
 CO_JointNonGaussianity(x_z,'ac',3,1,10000)	CO_JointNonGaussianity_ac_3_1_10000
 CO_PartialAutoCorr(x_z,20,'ols')  CO_PartialAutoCorr_20_ols
