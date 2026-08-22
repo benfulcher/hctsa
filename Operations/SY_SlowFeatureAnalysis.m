@@ -69,6 +69,14 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 %       (highest-variance) direction PCA would already find; near 0 means
 %       SFA has isolated a genuinely separate, low-variance slow mode.
 %
+% slowCorrMean, slowCorrVar, slowCorrSkew, slowCorrAC1, the absolute
+%       correlation between each raw per-window statistic (mean, variance,
+%       skewness, AC1, computed before whitening) and the slowest SFA
+%       component's scores -- these are loadings that indicate which of
+%       the four statistics is driving the slow mode SFA found, since the
+%       eta/PCA fields above summarize the slow mode's existence but not
+%       its composition.
+%
 % cf. Wiskott, L. & Sejnowski, T.J. "Slow feature analysis: unsupervised
 % learning of invariances." Neural Computation 14(4), 715-770 (2002).
 
@@ -182,5 +190,10 @@ out.etaStd = std(etas);
 
 out.pc1VarFrac = pcaEigs(1) / sum(pcaEigs);
 out.slowPCA1corr = abs(corr(slowScores(:, 1), pcScores(:, 1)));
+
+out.slowCorrMean = abs(corr(winMean, slowScores(:, 1)));
+out.slowCorrVar = abs(corr(winVar, slowScores(:, 1)));
+out.slowCorrSkew = abs(corr(winSkew, slowScores(:, 1)));
+out.slowCorrAC1 = abs(corr(winAC1, slowScores(:, 1)));
 
 end
