@@ -2,20 +2,26 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 % SY_SlowFeatureAnalysis    Slow feature analysis of windowed statistics
 %
 % Splits the time series into numWindows non-overlapping segments (same
-% segmentation and per-segment statistics as SY_RampingWindows: mean,
-% variance, skewness, and lag-1 autocorrelation, forming a numWindows x 4
-% matrix), then applies Slow Feature Analysis (SFA) to find the linear
-% combination of these four statistics that varies as *slowly* as
+% segmentation as SY_RampingWindows), computes five per-window statistics
+% -- mean, variance, skewness, lag-1 autocorrelation, and lag-1 trev (a
+% normalized third-order cross-moment measuring time-reversal asymmetry,
+% cf. CO_trev, here fixed to tau = 1 since per-window tau estimation would
+% be unreliable at these window lengths) -- forming a numWindows x 5
+% matrix, then applies Slow Feature Analysis (SFA) to find the linear
+% combination of these five statistics that varies as *slowly* as
 % possible across the sequence of windows -- i.e., minimizes the
 % variance of its own increments, subject to unit variance. This is a
 % fundamentally different criterion to SY_RampingWindows' per-statistic
 % monotonic-trend tests: SFA is multivariate (can find a slow combination
-% spread across mean/variance/skewness/AC1 that no single one of them
+% spread across mean/variance/skewness/AC1/trev that no single one of them
 % shows individually) and detects any slow, low-frequency evolution, not
 % just a monotonic ramp (e.g., a slow rise-then-fall hump across the
 % series, invisible to Kendall's tau/Pearson's r, still registers as
-% "slow" here). Validated on Empirical1000 to be essentially uncorrelated
-% (max |r| ~ 0.14) with all SY_RampingWindows_10 trend fields.
+% "slow" here). AC1 is symmetric under time reversal, so trev is included
+% specifically to let SFA pick up a slow drift in the *irreversibility* of
+% the dynamics that none of the other four statistics can see. Validated
+% on Empirical1000 to be essentially uncorrelated (max |r| ~ 0.14) with
+% all SY_RampingWindows_10 trend fields.
 %
 % The companion comparison to ordinary PCA addresses a different
 % question: PCA finds the combination of the four statistics with
@@ -47,8 +53,8 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 %
 % ---OUTPUTS:
 %
-% Let z(t) be the numWindows x 4 matrix of [mean, variance, skewness,
-% AC1] computed per window, whitened (centered, then linearly
+% Let z(t) be the numWindows x 5 matrix of [mean, variance, skewness,
+% AC1, trev] computed per window, whitened (centered, then linearly
 % transformed to unit covariance). SFA finds the orthogonal directions
 % u_i that minimize var(diff(z*u_i)), i.e. the "slowness" eigenvalues
 % eta_i = var(diff(z*u_i)) of the covariance of the whitened derivative
@@ -59,9 +65,9 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 %
 % eta1, the smallest (slowest) SFA eigenvalue
 % etaEnd, the largest (fastest/noisiest) SFA eigenvalue
-% etaStd, the standard deviation of all four SFA eigenvalues (spread of
+% etaStd, the standard deviation of all SFA eigenvalues (spread of
 %       the slowness spectrum)
-% pc1VarFrac, the fraction of total variance (across the four
+% pc1VarFrac, the fraction of total variance (across the five
 %       statistics) explained by the leading PCA component
 % slowPCA1corr, the absolute correlation between the slowest SFA
 %       component's scores and the leading PCA component's scores --
@@ -69,13 +75,13 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 %       (highest-variance) direction PCA would already find; near 0 means
 %       SFA has isolated a genuinely separate, low-variance slow mode.
 %
-% slowCorrMean, slowCorrVar, slowCorrSkew, slowCorrAC1, the absolute
-%       correlation between each raw per-window statistic (mean, variance,
-%       skewness, AC1, computed before whitening) and the slowest SFA
-%       component's scores -- these are loadings that indicate which of
-%       the four statistics is driving the slow mode SFA found, since the
-%       eta/PCA fields above summarize the slow mode's existence but not
-%       its composition.
+% slowCorrMean, slowCorrVar, slowCorrSkew, slowCorrAC1, slowCorrTrev, the
+%       absolute correlation between each raw per-window statistic (mean,
+%       variance, skewness, AC1, trev, computed before whitening) and the
+%       slowest SFA component's scores -- these are loadings that indicate
+%       which of the five statistics is driving the slow mode SFA found,
+%       since the eta/PCA fields above summarize the slow mode's existence
+%       but not its composition.
 %
 % cf. Wiskott, L. & Sejnowski, T.J. "Slow feature analysis: unsupervised
 % learning of invariances." Neural Computation 14(4), 715-770 (2002).
@@ -119,7 +125,7 @@ if nargin < 2 || isempty(numWindows)
 end
 
 minNumWindows = 10; % need enough windows to estimate the 4x4 covariance matrices reliably
-minWindowLength = 20; % heuristic minimum for meaningful skewness/AC1 estimates
+minWindowLength = 20; % heuristic minimum for meaningful skewness/AC1/trev estimates
 
 if numWindows < minNumWindows
     error('numWindows = %u is too few for a reliable slow feature analysis (need >= %u)', numWindows, minNumWindows);
@@ -137,16 +143,22 @@ end
 z = reshape(y(1:winLength * numWindows), winLength, numWindows); % winLength x numWindows
 
 % ------------------------------------------------------------------------------
-%% Per-window statistics: mean, variance, skewness, AC1 (same as SY_RampingWindows)
+%% Per-window statistics: mean, variance, skewness, AC1, trev
+% (mean/variance/skewness/AC1 as in SY_RampingWindows; trev is a lag-1
+% time-reversal asymmetry statistic, cf. CO_trev, with tau fixed to 1
+% rather than estimated per window)
 % ------------------------------------------------------------------------------
 winMean = mean(z)';
 winVar = var(z)';
 winSkew = skewness(z)';
 winAC1 = zeros(numWindows, 1);
+winTrev = zeros(numWindows, 1);
 for i = 1:numWindows
     winAC1(i) = CO_AutoCorr(z(:, i), 1, 'Fourier');
+    dz = diff(z(:, i));
+    winTrev(i) = mean(dz.^3) / (mean(dz.^2))^(3 / 2);
 end
-X = [winMean, winVar, winSkew, winAC1]; % numWindows x 4
+X = [winMean, winVar, winSkew, winAC1, winTrev]; % numWindows x 5
 
 % ------------------------------------------------------------------------------
 %% PCA (variance-maximizing directions) and SFA (slowness-minimizing directions)
@@ -195,5 +207,6 @@ out.slowCorrMean = abs(corr(winMean, slowScores(:, 1)));
 out.slowCorrVar = abs(corr(winVar, slowScores(:, 1)));
 out.slowCorrSkew = abs(corr(winSkew, slowScores(:, 1)));
 out.slowCorrAC1 = abs(corr(winAC1, slowScores(:, 1)));
+out.slowCorrTrev = abs(corr(winTrev, slowScores(:, 1)));
 
 end
