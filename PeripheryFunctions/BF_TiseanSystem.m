@@ -13,8 +13,10 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % macOS/Homebrew name for the same utility, since it clashes with no
 % built-in on that platform) shell command, so a hang fails loudly and
 % boundedly instead. If neither is available, degrades to a plain
-% unbounded system() call -- identical to every caller's previous
-% behavior -- rather than hard-requiring a new dependency.
+% unbounded system() call (with a one-time warning) rather than
+% hard-requiring a new dependency; a post-hoc cap on the captured output
+% size then still catches a binary that runs but streams console output
+% without terminating.
 %
 % The default (600s) is deliberately generous, not tight: most of the
 % Operations calling this have no length cap on their input (unlike
@@ -29,8 +31,9 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % without being effectively unbounded.
 %
 % A call that fails this way -- status 124 (this wrapper's own timeout),
-% or 126/127 (the shell's reserved "found but not executable"/"command not
-% found" codes, i.e. TISEAN never ran at all) -- errors immediately rather
+% 126/127 (the shell's reserved "found but not executable"/"command not
+% found" codes, i.e. TISEAN never ran at all), or an over-limit output
+% capture (a runaway binary, see below) -- errors immediately rather
 % than returning res to the caller. This is deliberate: a caller expecting
 % to parse numeric rows out of res could otherwise misinterpret a partially
 % flushed line (captured right before a timeout kill) as real, if
@@ -74,17 +77,37 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-persistent timeoutCmd
-if isempty(timeoutCmd)
+persistent timeoutCmd timeoutChecked
+if isempty(timeoutChecked)
     % Cache which (if either) timeout utility is on the path -- checked
-    % once per MATLAB session, not on every call:
-    if system('command -v timeout >/dev/null 2>&1') == 0
+    % once per MATLAB session, not on every call.
+    %
+    % The probe runs '<cmd> --version' and inspects ONLY the exit status
+    % (0 = present). This deliberately uses no shell redirection or shell
+    % builtins so it behaves identically whichever shell MATLAB's system()
+    % invokes. The previous probe -- "command -v timeout >/dev/null 2>&1"
+    % -- is sh/bash/zsh syntax that silently fails under csh/tcsh: 'command'
+    % is not a tcsh builtin and '2>&1' is a parse error ("Ambiguous output
+    % redirect"), so the whole test returned nonzero. On a tcsh cluster
+    % (MATLAB's system() follows $SHELL) hctsa therefore concluded no
+    % timeout utility existed and ran EVERY TISEAN call unbounded -- a hung
+    % or runaway binary's console output then accumulated in 'res' until
+    % MATLAB exhausted memory and the process was killed.
+    [statusTimeout,~]  = system('timeout --version');
+    [statusGtimeout,~] = system('gtimeout --version');
+    if statusTimeout == 0
         timeoutCmd = 'timeout';
-    elseif system('command -v gtimeout >/dev/null 2>&1') == 0
-        timeoutCmd = 'gtimeout';
+    elseif statusGtimeout == 0
+        timeoutCmd = 'gtimeout'; % GNU coreutils' macOS/Homebrew name
     else
         timeoutCmd = ''; % neither available -- degrade to unbounded system()
+        warning('BF_TiseanSystem:noTimeoutUtility', ...
+            ['No ''timeout'' or ''gtimeout'' utility found on the path: TISEAN ' ...
+             'calls will run unbounded, so a hung or runaway TISEAN binary can ' ...
+             'stall the computation or exhaust memory. Install GNU coreutils to ' ...
+             'restore the wall-clock guard. (This message prints once per session.)']);
     end
+    timeoutChecked = true;
 end
 
 if nargin < 2 || isempty(timeoutSecs)
@@ -138,6 +161,23 @@ if any(status == [124, 126, 127])
     error('BF_TiseanSystem:tiseanFailed', ...
         'TISEAN command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
         reason, tiseanCommand, res);
+end
+
+% Belt-and-braces guard against a runaway binary -- one that streams console
+% output without terminating (a mode 'lyap_r' and 'false_nearest' can enter
+% on pathological input). A working 'timeout' bounds this by wall-clock, and
+% every legitimate TISEAN capture here is a few KB at most (numeric results
+% mostly go to a '-o' file, not stdout), so an implausibly large 'res' means
+% the call misbehaved: treat it as a failure of the same class as a timeout
+% rather than handing megabytes of junk to the caller's numeric parser. Also
+% covers the degraded no-timeout-utility path above, where the only other
+% bound on output volume is available memory.
+maxResChars = 50e6; % ~50 MB of text
+if numel(res) > maxResChars
+    error('BF_TiseanSystem:runawayOutput', ...
+        ['TISEAN command produced %d characters of output (limit %d) without ' ...
+         'failing cleanly -- treating as a runaway/hung call.\nCommand: %s'], ...
+        numel(res), maxResChars, tiseanCommand);
 end
 
 end

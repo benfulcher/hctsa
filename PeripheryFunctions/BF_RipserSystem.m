@@ -9,9 +9,10 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 %
 % A call that fails this way -- status 124 (this wrapper's own timeout),
 % 126/127 (the shell's reserved "found but not executable"/"command not
-% found" codes, i.e. ripser never ran at all), or any other nonzero status
+% found" codes, i.e. ripser never ran at all), any other nonzero status
 % (ripser itself erroring out, e.g. a bad argument, an unreadable file, or a
-% crash) -- errors immediately rather than returning res to the caller.
+% crash), or an over-limit output capture (a runaway binary) -- errors
+% immediately rather than returning res to the caller.
 % Unlike BF_TiseanSystem's siblings, ripser has no legitimate nonzero-but-
 % successful exit path (checked against ripser.cpp: every non-help exit
 % point other than 0 is a genuine failure), so status==0 is required here
@@ -52,18 +53,31 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-persistent timeoutCmd
-if isempty(timeoutCmd)
+persistent timeoutCmd timeoutChecked
+if isempty(timeoutChecked)
     % Cache which (if either) timeout utility is on the path -- checked once
     % per MATLAB session, not on every call (see BF_TiseanSystem.m for why
-    % 'timeout' vs 'gtimeout' matters on macOS):
-    if system('command -v timeout >/dev/null 2>&1') == 0
+    % 'timeout' vs 'gtimeout' matters on macOS).
+    %
+    % Probe by exit status of '<cmd> --version', with no shell redirection
+    % or builtins, so it works whichever shell MATLAB's system() invokes.
+    % The previous probe -- "command -v timeout >/dev/null 2>&1" -- silently
+    % fails under csh/tcsh (see BF_TiseanSystem.m), which made hctsa run
+    % ripser unbounded on those systems.
+    [statusTimeout,~]  = system('timeout --version');
+    [statusGtimeout,~] = system('gtimeout --version');
+    if statusTimeout == 0
         timeoutCmd = 'timeout';
-    elseif system('command -v gtimeout >/dev/null 2>&1') == 0
+    elseif statusGtimeout == 0
         timeoutCmd = 'gtimeout';
     else
         timeoutCmd = ''; % neither available -- degrade to unbounded system()
+        warning('BF_RipserSystem:noTimeoutUtility', ...
+            ['No ''timeout'' or ''gtimeout'' utility found on the path: ripser ' ...
+             'calls will run unbounded. Install GNU coreutils to restore the ' ...
+             'wall-clock guard. (This message prints once per session.)']);
     end
+    timeoutChecked = true;
 end
 
 if nargin < 2 || isempty(timeoutSecs)
@@ -120,6 +134,17 @@ if status ~= 0
     error('BF_RipserSystem:ripserFailed', ...
         'ripser command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
         reason, ripserCommand, res);
+end
+
+% Belt-and-braces guard against a runaway binary that streams output without
+% terminating (see BF_TiseanSystem.m). A legitimate ripser persistence
+% diagram is small; an implausibly large capture means the call misbehaved.
+maxResChars = 50e6; % ~50 MB of text
+if numel(res) > maxResChars
+    error('BF_RipserSystem:runawayOutput', ...
+        ['ripser command produced %d characters of output (limit %d) without ' ...
+         'failing cleanly -- treating as a runaway/hung call.\nCommand: %s'], ...
+        numel(res), maxResChars, ripserCommand);
 end
 
 end
