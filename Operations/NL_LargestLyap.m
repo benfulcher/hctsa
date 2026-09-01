@@ -151,8 +151,17 @@ m = tm(2);
 filePath = BF_WriteTempFile(y);
 outFilePath = [filePath '.ros'];
 
-[~, res] = BF_TiseanSystem(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
+[status, res] = BF_TiseanSystem(sprintf('lyap_r -d%u -m%u -t%u -s%u -o %s %s', ...
 						  tau, m, past, maxtstep, outFilePath, filePath));
+
+% lyap_r exits 54 when it cannot find a neighbour within its search radius for
+% every reference point -- the Rosenstein estimator is not applicable to this
+% series (too sparse, or dominated by repeated values / extreme outliers, so
+% many embedding vectors are isolated or identical). Treat as a non-result:
+if status == 54
+	if exist(outFilePath, 'file'), delete(outFilePath); end
+	out = NaN; return
+end
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist(outFilePath, 'file'), delete(outFilePath); end

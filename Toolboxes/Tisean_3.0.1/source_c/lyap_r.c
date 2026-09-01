@@ -230,7 +230,15 @@ int main(int argc,char **argv)
   file=fopen(outfile,"w");
   if (verbosity&VER_INPUT)
     fprintf(stderr,"Opened %s for writing\n",outfile);
-  for (eps=eps0;!alldone;eps*=1.1) {
+  /* make_iterate() only accepts a neighbour within squared distance 1.0
+     regardless of eps, and the data is rescaled to [0,1], so once eps grows
+     past ~2 the +/-1-box scan already spans that radius in every direction:
+     any reference point still unresolved then can never be resolved. Without
+     the eps<=2.0 bound, eps keeps multiplying by 1.1 until it overflows to
+     +inf and this loop spins forever (observed on sparse / heavily-quantised
+     input, e.g. coarsely-binned series with many identical embedding vectors,
+     or series squashed into one box by a few extreme outliers). */
+  for (eps=eps0;!alldone && eps<=2.0;eps*=1.1) {
     epsinv=1.0/eps;
     put_in_boxes();
     alldone=1;
@@ -241,7 +249,21 @@ int main(int argc,char **argv)
     }
     if (verbosity&VER_USR1)
       fprintf(stderr,"epsilon: %e already found: %ld\n",eps*max,found[0]);
-  } 
+  }
+  if (!alldone) {
+    /* Could not find a neighbour within the search radius for every reference
+       point: the Rosenstein construction is not applicable to this series.
+       Exit with a distinct code (matching false_nearest's use of 54) and
+       write no output file, rather than emitting a Lyapunov estimate built
+       from only the fraction of points that happened to resolve. */
+    fprintf(stderr,"lyap_r: could not resolve every reference point within "
+	    "the neighbour-search radius (%ld contributed); data too sparse or "
+	    "quantised for the Rosenstein estimator -- no output written.\n",
+	    found[0]);
+    fclose(file);
+    remove(outfile);
+    return 54;
+  }
   for (i=0;i<=steps;i++)
     if (found[i])
       fprintf(file,"%d %e\n",i,lyap[i]/found[i]/2.0);
