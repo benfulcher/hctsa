@@ -16,6 +16,17 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
     methods(TestClassSetup)
 
+        function suppressFigureWindows(testCase)
+            % Render figures off-screen for the duration of the test class so
+            % the plotting tests (TS_PlotTimeSeries, TS_PlotDataMatrix,
+            % TS_PlotLowDim, TS_SimSearch, ...) don't pop windows and steal
+            % focus, and so CI runs headless-clean. Figures are still created
+            % and closed exactly as before; only their visibility changes.
+            oldState = get(groot, 'defaultFigureVisible');
+            set(groot, 'defaultFigureVisible', 'off');
+            testCase.addTeardown(@() set(groot, 'defaultFigureVisible', oldState));
+        end
+
         function runStartup(testCase)
             try
                 run("../startup.m")
