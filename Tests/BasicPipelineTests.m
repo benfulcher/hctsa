@@ -268,6 +268,103 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 'Special-valued cells not stored as NaN after split compute.');
         end
 
+        function test_TS_Compute_autosave(testCase)
+            % autosaveEvery writes partial progress mid-run without changing the
+            % final result. Default (Inf) writes only once, at the end.
+            inpFile = 'INP_autosave_test.mat';
+            offFile = 'HCTSA_autosave_off.mat';
+            onFile  = 'HCTSA_autosave_on.mat';
+
+            rng(11);
+            timeSeriesData = {randn(200,1); cumsum(randn(250,1)); sin((1:220)'/4); ...
+                randn(180,1); 3*ones(160,1); abs(randn(240,1))}; %#ok<NASGU>
+            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'}; %#ok<NASGU>
+            keywords = repmat({'k'},6,1); %#ok<NASGU>
+            save(inpFile,'timeSeriesData','labels','keywords');
+
+            for f = {offFile, onFile}
+                if exist(f{1},'file'), delete(f{1}); end
+                TS_Init(inpFile,'catch22',false,f{1});
+            end
+
+            TS_Compute('none',[],[],'missing',offFile,'fast');                 % default: save once
+            logText = evalc("TS_Compute('none',[],[],'missing',onFile,'fast',[],0.001);"); % autosave aggressively
+
+            testCase.verifySubstring(logText, 'Autosaved progress', ...
+                'autosaveEvery did not produce any mid-run autosave.');
+
+            off = load(offFile);
+            on  = load(onFile);
+            testCase.verifyEqual(on.TS_DataMat, off.TS_DataMat, 'RelTol', 0, ...
+                'Autosaving changed the computed TS_DataMat.');
+            testCase.verifyEqual(on.TS_Quality, off.TS_Quality, ...
+                'Autosaving changed the computed TS_Quality.');
+        end
+
+        function test_TS_Compute_series_parallel_equals_serial(testCase)
+            % parallelHow='series' (parfor over time series) must give a
+            % byte-identical result to parallelHow='none' (serial). Also checks
+            % the backwards-compatible logical aliases (false->'none',
+            % true->'operations') and that 'series' resumes an interrupted run.
+            %
+            % Opt-in: set the environment variable HCTSA_TEST_PARALLEL to run
+            % it. Off by default because (a) CI has no Parallel Computing
+            % Toolbox (there 'series' just falls back to serial anyway) and
+            % (b) some MATLAB installs cannot start a parpool from inside a
+            % matlab.unittest run at all -- an environment bug, not an hctsa
+            % one. Exercise this path directly from a script when in doubt.
+            testCase.assumeTrue(~isempty(getenv('HCTSA_TEST_PARALLEL')), ...
+                'Set HCTSA_TEST_PARALLEL to run the series-parallel test.');
+            testCase.assumeTrue(logical(license('test','Distrib_Computing_Toolbox')), ...
+                'Parallel Computing Toolbox not available -- skipping series-parallel test.');
+
+            inpFile = 'INP_series_test.mat';
+            serialFile = 'HCTSA_series_serial.mat';
+            seriesFile = 'HCTSA_series_parallel.mat';
+            aliasFile  = 'HCTSA_series_alias.mat';
+
+            rng(7);
+            timeSeriesData = {randn(200,1); 2.5*ones(150,1); cumsum(randn(300,1)); ...
+                sin((1:250)'/3); randn(180,1)+1; abs(randn(220,1))}; %#ok<NASGU>
+            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'}; %#ok<NASGU>
+            keywords = repmat({'k'},6,1); %#ok<NASGU>
+            save(inpFile,'timeSeriesData','labels','keywords');
+
+            for f = {serialFile, seriesFile, aliasFile}
+                if exist(f{1},'file'), delete(f{1}); end
+                TS_Init(inpFile,'catch22',false,f{1});
+            end
+
+            TS_Compute('none',   [],[],'missing',serialFile,'fast');
+            TS_Compute('series', [],[],'missing',seriesFile,'fast');
+            TS_Compute(false,    [],[],'missing',aliasFile,'fast'); % logical alias -> 'none'
+
+            a = load(serialFile);
+            b = load(seriesFile);
+            c = load(aliasFile);
+
+            testCase.assertTrue(any(a.TS_Quality(:) > 0), ...
+                'Test is vacuous: no special-valued cells were produced.');
+            testCase.verifyEqual(b.TS_Quality, a.TS_Quality, ...
+                'TS_Quality differs between series-parallel and serial compute.');
+            testCase.verifyEqual(b.TS_DataMat, a.TS_DataMat, 'RelTol', 0, ...
+                'TS_DataMat differs between series-parallel and serial compute.');
+            testCase.verifyEqual(c.TS_DataMat, a.TS_DataMat, 'RelTol', 0, ...
+                'Logical false first argument is not equivalent to ''none''.');
+            testCase.verifyTrue(all(isnan(b.TS_DataMat(b.TS_Quality > 0))), ...
+                'Special-valued cells not stored as NaN after series-parallel compute.');
+
+            % Resume: wipe some rows and recompute 'missing' in series mode:
+            b.TS_DataMat(4:6,:) = NaN;
+            b.TS_Quality(4:6,:) = NaN;
+            b.TS_CalcTime(4:6,:) = NaN;
+            save(seriesFile,'-struct','b');
+            TS_Compute('series',[],[],'missing',seriesFile,'fast');
+            bResumed = load(seriesFile);
+            testCase.verifyEqual(bResumed.TS_DataMat, a.TS_DataMat, 'RelTol', 0, ...
+                'series-parallel did not correctly resume an interrupted run.');
+        end
+
         function test_TS_InspectQuality(testCase)
             % simple check of whether or not the function runs. 
             try
