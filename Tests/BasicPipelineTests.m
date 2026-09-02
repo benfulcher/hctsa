@@ -513,6 +513,72 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             delete(newFilteredMatName)
         end
 
+        function test_TS_Subset_roundtrip(testCase)
+            % TS_Subset must produce a file whose matrices/tables exactly equal
+            % the manually-indexed source, carry forward auxiliary variables,
+            % and NOT drag along a full-size copy of the source (the old
+            % copyfile + save('-append') path bloated -v7.3 subset files with
+            % the overwritten full matrices' dead space).
+            src = testCase.precomputedMatName; % computed HCTSA (copy of OG)
+            outFile = 'HCTSA_subset_roundtrip.mat';
+            if exist(outFile,'file'), delete(outFile); end
+
+            raw = load(src);
+            tsKeep = raw.TimeSeries.ID(1:50);
+            opKeep = raw.Operations.ID(1:1000);
+
+            TS_Subset(src, tsKeep, opKeep, true, outFile);
+            testCase.assertTrue(exist(outFile,'file') == 2, 'Subset file not created.');
+
+            sub = load(outFile);
+            its = ismember(raw.TimeSeries.ID, tsKeep);
+            iop = ismember(raw.Operations.ID, opKeep);
+
+            testCase.verifyEqual(sub.TS_DataMat, raw.TS_DataMat(its,iop), 'RelTol', 0, ...
+                'TS_DataMat subset does not match manual indexing.');
+            testCase.verifyEqual(sub.TS_Quality, raw.TS_Quality(its,iop), ...
+                'TS_Quality subset does not match manual indexing.');
+            testCase.verifyEqual(sub.TS_CalcTime, raw.TS_CalcTime(its,iop), ...
+                'TS_CalcTime subset does not match manual indexing.');
+            testCase.verifyEqual(sub.TimeSeries.ID, raw.TimeSeries.ID(its), ...
+                'TimeSeries.ID subset does not match manual indexing.');
+            testCase.verifyEqual(sub.Operations.ID, raw.Operations.ID(iop), ...
+                'Operations.ID subset does not match manual indexing.');
+            testCase.verifyTrue(isfield(sub,'MasterOperations'), ...
+                'MasterOperations not carried forward into the subset file.');
+
+            % Special/error cells carried through from the source unchanged
+            % (not NaN-ified by the subset step):
+            testCase.verifyEqual(isnan(sub.TS_DataMat), isnan(raw.TS_DataMat(its,iop)), ...
+                'Subset step altered the NaN pattern of TS_DataMat.');
+
+            % Every stored (ts x op) matrix must be subset-sized in the file:
+            w = whos('-file', outFile);
+            dm = w(strcmp({w.name},'TS_DataMat'));
+            testCase.verifyEqual(dm.size, [50 1000], ...
+                'TS_DataMat in the subset file is not subset-sized.');
+
+            % ...and the file itself must not be a near-copy of the source:
+            d = dir(src);      srcBytes = d.bytes;
+            d = dir(outFile);  subBytes = d.bytes;
+            testCase.verifyLessThan(subBytes, 0.5*srcBytes, ...
+                'Subset file is close to the source file size (full-file copy / dead space).');
+
+            % In-memory subset from a pre-loaded struct (doSave defaults false):
+            [dm2,ts2,op2] = TS_Subset(raw, tsKeep, opKeep);
+            testCase.verifyEqual(ts2.ID, raw.TimeSeries.ID(its), ...
+                'Struct-source subset: TimeSeries.ID mismatch.');
+            testCase.verifyEqual(op2.ID, raw.Operations.ID(iop), ...
+                'Struct-source subset: Operations.ID mismatch.');
+            % Returned matrix is NaN-ified for special cells (TS_LoadData convention):
+            expected = raw.TS_DataMat(its,iop);
+            expected(~isfinite(expected) | raw.TS_Quality(its,iop) > 0) = NaN;
+            testCase.verifyEqual(dm2, expected, 'RelTol', 0, ...
+                'Struct-source subset: returned TS_DataMat mismatch.');
+
+            delete(outFile);
+        end
+
         function test_TS_PlotLowDim(testCase)
             % basic check - does the function run without errors
             try

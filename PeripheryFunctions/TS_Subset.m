@@ -2,10 +2,14 @@ function [TS_DataMat,TimeSeries,Operations] = TS_Subset(whatData,ts_ids_keep,op_
 % TS_Subset  Save a given subset of an hctsa dataset, based on time series and operation IDs
 %
 %---INPUTS:
-% whatData, the source of the hctsa dataset (default, 'HCTSA_N.mat', cf. TS_LoadData)
+% whatData, the source of the hctsa dataset: a .mat filename or shorthand
+%           ('raw'/'norm'/..., default 'HCTSA_N.mat', cf. TS_LoadData), or a
+%           struct of a pre-loaded dataset (e.g. load('HCTSA.mat')).
 % ts_ids_keep, the IDs of time series to include in the subset (empty, [], to include all time series)
 % op_ids_keep, the IDs of operations to include in the subset (empty, [], to include all operations)
-% doSave, (binary), saves the result back to file
+% doSave, (binary), saves the result to file (default: true for a file source,
+%           false for a struct source; a struct source with doSave=true needs
+%           an explicit outputFileName).
 % outputFileName, the filename to save the hctsa subset (if doSave==1).
 %
 %---OUTPUTS:
@@ -53,13 +57,9 @@ if nargin < 3
     op_ids_keep = []; % all
 end
 if nargin < 4
-    doSave = true;
-end
-if nargin < 5
-    outputFileName = regexprep(whatData,'.mat','_subset.mat');
-end
-if ~strcmp(outputFileName(end-3:end),'.mat')
-    error('Specify a .mat filename as output');
+    % Default to saving when given a file to work from; when given a pre-loaded
+    % struct, default to just returning the subset in memory:
+    doSave = ~isstruct(whatData);
 end
 
 if isempty(ts_ids_keep) && isempty(op_ids_keep)
@@ -67,79 +67,127 @@ if isempty(ts_ids_keep) && isempty(op_ids_keep)
 end
 
 %-------------------------------------------------------------------------------
-% Load in data:
+% Get the source dataset into a struct S (one read):
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
-numTimeSeries = height(TimeSeries);
-numOperations = height(Operations);
+% NB: we take the matrices raw (not via TS_LoadData) and write them through
+% unchanged -- a subset is a faithful slice of the source, so whatever coding
+% the source uses for special/error cells (NaN from TS_Compute, or a legacy
+% literal 0) is carried across as-is. The returned TS_DataMat is NaN-ified at
+% the end for consistency with TS_LoadData (matching this function's historical
+% return behaviour).
+if isstruct(whatData)
+    % Pre-loaded dataset (e.g. whatData = load('HCTSA.mat')):
+    S = whatData;
+    whatDataFile = '';
+    if doSave && nargin < 5
+        error(['TS_Subset: provide an outputFileName when subsetting a ' ...
+               'pre-loaded struct with doSave=true.']);
+    end
+else
+    switch whatData
+    case {'raw','loc'}
+        whatDataFile = 'HCTSA.mat';
+    case {'norm','cl'}
+        whatDataFile = 'HCTSA_N.mat';
+    otherwise
+        whatDataFile = whatData;
+    end
+    if ~strcmp(whatDataFile(end-3:end),'.mat')
+        error('Specify a .mat filename');
+    end
+    if ~exist(whatDataFile,'file')
+        error('%s not found',whatDataFile);
+    end
+    if nargin < 5
+        outputFileName = regexprep(whatDataFile,'\.mat$','_subset.mat');
+    end
+    fprintf(1,'Loading data from %s...',whatDataFile);
+    S = load(whatDataFile);
+    fprintf(1,' Done.\n');
+end
+
+if doSave && ~strcmp(outputFileName(end-3:end),'.mat')
+    error('Specify a .mat filename as output');
+end
+
+% Handle legacy structure-array metadata format:
+if isstruct(S.TimeSeries)
+    warning('Metadata stored in old structure-array format; run TS_ConvertToTable on your hctsa data file to update?');
+    S.TimeSeries = struct2table(S.TimeSeries);
+end
+if isstruct(S.Operations)
+    S.Operations = struct2table(S.Operations);
+end
+
+if ~isfield(S,'TS_DataMat')
+    error('The source hctsa dataset does not contain a TS_DataMat');
+end
+
+numTimeSeries = height(S.TimeSeries);
+numOperations = height(S.Operations);
 
 %-------------------------------------------------------------------------------
 % Do the subsetting:
 %-------------------------------------------------------------------------------
 i_keep = struct;
 %--Match to TimeSeries IDs:
-i_keep.TimeSeries = MatchMe(TimeSeries.ID,ts_ids_keep);
+i_keep.TimeSeries = MatchMe(S.TimeSeries.ID,ts_ids_keep);
 %--Match to Operation IDs:
-i_keep.Operations = MatchMe(Operations.ID,op_ids_keep);
-% Subset:
-TS_DataMat = TS_DataMat(i_keep.TimeSeries,i_keep.Operations);
-TimeSeries = TimeSeries(i_keep.TimeSeries,:);
-Operations = Operations(i_keep.Operations,:);
+i_keep.Operations = MatchMe(S.Operations.ID,op_ids_keep);
+
+TimeSeries = S.TimeSeries(i_keep.TimeSeries,:);
+Operations = S.Operations(i_keep.Operations,:);
+
+% Subset every stored (time series)x(operations) matrix:
+for theField = {'TS_DataMat','TS_Quality','TS_CalcTime'}
+    if isfield(S,theField{1})
+        S.(theField{1}) = S.(theField{1})(i_keep.TimeSeries,i_keep.Operations);
+    end
+end
+TS_DataMat = S.TS_DataMat; % raw: special/error cells carried through unchanged
 
 fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations.\n',...
             numTimeSeries,height(TimeSeries),numOperations,height(Operations))
 
+% Remove group information because this will no longer be valid for sure
+if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames)
+    TimeSeries(:,'Group') = [];
+    fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
+end
+
 if doSave
-    % Save result to file
+    %---------------------------------------------------------------------------
+    % Write a single fresh .mat file: the subsetted tables/matrices, plus every
+    % other variable in the source carried forward unchanged (gitInfo,
+    % MasterOperations, normalisationInfo, ...). No copyfile of the full source,
+    % no save('-append') (which on -v7.3 leaves dead space for overwritten
+    % variables), and only one write of exactly the subset.
+    %---------------------------------------------------------------------------
+    S.TimeSeries = TimeSeries;
+    S.Operations = Operations;
 
-    % Remove group information because this will no longer be valid for sure
-    if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames)
-        TimeSeries(:,'Group') = [];
-        fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
+    % Clustering info no longer valid for a subset -- reset it (if present):
+    if isfield(S,'ts_clust')
+        S.ts_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:height(TimeSeries),'linkageMethod','none');
     end
-
-    % Copy to a new subset .mat file, then save over with the new subset variables
-    try
-        copyfile(whatDataFile,outputFileName);
-    catch
-        system(sprintf('cp %s %s',whatDataFile,outputFileName));
-    end
-    save(outputFileName,'TS_DataMat','TimeSeries','Operations','-append');
-
-    % Add additional variables to the new file, if they exist in the previous file:
-    varNames = whos('-file',whatDataFile);
-    varNames = {varNames.name};
-
-    % Remove clustering information, because it will no longer be valid
-    if ismember('ts_clust',varNames)
-        ts_clust = struct('distanceMetric','none','Dij',[],...
-                    'ord',1:size(TS_DataMat,1),'linkageMethod','none');
-        save(outputFileName,'ts_clust','-append');
-    end
-    if ismember('op_clust',varNames)
-        op_clust = struct('distanceMetric','none','Dij',[],...
-                    'ord',1:size(TS_DataMat,2),'linkageMethod','none');
-        save(outputFileName,'op_clust','-append');
+    if isfield(S,'op_clust')
+        S.op_clust = struct('distanceMetric','none','Dij',[],...
+                    'ord',1:height(Operations),'linkageMethod','none');
     end
 
-    % Add the Quality and CalcTime matrices if they exist:
-    if ismember('TS_Quality',varNames)
-        load(whatDataFile,'TS_Quality')
-        TS_Quality = TS_Quality(i_keep.TimeSeries,i_keep.Operations);
-        save(outputFileName,'TS_Quality','-append');
-    end
-    if ismember('TS_CalcTime',varNames)
-        load(whatDataFile,'TS_CalcTime')
-        TS_CalcTime = TS_CalcTime(i_keep.TimeSeries,i_keep.Operations);
-        save(outputFileName,'TS_CalcTime','-append');
-    end
+    save(outputFileName,'-struct','S','-v7.3');
 
     fprintf(1,'Data saved to %s!\n',outputFileName);
 end
 
-% Don't display all of this info to screen if it's been saved and not stored
 if nargout == 0
+    % Don't display all of this info to screen if it's been saved and not stored
     clear('TS_DataMat','TimeSeries','Operations');
+elseif isfield(S,'TS_Quality')
+    % NaN-ify special/error cells in the returned matrix, matching TS_LoadData:
+    TS_DataMat(~isfinite(TS_DataMat)) = NaN;
+    TS_DataMat(S.TS_Quality > 0) = NaN;
 end
 
 %-------------------------------------------------------------------------------
