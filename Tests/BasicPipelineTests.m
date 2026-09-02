@@ -365,8 +365,68 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
                 'series-parallel did not correctly resume an interrupted run.');
         end
 
+        function test_TS_Combine_nway_equals_pairwise(testCase)
+            % The many-file form TS_Combine({f1,...,fN},...) of G disjoint
+            % subsets must give the same combined matrices and TimeSeries.ID
+            % ordering as accumulating the subsets pairwise through the two-file
+            % form of TS_Combine.
+            src = testCase.precomputedMatName; % computed HCTSA (copy of OG)
+            raw = load(src);
+            allIDs = raw.TimeSeries.ID;
+            edges = round(linspace(0,numel(allIDs),5)); % 4 disjoint blocks
+
+            % Build the subset files by raw indexing (independent of TS_Subset):
+            subFiles = cell(1,4);
+            for k = 1:4
+                subFiles{k} = sprintf('HCTSA_combine_part%u.mat',k);
+                if exist(subFiles{k},'file'), delete(subFiles{k}); end
+                its = ismember(allIDs, allIDs(edges(k)+1:edges(k+1)));
+                S = raw;
+                S.TimeSeries = raw.TimeSeries(its,:);
+                S.TS_DataMat = raw.TS_DataMat(its,:);
+                S.TS_Quality = raw.TS_Quality(its,:);
+                S.TS_CalcTime = raw.TS_CalcTime(its,:);
+                save(subFiles{k},'-struct','S','-v7.3');
+            end
+
+            % Pairwise accumulation via TS_Combine (compare_tsids = true):
+            pairFile = 'HCTSA_combine_pairwise.mat';
+            if exist(pairFile,'file'), delete(pairFile); end
+            copyfile(subFiles{1},pairFile);
+            for k = 2:4
+                TS_Combine(pairFile, subFiles{k}, true, false, pairFile, true);
+            end
+
+            % One-shot N-way combine (cell array as the first argument):
+            manyFile = 'HCTSA_combine_many.mat';
+            if exist(manyFile,'file'), delete(manyFile); end
+            TS_Combine(subFiles, manyFile, true, true);
+
+            p = load(pairFile);
+            m = load(manyFile);
+
+            testCase.verifyEqual(m.TimeSeries.ID, p.TimeSeries.ID, ...
+                'TimeSeries.ID ordering differs between N-way and pairwise combine.');
+            testCase.verifyEqual(sort(m.TimeSeries.ID), sort(allIDs), ...
+                'N-way combine did not recover every original time series exactly once.');
+            testCase.verifyEqual(m.TS_DataMat, p.TS_DataMat, 'RelTol', 0, ...
+                'TS_DataMat differs between N-way and pairwise combine.');
+            testCase.verifyEqual(m.TS_Quality, p.TS_Quality, ...
+                'TS_Quality differs between N-way and pairwise combine.');
+            testCase.verifyEqual(m.TS_CalcTime, p.TS_CalcTime, 'RelTol', 0, ...
+                'TS_CalcTime differs between N-way and pairwise combine.');
+
+            % Also equals the original (rows reordered by sorted ID):
+            [~,ord] = sort(allIDs);
+            testCase.verifyEqual(m.TS_DataMat, raw.TS_DataMat(ord,:), 'RelTol', 0, ...
+                'N-way combined TS_DataMat does not match the original.');
+
+            for k = 1:4, delete(subFiles{k}); end
+            delete(pairFile); delete(manyFile);
+        end
+
         function test_TS_InspectQuality(testCase)
-            % simple check of whether or not the function runs. 
+            % simple check of whether or not the function runs.
             try
                 TS_InspectQuality('summary', testCase.precomputedMatName);
                 close()

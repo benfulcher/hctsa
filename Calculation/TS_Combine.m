@@ -1,18 +1,20 @@
 function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,forceWrite)
-% TS_Combine   Combine two hctsa .mat datasets
+% TS_Combine   Combine hctsa .mat datasets
 %
 % Writes the new combined dataset to a new .mat file
 % Any data matrices are combined, and the TimeSeries and Operations tables are
 % updated to reflect the concatenation.
 %
 % Note that in the case of duplicates, HCTSA_1 takes precedence over
-% HCTSA_2.
+% HCTSA_2 (for the two-file form; the first list entry for the many-file form).
 %
 %---INPUTS:
-% HCTSA_1: the first hctsa dataset (a .mat filename)
-% HCTSA_2: the second hctsa dataset (a .mat filename)
+% HCTSA_1: the first hctsa dataset (a .mat filename), OR a cell array of hctsa
+%          .mat filenames to combine in a single pass -- see MANY FILES below.
+% HCTSA_2: the second hctsa dataset (a .mat filename). Omit / leave empty when
+%          HCTSA_1 is a cell array.
 % compare_tsids: (logical) whether to consider IDs in each file as the same.
-%                If the two datasets to be joined are from different databases,
+%                If the datasets to be joined are from different databases,
 %                then a union of all time series results, regardless of the
 %                uniqueness of their IDs (false, default).
 %                However, if set to true (true, useful for different parts of a
@@ -22,17 +24,29 @@ function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 %                   between the two datasets. By default (false) assumes that
 %                   both datasets were computed using the exact same feature set.
 %                   Setting to true takes the union of the features present in
-%                   both (assumes disjoint).
+%                   both (assumes disjoint). Not supported for the many-file form.
 % outputFileName: output to a custom .mat file ('HCTSA.mat' by default).
 % forceWrite: whether to write to the custom filename (regardless of whether it already exists)
 %
 %---OUTPUTS:
 % Writes a new, combined .mat file (to the outputFileName)
 %
+%---MANY FILES (single-pass, O(N)):
+% Pass a cell array of filenames as the first argument to combine them all in
+% one pass, rather than an O(N^2) loop of pairwise TS_Combine calls (each of
+% which reloads and rewrites the growing accumulator). The remaining arguments
+% shift:
+%   TS_Combine(fileList, outputFileName, compare_tsids, forceWrite)
+% All inputs must share the same feature set (identical Operations);
+% merge_features is not available here (combine those pairwise).
+%
 %---USAGE:
 % Combine two datasets computed using the same set of features, 'HCTSA_1.mat' and
 % 'HCTSA_2.mat', into a new combined HCTSA file:
 % TS_Combine('HCTSA_1.mat','HCTSA_2.mat');
+%
+% Combine many chunk files of one dataset in a single pass:
+% TS_Combine({'HCTSA_1.mat','HCTSA_2.mat','HCTSA_3.mat'},'HCTSA.mat',true);
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -59,6 +73,32 @@ function TS_Combine(HCTSA_1,HCTSA_2,compare_tsids,merge_features,outputFileName,
 % ------------------------------------------------------------------------------
 % Check inputs:
 % ------------------------------------------------------------------------------
+
+if nargin < 1
+    error('Must provide hctsa .mat file(s) to combine')
+end
+
+% ------------------------------------------------------------------------------
+% Many-file form: a cell array of filenames as the first argument.
+% Arguments shift: TS_Combine(fileList, outputFileName, compare_tsids, forceWrite)
+% ------------------------------------------------------------------------------
+if iscell(HCTSA_1)
+    if nargin >= 2 && ~isempty(HCTSA_2)
+        manyOutputFile = HCTSA_2;
+    else
+        manyOutputFile = 'HCTSA.mat';
+    end
+    if nargin < 3 || isempty(compare_tsids)
+        compare_tsids = false;
+    end
+    if nargin < 4 || isempty(merge_features) % 4th positional arg is forceWrite here
+        manyForceWrite = false;
+    else
+        manyForceWrite = merge_features;
+    end
+    combineManyFiles(HCTSA_1(:),manyOutputFile,compare_tsids,manyForceWrite);
+    return
+end
 
 if nargin < 2
     error('Must provide paths for two HCTSA*.mat files')
@@ -254,7 +294,12 @@ else
         fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_Init\n')
 
         % Check for duplicate IDs:
-        [uniqueTsids,ix_ts] = unique(TimeSeries.ID); % will be sorted
+        uniqueTsids = unique(TimeSeries.ID); % sorted
+        % Index the FIRST occurrence of each ID (ismember's second output is the
+        % lowest matching index) so that HCTSA_1 takes precedence over HCTSA_2
+        % for duplicates, as the docstring promises -- rather than relying on
+        % unique()'s occurrence convention, which has differed across releases:
+        [~,ix_ts] = ismember(uniqueTsids,TimeSeries.ID);
         TimeSeries = TimeSeries(ix_ts,:);
 
         % Check whether trimming just occurred:
@@ -403,4 +448,173 @@ function [gotTheField,theCombinedMatrix] = MergeMe(loadedData,theField,merge_fea
     end
 end
 
+end
+
+%===============================================================================
+function combineManyFiles(fileList,outputFileName,compare_tsids,forceWrite)
+    % Single-pass combine of many hctsa files that share a feature set: load
+    % each once, vertcat the TimeSeries tables and the data/quality/calc-time
+    % matrices, dedupe once, and write once. O(N) vs the O(N^2) of looping
+    % pairwise TS_Combine over a growing accumulator.
+
+    if isempty(fileList)
+        error('Provide at least one hctsa .mat filename to combine');
+    end
+    if ~strcmp(outputFileName(end-3:end),'.mat')
+        error('Specify a .mat filename to output');
+    end
+    numFiles = numel(fileList);
+    for i = 1:numFiles
+        if ~exist(fileList{i},'file')
+            error('Could not find %s',fileList{i});
+        end
+    end
+
+    %--- Load every input once:
+    fprintf(1,'Loading %u files...',numFiles);
+    loadedData = cell(numFiles,1);
+    for i = 1:numFiles
+        loadedData{i} = load(fileList{i});
+    end
+    fprintf(1,' Loaded.\n');
+    for i = 1:numFiles
+        fprintf(1,'%u: %s -- %u time series x %u operations.\n',i,fileList{i},...
+                    height(loadedData{i}.TimeSeries),height(loadedData{i}.Operations));
+    end
+
+    %--- Feature set must be identical across all inputs:
+    refOps = loadedData{1}.Operations;
+    for i = 2:numFiles
+        if height(loadedData{i}.Operations) ~= height(refOps) || ...
+                ~isequal(loadedData{i}.Operations.Name,refOps.Name)
+            error(['Operations differ between %s and %s. The many-file form of ' ...
+                'TS_Combine requires an identical feature set across all inputs ' ...
+                '(use the two-file form with merge_features to merge disjoint ' ...
+                'feature sets).'],fileList{1},fileList{i});
+        end
+    end
+    Operations = refOps;
+    MasterOperations = loadedData{1}.MasterOperations;
+
+    %--- git version consistency:
+    gitHashes = cell(numFiles,1);
+    for i = 1:numFiles
+        if isfield(loadedData{i},'gitInfo') && isfield(loadedData{i}.gitInfo,'hash')
+            gitHashes{i} = loadedData{i}.gitInfo.hash;
+        else
+            gitHashes{i} = '';
+        end
+    end
+    if numel(unique(gitHashes)) > 1
+        warning(['hctsa git versions are inconsistent across the input files; ' ...
+            'results may not be comparable:\n%s'],strjoin(compose('  %s: %s',...
+            string(fileList),string(gitHashes)),newline));
+    end
+    if isfield(loadedData{1},'gitInfo')
+        gitInfo = loadedData{1}.gitInfo;
+    else
+        gitInfo = struct();
+    end
+
+    %--- Concatenate the TimeSeries tables (canonical variables only):
+    canonicalVariables = {'ID','Name','Keywords','Length','Data'};
+    tsTables = cell(numFiles,1);
+    for i = 1:numFiles
+        theTable = loadedData{i}.TimeSeries;
+        isExtra = ~ismember(theTable.Properties.VariableNames,canonicalVariables);
+        if any(isExtra)
+            theExtra = theTable.Properties.VariableNames(isExtra);
+            theTable(:,theExtra) = [];
+            for j = 1:numel(theExtra)
+                fprintf(1,'Removed non-canonical variable, %s, from %s.\n',theExtra{j},fileList{i});
+            end
+        end
+        theTable = theTable(:,canonicalVariables(ismember(canonicalVariables,theTable.Properties.VariableNames)));
+        tsTables{i} = theTable;
+    end
+    TimeSeries = vertcat(tsTables{:});
+
+    %--- Concatenate the matrices in the same row order:
+    [gotData,TS_DataMat] = stackField(loadedData,'TS_DataMat');
+    [gotQuality,TS_Quality] = stackField(loadedData,'TS_Quality');
+    [gotCalcTime,TS_CalcTime] = stackField(loadedData,'TS_CalcTime');
+
+    %--- Dedupe time series:
+    needReIndex = false;
+    if compare_tsids
+        % IDs are comparable: trim duplicate IDs, first input file wins.
+        uniqueTsids = unique(TimeSeries.ID);
+        % Index the FIRST occurrence of each ID (ismember's second output is the
+        % lowest matching index) so the earliest file in fileList takes
+        % precedence -- rather than relying on unique()'s occurrence convention,
+        % which has differed across MATLAB releases:
+        [~,ix_ts] = ismember(uniqueTsids,TimeSeries.ID);
+        numDup = height(TimeSeries) - numel(ix_ts);
+        if numDup > 0
+            fprintf(1,'Trimming %u duplicate time series (matched by ID) to a total of %u.\n',...
+                        numDup,numel(ix_ts));
+        else
+            fprintf(1,'All %u time series were distinct.\n',height(TimeSeries));
+        end
+    else
+        % IDs not comparable: dedupe by Name (keep first occurrence), reindex if
+        % duplicate IDs remain.
+        [~,ix_ts] = unique(TimeSeries.Name,'stable');
+        numDup = height(TimeSeries) - numel(ix_ts);
+        if numDup > 0
+            warning('%u duplicate time series names present in combined dataset -- removed',numDup);
+        end
+        if numel(unique(TimeSeries.ID(ix_ts))) < numel(ix_ts)
+            needReIndex = true;
+        end
+    end
+
+    TimeSeries = TimeSeries(ix_ts,:);
+    if gotData,     TS_DataMat  = TS_DataMat(ix_ts,:);  end
+    if gotQuality,  TS_Quality  = TS_Quality(ix_ts,:);  end
+    if gotCalcTime, TS_CalcTime = TS_CalcTime(ix_ts,:); end
+
+    %--- Save (single write):
+    if ~forceWrite
+        hereSheIs = which(fullfile(pwd,outputFileName));
+        if ~isempty(hereSheIs)
+            outputFileName = [outputFileName(1:end-4),'_combined.mat'];
+        end
+    end
+    fprintf(1,'----------Saving %u x %u combined dataset to %s----------\n',...
+                height(TimeSeries),height(Operations),outputFileName);
+
+    save(outputFileName,'TimeSeries','Operations','MasterOperations','gitInfo','-v7.3');
+    if gotData,     save(outputFileName,'TS_DataMat','-append');  end
+    if gotQuality,  save(outputFileName,'TS_Quality','-append');  end
+    if gotCalcTime, save(outputFileName,'TS_CalcTime','-append'); end
+
+    fprintf(1,'%s contains %u time series and %u operations.\n',outputFileName,...
+                height(TimeSeries),height(Operations));
+
+    if needReIndex
+        fprintf(1,'Duplicate time-series IDs present -- re-indexing.\n');
+        TS_ReIndex(outputFileName,'ts',true);
+    end
+
+    %---------------------------------------------------------------------------
+    function [gotField,stacked] = stackField(loadedData,theField)
+        n = numel(loadedData);
+        gotField = all(cellfun(@(s) isfield(s,theField),loadedData));
+        if ~gotField
+            stacked = [];
+            return
+        end
+        switch theField
+        case 'TS_DataMat',  fprintf(1,'Combining data matrices...');
+        case 'TS_Quality',  fprintf(1,'Combining quality matrices...');
+        case 'TS_CalcTime', fprintf(1,'Combining calculation-time matrices...');
+        end
+        parts = cell(n,1);
+        for k = 1:n
+            parts{k} = loadedData{k}.(theField);
+        end
+        stacked = vertcat(parts{:});
+        fprintf(1,' Done.\n');
+    end
 end
