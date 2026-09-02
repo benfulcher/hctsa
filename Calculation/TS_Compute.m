@@ -299,6 +299,17 @@ end
 
 % Save back to local files (if results were computed):
 if any(numCalc_all > 0)
+	% Special/error cells (fatal errors, NaN/Inf/complex outputs) are recorded
+	% in TS_Quality; store them in TS_DataMat as NaN so a raw load of the file
+	% can't mistake them for computed values. This is the same convention
+	% TS_LoadData applies on read, applied here at the single point of truth so
+	% that a dataset computed in one call and the same dataset computed in
+	% several calls (batched / resumed / runslice-style) write an identical
+	% TS_DataMat. (Older files may still hold the legacy 0 coding; TS_LoadData
+	% maps both to NaN.)
+	TS_DataMat(~isfinite(TS_DataMat)) = NaN;
+	TS_DataMat(TS_Quality > 0) = NaN;
+
 	fprintf(1,'Saving all results to %s...',customFile);
 	saveTimer = tic;
 	save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')

@@ -217,6 +217,57 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             writetable(fatal_error_ops_table, testCase.failedOpFileName);
         end
 
+        function test_TS_Compute_split_equals_single(testCase)
+            % Regression test for the special-value round-trip bug: computing an
+            % HCTSA dataset in a single TS_Compute call must yield a byte-identical
+            % TS_DataMat to computing it in several calls over disjoint
+            % time-series ID ranges (as batched / resumed / runslice-style runs
+            % do). Previously a single call stored special/error cells as the
+            % literal 0 while a batched call reloaded earlier rows via
+            % TS_LoadData and wrote them back as NaN -- so the same computation
+            % gave a different on-disk TS_DataMat depending on how it was split.
+            % TS_Compute now stores special cells as NaN in every case.
+
+            inpFile = 'INP_split_test.mat';
+            singleFile = 'HCTSA_split_single.mat';
+            splitFile  = 'HCTSA_split_multi.mat';
+
+            % A constant series guarantees some special-valued (quality>0) cells
+            % under catch22; the rest exercise ordinary values:
+            rng(42);
+            timeSeriesData = {randn(200,1); 2.5*ones(150,1); cumsum(randn(300,1)); sin((1:250)'/3)}; %#ok<NASGU>
+            labels = {'rand_ts';'constant_ts';'randomwalk_ts';'sine_ts'}; %#ok<NASGU>
+            keywords = {'a';'b';'c';'d'}; %#ok<NASGU>
+            save(inpFile,'timeSeriesData','labels','keywords');
+
+            for f = {singleFile, splitFile}
+                if exist(f{1},'file'), delete(f{1}); end
+                TS_Init(inpFile,'catch22',false,f{1});
+            end
+
+            % One call vs. two calls over disjoint ts-id ranges:
+            TS_Compute(false,[],[],'missing',singleFile,'fast');
+            TS_Compute(false,1:2,[],'missing',splitFile,'fast');
+            TS_Compute(false,3:4,[],'missing',splitFile,'fast');
+
+            a = load(singleFile);
+            b = load(splitFile);
+
+            testCase.assertTrue(any(a.TS_Quality(:) > 0), ...
+                'Test is vacuous: no special-valued cells were produced.');
+            testCase.verifyEqual(b.TS_Quality, a.TS_Quality, ...
+                'TS_Quality differs between split and single compute.');
+            testCase.verifyEqual(isnan(b.TS_DataMat), isnan(a.TS_DataMat), ...
+                'NaN pattern of TS_DataMat differs between split and single compute.');
+            testCase.verifyEqual(b.TS_DataMat, a.TS_DataMat, 'RelTol', 0, ...
+                'TS_DataMat differs between split and single compute.');
+            % Special/error cells must be stored on disk as NaN:
+            testCase.verifyTrue(all(isnan(a.TS_DataMat(a.TS_Quality > 0))), ...
+                'Special-valued cells not stored as NaN after single compute.');
+            testCase.verifyTrue(all(isnan(b.TS_DataMat(b.TS_Quality > 0))), ...
+                'Special-valued cells not stored as NaN after split compute.');
+        end
+
         function test_TS_InspectQuality(testCase)
             % simple check of whether or not the function runs. 
             try

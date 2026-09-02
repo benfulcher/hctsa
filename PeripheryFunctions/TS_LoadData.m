@@ -75,10 +75,10 @@ if isstruct(whatDataFile)
         Operations = table();
     end
 
-    % Bad-quality entries (fatal errors, NaN/Inf/complex outputs) are stored in
-    % TS_DataMat as the literal number 0, with their true status recorded only
-    % in TS_Quality -- convert them to NaN here so callers can't mistake them
-    % for real computed values:
+    % Bad-quality entries (fatal errors, NaN/Inf/complex outputs) are recorded
+    % in TS_Quality; TS_Compute stores them in TS_DataMat as NaN, but older
+    % files use the legacy coding of a literal 0. Normalise both to NaN here so
+    % callers can't mistake them for real computed values:
     if ~isempty(TS_DataMat) && isfield(whatDataFile,'TS_Quality')
         TS_DataMat(~isfinite(TS_DataMat)) = NaN;
         TS_DataMat(whatDataFile.TS_Quality > 0) = NaN;
@@ -124,11 +124,11 @@ fprintf(1,'Loading data from %s...',whatDataFile);
 load(whatDataFile,'TS_DataMat','Operations','TimeSeries','TS_Quality');
 fprintf(1,' Done.\n');
 
-% Bad-quality entries (fatal errors, NaN/Inf/complex outputs) are stored in
-% TS_DataMat as the literal number 0, with their true status recorded only
-% in TS_Quality -- convert them to NaN here so callers can't mistake them
-% for real computed values (TS_Normalize already does this explicitly, so
-% this is a no-op for already-normalized data):
+% Bad-quality entries (fatal errors, NaN/Inf/complex outputs) are recorded in
+% TS_Quality; TS_Compute stores them in TS_DataMat as NaN, but older files use
+% the legacy coding of a literal 0. Normalise both to NaN here so callers can't
+% mistake them for real computed values (TS_Normalize already does this
+% explicitly, so this is a no-op for already-normalized data):
 if exist('TS_Quality','var')
     TS_DataMat(~isfinite(TS_DataMat)) = NaN;
     TS_DataMat(TS_Quality > 0) = NaN;
