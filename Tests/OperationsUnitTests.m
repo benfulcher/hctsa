@@ -1509,6 +1509,67 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 EN_DispEn(y, 2, 6, 1).normDispEn, 'AbsTol', 1e-12);
         end
 
+        %-------------------------------------------------------------
+        % SP_Rhythmicity
+        %-------------------------------------------------------------
+        function test_SP_Rhythmicity_SustainedVsBurstySamePower(testCase)
+            % The whole point of the rhythmicity index: against a common
+            % noise floor, a sustained oscillation and a train of brief
+            % bursts at the SAME frequency and matched power are told apart
+            % -- the sustained one has far higher phase persistence, so a
+            % taller, more prominent peak in the rhythmicity spectrum, at
+            % the right frequency. (A noise floor is needed: LAVI of a *pure*
+            % sinusoid saturates near 1 at every frequency, because the
+            % off-band wavelet output is still a phase-coherent copy of the
+            % tone -- see Karvat et al.)
+            rng(7);
+            N = 3000;
+            t = (1:N)';
+            f0 = 0.05; % cycles/sample, inside the default [0.02,0.4] grid
+
+            carrier = sin(2*pi*f0*t);
+            period = 1/f0;
+            env = double(mod(floor(t/(3*period)), 3) == 0); % ~3-cycle-on, 6-off
+            bursts = env .* sin(2*pi*f0*t);
+            bursts = bursts / std(bursts) * std(carrier); % power-match to carrier
+
+            noise = randn(N,1);
+            outS = SP_Rhythmicity(carrier + noise);
+            outB = SP_Rhythmicity(bursts + noise);
+
+            testCase.verifyGreaterThan(outS.lavi_max, 0.85, ...
+                'A sustained oscillation above noise should have high peak phase persistence.');
+            testCase.verifyGreaterThan(outS.lavi_max, outB.lavi_max + 0.2, ...
+                'Sustained oscillation should be markedly more rhythmic than power-matched bursts.');
+            testCase.verifyGreaterThan(outS.lavi_maxOnMedian, outB.lavi_maxOnMedian, ...
+                'The sustained band should stand out further above the rhythmicity baseline.');
+            testCase.verifyEqual(outS.lavi_freqAtMax, 2*pi*f0, 'RelTol', 0.2, ...
+                'The most rhythmic frequency should be the oscillation frequency.');
+        end
+
+        function test_SP_Rhythmicity_WhiteNoiseHasLowFlatRhythmicity(testCase)
+            % White noise has no sustained rhythm at any frequency: LAVI
+            % should sit low and roughly flat, with a small maxOnMedian.
+            rng(11);
+            out = SP_Rhythmicity(randn(4000,1));
+            testCase.verifyLessThan(out.lavi_median, 0.4, ...
+                'White noise should have low baseline rhythmicity.');
+            testCase.verifyLessThan(out.lavi_maxOnMedian, 2, ...
+                'White noise should show no strongly prominent rhythmic band.');
+        end
+
+        function test_SP_Rhythmicity_DegenerateInputsReturnNaN(testCase)
+            % Constant series (no phase) and series too short to fit even a
+            % handful of the analysis wavelets should return a scalar NaN,
+            % matching the codebase NaN-vs-error convention.
+            testCase.verifyTrue(isscalar(SP_Rhythmicity(ones(2000,1))) && ...
+                isnan(SP_Rhythmicity(ones(2000,1))), ...
+                'A constant series carries no phase information.');
+            testCase.verifyTrue(isscalar(SP_Rhythmicity(randn(40,1))) && ...
+                isnan(SP_Rhythmicity(randn(40,1))), ...
+                'A too-short series cannot support the rhythmicity spectrum.');
+        end
+
     end
 end
 
