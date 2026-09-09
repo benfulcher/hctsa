@@ -825,7 +825,7 @@ SP_EnvelopeStats(x_z,0.5,0.05)	SP_EnvelopeStats_05_005
 SP_SinusoidFit(x_z,'sin1')	SP_SinusoidFit_sin1
 SP_SinusoidFit(x_z,'sin2')	SP_SinusoidFit_sin2
 SP_SinusoidFit(x_z,'sin3')	SP_SinusoidFit_sin3
-SP_Rhythmicity(x_z,5,1.5,40,0.02,0.4)	SP_Rhythmicity_5_15_40
+SP_Rhythmicity(x_z,5,1.5,40,0.02,0.4,5)	SP_Rhythmicity_5_15_40
 SP_Specparam(x_z,'fixed',4,1,[0.02,0.5],[],Inf)	SP_Specparam_fixed_4_1
 SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 SP_Summaries(x_z,'fft',[],[],false)	                SP_Summaries_fft

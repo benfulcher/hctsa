@@ -1545,6 +1545,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The sustained band should stand out further above the rhythmicity baseline.');
             testCase.verifyEqual(outS.lavi_freqAtMax, 2*pi*f0, 'RelTol', 0.2, ...
                 'The most rhythmic frequency should be the oscillation frequency.');
+
+            % The amplitude-weighted spectrum (LC) should tell the same story:
+            testCase.verifyGreaterThan(outS.lc_max, outB.lc_max + 0.15, ...
+                'Lagged coherence should also separate sustained from bursty.');
+
+            % Smoothed band count: one dominant rhythmic band for the
+            % sustained oscillation, and no more bands than the (jaggier)
+            % bursty case would spuriously produce.
+            testCase.verifyGreaterThanOrEqual(outS.lavi_numPeaks, 1, ...
+                'The sustained oscillation should register at least one rhythmic band.');
+            testCase.verifyLessThanOrEqual(outS.lavi_numPeaks, 3, ...
+                'Smoothing should keep the sustained-oscillation band count small.');
         end
 
         function test_SP_Rhythmicity_WhiteNoiseHasLowFlatRhythmicity(testCase)
@@ -1556,6 +1568,20 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'White noise should have low baseline rhythmicity.');
             testCase.verifyLessThan(out.lavi_maxOnMedian, 2, ...
                 'White noise should show no strongly prominent rhythmic band.');
+            testCase.verifyLessThanOrEqual(out.lavi_numPeaks, 2, ...
+                'Smoothing should leave white noise with essentially no rhythmic bands.');
+        end
+
+        function test_SP_Rhythmicity_SmoothingReducesSpuriousBandCount(testCase)
+            % The smoothWin argument should monotonically (weakly) shrink the
+            % rhythmic-band count on a noisy spectrum: more smoothing, fewer
+            % spurious local maxima.
+            rng(23);
+            y = filter(1, [1 -0.7], randn(3000,1)); % AR(1): jagged LAVI spectrum
+            nUnsmoothed = SP_Rhythmicity(y, [], [], [], [], [], 1).lavi_numPeaks;
+            nSmoothed = SP_Rhythmicity(y, [], [], [], [], [], 9).lavi_numPeaks;
+            testCase.verifyLessThanOrEqual(nSmoothed, nUnsmoothed, ...
+                'A wider Daniell window should not increase the band count.');
         end
 
         function test_SP_Rhythmicity_DegenerateInputsReturnNaN(testCase)
