@@ -40,6 +40,8 @@ TS_PlotDataMatrix;                  % plot the clustered feature matrix
 
 See the [docs](https://time-series-features.gitbook.io/hctsa-manual/) for how to bring in your own time-series data and for the many other analysis and visualization tools available.
 
+<p align="center"><img src="img/eeg_lowdim_demo.gif" alt="hctsa low-dimensional feature-based projection of EEG time series, clicking through points to inspect the underlying time series" width="420"/></p>
+
 ## Documentation &#x1F4D6;
 
 __Comprehensive documentation__ for _hctsa_, from getting started through to more advanced analyses is on [GitBook](https://time-series-features.gitbook.io/hctsa-manual/).
