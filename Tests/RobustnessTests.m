@@ -110,6 +110,33 @@ classdef RobustnessTests < matlab.unittest.TestCase
         function test_DeterministicOnContinuousSeries(testCase)
             testCase.checkDeterminism('ar1');
         end
+
+        function test_EachOperationIndependentOfGlobalRngState(testCase)
+            % The two tests above recompute the whole library in file order,
+            % which cannot catch an operation that draws from the global random
+            % stream without seeding it when an EARLIER operation happens to
+            % reset that stream (NL_EmbedCluster passed them for exactly that
+            % reason). Here every master operation is evaluated twice from two
+            % different global RNG states, in isolation, and must agree.
+            [ts, ~] = RobustnessTests.adversarialSeries('ar1');
+            x = ts; x_z = zscore(x);
+            mops = testCase.MasterOperations;
+            bad = {};
+            for i = 1:height(mops)
+                fn = str2func(['@(x,x_z) ', mops.Code{i}]);
+                try
+                    rng(1); o1 = fn(x, x_z);
+                    rng(2); o2 = fn(x, x_z);
+                catch
+                    continue % errors are the no-error test's business
+                end
+                if ~isequaln(o1, o2)
+                    bad{end+1} = mops.Code{i}; %#ok<AGROW>
+                end
+            end
+            testCase.verifyEmpty(bad, sprintf(['%u master operation(s) gave different outputs from ' ...
+                'different global RNG states (unseeded randomness):\n  %s'], numel(bad), strjoin(bad, newline + "  ")));
+        end
     end
 
     methods (Access = private)
