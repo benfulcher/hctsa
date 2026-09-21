@@ -108,9 +108,7 @@ switch whatDistn
 			a = raylfit(x);
 			peaky = raylpdf(a, a); thresh = peaky / 100;
 			xf(1) = 0;
-			xf(2) = a;
-			ange = 10;
-			while ange > thresh, xf(2) = xf(2) + xStep; ange = raylpdf(xf(2), a); end
+			xf(2) = SUB_WalkTail(@(x) raylpdf(x, a), a, xStep, thresh);
 		end
 
 	case 'exp'
@@ -123,9 +121,7 @@ switch whatDistn
 		else a = expfit(x);
 			peaky = exppdf(0, a); thresh = peaky / 100;
 			xf(1) = 0;
-			xf(2) = 0;
-			ange = 10;
-			while ange > thresh, xf(2) = xf(2) + xStep; ange = exppdf(xf(2), a); end
+			xf(2) = SUB_WalkTail(@(x) exppdf(x, a), 0, xStep, thresh);
 		end
 
 	case 'gamma'
@@ -139,9 +135,7 @@ switch whatDistn
 				peaky = gampdf((a(1) - 1) * a(2), a(1), a(2)); thresh = peaky / 100;
 			end
 			xf(1) = 0;
-			xf(2) = a(1) * a(2);
-			ange = 10;
-			while ange > thresh, xf(2) = xf(2) + xStep; ange = gampdf(xf(2), a(1), a(2)); end
+			xf(2) = SUB_WalkTail(@(x) gampdf(x, a(1), a(2)), a(1) * a(2), xStep, thresh);
 		end
 
 	case 'logn'
@@ -152,9 +146,7 @@ switch whatDistn
 			a = lognfit(x);
 			peaky = lognpdf(exp(a(1) - a(2)^2), a(1), a(2)); thresh = peaky / 100;
 			xf(1) = 0;
-			xf(2) = exp(a(1) - a(2)^2);
-			ange = 10;
-			while ange > thresh, xf(2) = xf(2) + xStep; ange = lognpdf(xf(2), a(1), a(2)); end
+			xf(2) = SUB_WalkTail(@(x) lognpdf(x, a(1), a(2)), exp(a(1) - a(2)^2), xStep, thresh);
 		end
 
 	case 'wbl'
@@ -170,9 +162,7 @@ switch whatDistn
 				thresh = peaky / 100;
 			end
 			xf(1) = 0;
-			xf(2) = 0;
-			ange = 10;
-			while ange > thresh, xf(2) = xf(2) + xStep; ange = wblpdf(xf(2), a(1), a(2)); end
+			xf(2) = SUB_WalkTail(@(x) wblpdf(x, a(1), a(2)), 0, xStep, thresh);
 		end
 
 	otherwise
@@ -266,3 +256,59 @@ r = (ffit ~= 0) & (f ~= 0);
 out.relent = sum(f(r) .* log(f(r) ./ ffit(r)) * (xi(2) - xi(1)));
 
 end
+
+% ------------------------------------------------------------------------------
+function xEnd = SUB_WalkTail(pdfFn, xStart, xStep, thresh)
+	% The first grid point xStart + k*xStep (k >= 1) at which the fitted pdf has
+	% fallen to <= thresh, i.e., exactly what the stepping loop
+	%   x = xStart; ange = 10; while ange > thresh, x = x + xStep; ange = pdfFn(x); end
+	% returns -- but found by bracketing the tail crossing and root-finding, then
+	% snapping to the grid, instead of by stepping. The stepping form costs
+	% (tail length)/xStep evaluations, and with xStep = std(x)/100 that is
+	% ~100*(scale/std(x)) -- effectively unbounded for near-constant
+	% positive-valued data (e.g., ~5e10 steps for the exponential fit to a
+	% series with mean ~1 and std ~1e-8), which stalled a whole TS_Compute run.
+
+	if ~(10 > thresh) % replicate the loop's initial ange = 10 sentinel
+		xEnd = xStart; % (e.g., thresh = Inf for a gamma with shape < 1)
+		return
+	end
+
+	% The pdf may still be rising over the first step (e.g., a Weibull/gamma
+	% with shape > 1 walked from 0), in which case the loop stops immediately:
+	xEnd = xStart + xStep;
+	if ~(pdfFn(xEnd) > thresh)
+		return
+	end
+
+	% Bracket the tail crossing: double the distance from xStart until the pdf
+	% has dropped below the threshold (the pdfs used here are unimodal, so
+	% beyond the first step that has pdf > thresh there is exactly one
+	% crossing):
+	lo = xEnd;
+	stride = max(xStep, abs(xStart) + xStep);
+	hi = lo + stride;
+	numDoublings = 0;
+	while pdfFn(hi) > thresh
+		stride = 2 * stride;
+		hi = lo + stride;
+		numDoublings = numDoublings + 1;
+		if numDoublings > 200 || ~isfinite(hi)
+			error('Could not bracket the tail of the fitted distribution');
+		end
+	end
+	xCross = fzero(@(x) pdfFn(x) - thresh, [lo, hi]);
+
+	% Snap to the loop's grid, then correct for any floating-point boundary
+	% ambiguity so the result satisfies the loop's own stopping condition
+	% (pdf > thresh at k-1, pdf <= thresh at k):
+	k = max(1, ceil((xCross - xStart) / xStep));
+	while k > 1 && ~(pdfFn(xStart + (k - 1) * xStep) > thresh)
+		k = k - 1;
+	end
+	while pdfFn(xStart + k * xStep) > thresh
+		k = k + 1;
+	end
+	xEnd = xStart + k * xStep;
+end
+
