@@ -193,12 +193,17 @@ gmOptions = statset('MaxIter', 500, 'Display', 'off');
 BIC = NaN(kMax, 1);
 gmModels = cell(kMax, 1);
 
+% fitgmdist's k-means++ initialization draws from the global random stream,
+% so seed it locally (and restore the caller's state afterwards) for
+% reproducible results independent of what ran before this operation:
+rngState = rng(0, 'twister');
 try
 	gmModels{1} = fitgmdist(y_gmm, 1);
 	BIC(1) = gmModels{1}.BIC;
 catch
 	% A single-component Gaussian fit failing (degenerate covariance) means
 	% no useful mixture structure can be assessed either:
+	rng(rngState);
 	out = NaN; return
 end
 
@@ -218,6 +223,7 @@ for k = 2:kMax
 	end
 end
 warning(warningState);
+rng(rngState);
 
 [~, bestK] = min(BIC);
 out.bestK = bestK;
