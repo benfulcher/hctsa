@@ -157,7 +157,13 @@ if nargin < 6
 end
 
 % Inference algorithm -- use the Laplace approximation:
-infAlg = @infLaplace;
+% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Laplace approximation is exact but is computed by Newton iteration, and
+% gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
+% previous call's solution, so every fit depended on whatever series was
+% fitted before it -- the same series gave outputs differing in the 4th digit
+% from call to call once the optimizer amplified the difference.)
+infAlg = @infGaussLik;
 
 % ------------------------------------------------------------------------------
 %% Downsample long time series

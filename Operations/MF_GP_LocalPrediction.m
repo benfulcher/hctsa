@@ -114,7 +114,13 @@ end
 % Details of GP:
 meanFunc = {'meanZero'}; % zero-mean process
 likFunc = @likGauss; % likelihood function (Gaussian)
-infAlg = @infLaplace; % Inference algorithm (Laplace approximation)
+% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Laplace approximation is exact but is computed by Newton iteration, and
+% gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
+% previous call's solution, so every fit depended on whatever series was
+% fitted before it -- the same series gave outputs differing in the 4th digit
+% from call to call once the optimizer amplified the difference.)
+infAlg = @infGaussLik;
 nfevals = -50;
 hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
 
