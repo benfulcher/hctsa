@@ -583,7 +583,6 @@ HT_DistributionTest(x,'ks','norm')				HT_DistributionTest_ks_norm
 HT_DistributionTest(x,'ks','rayleigh')			HT_DistributionTest_ks_rayl
 HT_DistributionTest(x,'ks','uni')				HT_DistributionTest_ks_uni
 HT_DistributionTest(x,'ks','wbl')				HT_DistributionTest_ks_wbl
-HT_DistributionTest(x,'lillie','ev')			HT_DistributionTest_lillie_ev
 HT_DistributionTest(x,'lillie','exp')			HT_DistributionTest_lillie_exp
 HT_DistributionTest(x,'lillie','norm')			HT_DistributionTest_lillie_norm
 HT_HypothesisTest(x,'jbtest')		HT_HypothesisTest_jbtest
