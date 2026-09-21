@@ -341,6 +341,11 @@ for jj = 1:numCalc
 			fprintf(1,'Error retrieving element %s from %s.\n', ...
 				Operations.CodeString{jj},MasterOperations.Label{MasterOp_ind(jj)});
 		end
+		% Record it as an error rather than leaving the initialized (0, quality 0)
+		% pair, which would otherwise be stored as a good, real-valued zero:
+		featureVector(jj) = 0;
+		calcQuality(jj) = 1;
+		calcTimes(jj) = NaN;
 	end
 end
 

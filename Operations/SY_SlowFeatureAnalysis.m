@@ -46,7 +46,7 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 %       spuriously small regardless of any real slow structure in the
 %       data. 20 was chosen (rather than SY_RampingWindows' default of
 %       10) because SFA needs enough windows to estimate the underlying
-%       4x4 covariance matrices (of the statistics, and of their
+%       5x5 covariance matrices (of the statistics, and of their
 %       increments) reasonably reliably -- at numWindows = 10 the
 %       null-distribution spread of the slowness eigenvalues is
 %       considerably wider, making individual values a noisier signal.
@@ -124,7 +124,7 @@ if nargin < 2 || isempty(numWindows)
     numWindows = 20;
 end
 
-minNumWindows = 10; % need enough windows to estimate the 4x4 covariance matrices reliably
+minNumWindows = 10; % need enough windows to estimate the 5x5 covariance matrices reliably
 minWindowLength = 20; % heuristic minimum for meaningful skewness/AC1/trev estimates
 
 if numWindows < minNumWindows
@@ -164,12 +164,12 @@ X = [winMean, winVar, winSkew, winAC1, winTrev]; % numWindows x 5
 %% PCA (variance-maximizing directions) and SFA (slowness-minimizing directions)
 % ------------------------------------------------------------------------------
 Xc = X - mean(X, 1);
-Cx = cov(Xc); % 4 x 4
+Cx = cov(Xc); % 5 x 5
 
 [Vp, Dp] = eig(Cx);
 [pcaEigs, ord] = sort(diag(Dp), 'descend');
 Vp = Vp(:, ord);
-pcScores = Xc * Vp; % numWindows x 4, PC1 = pcScores(:,1)
+pcScores = Xc * Vp; % numWindows x 5, PC1 = pcScores(:,1)
 
 % Whitening (symmetric/ZCA, avoids an arbitrary rotation among near-degenerate
 % directions). Directions with near-zero variance relative to the leading one

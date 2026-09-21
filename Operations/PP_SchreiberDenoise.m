@@ -183,7 +183,14 @@ out.fracNoCorrection = mean(numNeighbors == 1);
 % ------------------------------------------------------------------------------
 zeroOneOrig = NL_ZeroOneTest(y, 20);
 zeroOneDenoised = NL_ZeroOneTest(yDenoised, 20);
-out.KDenoised = zeroOneDenoised.K;
-out.KChange = zeroOneDenoised.K - zeroOneOrig.K;
+if ~isstruct(zeroOneOrig) || ~isstruct(zeroOneDenoised)
+	% (NL_ZeroOneTest returns NaN below its own minimum length, which is
+	% longer than the minimum imposed above for the denoising itself)
+	out.KDenoised = NaN;
+	out.KChange = NaN;
+else
+	out.KDenoised = zeroOneDenoised.K;
+	out.KChange = zeroOneDenoised.K - zeroOneOrig.K;
+end
 
 end

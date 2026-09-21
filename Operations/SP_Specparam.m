@@ -408,7 +408,11 @@ function ap = SUB_FitAperiodic(fv, logF, logS, aperiodicMode)
                        'Lower', [-Inf, 0, 0], ...
                        'Upper', [Inf, Inf, 10], ...
                        'MaxIter', 400, 'Display', 'off');
-        ft = fittype('a - log10(k + x^c)', 'independent', 'x', 'options', s);
+        % (coefficient order is named explicitly: fittype otherwise orders
+        % coefficients alphabetically, [a,c,k], which would silently hand the
+        % knee's start/bounds to the exponent and vice versa)
+        ft = fittype('a - log10(k + x^c)', 'independent', 'x', ...
+                     'coefficients', {'a', 'k', 'c'}, 'options', s);
         [c, ~] = fit(fv, logS, ft);
         kneeVal = c.k;
         predKnee = c.a - log10(kneeVal + fv.^c.c);

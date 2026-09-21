@@ -57,7 +57,7 @@ if nargin < 2 || isempty(forecastMeth)
 	forecastMeth = 'mean';
 end
 % Number of samples to train with, trainLength
-if nargin < 2 || isempty(trainLength)
+if nargin < 3 || isempty(trainLength)
 	trainLength = 3;
 end
 

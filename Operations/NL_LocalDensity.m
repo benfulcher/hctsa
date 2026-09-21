@@ -82,12 +82,14 @@ end
 Y = BF_Embed(y, embedParams{1}, embedParams{2}, false);
 
 if isscalar(Y) && isnan(Y) % embedding failed
-	error('Embedding failed.')
+	warning('Embedding failed');
+	out = NaN; return
 end
 [N_embed, m] = size(Y);
 
 if N_embed <= NNR + 2 * past
-	error('Time series too short to do a local density estimate with these parameters.')
+	warning('Time series too short to do a local density estimate with these parameters');
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------

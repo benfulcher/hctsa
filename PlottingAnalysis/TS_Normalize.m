@@ -86,7 +86,7 @@ TS_Quality = TS_GetFromData(fileName_HCTSA,'TS_Quality');
 MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
 
 if keepCalcTime
-    TS_CalcTime = TS_GetFromData(fileName_HCTSA,'TS_Quality');
+    TS_CalcTime = TS_GetFromData(fileName_HCTSA,'TS_CalcTime');
 end
 
 % Maybe we kept the git repository info

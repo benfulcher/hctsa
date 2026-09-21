@@ -55,8 +55,11 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 % ------------------------------------------------------------------------------
 
 % Quantile puts an equal number into each bin
-if nargin < 3
+if nargin < 2 || isempty(howtocg)
 	howtocg = 'quantile';
+end
+if nargin < 3 || isempty(numGroups)
+	error('Specify numGroups, the number of symbols to coarse-grain into')
 end
 
 N = length(y); % length of the input sequence

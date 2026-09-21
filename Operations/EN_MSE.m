@@ -95,14 +95,14 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow)
 % -------------------------------------------------------------------------------
 % Check inputs, set defaults
 % -------------------------------------------------------------------------------
-if nargin < 2
+if nargin < 2 || isempty(scaleRange)
+	scaleRange = 1:10;
+end
+if nargin < 3 || isempty(m)
 	m = 2;
 end
-if nargin < 3
+if nargin < 4 || isempty(r)
 	r = 0.15;
-end
-if nargin < 4
-	scaleRange = 1:10;
 end
 if nargin < 5
 	preProcessHow = '';
