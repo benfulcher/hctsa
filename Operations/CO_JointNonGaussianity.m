@@ -81,18 +81,14 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 %             reduce the correlated-pair bias described above. Default: 1.
 %
 % maxN, the maximum number of embedded points used for the skewness
-%       statistic, whose cost is O(N^2) (it involves all pairwise
-%       Mahalanobis inner products, unlike the kurtosis and KS
-%       statistics, which are both O(N)). The mean, covariance, kurtosis,
-%       and KS statistic always use the full embedded series; only the
-%       skewness statistic is computed from the first maxN embedded
-%       points when the series is longer than this (default: 10000, i.e.,
-%       an 800MB Gram matrix, ~1s; a warning is issued whenever this
-%       cropping actually happens, since the skewness estimate is still
-%       visibly noisy even at 10000 points and keeps improving with more
-%       -- this is a memory/time cap, not a convergence point. Can be set
-%       to 'full' to disable, with a second warning above 20000 points
-%       where the ~3.2GB+ Gram matrix becomes a serious memory cost).
+%       statistic (default: 10000; 'full' to disable). Legacy cap: the
+%       skewness double sum used to be evaluated through an N x N Gram
+%       matrix, O(N^2) in time and memory, which this bounded. It is now
+%       evaluated exactly through the third-moment tensor in O(N d^3)
+%       (see the code), so the cap costs nothing to lift -- it is honored
+%       only so that values are unchanged from earlier computations on
+%       series with more than maxN embedded points. The mean, covariance,
+%       kurtosis and KS statistic always use the full embedded series.
 %
 % ---OUTPUTS:
 % Mardia's raw multivariate skewness (Theiler-windowed) and multivariate
@@ -202,35 +198,44 @@ mycdf = [x1, chi2cdf(x1, d)];
 [~, ~, out.mahalKSstat] = kstest(D2, 'CDF', mycdf);
 
 % ------------------------------------------------------------------------------
-%% Mardia's multivariate skewness (O(N^2): subsample if needed)
+%% Mardia's multivariate skewness
 % ------------------------------------------------------------------------------
-if ischar(maxN) && strcmp(maxN, 'full')
-    slowThreshold = 20000;
-    if Nemb > slowThreshold
-        warning('%u embedded points exceeds %u with maxN=''full''; skewness Gram matrix may use substantial memory (>%.1fGB)', ...
-                Nemb, slowThreshold, 8 * Nemb^2 / 1e9);
-    end
-    Xskew = X;
-elseif Nemb > maxN
-    warning(['Cropping to the first %u of %u embedded points for the skewness statistic ' ...
-             '(memory/time cap, not a convergence point -- the estimate is still noisy at ' ...
-             'this size and would keep improving with more data; raise maxN or use ''full'' ' ...
-             'for a more precise, more expensive estimate)'], maxN, Nemb);
+% b_{1,d} = mean over pairs (i,j) of (x_i' x_j)^3 for whitened x. Rather than
+% forming the N x N Gram matrix (O(N^2) time and memory, which is what the
+% maxN cap was guarding), use the identity
+%   sum_{i,j} (x_i' x_j)^3 = sum_{a,b,c} ( sum_i x_ia x_ib x_ic )^2 = ||M||^2,
+% where M is the d x d x d third-moment tensor -- O(N d^3) -- and then
+% subtract the O(N w) contribution of the pairs inside the Theiler band
+% |i - j| <= w, which the mean excludes. Identical result, no N^2 term.
+if ~(ischar(maxN) && strcmp(maxN, 'full')) && Nemb > maxN
+    % (kept for backwards compatibility of values with earlier computations;
+    % no longer needed for cost)
     Xskew = X(:, 1:maxN);
 else
     Xskew = X;
 end
 Nskew = size(Xskew, 2);
-
-G = Xskew' * Xskew; % Nskew x Nskew Gram matrix of Mahalanobis inner products
-idx = (1:Nskew)';
-offBand = abs(idx - idx') > theilerWin;
-if ~any(offBand(:))
+numOffBand = Nskew^2 - ((2 * theilerWin + 1) * Nskew - theilerWin * (theilerWin + 1));
+if theilerWin >= Nskew || numOffBand <= 0
     warning('theilerWin too large relative to the (possibly subsampled) skewness sample size');
     out.mardiaSkew = NaN;
 else
-    G3 = G.^3;
-    out.mardiaSkew = sum(G3(offBand)) / sum(offBand(:));
+    % Full double sum via the third-moment tensor:
+    Xt = Xskew'; % Nskew x d
+    fullSum = 0;
+    for a = 1:d
+        for b = 1:d
+            Mab = (Xt(:, a) .* Xt(:, b))' * Xt; % 1 x d: sum_i x_ia x_ib x_ic over c
+            fullSum = fullSum + sum(Mab.^2);
+        end
+    end
+    % Pairs inside the Theiler band (including i == j), to exclude:
+    bandSum = sum(sum(Xskew.^2, 1).^3); % i == j: (x_i' x_i)^3
+    for k = 1:min(theilerWin, Nskew - 1)
+        ip = sum(Xskew(:, 1:end - k) .* Xskew(:, 1 + k:end), 1); % x_i' x_{i+k}
+        bandSum = bandSum + 2 * sum(ip.^3);
+    end
+    out.mardiaSkew = (fullSum - bandSum) / numOffBand;
 end
 
 end
