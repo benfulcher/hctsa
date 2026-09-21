@@ -238,7 +238,8 @@ for i = 1:length(c1dat)
 	try
 		c1sc(i, 1:5) = findscalingr_ind(c1dat{i}(:, 2));
 	catch
-		error('Error finding scaling range')
+		warning('Could not find a scaling range in the TISEAN c1 output (time series too short?)');
+		out = NaN; return
 	end
 end
 % scaling ranges

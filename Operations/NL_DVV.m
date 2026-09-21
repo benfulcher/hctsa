@@ -125,6 +125,13 @@ end
 % ------------------------------------------------------------------------------
 BF_ResetSeed(randomSeed); % Reset the random seed if specified
 
+% DVV_dvv draws numDVs reference delay vectors without replacement from the
+% N - m available, so a short series cannot supply them (data-dependent):
+if length(x) - m < numDVs
+	warning('Time series (N = %u) too short to draw %u reference delay vectors at m = %u', length(x), numDVs, m);
+	out = NaN; return
+end
+
 % ------------------------------------------------------------------------------
 % Run DVV on input data:
 % ------------------------------------------------------------------------------

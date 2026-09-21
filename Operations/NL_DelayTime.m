@@ -120,8 +120,18 @@ len = N - maxDelay;
 [~, index] = sort(y(1:len));
 
 err = zeros(maxDelay + 1, 1);
+maxAttempts = 1000; % per iteration, on drawing a reference point with neighbors on both sides
 for i = 1:ITERATIONS
+	numAttempts = 0;
 	while true
+		numAttempts = numAttempts + 1;
+		if numAttempts > maxAttempts
+			% (e.g., the Theiler exclusion, past, leaves no reference point with
+			% value-neighbors on both sides -- data-dependent, so NaN rather than
+			% spinning forever)
+			warning('Could not find reference points with neighbors on both sides after %u attempts', maxAttempts);
+			out = NaN; return
+		end
 		ref = ceil(rand(1, 1) * len);
 		actual = index(ref);
 		preCandidates = index(abs(index(1:ref - 1) - actual) > past);

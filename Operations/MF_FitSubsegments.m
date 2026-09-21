@@ -240,7 +240,7 @@ switch model
 			try
 				[west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
 			catch emsg
-				if strcmp(emsg.message, 'Time series too short.')
+				if contains(emsg.message, 'too short') % (ARFIT_arfit: 'Time series (N = %u) too short.')
 					fprintf(1, 'Time Series is too short for ARFIT\n');
 					out = NaN; return
 				else

@@ -85,7 +85,8 @@ if (minDelay > 0) && (minDelay < 1)
 end
 
 if wmaxlev(N, wName) < level
-	error('Chosen level, %u, is too large for this wavelet on this signal. Sorry.', level);
+	warning('Chosen level, %u, is too large for wavelet %s on a series of length %u', level, wName, N);
+	out = NaN; return
 end
 
 % The aim of this example is to recover the change points in signal y.

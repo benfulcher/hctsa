@@ -163,6 +163,12 @@ switch theTest
 				mycdf = [x1, wblcdf(x1, a(1), a(2))];
 		end
 
+		if ~any(isfinite(mycdf(:, 2)))
+			% The fitted CDF is degenerate (e.g., a gamma fit to near-constant
+			% data): no valid hypothesized distribution to test against
+			warning('Fitted %s CDF is degenerate for this data; no KS test possible', theDistn);
+			p = NaN; return
+		end
 		[~, p] = kstest(x, mycdf);
 
 	case 'lillie' % LILLIEFORS TEST
