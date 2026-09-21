@@ -31,6 +31,19 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 % parameter-transparent, and avoids EMD's known mode-mixing/boundary
 % sensitivities -- at the cost of not being a literal reimplementation.
 %
+% NOTE (audit, 2026-09): the short-window slope does NOT behave as the
+% reasoning above would suggest. Because the phase comes from a narrow
+% band (a coherence length of ~N/(2*halfWidthBins) samples), it is smooth
+% at short lags for ANY input, so mean(|dphi(t+w) - dphi(t)|) grows
+% linearly with w there -- the trivial derivative regime -- and
+% slope_short is ~1 regardless of dynamics: 0.93-1.00 for 90% of the
+% Empirical1000 series (and 0.92 for a clean periodic signal, not ~0).
+% slope_diff is consequently just 1 - slope_long (r = -0.98). The
+% informative quantity is slope_long alone: near 0 where the phase
+% fluctuation saturates (periodic, SNA-like), and positive where it keeps
+% growing (chaotic, noisy). slope_short and slope_diff are still computed
+% but should not be read as a short-window instability measure.
+%
 % cf. K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal
 % analysis of strange nonchaotic dynamics", Phys. Rev. E 77, 046220 (2008).
 % DOI: 10.1103/PhysRevE.77.046220
@@ -52,9 +65,8 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 %
 % ---OUTPUTS: the short-window and long-window log-log slopes
 % (slope_short, slope_long), their difference (slope_diff = slope_short -
-% slope_long, positive and appreciable for the SNA-like flattening
-% signature above), and the mean rotation frequency of the isolated
-% dominant component (meanFreq, in cycles per sample -- correlates r=0.90
+% slope_long), and the mean rotation frequency of the isolated dominant
+% component (meanFreq, in cycles per sample -- correlates r=0.90
 % with the existing SP_Summaries_*_maxw fields on the Bonn EEG dataset,
 % which capture a related "location of the dominant spectral peak"
 % concept via a plain periodogram rather than this operation's isolated
