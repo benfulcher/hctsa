@@ -70,60 +70,62 @@ end
 ref = randsample(N - m*tau,Nsub) + m*tau;
 
 % Compute pairwise distances between reference DVs and all DVs
-count = 0;
-acc = 0;
-for i = 1:Nsub
-    for j = m*tau+1:N
-        d(j-m*tau,i) = norm (x(ref(i)-m*tau:tau:ref(i)-tau) - x(j-m*tau:tau:j-tau));
-        if (ref(i) ~= j)
-            acc = acc + d(j-m*tau,i);
-            count = count + 1;
-        end
-    end
+% (hctsa modification: the original evaluated norm() once per (reference,
+% point) pair -- Nsub x (N - m*tau) scalar calls, and this function is run
+% once per surrogate too -- which dominated NL_DVV's cost. Build the delay
+% vectors once and use pdist2; d, avg and variance are exactly as before.)
+Nd = N - m*tau;
+Y = zeros(Nd, m); % delay vectors: row r holds x(r : tau : r + (m-1)*tau), i.e., the DV of point j = r + m*tau
+for k = 1:m
+    Y(:,k) = x((1:Nd) + (k-1)*tau);
 end
+d = pdist2(Y, Y(ref - m*tau, :)); % Nd x Nsub: d(j - m*tau, i) = ||DV_ref(i) - DV_j||
 
-% Mean and std variation calculation of input data
-avg = acc/count;
-count = 0;
-acc = 0;
-for i = 1:Nsub
-    for j = m*tau + 1:N
-        if (ref(i) ~= j)
-            acc = acc + (d(j-m*tau,i)-avg).^2;
-            count = count + 1;
-        end
-    end
-end
-variance = sqrt(acc/(count-1));
+% Mean and std variation calculation of input data, over all (reference,
+% point) pairs except each reference's pairing with itself (distance 0):
+count = Nsub*Nd - Nsub;
+avg = sum(d(:))/count;
+variance = sqrt((sum((d(:)-avg).^2) - Nsub*avg^2)/(count-1));
 
 % Calculates the range vector consisting of Ntv equally spaced regions
 n = (1:Ntv)-1;
 rd = avg-nd*variance + (2*nd*variance*n)/(Ntv-1);
 
 % Creates sets of DV's, for each ref element of subset and value rd, which have norms closer than distance rd to ref
-for n = 1:length(rd)
-    if rd(n) > 0
-        tot = 0;
-        count = 0;
-        for k = 1:Nsub
-            IND = find(d(:,k) <= rd(n)) + m*tau;
-            IND = IND(IND~=k);
-            % Only those variance values are considered for which the corresponding
-            % sets have atleast 30 DVs
-            if (length(IND) >= 30)
-                tot = tot + var(x(IND));
-                count = count+1;
-            end
-        end
-        if (~count)
-            y(n) = NaN;
-        else
-            y(n) = tot/(count*var(x));
-        end
-    else
-        y(n) = NaN;
+% (hctsa modification: the original looped over every (rd, reference) pair
+% with a find() and a var() over the selected targets. Equivalent here:
+% for each reference, sort its distances once and read the variance of
+% the targets within each rd off cumulative sums. The original excluded the
+% target with raw index k (the loop counter, not ref(k)) from each set; that
+% is reproduced exactly so results are unchanged.)
+tot = zeros(1, Ntv);
+count = zeros(1, Ntv);
+rdRow = rd(:)';
+for k = 1:Nsub
+    [ds, o] = sort(d(:,k));
+    xs = x(o + m*tau);
+    S1 = cumsum(xs);
+    S2 = cumsum(xs.^2);
+    c = sum(ds <= rdRow, 1); % number of targets within each rd (1 x Ntv)
+    s1 = zeros(1, Ntv); s2 = zeros(1, Ntv);
+    s1(c > 0) = S1(c(c > 0)); s2(c > 0) = S2(c(c > 0));
+    % Exclude target index k, as the original did (only possible when k is a
+    % valid target index, i.e., k > m*tau, and it lies within rd):
+    if k > m*tau
+        isIn = d(k - m*tau, k) <= rdRow;
+        c(isIn) = c(isIn) - 1;
+        s1(isIn) = s1(isIn) - x(k);
+        s2(isIn) = s2(isIn) - x(k)^2;
     end
+    % Only those variance values are considered for which the corresponding
+    % sets have atleast 30 DVs
+    ok = (c >= 30) & (rdRow > 0);
+    v = (s2(ok) - s1(ok).^2 ./ c(ok)) ./ (c(ok) - 1); % sample variance of x over the set
+    tot(ok) = tot(ok) + v;
+    count(ok) = count(ok) + 1;
 end
+y = nan(Ntv, 1);
+y(count > 0) = (tot(count > 0) ./ (count(count > 0) * var(x)))';
 
 % Horizontal axis
 T = (rd'-avg)/variance;
