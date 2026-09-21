@@ -224,6 +224,17 @@ switch psdMeth
 		S = fft(y, NFFT); % Fourier Transform
 		S = 2 * abs(S(1:NFFT / 2 + 1)).^2 / Ny; % single-sided power spectral density
 		S = S / (2 * pi); % convert to angular frequency space
+		% Drop the DC bin (w = 0). hctsa feeds this a z-scored series, whose sum
+		% is zero up to floating-point rounding, so S(1) is not a spectral
+		% estimate but the square of a ~1e-14 rounding residual (~1e-31), and
+		% log(S(1)) ~ -70 +/- a few, varying from series to series at random.
+		% Left in, that single bin dominated every log-domain statistic of this
+		% estimate: std(logS), its skewness and autocorrelation, the
+		% semilog fit, and min(logS) -- making the range-relative crossing
+		% counts identically 1 for every series. (The windowed/Welch estimates
+		% have a genuine non-zero DC bin from spectral leakage, so are unaffected.)
+		w = w(2:end);
+		S = S(2:end);
 
 	case 'welch'
 		% Welch power spectral density estimate:
