@@ -46,26 +46,22 @@ function out = SP_SummariesPhase(y)
 %       preferred phases), which R alone (only the first circular
 %       moment) cannot distinguish from uniformity.
 % groupDelay, the negative slope of a magnitude-weighted linear fit of
-%       unwrapped phase against angular frequency: for a signal that is
-%       mostly a single localized/delayed feature, this recovers its
-%       delay directly (validated: a unit impulse at sample 500 in a
-%       series of length 2000 gave an estimated groupDelay of 499.0).
-%       CAVEAT: like any phase-slope-based delay estimator, this becomes
-%       unreliable once the true delay is large enough that phase wraps
-%       many times between adjacent frequency bins -- validated failure
-%       at delay=1000 (of 2000 samples), which gave a wildly wrong
-%       estimate of 124.1; delay=500 was still accurate (499.0). Best
-%       interpreted as reliable for delays that are a modest fraction of
-%       the series length, and otherwise as a rough summary statistic
-%       (still informative in aggregate, e.g. via its correlation with
-%       change-point-detection and stationarity-test features on
-%       Empirical1000) rather than a literal delay estimate.
-% phaseLinearity, the weighted RMSE of that same linear fit -- how far
-%       the phase-frequency relationship is from a pure linear (i.e.
-%       pure-delay) one. Correlates with ARMAX/state-space model fit
-%       diagnostics on Empirical1000 (a pure low-order linear process has
-%       an especially simple phase-frequency relationship), without
-%       duplicating them (max |r| = 0.61).
+%       unwrapped phase against angular frequency, with the phase
+%       referenced to the CENTRE of the series and the result expressed
+%       as a fraction of the series length: the delay of the series'
+%       energy relative to its midpoint. ~0 for a stationary series; a
+%       unit impulse at sample 500 of 2000 gives -0.25, at sample 1500
+%       gives +0.25. (Audit, 2026-09: previously referenced to the first
+%       sample, which made this ~N/2 for any stationary series, aliased
+%       under unwrap once N approached the FFT length, and so tracked
+%       series length rather than the data -- Spearman 0.47 with N on
+%       Empirical1000.)
+% phaseLinearity, the weighted RMSE of that same linear fit, normalized
+%       by sqrt(#frequency bins) -- how far the phase-frequency
+%       relationship is from a pure linear (i.e. pure-delay) one, on a
+%       scale where an unstructured (random-walk) unwrapped phase gives
+%       ~0.4 regardless of series length. (Previously un-normalized, so
+%       it grew as sqrt(N): Spearman 0.78 with N on Empirical1000.)
 % phaseUnwrapAC1, the magnitude-weighted lag-1 autocorrelation of
 %       consecutive unwrapped-phase increments across frequency: near
 %       zero when the local group delay is roughly constant/unstructured
@@ -131,6 +127,20 @@ w = 2 * pi * f;
 
 Sc = fft(y - mean(y), NFFT); % mean-subtracted, so the DC bin is (numerically) exactly zero
 Sc = Sc(1:NFFT / 2 + 1); % single-sided
+% Reference the phase to the centre of the series rather than its first
+% sample. The Fourier phase of any signal carries a linear term -w*t0 set
+% by where its energy sits in time (t0 ~ (Ny-1)/2 for a stationary series),
+% which for the full-series FFT is a phase advance of ~pi*Ny/NFFT per bin --
+% up to pi. That term (i) dominated the unwrapped phase, so groupDelay was
+% ~Ny/2 for any stationary series and phaseLinearity grew with Ny, and
+% (ii) aliased under unwrap once Ny/NFFT approached 1, so both jumped
+% between regimes with Ny (e.g., groupDelay ~0 at Ny <= 2048 but ~1050 at
+% Ny = 5000 for white noise). Shifting the time origin to the centre
+% removes it: groupDelay is then the delay of the series' energy relative
+% to its centre (0 for stationary data, +/- for a transient early or
+% late in the window), and the other statistics describe the phase
+% structure itself.
+Sc = Sc .* exp(1i * w(:) * (Ny - 1) / 2);
 mag = abs(Sc);
 ph = angle(Sc);
 
@@ -170,9 +180,13 @@ phUnwrap = unwrap(ph);
 X = [ones(length(ww), 1), ww];
 Wd = diag(wgt);
 beta = (X' * Wd * X) \ (X' * Wd * phUnwrap);
-out.groupDelay = -beta(2);
+out.groupDelay = -beta(2) / Ny; % relative to the series centre, as a fraction of its length
 resid = phUnwrap - X * beta;
-out.phaseLinearity = sqrt(sum(wgt .* resid.^2));
+% (normalized by sqrt(#bins): the residual of an unstructured -- random-walk
+% -- unwrapped phase grows as sqrt(#bins), so without this the statistic
+% was mostly a restatement of series length: Spearman 0.78 with N on
+% Empirical1000, and 6.6 -> 34 for white noise from N = 500 to 10000)
+out.phaseLinearity = sqrt(sum(wgt .* resid.^2)) / sqrt(length(ww));
 
 % ------------------------------------------------------------------------------
 %% Magnitude-phase correlation
