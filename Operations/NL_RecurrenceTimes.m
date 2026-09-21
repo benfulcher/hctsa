@@ -232,11 +232,17 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
         nbrs = nbrs(abs(nbrs - j) > theilerWinAbs); % exclude Theiler window (incl. self)
         if numel(nbrs) >= 2
             nbrs = sort(nbrs);
-            allW{j} = diff(nbrs);
+            % White vertical line lengths: the number of NON-recurrent points
+            % between successive recurrent points in this column of the
+            % recurrence plot (Ngamga et al. 2007, Sec. II: P(w) is the
+            % distribution of white vertical line lengths). Consecutive
+            % recurrent points (a sojourn within one visit) are not
+            % separated by a white line, so contribute nothing:
+            allW{j} = diff(nbrs) - 1;
         end
     end
     w = vertcat(allW{:});
-    w = w(w >= 1); % recurrence times are >= 1 by construction
+    w = w(w >= 1); % (drops the zero-length "lines" between consecutive recurrent points)
 
     if isempty(w)
         T_MRT = NaN; N_MPRT = NaN; return
