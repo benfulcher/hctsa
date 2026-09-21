@@ -4,18 +4,23 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % cf. "Detecting strange attractors in turbulence", F. Takens.
 % Lect. Notes Math. 898 p366 (1981)
 %
-% Uses the TISEAN routines d2 and c2t (Takens' estimator from correlation sum
-% data) rather than TSTOOL's takens_estimator, which this operation used
-% previously. d2 estimates the correlation sum across embedding dimensions
-% 1:m (only the dimension-m block is used here); c2t then reads off Takens'
-% maximum-likelihood dimension estimate as a function of length scale from
-% that correlation-sum data, and the value at an upper length scale of rad
-% standard deviations of y is taken as the output (matching Kantz &
-% Schreiber's recommendation of using half a standard deviation, already
-% used the same way in NL_d2.m's takens05 -- TSTOOL's own rad
-% parameter was instead defined as a proportion of "attractor size", so this
-% is an equivalent-in-spirit but not numerically identical length-scale
-% convention).
+% Takens' maximum-likelihood estimator of the correlation dimension at an
+% upper length scale eup = rad standard deviations of y:
+%   D_T = 1 / mean( ln(eup / r_ij) ),
+% the mean taken over all pairs (i,j) of delay vectors with max-norm distance
+% r_ij < eup, excluding pairs closer in time than the Theiler window, past.
+% Computed natively (KD-tree range search at the one radius needed). This
+% replaced running TISEAN's d2 (correlation sums over every dimension 1:m
+% and every radius, all reference points) followed by c2t, and reading one
+% number off the result -- the same estimator, since c2t's
+% D_T(r) = C(r) / int_0^r C(r')/r' dr' reduces to the expression above, but
+% c2t evaluates it from d2's logarithmically-binned correlation sum at the
+% first bin above eup, whereas here it is evaluated exactly at eup from the
+% pair distances themselves; values therefore differ slightly from the
+% TISEAN-based implementation (which itself was not numerically identical to
+% the TSTOOL takens_estimator used before that). Kantz & Schreiber's
+% recommendation of half a standard deviation for the length scale is used
+% the same way in NL_d2.m's takens05.
 %
 % ---INPUTS:
 % y, the input time series
@@ -28,7 +33,9 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %               (relevant if an embedding-dimension method requiring
 %               randomization is used)
 %
-% ---OUTPUT: the Taken's estimator of the correlation dimension, d2.
+% ---OUTPUT: the Taken's estimator of the correlation dimension, d2 (NaN if
+%           no pair of delay vectors lies within the length scale, or all such
+%           pairs are exact duplicates, e.g., heavily quantized data).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -99,94 +106,61 @@ if nargin < 6
 end
 
 % ------------------------------------------------------------------------------
-%% Resolve the embedding parameters (tau, m)
+%% Embed
 % ------------------------------------------------------------------------------
-tm = BF_Embed(y, embedParams{1}, embedParams{2}, true, randomSeed);
-tau = tm(1);
-if isnan(tau)
-	warning('Could not determine embedding parameters for this time series');
+Y = BF_Embed(y, embedParams{1}, embedParams{2}, false, randomSeed);
+if isscalar(Y) && isnan(Y)
+	warning('Could not embed this time series with these embedding parameters');
 	out = NaN; return
 end
-m = tm(2);
+Nemb = size(Y, 1);
 
-% ------------------------------------------------------------------------------
-%% Write the file for TISEAN to work with
-% ------------------------------------------------------------------------------
-filePath = BF_WriteTempFile(y);
-
-% Map TSTOOL's Nref convention (-1 = use all points) onto TISEAN's d2
-% (-N 0 = use all pairs):
-if Nref == -1
-	NrefTISEAN = 0;
+% Reference points: the first Nref delay vectors (as TISEAN's d2 -N did), or all:
+if Nref == -1 || Nref >= Nemb
+	refIdx = (1:Nemb)';
 else
-	NrefTISEAN = Nref;
+	refIdx = (1:Nref)';
+end
+
+eup = rad * std(y); % upper length scale, in data units
+if ~(eup > 0)
+	out = NaN; return % constant series
 end
 
 % ------------------------------------------------------------------------------
-%% Run the TISEAN codes, d2 then c2t
+%% Accumulate sum of ln(eup/r_ij) over pairs with r_ij < eup (max norm),
+%% outside the Theiler window, over reference points in chunks (a
+%% low-dimensional attractor can have O(N^2) pairs within eup, so never hold
+%% them all at once)
 % ------------------------------------------------------------------------------
-% d2 over embedding dimensions 1:m (only the m-th is used below). Note:
-% "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
-% a bug in this TISEAN build where it reports "0 lines read" and produces no
-% output at all; "-M1,<m>" (a genuine range, as NL_d2.m already uses)
-% works correctly, so that's used here too and the dimension-m block is
-% picked out afterwards. The swept range of length scales is left at d2's
-% default (spans the full data interval, so comfortably covers the
-% rad-standard-deviations cutoff used below):
-[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -N%u %s', tau, m, past, NrefTISEAN, filePath));
-if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
-if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end
-if exist([filePath '.h2'], 'file'), delete([filePath '.h2']); end
-
-if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
-	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
-	error('Call to TISEAN function ''d2'' failed.');
-end
-
-[~, res] = BF_TiseanSystem(sprintf('c2t %s.c2', filePath));
-delete([filePath '.c2']);
-
-if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
-	error('Call to TISEAN function ''c2t'' failed.');
-end
-
-% ------------------------------------------------------------------------------
-%% Parse the c2t output and read off the estimate at rad standard deviations
-% ------------------------------------------------------------------------------
-s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('writing to stdout', s);
-if isempty(wi)
-	error('TISEAN routine ''c2t'' returned unexpected output.');
-end
-s = s(wi + 1:end);
-
-% There should be one '#m=' block per embedding dimension 1:m; take the
-% last one (dimension m, the one actually requested):
-w = strmatch('#m=', s);
-if length(w) ~= m
-	error('TISEAN routine ''c2t'' returned an unexpected number of data blocks.');
-end
-w(end + 1) = length(s) + 1;
-ss = s(w(m) + 1:w(m + 1) - 1);
-
-rc = zeros(length(ss), 2); % [length scale r, Takens estimate]
-nn = 0;
-for jj = 1:length(ss)
-	tmp = textscan(ss{jj}, '%f%f');
-	if all(cellfun(@isempty, tmp))
-		break % a trailing comment line
+searcher = KDTreeSearcher(Y, 'Distance', 'chebychev');
+chunkSize = 500;
+sumLog = 0;
+numPairs = 0;
+for c = 1:chunkSize:length(refIdx)
+	theRefs = refIdx(c:min(c + chunkSize - 1, length(refIdx)));
+	[idxCell, distCell] = rangesearch(searcher, Y(theRefs, :), eup);
+	for k = 1:length(theRefs)
+		keep = abs(idxCell{k} - theRefs(k)) > past; % outside the Theiler window (and not self)
+		d = distCell{k}(keep);
+		d = d(d > 0); % exact duplicates carry no length-scale information (ln -> Inf)
+		sumLog = sumLog + sum(log(eup ./ d));
+		numPairs = numPairs + length(d);
 	end
-	nn = nn + 1;
-	rc(nn, :) = horzcat(tmp{:});
 end
-rc = rc(1:nn, :);
 
-eup = rad * std(y); % upper length scale, in standard deviations of y
-theIndex = find(rc(:, 1) > eup, 1, 'first');
-if isempty(theIndex)
-	out = NaN;
-else
-	out = rc(theIndex, 2);
+if numPairs == 0
+	warning('No pairs within %g standard deviations of each other to estimate a correlation dimension from', rad);
+	out = NaN; return
 end
+% (No minimum pair count beyond that. Note that for high embedding
+% dimensions of noise-like series no pair may fall within eup at all, giving
+% NaN here (~1/3 of Empirical1000 series for the m = 8 and m = 10 variants);
+% the TISEAN-based implementation returned a constant 14.3 in that situation
+% -- 1/ln of d2's radius-bin ratio, i.e. every pair in a single bin -- which
+% was an artifact, not an estimate. Where both are defined they agree to
+% ~2% (median), Spearman 0.95-0.99 across Empirical1000.)
+
+out = numPairs / sumLog; % Takens' estimator: 1 / mean(ln(eup/r))
 
 end
