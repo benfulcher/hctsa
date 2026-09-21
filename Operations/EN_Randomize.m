@@ -248,16 +248,23 @@ end
 function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 	% Fits an exponential to the data vector across data points r
 
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', startPoint);
+	% The fittype objects are built once and reused across calls (parsing the
+	% model string was ~25% of each fit's cost, for ten fits per call of
+	% this operation); the start point is passed to fit() instead:
+	persistent fExp fExpOffset
+	if isempty(fExp)
+		fExp = fittype('a*exp(b*x)');
+		fExpOffset = fittype('a*exp(b*x)+c');
+	end
 	if addOffset
-		f = fittype('a*exp(b*x)+c', 'options', s);
+		f = fExpOffset;
 		f_x = @(c, x) c.a * exp(c.b * x) + c.c;
 	else
-		f = fittype('a*exp(b*x)', 'options', s);
+		f = fExp;
 		f_x = @(c, x) c.a * exp(c.b * x);
 	end
 	try
-		[c, gof] = fit(r, dataVector, f);
+		[c, gof] = fit(r, dataVector, f, 'StartPoint', startPoint);
 	catch
 		warning('Exponential fit failed :(')
 		if addOffset
