@@ -199,10 +199,14 @@ if fileInfo.bytes == 0
 end
 
 % ------------------------------------------------------------------------------
-%% Parse the output: a single data row (the converged exponent estimates),
-%% plus a handful of '#'-prefixed comment lines with diagnostics we don't need
-%% (TISEAN's own KYdim estimate is recomputed independently below instead of
-%% parsed, for full control over edge cases like k==m)
+%% Parse the output. lyap_spec writes a progress row (iteration count, then
+%% the m running exponent estimates) every 10 s of wall-clock time AND one
+%% final row at the last iteration, followed by '#'-prefixed diagnostic
+%% comment lines. Only the LAST data row is the converged estimate: a run
+%% longer than 10 s produces earlier, unconverged rows first (and how many
+%% depends on machine speed). (TISEAN's own KYdim estimate is recomputed
+%% independently below instead of parsed, for full control over edge cases
+%% like k==m.)
 % ------------------------------------------------------------------------------
 fid = fopen(outFilePath, 'r');
 dataLine = '';
@@ -210,8 +214,7 @@ while true
     tline = fgetl(fid);
     if ~ischar(tline), break; end
     if ~isempty(tline) && tline(1) ~= '#'
-        dataLine = tline;
-        break
+        dataLine = tline; % keep overwriting: the last data row wins
     end
 end
 fclose(fid);
