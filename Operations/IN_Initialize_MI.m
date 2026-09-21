@@ -90,31 +90,15 @@ end
 
 % Make deterministic if kraskov1 or 2 (which add a small amount of noise to the signal by default):
 if ~addNoise && ismember(estMethod, {'kraskov1', 'kraskov2'})
-	% The KSG estimator assumes points are in general position (no exact ties);
-	% with zero noise, data with a high proportion of repeated values (e.g., a
-	% quantized/periodic-orbit series) can produce degenerate nearest-neighbor
-	% distances and wildly unreliable estimates. Guard against this with a
-	% noise level too small to affect any well-behaved continuous series
-	% (~1e-10 x the data's own std), only switched on when repeats are common:
-	tieNoiseLevel = BF_TieBreakNoiseLevel(y);
-	miCalc.setProperty('NOISE_LEVEL_TO_ADD', num2str(tieNoiseLevel));
+	% No noise added inside JIDT. JIDT's own NOISE_LEVEL_TO_ADD draws from an
+	% internal Java RNG that cannot be seeded in the bundled build, which made
+	% every Kraskov-based feature irreproducible on data with many repeated
+	% values. Tie-breaking jitter for such data is instead added by the caller,
+	% reproducibly, on the MATLAB side: see BF_TieBreakNoise.
+	miCalc.setProperty('NOISE_LEVEL_TO_ADD', '0');
 end
 
 % Specify a univariate calculation:
 miCalc.initialise(1, 1);
 
-end
-
-% ------------------------------------------------------------------------------
-function noiseLevel = BF_TieBreakNoiseLevel(y)
-% Returns 0 unless y has a high proportion of repeated values, in which case
-% returns a noise standard deviation tiny enough to only break exact ties.
-	noiseLevel = 0;
-	if isempty(y) || numel(y) < 2
-		return
-	end
-	uniqueFrac = numel(unique(y)) / numel(y);
-	if uniqueFrac < 0.9 && std(y) > 0
-		noiseLevel = 1e-10 * std(y);
-	end
 end

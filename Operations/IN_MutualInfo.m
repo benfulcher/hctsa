@@ -68,6 +68,10 @@ end
 % Initialize miCalc object (don't add noise, except tiny tie-breaking noise if
 % y1/y2 have many repeated values):
 miCalc = IN_Initialize_MI(estMethod, extraParam, 0, [y1; y2]);
+if ismember(estMethod, {'kraskov1', 'kraskov2'})
+	y1 = BF_TieBreakNoise(y1, 0);
+	y2 = BF_TieBreakNoise(y2, 1); % (independent jitter for the two variables)
+end
 
 % Set observations to two time series:
 miCalc.setObservations(y1, y2);

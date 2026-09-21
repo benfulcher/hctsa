@@ -122,7 +122,12 @@ switch estMethod
 		out.ami_tau = -0.5 * log(1 - R(1, 3)^2);
 
 	case {'kraskov1', 'kraskov2'}
-		miCalc = IN_Initialize_MI(estMethod, extraParam, false, y); % tie-break-protected, no other added noise
+		miCalc = IN_Initialize_MI(estMethod, extraParam, false, y); % no added noise
+		% (tiny, reproducible tie-breaking jitter if y has many repeats; applied to
+		% the series so every lagged copy of a sample carries the same jitter)
+		y_j = BF_TieBreakNoise(y);
+		Yj = BF_Embed(y_j, tau, 3);
+		x_2tau = Yj(:, 1); x_tau = Yj(:, 2); x_now = Yj(:, 3);
 		miCalc.initialise(2, 1);
 		miCalc.setObservations([x_2tau, x_tau], x_now);
 		out.multiAMI = miCalc.computeAverageLocalOfObservations();

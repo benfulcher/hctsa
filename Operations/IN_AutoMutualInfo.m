@@ -84,7 +84,8 @@ end
 
 % Initialize miCalc object (needs to be reinitialized within the loop for kraskov):
 if ~strcmp(estMethod, 'gaussian')
-	miCalc = IN_Initialize_MI(estMethod, extraParam, false, y); % NO ADDED NOISE (except tiny tie-breaking noise if y has many repeats)!
+	miCalc = IN_Initialize_MI(estMethod, extraParam, false, y); % NO ADDED NOISE!
+	y = BF_TieBreakNoise(y); % (except tiny, reproducible tie-breaking jitter if y has many repeats)
 end
 
 for k = 1:numTimeDelays
