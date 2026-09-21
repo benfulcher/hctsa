@@ -105,7 +105,7 @@ if calc_pts(end) ~= randp_max * N;
 end
 numCalcs = length(calc_pts); % some rounding issues inevitable
 
-statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'sampen2_015', 'statav5', 'swss5_1'};
+statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'permen3_1', 'statav5', 'swss5_1'};
 numStats = length(statNames);
 stats = zeros(numCalcs, numStats); % record a stat at each randomization increment
 
@@ -170,7 +170,7 @@ r = (1:size(stats, 1))'; % gives an 'x-axis' for fitting
 % 5) ac2
 % 6) ac3
 % 7) ac4
-% 8) sample entropy
+% 8) normalized permutation entropy, PermEn(3,1)
 % 9) statav5
 % 10) swss5_1
 
@@ -187,7 +187,7 @@ for i = 1:length(statNames)
 		case 'ac4'
 			startPoint = [stats(1, i), -0.4];
 			[c, gof] = f_fix_exp(r, stats(:, i), startPoint, 0);
-		case {'d1', 'sampen2_015'}
+		case {'d1', 'permen3_1'}
 			startPoint = [-stats(end, i), -0.2, stats(end, i)];
 			[c, gof] = f_fix_exp(r, stats(:, i), startPoint, 1);
 		case {'statav5', 'swss5_1'}
@@ -223,15 +223,17 @@ function out = CalculateStats(y, y_rand)
 	% 2-bit LZ complexity:
 	% LZcomplex = EN_LZComplexity(y,3);
 
-	% SampEn(2,0.2,1):
-	sampenStruct = EN_SampEn(y_rand, 2, 0.15);
-	sampen2_015 = sampenStruct.quadSampEn2;
+	% Normalized permutation entropy, PermEn(3,1) (replaced SampEn(2,0.15),
+	% whose O(N^2) cost at each of the 20 randomization stages was ~75% of
+	% this operation's time on long series; PermEn is O(N)):
+	permEnStruct = EN_PermEn(y_rand, 3, 1);
+	permen3_1 = permEnStruct.normPermEn;
 
 	% Stationarity
 	statav5 = SY_StatAv(y_rand, 'seg', 5);
 	swss5_1 = SY_SlidingWindow(y_rand, 'std', 'std', 5, 1);
 
-	out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, sampen2_015, statav5, swss5_1];
+	out = [xcn1, xc1, d1, ac1, ac2, ac3, ac4, permen3_1, statav5, swss5_1];
 end
 % ------------------------------------------------------------------------------
 
