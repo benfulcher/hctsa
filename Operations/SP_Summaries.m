@@ -343,6 +343,12 @@ minDist_w = 0.02;
 ptsPerw = length(S) / pi;
 minPkDist = ceil(minDist_w * ptsPerw);
 [pkHeight, pkLoc, pkWidth, pkProm] = findpeaks(logS, 'SortStr', 'descend', 'minPeakDistance', minPkDist);
+% Linear-domain height of each detected peak, for the 'power in peaks'
+% fields below: peak *detection* and prominence are done on logS (see
+% above), but height x width only means 'power' on the linear spectrum
+% (log heights are mostly negative, so the log-domain product is not a
+% power and made numPeaks_50power identically 1 on every series):
+pkHeightLin = S(pkLoc);
 pkWidth = pkWidth / ptsPerw;
 pkLoc = pkLoc / ptsPerw;
 
@@ -371,13 +377,13 @@ out.width_weighted_prom = sum(pkWidth .* pkProm) / sum(pkProm);
 
 % Power in top N peaks:
 nn = @(x) 1:min(x, numPeaks);
-out.peakPower_2 = sum(pkHeight(nn(2)) .* pkWidth(nn(2)));
-out.peakPower_5 = sum(pkHeight(nn(5)) .* pkWidth(nn(5)));
-out.peakPower_prom5 = sum(pkHeight(pkProm > 5) .* pkWidth(pkProm > 5)); % power in peaks with log-prominence of at least 5
+out.peakPower_2 = sum(pkHeightLin(nn(2)) .* pkWidth(nn(2)));
+out.peakPower_5 = sum(pkHeightLin(nn(5)) .* pkWidth(nn(5)));
+out.peakPower_prom5 = sum(pkHeightLin(pkProm > 5) .* pkWidth(pkProm > 5)); % power in peaks with log-prominence of at least 5
 out.w_weighted_peak_prom = sum(pkLoc .* pkProm) / sum(pkProm); % where are prominent peaks located on average (weighted by prominence)
 
 % Number of peaks required to get to 50% of power in peaks
-peakPower = pkHeight .* pkWidth;
+peakPower = pkHeightLin .* pkWidth;
 if isempty(peakPower) % no peaks at all (e.g. a monotonic power spectrum)
     out.numPeaks_50power = NaN;
     out.peakpower_1 = NaN;
