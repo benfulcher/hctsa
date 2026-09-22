@@ -287,7 +287,7 @@ emsg = '';
 try
 	[c, gof] = fit(thr', msDt(:, 1), f);
 catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg);
+	fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg.message);
 end
 
 if isempty(emsg)
@@ -313,7 +313,7 @@ emsg = '';
 try
 	[c, gof] = fit(thr', msDt(:, 3), f);
 catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting exponential decay to valid proportion: %s\n', emsg);
+	fprintf(1, 'DN_OutlierInclude: error fitting exponential decay to valid proportion: %s\n', emsg.message);
 end
 
 if isempty(emsg)
@@ -339,7 +339,7 @@ emsg = '';
 try
 	[c, gof] = fit(thr', msDt(:, 3), f);
 catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to valid proportion: %s\n', emsg);
+	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to valid proportion: %s\n', emsg.message);
 end
 
 if isempty(emsg)
@@ -413,7 +413,7 @@ emsg = '';
 try
 	[c, gof] = fit(thr', msDt(:, 6), f);
 catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to std: %s\n', emsg);
+	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to std: %s\n', emsg.message);
 end
 
 if isempty(emsg)
