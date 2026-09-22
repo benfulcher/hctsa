@@ -227,10 +227,17 @@ function stats = SUB_spectrumstats(perc, m)
 		stats.(sprintf('perc_%u', i)) = perc(i);
 	end
 
-	stats.std = std(perc);
-	stats.range = max(perc) - min(perc);
-	stats.min = min(perc);
-	stats.max = max(perc);
+	% Spread statistics are taken over the leading m components only. The
+	% linear spectrum has exactly m entries, but the kernel spectrum has one
+	% per embedded point, N: taken over all N, its std scales as ~1/sqrt(N)
+	% (verified: 3.3x change from N = 200 to 2000 on the same AR(1) process),
+	% and its ratio to an m-entry linear std is then just noise. Restricting
+	% both to their top m makes the two directly comparable.
+	percTop = perc(1:m);
+	stats.std = std(percTop);
+	stats.range = max(percTop) - min(percTop);
+	stats.min = min(percTop);
+	stats.max = max(percTop);
 	stats.top2 = sum(perc(1:2));
 
 	csperc = cumsum(perc);
