@@ -297,7 +297,7 @@ else
 			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j)));
 		end
 	end
-	[a, b] = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
+	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 
 	% Do the optimum fit again
 	t_opt = t_scal(stptr(a):endptr(b));
@@ -324,7 +324,7 @@ else
 	for i = 1:length(endptr)
 		mybad(i) = lfitbadness(t_scal(1:endptr(i)), p_scal(1:endptr(i)));
 	end
-	b = find(mybad == min(mybad(:))); % this defines the 'best' scaling range
+	b = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 
 	% Do the optimum fit again
 	t_opt = t_scal(1:endptr(b));
