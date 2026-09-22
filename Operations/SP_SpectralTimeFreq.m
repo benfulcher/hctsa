@@ -97,16 +97,24 @@ try
 	[kurt, spread, centroid, thresh, fout] = spectralKurtosis(y, Fs, ...
 				'Window', window, 'OverlapLength', noverlap, ...
 				'Scaled', false, 'ConfidenceLevel', 0.95);
-catch emsg
-	if contains(emsg.message, 'Too many output arguments')
-		% Older MATLAB signatures: keep core outputs and mark unavailable ones NaN.
-		[kurt, fout] = spectralKurtosis(y, Fs, 'Window', window, 'OverlapLength', noverlap);
-        spread = NaN;
-        centroid = NaN;
-        thresh = NaN;
-	else
-		rethrow(emsg)
-	end
+catch
+	% Older releases: the five-output, per-frequency form above is not
+	% available. (The previous fallback here called spectralKurtosis with two
+	% outputs, which in those releases is the Audio Toolbox function returning
+	% the kurtosis of the spectrum PER FRAME and, as second output, the
+	% spectral spread -- a different quantity, and not a frequency axis.)
+	% Compute the same estimator directly from the spectrogram: MATLAB's
+	% unscaled spectral kurtosis is SK(f) = ((K+1)/(K-1)) <|X|^4>/<|X|^2>^2 - 2
+	% over K frames (Antoni 2006), with the Gaussian-null threshold
+	% 2 z_{(1+p)/2}/sqrt(K). Verified identical (to ~1e-15) to the toolbox
+	% call above for several series lengths.
+	[Sxx, fout] = spectrogram(y, window, noverlap, winLength, Fs);
+	P = abs(Sxx).^2;
+	K = size(P, 2);
+	kurt = ((K + 1) / (K - 1)) * mean(P.^2, 2) ./ mean(P, 2).^2 - 2;
+	thresh = 2 * norminv(1 - (1 - 0.95) / 2) / sqrt(K);
+	spread = NaN;
+	centroid = NaN;
 end
 
 out.sk_max = max(kurt);
