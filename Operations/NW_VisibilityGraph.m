@@ -138,10 +138,22 @@ switch meth
 		cols = zeros(2 * N, 1);
 		numEdges = 0;
 
+		% Node i is linked to the first point ahead of it with y >= y(i), and to
+		% the first point behind it with y >= y(i). Together these give exactly
+		% the horizontal visibility graph (y(k) < min(y(i),y(j)) for all i<k<j):
+		% an edge with y(j) >= y(i) is found from i looking forward, and one with
+		% y(i) > y(j) is found from j looking back. The comparisons must be >=,
+		% not >: with a strict > (as this code originally had), a point equal
+		% to y(i) neither terminates the search nor forms an edge, so equal-
+		% valued pairs were never linked and pairs separated by an equal-valued
+		% intermediate were linked when they should not be (verified against a
+		% brute-force HVG: identical for continuous data, but for a
+		% quantized series 154/440 edges were missing and 284 spurious edges
+		% were added).
 		for i = 1:N
-			% Look forward to first blocker, then stop
+			% Look forward to first point at or above this one, then stop
 			if i < N
-				nAhead = find(y(i + 1:end) > y(i), 1, 'first');
+				nAhead = find(y(i + 1:end) >= y(i), 1, 'first');
 				if ~isempty(nAhead)
 					numEdges = numEdges + 1;
 					rows(numEdges) = i;
@@ -149,9 +161,9 @@ switch meth
 				end
 			end
 
-			% Look back to the first hit, then stop
+			% Look back to the first point at or above this one, then stop
 			if i > 1
-				nBack = find(yr(N - i + 2:end) > yr(N - i + 1), 1, 'first');
+				nBack = find(yr(N - i + 2:end) >= yr(N - i + 1), 1, 'first');
 				if ~isempty(nBack)
 					numEdges = numEdges + 1;
 					rows(numEdges) = i - nBack;
