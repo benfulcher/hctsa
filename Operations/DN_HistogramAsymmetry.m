@@ -78,7 +78,12 @@ binCentersPos = mean([binEdgesPos(1:end - 1); binEdgesPos(2:end)]);
 binCentersNeg = mean([binEdgesNeg(1:end - 1); binEdgesNeg(2:end)]);
 
 % Histogram counts and overall density differences:
-out.densityDiff = sum(y > 0) - sum(y < 0); % measure of asymmetry about the mean
+% Asymmetry about the mean, as a PROPORTION of the non-zero values (matching the
+% denominator modeProbPos/modeProbNeg below already use). A raw count difference is
+% extensive -- it grows with the time-series length rather than describing the
+% distribution: measured on Empirical1000, |densityDiff| had Spearman rho = 0.45
+% with series length (values ranged to +/-9070), which normalizing removes (-0.08).
+out.densityDiff = (sum(y > 0) - sum(y < 0)) / NnonZero;
 out.modeProbPos = max(pPos);
 out.modeProbNeg = max(pNeg);
 out.modeDiff = out.modeProbPos - out.modeProbNeg;

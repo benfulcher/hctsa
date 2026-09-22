@@ -81,8 +81,11 @@ for k = 1:maxOrder
 	% Fit the state space model for this order, k
 	try
 		m = n4sid(y, k);
-	catch emsg
-		error('Model fitting failed for k = %u', k)
+	catch
+		% Data-dependent (n4sid could not fit this series at this order), so NaN
+		% rather than error(), per the NaN-vs-error convention:
+		warning('State-space model fitting failed for k = %u', k);
+		out = NaN; return
 	end
 
 	lossfns(k) = m.EstimationInfo.LossFcn;

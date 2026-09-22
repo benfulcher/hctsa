@@ -58,7 +58,9 @@ for i = 1:numTau
 	theta = atan(theta); % measured as deviation from the horizontal
 
 	if isempty(theta)
-		error('Time series (N=%u) too short for embedding', length(y));
+		% Data-dependent (too short to embed at this tau), so NaN, not error():
+		warning('Time series (N=%u) too short for embedding at tau = %u', length(y), tau);
+		out = NaN; return
 	end
 
 	stats_store(1, i) = CO_AutoCorr(theta, 1, 'Fourier');
