@@ -955,7 +955,6 @@ DN_CustomSkewness_pearson_median	skewness_coeff_pearson_median	distribution,mome
 DN_CustomSkewness_pearson_mode	    skewness_coeff_pearson_mode	    distribution,moment,raw,locationDependent
 DN_CV_1	        coeff_var_1	    distribution,spread,cv,raw,locationDependent,spreadDependent
 DN_CV_2	        coeff_var_2	    distribution,spread,cv,raw,locationDependent,spreadDependent
-DN_Fit_mle_geometric		DN_Fit_mle_geometric		distribution,fit
 DN_FitKernelSmoothraw.npeaks	DN_FitKernelSmoothraw_numpeaks	distribution,ksdensity,raw,spreadDependent
 DN_FitKernelSmoothraw.entropy	DN_FitKernelSmoothraw_entropy	distribution,ksdensity,entropy,raw,spreadDependent
 DN_FitKernelSmoothraw.max  DN_FitKernelSmoothraw_max  distribution,ksdensity,raw,spreadDependent

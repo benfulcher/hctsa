@@ -281,7 +281,6 @@ DN_CustomSkewness(x,'pearsonMedian')	DN_CustomSkewness_pearson_median
 DN_CustomSkewness(x,'pearsonMode')	    DN_CustomSkewness_pearson_mode
 DN_CV(x,1)	DN_CV_1
 DN_CV(x,2)	DN_CV_2
-DN_Fit_mle(x_z,'geometric')	DN_Fit_mle_geometric
 DN_FitKernelSmooth(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_FitKernelSmoothraw
 DN_FitKernelSmooth(x_z)	DN_FitKernelSmoothzscore
 DN_HistogramAsymmetry(x_z,11,false) DN_HistogramAsymmetry_11
