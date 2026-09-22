@@ -1225,6 +1225,81 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyTrue(threw, 'DN_Mean should error for an unrecognized meanType.');
         end
 
+        function test_EN_DispEn_MatchesPublishedWorkedExample(testCase)
+            % Ground truth: the worked example in the dispersion-entropy
+            % literature (Azami & Escudero; reproduced in Fig. 1 of
+            % arXiv:1902.10825), computed with a linear mapping, d = 1,
+            % m = 2, c = 3 on a fixed 10-point series.
+            x = [3.6; 4.2; 1.2; 3.1; 4.2; 2.1; 3.3; 4.6; 6.8; 8.4];
+            out = EN_DispEn(x, 2, 3, 1, 'linear');
+
+            % (a) The published fluctuation-based value, stated in the text as
+            % -(4/9*ln(4/9) + 3/9*ln(3/9) + 2/9*ln(2/9)) = 1.0609:
+            expectedF = -(4/9*log(4/9) + 3/9*log(3/9) + 2/9*log(2/9));
+            testCase.verifyEqual(out.fDispEn, expectedF, 'AbsTol', 1e-10, ...
+                'FDispEn should reproduce the published worked example (1.0609).');
+
+            % (b) The dispersion-pattern distribution shown in the same
+            % figure: {11},{12},{21} at 2/9; {22},{23},{33} at 1/9; and
+            % {13},{31},{32} absent. Checking the entropy this implies pins
+            % down the classification as well as the entropy formula:
+            p = [2 2 0 2 1 1 0 0 1]/9;
+            expectedD = -sum(p(p>0).*log(p(p>0)));
+            testCase.verifyEqual(out.dispEn, expectedD, 'AbsTol', 1e-10, ...
+                'DispEn should match the published pattern distribution.');
+
+            % Normalizations are by log(c^m) and log((2c-1)^(m-1)):
+            testCase.verifyEqual(out.normDispEn, expectedD/log(3^2), 'AbsTol', 1e-10);
+            testCase.verifyEqual(out.normFDispEn, expectedF/log(5^1), 'AbsTol', 1e-10);
+        end
+
+        function test_EN_DispEn_SeesAmplitudeWherePermEnCannot(testCase)
+            % The motivation for adding this operation: permutation entropy
+            % records only rank order, so a strictly monotone transform of a
+            % series leaves it exactly unchanged; dispersion entropy assigns
+            % amplitude classes and so does respond.
+            rng(2);
+            y = zscore(cumsum(randn(5000,1)));
+            yWarped = zscore(sign(y).*abs(y).^3); % monotone => identical ordinal patterns
+
+            pe1 = EN_PermEn(y,3,1); pe2 = EN_PermEn(yWarped,3,1);
+            testCase.verifyEqual(pe2.normPermEn, pe1.normPermEn, 'AbsTol', 1e-12, ...
+                'A monotone transform must leave permutation entropy unchanged.');
+
+            de1 = EN_DispEn(y,2,6,1); de2 = EN_DispEn(yWarped,2,6,1);
+            testCase.verifyGreaterThan(abs(de2.normDispEn - de1.normDispEn), 0.01, ...
+                'Dispersion entropy should respond to an amplitude warp.');
+        end
+
+        function test_EN_DispEn_BoundsAndDegenerateInput(testCase)
+            rng(1);
+            % Approaches the maximum for iid uniform data:
+            outU = EN_DispEn(rand(20000,1), 2, 6, 1);
+            testCase.verifyGreaterThan(outU.normDispEn, 0.95);
+            testCase.verifyLessThanOrEqual(outU.normDispEn, 1 + 1e-12);
+
+            % A period-2 square wave visits exactly two patterns whatever c
+            % is, so its entropy is log(2) up to the imbalance forced by an
+            % odd number of embedding vectors: 4000 points give 3999 vectors,
+            % split 2000/1999 between the two patterns.
+            outSq = EN_DispEn(repmat([1;-1],2000,1), 2, 6, 1);
+            pSq = [2000 1999]/3999;
+            testCase.verifyEqual(outSq.dispEn, -sum(pSq.*log(pSq)), 'AbsTol', 1e-12);
+            testCase.verifyEqual(outSq.dispEn, log(2), 'AbsTol', 1e-6);
+
+            % Data-dependent failures return NaN rather than erroring:
+            testCase.verifyTrue(isnan(EN_DispEn(ones(500,1))), ...
+                'A constant series should give NaN, not an error.');
+            testCase.verifyTrue(isnan(EN_DispEn(randn(5,1))), ...
+                'A too-short series should give NaN, not an error.');
+
+            % The NCDF mapping uses the series' own mean and SD, so the
+            % result is invariant to any affine rescaling of the input:
+            y = randn(2000,1);
+            testCase.verifyEqual(EN_DispEn(3*y + 7, 2, 6, 1).normDispEn, ...
+                EN_DispEn(y, 2, 6, 1).normDispEn, 'AbsTol', 1e-12);
+        end
+
     end
 end
 

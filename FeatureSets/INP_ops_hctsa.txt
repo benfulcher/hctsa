@@ -1425,6 +1425,8 @@ EN_DistributionEntropy_ks__002	        EN_DistributionEntropy_ks__002	    entrop
 EN_DistributionEntropy_ks__02	        EN_DistributionEntropy_ks__02	    entropy
 EN_DistributionEntropy_ks__03	        EN_DistributionEntropy_ks__03	    entropy
 EN_DistributionEntropy_ks__005	        EN_DistributionEntropy_ks__005	    entropy
+EN_DispEn_2_6_ac.normDispEn	EN_DispEn_2_6_ac_normDispEn	entropy,symbolic
+EN_DispEn_2_6_ac.normFDispEn	EN_DispEn_2_6_ac_normFDispEn	entropy,symbolic
 EN_LZComplexity_2		EN_LZComplexity_2		entropy,mex
 EN_LZComplexity_2_diff	EN_LZComplexity_2_diff	entropy,mex
 EN_LZComplexity_3		EN_LZComplexity_3		entropy,mex

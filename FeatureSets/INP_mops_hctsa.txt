@@ -670,6 +670,7 @@ EN_Shannon(x_z,2:10,4)	EN_Shannon_2t10_4
 EN_Shannon(x_z,3,1:10)	EN_Shannon_3_1t10
 EN_Shannon(x_z,3,2)	EN_Shannon_3_2
 EN_Shannon(x_z,4,1:10)	EN_Shannon_4_1t10
+EN_DispEn(x_z,2,6,'ac')	EN_DispEn_2_6_ac
 NL_BoxCorrDim(x_z,50,{'ac',5})	    NL_BoxCorrDim_50_ac_5
 NL_DelayTime(x_z,0.1,1,'default')	NL_DelayTime_01_1
 NL_Dimensions(x_z,50,{'ac','fnn'})	NL_Dimensions_50_ac_fnn
