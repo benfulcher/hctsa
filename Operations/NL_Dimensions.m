@@ -366,7 +366,7 @@ function out = SUB_ScalingRange(logr, logN, prefix, out)
 			mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 		end
 	end
-	[a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 	%         plot(logr,logN,'o-b'); hold on; plot(logr(stptr(a):endptr(b)),logN(stptr(a):endptr(b)),'o-r');
 	%         hold off
 	%         disp(['keep from ' num2str(stptr(a)) ' to ' num2str(endptr(b))])
@@ -423,7 +423,7 @@ function out = SUB_bestm(logr, logNN, prefix, out)
 				mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 			end
 		end
-		[a, b] = find(mybad == min(min(mybad))); % this defines the 'best' scaling range
+		[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 
 		% Do the optimum fit again
 		x = logr(stptr(a):endptr(b));

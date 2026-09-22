@@ -267,10 +267,9 @@ out.meanlnCr = mean(lnCr);
 enoughpoints = true;
 try
 	[a, stats] = robustfit(lnr, lnCr);
-catch me
-	if strcmp(me.message, 'Not enough points to perform robust estimation.')
-		enoughpoints = false;
-	end
+catch
+	% Too few finite (ln r, ln C(r)) points to fit (data-dependent):
+	enoughpoints = false;
 end
 
 if enoughpoints
