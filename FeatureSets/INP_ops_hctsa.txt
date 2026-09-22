@@ -4916,8 +4916,8 @@ SB_BinaryStats_mean.meanstretchdiff	    SB_BinaryStats_mean_meanstretchdiff	    
 SB_BinaryStats_mean.stdstretchdiff	    SB_BinaryStats_mean_stdstretchdiff	    symbolic,distribution,correlation
 SB_BinaryStats_mean.diff21stretch1	    SB_BinaryStats_mean_diff21stretch1	    symbolic,distribution,correlation
 SB_BinaryStats_mean.diff21stretch0	    SB_BinaryStats_mean_diff21stretch0	    symbolic,distribution,correlation
-SB_BinaryStretch_lseq0	SB_BinaryStretch_lseq0	binary,symbolic
-SB_BinaryStretch_lseq1	SB_BinaryStretch_lseq1	binary,symbolic
+SB_BinaryGapHomogeneity_gaps0	SB_BinaryGapHomogeneity_gaps0	binary,symbolic
+SB_BinaryGapHomogeneity_gaps1	SB_BinaryGapHomogeneity_gaps1	binary,symbolic
 SB_MotifThree_diffquant.aa	SB_MotifThree_diffquant_aa	symbolic,motifs
 SB_MotifThree_diffquant.ab	SB_MotifThree_diffquant_ab	symbolic,motifs
 SB_MotifThree_diffquant.ac	SB_MotifThree_diffquant_ac	symbolic,motifs

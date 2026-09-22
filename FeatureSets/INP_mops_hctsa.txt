@@ -768,8 +768,8 @@ SB_BinaryStats_AR1(x_z,'mean')	    SB_BinaryStats_AR1_mean
 SB_BinaryStats(x_z,'diff')	    SB_BinaryStats_diff
 SB_BinaryStats(x_z,'iqr')	    SB_BinaryStats_iqr
 SB_BinaryStats(x_z,'mean')	    SB_BinaryStats_mean
-SB_BinaryStretch(x_z,'lseq0')	SB_BinaryStretch_lseq0
-SB_BinaryStretch(x_z,'lseq1')	SB_BinaryStretch_lseq1
+SB_BinaryGapHomogeneity(x_z,'gaps0')	SB_BinaryGapHomogeneity_gaps0
+SB_BinaryGapHomogeneity(x_z,'gaps1')	SB_BinaryGapHomogeneity_gaps1
 SB_MotifThree(x_z,'diffquant')	SB_MotifThree_diffquant
 SB_MotifThree(x_z,'diffquant','ac')	SB_MotifThree_diffquant_ac
 SB_MotifThree(x_z,'quantile')	SB_MotifThree_quantile
