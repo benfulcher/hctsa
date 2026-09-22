@@ -448,7 +448,11 @@ function g = SUB_FitGaussian(logF, resid, iPk, peakWidthLimits)
                        'Lower', [0, min(logF), peakWidthLimits(1)], ...
                        'Upper', [Inf, max(logF), peakWidthLimits(2)], ...
                        'MaxIter', 400, 'Display', 'off');
-        ft = fittype('h*exp(-(x-m)^2/(2*w^2))', 'independent', 'x', 'options', s);
+        % (coefficient order stated explicitly so StartPoint/Lower/Upper above
+        % cannot be silently permuted by fittype's default alphabetical order,
+        % which is what once broke the knee fit in SUB_FitAperiodic)
+        ft = fittype('h*exp(-(x-m)^2/(2*w^2))', 'independent', 'x', ...
+                     'coefficients', {'h', 'm', 'w'}, 'options', s);
         c = fit(logF, resid, ft);
     catch
         return
