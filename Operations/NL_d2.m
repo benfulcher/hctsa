@@ -273,14 +273,16 @@ out.takens05mmin_linrmserr = mmintakens05.linrmserr;
 % (2i) Estimate dimensions using Ben's method
 % convert cell to matrix, taking second column in each case:
 if all(cellfun(@isempty, d2dat))
-	error('No data...')
+	warning('TISEAN d2 returned no usable correlation-dimension data for this series');
+	out = NaN; return
 end
 [d2dat_v, d2dat_M] = SUB_celltomat(d2dat, 2);
 
 try
 	benfindd2 = findscalingr_ind(d2dat_M);
 catch
-	error('Error finding scaling range')
+	warning('Could not find a scaling range in the TISEAN d2 output for this series');
+	out = NaN; return
 end
 
 % rows: increasing embedding m
@@ -348,7 +350,8 @@ out.d2_dimstd = scd2.dimstd;
 try
 	benfindd2g = findscalingr_ind(d2gdat_M);
 catch
-	error('Error finding scaling range')
+	warning('Could not find a scaling range in the TISEAN d2 output for this series');
+	out = NaN; return
 	% out = NaN;
 	% return
 end
