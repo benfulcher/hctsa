@@ -221,6 +221,7 @@ CO_HistogramAMI(x_z,1:5,'std1',2)	CO_HistogramAMI_std1_2bin
 CO_HistogramAMI(x_z,1:5,'std2',2)	CO_HistogramAMI_std2_2bin
 CO_JointNonGaussianity(x_z,'ac',2,1,10000)	CO_JointNonGaussianity_ac_2_1_10000
 CO_JointNonGaussianity(x_z,'ac',3,1,10000)	CO_JointNonGaussianity_ac_3_1_10000
+CO_MatrixProfile(x_z,{'ac',8},5000)	CO_MatrixProfile_ac_8_5000
 CO_PartialAutoCorr(x_z,20,'ols')  CO_PartialAutoCorr_20_ols
 CO_PosNegAsymmetry(x_z)	CO_PosNegAsymmetry_y
 CO_StickAngles(x_z)	CO_StickAngles_y
@@ -706,6 +707,7 @@ NW_OrdinalPartitionNetwork(x_z,4,1)	NW_OrdinalPartitionNetwork_4_1
 NW_VisibilityGraph(x_z,'horiz','full')	NW_VisibilityGraph_horiz_full
 NW_VisibilityGraph(x_z,'norm',5000)	    NW_VisibilityGraph_norm_5000
 PD_PeriodicityWang(x_z)	PD_PeriodicityWang
+PH_KramersMoyal(x_z,1,15)	PH_KramersMoyal_1_15
 PH_ForcePotential(x_z,'dblwell',[1,0.2,0.1])	PH_ForcePotential_dblwell_1_02_01
 PH_ForcePotential(x_z,'dblwell',[1,0.5,0.2])	PH_ForcePotential_dblwell_1_05_02
 PH_ForcePotential(x_z,'dblwell',[2,0.05,0.2])	PH_ForcePotential_dblwell_2_005_02

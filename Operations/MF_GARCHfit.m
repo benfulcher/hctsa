@@ -329,7 +329,7 @@ else
 end
 
 % More statistics given from the fit
-out.LLF = LLF; % log-likelihood function
+out.LLF = LLF / N; % log-likelihood per observation (the total scales with length)
 
 out.summaryexitflag = info.exitflag; % whether the fit worked ok.
 % This is just a record, really, since the numerical values are only
@@ -342,8 +342,8 @@ nparams = sum(any(estParamCov)); % number of parameters
 
 % use aicbic function
 [AIC, BIC] = aicbic(LLF, nparams, N); % aic and bic of fit
-out.aic = AIC;
-out.bic = BIC;
+out.aic = AIC / N; % per observation, as for LLF
+out.bic = BIC / N;
 
 % Persistence (sum of ARCH + GARCH coefficients, i.e. how long volatility
 % shocks persist) and implied long-run (unconditional) variance. Persistence

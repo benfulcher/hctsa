@@ -29,7 +29,8 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 %
 %
 % ---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
-% Akaike's Information Criteria (AIC), outputs from Engle's ARCH test and the
+% Akaike's Information Criteria (AIC) (all per observation, i.e., divided by the
+% series length), outputs from Engle's ARCH test and the
 % Ljung-Box Q-test, and estimates of optimal model orders.
 %
 % ---NOTES:
@@ -241,6 +242,13 @@ end
 % ------------------------------------------------------------------------------
 %% Statistics on retrieved model summaries
 % ------------------------------------------------------------------------------
+% Log-likelihoods and information criteria are sums over observations, so they
+% scale with the series length; express them per observation so they are
+% comparable across lengths (order selection below is unaffected)
+LLFs = LLFs / N;
+AICs = AICs / N;
+BICs = BICs / N;
+
 % 'whole things'
 out.minLLF = min(LLFs(:));
 out.maxLLF = max(LLFs(:));
