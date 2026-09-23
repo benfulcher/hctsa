@@ -1,4 +1,4 @@
-function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate)
+function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % DN_RemovePoints   How time-series properties change as points are removed.
 %
 % A proportion, p, of points are removed from the time series according to some
@@ -16,6 +16,10 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate)
 % p, the proportion of points to remove
 %
 % removeOrSaturate, to remove points ('remove') or saturate their values ('saturate')
+%
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%             (only relevant for removeHow = 'random', which is otherwise
+%             irreproducible run to run; no registered feature uses it)
 %
 % ---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
 % spread, and skewness.
@@ -70,6 +74,10 @@ if nargin < 4 || isempty(removeOrSaturate)
 	removeOrSaturate = 'remove';
 end
 
+if nargin < 5
+	randomSeed = []; % default for BF_ResetSeed
+end
+
 if ~BF_iszscored(y)
 	warning('The input time series should be z-scored')
 end
@@ -90,6 +98,7 @@ switch removeHow
 		% Remove/saturate a proportion p of points with the highest values
 		[~, is] = sort(y, 'ascend');
 	case 'random'
+		BF_ResetSeed(randomSeed); % (for reproducibility of the random ordering)
 		is = randperm(N);
 	otherwise
 		error('Unknown method ''%s''', removeHow);

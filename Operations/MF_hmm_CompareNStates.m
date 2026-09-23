@@ -83,11 +83,21 @@ BF_ResetSeed(randomSeed); % reset the random seed if specified
 %% Train the HMM
 % ------------------------------------------------------------------------------
 % Divide up dataset into training (yTrain) and test (yTest) portions
-yTrain = y(1:Ntrain);
-if Ntrain < N
-	yTest = y(Ntrain + 1:end);
-	Ntest = length(yTest);
+if Ntrain >= N
+	% Every subsequent step evaluates the fitted models on a held-out test
+	% portion, so a training proportion that consumes the whole series leaves
+	% nothing to evaluate on (this used to leave yTest/Ntest undefined and
+	% error deeper in the loop):
+	error('trainp = %g leaves no test data for a series of length %u', trainp, N);
 end
+if Ntrain < 2
+	% Data-dependent: too short to fit anything on the training portion
+	warning('Time series (N = %u) too short to train on %g of it', N, trainp);
+	out = NaN; return
+end
+yTrain = y(1:Ntrain);
+yTest = y(Ntrain + 1:end);
+Ntest = length(yTest);
 
 Nstate = length(nstater);
 LLtrains = zeros(Nstate, 1);

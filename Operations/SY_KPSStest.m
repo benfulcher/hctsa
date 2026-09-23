@@ -80,8 +80,10 @@ if length(lags) > 1
 	out.minpValue = min(pValue);
 	out.maxstat = max(stat);
 	out.minstat = min(stat);
-	out.lagmaxstat = lags(stat == max(stat)); % lag at max test statistic
-	out.lagminstat = lags(stat == min(stat));
+	% (index with the FIRST extremum: an exact tie between two lags would
+	% otherwise make these fields vectors rather than scalars)
+	out.lagmaxstat = lags(find(stat == max(stat), 1, 'first')); % lag at max test statistic
+	out.lagminstat = lags(find(stat == min(stat), 1, 'first'));
 else
 	% return the statistic and pvalue
 	out.stat = stat;
