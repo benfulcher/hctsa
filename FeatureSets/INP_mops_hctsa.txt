@@ -449,6 +449,7 @@ EN_LZComplexity(x_z,10,'diff')	EN_LZComplexity_10_diff
 EN_MSE(x_z,1:10,2,0.15)                 EN_MSE_1-10_2_015
 EN_MSE(x_z,1:10,2,0.15,'diff1')         EN_MSE_1-10_2_015_diff1
 EN_MSE(x_z,1:10,2,0.15,'rescale_tau')   EN_MSE_1-10_2_015_rescale_tau
+EN_MSE(x_z,1:10,2,0.15,'','dispen',6)	EN_MSE_1-10_2_dispen6
 EN_PermEn(x_z,2,1)        EN_PermEn_2_1
 EN_PermEn(x_z,2,2)        EN_PermEn_2_2
 EN_PermEn(x_z,2,'ac')        EN_PermEn_2_ac

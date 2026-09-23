@@ -1510,6 +1510,9 @@ EN_MSE_1-10_2_015_rescale_tau.stdSampEn         EN_MSE_1-10_2_015_rescale_tau_st
 EN_MSE_1-10_2_015_rescale_tau.cvSampEn          EN_MSE_1-10_2_015_rescale_tau_cvSampEn          entropy
 EN_MSE_1-10_2_015_rescale_tau.slope            EN_MSE_1-10_2_015_rescale_tau_slope            entropy
 EN_MSE_1-10_2_015_rescale_tau.slopeSE            EN_MSE_1-10_2_015_rescale_tau_slopeSE            entropy
+EN_MSE_1-10_2_dispen6.meanDispEn	EN_MSE_1-10_2_dispen6_meanDispEn	entropy,symbolic
+EN_MSE_1-10_2_dispen6.minDispEn	EN_MSE_1-10_2_dispen6_minDispEn	entropy,symbolic
+EN_MSE_1-10_2_dispen6.stdDispEn	EN_MSE_1-10_2_dispen6_stdDispEn	entropy,symbolic
 EN_PermEn_2_1.normPermEn            EN_PermEn_2_1_normPermEn            entropy
 EN_PermEn_2_2.normPermEn            EN_PermEn_2_2_normPermEn            entropy
 EN_PermEn_2_ac.normPermEn            EN_PermEn_2_ac_normPermEn            entropy
