@@ -35,11 +35,10 @@ else
     case 'equiprobable'
         x=x(:);
         nx=length(x);
-        [xn,xi]=sort(x+eps*randn(size(x))); %introduce randomness for ties
-        y=zeros(nx,1);
-        y=1:nx;
-        y=floor(y.*(n/(nx+1)));
-        x(xi)=y;
+        % Equiprobable bins from ranks; tied values share an (average) rank so
+        % they always receive the same symbol (was random tie-breaking from
+        % the global RNG, which made the output irreproducible on quantized data)
+        x=floor(tiedrank(x).*(n/(nx+1)));
     case 'equiwidth'
     % else,
     %     %do binning with equal width bins

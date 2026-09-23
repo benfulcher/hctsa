@@ -176,8 +176,8 @@ switch windowStat
 			qs(i) = DN_Moments(y(getWindow(i)), 5, true);
 		end
 	case 'lillie' % Lilliefors test statistic (KS-type distance from a Gaussian CDF)
-		% Uses lillietest's raw kstat output directly rather than going via
-		% HT_DistributionTest's p-value: MATLAB's lillietest interpolates p from a
+		% Uses lillietest's raw kstat output directly rather than its p-value:
+		% MATLAB's lillietest interpolates p from a
 		% simulated lookup table and clips to its boundary once the data is clearly
 		% non-Gaussian, which saturates the p-value to an identical constant across
 		% many real (non-Gaussian) windows. kstat is the underlying continuous

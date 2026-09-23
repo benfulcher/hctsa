@@ -1,4 +1,4 @@
-function out = NL_NSAMDF(x, fs, winLenRel, shiftLenRel, lagRel, degree, doPlot)
+function out = NL_NSAMDF(x, tauMult, winLenRel, shiftLenRel, degree, doPlot)
 % NL_NSAMDF computes the nonlinearity measure L through nsAMDF
 % (nonlinear average magnitude difference function), developed by:
 %
@@ -8,84 +8,101 @@ function out = NL_NSAMDF(x, fs, winLenRel, shiftLenRel, lagRel, degree, doPlot)
 %
 % Please refer to and cite this paper if you use this function in your work.
 %
+% The nsAMDF of degree p is the p-norm of the lag-tau increments,
+% ||x(t+tau) - x(t)||_p, as a function of tau = 0, ..., maxLag, averaged over
+% sliding windows. For a linear Gaussian process the increments at every lag are
+% Gaussian, so the normalized p = 2 and p = degree curves have the same shape;
+% L measures how far they differ, which is sensitive to non-sinusoidal waveform
+% shape and other departures from Gaussian increment structure. It does not
+% detect all nonlinearity (e.g., a threshold AR with near-Gaussian increments).
+%
+% The paper used a lag range of 1 s and a window of 14 s at the sampling rate of
+% the data. hctsa has no sampling rate, so both are set relative to the
+% correlation timescale of the series (first zero-crossing of the
+% autocorrelation function, tau_ac): maxLag = ceil(tauMult*tau_ac), and the
+% window length is winLenRel*maxLag.
+%
 % ---INPUTS:
 %
-% data = One dimensional input time-series (it can be raw, but it is a good idea
-%           to low-pass filter it to get rid of high frequency nuisance)
-%           For the neural data (LFP, MEG) in the aferomentioned paper, we
-%           low-passed the raw data for 40 Hz.
-%           The data should be long enough for proper estimation of nonlinearity.
+% x, the input time series.
 %
-% winLenRel = window length (a long enough segment is important to estimate the nonlinearity)
+% tauMult, the maximum lag as a multiple of tau_ac.
 %
-% shiftLenRel = This amounts to window length - overlap length btw windows
+% winLenRel, the window length as a multiple of the maximum lag.
 %
-% lagRel = TMaximum lag for nsAMDF, we chose it as 1.
+% shiftLenRel, the window shift as a proportion of the window length.
 %
-% degree = The chosen degree p should ideally be large enough to capture the
+% degree, the chosen degree p (> 2) should ideally be large enough to capture the
 %           highest order of nonlinearity within the data.
-%           We chose p=7 for in our case of Parkinsonian data in the paper.
+%           The paper used p = 7 for Parkinsonian data.
 %
-% doPlot = true to plot nsAMDF sequences, otherwise just assign it false.
+% doPlot, true to plot nsAMDF sequences.
 %
 % ---OUTPUTS:
 %
-% L: nonlinearity measure
+% L: root-mean-square difference between the normalized nsAMDF curves of degree
+%       2 and of degree p, across lags 0, ..., maxLag (scale-invariant).
 %
 % s2: normalized nsAMDF for the degree 2
 %
 % sd: normalized nsAMDF for the chosen degree greater than 2
 %
-%
 % Required subfunctions are NormedSingleCurveLengthWindowed.m & NormedSingleCurveLength.m
-%
 %
 %   Authored by Tolga Esat Ozkurt, 2020. (tolgaozkurt@gmail.com)
 %   Edits by Ben Fulcher for incorporating into hctsa.
 
 % -------------------------------------------------------------------------------
 % Set defaults:
-if nargin < 2
-	fs = 1;
+if nargin < 2 || isempty(tauMult)
+	tauMult = 2;
 end
-if nargin < 3
-	winLenRel = 14;
+if nargin < 3 || isempty(winLenRel)
+	winLenRel = 10;
 end
-windowLength = winLenRel * fs;
-if nargin < 4
+if nargin < 4 || isempty(shiftLenRel)
 	shiftLenRel = 0.5;
 end
-shiftLength = shiftLenRel * windowLength;
-if nargin < 5
-	lagRel = 1;
-end
-lag = fs * lagRel;
-if nargin < 6
+if nargin < 5 || isempty(degree)
 	degree = 7;
 end
-if nargin < 7
+if nargin < 6
 	doPlot = false;
 end
 
 % -------------------------------------------------------------------------------
+% Set the lag range and window from the correlation timescale:
+tau = CO_FirstCrossing(x, 'ac', 0, 'discrete');
+if isnan(tau)
+	out = NaN; return % data-dependent: no correlation length could be estimated
+end
+maxLag = ceil(tauMult * tau);
+windowLength = winLenRel * maxLag;
+if windowLength > length(x)
+	out = NaN; return % data-dependent: too short relative to its correlation time
+end
+shiftLength = max(1, floor(shiftLenRel * windowLength));
+
+% -------------------------------------------------------------------------------
 % nsAMDF for p = 2:
-s2 = NormedSingleCurveLengthWindowed(x, windowLength, shiftLength, lag, fs, 2);
+s2 = NormedSingleCurveLengthWindowed(x, windowLength, shiftLength, maxLag, 1, 2);
 out.s2 = s2 ./ max(s2); % normalized
 
 % nsAMDF for p = degree:
-sd = NormedSingleCurveLengthWindowed(x, windowLength, shiftLength, lag, fs, degree);
+sd = NormedSingleCurveLengthWindowed(x, windowLength, shiftLength, maxLag, 1, degree);
 out.sd = sd ./ max(sd); % normalized
 
-% If you like, you can bandpass filter s2 and sd for the specific frequency band
-% of nonlinear effect both to compute L and plot them as such
-out.L = norm(s2 - sd);
+% Compare the normalized curves (the original code compared the unnormalized
+% ones, which makes L scale with the amplitude of the data):
+out.L = sqrt(mean((out.s2 - out.sd).^2));
 
 % -------------------------------------------------------------------------------
 if doPlot
 	figure
-	plot(s2, 'b')
+	plot(0:maxLag, out.s2, 'b')
 	hold on
-	plot(sd, 'g')
+	plot(0:maxLag, out.sd, 'g')
+	xlabel('Lag'); legend('p = 2', sprintf('p = %u', degree))
 end
 
 end

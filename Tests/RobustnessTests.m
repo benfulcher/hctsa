@@ -112,13 +112,25 @@ classdef RobustnessTests < matlab.unittest.TestCase
         end
 
         function test_EachOperationIndependentOfGlobalRngState(testCase)
+            testCase.checkRngIndependence('ar1');
+        end
+
+        function test_EachOperationIndependentOfGlobalRngStateQuantized(testCase)
+            % Repeated values expose random tie-breaking, which is invisible on
+            % continuous data (EN_LZComplexity passed the 'ar1' check this way)
+            testCase.checkRngIndependence('quantized');
+        end
+    end
+
+    methods (Access = private)
+        function checkRngIndependence(testCase, whichSeries)
             % The two tests above recompute the whole library in file order,
             % which cannot catch an operation that draws from the global random
             % stream without seeding it when an EARLIER operation happens to
             % reset that stream (NL_EmbedCluster passed them for exactly that
             % reason). Here every master operation is evaluated twice from two
             % different global RNG states, in isolation, and must agree.
-            [ts, ~] = RobustnessTests.adversarialSeries('ar1');
+            [ts, ~] = RobustnessTests.adversarialSeries(whichSeries);
             x = ts; x_z = zscore(x);
             mops = testCase.MasterOperations;
             bad = {};
@@ -135,11 +147,10 @@ classdef RobustnessTests < matlab.unittest.TestCase
                 end
             end
             testCase.verifyEmpty(bad, sprintf(['%u master operation(s) gave different outputs from ' ...
-                'different global RNG states (unseeded randomness):\n  %s'], numel(bad), strjoin(bad, newline + "  ")));
+                'different global RNG states on the ''%s'' series (unseeded randomness):\n  %s'], ...
+                numel(bad), whichSeries, strjoin(bad, newline + "  ")));
         end
-    end
 
-    methods (Access = private)
         function checkDeterminism(testCase, whichSeries)
             [ts, name] = RobustnessTests.adversarialSeries(whichSeries);
             [fv1, cq1] = testCase.computeAll(ts);
