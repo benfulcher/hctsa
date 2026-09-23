@@ -721,7 +721,6 @@ PH_Walker(x_z,'momentum',2)	            PH_Walker_momentum_2
 PH_Walker(x_z,'momentum',5)	            PH_Walker_momentum_5
 PH_Walker(x_z,'prop',0.1)	            PH_Walker_prop_01
 PH_Walker(x_z,'prop',0.5)	            PH_Walker_prop_05
-PH_Walker(x_z,'prop',0.9)	            PH_Walker_prop_09
 PH_Walker(x_z,'prop',1.1)	            PH_Walker_prop_11
 PH_Walker(x_z,'runningvar',[1.5,50])	PH_Walker_runningvar_15_50
 PP_Compare(x,'diff1')			PP_Compare_diff1
