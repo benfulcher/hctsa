@@ -205,25 +205,40 @@ TrettSecondHalf = TrettSecondHalf(TrettSecondHalf > 0);
 out.statrtys = std(TrettFirstHalf) / std(TrettSecondHalf);
 out.statrtym = mean(TrettFirstHalf) / mean(TrettSecondHalf);
 
-out.hhist = -sum(Trett(Trett > 0) .* log(Trett(Trett > 0)));
+% ------------------------------------------------------------------------------
+%% Distribution of return times, in units of the mean return time
+% ------------------------------------------------------------------------------
+% (Previously these statistics were computed on the time-ordered sequence of
+% return times, Trett, as if it were a histogram -- a holdover from TSTOOL's
+% return_time, which returned one -- giving sums over reference points that
+% scaled with the series length rather than any property of the distribution.)
+% By Kac's lemma, the mean return time to a neighborhood holding NNR of N points
+% is ~N/NNR, so return times are rescaled by their mean, tau = T/mean(T). For a
+% mixing process tau is approximately exponential with mean 1; peaked
+% (periodic) return times give lower entropy.
+Tpos = Trett(Trett > 0);
+if numel(Tpos) < 10
+	out.hhist = NaN; out.hcgdist = NaN; out.rangecgdist = NaN; out.pzeroscgdist = NaN;
+else
+	% Entropy of the integer return-time distribution, minus log(mean T): a
+	% discretized differential entropy of tau (1 for an exponential distribution)
+	pT = accumarray(Tpos, 1) / numel(Tpos);
+	out.hhist = -sum(pT(pT > 0) .* log(pT(pT > 0))) - log(mean(Tpos));
 
-% ------------------------------------------------------------------------------
-%% Coarse-grain to 20 bins
-% ------------------------------------------------------------------------------
-numBins = 20;
-cglav = zeros(numBins, 1);
-inds = round(linspace(0, NN, numBins + 1));
-for i = 1:numBins
-	cglav(i) = sum(Trett(inds(i) + 1:inds(i + 1)));
+	% Coarse-grain tau into 20 equal bins over [0, 5] mean return times (holding
+	% ~99% of the mass of an exponential), with the tail clamped into the last bin
+	numBins = 20;
+	binIdx = min(floor((Tpos / mean(Tpos)) / (5 / numBins)) + 1, numBins);
+	cglav = accumarray(binIdx, 1, [numBins, 1]) / numel(Tpos);
+	if doPlot
+		figure('color', 'w');
+		box('on');
+		plot(cglav, 'k')
+	end
+	out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
+	out.rangecgdist = range(cglav);
+	out.pzeroscgdist = sum(cglav == 0) / numBins;
 end
-if doPlot
-	figure('color', 'w');
-	box('on');
-	plot(cglav, 'k')
-end
-out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
-out.rangecgdist = range(cglav);
-out.pzeroscgdist = sum(cglav == 0) / numBins;
 
 % ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times

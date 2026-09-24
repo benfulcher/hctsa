@@ -193,7 +193,7 @@ switch method
 		steppedy = round(steppedy * 1e4) / 1e4;
 
 		% Compute outputs specific to this method:
-		out.E = E;
+		out.E = E / N; % energy per sample (E sums over the series, so it scales with length)
 		out.s = s; % for some parameter values, this is 1
 		out.lambdamax = lambdaMax;
 
