@@ -1,4 +1,4 @@
-function out = NL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
+function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % NL_ReturnTime    Analysis of the histogram of return times.
 %
 % Return times are the time taken for the time series to return to a similar
@@ -6,31 +6,44 @@ function out = NL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
 %
 % Strong peaks in the histogram are indicative of periodicities in the data.
 %
+% For each reference point in the embedding space, its NNR nearest neighbors
+% are found (excluding a Theiler window of "past" samples either side), and the
+% time offset, T, of each neighbor from the reference point is recorded. The
+% histogram of these offsets over the numLags lags beyond the Theiler window,
+% T = past+1, ..., past+numLags, is analyzed. This
+% follows TSTOOL's 'return_time' (which hctsa previously called), with one
+% change: each lag's count is divided by its expected count if neighbors were
+% placed at random among the valid (Theiler-excluded) candidates, rather than
+% TSTOOL's 2*NNR*(N - T), so that the histogram is ~1 at every lag for an
+% uncorrelated process at any series length (TSTOOL's normalization scaled as
+% 1/N). Values above 1 mark lags at which the trajectory preferentially
+% returns to its neighborhood. The profile is closely related to the
+% tau-recurrence rate of recurrence quantification analysis (cf. N. Marwan et
+% al., Phys. Rep. 438, 237 (2007)), with neighborhoods holding a fixed
+% proportion of points rather than having a fixed radius.
+%
+% (For the distribution of *first* return times to a neighborhood, see
+% NL_RecurrenceTimes.)
+%
 % ---INPUTS:
 %
 % y, scalar time series as a column vector
-% NNR, number of nearest neighbours
-% maxT, maximum return time to consider
-% past, Theiler window
-% Nref, number of reference indicies
+% NNR, number of nearest neighbours (or, if in (0,1), a proportion of the
+%       number of embedded points, keeping neighborhoods the same size in
+%       probability as the series length changes)
+% numLags, the number of lags beyond the Theiler window to analyze (samples)
+% past, Theiler window, excluding neighbors that are close only because they
+%       are close in time: {'ac', k} for k times the first zero-crossing of
+%       the autocorrelation function, or a number of samples (see
+%       BF_TheilerWindow)
+% Nref, number of reference points, spaced evenly through the series (-1 uses
+%       all points). A fixed number keeps the number of neighbors counted at
+%       each lag, and so the sampling noise of the histogram, independent of
+%       the series length (neighbors are still sought among all points).
 % embedParams, to feed into BF_Embed
 %
 % ---OUTPUTS: include basic measures from the histogram, including the occurrence of
 % peaks, spread, proportion of zeros, and the distributional entropy.
-%
-% Computed natively in MATLAB (this operation previously used TSTOOL's
-% 'return_time'; TISEAN has no direct equivalent -- its own recurrence
-% tool, 'recurr', defines neighborhoods by a fixed epsilon radius rather
-% than a nearest-neighbor count, a parameter-type mismatch with NNR below).
-% For each of Nref reference points, the neighborhood radius is the
-% distance to its NNR-th nearest neighbor (excluding a Theiler window of
-% "past" samples, via a KD-tree, same approach as NL_LocalDensity.m);
-% starting just after that Theiler window, the series is scanned forward
-% for the first return within that radius, up to maxT samples ahead. A
-% return time of 0 is a sentinel for "no return found within maxT" (a
-% return time can never be legitimately 0, since the Theiler window
-% already excludes any offset from 0 up to "past").
-
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -60,36 +73,35 @@ function out = NL_ReturnTime(y, NNR, maxT, past, Nref, embedParams)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
 N = length(y); % length of the input time series
 
-% Number of nearest neighbours, NNR
+% Number of nearest neighbours, NNR (a proportion is resolved after embedding)
 if nargin < 2 || isempty(NNR)
-	NNR = 5;
-end
-if (NNR > 0) && (NNR < 1) % specify a proportion of time series length
-	NNR = floor(NNR * N); if NNR == 0, NNR = 1; end
+	NNR = 0.01;
 end
 
-% Maximum return time, maxT
-if nargin < 3 || isempty(maxT)
-	maxT = 0.1;
+% Number of lags to analyze, numLags
+if nargin < 3 || isempty(numLags)
+	numLags = 100;
 end
-if (maxT > 0) && (maxT <= 1) % specify a proportion
-	maxT = floor(N * maxT);
-	if maxT == 0, maxT = 1; end
+if numLags < 2
+	error('numLags (%g) must be at least 2', numLags);
 end
 
 % Theiler window, past
 if nargin < 4 || isempty(past)
-	past = 10;
+	past = {'ac', 1};
 end
-if (past > 0) && (past < 1) % specify a proportion
-	past = floor(N * past);
-	if past == 0, past = 1; end % round up from 0
+past = BF_TheilerWindow(y, past);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
+maxT = past + numLags; % maximum return time (lag) to consider
 
 % Number of reference points
 if nargin < 5 || isempty(Nref)
@@ -99,7 +111,7 @@ end
 % embed parameters
 if nargin < 6 || isempty(embedParams)
 	embedParams = {'ac', 'fnn'};
-	fprintf(1, 'Using default embedding using autocorrelation and cao\n');
+	fprintf(1, 'Using default embedding using autocorrelation and false nearest neighbors\n');
 end
 
 doPlot = false; % plot outputs to figures
@@ -112,71 +124,78 @@ if isscalar(Y) && isnan(Y) % embedding failed
 	warning('Embedding failed');
 	out = NaN; return
 end
-[N_embed, m] = size(Y);
-if N_embed < 10
-	% Set heuristic minimum (10) on the number of points needed to perform a meaningful analysis
-	warning('Time series not long enough for return time analysis')
-	out = NaN; return
+N_embed = size(Y, 1);
+if (NNR > 0) && (NNR < 1) % a proportion of the number of embedded points
+	NNR = max(1, round(NNR * N_embed));
 end
-if N_embed <= NNR + 2 * past
+if N_embed < 2 * maxT || N_embed <= NNR + 2 * past + 1
+	% Need every lag in the histogram to be sampled by at least half the points
 	warning('Time series too short to do a return-time analysis with these parameters')
 	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
-%% Resolve the reference points
+%% Neighborhood radius of each reference point: distance to its NNR-th nearest
+%% neighbor outside the Theiler window
 % ------------------------------------------------------------------------------
 if Nref == -1 || Nref >= N_embed
-	refIdx = 1:N_embed;
+	refIdx = (1:N_embed)';
 else
-	refIdx = randperm(N_embed, Nref); % a random subset of reference points
+	refIdx = unique(round(linspace(1, N_embed, Nref)))';
 end
-NN = length(refIdx);
+% At most 2*past + 1 points (the reference point itself included) fall within
+% the Theiler window, so NNR + 2*past + 1 neighbors always hold NNR valid ones
+K = min(N_embed, NNR + 2 * past + 1);
+r2 = NaN(N_embed, 1); % squared radius (NaN for non-reference points)
+chunkSize = max(1, floor(2e6 / K)); % bound the memory of the neighbor lists
+for c = 1:chunkSize:length(refIdx)
+	theRefs = refIdx(c:min(c + chunkSize - 1, length(refIdx)));
+	[idx, dist] = knnsearch(Y, Y(theRefs, :), 'K', K);
+	isValid = abs(idx - theRefs) > past;
+	[~, whichCol] = max(cumsum(isValid, 2) >= NNR, [], 2);
+	% (slightly inflated so the NNR-th neighbor itself survives the round trip
+	% through knnsearch's square root)
+	r2(theRefs) = dist(sub2ind(size(dist), (1:length(theRefs))', whichCol)).^2 * (1 + 1e-9);
+end
 
 % ------------------------------------------------------------------------------
-%% For each reference point, find its NNR-th-nearest-neighbor radius (KD-tree,
-%% Theiler-window-aware, same approach as NL_LocalDensity.m), then scan
-%% forward for the first return within that radius
+%% Count neighbors at each lag, relative to the count expected by chance
 % ------------------------------------------------------------------------------
-kFetch = min(N_embed - 1, NNR + 2 * past + 5);
-[idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);
+lags = (past + 1:maxT)';
+numLags = length(lags);
+counts = zeros(numLags, 1);
+for k = 1:numLags
+	T = lags(k);
+	fwd = refIdx(refIdx + T <= N_embed); % references with a partner T ahead
+	bwd = refIdx(refIdx - T >= 1); % references with a partner T behind
+	counts(k) = sum(sum((Y(fwd + T, :) - Y(fwd, :)).^2, 2) <= r2(fwd)) ...
+			+ sum(sum((Y(bwd - T, :) - Y(bwd, :)).^2, 2) <= r2(bwd));
+end
+% By chance, a given valid candidate is one of reference i's NNR neighbors with
+% probability NNR/V_i, where V_i is the number of points outside i's Theiler window
+i = (1:N_embed)';
+V = N_embed - (min(i - 1, past) + min(N_embed - i, past) + 1);
+w = zeros(N_embed, 1);
+w(refIdx) = NNR ./ V(refIdx);
+cw = cumsum(w);
+expected = cw(N_embed - lags) + (cw(end) - cw(lags)); % forward + backward partners
+Trett = counts ./ expected;
 
-Trett = zeros(NN, 1);
-for ii = 1:NN
-	i = refIdx(ii);
-
-	validDists = dist(ii, abs(idx(ii, :) - i) > past);
-	if length(validDists) < NNR
-		allDists = sqrt(sum((Y - Y(i, :)).^2, 2));
-		allDists(abs((1:N_embed)' - i) <= past) = Inf;
-		validDists = sort(allDists);
-	end
-	r_i = validDists(NNR);
-
-	winStart = i + past + 1;
-	winEnd = min(i + maxT, N_embed);
-	if winStart > winEnd
-		Trett(ii) = 0; % sentinel: no return found within maxT
-		continue
-	end
-	candidateIdx = winStart:winEnd;
-	sqDists = sum((Y(candidateIdx, :) - Y(i, :)).^2, 2);
-	firstReturn = find(sqDists <= r_i^2, 1, 'first');
-	if isempty(firstReturn)
-		Trett(ii) = 0; % sentinel: no return found within maxT
-	else
-		Trett(ii) = candidateIdx(firstReturn) - i;
-	end
+if doPlot
+	figure('color', 'w');
+	plot(lags, Trett, 'k')
+	xlabel('Lag, T'); ylabel('Neighbors relative to chance')
 end
 
 % ------------------------------------------------------------------------------
 %% Quantify structure in output
 % ------------------------------------------------------------------------------
+NN = numLags;
 out.max = max(Trett);
-out.std = std(Trett(Trett > 0)); % exclude the "no return found" sentinel
+out.std = std(Trett);
 out.pzeros = sum(Trett == 0) / NN;
 out.pg05 = sum(Trett > max(Trett) * 0.5) / NN;
-out.iqr = iqr(Trett(Trett > 0)); % exclude the "no return found" sentinel
+out.iqr = iqr(Trett);
 
 % recurrent peaks:
 icross05 = find((Trett(1:end - 1) - 0.5 * max(Trett)) .* (Trett(2:end) - 0.5 * max(Trett)) < 0);
@@ -197,48 +216,31 @@ else
 	out.stdpeaksep = NaN;
 end
 
-% exclude the "no return found" sentinel from each half before comparing:
-TrettFirstHalf = Trett(1:floor(end / 2));
-TrettFirstHalf = TrettFirstHalf(TrettFirstHalf > 0);
-TrettSecondHalf = Trett(floor(end / 2) + 1:end);
-TrettSecondHalf = TrettSecondHalf(TrettSecondHalf > 0);
-out.statrtys = std(TrettFirstHalf) / std(TrettSecondHalf);
-out.statrtym = mean(TrettFirstHalf) / mean(TrettSecondHalf);
+% short lags compared to long lags:
+out.statrtys = std(Trett(1:floor(end / 2))) / std(Trett(floor(end / 2) + 1:end));
+out.statrtym = mean(Trett(1:floor(end / 2))) / mean(Trett(floor(end / 2) + 1:end));
+
+% entropy of the histogram, as a distribution over lags:
+pTrett = Trett / sum(Trett);
+out.hhist = -sum(pTrett(pTrett > 0) .* log(pTrett(pTrett > 0)));
 
 % ------------------------------------------------------------------------------
-%% Distribution of return times, in units of the mean return time
+%% Coarse-grain to 20 bins of lags
 % ------------------------------------------------------------------------------
-% (Previously these statistics were computed on the time-ordered sequence of
-% return times, Trett, as if it were a histogram -- a holdover from TSTOOL's
-% return_time, which returned one -- giving sums over reference points that
-% scaled with the series length rather than any property of the distribution.)
-% By Kac's lemma, the mean return time to a neighborhood holding NNR of N points
-% is ~N/NNR, so return times are rescaled by their mean, tau = T/mean(T). For a
-% mixing process tau is approximately exponential with mean 1; peaked
-% (periodic) return times give lower entropy.
-Tpos = Trett(Trett > 0);
-if numel(Tpos) < 10
-	out.hhist = NaN; out.hcgdist = NaN; out.rangecgdist = NaN; out.pzeroscgdist = NaN;
-else
-	% Entropy of the integer return-time distribution, minus log(mean T): a
-	% discretized differential entropy of tau (1 for an exponential distribution)
-	pT = accumarray(Tpos, 1) / numel(Tpos);
-	out.hhist = -sum(pT(pT > 0) .* log(pT(pT > 0))) - log(mean(Tpos));
-
-	% Coarse-grain tau into 20 equal bins over [0, 5] mean return times (holding
-	% ~99% of the mass of an exponential), with the tail clamped into the last bin
-	numBins = 20;
-	binIdx = min(floor((Tpos / mean(Tpos)) / (5 / numBins)) + 1, numBins);
-	cglav = accumarray(binIdx, 1, [numBins, 1]) / numel(Tpos);
-	if doPlot
-		figure('color', 'w');
-		box('on');
-		plot(cglav, 'k')
-	end
-	out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
-	out.rangecgdist = range(cglav);
-	out.pzeroscgdist = sum(cglav == 0) / numBins;
+numBins = 20;
+cglav = zeros(numBins, 1);
+inds = round(linspace(0, NN, numBins + 1));
+for i = 1:numBins
+	cglav(i) = sum(pTrett(inds(i) + 1:inds(i + 1)));
 end
+if doPlot
+	figure('color', 'w');
+	box('on');
+	plot(cglav, 'k')
+end
+out.hcgdist = -sum(cglav(cglav > 0) .* log(cglav(cglav > 0)));
+out.rangecgdist = range(cglav);
+out.pzeroscgdist = sum(cglav == 0) / numBins;
 
 % ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times
@@ -250,7 +252,7 @@ if doPlot
 	plot(binCenters, nhist, 'o-k')
 end
 out.maxhisthist = max(nhist);
-out.phisthistmin = nhist(1); % probability in the first (smallest-return-time) bin
+out.phisthistmin = nhist(1); % probability in the first (lowest-value) bin
 out.hhisthist = -sum(nhist(nhist > 0) .* log(nhist(nhist > 0)));
 
 end

@@ -241,8 +241,7 @@ CO_trev(x_z,'ac')	CO_trev_ac
 CO_trev(x_z,'mi')	CO_trev_mi
 CO_Oversampling(x_z)	CO_Oversampling
 CP_l1pwc_SweepLambda(x_z,0:0.05:0.95)	CP_l1pwc_SweepLambda_0_005_095
-CP_ML_StepDetect(x_z,'l1pwc',0.2)	CP_ML_StepDetect_l1pwc_02
-CP_ML_StepDetect(x_z,'l1pwc',0.05)	CP_ML_StepDetect_l1pwc_005
+CP_ML_StepDetect(x_z,'l1pwc',3)	CP_ML_StepDetect_l1pwc_3
 CP_ML_StepDetect(x_z,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_WaveletVarChg(x_z,'db3',2,10,0.01)	CP_WaveletVarChg_db3_2_10_001
 CP_WaveletVarChg(x_z,'db3',3,10,0.01)	CP_WaveletVarChg_db3_3_10_001
@@ -678,9 +677,9 @@ NL_PersistentHomology(x_z,'periodWelch',2)	NL_PersistentHomology_periodWelch_2
 NL_PoincareSection(x_z,'max',{1,3})	NL_PoincareSection_max_1
 NL_PoincareSection(x_z,'max',{'ac',3})	NL_PoincareSection_max_ac
 NL_PoincareSection(x_z,'max',{'mi',3})	NL_PoincareSection_max_mi
-NL_ReturnTime(x_z,0.05,1,0.05,-1,{1,3})	NL_ReturnTime_005_1_005_n1_1_3
-NL_ReturnTime(x_z,5,1,40,-1,{1,8})	NL_ReturnTime_5_1_40_n1_1_8
-NL_ReturnTime(x_z,10,1,1,-1,{'ac',8})	NL_ReturnTime_10_1_1_n1_ac_8
+NL_ReturnTime(x_z,0.05,100,{'ac',1},500,{1,3})	NL_ReturnTime_005_100_ac1_500_1_3
+NL_ReturnTime(x_z,0.02,100,{'ac',1},500,{1,8})	NL_ReturnTime_002_100_ac1_500_1_8
+NL_ReturnTime(x_z,0.02,100,{'ac',1},500,{'ac',3})	NL_ReturnTime_002_100_ac1_500_ac_3
 NL_RecurrenceTimes(x_z,'mi','fnn',0.01,0.1,4,'full','default')	NL_RecurrenceTimes_mi_fnn_001_01_4_full
 NL_RQA(x_z,'mi','fnn',0.01,0.1,2,2,'full','default')	NL_RQA_mi_fnn_001_01_2_2_full
 NL_SSA(x_z,10)	NL_SSA_10

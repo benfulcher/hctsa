@@ -31,13 +31,17 @@ function out = CP_ML_StepDetect(y, method, params)
 %
 % params, the parameters for the given method used:
 %           (i) 'kv': (no parameters required)
-%           (ii) 'l1pwc': params = lambda
+%           (ii) 'l1pwc': params = lambda, the penalty on each step's size.
+%                 For a z-scored series, a fixed lambda gives a segmentation
+%                 that does not depend on the series length (a proportion of
+%                 lambdamax, specified as lambda < 1, does: lambdamax grows
+%                 with the length, as ~sqrt(N) for a short-memory process).
 %
 % ---OUTPUTS:
 % Statistics on the output of the step-detection method, including the intervals
-% between change points, the proportion of constant segments, the reduction in
-% variance from removing the piece-wise constants, and stationarity in the
-% occurrence of change points.
+% between change points (in samples), the number of constant segments per sample,
+% the reduction in variance from removing the piece-wise constants, and
+% stationarity in the occurrence of change points.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -195,7 +199,7 @@ switch method
 		% Compute outputs specific to this method:
 		out.E = E / N; % energy per sample (E sums over the series, so it scales with length)
 		out.s = s; % for some parameter values, this is 1
-		out.lambdamax = lambdaMax;
+		out.lambdamax = lambdaMax / sqrt(N); % (lambdamax itself grows as ~sqrt(N))
 
 		% Get step indicies from steppedy
 		% these give the index of the start of each run
@@ -226,8 +230,8 @@ end
 
 numChangePoints = length(chpts);
 
-% Intervals -- of change
-chints = diff([chpts; N]);
+% Intervals -- of change (the length of each constant segment)
+chints = diff([chpts; N + 1]);
 
 % Number of constant segments per sample
 out.nsegments = numChangePoints / N; % will be 1 if there are no changes
@@ -235,8 +239,8 @@ out.nsegments = numChangePoints / N; % will be 1 if there are no changes
 % How much reduces variance
 out.rmsoff = std(y) - std(y - steppedy);
 
-% Reduces variance per step
-out.rmsoffpstep = out.rmsoff / numChangePoints;
+% Reduces variance per step (per unit step rate, so as not to scale with length)
+out.rmsoffpstep = out.rmsoff / out.nsegments;
 
 % Ratio of number of steps in first half of time series to second half
 sum1 = sum(chpts < N / 2) - 1; % (exclude the chpt that's always sitting at 1)
@@ -258,17 +262,14 @@ out.diffn12 = abs(sum1 - sum2) / numChangePoints;
 
 % Proportion of really short steps:
 out.pshort_3 = sum(chints <= 3) / N;
-% Mean interval between steps:
-out.meanstepint = mean(chints) / N;
-% Mean interval greater than 3 samples, per sample:
-out.meanstepintgt3 = mean(chints(chints > 3)) / N;
-% Mean error on step interval distribution:
-out.meanerrstepint = std(chints) / sqrt(length(chints));
-% Maximum step interval:
-out.maxstepint = max(chints) / N;
-% Minimum step interval:
-out.minstepint = min(chints) / N;
+% Step intervals, in samples:
+% (With a fixed lambda these do not grow with the series length. The mean
+% interval is 1/nsegments, and so is not given separately.)
+% Mean interval greater than 3 samples:
+out.meanstepintgt3 = mean(chints(chints > 3));
+% Coefficient of variation of the step intervals:
+out.cvstepint = std(chints) / mean(chints);
 % Median step interval:
-out.medianstepint = median(chints) / N;
+out.medianstepint = median(chints);
 
 end

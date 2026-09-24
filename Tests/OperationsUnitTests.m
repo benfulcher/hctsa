@@ -1041,34 +1041,24 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         function test_NL_ReturnTime_DiscriminatesPeriodicity(testCase)
-            % NL_ReturnTime used to depend on TSTOOL's 'return_time';
-            % TISEAN has no direct equivalent (its own recurrence tool,
-            % 'recurr', defines neighborhoods by a fixed epsilon radius,
-            % not a nearest-neighbor count), so this is now computed
-            % natively: for each reference point, the neighborhood radius
-            % is its NNR-th-nearest-neighbor distance (Theiler-window
-            % excluded), and the series is scanned forward for the first
-            % return within that radius (see the operation's header
-            % comment). Direct inspection during development showed the 3
-            % most common nonzero return times for a period-17 sinusoid
-            % were exactly 17, 34, and 51 -- confirming the implementation
-            % genuinely detects periodicity, not just that it runs. For a
-            % permanent regression test, use a more robust summary
-            % statistic: a periodic signal's return times should cluster
-            % tightly around multiples of the period (low std), while
-            % structureless noise's return times should be widely
-            % scattered (high std), since there's no preferred recurrence
-            % timescale.
+            % NL_ReturnTime computes TSTOOL's 'return_time' histogram
+            % natively: the lags at which each reference point's nearest
+            % neighbors occur, relative to the count expected by chance.
+            % For structureless noise the profile is flat at ~1; for a
+            % periodic signal it peaks sharply at multiples of the period,
+            % so its spread across lags is far larger.
             rng(111);
             yNoise = randn(2000,1);
-            outNoise = NL_ReturnTime(yNoise, 5, 1, 40, -1, {1,8});
+            outNoise = NL_ReturnTime(yNoise, 0.02, 100, {'ac',1}, 500, {1,8});
 
             t = (1:2000)';
             yPeriodic = sin(2*pi*t/17);
-            outPeriodic = NL_ReturnTime(yPeriodic, 5, 1, 40, -1, {1,8});
+            outPeriodic = NL_ReturnTime(yPeriodic, 0.02, 100, {'ac',1}, 500, {1,8});
 
-            testCase.verifyLessThan(outPeriodic.std, 0.5 * outNoise.std, ...
-                'A periodic signal''s return times should cluster far more tightly than noise''s.');
+            testCase.verifyEqual(outNoise.statrtym, 1, 'AbsTol', 0.1, ...
+                'Noise should return to its neighborhoods at chance level at all lags.');
+            testCase.verifyGreaterThan(outPeriodic.std, 5 * outNoise.std, ...
+                'A periodic signal should return to its neighborhoods far more at some lags than others.');
         end
 
         function test_NL_DelayTime_DiscriminatesStructure(testCase)
