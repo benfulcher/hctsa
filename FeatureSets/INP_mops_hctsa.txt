@@ -59,7 +59,6 @@ CO_NonlinearAutocorr(x_z,[0,6],true)	        AC_nl_06_abs
 CO_NonlinearAutocorr(x_z,[1,1],false)	        AC_nl_11
 CO_NonlinearAutocorr(x_z,[0,1,1],false)	        AC_nl_011
 CO_NonlinearAutocorr(x_z,[1,1],true)	        AC_nl_11_abs
-CO_NonlinearAutocorr(x_z,[1,2],false)	            AC_nl_12
 CO_NonlinearAutocorr(x_z,[0,1,2],false)	        AC_nl_012
 CO_NonlinearAutocorr(x_z,[1,2],true)	            AC_nl_12_abs
 CO_NonlinearAutocorr(x_z,[1,3],false)	            AC_nl_13
@@ -74,7 +73,6 @@ CO_NonlinearAutocorr(x_z,[2,2],false)	        AC_nl_22
 CO_NonlinearAutocorr(x_z,[0,2,2],false)	        AC_nl_022
 CO_NonlinearAutocorr(x_z,[2,2],true)	        AC_nl_22_abs
 CO_NonlinearAutocorr(x_z,[0,2,3],false)	        AC_nl_023
-CO_NonlinearAutocorr(x_z,[2,4],false)	            AC_nl_24
 CO_NonlinearAutocorr(x_z,[0,2,4],false)	        AC_nl_024
 CO_NonlinearAutocorr(x_z,[2,4],true)	            AC_nl_24_abs
 CO_NonlinearAutocorr(x_z,[0,2,5],false)	        AC_nl_025
@@ -274,7 +272,6 @@ DN_CompareKSFit(x,'rayleigh')	    DN_CompareKSFit_rayleigh
 DN_CompareKSFit(x,'uni')		    DN_CompareKSFit_uni
 DN_CompareKSFit(x,'wbl')		    DN_CompareKSFit_wbl
 DN_CustomSkewness(x_z,'bowley')	        DN_CustomSkewness_bowley
-DN_CustomSkewness(x,'pearsonMedian')	DN_CustomSkewness_pearson_median
 DN_CustomSkewness(x,'pearsonMode')	    DN_CustomSkewness_pearson_mode
 DN_CV(x,1)	DN_CV_1
 DN_CV(x,2)	DN_CV_2
@@ -900,9 +897,7 @@ SY_nstat_z(x_z,4,{1,3})	SY_nstat_z_4_1_3
 SY_nstat_z(x_z,5,{1,3})	SY_nstat_z_5_1_3
 SY_Trend(x_z)	    SY_Trend
 SY_VarRatioTest(x_z,2,0)	SY_VarRatioTest_2_0
-SY_VarRatioTest(x_z,2,1)	SY_VarRatioTest_2_1
 SY_VarRatioTest(x_z,4,0)	SY_VarRatioTest_4_0
-SY_VarRatioTest(x_z,4,1)	SY_VarRatioTest_4_1
 SY_VarRatioTest(x_z,[2,4,6,8,2,4,6,8],[0,0,0,0,1,1,1,1])	SY_VarRatioTest_24682468_00001111
 WL_Coeffs(x_z,'db3',1)	WL_Coeffs_db3_1
 WL_Coeffs(x_z,'db3',2)	WL_Coeffs_db3_2
