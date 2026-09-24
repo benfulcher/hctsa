@@ -30,7 +30,10 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 % featureVector, the feature vector obtained by running MasterOperations and
 % 					retrieving all features defined in the Operations structure
 % 					array on the time series data given in tsStruct.
-% calcTimes, corresponding calculation times for each feature in featureVector
+% calcTimes, corresponding calculation times for each feature in featureVector.
+%               Each is the time taken by the feature's *master* operation, so
+%               features sharing a master operation repeat the same time:
+%               sum(calcTimes) overcounts the total (see TS_TotalCalcTime).
 % calcQuality, quality labels of each calculation (e.g., coding for NaNs, Infs, etc.)
 %
 %---USAGE:

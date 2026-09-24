@@ -215,8 +215,11 @@ fprintf(1,'[%s]: Extracting %u features from each of %u time series.\n',...
 
 
 % The times vector stores the time taken for each time series to have its
-% operations calculated (for determining time remaining)
+% operations calculated (for determining time remaining). NB: under 'series'
+% parallelism these overlap in time (one per worker), so their sum is the total
+% compute time across workers, not the elapsed wall time (timed by wallTimer).
 times = zeros(numTimeSeries,1);
+wallTimer = tic;
 
 % Initialize TS_CalcTime and TS_Quality if they don't yet exist
 if ~exist('TS_CalcTime','var')
@@ -394,7 +397,9 @@ else
             TS_CalcTime(tsInd,toCalc) = calcTimes; % store calculation times in TS_CalcTime
             TS_Quality(tsInd,toCalc) = calcQuality; % store quality labels in TS_Quality
             % NB: the calculation time assigned for individual operations is the total calculation
-            % time taken to evaluate the master code.
+            % time taken to evaluate the master code. Every operation drawing on the same master
+            % gets that same time, so summing TS_CalcTime over operations overcounts
+            % (use TS_TotalCalcTime to count each master operation once).
         else
             fprintf(1,'Nothing calculated! All %u operations already complete!!\n',numOps);
         end
@@ -444,15 +449,22 @@ end
 %% Finished calculating!!
 % --------------------------------------------------------------------------
 % --------------------------------------------------------------------------
+% Report elapsed wall time (not sum(times), which under 'series' parallelism
+% adds up series computed concurrently on different workers):
+timeString = BF_TheTime(toc(wallTimer),1);
+if doParallelSeries
+    timeString = sprintf('%s (%s of compute summed across %u workers)',...
+                    timeString,BF_TheTime(sum(times),1),pool.NumWorkers);
+end
 if strcmp(howVocal,'fast')
     if showProgressBar
         BF_ProgressBar('close')
     end
-    fprintf(1,'Calculations complete in a total of %s.\n',BF_TheTime(sum(times),1));
+    fprintf(1,'Calculations complete in a total of %s.\n',timeString);
 else
     fprintf(1,'!! !! !! !! !! !! Calculation completed !! !! !! !! !!\n');
     fprintf(1,'[%s]: Calculations complete in a total of %s.\n',...
-                        datestr(now),BF_TheTime(sum(times),1));
+                        datestr(now),timeString);
 end
 
 % Save back to local files (if results were computed):
