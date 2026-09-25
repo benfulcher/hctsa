@@ -1,4 +1,4 @@
-function out = CO_Embed2_Shapes(y, tau, shape, r)
+function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 % CO_Embed2_Shapes Shape-based statistics in a 2-d embedding space
 %
 % Takes a shape and places it on each point in the two-dimensional time-delay
@@ -10,6 +10,11 @@ function out = CO_Embed2_Shapes(y, tau, shape, r)
 % tau, the time-delay
 % shape, has to be 'circle' for now...
 % r, the radius of the circle
+% theilerWin, Theiler window: points closer in time than this are not counted
+%       as neighbors, since they are close in the embedding only because
+%       successive values are correlated ({'ac', k} for k times the first
+%       zero-crossing of the autocorrelation function, or a number of samples;
+%       see BF_TheilerWindow; default: {'ac', 1}; 0 counts every other point)
 %
 % ---OUTPUTS:
 % The constructed time series of the number of nearby points, and
@@ -67,6 +72,13 @@ end
 if nargin < 4 || isempty(r)
 	r = 1; % default radius of 1
 end
+if nargin < 5 || isempty(theilerWin)
+	theilerWin = {'ac', 1};
+end
+theilerWin = BF_TheilerWindow(y, theilerWin);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+	out = NaN; return
+end
 
 % Can set time lag equal to first zero crossing of the autocorrelation function with the 'tau' input
 if strcmp(tau, 'tau'),
@@ -117,35 +129,31 @@ switch shape
 			m_c = m - m(i, :); % points wrt current point i
 			m_c_d = sum(m_c.^2, 2); % Euclidean distances from point i
 
-			counts(i) = sum(m_c_d <= r^2); % number of points enclosed in a circle of radius r
+			% Fraction of the points outside i's Theiler window (which includes
+			% i itself) that are enclosed in a circle of radius r:
+			isOther = abs((1:N)' - i) > theilerWin;
+			counts(i) = sum(m_c_d(isOther) <= r^2) / sum(isOther);
 		end
 
 	otherwise
 		error('Unknown shape ''%s''', shape)
 end
-counts = counts - 1; % ignore self-counts
-
 % ------------------------------------------------------------------------------
-% No meaningful output if never got a count with any other point!
+% No point has any (non-Theiler-excluded) neighbor within r
 % ------------------------------------------------------------------------------
-% (radius, r, is probably too small)
+% A zero density everywhere is a valid (if extreme) outcome: the location/spread
+% statistics are zero, and statistics of the shape of the (constant) counts are
+% undefined (NaN)
 if all(counts == 0)
-	fprintf(1, 'No counts detected!\n');
-	out = NaN; return
+	out = struct('ac1', NaN, 'ac2', NaN, 'ac3', NaN, 'tau', NaN, 'std', 0, ...
+				'median', 0, 'mean', 0, 'iqr', 0, 'iqronrange', NaN, ...
+				'mode_val', 1, 'mode', 0, 'hist_ent', 0, 'statav5_m', NaN, 'statav5_s', NaN);
+	return
 end
 
-% ------------------------------------------------------------------------------
-% Normalize counts to a local density
-% ------------------------------------------------------------------------------
-% Raw neighbour counts are extensive: the embedding is z-scored, so point
-% density -- and hence the expected number of points inside a fixed radius r --
-% grows in direct proportion to N. Dividing by the number of *other* points
-% gives the fraction of the embedding lying within r of each point, i.e. the
-% pointwise correlation sum, which is intensive and bounded in [0,1].
-% This rescales std/median/mean/iqr/mode; the scale-invariant outputs
-% (ac1-3, tau, iqronrange, hist_ent, mode_val, statav5_*) are unaffected, since
-% they are ratios or are computed from a histogram whose shape is unchanged.
-counts = counts / (N - 1);
+% (counts are the fraction of the embedding within r of each point, i.e. the
+% pointwise correlation sum, which is intensive and bounded in [0,1]: raw counts
+% would grow in direct proportion to N)
 
 % ------------------------------------------------------------------------------
 % Return basic statistics on the counts

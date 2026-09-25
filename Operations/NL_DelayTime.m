@@ -33,11 +33,13 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % ---INPUTS:
 % y, column vector of time series data
 %
-% maxDelay, maximum value of the delay to consider (can also specify a
-%           proportion of time series length)
+% maxDelay, maximum value of the delay to consider: {'ac', k} for k times the
+%           first zero-crossing of the autocorrelation function, or a number
+%           of samples (or, legacy, a proportion of the time-series length);
+%           shortened to fit series shorter than 2*maxDelay
 %
-% past, the TSTOOL documentation describes this parameter as "?", which is
-%       relatively uninformative.
+% past, Theiler window: value-neighbors closer in time than this are not used
+%       ({'ac', k}, or a number of samples; see BF_TheilerWindow)
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 
@@ -81,7 +83,14 @@ N = length(y); % length of time series
 % ------------------------------------------------------------------------------
 % (1) Maximum delay, maxDelay
 if nargin < 2 || isempty(maxDelay)
-	maxDelay = 0.2; % 1/5 the length of the time series
+	maxDelay = {'ac', 10};
+end
+if iscell(maxDelay) % a multiple of the autocorrelation time (as for a Theiler window)
+	maxDelay = BF_TheilerWindow(y, maxDelay);
+	if isnan(maxDelay)
+		warning('No autocorrelation zero-crossing to set the maximum delay')
+		out = NaN; return
+	end
 end
 if maxDelay < 1 && maxDelay > 0
 	maxDelay = round(N * maxDelay); % specify a proportion of time series length
@@ -92,14 +101,22 @@ if maxDelay < 10
 	fprintf(1, 'Max delay set to its minimum: delaytime = 10\n');
 end
 if maxDelay >= N / 2
-	% Heuristic for appropriate time delay
-	warning('Max delay, %u, too long for time series of length %u', maxDelay, N)
-	out = NaN; return
+	% Too long for the series: shorten to fit (keeping the minimum of 10)
+	maxDelay = ceil(N / 2) - 1;
+	if maxDelay < 10
+		warning('Time series of length %u too short for a maximum delay of 10', N)
+		out = NaN; return
+	end
 end
 
 % (2) Theiler window, past
 if nargin < 3 || isempty(past)
-	past = maxDelay; % exclude a window as wide as maxDelay by default
+	past = {'ac', 1};
+end
+past = BF_TheilerWindow(y, past);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % randomSeed: how to treat the randomization

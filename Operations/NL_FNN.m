@@ -5,7 +5,9 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % y, the input time series
 % tau, the time delay
 % maxm, the maximum embedding dimension
-% theilerWin, the Theiler window
+% theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing
+%             of the autocorrelation function, or a number of samples (see
+%             BF_TheilerWindow)
 % justBest, if 1 just outputs a scalar estimate of embedding dimension
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %                dimension
@@ -100,10 +102,12 @@ end
 
 % Theiler window:
 if nargin < 4 || isempty(theilerWin)
-	theilerWin = 0.05; % 5% of the time-series length
+	theilerWin = {'ac', 1};
 end
-if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
-	theilerWin = round(theilerWin * N);
+theilerWin = BF_TheilerWindow(y, theilerWin, N);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % Just return best dimension:

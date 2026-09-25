@@ -1,4 +1,4 @@
-function out = NL_nlpe(y, de, tau, maxN)
+function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % NL_nlpe   Normalized drop-one-out constant interpolation nonlinear prediction error.
 %
 % Computes the nlpe for a time-delay embedded time series using Michael Small's
@@ -17,6 +17,14 @@ function out = NL_nlpe(y, de, tau, maxN)
 %       to their first maxN points (default: 5000, due to memory constraints
 %       with longer time series). Set to 'full' to disable, with a warning
 %       above 20000 points.
+%
+% theilerWin, Theiler window: the prediction for each point uses its nearest
+%       neighbor outside this window in time ({'ac', k} for k times the first
+%       zero-crossing of the autocorrelation function, or a number of samples;
+%       see BF_TheilerWindow; default: {'ac', 1}). Excluding only the point
+%       itself lets a temporally adjacent point serve as the neighbor, so the
+%       error measures the local smoothness of the series rather than its
+%       predictability from similar past states.
 %
 % ---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
 % set of measures on the correlation, Gaussianity, etc. of the residuals.
@@ -114,7 +122,7 @@ end
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 % (escapeFactor=5 matches the convention used elsewhere for this test):
 if strcmp(de, 'fnn')
-	de = NL_FNN(y, tau, 10, 0.05, 1, 0.05, 5);
+	de = NL_FNN(y, tau, 10, {'ac', 1}, 1, 0.05, 5);
 	if isnan(de)
 		% NL_FNN already signals a data-dependent embedding-dimension failure
 		% (e.g. series too short for the requested tau) via NaN; propagate it
@@ -125,7 +133,15 @@ end
 
 % -------------------------------------------------------------------------------
 % Run Michael Small's nonlinear prediction error code:
-res = MS_nlpe(y, de, tau); % residuals
+if nargin < 5 || isempty(theilerWin)
+	theilerWin = {'ac', 1};
+end
+theilerWin = BF_TheilerWindow(y, theilerWin);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
+end
+res = MS_nlpe(y, de, tau, theilerWin); % residuals
 
 % ------------------------------------------------------------------------------
 %% Compute outputs

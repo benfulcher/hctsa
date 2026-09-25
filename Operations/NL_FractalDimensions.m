@@ -8,8 +8,10 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % Nref, number of randomly-chosen reference points (-1: use all points)
 % gstart, starting value for moments
 % gend, end value for moments
-% past [opt], number of samples to exclude before an after each reference
-%             index (default=0)
+% past [opt], Theiler window of samples to exclude before and after each
+%             reference index: {'ac', k} for k times the first zero-crossing
+%             of the autocorrelation function, or a number of samples (see
+%             BF_TheilerWindow; default: {'ac', 1})
 % steps [opt], number of moments to calculate (default=32);
 % embedParams, how to embed the time series using a time-delay reconstruction
 % randomSeed [opt], whether (and how) to reset the random seed, using
@@ -124,8 +126,12 @@ end
 
 % (6) past
 if nargin < 7 || isempty(past)
-	past = 10; % default
-	fprintf(1, 'Using default past correlation exclusion window value, past = %u\n', past);
+	past = {'ac', 1};
+end
+past = BF_TheilerWindow(y, past);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % (7) steps

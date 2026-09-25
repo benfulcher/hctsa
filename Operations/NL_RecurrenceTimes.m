@@ -29,14 +29,12 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 % conditions under identical forcing, which requires access to the
 % generating process itself, not just one observed series.)
 %
-% NL_ReturnTime.m already computes a related first-return-time histogram
-% from a single reference-point radius, and T_MRT/T_MRT_var correlate with
-% it at r up to ~0.80 on the Empirical1000 dataset -- a real conceptual
-% overlap, worth knowing about, though below the redundancy bar used
-% elsewhere in this codebase (r>=0.95). The segment-to-segment variance
-% computed here (the paper's actual torus-to-SNA diagnostic) has no
-% counterpart in NL_ReturnTime, which characterizes only a single
-% whole-series histogram.
+% NL_ReturnTime.m characterizes a related but distinct quantity: the lags at
+% which each point's nearest neighbors occur (where along the series the
+% trajectory tends to revisit a neighborhood), rather than the distribution of
+% gaps between successive returns computed here. Neither has a counterpart to
+% the segment-to-segment variance computed here (the paper's actual
+% torus-to-SNA diagnostic).
 %
 % ---INPUTS:
 %
@@ -46,8 +44,10 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 %
 % m, embedding dimension (a positive integer)
 %
-% theilerWin, Theiler window excluding temporally-correlated neighbors
-%             (a proportion of N if in (0,1)) -- see NL_RQA
+% theilerWin, Theiler window excluding temporally-correlated neighbors:
+%             {'ac', k} for k times the first zero-crossing of the
+%             autocorrelation function, or a number of samples (see BF_TheilerWindow) -- see NL_RQA.
+%             Narrowed to Nemb/5 for short series.
 %
 % rr, target recurrence rate used to set the neighborhood radius (the
 %     radius is set once, from the full embedded series, to the
@@ -116,7 +116,7 @@ if nargin < 3 || isempty(m)
     m = 3;
 end
 if nargin < 4 || isempty(theilerWin)
-    theilerWin = 0.01; % 1% of the (embedded) series length
+    theilerWin = {'ac', 1};
 end
 if nargin < 5 || isempty(rr)
     rr = 0.1; % target recurrence rate of 10%
@@ -150,13 +150,15 @@ if isscalar(Y) && isnan(Y)
 end
 Nemb = size(Y, 1);
 
-if (theilerWin > 0) && (theilerWin < 1)
-    theilerWinAbs = round(theilerWin * Nemb);
-else
-    theilerWinAbs = theilerWin;
+theilerWinAbs = BF_TheilerWindow(y, theilerWin, Nemb);
+if isnan(theilerWinAbs) % the autocorrelation function never crosses zero
+    warning('No autocorrelation zero-crossing to set the Theiler window')
+    out = NaN; return
 end
 
-if Nemb < 50 || Nemb <= 4 * theilerWinAbs
+% For short series, narrow the Theiler window to fit rather than give up
+theilerWinAbs = min(theilerWinAbs, floor(Nemb / 5));
+if Nemb < 50
     warning('Time series too short for meaningful recurrence-time statistics (Nemb = %u, theilerWin = %u)', Nemb, theilerWinAbs);
     out = NaN; return
 end
@@ -192,8 +194,9 @@ end
 %% segments (using the same global radius throughout)
 % ------------------------------------------------------------------------------
 segLen = floor(Nemb / numSegments);
-minSegLen = max(50, 4 * theilerWinAbs);
-if segLen < minSegLen
+% (as for the full series, narrow the Theiler window to fit short segments)
+theilerWinSeg = min(theilerWinAbs, floor(segLen / 5));
+if segLen < 50
     % Segments would be too short for a meaningful within-segment estimate
     out.T_MRT_var = NaN;
     out.N_MPRT_var = NaN;
@@ -204,7 +207,7 @@ segT = NaN(numSegments, 1);
 segN = NaN(numSegments, 1);
 for s = 1:numSegments
     idxRange = ((s - 1) * segLen + 1):(s * segLen);
-    [segT(s), segN(s)] = SUB_recurrenceTimeStats(Y(idxRange, :), radius, theilerWinAbs);
+    [segT(s), segN(s)] = SUB_recurrenceTimeStats(Y(idxRange, :), radius, theilerWinSeg);
 end
 
 if any(isnan(segT))

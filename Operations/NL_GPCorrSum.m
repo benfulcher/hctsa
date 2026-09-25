@@ -6,8 +6,9 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % Nref, number of (randomly-chosen) reference points (-1: use all points,
 %       if a decimal, then use this fraction of the time series length)
 % r, maximum search radius relative to attractor size, 0 < r < 1
-% thwin, number of samples to exclude before and after each reference index
-%        (~ Theiler window)
+% thwin, Theiler window of samples to exclude before and after each reference
+%        index: {'ac', k} for k times the first zero-crossing of the autocorrelation
+%        function, or a number of samples (see BF_TheilerWindow)
 % nbins, number of partitioned bins
 % embedParams, embedding parameters to feed BF_Embed.m for embedding the
 %               signal in the form {tau,m}
@@ -84,7 +85,12 @@ end
 
 % (3) Remove spurious correlations of adjacent points, thwin
 if nargin < 4 || isempty(thwin)
-	thwin = 10; % default window length
+	thwin = {'ac', 1};
+end
+thwin = BF_TheilerWindow(y, thwin);
+if isnan(thwin) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % (4) Number of bins, nbins

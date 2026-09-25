@@ -206,11 +206,11 @@ if ismember('nlpe', theTestStat)
 	% Locally constant phase space prediction error
 	warning('''nlpe'' can be very time consuming...')
 	de = 3; tau = 1; % embedding parameters: fixed like a dummy!
-	tmp = NL_nlpe(x, de, tau);
+	tmp = NL_nlpe(x, de, tau, [], {'ac', 1});
 	nlpex = tmp.msqerr;
 	nlpesurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
-		res = MS_nlpe(z(:, i), de, tau);
+		res = MS_nlpe(z(:, i), de, tau, BF_TheilerWindow(z(:, i), {'ac', 1}));
 		msqerr = sum(res.^2);
 		nlpesurr(i) = msqerr;
 	end
@@ -227,11 +227,11 @@ if ismember('fnn', theTestStat)
 
 	% false nearest neighbours at d=2 (escapeFactor=5 matches the convention
 	% used elsewhere for this test):
-	tmp = NL_FNN(x, 1, 2, 0.05, 0, [], 5);
+	tmp = NL_FNN(x, 1, 2, {'ac', 1}, 0, [], 5);
 	fnnx = tmp.pfnn_2;
 	fnnsurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
-		tmp = NL_FNN(z(:, i), 1, 2, 0.05, 0, [], 5);
+		tmp = NL_FNN(z(:, i), 1, 2, {'ac', 1}, 0, [], 5);
 		fnnsurr(i) = tmp.pfnn_2;
 	end
 

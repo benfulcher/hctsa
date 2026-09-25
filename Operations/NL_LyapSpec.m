@@ -1,4 +1,4 @@
-function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN)
+function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 % NL_LyapSpec   Spectrum of Lyapunov exponents of a time series.
 %
 % Estimates the full spectrum of m Lyapunov exponents (not just the
@@ -48,9 +48,11 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN)
 %
 % tauMethod, the time-delay for the embedding: an integer, or 'ac'/'mi'
 %       for the first zero-crossing of the autocorrelation function or
-%       first minimum of the automutual information (default: 'mi', as
-%       used elsewhere for delay-embedding-based operations, e.g.
-%       NL_EmbedPCA)
+%       first minimum of the automutual information (default: 1). Across 134
+%       chaotic flows with known maximal Lyapunov exponents (W. Gilpin's
+%       dysts, 30 samples per period), LE1 tracked the true exponent better
+%       with tau = 1 (Spearman 0.47) than with tau = 'ac' (0.37), and the
+%       Kaplan-Yorke dimension far better (0.36 vs 0.08).
 %
 % m, the embedding dimension, and hence the number of Lyapunov exponents
 %       estimated (default: 3 -- the minimum dimension in which a flow
@@ -74,6 +76,22 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN)
 %       scales with series length, roughly linearly to slightly
 %       superlinearly in practice; cost does not appreciably depend on
 %       m). Set to 'full' to disable cropping.
+%
+% theilerWin, Theiler window: neighbors closer in time than this are not used
+%       to estimate the local Jacobians ({'ac', k} for k times the first
+%       zero-crossing of the autocorrelation function, or a number of
+%       samples; see BF_TheilerWindow; default: {'ac', 1}). TISEAN's lyap_spec
+%       has no such option (it excludes only the point itself, so for a
+%       smoothly sampled flow most neighbors lie along the same stretch of
+%       trajectory, biasing the local linear fits towards the flow direction);
+%       hctsa's copy adds one (-t).
+%
+% (TISEAN's lyap_spec also ignores any delay: its -d option is disabled and the
+% delay fixed at 1, since the same constant sets the time step of the local
+% maps. The delay embedding is therefore built here and passed as m columns,
+% so that the maps still advance by one sample and the exponents are per
+% sample, while the embedding uses the intended delay tau. Previously the -d
+% passed to lyap_spec was silently ignored, i.e. tau = 1 always.)
 %
 % ---OUTPUTS:
 % LE1, LE2, LE3, the three Lyapunov exponents, in descending order (LE1
@@ -127,7 +145,7 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN)
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tauMethod)
-    tauMethod = 'mi';
+    tauMethod = 1;
 end
 if nargin < 3 || isempty(m)
     m = 3;
@@ -137,6 +155,9 @@ if nargin < 4 || isempty(kNN)
 end
 if nargin < 5 || isempty(maxN)
     maxN = 10000;
+end
+if nargin < 6 || isempty(theilerWin)
+    theilerWin = {'ac', 1};
 end
 
 y = y(:);
@@ -175,13 +196,37 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, lyap_spec
 % ------------------------------------------------------------------------------
-filePath = BF_WriteTempFile(y);
+theilerWin = BF_TheilerWindow(y, theilerWin);
+if isnan(theilerWin)
+    warning('No autocorrelation zero-crossing to set the Theiler window');
+    out = NaN; return
+end
+
+% Delay embedding with delay tau, one row per sample (see header comment)
+Nemb = N - (m - 1) * tau;
+if Nemb < 10 * kNN + 2 * theilerWin
+    warning('Time series too short to estimate the Lyapunov spectrum (N = %u, tau = %u, m = %u)', N, tau, m);
+    out = NaN; return
+end
+Y = zeros(Nemb, m);
+for j = 1:m
+    Y(:, j) = y((1:Nemb) + (j - 1) * tau);
+end
+filePath = [tempname '.dat'];
+fid = fopen(filePath, 'w');
+fprintf(fid, [repmat('%.7g ', 1, m - 1) '%.7g\n'], Y');
+fclose(fid);
 outFilePath = [filePath '.lyaps'];
 
-[~, res] = BF_TiseanSystem(sprintf('lyap_spec -m1,%u -d%u -k%u -o %s %s', ...
-                          m, tau, kNN, outFilePath, filePath));
+[status, res] = BF_TiseanSystem(sprintf('lyap_spec -m%u,1 -c%s -k%u -t%u -o %s %s', ...
+                          m, strjoin(arrayfun(@num2str, 1:m, 'uni', 0), ','), kNN, theilerWin, outFilePath, filePath));
 
 if exist(filePath, 'file'), delete(filePath); end
+
+if status == 50 % LYAP_SPEC_NOT_ENOUGH_NEIGHBORS: data too sparse for local fits
+    if exist(outFilePath, 'file'), delete(outFilePath); end
+    out = NaN; return
+end
 
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
     if exist(outFilePath, 'file'), delete(outFilePath); end

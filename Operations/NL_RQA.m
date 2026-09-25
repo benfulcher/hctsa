@@ -16,7 +16,8 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 % m, embedding dimension (a positive integer)
 %
 % theilerWin, Theiler window excluding temporally-correlated neighbors
-%             from the main diagonal (a proportion of N if in (0,1))
+%             from the main diagonal: {'ac', k} for k times the first zero-crossing of the
+%             autocorrelation function, or a number of samples (see BF_TheilerWindow)
 %
 % rr, target recurrence rate used to set the neighborhood radius (the
 %     radius is set to the rr-quantile of a subsample of pairwise
@@ -101,7 +102,7 @@ if nargin < 3 || isempty(m)
     m = 3;
 end
 if nargin < 4 || isempty(theilerWin)
-    theilerWin = 0.01; % 1% of the (embedded) series length
+    theilerWin = {'ac', 1};
 end
 if nargin < 5 || isempty(rr)
     rr = 0.1; % target recurrence rate of 10%
@@ -143,8 +144,10 @@ if isscalar(Y) && isnan(Y) % embedding failed
 end
 Nemb = size(Y, 1);
 
-if (theilerWin > 0) && (theilerWin < 1) % specify a proportion
-    theilerWin = round(theilerWin * Nemb);
+theilerWin = BF_TheilerWindow(y, theilerWin, Nemb);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+    warning('No autocorrelation zero-crossing to set the Theiler window')
+    out = NaN; return
 end
 
 if Nemb < 50 || Nemb <= 4 * theilerWin

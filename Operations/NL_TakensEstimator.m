@@ -27,7 +27,8 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % Nref, the number of reference points (can be -1 to use all points)
 % rad, the upper length scale to read off the dimension estimate, in standard
 %       deviations of y (cf. TSTOOL's rad, a proportion of attractor size)
-% past, the Theiler window
+% past, the Theiler window: {'ac', k} for k times the first zero-crossing of the autocorrelation
+%       function, or a number of samples (see BF_TheilerWindow)
 % embedParams, the embedding parameters for BF_Embed, in the form {tau,m}
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (relevant if an embedding-dimension method requiring
@@ -84,10 +85,12 @@ end
 
 % 3) Theiler window
 if nargin < 4 || isempty(past)
-	past = 1; % just exclude current point
+	past = {'ac', 1};
 end
-if (past > 0) && (past < 1)
-	past = floor(N * past); % specify a fraction of the time series length...
+past = BF_TheilerWindow(y, past, N);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % 4) Embedding parameters

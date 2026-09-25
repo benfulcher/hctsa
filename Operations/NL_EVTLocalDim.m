@@ -54,7 +54,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %
 % theilerWin, Theiler window excluding temporally-correlated neighbours of
 %             each pole from being treated as (trivially close) returns
-%             (a proportion of the embedded length if in (0,1); default: 0.01)
+%             ({'ac', k} for k times the first zero-crossing of the
+%             autocorrelation function, or a number of samples; see
+%             BF_TheilerWindow; default: {'ac', 1})
 %
 % nPoles, number of reference points (poles) to sample from the embedded
 %         orbit (cost is O(nPoles*Nemb); default: 200)
@@ -122,7 +124,7 @@ if nargin < 4 || isempty(q)
     q = 0.98;
 end
 if nargin < 5 || isempty(theilerWin)
-    theilerWin = 0.01;
+    theilerWin = {'ac', 1};
 end
 if nargin < 6 || isempty(nPoles)
     nPoles = 200;
@@ -157,8 +159,10 @@ if isscalar(Y) && isnan(Y) % embedding failed
 end
 Nemb = size(Y, 1);
 
-if (theilerWin > 0) && (theilerWin < 1) % specify a proportion
-    theilerWin = round(theilerWin * Nemb);
+theilerWin = BF_TheilerWindow(y, theilerWin, Nemb);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+    warning('No autocorrelation zero-crossing to set the Theiler window')
+    out = NaN; return
 end
 
 minExceed = 15; % minimum exceedances required for a pole's estimate to be trusted

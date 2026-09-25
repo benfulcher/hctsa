@@ -21,7 +21,8 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 %
 % NNR, number of nearest neighbours to compute
 %
-% past, number of time-correlated points to discard (samples)
+% past, Theiler window of time-correlated points to discard: {'ac', k} for k times the first zero-crossing of the autocorrelation
+%       function, or a number of samples (see BF_TheilerWindow)
 %
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
 %               tau and m can be characters specifying a given automatic method
@@ -68,7 +69,12 @@ if nargin < 2 || isempty(NNR)
 end
 
 if nargin < 3 || isempty(past)
-	past = 40;
+	past = {'ac', 1};
+end
+past = BF_TheilerWindow(y, past);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 if nargin < 4 || isempty(embedParams)

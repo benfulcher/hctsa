@@ -15,7 +15,9 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %
 % maxm, the maximum embedding dimension
 %
-% theilerWin, the Theiler window
+% theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing
+%             of the autocorrelation function, or a number of samples (see
+%             BF_TheilerWindow)
 
 % cf. "Practical implementation of nonlinear time series methods: The TISEAN
 % package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
@@ -100,10 +102,12 @@ end
 
 % Theiler window
 if nargin < 4 || isempty(theilerWin)
-	theilerWin = 0.01; % Set a Theiler window of 1% of the data length
+	theilerWin = {'ac', 1};
 end
-if (theilerWin > 0) && (theilerWin < 1) % specify proportion of time-series length
-	theilerWin = round(theilerWin * N);
+theilerWin = BF_TheilerWindow(y, theilerWin, N);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------

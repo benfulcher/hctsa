@@ -78,7 +78,10 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 %
 % theilerWin, the number of temporally-adjacent embedded points excluded
 %             from the skewness double sum (|i-j| <= theilerWin), to
-%             reduce the correlated-pair bias described above. Default: 1.
+%             reduce the correlated-pair bias described above: {'ac', k}
+%             for k times the first zero-crossing of the autocorrelation
+%             function, or a number of samples (see BF_TheilerWindow).
+%             Default: {'ac', 1}.
 %
 % maxN, the maximum number of embedded points used for the skewness
 %       statistic (default: 10000; 'full' to disable). Legacy cap: the
@@ -138,7 +141,12 @@ if nargin < 3 || isempty(m)
     m = 2;
 end
 if nargin < 4 || isempty(theilerWin)
-    theilerWin = 1;
+    theilerWin = {'ac', 1};
+end
+theilerWin = BF_TheilerWindow(y, theilerWin);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+    warning('No autocorrelation zero-crossing to set the Theiler window')
+    out = NaN; return
 end
 if nargin < 5 || isempty(maxN)
     maxN = 10000; % caps the O(N^2) skewness Gram matrix at ~800MB

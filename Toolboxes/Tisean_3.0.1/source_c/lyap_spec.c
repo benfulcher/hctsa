@@ -49,6 +49,8 @@ char *infile=NULL;
 char dimset=0;
 char *COLUMNS=NULL;
 unsigned long LENGTH=ULONG_MAX,ITERATIONS,exclude=0;
+/* (hctsa) Theiler window: neighbors closer in time than this are not used */
+unsigned long THEILER=0;
 unsigned int EMBED=2,DIMENSION=1/*,DELAY=1*/,MINNEIGHBORS=30;
 unsigned int verbosity=0xff;
 double EPSSTEP=1.2;
@@ -80,6 +82,8 @@ void show_options(char *progname)
   "(data interval)/1000]\n");
   fprintf(stderr,"\t-f factor to increase epsilon [default: 1.2]\n");
   fprintf(stderr,"\t-k # of neighbors to use [default: 30]\n");
+  fprintf(stderr,"\t-t Theiler window: exclude neighbors closer in time than"
+          " this [default: 0]\n");
   fprintf(stderr,"\t-n # of iterations [default: length]\n");
   fprintf(stderr,"\t-I invert the time series [default: no]\n");
   fprintf(stderr,"\t-o name of output file [default 'datafile'.lyaps]\n");
@@ -117,6 +121,8 @@ void scan_options(int n,char **argv)
     sscanf(out,"%lf",&EPSSTEP);
   if ((out=check_option(argv,n,'k','u')) != NULL)
     sscanf(out,"%u",&MINNEIGHBORS);
+  if ((out=check_option(argv,n,'t','u')) != NULL)
+    sscanf(out,"%lu",&THEILER);
   if ((out=check_option(argv,n,'V','u')) != NULL)
     sscanf(out,"%u",&verbosity);
   if ((out=check_option(argv,n,'I','n')) != NULL)
@@ -226,6 +232,17 @@ void make_dynamics(double **dynamics,long act)
 		   DELAY,epsilon);
     nfound=find_multi_neighbors(series,box,list,hser,LENGTH-DELAY,BOX,
 				DIMENSION,EMBED,DELAY,epsilon,found);
+    /* (hctsa) Drop neighbors within the Theiler window: they are close only
+       because successive values are correlated, and would bias the local
+       linear fit towards the direction of the flow. The reference point
+       itself is kept, since sort() removes it. */
+    if (THEILER > 0) {
+      unsigned long k,kept=0;
+      for (k=0;k<nfound;k++)
+	if (((long)found[k] == act) || (labs((long)found[k]-act) > (long)THEILER))
+	  found[kept++]=found[k];
+      nfound=kept;
+    }
     if (nfound > MINNEIGHBORS) {
       foundeps=sort(act,&nfound,&got_enough);
       if (got_enough)

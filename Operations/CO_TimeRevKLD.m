@@ -69,7 +69,10 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 % theilerWin, the number of temporally-adjacent points excluded from both
 %             the within-set and cross-set neighbor searches (|i-j| <=
 %             theilerWin), applied at matching time indices in both the
-%             forward and reversed embeddings. Default: 1.
+%             forward and reversed embeddings: {'ac', k} for k times the
+%             first zero-crossing of the autocorrelation function, or a
+%             number of samples (see BF_TheilerWindow). Default: {'ac', 1}.
+%             Narrowed to fit short series (see minN below).
 %
 % maxN, the maximum number of embedded points used. The k-NN searches are
 %       KD-tree-based, not the O(N^2) cost of CO_JointNonGaussianity's
@@ -131,7 +134,12 @@ if nargin < 4 || isempty(k)
     k = 3;
 end
 if nargin < 5 || isempty(theilerWin)
-    theilerWin = 1;
+    theilerWin = {'ac', 1};
+end
+theilerWin = BF_TheilerWindow(y, theilerWin);
+if isnan(theilerWin) % the autocorrelation function never crosses zero
+    warning('No autocorrelation zero-crossing to set the Theiler window')
+    out = NaN; return
 end
 if nargin < 6 || isempty(maxN)
     maxN = 'full';
@@ -147,7 +155,10 @@ if isscalar(Y) && isnan(Y) % embedding failed
 end
 [Nemb, d] = size(Y);
 
-minN = max(50, 10 * (k + theilerWin));
+% Require ~10*(k + theilerWin) embedded points; for short series, narrow the
+% Theiler window to fit rather than give up
+theilerWin = min(theilerWin, max(0, floor(Nemb / 10) - k));
+minN = max(50, 10 * k);
 if Nemb < minN
     warning('Too few embedded points (%u) for a meaningful time-reversal KLD estimate at m = %u', Nemb, d);
     out = NaN; return

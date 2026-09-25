@@ -1,4 +1,4 @@
-function e = MS_nlpe(y,de,tau);
+function e = MS_nlpe(y,de,tau,theilerWin);
 % MS_nlpe
 %
 % Compute the normalised "drop-one-out" constant interpolation nonlinear
@@ -14,7 +14,7 @@ function e = MS_nlpe(y,de,tau);
 % Analysis: Applications in Physics, Physiology and Finance. Nonlinear Science
 % Series A, vol. 52. World Scientific, 2005. (ISBN 981-256-117-X) and the
 % references therein.
-% (Minor edits by Ben Fulcher, 2010)
+% (Minor edits by Ben Fulcher, 2010; optional Theiler window, theilerWin, added 2026)
 %-------------------------------------------------------------------------------
 
 if min(size(y)) > 1
@@ -43,6 +43,9 @@ end
 % speye = sparse(1:n,1:n,1);
 warning('off','MATLAB:divideByZero')
 dd = dd + 1./(1 - eye(n,n));
+if nargin > 3 && theilerWin > 0 % (hctsa) also exclude neighbours within a Theiler window in time
+    dd(abs((1:n)' - (1:n)) <= theilerWin) = Inf;
+end
 % dd=dd+1./(1-speye);
 warning('on','MATLAB:divideByZero')
 % near is the index of the nearest neighbour of each point

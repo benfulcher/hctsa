@@ -6,8 +6,15 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % Nref, number of randomly-chosen reference points (-1 == all). Accepted for
 %       backwards compatibility but no longer affects the computation -- see
 %       below.
-% maxtstep, maximum prediction length (samples)
-% past, exclude -- Theiler window idea
+% maxtstep, maximum prediction length: {'ac', k} for k times the first
+%       zero-crossing of the autocorrelation function, or a number of samples.
+%       {'ac', 20} tracked known maximal Lyapunov exponents across 134 chaotic
+%       flows (W. Gilpin's dysts) as well as or better than the former 10% of
+%       the series length, without scaling with the length. The series must span
+%       maxtstep + 2*past <= N/2 samples, else NaN (a shortened horizon carries
+%       no information about the exponent).
+% past, the Theiler window: {'ac', k} for k times the first zero-crossing of the autocorrelation
+%       function, or a number of samples (see BF_TheilerWindow)
 % NNR, number of nearest neighbours. Accepted for backwards compatibility but
 %      no longer affects the computation -- see below.
 % embedParams, input to BF_Embed, how to time-delay-embed the time series, in
@@ -96,7 +103,14 @@ end
 
 % (2) maxtstep: maximum prediction length
 if nargin < 3 || isempty(maxtstep)
-	maxtstep = 0.1; % 10% length of time series
+	maxtstep = {'ac', 20}; % (neighbor divergence typically saturates within ~15-30 autocorrelation times)
+end
+if iscell(maxtstep) % a multiple of the autocorrelation time (as for a Theiler window)
+	maxtstep = BF_TheilerWindow(y, maxtstep);
+	if isnan(maxtstep)
+		warning('No autocorrelation zero-crossing to set the prediction length')
+		out = NaN; return
+	end
 end
 if maxtstep < 1 && maxtstep > 0
 	maxtstep = round(N * maxtstep); % specify a proportion of time series length
@@ -110,11 +124,20 @@ end
 
 % (3) past/theiler window
 if nargin < 4 || isempty(past)
-	past = 40;
+	past = {'ac', 1};
 end
-if past < 1 && past > 0
-	past = floor(past * N);
-	if past == 0, past = 1; end
+past = BF_TheilerWindow(y, past, N);
+if isnan(past) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
+end
+if maxtstep + 2 * past > N / 2
+	% Too few correlation times in the series to follow neighbor divergence
+	% (lyap_r also becomes very slow as maxtstep + past approaches N). Shortening
+	% maxtstep to fit was tested instead: below ~20 autocorrelation times the
+	% slope fields lost all correlation with known exponents (dysts flows), so NaN
+	warning('Time series too short (N = %u) for maxtstep = %u with Theiler window %u', N, maxtstep, past);
+	out = NaN; return
 end
 
 % (4) Number of nearest neighbours. No longer used (TISEAN's lyap_r always

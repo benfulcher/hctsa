@@ -403,11 +403,24 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % before computing summary statistics -- match that here:
             countsExpected = countsExpected / (Nm - 1);
 
-            out = CO_Embed2_Shapes(y,tau,'circle',r);
+            out = CO_Embed2_Shapes(y,tau,'circle',r,0); % (no Theiler window)
 
             testCase.verifyEqual(out.mean, mean(countsExpected), 'AbsTol', 1e-10);
             testCase.verifyEqual(out.median, median(countsExpected), 'AbsTol', 1e-10);
             testCase.verifyEqual(out.std, std(countsExpected), 'AbsTol', 1e-10);
+
+            % With a Theiler window of W samples: count only points more than
+            % W apart in time, as a fraction of those points
+            W = 5;
+            countsW = zeros(Nm,1);
+            for i = 1:Nm
+                m_c_d = sum((m - ones(Nm,1)*m(i,:)).^2,2);
+                isOther = abs((1:Nm)' - i) > W;
+                countsW(i) = sum(m_c_d(isOther) <= r^2) / sum(isOther);
+            end
+            outW = CO_Embed2_Shapes(y,tau,'circle',r,W);
+            testCase.verifyEqual(outW.mean, mean(countsW), 'AbsTol', 1e-10);
+            testCase.verifyEqual(outW.std, std(countsW), 'AbsTol', 1e-10);
         end
 
         %-------------------------------------------------------------
