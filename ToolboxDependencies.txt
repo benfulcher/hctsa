@@ -41,7 +41,7 @@ FC_LocalSimple.m
 FC_LoopLocalSimple.m
 FC_Surprise.m
 HT_DistributionTest.m
-HT_DistributionTests.m
+HT_MarginalTests.m
 HT_HypothesisTest.m
 HT_IndependenceTests.m
 MF_CompareTestSets.m

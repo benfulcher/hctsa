@@ -541,11 +541,11 @@ HT_DistributionTest(x,'ks','norm')				HT_DistributionTest_ks_norm
 HT_DistributionTest(x,'ks','rayleigh')			HT_DistributionTest_ks_rayl
 HT_DistributionTest(x,'ks','uni')				HT_DistributionTest_ks_uni
 HT_DistributionTest(x,'ks','wbl')				HT_DistributionTest_ks_wbl
-HT_DistributionTests(x,'jbtest')		HT_DistributionTests_jbtest
+HT_MarginalTests(x,'jbtest')		HT_MarginalTests_jbtest
 HT_IndependenceTests(x_z,'lbq')			HT_IndependenceTests_lbq
 HT_IndependenceTests(x,'runstest')	HT_IndependenceTests_runstest
-HT_DistributionTests(x_z,'signrank')	HT_DistributionTests_signrank
-HT_DistributionTests(x_z,'signtest')	HT_DistributionTests_signtest
+HT_MarginalTests(x_z,'signrank')	HT_MarginalTests_signrank
+HT_MarginalTests(x_z,'signtest')	HT_MarginalTests_signtest
 IN_AutoMutualInfoStats(x_z,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
 IN_AutoMutualInfoStats(x_z,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(x_z),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian

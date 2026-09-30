@@ -1,7 +1,7 @@
 function p = HT_HypothesisTest(x, theTest)
 % HT_HypothesisTest     [DEPRECATED] Statistical hypothesis test applied to a time series.
 %
-% DEPRECATED: use HT_DistributionTests (tests about the distribution of values)
+% DEPRECATED: use HT_MarginalTests (tests about the distribution of values)
 % or HT_IndependenceTests (tests of serial independence) instead; this thin
 % wrapper is kept only so that custom input files keep working, and is no longer
 % part of the default feature library.
@@ -10,7 +10,7 @@ function p = HT_HypothesisTest(x, theTest)
 % x, the input time series
 %
 % theTest, the hypothesis test to perform, dispatched as:
-%           HT_DistributionTests: 'signtest', 'vartest', 'ztest', 'signrank', 'jbtest'
+%           HT_MarginalTests: 'signtest', 'vartest', 'ztest', 'signrank', 'jbtest'
 %           HT_IndependenceTests: 'runstest', 'lbq'
 %
 % ---OUTPUT:
@@ -49,14 +49,14 @@ function p = HT_HypothesisTest(x, theTest)
 % Warn once per session:
 persistent hasWarned
 if isempty(hasWarned)
-	warning('hctsa:deprecated', ['HT_HypothesisTest is deprecated: use HT_DistributionTests ' ...
+	warning('hctsa:deprecated', ['HT_HypothesisTest is deprecated: use HT_MarginalTests ' ...
 				'(distribution tests) or HT_IndependenceTests (serial independence tests) instead.']);
 	hasWarned = true;
 end
 
 switch theTest
 	case {'signtest','vartest','ztest','signrank','jbtest'}
-		p = HT_DistributionTests(x, theTest);
+		p = HT_MarginalTests(x, theTest);
 
 	case {'runstest','lbq'}
 		p = HT_IndependenceTests(x, theTest);

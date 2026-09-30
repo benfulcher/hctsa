@@ -3,7 +3,7 @@ function p = HT_IndependenceTests(y, theTest)
 %
 % These tests ask whether the temporal ordering of the time series carries
 % structure: the null hypothesis is that successive values are independent (no
-% serial dependence). Unlike the tests in HT_DistributionTests, the p-value
+% serial dependence). Unlike the tests in HT_MarginalTests, the p-value
 % depends on the order of the measurements, and can change if the series is
 % reordered.
 %

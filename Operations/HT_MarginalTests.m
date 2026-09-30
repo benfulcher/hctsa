@@ -1,5 +1,5 @@
-function p = HT_DistributionTests(y, theTest)
-% HT_DistributionTests     p-value of a hypothesis test about the distribution of values.
+function p = HT_MarginalTests(y, theTest)
+% HT_MarginalTests     p-value of a hypothesis test about the marginal distribution of values.
 %
 % These tests ask a question about the distribution of the values in the time
 % series (its center, spread, symmetry, or shape) and are insensitive to the

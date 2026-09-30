@@ -1,7 +1,7 @@
 old_name,new_name,reason
-jbtest,HT_DistributionTests_jbtest,split HT_HypothesisTest by question (distribution vs serial independence)
-signrank,HT_DistributionTests_signrank,split HT_HypothesisTest by question (distribution vs serial independence)
-signtest,HT_DistributionTests_signtest,split HT_HypothesisTest by question (distribution vs serial independence)
+jbtest,HT_MarginalTests_jbtest,split HT_HypothesisTest by question (distribution vs serial independence)
+signrank,HT_MarginalTests_signrank,split HT_HypothesisTest by question (distribution vs serial independence)
+signtest,HT_MarginalTests_signtest,split HT_HypothesisTest by question (distribution vs serial independence)
 lbqtest,HT_IndependenceTests_lbq,split HT_HypothesisTest by question (distribution vs serial independence)
 runstest,HT_IndependenceTests_runstest,split HT_HypothesisTest by question (distribution vs serial independence)
 seasonality_test,,deregistered: binarized output of a sinusoid fit
