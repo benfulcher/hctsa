@@ -366,9 +366,6 @@ DN_SimpleFit(x_z,'gauss1',0)	    DN_SimpleFit_gauss1_ks
 DN_SimpleFit(x_z,'gauss2','sqrt')	DN_SimpleFit_gauss2_hsqrt
 DN_SimpleFit(x_z,'gauss2',0)	    DN_SimpleFit_gauss2_ks
 DN_SimpleFit(x,'power1','sqrt')	    DN_SimpleFit_power1_hsqrt
-DN_SimpleFit(x_z,'sin1')	DN_SimpleFit_sin1
-DN_SimpleFit(x_z,'sin2')	DN_SimpleFit_sin2
-DN_SimpleFit(x_z,'sin3')	DN_SimpleFit_sin3
 DN_Spread(x,'iqr')			DN_Spread_iqr
 DN_Spread(x,'mad')			DN_Spread_mad
 DN_Spread(x,'mead')			DN_Spread_mead
@@ -793,6 +790,9 @@ SP_Bicoherence(x_z,64,'full',25)	SP_Bicoherence_64_full_25
 SP_Cepstrum(x_z,100,4)	SP_Cepstrum_100_4
 SP_PhaseAmpCoupling(x_z,5,'full',18)	SP_PhaseAmpCoupling_5_full_18
 SP_PhaseFluctuationScaling(x_z,0.01,16,10000)	SP_PhaseFluctuationScaling_001_16_10000
+SP_SinusoidFit(x_z,'sin1')	SP_SinusoidFit_sin1
+SP_SinusoidFit(x_z,'sin2')	SP_SinusoidFit_sin2
+SP_SinusoidFit(x_z,'sin3')	SP_SinusoidFit_sin3
 SP_Specparam(x_z,'fixed',4,1,[0.02,0.5],[],Inf)	SP_Specparam_fixed_4_1
 SP_SpectralTimeFreq(x_z,20)	SP_SpectralTimeFreq_20
 SP_Summaries(x_z,'fft',[],[],false)	                SP_Summaries_fft

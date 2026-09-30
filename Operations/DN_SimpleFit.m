@@ -1,33 +1,36 @@
 function out = DN_SimpleFit(x, dmodel, numBins)
-% DN_SimpleFit  Fit distributions or simple time-series models to the data.
+% DN_SimpleFit  Fit a simple model to the distribution of time-series values.
 %
-% Uses the 'fit' function from Matlab's Curve Fitting Toolbox.
+% Uses the 'fit' function from Matlab's Curve Fitting Toolbox to fit a simple
+% parametric model to an estimate of the distribution of values in the time
+% series, ignoring their temporal ordering.
 %
 % The distribution of time-series values is estimated using either a
 % kernel-smoothed density via the Matlab function ksdensity with the default
 % width parameter, or by a histogram with a specified number of bins, numBins.
 %
+% Deprecated: fits of time-series models (sinusoids or Fourier series) against
+% time have moved to SP_SinusoidFit, since they depend on the temporal ordering
+% of the data. For backward compatibility, the time-series models ('sin1',
+% 'sin2', 'sin3', 'fourier1', 'fourier2', 'fourier3') are still accepted here:
+% the call is passed on to SP_SinusoidFit (with identical outputs) after issuing
+% a one-time 'hctsa:deprecated' warning.
+%
 % ---INPUTS:
 % x, the input time series
 %
-% dmodel, the model to fit:
-%       (I) distribution models:
+% dmodel, the distribution model to fit:
 %           (i) 'gauss1'
 %           (ii) 'gauss2'
 %           (iii) 'exp1'
 %           (iv) 'power1'
-%       (II) simple time-series models:
-%           (i) 'sin1'
-%           (ii) 'sin2'
-%           (iii) 'sin3'
-%           (iv) 'fourier1'
-%           (v) 'fourier2'
-%           (vi) 'fourier3'
+%       (The deprecated time-series models 'sin1', 'sin2', 'sin3', 'fourier1',
+%       'fourier2', 'fourier3' are dispatched to SP_SinusoidFit.)
 %
 % numBins, the number of bins for a histogram-estimate of the distribution of
 %       time-series values. If numBins = 0, uses ksdensity instead of histogram.
 %
-% ---OUTPUTS: the goodness of fifit, R^2, rootmean square error, the
+% ---OUTPUTS: the goodness of fit, R^2, root mean square error, the
 % autocorrelation of the residuals, and a runs test on the residuals.
 
 % ------------------------------------------------------------------------------
@@ -67,11 +70,24 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 BF_CheckToolbox('curve_fitting_toolbox');
 
 % ------------------------------------------------------------------------------
+%% Deprecated: time-series models now live in SP_SinusoidFit
+% ------------------------------------------------------------------------------
+persistent warnedTSmodel % warn only once per session
+TSmodels = {'sin1', 'sin2', 'sin3', 'fourier1', 'fourier2', 'fourier3'}; % time-series models
+if ischar(dmodel) && any(strcmp(TSmodels, dmodel))
+	if isempty(warnedTSmodel)
+		warning('hctsa:deprecated', ['DN_SimpleFit no longer fits time-series models; ' ...
+				'''%s'' is dispatched to SP_SinusoidFit (this warning is shown once per session).'], dmodel);
+		warnedTSmodel = true;
+	end
+	out = SP_SinusoidFit(x, dmodel);
+	return
+end
+
+% ------------------------------------------------------------------------------
 %% Fit the model
 % ------------------------------------------------------------------------------
-% Two cases: distribution fits and fits on the data
 distModels = {'gauss1', 'gauss2', 'exp1', 'power1'}; % valid distribution models
-TSmodels = {'sin1', 'sin2', 'sin3', 'fourier1', 'fourier2', 'fourier3'}; % valid time-series models
 
 if any(strcmp(distModels, dmodel)) % valid DISTRIBUTION model name
 	if nargin < 3 || isempty(numBins) % haven't specified numBins
@@ -112,30 +128,14 @@ if any(strcmp(distModels, dmodel)) % valid DISTRIBUTION model name
 		end
 	end
 
-elseif ismember(dmodel, TSmodels) % Valid time-series model name
-	if size(x, 2) > size(x, 1)
-		x = x';
-	end % x must be a column vector
-	t = (1:length(x))'; % Time variable for equal sampling of the univariate time series
-	try
-		[cfun, gof, output] = fit(t, x, dmodel); % fit the model
-	catch emsg % this model can't even be fitted OR license problem
-		if strcmp(emsg.message, 'NaN computed by model function.') || strcmp(emsg.message, 'Inf computed by model function.')
-			fprintf(1, 'The model %s failed for this data -- returning NaNs for all fitting outputs\n', dmodel);
-			out = NaN; return
-		else
-			error('Unexpected error fitting ''%s'' to the time series', dmodel)
-		end
-	end
 else
-	error('Invalid distribution or time-series model ''%s'' specified', dmodel);
+	error('Invalid distribution model ''%s'' specified', dmodel);
 end
 
 % ------------------------------------------------------------------------------
 %% Compute the outputs into a structure
 % ------------------------------------------------------------------------------
-out.r2 = gof.rsquare; % rsquared (registered for the distribution-model mops; not for the
-                       % time-series-model mops sin1/sin2/sin3, which register rmse instead)
+out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
                              % by any mop -- redundant with r2 for these fixed-order fits)
 
