@@ -1,6 +1,12 @@
 function out = DT_IsSeasonal(y)
 % DT_IsSeasonal     A simple test of seasonality.
 %
+% DEPRECATED: no longer in the default feature library (deregistered from
+% INP_mops_hctsa.txt and INP_ops_hctsa.txt), because thresholding the R^2 and
+% amplitude of a sinusoid fit into a binary output discards information that is
+% available in the continuous outputs of the sinusoid fit (e.g., DN_SimpleFit
+% with 'sin1'). The function is kept so that custom input files keep working.
+%
 % Fits a 'sin1' model to the time series using fit function from the Curve Fitting
 % Toolbox. The output is binary: 1 if the goodness of fit, R^2, exceeds 0.3 and
 % the amplitude of the fitted periodic component exceeds 0.5, and 0 otherwise.

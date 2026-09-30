@@ -1,23 +1,21 @@
 function p = HT_HypothesisTest(x, theTest)
-% HT_HypothesisTest     Statistical hypothesis test applied to a time series.
+% HT_HypothesisTest     [DEPRECATED] Statistical hypothesis test applied to a time series.
 %
-% Tests are implemented as functions in Matlab's Statistics Toolbox.
-% (except Ljung-Box Q-test, which uses the Econometrics Toolbox)
+% DEPRECATED: use HT_DistributionTests (tests about the distribution of values)
+% or HT_IndependenceTests (tests of serial independence) instead; this thin
+% wrapper is kept only so that custom input files keep working, and is no longer
+% part of the default feature library.
 %
 % ---INPUTS:
 % x, the input time series
 %
-% theTest, the hypothesis test to perform:
-%           (i) sign test ('signtest'), nonparametric test for the median of a population
-%           (ii) runs test ('runstest'),
-%           (iii) variance test ('vartest'),
-%           (iv) Z-test ('ztest'),
-%           (v) Wilcoxon signed rank test for a zero median ('signrank'),
-%           (vi) Jarque-Bera test of composite normality ('jbtest').
-%           (vii) Ljung-Box Q-test for residual autocorrelation ('lbq')
+% theTest, the hypothesis test to perform, dispatched as:
+%           HT_DistributionTests: 'signtest', 'vartest', 'ztest', 'signrank', 'jbtest'
+%           HT_IndependenceTests: 'runstest', 'lbq'
 %
 % ---OUTPUT:
-% p-value from the specified statistical test
+% p-value from the specified statistical test (identical to that of the function
+% it dispatches to)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -48,36 +46,20 @@ function p = HT_HypothesisTest(x, theTest)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+% Warn once per session:
+persistent hasWarned
+if isempty(hasWarned)
+	warning('hctsa:deprecated', ['HT_HypothesisTest is deprecated: use HT_DistributionTests ' ...
+				'(distribution tests) or HT_IndependenceTests (serial independence tests) instead.']);
+	hasWarned = true;
+end
+
 switch theTest
-	case 'signtest' % Statistics Toolbox
-		[p, ~] = signtest(x);
-		% for some reason this one has p-value as the first output
+	case {'signtest','vartest','ztest','signrank','jbtest'}
+		p = HT_DistributionTests(x, theTest);
 
-	case 'runstest' % Statistics Toolbox
-		[~, p] = runstest(x);
-
-	case 'vartest' % Statistics Toolbox
-		[~, p] = vartest(x, 1); % normal distribution of variance 1
-
-	case 'ztest' % Statistics Toolbox
-		[~, p] = ztest(x, 0, 1);
-
-	case 'signrank' % Statistics Toolbox
-		[p, ~] = signrank(x);
-
-	case 'jbtest' % Statistics Toolbox
-		warning('off', 'stats:jbtest:PTooBig'); % suspend this warning
-		warning('off', 'stats:jbtest:PTooSmall'); % suspend this warning
-		[~, p] = jbtest(x);
-		warning('on', 'stats:jbtest:PTooBig'); % resume this warning
-		warning('on', 'stats:jbtest:PTooSmall'); % resume this warning
-
-	case 'lbq'
-		% Check that an Econometrics Toolbox license is available:
-		BF_CheckToolbox('econometrics_toolbox');
-
-		% Perform the test
-		[~, p] = lbqtest(x);
+	case {'runstest','lbq'}
+		p = HT_IndependenceTests(x, theTest);
 
 	otherwise
 		error('Unknown hypothesis test ''%s''', theTest);

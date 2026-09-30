@@ -1367,7 +1367,6 @@ DN_WithinP_median_15    DN_WithinP_median_15    distribution,spread
 DN_WithinP_median_20    DN_WithinP_median_20    distribution,spread
 DN_WithinP_median_25    DN_WithinP_median_25    distribution,spread
 DN_WithinP_median_30    DN_WithinP_median_30    distribution,spread
-DT_IsSeasonal	seasonality_test	periodicity
 EN_CID.CE2 EN_CID_CE2 entropy
 EN_CID.minCE1 EN_CID_minCE1 entropy,distribution
 EN_CID.minCE2 EN_CID_minCE2 entropy,distribution
@@ -2218,11 +2217,11 @@ HT_DistributionTest_ks_norm	    HT_DistributionTest_ks_norm	    hypothesisTest,d
 HT_DistributionTest_ks_rayl	    HT_DistributionTest_ks_rayl	    hypothesisTest,distribution,KS,raw,locationDependent,posOnly
 HT_DistributionTest_ks_uni	    HT_DistributionTest_ks_uni	    hypothesisTest,distribution,KS,raw
 HT_DistributionTest_ks_wbl	    HT_DistributionTest_ks_wbl	    hypothesisTest,distribution,KS,raw,locationDependent,posOnly
-HT_HypothesisTest_jbtest		jbtest	    hypothesisTest,raw,distribution
-HT_HypothesisTest_lbqtest		lbqtest	    hypothesisTest,randomness
-HT_HypothesisTest_runstest	    runstest	hypothesisTest,randomness,raw
-HT_HypothesisTest_signrank		signrank	hypothesisTest,distribution
-HT_HypothesisTest_signtest		signtest	hypothesisTest,signtest,distribution
+HT_DistributionTests_jbtest	HT_DistributionTests_jbtest	hypothesisTest,raw,distribution
+HT_IndependenceTests_lbq	HT_IndependenceTests_lbq	hypothesisTest,randomness
+HT_IndependenceTests_runstest	HT_IndependenceTests_runstest	hypothesisTest,randomness,raw
+HT_DistributionTests_signrank	HT_DistributionTests_signrank	hypothesisTest,distribution
+HT_DistributionTests_signtest	HT_DistributionTests_signtest	hypothesisTest,signtest,distribution
 IN_AutoMutualInfoStats_40_gaussian.fmmi  IN_AutoMutualInfoStats_40_gaussian_fmmi  information,correlation,AMI
 IN_AutoMutualInfoStats_40_kraskov1_4.ami1  IN_AutoMutualInfoStats_40_kraskov1_4_ami1  information,correlation,AMI
 IN_AutoMutualInfoStats_40_kraskov1_4.ami2  IN_AutoMutualInfoStats_40_kraskov1_4_ami2  information,correlation,AMI

@@ -41,7 +41,9 @@ FC_LocalSimple.m
 FC_LoopLocalSimple.m
 FC_Surprise.m
 HT_DistributionTest.m
+HT_DistributionTests.m
 HT_HypothesisTest.m
+HT_IndependenceTests.m
 MF_CompareTestSets.m
 MF_ExpSmoothing.m
 MF_FitSubsegments.m
@@ -151,6 +153,7 @@ WL_scal2frq.m
 Econometrics Toolbox (Matlab Toolbox)
 
 HT_HypothesisTest.m
+HT_IndependenceTests.m
 MF_GARCHcompare.m
 MF_GARCHfit.m
 SY_KPSStest.m

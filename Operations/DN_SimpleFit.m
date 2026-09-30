@@ -142,6 +142,6 @@ out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currentl
 out.rmse = gof.rmse; % root mean square error
 out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_AutoCorr(output.residuals, 2, 'Fourier'); % autocorrelation of residuals at lag 2
-out.resruns = HT_HypothesisTest(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value
+out.resruns = HT_IndependenceTests(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value
 
 end

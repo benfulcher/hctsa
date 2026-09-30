@@ -391,7 +391,6 @@ DN_WithinP(x_z,1.5,'median')	DN_WithinP_median_15
 DN_WithinP(x_z,2,'median')	DN_WithinP_median_20
 DN_WithinP(x_z,2.5,'median')	DN_WithinP_median_25
 DN_WithinP(x_z,3,'median')	DN_WithinP_median_30
-DT_IsSeasonal(x_z)	DT_IsSeasonal
 EN_CID(x_z)           EN_CID
 EN_DistributionEntropy(x_z,'hist',5,0)	EN_DistributionEntropy_hist_5_0
 EN_DistributionEntropy(x_z,'hist',10,0)	EN_DistributionEntropy_hist_10_0
@@ -545,11 +544,11 @@ HT_DistributionTest(x,'ks','norm')				HT_DistributionTest_ks_norm
 HT_DistributionTest(x,'ks','rayleigh')			HT_DistributionTest_ks_rayl
 HT_DistributionTest(x,'ks','uni')				HT_DistributionTest_ks_uni
 HT_DistributionTest(x,'ks','wbl')				HT_DistributionTest_ks_wbl
-HT_HypothesisTest(x,'jbtest')		HT_HypothesisTest_jbtest
-HT_HypothesisTest(x_z,'lbq')			HT_HypothesisTest_lbqtest
-HT_HypothesisTest(x,'runstest')	    HT_HypothesisTest_runstest
-HT_HypothesisTest(x_z,'signrank')	HT_HypothesisTest_signrank
-HT_HypothesisTest(x_z,'signtest')	    HT_HypothesisTest_signtest
+HT_DistributionTests(x,'jbtest')		HT_DistributionTests_jbtest
+HT_IndependenceTests(x_z,'lbq')			HT_IndependenceTests_lbq
+HT_IndependenceTests(x,'runstest')	HT_IndependenceTests_runstest
+HT_DistributionTests(x_z,'signrank')	HT_DistributionTests_signrank
+HT_DistributionTests(x_z,'signtest')	HT_DistributionTests_signtest
 IN_AutoMutualInfoStats(x_z,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian
 IN_AutoMutualInfoStats(x_z,40,'kraskov1','4') IN_AutoMutualInfoStats_40_kraskov1_4
 IN_AutoMutualInfoStats(diff(x_z),20,'gaussian') IN_AutoMutualInfoStats_diff_20_gaussian
