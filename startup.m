@@ -32,23 +32,36 @@ addfcn = @(x) addpath(fullfile(hctsaDir,x));
 
 % ------------------------------------------------------------------------------
 % Make sure the catch22 git submodule has been fetched. A fresh `git clone`
-% without --recurse-submodules leaves this directory empty, so fetch it
-% automatically rather than leaving the user to hit an addpath warning below:
+% without --recurse-submodules (or a new git worktree) leaves this directory
+% empty. catch22 is optional -- no operation in the hctsa library needs it -- so
+% startup must never block on fetching it: fetch only in an interactive session
+% of a git checkout, never prompt for credentials, give up if the transfer
+% stalls, and otherwise just say how to fetch it. Set the environment variable
+% HCTSA_NO_SUBMODULE_FETCH (to anything) to skip the fetch altogether.
 % ------------------------------------------------------------------------------
 catch22Dir = fullfile(hctsaDir,'Toolboxes','catch22','wrap_Matlab');
 if ~isfolder(catch22Dir)
-    fprintf(1,'catch22 submodule not found -- fetching it automatically now (this can take a minute)...\n');
-    ownerDir = pwd;
-    cd(hctsaDir);
-    % '-echo' streams git's own progress output live, so this doesn't look hung:
-    gitStatus = system('git submodule update --init --recursive','-echo');
-    cd(ownerDir);
-    if gitStatus==0 && isfolder(catch22Dir)
-        fprintf(1,'catch22 submodule fetched successfully.\n');
-    else
-        fprintf(1,['Could not fetch the catch22 submodule automatically (see output above).\n' ...
-            'If you downloaded a ZIP rather than using git, please instead clone the\n' ...
-            'repository (or run: git submodule update --init --recursive from the hctsa root).\n']);
+    gitDir = fullfile(hctsaDir,'.git'); % a folder in a clone, a file in a worktree
+    isGitCheckout = isfolder(gitDir) || isfile(gitDir);
+    canFetch = isGitCheckout && isempty(getenv('HCTSA_NO_SUBMODULE_FETCH')) ...
+                && ~batchStartupOptionUsed && usejava('desktop');
+    if canFetch
+        fprintf(1,'catch22 submodule not found -- fetching it now (skipped if the network is unavailable)...\n');
+        oldPrompt = getenv('GIT_TERMINAL_PROMPT');
+        setenv('GIT_TERMINAL_PROMPT','0'); % fail instead of waiting for credentials
+        % Abort if the transfer runs below 1 kB/s for 20 s, rather than hanging;
+        % '-echo' streams git's own progress output live:
+        gitStatus = system(sprintf(['git -C "%s" -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=20 ' ...
+                                    'submodule update --init --recursive'],hctsaDir),'-echo');
+        setenv('GIT_TERMINAL_PROMPT',oldPrompt);
+        if gitStatus==0 && isfolder(catch22Dir)
+            fprintf(1,'catch22 submodule fetched successfully.\n');
+        end
+    end
+    if ~isfolder(catch22Dir)
+        fprintf(1,['catch22 (optional) is not available; the rest of hctsa works without it.\n' ...
+            'To add it, run from the hctsa root: git submodule update --init --recursive\n' ...
+            '(or, if you downloaded a ZIP, clone the repository instead).\n']);
     end
 end
 
@@ -114,13 +127,15 @@ addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','rpde'));
 fprintf(1,', nsamdf,\n');
 addpath(fullfile(hctsaDir,'Toolboxes','nsamdf'));
 
-% catch22
-fprintf(1,'catch22')
-addpath(fullfile(hctsaDir,'Toolboxes','catch22','wrap_Matlab'));
+% catch22 (optional; see above)
+if isfolder(catch22Dir)
+    fprintf(1,'catch22, ')
+    addpath(catch22Dir);
+end
 
 % Java information dynamics toolkit written by Joseph Lizier
 % (should be ok to re-add this every time startup is run)
-fprintf(1,', Information dynamics toolkit')
+fprintf(1,'Information dynamics toolkit')
 javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
 
 % ------------------------------------------------------------------------------
