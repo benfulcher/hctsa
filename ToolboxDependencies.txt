@@ -69,6 +69,7 @@ SB_TransitionPAlphabet.m
 SC_FluctAnal.m
 SD_SurrogateTest.m
 SD_Surrogates.m
+SP_SinusoidFit.m
 SP_Summaries.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
@@ -117,6 +118,7 @@ PD_PeriodicityWang.m
 PP_Compare.m
 PP_Iterate.m
 SB_TransitionPAlphabet.m
+SP_SinusoidFit.m
 SP_Summaries.m
 SY_StdNthDerChange.m
 

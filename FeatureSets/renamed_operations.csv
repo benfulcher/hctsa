@@ -1,0 +1,13 @@
+old_name,new_name,reason
+DN_SimpleFit_sin1_rmse,SP_SinusoidFit_sin1_rmse,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin1_resAC1,SP_SinusoidFit_sin1_resAC1,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin1_resAC2,SP_SinusoidFit_sin1_resAC2,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin1_resruns,SP_SinusoidFit_sin1_resruns,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin2_rmse,SP_SinusoidFit_sin2_rmse,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin2_resAC1,SP_SinusoidFit_sin2_resAC1,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin2_resAC2,SP_SinusoidFit_sin2_resAC2,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin2_resruns,SP_SinusoidFit_sin2_resruns,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin3_rmse,SP_SinusoidFit_sin3_rmse,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin3_resAC1,SP_SinusoidFit_sin3_resAC1,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin3_resAC2,SP_SinusoidFit_sin3_resAC2,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
+DN_SimpleFit_sin3_resruns,SP_SinusoidFit_sin3_resruns,split DN_SimpleFit: time-domain sinusoid fits moved out of the distribution family
