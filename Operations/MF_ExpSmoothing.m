@@ -1,29 +1,61 @@
 function out = MF_ExpSmoothing(x, ntrain, alpha)
-% MF_ExpSmoothing   Exponential smoothing time-series prediction model.
+% MF_ExpSmoothing   Exponential smoothing as a one-step forecaster: the best smoothing parameter and its residuals.
 %
-% Fits an exponential smoothing model to the time series using a training set to
-% fit the optimal smoothing parameter, alpha, and then applies the result to the
-% try to predict the rest of the time series.
-%
-% cf. "The Analysis of Time Series", C. Chatfield, CRC Press LLC (2004)
-%
-% Code is adapted from that provided by Siddharth Arora:
-% Siddharth.Arora@sbs.ox.ac.uk
+% Fits an exponential smoothing model to the time series, in which the forecast is an
+% exponentially weighted average of past values, S(t) = alpha*X(t) + (1-alpha)*S(t-1),
+% and alpha is the smoothing parameter. The best alpha is found by minimizing the
+% root-mean-square one-step prediction error over a training set (the first ntrain
+% samples): a coarse search over five values from 0.1 to 0.9, with a parabola fitted
+% to the three lowest errors, and then a finer search around its minimum. The chosen
+% alpha is then used to forecast the whole time series, from its third sample, and
+% the outputs report alpha and statistics of the residuals, from the shared residual
+% summary MF_ResidualAnalysis (at its 'full' level).
 %
 % ---INPUTS:
 % x, the input time series
 %
 % ntrain, the number of samples to use for training (can be a proportion of the
-%           time-series length)
+%           time-series length, if between 0 and 1). It is kept between 100 and 1000
+%           samples. Default is min(100, N). If the series is shorter than ntrain, a
+%           NaN is returned.
 %
-% alpha, the exponential smoothing parameter
+% alpha, the exponential smoothing parameter, or 'best' (default) to fit it on the
+%           training set.
 %
-% ---OUTPUTS: include the fitted alpha, and statistics on the residuals from the
-% prediction phase.
+% ---OUTPUTS (when alpha is 'best'):
+% alphamin, the fitted smoothing parameter (between 0.01 and 1)
+% alphamin_1, the first estimate of it: the minimum of the parabola fitted in the
+%           coarse search (not bounded to the interval 0 to 1)
+% p1_1, the size of the quadratic coefficient of that parabola
+% cup_1, the sign of that coefficient (+1 if the parabola opens upward)
+% meane, mean of the residuals (prediction minus data)
+% meanabs, mean absolute residual
+% stde, standard deviation of the residuals
+% maxonstd, largest absolute residual, in units of the residual standard deviation
+% ac1, ac2, ac3: autocorrelation of the (z-scored) residuals at lags 1, 2 and 3
+% propbth, proportion of the residual autocorrelations at lags 1 to 25 within the
+%           significance band +/- 2.6/sqrt(N)
+% taurat, decorrelation time of the residuals (first zero-crossing of their
+%           autocorrelation function) divided by that of the time series
+% ftbth, first lag at which the residual autocorrelation falls inside the
+%           significance band (26 if it never does)
+% normksstat, Kolmogorov-Smirnov statistic of the residuals against a Gaussian
+% sws, standard deviation across 5 windows of the local standard deviation of the
+%           residuals, relative to their overall standard deviation
+% swm, standard deviation across 5 windows of the local mean of the residuals,
+%           relative to their overall standard deviation
+% popt, the order (1 to 10) of the AR model fitted to the residuals, selected by the
+%           Schwarz Bayesian criterion
+% minsbc, the corresponding Schwarz Bayesian criterion
 %
-% Future alteration could take a number of training sets and average to some
-% optimal alpha, for example, rather than just fitting it in an initial portion
-% of the time series.
+% ---REFERENCES:
+% C. Chatfield, "The Analysis of Time Series", CRC Press LLC (2004).
+%
+% ---NOTES:
+% The residuals are those of the forecast over the whole series (from the third
+% sample), including the training portion, not only of a held-out remainder.
+%
+% Code is adapted from that provided by Siddharth Arora (Siddharth.Arora@sbs.ox.ac.uk).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

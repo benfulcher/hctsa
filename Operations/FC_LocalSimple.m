@@ -1,24 +1,43 @@
 function out = FC_LocalSimple(y, forecastMeth, trainLength)
-% FC_LocalSimple    Simple local time-series forecasting.
+% FC_LocalSimple   How well a simple local rule forecasts the next value.
 %
-% Simple predictors using the past trainLength values of the time series to
-% predict its next value.
+% Predicts each value of the time series from the trainLength values just before
+% it, using a simple rule (the mean, the median, or a straight line fitted to those
+% values and extended one step). The residuals are the prediction minus the data
+% (e = yp - y), and the outputs describe them with the shared residual summary
+% MF_ResidualAnalysis (at its 'core' level), plus the Gaussianity of their
+% distribution. The first trainLength values are used for training only and are not
+% forecast. If the series is too short to forecast, a NaN is returned.
 %
 % ---INPUTS:
 % y, the input time series
 %
 % forecastMeth, the forecasting method:
-%          (i) 'mean': local mean prediction using the past trainLength time-series
-%                       values,
-%          (ii) 'median': local median prediction using the past trainLength
-%                         time-series values
-%          (iii) 'lfit': local linear prediction using the past trainLength
-%                         time-series values.
+%          (i) 'mean': the mean of the past trainLength values (default),
+%          (ii) 'median': the median of the past trainLength values,
+%          (iii) 'lfit': the next point on a straight line fitted to the past
+%                         trainLength values.
 %
-% trainLength, the number of time-series values to use to forecast the next value
+% trainLength, the number of past values used to forecast the next value (default
+%          3), or 'ac' to use the first zero-crossing of the autocorrelation
+%          function of y (discrete, from CO_FirstCrossing).
 %
-% ---OUTPUTS: the mean error, stationarity of residuals, Gaussianity of
-% residuals, and their autocorrelation structure.
+% ---OUTPUTS:
+% meane, mean of the residuals (the bias of the forecast)
+% meanabs, mean absolute residual
+% stde, standard deviation of the residuals
+% maxonstd, largest absolute residual, in units of the residual standard deviation
+% ac1, ac2, ac3: autocorrelation of the (z-scored) residuals at lags 1, 2 and 3
+% propbth, proportion of the residual autocorrelations at lags 1 to 25 within the
+%          significance band +/- 2.6/sqrt(N)
+% taurat, decorrelation time of the residuals (first zero-crossing of their
+%          autocorrelation function) divided by that of the time series
+% sws, standard deviation across 5 windows of the local standard deviation of the
+%          residuals, relative to their overall standard deviation
+% swm, standard deviation across 5 windows of the local mean of the residuals,
+%          relative to their overall standard deviation
+% normr2, R^2 of a Gaussian fit (DN_SimpleFit) to the kernel-smoothed distribution
+%          of the residuals: a measure of their Gaussianity
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

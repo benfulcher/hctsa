@@ -1,21 +1,47 @@
 function out = MF_GP_FitAcross(y, covFunc, npoints)
-% MF_GP_FitAcross   Gaussian Process time-series modeling for local prediction.
+% MF_GP_FitAcross   How well a Gaussian process through a few evenly spaced points reproduces the series.
 %
-% Trains a Gaussian Process model on equally-spaced points throughout the time
-% series and uses the model to predict its intermediate values.
+% Trains a Gaussian Process (GP) model, with zero mean and a Gaussian likelihood, on
+% points spaced equally throughout the time series, and uses the model to predict all
+% the time series values (the intermediate values, and the training points). Times are
+% the sample indices. The hyperparameters of the covariance function are learned by
+% maximizing the marginal likelihood (MF_GP_LearnHyperp), and the outputs summarize
+% the prediction error, the predictive mean and standard deviation, the marginal
+% likelihood, and the fitted hyperparameters. If the series is longer than 2000
+% samples, predictions are made at 2000 evenly spaced times. A NaN is returned if the
+% fit fails.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 %
 % ---INPUTS:
 % y, the input time series
-% covFunc, the covariance function (structured in the standard way for the gpml toolbox)
+%
+% covFunc, the covariance function (structured in the standard way for the gpml
+%       toolbox); the default is a sum of a squared-exponential and a noise term,
+%       {'covSum',{'covSEiso','covNoise'}}
+%
 % npoints, the number of points through the time series to fit the GP model to
+%       (default 20)
 %
-% ---OUTPUTS: summarize the error and fitted hyperparameters.
+% ---OUTPUTS:
+% stde, the root-mean-square error of the predictive mean, compared with the series
+% meanabs_std, the mean absolute error of the predictive mean, in units of the
+%       predictive standard deviation at each time
+% stdmu, the standard deviation of the predictive mean over the series
+% meanS, stdS, the mean and standard deviation of the predictive standard deviation
+%       over the series
+% mlikelihood, the negative log marginal likelihood of the whole series under the
+%       fitted GP
+% logh1, logh2, logh3, ...: the log hyperparameters of the covariance function, in
+%       gpml's order (for the squared-exponential plus noise covariance, the length
+%       scale, the signal amplitude, and the noise standard deviation)
+% h_lonN, the fitted length scale divided by the series length (only for the
+%       squared-exponential plus noise covariance)
 %
-% In future could do a better job of the sampling of points -- perhaps to take
-% into account the autocorrelation of the time series.
+% ---NOTES:
+% In future, the sampling of points could take into account the autocorrelation of
+% the time series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

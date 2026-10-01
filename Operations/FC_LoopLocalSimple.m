@@ -1,21 +1,42 @@
 function out = FC_LoopLocalSimple(y, forecastMeth)
-% FC_LoopLocalSimple    How simple local forecasting depends on window length.
+% FC_LoopLocalSimple   How simple local forecast errors change with the number of past values used.
 %
-% Analyzes the outputs of FC_LocalSimple for a range of local window lengths, l.
-% Loops over the length of the data to use for FC_LocalSimple prediction
+% Runs FC_LocalSimple for a range of training lengths l (the number of past values
+% used to forecast the next value), and summarizes how five statistics of the
+% residuals vary with l: the standard deviation (stde), the stationarity measures
+% sws and swm (variation of the local standard deviation and local mean of the
+% residuals across 5 segments), and the residual autocorrelations at lags 1 and 2
+% (ac1, ac2). Requires the Curve Fitting Toolbox, for the exponential fit.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
 % forecastMeth, the prediction method:
-%            (i) 'mean', local mean prediction
-%            (ii) 'median', local median prediction
+%            (i) 'mean': local mean prediction, with l = 1, 2, ..., 10 (default),
+%            (ii) 'median': local median prediction, with l = 1, 3, ..., 19.
 %
 % ---OUTPUTS:
-% Statistics including whether the mean square error increases or decreases,
-% testing for peaks, variability, autocorrelation, stationarity, and a fit of
-% exponential decay, f(x) = A*exp(Bx) + C, to the variation.
+% Each of the five statistics (stde, sws, swm, ac1, ac2) is followed across l:
+% stde_chn, sws_chn, swm_chn, ac1_chn, ac2_chn: mean change per step divided by the
+%        range of the curve; negative when the statistic falls on the whole as l grows
+% stde_meansgndiff, sws_meansgndiff, swm_meansgndiff, ac1_meansgndiff,
+%        ac2_meansgndiff: mean sign of the changes between successive l (-1 if it
+%        falls at every step, +1 if it rises at every step)
+% sws_stdn, swm_stdn, ac1_stdn, ac2_stdn: standard deviation of the curve divided by
+%        its range
+% stde_peakpos: the training length at which the stde curve has its maximum, if that
+%        maximum is a local one (NaN otherwise)
+% stde_peaksize: the height of that maximum divided by the mean of the stde curve
+%        (NaN if there is no local maximum)
+% sws_fexp_a, sws_fexp_b, sws_fexp_c: the amplitude a, rate b and offset c of an
+%        exponential fit f(l) = a*exp(b*l) + c to the sws curve
+% sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2, adjusted R^2 and root-mean-
+%        square error of that fit
+%
+% ---NOTES:
+% The 'else' branch of the stde peak search, for stde_chn >= 1, can never run
+% (stde_chn is at most 1/(number of lengths - 1) in magnitude), so only maxima
+% are ever searched for.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
