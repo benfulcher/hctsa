@@ -1,9 +1,12 @@
 function out = MF_StateSpaceCompOrder(y, maxOrder)
-% MF_StateSpaceCompOrder    Change in goodness of fit across different state space models.
+% MF_StateSpaceCompOrder   How the fit of a state-space model improves as its order increases.
 %
 % Fits state space models using n4sid (from Matlab's System Identification
-% Toolbox) of orders 1, 2, ..., maxOrder and returns statistics on how the
-% goodness of fit changes across this range.
+% Toolbox) of orders 1, 2, ..., maxOrder to the whole time series (all fits are
+% within the sample), and returns statistics on how the goodness of fit changes
+% across this range, measured by Akaike's information criterion (AIC) and by the
+% loss function (the estimated variance of the one-step prediction error).
+% The output is NaN if the model cannot be fitted at some order.
 %
 % c.f., MF_CompareAR -- does a similar thing for AR models
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification
@@ -11,7 +14,21 @@ function out = MF_StateSpaceCompOrder(y, maxOrder)
 %
 % ---INPUTS:
 % y, the input time series
-% maxOrder, the maximum model order to consider.
+% maxOrder, the maximum model order to consider (default: 10)
+%
+% ---OUTPUTS:
+% minaic: the lowest AIC across orders 1 to maxOrder
+% aicopt: the order with the lowest AIC
+% minlossfn: the lowest loss function across orders 1 to maxOrder
+% lossfnopt: the order with the lowest loss function
+% meandiffaic: the mean change in AIC when the order increases by one
+% maxdiffaic: the largest increase in AIC when the order increases by one
+% mindiffaic: the largest decrease (most negative change) in AIC when the order
+%       increases by one
+% ndownaic: the number of order increases at which the AIC decreases
+%
+% ---NOTES:
+% Akaike's final prediction error is also computed at each order but is not output.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

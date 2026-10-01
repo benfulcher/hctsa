@@ -1,42 +1,114 @@
 function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
-% SP_Summaries  Statistics of the power spectrum of a time series
+% SP_Summaries   Statistics of the power spectrum of a time series.
 %
-% The estimation can be done using a periodogram, using the periodogram code in
-% Matlab's Signal Processing Toolbox, or a fast fourier transform, implemented
-% using Matlab's fft code.
+% Estimates the power spectrum (as a periodogram, using Matlab's periodogram, as
+% a plain fast Fourier transform, or by Welch's method) and returns many summary
+% statistics: the location and width of its main peak, the number and prominence
+% of peaks, the distribution of power values, the autocorrelation of power across
+% frequency, the frequencies below which given fractions of the power lie,
+% power-weighted moments of frequency, fits to the cumulative power, a spectral
+% entropy and flatness, robust power-law fits to the log-log spectrum, the power in
+% 2 and 5 equal frequency bands, and the number of crossings of the log spectrum at
+% various levels. Many statistics have a log-domain version computed on log(S).
 %
 % ---INPUTS:
 % y, the input time series
-%
 % psdMeth, the method of obtaining the spectrum from the signal:
-%               (i) 'periodogram': periodogram
-%               (ii) 'fft': fast fourier transform
-%               (iii) 'welch': Welch's method
-%
-% windowType, the window to use:
+%               (i) 'periodogram': periodogram (window across the whole series)
+%               (ii) 'fft': fast fourier transform, single-sided power spectral
+%                    density; no window is applied and the DC bin is dropped
+%               (iii) 'welch': Welch's method, with windows of
+%                    max(min(256, round(N/4)), 16) samples and 50% overlap
+%               (default: 'fft')
+% windowType, the window to use (for 'periodogram' and 'welch'; ignored by 'fft'):
 %               (i) 'boxcar'
 %               (ii) 'rect'
 %               (iii) 'bartlett'
 %               (iv) 'hann'
-%               (v) 'hamming'
+%               (v) 'hamming' (default)
 %               (vi) 'none'
-%
-% nf, the number of frequency components to include. If
-%           empty (default), it's approximately length(y).
-%
-% doLogAbs, if 1, takes log amplitude of the signal before
-%           transforming to the frequency domain.
-%
-% doPower, analyzes the power spectrum rather than amplitudes of a Fourier
-%          transform
+% nf, the number of frequency components to include; used only by 'periodogram'.
+%           If empty (default), the periodogram's own frequency grid is used.
+% doLogAbs, if true, analyzes the spectrum of the log of the absolute values,
+%           log(abs(y)), in place of y (default: false)
 %
 % ---OUTPUTS:
-% Statistics summarizing various properties of the spectrum,
-% including its maximum, minimum, spread, correlation, centroid, area in certain
-% (normalized) frequency bands, moments of the spectrum, power-weighted
-% moments of the frequency distribution, Shannon spectral
-% entropy, a spectral flatness measure, power-law fits, and the number of
-% crossings of the spectrum at various amplitude thresholds.
+% The spectrum S is a power spectral density in angular frequency w (radians per
+% sample, 0 to pi). Output fields:
+%
+% Peaks:
+% maxS, maxw: the maximum of S and the angular frequency at which it occurs
+% maxWidth: half-power bandwidth of the dominant peak
+% numPromPeaks_3, numPromPeaks_5, numPromPeaks_8: number of peaks of log(S) with
+%       prominence above 3, 5, 8 (natural-log units)
+% meanProm_5, meanPeakWidth_prom5: mean prominence and mean width of the peaks with
+%       prominence above 5
+% width_weighted_prom, w_weighted_peak_prom: mean peak width and mean peak location,
+%       weighted by prominence
+% peakPower_2, peakPower_5, peakPower_prom5: power (height x width) in the 2 and 5
+%       tallest peaks and in the peaks with prominence above 5
+% numPeaks_50power, peakpower_1: number of tallest peaks needed to hold half the
+%       peak power, and the fraction of peak power in the tallest peak
+% (These are calibrated for, and registered only with, psdMeth = 'welch'.)
+%
+% Distribution of power values (and of log power values, with prefix log):
+% iqr, logiqr, q25, median, q75, logq25, logmedian, logq75, std, stdlog (= log of
+% std), logstd (= std of log(S)), mom3 and logmom3 (skewness)
+%
+% Autocorrelation of the spectrum across frequency:
+% ac1, ac2, tau (first zero-crossing of the autocorrelation, in units of w), and
+% logac1, logac2, logtau for log(S)
+%
+% Cumulative power:
+% wmax_5, wmax_10, wmax_25, centroid, wmax_75, wmax_90, wmax_95, wmax_99: the
+% frequency below which 5%, 10%, ..., 99% of the power lies (centroid is the
+% median frequency, 50%)
+%
+% Power-weighted moments of frequency:
+% specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
+% and kurtosis of frequency weighted by power
+%
+% Fits to the cumulative sum of S:
+% fpoly2csS_p1, fpoly2csS_p2, fpoly2csS_p3, fpoly2_sse, fpoly2_r2, fpoly2_rmse:
+%       coefficients and goodness of a quadratic fit
+% fpolysat_a, fpolysat_b, fpolysat_r2, fpolysat_rmse: parameters and goodness of
+%       a*w^2/(b+w^2)
+%
+% Entropy, flatness and areas:
+% spect_shann_ent, spect_shann_ent_norm: -sum(S log S), and its mean over bins
+% sfm: spectral flatness measure, 10*log10(geometric mean / arithmetic mean)
+% areatopeak, ylogareatopeak: area under S, and under log(S), up to the peak
+%
+% Robust linear fits (a1 = intercept, a2 = gradient; sigrat = OLS/robust sigma ratio;
+% sigma = residual sigma estimate; sea1 = standard error of the intercept):
+% linfitloglog_all_a1, linfitloglog_all_a2, linfitloglog_all_sigrat,
+% linfitloglog_all_sigma, linfitloglog_all_sea1: log(S) against log(w), all
+%       frequencies
+% linfitloglog_lf_a2, linfitloglog_mf_a2: gradient over the lower half and the
+%       middle half of the frequencies
+% linfitloglog_hf_a1, linfitloglog_hf_a2, linfitloglog_hf_sigrat,
+% linfitloglog_hf_sigma, linfitloglog_hf_sea1: upper half of the frequencies
+% linfitsemilog_all_a1, linfitsemilog_all_sigrat, linfitsemilog_all_sigma,
+% linfitsemilog_all_sea1: log(S) against w, all frequencies
+%
+% Power in frequency bands (2 and 5 equal bands, from the lowest frequencies):
+% area_2_1, area_2_2, logarea_2_1, logarea_2_2: area under S and log(S) in each of
+%       2 bands
+% area_5_1, area_5_2, area_5_3, area_5_4, area_5_5, logarea_5_1, logarea_5_2,
+% logarea_5_3, logarea_5_4, logarea_5_5: the same for 5 bands
+% statav2_s, statav5_s: std across bands of the within-band std of S, relative to
+%       std(S), for 2 and 5 bands
+% logstatav2_m, logstatav2_s, logstatav5_m, logstatav5_s: std across bands of the
+%       band means (_m) and of the within-band stds (_s) of log(S), relative to
+%       std(log(S)), for 2 and 5 bands
+%
+% Crossings of the log spectrum:
+% ncross_log_f05, ncross_log_f10, ncross_log_f20, ncross_log_f50: crossings of a
+%       level 5%, 10%, 20%, 50% of the way from min(log S) to max(log S)
+%
+% ---NOTES:
+% The 2- and 5-band areas use buffer on the bins, so when the number of bins is not
+% divisible by the number of bands the last few bins are dropped.
 %
 % Note there are two distinct senses of 'moment' here, which the field
 % names can obscure: mom3 etc. are moments of the distribution of power

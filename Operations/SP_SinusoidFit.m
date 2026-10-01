@@ -1,5 +1,5 @@
 function out = SP_SinusoidFit(y, model)
-% SP_SinusoidFit  Fit sinusoids or a Fourier series to the time series.
+% SP_SinusoidFit   Fit sinusoids or a Fourier series to the time series.
 %
 % Fits a sum of 1-3 sinusoids, or a Fourier series with 1-3 terms, to the time
 % series y as a function of its time index t = 1:N (the values are fitted in the
@@ -20,13 +20,8 @@ function out = SP_SinusoidFit(y, model)
 % structure that the model has not captured (e.g., whether a periodic component
 % has been fully explained).
 %
-% This function contains the time-series-model branch of the former
-% DN_SimpleFit, from which it was split because the distribution of values is
-% unaffected by temporal ordering, whereas these fits are not.
-%
 % ---INPUTS:
 % y, the input time series (a vector; row vectors are converted to columns)
-%
 % model, the model to fit:
 %       (i) 'sin1': a single sinusoid
 %       (ii) 'sin2': a sum of two sinusoids
@@ -36,17 +31,22 @@ function out = SP_SinusoidFit(y, model)
 %       (vi) 'fourier3': a Fourier series with three terms
 %
 % ---OUTPUTS: a structure containing
-%   r2, the R^2 of the fit,
-%   adjr2, the degrees-of-freedom-adjusted R^2,
-%   rmse, the root mean square error of the fit,
-%   resAC1, the autocorrelation of the residuals at lag 1 (using the 'Fourier'
-%           method of CO_AutoCorr),
-%   resAC2, the autocorrelation of the residuals at lag 2,
-%   resruns, the p-value of a runs test on the residuals (HT_IndependenceTests,
-%           'runstest').
+% r2, the R^2 of the fit
+% adjr2, the degrees-of-freedom-adjusted R^2
+% rmse, the root mean square error of the fit
+% resAC1, the autocorrelation of the residuals at lag 1 (using the 'Fourier'
+%         method of CO_AutoCorr)
+% resAC2, the autocorrelation of the residuals at lag 2
+% resruns, the p-value of a runs test on the residuals (HT_IndependenceTests,
+%         'runstest')
+% If the model cannot be fitted (NaN or Inf computed by the model function), NaN
+% is returned instead of a structure.
 %
-% If the model cannot be fitted (NaN or Inf computed by the model function),
-% NaN is returned instead of a structure.
+% ---NOTES:
+% This function holds the time-series-model branch of the former DN_SimpleFit,
+% from which it was split because the distribution of values is unaffected by
+% temporal ordering, whereas these fits are not. r2 and adjr2 are not registered
+% for the sin1/sin2/sin3 mops (rmse is).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

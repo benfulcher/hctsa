@@ -1,61 +1,60 @@
 function out = SY_RampingWindows(y, numSeg)
-% SY_RampingWindows    Monotonic trend ('ramping') in windowed statistics
+% SY_RampingWindows   Monotonic trend ('ramping') in windowed statistics.
 %
-% Splits the time series into numSeg non-overlapping segments, computes
-% the mean, variance, skewness, kurtosis, and lag-1 autocorrelation (AC1)
-% within each segment, and quantifies whether each of these quantities
-% trends monotonically across the segments (e.g., a variance that ramps
-% up steadily across the series, rather than merely fluctuating).
+% Splits the time series into numSeg non-overlapping segments (discarding any
+% remainder), computes the mean, variance, skewness, kurtosis, lag-1
+% autocorrelation (AC1), and an asymmetric lag-1 correlation (asymAC1) within each
+% segment, and quantifies whether each of these quantities trends monotonically
+% across the segments (e.g., a variance that ramps up steadily across the series,
+% rather than merely fluctuating).
 %
-% Existing hctsa stationarity operations (SY_SlidingWindow, SY_DriftingMean,
-% SY_StatAv, SY_LocalDistributions) summarize the *spread* of windowed
-% statistics (std, range, entropy) -- order-agnostic measures that don't
-% distinguish a monotonic ramp from random fluctuation of the same
-% magnitude. This operation targets that gap directly.
+% Other hctsa stationarity operations (SY_SlidingWindow, SY_DriftingMean,
+% SY_StatAv, SY_LocalDistributions) summarize the *spread* of windowed statistics
+% (std, range, entropy): order-agnostic measures that don't distinguish a
+% monotonic ramp from random fluctuation of the same magnitude. This operation
+% targets that gap directly.
+%
+% Kendall's tau is scale-invariant and detects any monotonic trend, not just a
+% linear one, matching "ramping" more directly than a slope would, and is more
+% robust to outlying segments. Pearson's r is included alongside it as a
+% complementary measure of specifically *linear* ramping (r^2 is the fraction of
+% across-segment variance explained by a linear trend); expect the two to agree
+% closely for a clean linear ramp and to diverge for a monotonic-but-nonlinear one
+% (e.g., a ramp that plateaus). Skewness and kurtosis are MATLAB's standardized
+% versions (normalized by std^3 and std^4), not DN_Moments' convention, so that a
+% shape trend isn't conflated with the (separately tracked) scale trend in the
+% variance.
+%
+% asymAC1 is a nonlinear, asymmetric variant of the lag-1 autocorrelation:
+% mean(x_t * x_{t+1} * (x_{t+1} - x_t)), with x z-scored *within* each segment.
+% It is the difference between the statistic computed forwards (mean(x_t *
+% x_{t+1}^2)) and on the time-reversed segment (mean(x_{t+1} * x_t^2)): swapping
+% x_t and x_{t+1} negates the expression, so it is antisymmetric under time
+% reversal and zero in expectation for any time-reversible process (in the same
+% spirit as CO_trev). A ramp in asymAC1 therefore flags a trend specifically in
+% the series' local time-asymmetry/nonlinearity.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% numSeg, the number of non-overlapping segments to divide the time series
-%         into (default: 10). Non-overlapping segments are used
-%         deliberately (rather than SY_SlidingWindow's overlapping
-%         windows): overlap between windows would induce artificial
-%         serial correlation between adjacent window-statistics, which
-%         would inflate the apparent monotonic trend independent of any
-%         real ramping in the data.
+% numSeg, the number of non-overlapping segments to divide the time series into
+%         (default: 10; at least 5). Non-overlapping segments are used
+%         deliberately (rather than SY_SlidingWindow's overlapping windows):
+%         overlap between windows would induce artificial serial correlation
+%         between adjacent window statistics, which would inflate the apparent
+%         monotonic trend independent of any real ramping in the data.
+%         Returns NaN if segments would be shorter than 20 samples.
 %
-% ---OUTPUTS: Kendall's rank correlation tau, and Pearson's linear
-% correlation r (each with its p-value), between segment index and each
-% windowed statistic, for the mean, variance, standardized
-% skewness/kurtosis, AC1, and asymAC1 (see below). Kendall's tau is
-% scale-invariant and detects any monotonic trend, not just a linear one
-% -- matching "ramping" more directly than a slope would, and more
-% robust to outlying segments. Pearson's r is included alongside it as a
-% complementary, effect-size-like measure of specifically *linear*
-% ramping (r^2 is the fraction of across-segment variance explained by a
-% linear trend); expect the two to agree closely for a clean linear ramp
-% and diverge for a monotonic-but-nonlinear one (e.g. a ramp that
-% plateaus). Skewness/kurtosis are standardized in the usual sense
-% (normalized by std^3/std^4 respectively, i.e., Matlab's skewness/
-% kurtosis, not DN_Moments' convention of normalizing by std^1 regardless
-% of moment order) so that a shape trend isn't conflated with the
-% (separately tracked) scale trend in segVar.
-%
-% asymAC1 is a nonlinear, asymmetric variant of the lag-1 autocorrelation:
-% mean(x_t * x_{t+1} * (x_{t+1} - x_t)), with x z-scored *within* each
-% segment (unlike the other statistics above, this one needs the explicit
-% per-segment z-scoring, since it's neither scale-invariant like AC1/
-% skewness/kurtosis nor a raw moment tracked deliberately like
-% mean/variance). This is the difference between the statistic computed
-% forwards (mean(x_t * x_{t+1}^2)) and on the time-reversed segment
-% (mean(x_{t+1} * x_t^2)): swapping x_t <-> x_{t+1} negates the
-% expression, so it is manifestly antisymmetric under time reversal and
-% hence zero in expectation for any time-reversible process (same spirit
-% as CO_trev's third-moment reversibility statistic, computed densely at
-% a single lag over the whole series rather than trended across
-% segments). A ramp in asymAC1 therefore flags a trend specifically in
-% the series' local time-asymmetry/nonlinearity, distinct from a trend in
-% any of the other (symmetric) segment statistics above.
+% ---OUTPUTS:
+% For each of the statistics mean, var, skew, kurt, ac1, asymac1 (X below):
+% X_tau, X_p: Kendall's rank correlation tau between segment index and the
+%       segment statistic, and its p-value
+% X_pearson_r, X_pearson_p: Pearson's linear correlation r between segment index
+%       and the segment statistic, and its p-value
+% Named in full: mean_tau, mean_p, mean_pearson_r, mean_pearson_p, var_tau, var_p,
+% var_pearson_r, var_pearson_p, skew_tau, skew_p, skew_pearson_r, skew_pearson_p,
+% kurt_tau, kurt_p, kurt_pearson_r, kurt_pearson_p, ac1_tau, ac1_p, ac1_pearson_r,
+% ac1_pearson_p, asymac1_tau, asymac1_p, asymac1_pearson_r, asymac1_pearson_p
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

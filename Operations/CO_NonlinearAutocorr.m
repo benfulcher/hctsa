@@ -1,9 +1,9 @@
 function out = CO_NonlinearAutocorr(y, taus, doAbs)
-% CO_NonlinearAutocorr      A custom nonlinear autocorrelation of a time series.
+% CO_NonlinearAutocorr   A custom nonlinear autocorrelation of a time series.
 %
-% Nonlinear autocorrelations are of the form: <x_i x_{i-\tau_1} x{i-\tau_2}...>
-%
-% The usual two-point autocorrelations are: <x_i.x_{i-\tau}>
+% Nonlinear autocorrelations are of the form <x_i x_{i-\tau_1} x_{i-\tau_2}...>
+% (the mean of the product of the series with several delayed copies of itself).
+% The usual two-point autocorrelations are <x_i.x_{i-\tau}>.
 %
 % Assumes that all the taus are much less than the length of the time
 % series, N, so that the means can be approximated as the sample means and the
@@ -11,25 +11,26 @@ function out = CO_NonlinearAutocorr(y, taus, doAbs)
 % the z-scored time series can simply be used straight-up.
 %
 % ---INPUTS:
-% y -- should be the z-scored time series (Nx1 vector)
-% taus -- should be a vector of the time delays as above (mx1 vector)
-%   e.g., [2] computes <x_i x_{i-2}>
-%   e.g., [1,2] computes <x_i x_{i-1} x_{i-2}>
-%   e.g., [1,1,3] computes <x_i x_{i-1}^2 x_{i-3}>
-%   e.g., [0,0,1] computes <x_i^3 x_{i-1}>
-% doAbs [opt] -- a boolean (true/false) -- if true, takes an absolute value before
-%                taking the final mean -- useful for an odd number of
-%                contributions to the sum. Default is to do this for odd
-%                numbers anyway, if not specified.
+% y, the z-scored time series (an Nx1 vector)
+% taus, a vector of the time delays as above:
+%       [2] computes <x_i x_{i-2}>
+%       [1,2] computes <x_i x_{i-1} x_{i-2}>
+%       [1,1,3] computes <x_i x_{i-1}^2 x_{i-3}>
+%       [0,0,1] computes <x_i^3 x_{i-1}>
+% doAbs, [optional] a boolean: if true, takes the absolute value of the product
+%        before taking the mean, which is useful for an odd number of factors
+%        (default: true if length(taus) is even, otherwise false)
+%
+% ---OUTPUTS:
+% out, a scalar: the mean of the product (or of its absolute value).
 %
 % ---NOTES:
-% (*) For odd numbers of regressions (i.e., even number length
-%         taus vectors) the result will be near zero (for reversible processes
-%         due to fluctuations about the mean; even for highly-correlated signals. (doAbs)
+% (*) For an odd number of factors (i.e., an even length of taus) the result will be
+%     near zero for time-reversible processes, due to fluctuations about the mean,
+%     even for highly correlated signals; hence the doAbs default.
 %
 % (*) doAbs = true is really a different operation that can't be compared with
-%         the values obtained from taking doAbs = false (i.e., for odd lengths
-%         of taus).
+%     the values obtained from taking doAbs = false (i.e., for odd lengths of taus).
 %
 % (*) It can be helpful to look at nonlinearAC at each iteration.
 

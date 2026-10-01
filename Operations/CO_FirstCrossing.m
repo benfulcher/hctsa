@@ -1,13 +1,25 @@
 function out = CO_FirstCrossing(y, corrFun, threshold, whatOut)
-% CO_FirstCrossing  The first crossing of a given autocorrelation across a given threshold
+% CO_FirstCrossing   The first crossing of the autocorrelation function across a threshold.
+%
+% Returns the lag at which the autocorrelation function (ACF) first crosses a
+% threshold, as the first whole lag at which it is below the threshold (if it starts
+% above) and as a point linearly interpolated between that lag and the lag before.
+% Lags are in samples, counted from lag 0. If the ACF never crosses, both are N-1.
 %
 % ---INPUTS:
-%
 % y, the input time series
 % corrFun, the self-correlation function to measure:
-%         (i) 'ac': normal linear autocorrelation function. Uses CO_AutoCorr to
-%                   calculate autocorrelations.
-% threshold, to cross. Examples: 0 [first zero crossing], 1/exp(1) [first 1/e crossing].
+%          'ac': the linear autocorrelation function, calculated with CO_AutoCorr
+%                (the default; the only option)
+% threshold, the value to cross (default 0). Examples: 0 [first zero-crossing],
+%            1/exp(1) [first 1/e crossing].
+% whatOut, what to return (default 'both'): 'both' for a structure with the two
+%          fields below, 'discrete' for the first, or 'continuous' for the second.
+%
+% ---OUTPUTS:
+% firstCrossing, the first whole lag at which the ACF is on the other side of the
+%       threshold,
+% pointOfCrossing, the linearly interpolated lag of the crossing.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

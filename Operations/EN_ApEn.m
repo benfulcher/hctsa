@@ -1,20 +1,31 @@
 function out = EN_ApEn(y, mnom, rth)
-% EN_ApEn   Approximate Entropy of a time series
+% EN_ApEn   Approximate entropy of a time series.
 %
-% ApEn(m,r).
-%
-% cf. S. M. Pincus, "Approximate entropy as a measure of system complexity",
-% P. Natl. Acad. Sci. USA, 88(6) 2297 (1991)
-%
-% For more information, cf. http://physionet.org/physiotools/ApEn/
+% Pincus's approximate entropy, ApEn(m,r). Every run of m consecutive values is
+% compared with every other run; two runs are similar when no pair of
+% corresponding values differs by more than r = rth*std(y) (maximum-norm
+% distance). Phi_m is the mean over runs of the log-proportion of runs similar to
+% each run (a run counts as similar to itself), and the output is
+% Phi_m - Phi_{m+1}. Low values indicate regular, predictable series; high
+% values irregular ones. Because self-matches are counted, it is biased towards
+% low values for short series.
 %
 % ---INPUTS:
 % y, the input time series
-% mnom, the embedding dimension
-% rth, the threshold for judging closeness/similarity
+% mnom, the embedding dimension m (default: 1)
+% rth, the similarity threshold as a fraction of the standard deviation of y,
+%      r = rth*std(y) (default: 0.2)
+%
+% ---OUTPUTS:
+% a scalar: ApEn(m,r) = Phi_m - Phi_{m+1}.
+%
+% ---REFERENCES:
+% S. M. Pincus, "Approximate entropy as a measure of system complexity",
+% P. Natl. Acad. Sci. USA, 88(6) 2297 (1991).
 %
 % ---NOTES:
-% I have no record of where this was code was derived from :-/
+% For more information, cf. http://physionet.org/physiotools/ApEn/
+% I have no record of where this code was derived from :-/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

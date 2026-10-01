@@ -3,43 +3,52 @@ function out = EN_PermEnComplexity(y, m, tau)
 %
 % Computes the Bandt-Pompe ordinal-pattern distribution (as in EN_PermEn) and
 % pairs its normalized Shannon entropy with the Jensen-Shannon statistical
-% complexity of Rosso, Larrondo, Martin, Plastino & Fuentes, "Distinguishing
-% Noise from Chaos", Phys. Rev. Lett. 99, 154102 (2007) -- the
-% entropy-complexity plane used to separate chaotic, stochastic and periodic
-% dynamics that can look alike under entropy alone.
+% complexity of Rosso et al. (2007): the entropy-complexity plane used to
+% separate chaotic, stochastic and periodic dynamics that can look alike under
+% entropy alone.
 %
-% Entropy is near its extremes (0 or log(m!)) for both fully ordered *and*
-% fully random sequences. The statistical complexity
-% C = Q_J[P,P_uniform] . H[P] is instead close to zero at both those extremes
-% and peaks for structured-but-disordered ('chaotic') ordinal-pattern
-% distributions -- a distinct axis of information from entropy alone, not
-% captured elsewhere in hctsa. cf. EN_PermEn for the plain Bandt-Pompe
-% permutation entropy this complements (and whose normalized entropy,
-% normPermEn, this function's hNorm reproduces).
-%
-% cf. Martin, Plastino & Rosso, Physica A 369(2) 439 (2006) for the Q_0
-% normalization; Lamberti, Martin, Plastino & Rosso, Physica A 334(1-2) 119
-% (2004) for the Jensen-Shannon statistical complexity construction.
-%
-% Note: at m = 2 there are only two ordinal states, so H and C are both
-% unimodal, symmetric functions of a single probability -- they are then
-% forced to be near-perfect reparameterizations of one another (|r| ~ 1)
-% regardless of the input data, making jsComplexity redundant with plain
-% permutation entropy at that order. m = 3 was also found redundant with
-% existing normPermEn/motif fields on real-world data (Empirical1000,
-% r up to 0.97); only m = 4 and m = 5 are registered in the default feature
-% set.
+% Entropy is near its extremes (0 or log(m!)) for both fully ordered *and* fully
+% random sequences. The statistical complexity C = Q_J[P,P_uniform] . H[P] is
+% instead close to zero at both those extremes and peaks for
+% structured-but-disordered ('chaotic') ordinal-pattern distributions, a distinct
+% axis of information from entropy alone, not captured elsewhere in hctsa. cf.
+% EN_PermEn for the plain Bandt-Pompe permutation entropy this complements (and
+% whose normalized entropy, normPermEn, this function's hNorm reproduces).
 %
 % ---INPUTS:
 % y, the input time series
-% m, the embedding dimension (order of the ordinal patterns)
-% tau, the time-delay for the embedding
+% m, the embedding dimension (order of the ordinal patterns; default: 2)
+% tau, the time delay for the embedding (default: 1); can also be 'ac' (first
+%    zero-crossing of the autocorrelation function) or 'mi' (first minimum of
+%    the automutual information), as in BF_Embed
 %
 % ---OUTPUTS:
-% hNorm, normalized Shannon entropy of the ordinal-pattern distribution,
-%        H[P] = S[P]/log2(m!), in [0,1]
+% A structure with fields:
+% hNorm, the normalized Shannon entropy of the ordinal-pattern distribution,
+%    H[P] = S[P]/log2(m!), in [0,1]
 % jsComplexity, the Jensen-Shannon statistical complexity,
-%               C[P] = Q_J[P,P_uniform] . H[P], in [0,1]
+%    C[P] = Q_J[P,P_uniform] . H[P], in [0,1]
+% Both are NaN if the series is too short to embed (fewer than 5 embedding
+% vectors).
+%
+% ---REFERENCES:
+% Rosso, Larrondo, Martin, Plastino and Fuentes, "Distinguishing Noise from
+% Chaos", Phys. Rev. Lett. 99, 154102 (2007).
+%
+% Martin, Plastino and Rosso, Physica A 369(2) 439 (2006), for the Q_0
+% normalization.
+%
+% Lamberti, Martin, Plastino and Rosso, Physica A 334(1-2) 119 (2004), for the
+% Jensen-Shannon statistical complexity construction.
+%
+% ---NOTES:
+% At m = 2 there are only two ordinal states, so H and C are both unimodal,
+% symmetric functions of a single probability: they are then forced to be
+% near-perfect reparameterizations of one another (|r| ~ 1) regardless of the
+% input data, making jsComplexity redundant with plain permutation entropy at
+% that order. m = 3 was also found redundant with existing normPermEn/motif
+% fields on real-world data (Empirical1000, r up to 0.97); only m = 4 and m = 5
+% are registered in the default feature set.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

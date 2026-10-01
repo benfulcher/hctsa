@@ -1,38 +1,54 @@
 function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
-% CO_AddNoise  Changes in the automutual information with the addition of noise
+% CO_AddNoise   How the automutual information of the series falls as noise is added.
 %
-% Adds Gaussian-distributed noise to the time series with increasing standard
-% deviation, eta, across the range eta = 0, 0.1, ..., 2, and measures the
-% mutual information at each point
-% Can be measured using histograms with extraParam bins (implemented using
-% CO_HistogramAMI), or using the Information Dynamics Toolkit.
+% Adds independent Gaussian noise of standard deviation eta to the (z-scored)
+% series, for 50 noise levels evenly spaced from eta = 0 to eta = 3, drawing
+% fresh noise at each level, and measures the automutual information (AMI) at
+% lag tau at each level. The AMI falls as the noise swamps the signal; the outputs
+% describe the resulting curve of AMI against eta, including a fit to an
+% exponential decay.
 %
-% The output is a set of statistics on the resulting set of automutual
-% information estimates, including a fit to an exponential decay, since the
-% automutual information decreases with the added white noise.
+% The AMI can be estimated using histograms with extraParam bins (implemented in
+% CO_HistogramAMI) or using the Information Dynamics Toolkit (IN_AutoMutualInfo).
 %
-% Can calculate these statistics for time delays 'tau', and for a number 'extraParam'
-% bins.
-%
-% This algorithm is quite different, but was based on the idea of 'noise
-% titration' presented in: "Titration of chaos with added noise", Chi-Sang Poon
-% and Mauricio Barahona P. Natl. Acad. Sci. USA, 98(13) 7107 (2001)
+% This algorithm is quite different from, but was based on the idea of, noise
+% titration, presented in Poon and Barahona (2001).
 %
 % ---INPUTS:
+% y, the input time series (should be z-scored)
+% tau, the time delay for computing the AMI (a number of samples, or 'ac' for the
+%       first zero-crossing of the autocorrelation function of y)
+% amiMethod, the method for computing the AMI:
+%       * 'std1', 'std2', 'quantiles', 'even': histogram-based estimation
+%         (see CO_HistogramAMI)
+%       * 'gaussian', 'kernel', 'kraskov1', 'kraskov2': estimation using JIDT
+%         (see IN_AutoMutualInfo)
+%       Default: 'even'.
+% extraParam, a parameter of the estimator: the number of bins for the histogram
+%       methods (CO_HistogramAMI), or the number of nearest neighbors for the
+%       Kraskov methods (IN_AutoMutualInfo)
+% randomSeed, how to reset the random seed, using BF_ResetSeed, for reproducible
+%       results
 %
-% y, the input time series
+% ---OUTPUTS: statistics of the AMI as a function of noise level (50 levels):
+% pdec, the proportion of steps on which the AMI decreases
+% meanch, the mean change in AMI per step
+% ac1, ac2, the autocorrelation of the sequence of AMI values, at lags 1 and 2
+% firstUnder75, firstUnder50, firstUnder25: the noise level at which the AMI
+%       first falls below 75%, 50% and 25% of its value without noise (the
+%       largest noise level, 3, if it never does)
+% ami_at_5, ami_at_10, ami_at_15, ami_at_20: the AMI at the first noise level at or
+%       above eta = 0.5, 1, 1.5 and 2
+% pcrossmean, the proportion of steps on which the AMI curve crosses its mean
+% fitexpa, fitexpb, fitexpr2, fitexpadjr2, fitexprmse: the amplitude a, rate b,
+%       R^2, adjusted R^2 and root-mean-square error of a fit of a * exp(b * eta)
+%       (requires the Curve Fitting Toolbox)
+% fitlina, fitlinb, linfit_mse: the slope, intercept and mean squared error of a
+%       straight-line fit
 %
-% tau, the time delay for computing AMI
-%
-% amiMethod, the method for computing AMI:
-%      * one of 'std1','std2','quantiles','even' for histogram-based estimation,
-%      * one of 'gaussian','kernel','kraskov1','kraskov2' for estimation using JIDT
-%
-% extraParam, e.g., the number of bins input to CO_HistogramAMI, or parameter
-%             for IN_AutoMutualInfo
-%
-% randomSeed: settings for resetting the random seed for reproducible results
-%               (using BF_ResetSeed)
+% ---REFERENCES:
+% C.-S. Poon and M. Barahona, "Titration of chaos with added noise", Proc. Natl.
+% Acad. Sci. USA 98(13), 7107 (2001).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

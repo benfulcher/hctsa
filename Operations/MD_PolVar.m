@@ -1,7 +1,13 @@
 function p = MD_PolVar(x, d, D)
-% MD_PolVar     The POLVARd measure of a time series.
+% MD_PolVar   The POLVARd measure of a time series.
 %
-% Measures the probability of obtaining a sequence of consecutive ones or zeros.
+% Measures the probability of obtaining a sequence of D consecutive ones or zeros
+% in the series of absolute differences, binarized at a threshold d. Each step
+% (the absolute difference between consecutive values) is coded 1 if it is at
+% least d and 0 otherwise. Scanning along the code from the start, windows of D
+% consecutive symbols that are all ones or all zeros are counted, and after a
+% match the scan moves on by D steps (so matches do not overlap). The output is
+% the number of matches divided by the number of steps.
 %
 % The first mention may be in Wessel et al., PRE (2000), called Plvar
 % cf. "Short-term forecasting of life-threatening cardiac arrhythmias based on
@@ -19,11 +25,19 @@ function p = MD_PolVar(x, d, D)
 %
 % ---INPUTS:
 % x, the input time series
-% d, the symbolic coding (amplitude) difference
-% D, the word length (classically words of length 6)
+% d, the symbolic coding (amplitude) difference: steps of at least this size are
+%    coded 1 (default: 1)
+% D, the word length (default: 6, the classical value)
 %
-% ---OUPUT:
-% p - probability of obtaining a sequence of consecutive ones/zeros
+% ---OUTPUTS:
+% p, a scalar: the probability (proportion of steps) of obtaining a sequence of D
+%    consecutive ones or zeros, as a count of non-overlapping such sequences
+%    divided by the number of differences
+%
+% ---REFERENCES:
+% N. Wessel et al., "Short-term forecasting of life-threatening cardiac arrhythmias
+% based on symbolic dynamics and finite-time growth rates", Phys. Rev. E 61(1)
+% 733 (2000).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2016, Max A. Little, <max.a.little@gmail.com>,

@@ -1,24 +1,28 @@
 function out = WL_scal2frq(y, wname, amax, delta)
-% WL_scal2frq   Frequency components in a periodic time series
+% WL_scal2frq   Dominant wavelet level of a time series and its pseudo-period and pseudo-frequency.
 %
 % Estimates frequency components using functions from Matlab's Wavelet Toolbox,
-% including the scal2frq function.
+% including the scal2frq function. The detail coefficients of a discrete wavelet
+% decomposition are computed down to level amax; the level with the largest robust
+% noise-standard-deviation estimate (wnoisest) of its detail coefficients is the
+% dominant one, and the dyadic scale 2^level is converted to a pseudo-frequency
+% and pseudo-period of the wavelet.
+%
+% Adapted from an example in the Matlab Wavelet Toolbox documentation. It is kind of
+% a weird idea to apply the method to generic time series.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
-%           'sym2', cf. Wavelet Toolbox Documentation for details
+%        'sym2', cf. Wavelet Toolbox Documentation for details (default: 'db3')
+% amax, the maximum scale / level (can be 'max' to set according to wmaxlev;
+%       default: 5)
+% delta, the sampling period (default: 1)
 %
-% amax, the maximum scale / level (can be 'max' to set according to wmaxlev)
-%
-% delta, the sampling period
-%
-% ---OUTPUTS: the level with the highest energy coefficients, the dominant
-% period, and the dominant pseudo-frequency.
-%
-% Adapted from example in Matlab Wavelet Toolbox documentation. It's kind of a
-% weird idea to apply the method to generic time series.
+% ---OUTPUTS:
+% lmax, the level with the highest energy coefficients
+% period, the dominant period (the pseudo-period of that level, in units of delta)
+% pf, the dominant pseudo-frequency (the pseudo-frequency of that level)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

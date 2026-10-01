@@ -1,25 +1,35 @@
 function out = PD_PeriodicityWang(y)
-% PD_PeriodicityWang    Periodicity extraction measure of Wang et al. (2007)
+% PD_PeriodicityWang   Periodicity extraction measure of Wang et al. (2007).
 %
-% Implements an idea based on the periodicity extraction measure proposed in:
+% Implements an idea based on the periodicity extraction measure proposed in Wang et al.
+% (2007). Detrends the time series using a three-knot cubic regression spline (two cubic
+% pieces with one interior knot) and then computes autocorrelations up to one third of the
+% length of the time series. The period is the lag of the first peak in the
+% autocorrelation function satisfying a set of conditions:
+%   (a) there is a trough before it,
+%   (b) the difference between the peak and the trough is at least a threshold,
+%   (c) the peak corresponds to positive correlation.
+% If no peak qualifies, the output is 1.
 %
-% "Structure-based Statistical Features and Multivariate Time Series Clustering"
-% X. Wang and A. Wirth and L. Wang
-% Seventh IEEE International Conference on Data Mining, 351--360 (2007)
+% The single threshold of 0.01 was considered in the original paper; this code uses a range
+% of thresholds: 0, 0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N), and 10/sqrt(N), where N is the
+% length of the time series.
+%
+% ---INPUTS:
+% y, the input time series (should be z-scored; a warning is issued otherwise).
+%
+% ---OUTPUTS:
+% th1, th2, th3, th4, th5, th6, th7, the period (in samples) found with the thresholds 0,
+%       0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N) and 10/sqrt(N) respectively.
+%
+% ---REFERENCES:
+% Wang, Wirth & Wang, "Structure-based Statistical Features and Multivariate Time Series
+% Clustering", Seventh IEEE International Conference on Data Mining, 351--360 (2007).
 % DOI: 10.1109/ICDM.2007.103
 %
-% Detrends the time series using a three-knot cubic regression spline
-% and then computes autocorrelations up to one third of the length of
-% the time series.
-% The frequency is the first peak in the autocorrelation function satisfying
-% a set of conditions.
-%
-% ---INPUT:
-% y, the input time series.
-%
-% The single threshold of 0.01 was considered in the original paper, this code
-% uses a range of thresholds: 0, 0.01, 0.1, 0.2, 1/sqrt{N}, 5/sqrt{N}, and
-% 10/sqrt{N}, where N is the length of the time series.
+% ---NOTES:
+% Needs the Curve Fitting Toolbox (spap2). The autocorrelations are not normalized by the
+% variance of the detrended series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

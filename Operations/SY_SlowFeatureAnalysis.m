@@ -1,90 +1,80 @@
 function out = SY_SlowFeatureAnalysis(y, numWindows)
-% SY_SlowFeatureAnalysis    Slow feature analysis of windowed statistics
+% SY_SlowFeatureAnalysis   Slow feature analysis of windowed statistics.
 %
-% Splits the time series into numWindows non-overlapping segments (same
-% segmentation as SY_RampingWindows), computes five per-window statistics
-% -- mean, variance, skewness, lag-1 autocorrelation, and lag-1 trev (a
-% normalized third-order cross-moment measuring time-reversal asymmetry,
-% cf. CO_trev, here fixed to tau = 1 since per-window tau estimation would
-% be unreliable at these window lengths) -- forming a numWindows x 5
-% matrix, then applies Slow Feature Analysis (SFA) to find the linear
-% combination of these five statistics that varies as *slowly* as
-% possible across the sequence of windows -- i.e., minimizes the
-% variance of its own increments, subject to unit variance. This is a
-% fundamentally different criterion to SY_RampingWindows' per-statistic
-% monotonic-trend tests: SFA is multivariate (can find a slow combination
-% spread across mean/variance/skewness/AC1/trev that no single one of them
-% shows individually) and detects any slow, low-frequency evolution, not
-% just a monotonic ramp (e.g., a slow rise-then-fall hump across the
-% series, invisible to Kendall's tau/Pearson's r, still registers as
-% "slow" here). AC1 is symmetric under time reversal, so trev is included
-% specifically to let SFA pick up a slow drift in the *irreversibility* of
-% the dynamics that none of the other four statistics can see. Validated
-% on Empirical1000 to be essentially uncorrelated (max |r| ~ 0.14) with
-% all SY_RampingWindows_10 trend fields.
+% Splits the time series into numWindows non-overlapping segments (the same
+% segmentation as SY_RampingWindows, discarding any remainder), computes five
+% per-window statistics (mean, variance, skewness, lag-1 autocorrelation, and
+% lag-1 trev, a normalized third-order cross-moment measuring time-reversal
+% asymmetry, cf. CO_trev, here fixed to tau = 1 since per-window tau estimation
+% would be unreliable at these window lengths), forming a numWindows x 5 matrix,
+% then applies Slow Feature Analysis (SFA) to find the linear combination of these
+% five statistics that varies as *slowly* as possible across the sequence of
+% windows: it minimizes the variance of its own increments, subject to unit
+% variance. This is a fundamentally different criterion to SY_RampingWindows'
+% per-statistic monotonic-trend tests: SFA is multivariate (it can find a slow
+% combination spread across several statistics that no single one shows
+% individually) and detects any slow, low-frequency evolution, not just a
+% monotonic ramp (e.g., a slow rise-then-fall hump across the series, invisible to
+% Kendall's tau or Pearson's r, still registers as 'slow' here). AC1 is symmetric
+% under time reversal, so trev is included specifically to let SFA pick up a slow
+% drift in the *irreversibility* of the dynamics that none of the other four
+% statistics can see. Validated on Empirical1000 to be essentially uncorrelated
+% (max |r| ~ 0.14) with all SY_RampingWindows_10 trend fields.
 %
-% The companion comparison to ordinary PCA addresses a different
-% question: PCA finds the combination of the four statistics with
-% *maximal variance* across windows, which need not be the slowest one
-% -- a large-amplitude but choppy/noisy statistic can dominate variance
-% while a small-amplitude but smooth, genuinely slow drift is buried
-% underneath it and missed by PCA. pc1VarFrac and slowPCA1corr quantify
-% this: how concentrated the variance is in a single PCA direction, and
-% whether the slow direction found by SFA coincides with that
-% high-variance PCA direction (high overlap) or is a separate,
-% lower-variance mode that ordinary variance-based analysis would miss
-% (low overlap).
+% A companion comparison with ordinary PCA addresses a different question: PCA
+% finds the combination of the five statistics with *maximal variance* across
+% windows, which need not be the slowest one (a large-amplitude but choppy
+% statistic can dominate the variance while a small-amplitude but smooth, genuinely
+% slow drift is buried underneath it). pc1VarFrac and slowPCA1corr quantify this:
+% how concentrated the variance is in a single PCA direction, and whether the slow
+% direction found by SFA coincides with that high-variance direction (high
+% overlap) or is a separate, lower-variance mode (low overlap).
 %
 % ---INPUTS:
 % y, the input time series
 %
-% numWindows, the number of non-overlapping segments to divide the time
-%       series into (default: 20). Non-overlapping segments are used for
-%       the same reason as SY_RampingWindows: overlap would induce
-%       artificial serial correlation between adjacent window statistics,
-%       which would make the derivative-based slowness measure below
-%       spuriously small regardless of any real slow structure in the
-%       data. 20 was chosen (rather than SY_RampingWindows' default of
-%       10) because SFA needs enough windows to estimate the underlying
-%       5x5 covariance matrices (of the statistics, and of their
-%       increments) reasonably reliably -- at numWindows = 10 the
-%       null-distribution spread of the slowness eigenvalues is
-%       considerably wider, making individual values a noisier signal.
+% numWindows, the number of non-overlapping segments to divide the time series into
+%       (default: 20; at least 10). Non-overlapping segments are used for the same
+%       reason as in SY_RampingWindows: overlap would induce artificial serial
+%       correlation between adjacent window statistics, which would make the
+%       derivative-based slowness measure spuriously small. 20 was chosen (rather
+%       than SY_RampingWindows' default of 10) because SFA needs enough windows to
+%       estimate the 5x5 covariance matrices (of the statistics, and of their
+%       increments) reliably. Returns NaN if windows would be shorter than 20
+%       samples.
 %
 % ---OUTPUTS:
-%
-% Let z(t) be the numWindows x 5 matrix of [mean, variance, skewness,
-% AC1, trev] computed per window, whitened (centered, then linearly
-% transformed to unit covariance). SFA finds the orthogonal directions
-% u_i that minimize var(diff(z*u_i)), i.e. the "slowness" eigenvalues
-% eta_i = var(diff(z*u_i)) of the covariance of the whitened derivative
-% signal (ascending: eta_1 is the slowest direction). For reference,
-% i.i.d. (white-noise) windows give eta ~ 2 on average; substantially
-% smaller values indicate genuinely slow (smooth, low-frequency)
-% structure in some combination of the four per-window statistics.
+% Let z(t) be the numWindows x 5 matrix of [mean, variance, skewness, AC1, trev]
+% computed per window, whitened (centered, then linearly transformed to unit
+% covariance; directions with variance below 1% of the leading one are dropped
+% first). SFA finds the orthogonal directions u_i that minimize var(diff(z*u_i)):
+% the "slowness" eigenvalues eta_i of the covariance of the whitened derivative
+% signal (ascending: eta_1 is the slowest direction). For i.i.d. (white-noise)
+% windows eta is about 2 on average; substantially smaller values indicate
+% genuinely slow (smooth, low-frequency) structure in some combination of the five
+% per-window statistics.
 %
 % eta1, the smallest (slowest) SFA eigenvalue
 % etaEnd, the largest (fastest/noisiest) SFA eigenvalue
-% etaStd, the standard deviation of all SFA eigenvalues (spread of
-%       the slowness spectrum)
-% pc1VarFrac, the fraction of total variance (across the five
-%       statistics) explained by the leading PCA component
-% slowPCA1corr, the absolute correlation between the slowest SFA
-%       component's scores and the leading PCA component's scores --
-%       near 1 means the slow direction is simply the dominant
-%       (highest-variance) direction PCA would already find; near 0 means
-%       SFA has isolated a genuinely separate, low-variance slow mode.
+% etaStd, the standard deviation of all SFA eigenvalues (the spread of the slowness
+%       spectrum)
+% pc1VarFrac, the fraction of total variance (across the five statistics)
+%       explained by the leading PCA component
+% slowPCA1corr, the absolute correlation between the slowest SFA component's
+%       scores and the leading PCA component's scores: near 1 means the slow
+%       direction is simply the dominant (highest-variance) direction PCA would
+%       already find; near 0 means SFA has isolated a genuinely separate,
+%       low-variance slow mode
+% slowCorrMean, slowCorrVar, slowCorrSkew, slowCorrAC1, slowCorrTrev: the absolute
+%       correlation between each raw per-window statistic (mean, variance,
+%       skewness, AC1, trev, computed before whitening) and the slowest SFA
+%       component's scores; these indicate which of the five statistics drives the
+%       slow mode, since the eta and PCA fields summarize its existence but not its
+%       composition
 %
-% slowCorrMean, slowCorrVar, slowCorrSkew, slowCorrAC1, slowCorrTrev, the
-%       absolute correlation between each raw per-window statistic (mean,
-%       variance, skewness, AC1, trev, computed before whitening) and the
-%       slowest SFA component's scores -- these are loadings that indicate
-%       which of the five statistics is driving the slow mode SFA found,
-%       since the eta/PCA fields above summarize the slow mode's existence
-%       but not its composition.
-%
-% cf. Wiskott, L. & Sejnowski, T.J. "Slow feature analysis: unsupervised
-% learning of invariances." Neural Computation 14(4), 715-770 (2002).
+% ---REFERENCES:
+% L. Wiskott and T. J. Sejnowski, "Slow feature analysis: unsupervised learning of
+% invariances", Neural Computation 14(4), 715-770 (2002).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

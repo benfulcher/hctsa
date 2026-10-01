@@ -1,29 +1,45 @@
 function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
-% SY_LocalGlobal  Compares local statistics to global statistics of a time series.
+% SY_LocalGlobal   Compares local statistics to global statistics of a time series.
+%
+% Takes one subset of the time series (r) and compares its statistics to those of
+% the full time series. The mean, standard deviation, and median of the subset are
+% reported directly (the input is assumed z-scored, so the global values are 0, 1,
+% and about 0). For the other statistics the output is the relative error of the
+% subset's value, abs(1 - stat(y(r))/stat(y)), which is NaN if the global value is
+% exactly 0. Fewer than 5 points in the subset gives NaN.
+%
+% This is not the most reliable or systematic operation because only a single
+% sample is taken from the time series and compared to the full time series.
+% A better approach would be to repeat over many local subsets and compare the
+% statistics of these local regions to the full time series, cf.
+% SY_SpreadRandomLocal.
 %
 % ---INPUTS:
-% y, the time series to analyze
+% y, the time series to analyze (assumed z-scored)
 %
-% subsetHow, the local subset of time series to study:
-%             (i) 'l': the first n points in a time series,
+% subsetHow, the local subset of the time series to study:
+%             (i) 'l': the first n points in a time series (default),
 %             (ii) 'p': an initial proportion of the full time series, n
 %             (iii) 'unicg': n evenly-spaced points throughout the time series
 %             (iv) 'randcg': n randomly-chosen points from the time series
 %                               (chosen with replacement)
 %
-% n, the parameter for the method specified above
+% n, the parameter for the method specified above (default: 100 for 'l',
+%       'unicg', and 'randcg'; 0.1 for 'p')
 %
 % randomSeed, an option for whether (and how) to reset the random seed, for the
-% 'randcg' input
+%       'randcg' input
 %
-% ---OUTPUTS: the mean, standard deviation, median, interquartile range,
-% skewness, kurtosis, AC(1), and PermEn(3,1).
-%
-% This is not the most reliable or systematic operation because only a single
-% sample is taken from the time series and compared to the full time series.
-% A better approach would be to repeat over many local subsets and compare the
-% statistics of these local regions to the full time series,
-% cf. SY_SpreadRandomLocal
+% ---OUTPUTS:
+% absmean, the absolute value of the mean of the subset
+% std, the standard deviation of the subset
+% median, the median of the subset
+% iqr, skewness, kurtosis: the relative error of the interquartile range,
+%       skewness, and kurtosis of the subset, abs(1 - subset/global)
+% ac1, the relative error of the lag-1 autocorrelation of the subset (computed on
+%       the subset taken as a sequence, so for 'unicg' on the subsampled series)
+% permen, the normalized permutation entropy PermEn(3,1) of the subset divided by
+%       that of the full time series (NaN if the latter is 0)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,40 +1,57 @@
 function out = NL_c1(y, tau, mmm, tsep, Nref)
-% NL_c1  Information dimension.
+% NL_c1   Information dimension from fixed-mass scaling curves (TISEAN c1 and c2d).
 %
-% Implements the c1 and c2d routines from the TISEAN nonlinear time-series
-% analysis package that compute curves for the fixed mass computation of the
-% information dimension.
+% Implements the c1 and c2d routines from the TISEAN nonlinear time-series analysis package
+% that compute curves for the fixed mass computation of the information dimension. For each
+% embedding dimension from mmm(1) to mmm(2), c1 gives the fixed-mass curve and c2d turns it
+% into local slopes (dimension estimates as a function of length scale). For each embedding
+% dimension, a scaling range is then chosen: a stretch of scales, starting in the first
+% quarter and ending in the last three quarters of the scales, that minimizes the standard
+% deviation of the local slope minus 0.005 times the number of points in the stretch. The
+% dimension estimate is the mean local slope over that range.
 %
 % ---INPUTS:
-%
 % y, the time series to analyze
-%
 % tau, the time-delay (can be 'ac' or 'mi' for the first zero-crossing of the
-%           autocorrelation function or first minimum of the automutual
-%           information function)
+%      autocorrelation function or first minimum of the automutual information function;
+%      default: 1)
+% mmm, a two-vector specifying the minimum and maximum embedding dimensions, e.g., [2,10]
+%      for m = 2 up to m = 10 (default: [2,10])
+% tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion
+%       of the time-series length (default: 0.02)
+% Nref, the number of reference points; between 0 and 1 for a proportion of the time-series
+%       length (default: 0.5). It is limited to between 100 (if N > 100) and 2500.
 %
-% mmm, a two-vector specifying the minimum and maximum embedding dimensions,
-%       e.g., [2,10] for m = 2 up to m = 10
+% ---OUTPUTS: scaling ranges and dimension estimates over the embedding dimensions, m,
+% from mmm(1) to mmm(2):
+% bestestd, the dimension estimate (mean local slope in the scaling range) at the embedding
+%       dimension with the best scaling-range goodness
+% bestestdstd, the standard deviation of the local slope in that scaling range
+% bestgoodness, the best (lowest) goodness over embedding dimensions: the standard
+%       deviation of the local slope in the range minus 0.005 times the number of points in
+%       the range
+% mediand, mind, maxd, ranged, the median, minimum, maximum, and range of the dimension
+%       estimates over embedding dimensions
+% maxmd, the dimension estimate at the maximum embedding dimension
+% meanstd, the mean over embedding dimensions of the standard deviation of the local slope
+%       in the scaling range
+% bestscrd, the dimension estimate at the embedding dimension with the longest scaling range
+% longestscr, the longest scaling range (a difference of the TISEAN length-scale values at
+%       the ends of the range, over embedding dimensions)
+% The output is NaN for series shorter than 100 samples, constant series, or when no
+% scaling range can be found.
 %
-% tsep, time separation (can be between 0 and 1 for a proportion of the
-%       time-series length)
+% ---REFERENCES:
+% Hegger, Kantz, Schreiber, "Practical implementation of nonlinear time series methods: The
+% TISEAN package", Chaos 9(2) 413 (1999).
 %
-% Nref, the number of reference points (can also be between 0 and 1 to specify a
-%       proportion of the time-series length)
+% ---NOTES:
+% The TISEAN routines are performed in the command line using 'system' commands in Matlab,
+% and require that TISEAN is installed and compiled, and able to be executed in the command
+% line. TISEAN is available at http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
 %
-% ---OUTPUTS: optimal scaling ranges and dimension estimates for a time delay,
-% tau, embedding dimensions, m, ranging from m_{min} to m_{max}, a time
-% separation, tsep, and a number of reference points, Nref.
-%
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package" Hegger, R. and Kantz, H. and Schreiber, T., Chaos 9(2) 413 (1999)
-%
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-%
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
+% TISEAN's c1 freezes for series whose length is within 6 of a multiple of 128, so the last
+% mod(N,128)+1 points are dropped in that case.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

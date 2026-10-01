@@ -1,28 +1,33 @@
 function out = SY_LocalDistributions(y, numSegs, eachOrPar, numPoints)
-% SY_LocalDistributions  Compares the distribution in consecutive time-series segments
+% SY_LocalDistributions   Compares the distribution in consecutive time-series segments.
 %
-% Returns the sum of differences between each kernel-smoothed distributions
-%
-% ---INPUTS:
-%
-% y, the input time series
-%
-% numSegs, the number of segments to break the time series into
-%
-% eachOrPar, (i) 'par': compares each local distribution to the parent (full time
-%                       series) distribution
-%            (ii) 'each': compare each local distribution to all other local
-%                         distributions
-%
-% numPoints, number of points to compute the distribution across (in each local
-%          segments) [200 by default]
-%
-% The operation behaves in one of two modes: each compares the distribution in
-% each segment to that in every other segment, and par compares each
+% Breaks the time series into numSegs consecutive segments of equal length,
+% estimates the distribution of values in each by kernel smoothing (on a common
+% grid of numPoints points spanning the range of the whole series), and measures
+% the difference between distributions as the sum, over the grid, of the absolute
+% differences between two density estimates (not multiplied by the grid spacing).
+% The operation behaves in one of two modes: 'each' compares the distribution in
+% each segment to that in every other segment, and 'par' compares each
 % distribution to the so-called 'parent' distribution, that of the full signal.
 %
-% ---OUTPUTS: measures of the sum of absolute deviations between distributions
-% across the different pairwise comparisons.
+% ---INPUTS:
+% y, the input time series
+%
+% numSegs, the number of segments to break the time series into (default: 5)
+%
+% eachOrPar, (i) 'par': compares each local distribution to the parent (full time
+%                       series) distribution (default)
+%            (ii) 'each': compares each local distribution to all other local
+%                         distributions
+%
+% numPoints, the number of points to compute the distribution across (in each
+%          local segment) (default: 200)
+%
+% ---OUTPUTS:
+% meandiv, stddiv: the mean and standard deviation of the sum of absolute
+%       deviations between distributions, across the different comparisons
+%       (segments vs. the parent, or all pairs of segments). With 'each' and
+%       numSegs = 2, a single number (the one comparison) is returned instead.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

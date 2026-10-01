@@ -1,100 +1,98 @@
 function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed)
-% MF_FitSubsegments Robustness of model parameters across different segments of a time series
+% MF_FitSubsegments   How the fit of a model varies across segments of the time series.
 %
-% The spread of parameters obtained (including in-sample goodness of fit
-% statistics) provide some indication of stationarity.
-%
-% Values of goodness of fit provide some indication of model suitability.
-%
-% This code inherits strongly from MF_CompareTestSets
+% Fits the same kind of model to many segments of the time series, and summarizes how
+% the fitted parameters and goodness of fit vary from segment to segment. The spread
+% of the parameters (including in-sample goodness-of-fit statistics) indicates
+% stationarity, and the values of goodness of fit indicate the suitability of the
+% model. This code inherits strongly from MF_CompareTestSets.
 %
 % ---INPUTS:
 % y, the input time series.
 %
-% model, the model to fit in each segments of the time series:
-%           'arsbc': fits an AR model using the ARfit package. Outputs
-%                       statistics are on how the optimal order, p_{opt}, and
-%                       the goodness of fit varies in different parts of the
-%                       time series.
-%           'ar': fits an AR model of a specified order using the code
-%                   ar from Matlab's System Identification Toolbox. Outputs are
-%                   on how Akaike's Final Prediction Error (FPE), and the fitted
-%                   AR parameters vary across the different segments of time
-%                   series.
-%           'ss': fits a state space model of a given order using the code
-%                   n4sid from Matlab's System Identification Toolbox. Outputs
-%                   are on how the FPE varies.
-%           'arma': fits an ARMA model using armax code from Matlab's System
-%                   Identification Toolbox. Outputs are statistics on the FPE,
-%                   and fitted AR and MA parameters.
-%           'arcrosspred': splits the series into samplep non-overlapping
-%                   segments, fits an AR model of the given order to each,
-%                   and uses every segment's model to 1-step-ahead predict
-%                   every other segment (including itself), forming an
-%                   samplep x samplep cross-prediction RMSE matrix -- a
-%                   linear-model analogue of SY_nstat_z's nonlinear
-%                   zeroth-order cross-prediction matrix. Only spread/
-%                   off-diagonal statistics of that matrix are returned
-%                   (see NOTES): the level statistics (trace, mean, min,
-%                   max, ...) were checked and are redundant with this
-%                   same function's cheaper 'ar' fpe_* fields.
-%                   Requires subsetHow = 'uniform' and a scalar samplep
-%                   (a segment count, not [nsamples,length]), since
-%                   cross-prediction needs a genuine non-overlapping
-%                   partition of the series, not resampled/overlapping
-%                   segments.
+% model, the model to fit in each segment of the time series:
+%           'arsbc': fits an AR model of the best order (1 to 10) by the Schwarz
+%                       Bayesian criterion (SBC) using the ARfit package. Outputs
+%                       are on how the optimal order and the SBC vary in different
+%                       parts of the time series. (The order input is not used.)
+%           'ar': fits an AR model of a specified order using ar from MATLAB's
+%                   System Identification Toolbox. Outputs are on how Akaike's Final
+%                   Prediction Error (FPE) and the fitted AR parameters vary across
+%                   the segments.
+%           'ss': fits a state-space model of a given order using n4sid from
+%                   MATLAB's System Identification Toolbox. Outputs are on how the
+%                   FPE varies.
+%           'arma': fits an ARMA model using armax from MATLAB's System
+%                   Identification Toolbox. Outputs are on the FPE and the fitted AR
+%                   and MA parameters.
+%           'arcrosspred': splits the series into samplep non-overlapping segments,
+%                   fits an AR model of the given order to each, and uses every
+%                   segment's model to predict, one step ahead, every segment
+%                   (including itself). This forms a samplep x samplep matrix of
+%                   cross-prediction root-mean-square errors, a linear-model
+%                   analogue of SY_nstat_z's nonlinear zeroth-order cross-prediction
+%                   matrix. Only the spread and off-diagonal statistics of that
+%                   matrix are returned. Requires subsetHow = 'uniform' and a scalar
+%                   samplep (a segment count).
+%           The default is 'ss'.
+%
+% order, the order of the model to fit (default 2; a two-element vector [p, q] for
+%           'arma').
 %
 % subsetHow, how to choose segments from the time series, either 'uniform'
-%               (uniformly) or 'rand' (at random).
+%           (evenly spaced) or 'rand' (at random) (default).
 %
-% samplep, a two-vector specifying how many segments to take and of what length.
-%           Of the form [nsamples, length], where length can be a proportion of
-%           the time-series length. e.g., [20,0.1] takes 20 segments of 10% the
-%           time-series length. For model = 'arcrosspred', must instead be a
-%           scalar giving the number of non-overlapping segments to partition
-%           the whole series into.
+% samplep, a two-vector specifying how many segments to take and of what length, of
+%           the form [nsamples, length], where length can be a proportion of the
+%           time-series length (default [20, 0.1], i.e., 20 segments of 10% of the
+%           time-series length). For model = 'arcrosspred', a scalar giving the
+%           number of non-overlapping segments to partition the whole series into.
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%               (for when subsetHow is 'rand')
+%           (for when subsetHow is 'rand')
 %
-% ---OUTPUTS: depend on the model, as described above.
+% ---OUTPUTS: depend on the model.
+% For 'arsbc', statistics across segments of the best AR order and its SBC:
+%   orders_mode, orders_mean, orders_std, orders_max, orders_min, orders_range:
+%       the mode, mean, standard deviation, maximum, minimum and range of the order
+%   sbcs_mean, sbcs_std, sbcs_range, sbcs_min, sbcs_max: the mean, standard
+%       deviation, range, minimum and maximum of the SBC of the best-order fit
+% For 'ar', 'ss' and 'arma', statistics across segments of the FPE:
+%   fpe_std, fpe_mean, fpe_max, fpe_min, fpe_range: the standard deviation, mean,
+%       maximum, minimum and range of the FPE
+% For 'ar', statistics across segments of the fitted AR coefficients, as in the
+% polynomial 1 + a_1 z^-1 + ... (the negative of the usual AR coefficients), for each
+% lag k up to the order:
+%   a_k_std, a_k_mean, a_k_max, a_k_min (e.g., a_1_std, a_1_mean, a_1_max, a_1_min,
+%       a_2_std, a_2_mean, a_2_max, a_2_min for order 2)
+% For 'arma', the same statistics of the AR coefficients, p_k_std, p_k_mean, p_k_max,
+% p_k_min (k = 1 to order(1)), and of the MA coefficients, q_k_std, q_k_mean, q_k_max,
+% q_k_min (k = 1 to order(2)).
+% For 'arcrosspred', statistics of the cross-prediction error matrix (a row for each
+% predicting model, a column for each predicted segment):
+%   std, range, iqr: the standard deviation, range and interquartile range over all
+%       entries
+%   stdoffdiag, rangeoffdiag, iqroffdiag: the same over the off-diagonal entries
+%   stdmean, rangemean, stdmedian, rangemedian: the standard deviation and range,
+%       across predicted segments, of the mean and of the median error
+%   rangerange, stdrange, rangestd, stdstd: the range or standard deviation, across
+%       predicted segments, of the range or of the standard deviation of the errors
+%       (rangerange: range of range, stdrange: std of range, rangestd: range of std,
+%       stdstd: std of std)
+%   mineig: the smallest real part of the eigenvalues of the matrix
 %
 % ---NOTES:
-% 'arcrosspred' (added 2026-08-13): prompted by checking whether hctsa had
-% enough cross-prediction-based stationarity metrics, given SY_nstat_z
-% already covers this with a nonlinear model. Prototyped the full 26-field
-% stat menu SY_nstat_z uses (level stats: trace/mean/median/min/max/
-% min{lower,upper,offdiag}/eigenvalue-level stats; spread stats: std/range/
-% iqr/*offdiag/stdmean/rangemean/stdmedian/rangemedian/mineig/rangerange/
-% rangestd/stdstd) on 150 series each from Bonn EEG and Empirical1000, at
-% order=2, numSeg=5 (matching SY_nstat_z_5_1_3's segment count). The level
-% stats correlated |r|=0.89-0.98 with this function's own 'ar' registration
-% fpe_mean/min/max fields on BOTH datasets (unsurprising: the overall size
-% of cross-prediction error is dominated by each segment's in-sample AR fit
-% quality, which fpe_* already captures directly at a fraction of the cost
-% -- no O(numSeg^2) cross-prediction needed). Dropped all of them. The
-% spread/off-diagonal stats correlated only |r|=0.4-0.88 with fpe_*/a_1_*
-% and, notably, also only |r|=0.4-0.85 with SY_nstat_z's own spread stats
-% (the linear and nonlinear cross-prediction spread signals don't collapse
-% onto each other either) -- kept all of these as the genuinely novel
-% signal: whether segment i's model transfers to segment j, which neither
-% the parameter/FPE-variance view ('ar') nor the nonlinear model
-% (SY_nstat_z) directly measures.
+% 'arcrosspred' (added 2026-08-13): the level statistics (trace, mean, min, max,
+% eigenvalue levels) of the cross-prediction matrix correlated at |r| = 0.89-0.98 with
+% this function's own 'ar' fpe_mean/min/max fields on both Bonn EEG and Empirical1000
+% (150 series each), so were dropped. The spread and off-diagonal statistics, which
+% correlated only at |r| = 0.4-0.88 with fpe_* and a_1_*, and 0.4-0.85 with
+% SY_nstat_z's spread statistics, were kept.
 %
-% The 'arma' registration (order=[2,2], 25 uniform 10%-length subsegments) was
-% deregistered 2026-08-10: redundancy-checked its 21 output fields against
-% cheaper existing hctsa operations on Bonn EEG (500 series) and Empirical1000
-% (1000 series). The 13 AR-driven fields (fpe_*, p_1_*, p_2_*) correlate at
-% |r|=0.69-0.99 with the much cheaper 'ar' registration of this same function
-% (identical subsegment scheme, plain AR(2) instead of ARMA(2,2) -- AR fitting
-% is closed-form, no iterative optimization needed). The 8 MA-driven fields
-% (q_1_*, q_2_*) correlate more weakly on Bonn EEG (|r| up to 0.71) but more
-% strongly on the more diverse Empirical1000 (|r| up to 0.87) -- consistent
-% with [[mf-arma-orders-deregistered]]'s finding that MA-component estimates
-% from short (~100-point) segments are prone to landing in noisy/unstable
-% local optima rather than capturing real structure, rather than being a
-% genuinely independent signal. The 'ar'/'arsbc'/'ss' registrations of this
-% function are unaffected and remain registered.
+% The 'arma' registration (order = [2, 2], 25 uniform 10%-length segments) was
+% deregistered on 2026-08-10: its AR-driven fields correlated at |r| = 0.69-0.99 with
+% the much cheaper 'ar' registration, and the MA-driven fields (q_k_*) were noisy.
+% The 'ar', 'arsbc' and 'ss' registrations are unaffected.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

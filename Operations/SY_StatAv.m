@@ -1,26 +1,30 @@
 function out = SY_StatAv(y, whatType, n)
-% SY_StatAv     Simple mean-stationarity metric, StatAv.
+% SY_StatAv   Simple mean-stationarity metric, StatAv.
 %
 % The StatAv measure divides the time series into non-overlapping subsegments,
-% calculates the mean in each of these segments and returns the standard deviation
-% of this set of means.
+% calculates the mean in each of these segments, and returns the standard deviation
+% of this set of means, divided by the standard deviation of the whole time series.
 %
-% Empirically mean-stationary data would display StatAv approaching to zero.
-%
-% cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
-% Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
+% Empirically mean-stationary data would display StatAv approaching zero.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
 % whatType, the type of StatAv to perform:
-%           (i) 'seg': divide the time series into n segments
+%           (i) 'seg': divide the time series into n segments (default)
 %           (ii) 'len': divide the time series into segments of length n
 %
-% n, either the number of subsegments ('seg') or their length ('len')
-
-% Might be nicer to use the 'buffer' function for this...?
+% n, either the number of subsegments ('seg') or their length ('len'); default: 5.
+%       Any final partial segment is dropped. For 'len', NaN is returned unless the
+%       time series is longer than 2*n.
+%
+% ---OUTPUTS:
+% a scalar: the standard deviation of the segment means, divided by the standard
+%       deviation of the time series
+%
+% ---REFERENCES:
+% S. M. Pincus et al., "Heart rate control in normal and aborted-SIDS infants",
+% Am. J. Physiol. Regul. Integr. Comp. Physiol. 264(3), R638 (1993).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

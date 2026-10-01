@@ -1,14 +1,30 @@
 function out = SY_RangeEvolve(y)
-% SY_RangeEvolve    How the time-series range changes across time.
+% SY_RangeEvolve   How the time-series range changes across time.
 %
-% Measures of the range of the time series as a function of time,
-% i.e., range(x_{1:i}) for i = 1, 2, ..., N, where N is the length of the time
-% series.
+% Measures of the running range of the time series as a function of time, i.e.,
+% range(y(1:i)) = max(y(1:i)) - min(y(1:i)) for i = 1, 2, ..., N, where N is the
+% length of the time series. The running range only increases, when a new record
+% high or low occurs, so the outputs are based on the dynamics of how new extreme
+% events occur with time: how many distinct values the running range takes within
+% the first part of the series, and how much of the full range has been reached
+% at given points.
 %
-% ---INPUT:
+% ---INPUTS:
 % y, the time series
 %
-% ---OUTPUTS: based on the dynamics of how new extreme events occur with time.
+% ---OUTPUTS:
+% totnuq, the number of unique values of the running range (the number of record
+%       events, plus one)
+% nuqp1, nuqp10, nuqp20, nuqp50: the number of unique values of the running range
+%       within the first 1%, 10%, 20%, 50% of the time series, as a proportion of
+%       totnuq
+% nuql10, nuql50, nuql100, nuql1000: the number of unique values of the running
+%       range within the first 10, 50, 100, 1000 samples, as a proportion of
+%       totnuq (NaN if the time series is shorter)
+% p1, p10, p20, p50: the running range at 1%, 10%, 20%, 50% of the time series, as
+%       a proportion of the full range
+% l10, l50, l100, l1000: the running range after 10, 50, 100, 1000 samples, as a
+%       proportion of the full range (NaN if the time series is shorter)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

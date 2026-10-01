@@ -1,30 +1,47 @@
 function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
-% DN_RemovePoints   How time-series properties change as points are removed.
+% DN_RemovePoints   How time-series properties change when a set of points is removed or clipped.
 %
-% A proportion, p, of points are removed from the time series according to some
-% rule, and a set of statistics are computed before and after the change.
+% A proportion, p, of the points of the (z-scored) series are removed, or
+% saturated, according to a rule, and statistics are computed before and after
+% the change. Removing deletes the chosen points and closes up the rest into a
+% shorter series. Saturating keeps them in place but clips their values to the
+% most extreme value among the points kept.
 %
 % ---INPUTS:
-% y, the input time series
-% removeHow, how to remove points from the time series:
-%               (i) 'absclose': those that are the closest to the mean,
-%               (ii) 'absfar': those that are the furthest from the mean,
-%               (iii) 'min': the lowest values,
-%               (iv) 'max': the highest values,
-%               (v) 'random': at random.
-%
-% p, the proportion of points to remove
-%
-% removeOrSaturate, to remove points ('remove') or saturate their values ('saturate')
-%
+% y, the input time series (should be z-scored)
+% removeHow, how to choose the points to remove:
+%       'absclose': those closest to the mean
+%       'absfar': those furthest from the mean
+%       'min': the lowest values
+%       'max': the highest values
+%       'random': at random
+%       Default: 'absfar'.
+% p, the proportion of points to remove (default: 0.1)
+% removeOrSaturate, whether to remove the points ('remove', the default) or to
+%       saturate their values ('saturate'; not possible with 'absclose' or
+%       'random')
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%             (only relevant for removeHow = 'random', which is otherwise
-%             irreproducible run to run; no registered feature uses it)
+%       (only relevant for removeHow = 'random', which is otherwise
+%       irreproducible run to run; no registered feature uses it)
 %
-% ---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
-% spread, and skewness.
+% ---OUTPUTS: statistics of the changed series, relative to the original:
+% fzcacrat, the ratio of the first zero-crossing of the autocorrelation function
+%       (changed to original)
+% ac1rat, ac2rat, ac3rat, the ratios of the autocorrelation at lags 1, 2 and 3
+%       (changed to original; the sign is kept)
+% ac1diff, ac2diff, ac3diff, the absolute differences in the autocorrelation at
+%       lags 1, 2 and 3
+% sumabsacfdiff, the sum over lags 1 to 8 of the absolute differences in the
+%       autocorrelation
+% mean, median, std, the mean, median and standard deviation of the changed
+%       series (not ratios; the z-scored original has mean 0 and std 1)
+% skewnessrat, kurtosisrat, the ratios of the skewness and of the kurtosis
+%       (changed to original)
 %
-% NOTE: This is a similar idea to that implemented in DN_OutlierInclude.
+% ---NOTES:
+% A similar idea is implemented in DN_OutlierInclude.
+% skewnessrat divides by the skewness of the original series, which is near 0 for
+% symmetric distributions, so it is unstable for such series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

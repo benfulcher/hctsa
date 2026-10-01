@@ -1,22 +1,57 @@
 function out = ST_LocalExtrema(y, howToWindow, n)
 % ST_LocalExtrema   How local maximums and minimums vary across the time series.
 %
-% Finds maximums and minimums within given segments of the time series and
-% analyses the results.
+% Splits the series into non-overlapping windows, finds the maximum (locMax) and
+% minimum (locMin) in each window, and analyzes how these local extremes vary
+% across windows. The 'extreme' of a window (locExt) is whichever of its maximum
+% and minimum is larger in magnitude, with its sign. A final incomplete window is
+% dropped.
+%
+% Location statistics (means, medians, minima, maxima of the extremes) are
+% divided by the maximum expected of windowLength Gaussian values (Blom's
+% approximation, norminv((w-0.375)/(w+0.25))), so that they do not grow with the
+% window length alone (for iid standard normals the expected maximum grows as
+% ~sqrt(2*log(w))). Ratios, standard deviations, and the sign statistics are not
+% normalized this way.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% howToWindow, whether to use:
-%     (i) 'l', windows of a given length (in which case the third input, n
-%             specifies the length)
-%     (ii) 'n', a specified number of windows to break the time series up into
-%               (in which case the third input, n specifies this number)
-%     (iii) 'tau', sets a window length equal to the correlation length of the
-%                 time series, the first zero-crossing of the autocorrelation
-%                 function.
+% howToWindow, how the window length is set:
+%     (i) 'l', windows of a given length (in samples) n (default)
+%     (ii) 'n', a specified number n of windows to break the time series up
+%          into (window length floor(N/n))
+%     (iii) 'tau', a window length equal to the correlation length of the time
+%          series, the first zero-crossing of the autocorrelation function (not
+%          used by hctsa)
 %
-% n, somehow specifies the window length given the setting of howToWindow above.
+% n, the window length or the number of windows, according to howToWindow
+%       (default: 100 for 'l', 5 for 'n')
+%
+% ---OUTPUTS:
+% meanrat, medianrat: the mean (median) of the local maxima over the mean
+%       (median) of the magnitudes of the local minima
+% minmax, minabsmin: the smallest local maximum, and the smallest magnitude of a
+%       local minimum
+% minmaxonminabsmin: the smallest local maximum over the smallest magnitude of a
+%       local minimum
+% meanmax, medianmax: the mean, median of the local maxima
+% meanabsmin, medianabsmin: the mean, median of the magnitudes of the local minima
+% meanext, medianext: the mean, median of the local extremes (signed)
+% meanabsext, medianabsext: the mean, median of the magnitudes of the local extremes
+% (all the above except the ratios are divided by the expected Gaussian maximum)
+% stdmax, stdmin, stdext: the standard deviation of the local maxima, minima, and
+%       extremes
+% zcext, the proportion of zero-crossings of the sequence of local extremes (sign
+%       changes between consecutive windows, per window)
+% diffmaxabsmin, the mean over windows of abs(locMax - abs(locMin))
+% uord, the mean sign of the local extremes: whether extremes are more up or down
+% maxmaxmed, the maximum local maximum over the median local maximum
+% minminmed, the minimum local minimum over the median local minimum
+% maxabsext, the maximum magnitude of a local extreme over the median magnitude
+%
+% Returns NaN if the window length is NaN, longer than the series, or 1 sample or
+% shorter.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

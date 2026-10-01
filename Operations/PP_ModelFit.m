@@ -1,37 +1,43 @@
 function out = PP_ModelFit(y, model, order, randomSeed)
-% PP_ModelFit   Investigates whether AR model fit improves with different preprocessings.
+% PP_ModelFit   How the error of an AR model changes after preprocessing the series.
 %
-% After performing the range of transformations to the time series, returns the
-% in-sample root-mean-square (RMS) prediction errors for an AR model on each
-% transformed time series as a ratio of the RMS prediction error of the original
-% time series.
+% Fits an autoregressive (AR) model to the time series and to a set of
+% preprocessed versions of it, and returns the in-sample root-mean-square (RMS)
+% one-step prediction error for each preprocessed version as a ratio of the RMS
+% prediction error for the original series. Every version is z-scored before the
+% model is fitted. The AR model is fitted using the functions ar and pe from the
+% System Identification Toolbox.
 %
-% PP_PreProcess.m is used to perform the preprocessings
-%
-% The AR model is fitted using the function ar and pe from Matlab's System
-% Identification Toolbox
-%
-% Transformations performed include:
-% (i) incremental differencing,
-% (ii) filtering of the power spectral density function,
-% (iii) removal of piece-wise polynomial trends, and
-% (iv) rank mapping the values of the time series to a Gaussian distribution.
-%
-% Only one representative preprocessing per PP_PreProcess.m family is fit
-% (d1, d2, p1_20, p2_5, rmgd): a redundancy check on 100 real series (Bonn
-% EEG + Empirical1000) found the other candidates in PP_PreProcess.m's
-% output each correlate at r>=0.95 with one of these, so fitting all of
-% them just repeats the same handful of AR refits.
+% The preprocessed versions come from PP_PreProcess, and only one representative of
+% each family is fitted: a redundancy check on 100 real series (Bonn EEG and
+% Empirical1000) found the other candidates correlated at r >= 0.95 with one of
+% these:
+%     d1: incremental differencing (first differences)
+%     d2: second differences
+%     p1_20: a straight line removed in each of 20 equal segments (piece-wise
+%            linear detrending)
+%     p2_5: a quadratic removed in each of 5 equal segments (piece-wise quadratic
+%            detrending)
+%     rmgd: the values replaced by Gaussian values of the same rank (rank mapping
+%            to a Gaussian distribution)
+% (The spectral-filtering versions that PP_PreProcess can also return are not used.)
 %
 % ---INPUTS:
-%
 % y, the input time series
-% model, the time-series model to fit to the transformed time series (currently
-%           'ar' is the only option)
-%
-% order, the order of the AR model to fit to the data
-%
+% model, the time-series model to fit to the transformed series (currently 'ar'
+%       is the only option)
+% order, the order of the AR model to fit (default: 2)
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%       (for the random draws used by rmgd)
+%
+% ---OUTPUTS: the ratios of the RMS prediction error of the AR model for the
+% preprocessed series to that for the original series:
+% stderat_d1, stderat_d2, stderat_p1_20, stderat_p2_5, stderat_rmgd
+% A ratio above 1 means the preprocessing left the series harder to predict, as
+% when it removes a trend or slow dynamics that the model had been exploiting.
+%
+% ---NOTES:
+% Requires the System Identification Toolbox.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

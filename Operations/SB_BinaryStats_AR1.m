@@ -1,19 +1,31 @@
 function out = SB_BinaryStats_AR1(y, binaryMethod)
-% SB_BinaryStats_AR1    Binary run-length statistics normalized against an AR(1) null
+% SB_BinaryStats_AR1   Binary run-length statistics normalized against an AR(1) null.
 %
-% Binarizes the time series (as in SB_BinaryStats) and compares the
-% resulting run-length statistics to their analytic expectation under a
-% Gaussian AR(1) null process with the same lag-1 autocorrelation as y.
+% Binarizes the time series (as in SB_BinaryStats) and compares the resulting
+% run-length statistics to their analytic expectation under a Gaussian AR(1) null
+% process with the same lag-1 autocorrelation as y. Ratios near 1 indicate that the
+% binary run structure is what linear autocorrelation alone would give.
 %
 % ---INPUTS:
 % y, the input time series
+% binaryMethod, the symbolization rule: 'mean' (above/below the mean) or 'diff'
+%    (sign of incremental differences). Unlike SB_BinaryStats, 'iqr' is not
+%    supported here: the theory below is specific to a sign/half-line threshold at
+%    the mean of a (possibly transformed) Gaussian series, and does not apply to
+%    interval/band membership. Default: 'mean'.
 %
-% binaryMethod, the symbolization rule -- 'mean' (above/below the mean) or
-%               'diff' (sign of incremental differences). Unlike
-%               SB_BinaryStats, 'iqr' is not supported here: the theory
-%               below is specific to a sign/half-line threshold at the
-%               mean of a (possibly transformed) Gaussian series, and does
-%               not apply to interval/band membership. Default: 'mean'.
+% ---OUTPUTS:
+% A structure with fields:
+% pstretch1, the number of runs of 1s divided by the length of the binary string
+% meanstretch0, meanstretch1, the mean run length of 0s, and of 1s
+% ar1_p, the AR(1)-implied persistence probability p (see THEORY)
+% meanstretch_ar1exp, the expected mean run length, 1/(1-p)
+% pstretch1_ar1exp, the expected value of pstretch1, (1-p)/2
+% meanstretch0_ar1rat, meanstretch1_ar1rat, meanstretch0 and meanstretch1 divided
+%    by meanstretch_ar1exp
+% pstretch1_ar1rat, pstretch1 divided by pstretch1_ar1exp
+% (The ratios are NaN, and meanstretch_ar1exp is Inf, in the degenerate limit of
+% lag-1 autocorrelation of 1.)
 %
 % ---THEORY:
 % For a stationary Gaussian process u (u = y for 'mean'; u = diff(y) for

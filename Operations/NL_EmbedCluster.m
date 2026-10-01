@@ -1,19 +1,19 @@
 function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
-% NL_EmbedCluster   Gaussian-mixture clustering structure in a time-delay embedding space
+% NL_EmbedCluster   Whether the time-delay embedding of the series forms separate clusters of points.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA,
 % NL_EmbedKernelPCA) and fits Gaussian mixture models with a small grid of
-% component counts to the resulting point cloud. A dynamical process whose
-% trajectory visits distinct regions of phase space (e.g., alternating
-% between two attractor states, or a system with intermittent bursts) leaves
-% a multi-modal point cloud in the embedding; a process with a single smooth
-% (e.g., unimodal-stochastic or single-loop periodic) attractor does not.
-% This is a distinct signal from marginal-distribution multi-modality (e.g.
-% DN_ kurtosis/bimodality stats on the raw values), since two states can
-% overlap entirely in amplitude yet still separate cleanly once lagged
-% coordinates are added, and from regime-switching detected by MF_hmm_Fit /
-% MF_hmm_CompareNStates, which cluster points in raw-amplitude (not
-% lagged/embedded) space.
+% component counts (1,...,kMax) to the resulting point cloud. A dynamical
+% process whose trajectory visits distinct regions of phase space (e.g.,
+% alternating between two attractor states, or a system with intermittent
+% bursts) leaves a multi-modal point cloud in the embedding; a process with a
+% single smooth (e.g., unimodal-stochastic or single-loop periodic) attractor
+% does not. This is a distinct signal from marginal-distribution
+% multi-modality (e.g. DN_ kurtosis/bimodality stats on the raw values), since
+% two states can overlap entirely in amplitude yet still separate cleanly once
+% lagged coordinates are added, and from regime-switching detected by
+% MF_hmm_Fit / MF_hmm_CompareNStates, which cluster points in raw-amplitude
+% (not lagged/embedded) space.
 %
 % Rather than reporting only the BIC-optimal number of components (a
 % discrete, model-selection-driven output that can be noisy/discontinuous
@@ -23,16 +23,12 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 %
 % ---INPUTS:
 % y, the input time series
-%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%               zero-crossing of the autocorrelation function or first minimum
-%               of the automutual information, respectively
-%
+%      zero-crossing of the autocorrelation function or first minimum of the
+%      automutual information, respectively (default: 'ac')
 % m, the embedding dimension (default: 2)
-%
 % kMax, the maximum number of Gaussian mixture components to consider when
 %       searching for the BIC-optimal component count (default: 4)
-%
 % maxN, the maximum number of embedded points used to fit the mixture models.
 %       Defaults to 'full' (no cropping) -- measured cost is cheap and scales
 %       mildly with N, unlike hctsa's O(N^3)-type operations. Set to a number
@@ -44,7 +40,8 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % ---OUTPUTS:
 % bestK, the BIC-optimal number of mixture components over 1:kMax
 % dBIC, the relative BIC improvement of the best fit over a single
-%       (unimodal) Gaussian fit; 0 when bestK == 1 (no clustering evidence)
+%       (unimodal) Gaussian fit, (BIC_1 - BIC_best)/|BIC_1|; 0 when bestK == 1
+%       (no clustering evidence)
 % sep_mahal, log1p-compressed Mahalanobis separation between the two
 %       component means of a fixed 2-component fit, using their pooled
 %       covariance (log-compressed to tame the heavy tail from

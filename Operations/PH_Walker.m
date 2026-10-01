@@ -1,8 +1,8 @@
 function out = PH_Walker(y, walkerRule, walkerParams)
-% PH_Walker Simulates a hypothetical walker moving through the time domain.
+% PH_Walker   How a simulated particle driven by the series moves, and how its path differs from the series.
 %
-% The hypothetical particle (or 'walker') moves in response to values of the
-% time series at each point.
+% Simulates a hypothetical particle (or 'walker') that moves in response to values
+% of the time series at each point.
 %
 % Outputs from this operation are summaries of the walker's motion, and
 % comparisons of it to the original time series.
@@ -12,23 +12,24 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 % y, the input time series
 %
 % walkerRule, the kinematic rule by which the walker moves in response to the
-%             time series over time:
+%             time series over time (default: 'prop'):
 %
 %            (i) 'prop': the walker narrows the gap between its value and that
-%                        of the time series by a given proportion p.
-%                        walkerParams = p;
+%                        of the previous value of the time series by a given
+%                        proportion p: w(i) = w(i-1) + p*(y(i-1) - w(i-1)), with
+%                        w(1) = 0. walkerParams = p;
 %
 %            (ii) 'biasprop': the walker is biased to move more in one
-%                         direction; when it is being pushed up by the time
-%                         series, it narrows the gap by a proportion p_{up},
-%                         and when it is being pushed down by the time series,
-%                         it narrows the gap by a (potentially different)
+%                         direction; when the time series is going up (y(i) >
+%                         y(i-1)), it narrows the gap by a proportion p_{up},
+%                         and otherwise by a (potentially different)
 %                         proportion p_{down}. walkerParams = [pup, pdown].
 %
 %            (iii) 'momentum': the walker moves as if it has mass m and inertia
-%                         from the previous time step and the time series acts
-%                         as a force altering its motion in a classical
-%                         Newtonian dynamics framework. [walkerParams = m], the mass.
+%                         from the previous time step: it first extrapolates its
+%                         previous step, w_inert = 2*w(i-1) - w(i-2), then closes a
+%                         fraction 1/m of the gap between w_inert and y(i-1).
+%                         [walkerParams = m], the mass.
 %
 %             (iv) 'runningvar': the walker moves with inertia as above, but
 %                         its values are also adjusted so as to match the local
@@ -37,14 +38,30 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 %                         is the window length.
 %
 % walkerParams, the parameters for the specified walkerRule, explained above.
+% Defaults are 0.5 ('prop'), [0.1, 0.2] ('biasprop'), 2 ('momentum'), and [1.5, 50]
+% ('runningvar').
 %
-% ---OUTPUTS: Include the mean, spread, maximum, minimum, and autocorrelation of
-% the walker's trajectory, the number of crossings between the walker and the
-% original time series, the ratio or difference of some basic summary statistics
-% between the original time series and the walker, an Ansari-Bradley test
-% comparing the distributions of the walker and original time series, and
-% various statistics summarizing properties of the residuals between the
-% walker's trajectory and the original time series.
+% ---OUTPUTS:
+% The walker's path, w:
+% w_mean, w_median, w_std, w_min, w_max: mean, median, standard deviation, minimum,
+%       and maximum of w
+% w_ac1, w_ac2: autocorrelation of w at lags 1 and 2
+% w_tau: first zero-crossing of the autocorrelation function of w
+% w_propzcross: proportion of steps at which w crosses zero
+% The walker compared with the time series:
+% sw_meanabsdiff: mean absolute difference between y and w
+% sw_taudiff: first zero-crossing of the autocorrelation function of y minus that of w
+% sw_stdrat, sw_ac1rat, sw_minrat, sw_maxrat: ratios of the standard deviation, lag-1
+%       autocorrelation, minimum, and maximum of w to those of y
+% sw_propcross: proportion of steps at which w crosses y
+% sw_ansarib_pval: p-value of an Ansari-Bradley test comparing the distributions of
+%       w and y
+% sw_distdiff: sum of absolute differences between kernel-smoothed densities of y and
+%       w, on a common grid of 200 points
+% The residual, w - y:
+% res_runstest: p-value of a runs test for randomness
+% res_swss5_1: variability of the residual's standard deviation across 5 windows
+% res_ac1: lag-1 autocorrelation
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

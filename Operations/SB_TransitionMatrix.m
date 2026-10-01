@@ -1,11 +1,12 @@
 function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
-% SB_TransitionMatrix  Transition probabilities between time-series states.
+% SB_TransitionMatrix   Transition probabilities between time-series states.
 %
-% The time series is coarse-grained according to a given method.
-%
-% The input time series is transformed into a symbolic string using an
-% equiprobable alphabet of numGroups letters. The transition probabilities are
-% calculated at a lag tau.
+% The input time series is coarse-grained into a symbolic string using the given
+% method (by default, an equiprobable alphabet of numGroups letters), and the
+% matrix T of transition frequencies at a lag tau is computed: T(i,j) is the
+% number of consecutive pairs of symbols (state i then state j) divided by the
+% number of pairs, N - 1. Note that this makes T a matrix of joint probabilities
+% that sums to 1, not one whose rows each sum to 1. Statistics on T are returned.
 %
 % Related to the idea of quantile graphs from time series.
 % cf. Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
@@ -13,24 +14,45 @@ function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
 %
 % ---INPUTS:
 % y, the input time series
+% howtocg, the method of discretization: 'quantile' (equiprobable, the default) or
+%    'updown' (a true binary up/down split by the sign of each increment: NOT
+%    equiprobable, and requires numGroups = 2; see SB_CoarseGrain.m). Other
+%    SB_CoarseGrain methods could be incorporated in future.
+% numGroups, the number of groups in the coarse-graining (default: 2)
+% tau, analyze transition matrices corresponding to this lag (default: 1). We
+%    could either downsample the time series at this lag and then do the
+%    discretization as normal, or do the discretization and then just look at this
+%    discrete lag. Here we do the former (using resample). Can also set tau to 'ac'
+%    to set tau to the first zero-crossing of the autocorrelation function.
 %
-% howtocg, the method of discretization: 'quantile' (equiprobable, the
-%           default) or 'updown' (a true binary up/down split by the sign of
-%           each increment -- NOT equiprobable, and requires numGroups=2; see
-%           SB_CoarseGrain.m). Other SB_CoarseGrain methods could be
-%           incorporated in future.
-%
-% numGroups: number of groups in the course-graining
-%
-% tau: analyze transition matricies corresponding to this lag. We
-%      could either downsample the time series at this lag and then do the
-%      discretization as normal, or do the discretization and then just
-%      look at this dicrete lag. Here we do the former. Can also set tau to 'ac'
-%      to set tau to the first zero-crossing of the autocorrelation function.
-%
-% ---OUTPUTS: include the transition probabilities themselves, as well as the trace
-% of the transition matrix, measures of asymmetry, and eigenvalues of the
-% transition matrix.
+% ---OUTPUTS:
+% A structure with fields, including the transition probabilities themselves, as
+% well as the trace of the transition matrix, measures of asymmetry, and
+% eigenvalues of the transition matrix:
+% T1, T2, T3, T4, T5, T6, T7, T8, T9: the entries of T in column-major order (T(i,j) =
+%    probability of state i followed by state j); T1 to T4 if numGroups = 2, T1 to
+%    T9 if numGroups = 3
+% TD1, TD2, TD3, TD4, TD5, ..., TDk: the diagonal entries of T, if numGroups > 3
+% ondiag, the trace of T (probability of staying in the same state)
+% stddiag, the standard deviation of the diagonal of T
+% symdiff, the sum of absolute differences between T and its transpose
+% symsumdiff, the sum of the lower triangle minus the sum of the upper triangle
+%    of T
+% transKLdiv, the Kullback-Leibler-type divergence sum(T.*log(T./T')) over entries
+%    where both T and T' are positive
+% stdeig, the standard deviation of the eigenvalues of T
+% maxeig, the maximum real part of the eigenvalues of T
+% mineig, the minimum real part of the eigenvalues of T
+% maximeig, the maximum imaginary part of the eigenvalues of T
+% secondeig, the second largest real part of the eigenvalues of T
+% specgap, maxeig - secondeig
+% transEntropy, the Miller-Madow-corrected entropy of the pair distribution minus
+%    that of its row marginal (the conditional entropy of the next state), in nats
+% sumdiagcov, the trace of the covariance matrix of T (cov(T))
+% stdeigcov, the standard deviation of the eigenvalues of cov(T)
+% maxeigcov, the maximum eigenvalue of cov(T)
+% mineigcov, the minimum eigenvalue of cov(T)
+% NaN (instead of a structure) is returned if tau cannot be determined.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

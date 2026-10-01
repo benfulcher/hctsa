@@ -1,16 +1,26 @@
 function out = SY_Trend(y)
-% SY_Trend  Quantifies various measures of trend in a time series.
+% SY_Trend   Quantifies various measures of trend in a time series.
 %
-% ---INPUT:
-% y, the input time series.
-%
-% ---OUTPUTS:
 % Linearly detrends the time series using detrend, and returns the ratio of
-% standard deviations before and after the linear detrending. If a strong linear
+% standard deviations after and before the linear detrending. If a strong linear
 % trend is present in the time series, this operation should output a low value.
 %
-% Also fits a line and gives parameters from that fit, as well as statistics on
-% a cumulative sum of the time series.
+% Also fits a line and gives parameters from that fit, as well as statistics on a
+% cumulative sum of the time series. Time is t = 1, ..., N in samples, so slopes are
+% per sample and intercepts are the fitted values at t = 0.
+%
+% ---INPUTS:
+% y, the input time series (assumed z-scored)
+%
+% ---OUTPUTS:
+% stdRatio, the standard deviation of the linearly detrended series divided by
+%       that of the original series
+% gradient, intercept: the slope and intercept of a linear fit to the series
+% meanYC, stdYC: the mean and standard deviation of the cumulative sum of the series
+% gradientYC, interceptYC: the slope and intercept of a linear fit to the
+%       cumulative sum
+% meanYC12, meanYC22: the mean of the cumulative sum over the first and over the
+%       second half of the series
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

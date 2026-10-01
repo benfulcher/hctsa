@@ -1,10 +1,11 @@
 function out = NL_EmbedKernelPCA(y, tau, m, maxN)
-% NL_EmbedKernelPCA   Kernel PCA of a time series in an embedding space, vs. linear PCA.
+% NL_EmbedKernelPCA   Kernel PCA of a time-delay embedding of the series, compared with linear PCA.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA)
 % and performs kernel Principal Components Analysis on the result using an
-% RBF kernel, then compares the resulting eigenvalue spectrum to that of
-% ordinary (linear) PCA on the same embedded points.
+% RBF kernel exp(-d^2/median(d^2)), with d the distance between embedded
+% points, then compares the resulting eigenvalue spectrum to that of ordinary
+% (linear) PCA on the same embedded points.
 %
 % At any finite kernel bandwidth, kernel PCA's spectrum is less compact than
 % linear PCA's in absolute terms (its RBF feature space is far higher-
@@ -20,21 +21,12 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 % compare a metric's value to its outcome under a linear-appropriate
 % transformation (cf. surrogate-based tests in SD_SurrogateTest).
 %
-% "Nonlinear Component Analysis as a Kernel Eigenvalue Problem"
-% B. Scholkopf, A. Smola, K.-R. Muller, Neural Comput. 10(5) 1299 (1998)
-%
-% cf. "Extracting qualitative dynamics from experimental data"
-% D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
-%
 % ---INPUTS:
 % y, the input time series
-%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%               zero-crossing of the autocorrelation function or first minimum
-%               of the automutual information, respectively
-%
-% m, the embedding dimension
-%
+%      zero-crossing of the autocorrelation function or first minimum of the
+%      automutual information, respectively (default: 'ac')
+% m, the embedding dimension (default: 3)
 % maxN, the maximum number of embedded points used to form the N x N kernel
 %       matrix, whose eigendecomposition costs O(N^3). Longer embeddings are
 %       reduced to their first maxN points (default: 2000, i.e., a ~30MB
@@ -45,14 +37,30 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 %       to 'full' to disable, with a second warning above 5000 points,
 %       where the eigendecomposition starts to take several seconds.
 %
-% ---OUTPUTS:
-% The same battery of eigenvalue-spectrum statistics as NL_EmbedPCA
-% (variance explained by each of the top m components, how many components
-% are needed to explain 50-90% of the variance, etc.), computed on the
-% kernel PCA spectrum instead of the linear PCA spectrum, plus explicit
-% comparison outputs (ratios/differences of matched linear and kernel
-% statistics) that isolate the linear-vs-nonlinear discrepancy itself.
-
+% ---OUTPUTS: statistics of the normalized kernel PCA spectrum (the proportion
+% of variance in feature space explained by each kernel principal component,
+% ordered from largest, one per embedded point), with the linear PCA spectrum
+% of the same points (m entries) for comparison:
+% perc_1, ..., perc_m: the proportion of variance explained by each of the
+%       top m kernel components
+% std, range, min, max: standard deviation, range, minimum and maximum of the
+%       top m proportions only (so they are comparable with linear PCA)
+% top2: the proportion of variance explained by the top two kernel components
+% nto50, nto60, nto70, nto80, nto90: the number of kernel components needed to
+%       explain more than 50%, 60%, 70%, 80% or 90% of the variance
+% fb05, fb02, fb01, fb001: the position of the first kernel component whose
+%       proportion of variance is below 0.5, 0.2, 0.1 or 0.01
+% top2_ratio, top2_diff: top2 of the kernel PCA over (and minus) that of linear PCA
+% nto80_ratio, nto80_diff: nto80 of the kernel PCA over (and minus) that of
+%       linear PCA
+% nto50_ratio: nto50 of the kernel PCA over that of linear PCA
+% std_ratio: std of the kernel PCA over that of linear PCA
+%
+% ---REFERENCES:
+% B. Scholkopf, A. Smola and K.-R. Muller, "Nonlinear Component Analysis as a
+% Kernel Eigenvalue Problem", Neural Comput. 10(5), 1299 (1998).
+% D. S. Broomhead and G. P. King, "Extracting qualitative dynamics from
+% experimental data", Physica D 20(2-3), 217 (1986).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

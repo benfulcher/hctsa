@@ -1,38 +1,51 @@
 function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % NL_nlpe   Normalized drop-one-out constant interpolation nonlinear prediction error.
 %
-% Computes the nlpe for a time-delay embedded time series using Michael Small's
-% code, nlpe (renamed MS_nlpe here):
+% Computes the nlpe for a time-delay embedded time series using Michael Small's code, nlpe
+% (renamed MS_nlpe here). The series is embedded in de dimensions with delay tau. The
+% one-step-ahead value following each embedded state is predicted by the value that
+% followed its nearest neighbor outside the Theiler window ("drop-one-out", constant
+% interpolation). The prediction errors (prediction minus data) are summarized using
+% MF_ResidualAnalysis.
 %
 % ---INPUTS:
-% y, the input time series
-% de, the embedding dimension (can be an integer, or 'fnn' to select as the
-%       point where the proportion of false nearest neighbors falls below 5%
-%       using NL_FNN)
-% tau, the time-delay (can be an integer or 'ac' to be the first zero-crossing
-%       of the ACF or 'mi' to be the first minimum of the automutual information
-%       function)
+% y, the input time series (should be z-scored)
+% de, the embedding dimension (can be an integer, or 'fnn' to select as the point where the
+%     proportion of false nearest neighbors falls below 5% using NL_FNN; default: 3)
+% tau, the time-delay (can be an integer or 'ac' to be the first zero-crossing of the ACF
+%      or 'mi' to be the first minimum of the automutual information function; default: 1)
+% maxN, the maximum time-series length to analyze; longer series are cropped to their first
+%       maxN points (default: 5000, due to memory constraints with longer time series). Set
+%       to 'full' to disable, with a warning above 20000 points.
+% theilerWin, Theiler window: the prediction for each point uses its nearest neighbor
+%       outside this window in time ({'ac', k} for k times the first zero-crossing of the
+%       autocorrelation function, or a number of samples; see BF_TheilerWindow; default:
+%       {'ac', 1}). Excluding only the point itself lets a temporally adjacent point serve
+%       as the neighbor, so the error measures the local smoothness of the series rather
+%       than its predictability from similar past states.
 %
-% maxN, the maximum time-series length to analyze; longer series are cropped
-%       to their first maxN points (default: 5000, due to memory constraints
-%       with longer time series). Set to 'full' to disable, with a warning
-%       above 20000 points.
+% ---OUTPUTS: msqerr (the mean squared prediction error), and the 'full' set of
+% MF_ResidualAnalysis on the prediction errors:
+% meane, meanabs, stde: the mean, mean absolute value, and standard deviation of the errors
+% maxonstd, the largest absolute error in units of the standard deviation of the errors
+% ac1, ac2, ac3: the autocorrelation of the errors at lags 1, 2 and 3
+% propbth, the proportion of the first 25 autocorrelations inside the +/-2.6/sqrt(N) band
+% ftbth, the first lag at which the autocorrelation falls inside that band (26 if none)
+% taurat, the ratio of the errors' first zero-crossing of the autocorrelation function to
+%         that of the series
+% sws, swm, the stationarity of the standard deviation and mean of the errors across 5
+%         windows (SY_SlidingWindow)
+% normksstat, the Kolmogorov-Smirnov statistic of the errors against a normal distribution
+% popt, minsbc, the order (1 to 10) of the autoregressive model of the errors selected by
+%         the Schwarz criterion, and the corresponding criterion value
+% The output is NaN if tau or the embedding dimension cannot be determined, or the series
+% has fewer than 20 samples.
 %
-% theilerWin, Theiler window: the prediction for each point uses its nearest
-%       neighbor outside this window in time ({'ac', k} for k times the first
-%       zero-crossing of the autocorrelation function, or a number of samples;
-%       see BF_TheilerWindow; default: {'ac', 1}). Excluding only the point
-%       itself lets a temporally adjacent point serve as the neighbor, so the
-%       error measures the local smoothness of the series rather than its
-%       predictability from similar past states.
+% ---REFERENCES:
+% M. Small, "Applied Nonlinear Time Series Analysis: Applications in Physics, Physiology,
+% and Finance", World Scientific, Nonlinear Science Series A, Vol. 52 (2005).
 %
-% ---OUTPUTS: include measures of the meanerror of the nonlinear predictor, and a
-% set of measures on the correlation, Gaussianity, etc. of the residuals.
-%
-% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
-% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
-% Vol. 52 (2005)
-%
+% ---NOTES:
 % Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
 
 % ------------------------------------------------------------------------------

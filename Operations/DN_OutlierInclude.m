@@ -1,47 +1,68 @@
 function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
-% DN_OutlierInclude     How statistics depend on distributional outliers.
+% DN_OutlierInclude   How the timing and spacing of extreme values change as the threshold rises.
 %
-% Measures a range of different statistics about the time series as more and
-% more outliers are included in the calculation according to a specified rule,
-% of outliers being furthest from the mean, greatest positive, or negative
-% deviations.
+% Raises a threshold th from 0 to the maximum value of the series, in increments
+% of inc, and at each threshold takes the "events": the points at or beyond it
+% (for 'abs', values with abs(y) >= th; for 'pos', y >= th; for 'neg',
+% y <= -th). The threshold is applied to y itself, so the series should be
+% z-scored (a warning is issued otherwise). At each threshold it records:
+%   (1) the mean gap (in samples) between successive events, and its standard
+%       error (std of the gaps / sqrt of their number),
+%   (2) the percentage of points that are events (the number of gaps over the
+%       number of candidate points, times 100),
+%   (3) the median and mean time of the events, rescaled so that the start of the
+%       series is -1, the middle is 0 and the end is 1, and std(times)/sqrt(their
+%       number) (in samples).
+% The sweep stops when events are 2% or fewer of the points. The outputs measure
+% how these curves change with th, using exponential [f(x) = a*exp(b*x) + c] and
+% linear [f(x) = a*x + b] fits (which need the Curve Fitting Toolbox), and simple
+% statistics across thresholds. If a fit fails, its outputs are NaN.
 %
-% The threshold for including time-series data points in the analysis increases
-% from zero to the maximum deviation, in increments of 0.01*sigma (by default),
-% where sigma is the standard deviation of the time series.
-%
-% At each threshold, the mean, standard error, proportion of time series points
-% included, median, and standard deviation are calculated, and outputs from the
-% algorithm measure how these statistical quantities change as more extreme
-% points are included in the calculation.
+% If fixedThresh is given, the sweep and fits are skipped, and the statistics in
+% (1)-(3) are returned for that one threshold.
 %
 % ---INPUTS:
 % y, the input time series (ideally z-scored)
 %
-% thresholdHow, the method of how to determine outliers:
-%     (i) 'abs': outliers are furthest from the mean,
-%     (ii) 'pos': outliers are the greatest positive deviations from the mean, or
-%     (iii) 'neg': outliers are the greatest negative deviations from the mean.
+% thresholdHow, how to determine outliers:
+%       (i) 'abs': values furthest from zero in either direction (default),
+%       (ii) 'pos': the greatest positive values, or
+%       (iii) 'neg': the greatest negative values.
 %
-% inc, the increment to move through (fraction of std if input time series is
-%       z-scored). Unused when fixedThresh is given.
+% inc, the increment to move through (in units of the standard deviation if the
+%       time series is z-scored; default 0.01). Unused when fixedThresh is given.
 %
-% fixedThresh [opt], if given, skips the threshold sweep entirely and
-%       instead evaluates the same event/interval statistics at this single
-%       threshold (a scalar, in the same units as inc, e.g. 2 for two
-%       standard deviations of a z-scored series). Returns a small,
-%       curve-fit-free struct (meanDt, seDt, propIncluded, and the
-%       median/mean/std of event timing) rather than the swept exponential/
-%       linear trend fits below, which measure something different: how
-%       those quantities *change* as the threshold rises, not their value
-%       at one threshold.
+% fixedThresh, [optional] a single threshold (in the units of y, e.g., 2 for two
+%       standard deviations of a z-scored series). If given, the sweep is skipped.
 %
-% Most of the outputs measure either exponential [f(x) = Aexp(Bx) + C] or
-% linear [f(x) = Ax + B] fits to the sequence of statistics obtained in
-% this way.
+% ---OUTPUTS:
+% From the sweep (fixedThresh not given):
+% mfexpa, mfexpb, mfexpc, mfexpr2, mfexprmse: the parameters a, b, c, R^2 and
+%       root-mean-square error of the exponential fit to the mean gap vs. th
+% nfexpa, nfexpb, nfexpc, nfexpr2, nfexprmse: the same for an exponential fit to
+%       the percentage of points that are events vs. th
+% nfla, nflb, nflr2, nflrmse: slope a, intercept b, R^2 and root-mean-square
+%       error of a linear fit to the percentage of points that are events vs. th
+% mdtm, mdtmd, mdtstd: mean, median and standard deviation of the mean gap
+%       across thresholds
+% mdrm, mdrmd, mdrstd: mean, median and standard deviation, across thresholds,
+%       of the median time of the events (-1 to 1)
+% mrm, mrmd, mrstd: mean, median and standard deviation, across thresholds, of
+%       the mean time of the events (-1 to 1)
+% xcmerr1, xcmerrn1: cross-correlation (xcorr with 'coeff' normalization)
+%       between the mean gap and its standard error across thresholds, at lags
+%       +1 and -1
+% stdrfexpa, stdrfexpb, stdrfexpc, stdrfexpr2, stdrfexprmse: the parameters and
+%       fit quality of an exponential fit to std(times)/sqrt(their number) vs. th
+% stdrfla, stdrflb, stdrflr2, stdrflrmse: the same for a linear fit
+% From a single threshold (fixedThresh given; all NaN except propIncluded if events
+% are 2% or fewer of the points):
+% meanDt, seDt: the mean gap between events, and its standard error
+% propIncluded: the percentage of points that are events
+% medianRelTime, meanRelTime: the median and mean time of the events (-1 to 1)
+% stdRelTime: std(times)/sqrt(their number), in samples
 %
-% [future: could compare differences in outputs obtained with 'p', 'n', and
-%               'abs' -- could give an idea as to asymmetries/nonstationarities??]
+% A constant time series returns NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

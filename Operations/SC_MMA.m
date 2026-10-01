@@ -1,7 +1,52 @@
 function out = SC_MMA(y, doOverlap, scaleRange, qRange)
-% SC_MMA   Physionet implementation of multiscale multifractal analysis
+% SC_MMA   Multiscale multifractal analysis (PhysioNet implementation): scale-dependent multifractal scaling.
 %
-% Scale-dependent estimates of multifractal scaling in a time series.
+% Builds a surface of generalized Hurst exponents h(q, s) over the fluctuation
+% order q and the timescale s. The series is integrated (cumulative sum) and cut
+% into windows of s samples, non-overlapping or overlapping (doOverlap), and a
+% quadratic polynomial is removed from each. The order-q fluctuation function
+% F_q(s) is the q-th order mean of the window variances (their q/2 power mean) for
+% q from qMin to qMax in steps of 0.1 and for 20 window sizes between minScale
+% and maxScale. The exponent h(q, s) is the slope of log F_q(s') against log s'
+% over window sizes s' from s to 5s, for q in steps of 0.5 and for 11 starting
+% sizes s evenly spaced from minScale to maxScale/5 (the scale is reported as 3s,
+% following the original algorithm). The outputs summarize the surface h(q, s).
+%
+% ---INPUTS:
+% y, the input time series
+% doOverlap, whether windows overlap (1; step between windows of one sample, much
+%       slower) or not (0, the default)
+% scaleRange, [minScale, maxScale], the smallest and largest window sizes
+%       (default: [10, max(100, round(N/40))]). maxScale is rounded to a multiple
+%       of 5, and must be at least 5 * minScale. The floor of 100 keeps the scale
+%       axis wide enough for short series (below about N = 4000 the original
+%       rule N/40 would leave too little room).
+% qRange, [qMin, qMax], the range of the multifractal order q (default: [-5, 5]);
+%       q = 0 is replaced by 0.0001
+%
+% ---OUTPUTS: statistics of the h(q, s) surface:
+% meanHurstExponent, stdHurstExponent, minHurstExponent, maxHurstExponent: the
+%       mean, standard deviation, minimum and maximum of h over all q and scales
+% scaleHurstStd, scaleHurstTrend: the standard deviation across scales of h
+%       averaged over q, and the slope of a linear fit of it against scale
+% qHurstStd, qHurstTrend: the standard deviation across q of h averaged over
+%       scales, and the slope of a linear fit of it against q
+% maxHurstQ, maxHurstScale, minHurstQ, minHurstScale: the q and scale at which h
+%       is largest and smallest
+% stdStdHurstQ, stdStdHurstScale: the standard deviation across q of the
+%       standard deviation across scales of h (large if the scale dependence is
+%       very different at different q), and the standard deviation across
+%       scales of the standard deviation across q
+% A scalar NaN is returned if the series is too short for the scale range.
+%
+% ---REFERENCES:
+% J. Gieraltowski, J. J. Zebrowski, and R. Baranowski, "Multiscale multifractal
+% analysis of heart rate variability recordings with a large number of
+% occurrences of arrhythmia", Phys. Rev. E 85, 021915 (2012).
+%
+% ---NOTES:
+% This is the PhysioNet implementation by Jan Gieraltowski, modified for hctsa;
+% see the licence block below for its citation requirements.
 
 % ------------------------------------------------------------------------------
 % Modified by Ben Fulcher for use in hctsa, 2015-05-12.

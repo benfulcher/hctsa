@@ -1,49 +1,60 @@
 function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
-% NL_ReturnTime    Analysis of the histogram of return times.
+% NL_ReturnTime   Analysis of the histogram of return times.
 %
-% Return times are the time taken for the time series to return to a similar
-% location in phase space for a given reference point.
+% Return times are the time taken for the time series to return to a similar location in
+% phase space for a given reference point. Strong peaks in the histogram are indicative of
+% periodicities in the data.
 %
-% Strong peaks in the histogram are indicative of periodicities in the data.
+% For each reference point in the embedding space, its NNR nearest neighbors are found
+% (excluding a Theiler window of "past" samples either side), and the time offset, T, of
+% each neighbor from the reference point is recorded. The histogram of these offsets over
+% the numLags lags beyond the Theiler window, T = past+1, ..., past+numLags (the "return-time
+% profile"), is analyzed. This follows TSTOOL's 'return_time' (which hctsa previously
+% called), with one change: each lag's count is divided by its expected count if neighbors
+% were placed at random among the valid (Theiler-excluded) candidates, rather than TSTOOL's
+% 2*NNR*(N - T), so that the histogram is ~1 at every lag for an uncorrelated process at
+% any series length (TSTOOL's normalization scaled as 1/N). Values above 1 mark lags at
+% which the trajectory preferentially returns to its neighborhood. The profile is closely
+% related to the tau-recurrence rate of recurrence quantification analysis, with
+% neighborhoods holding a fixed proportion of points rather than having a fixed radius.
 %
-% For each reference point in the embedding space, its NNR nearest neighbors
-% are found (excluding a Theiler window of "past" samples either side), and the
-% time offset, T, of each neighbor from the reference point is recorded. The
-% histogram of these offsets over the numLags lags beyond the Theiler window,
-% T = past+1, ..., past+numLags, is analyzed. This
-% follows TSTOOL's 'return_time' (which hctsa previously called), with one
-% change: each lag's count is divided by its expected count if neighbors were
-% placed at random among the valid (Theiler-excluded) candidates, rather than
-% TSTOOL's 2*NNR*(N - T), so that the histogram is ~1 at every lag for an
-% uncorrelated process at any series length (TSTOOL's normalization scaled as
-% 1/N). Values above 1 mark lags at which the trajectory preferentially
-% returns to its neighborhood. The profile is closely related to the
-% tau-recurrence rate of recurrence quantification analysis (cf. N. Marwan et
-% al., Phys. Rep. 438, 237 (2007)), with neighborhoods holding a fixed
-% proportion of points rather than having a fixed radius.
-%
-% (For the distribution of *first* return times to a neighborhood, see
-% NL_RecurrenceTimes.)
+% (For the distribution of *first* return times to a neighborhood, see NL_RecurrenceTimes.)
 %
 % ---INPUTS:
-%
 % y, scalar time series as a column vector
-% NNR, number of nearest neighbours (or, if in (0,1), a proportion of the
-%       number of embedded points, keeping neighborhoods the same size in
-%       probability as the series length changes)
-% numLags, the number of lags beyond the Theiler window to analyze (samples)
-% past, Theiler window, excluding neighbors that are close only because they
-%       are close in time: {'ac', k} for k times the first zero-crossing of
-%       the autocorrelation function, or a number of samples (see
-%       BF_TheilerWindow)
-% Nref, number of reference points, spaced evenly through the series (-1 uses
-%       all points). A fixed number keeps the number of neighbors counted at
-%       each lag, and so the sampling noise of the histogram, independent of
-%       the series length (neighbors are still sought among all points).
-% embedParams, to feed into BF_Embed
+% NNR, number of nearest neighbors (or, if in (0,1), a proportion of the number of embedded
+%      points, keeping neighborhoods the same size in probability as the series length
+%      changes; default: 0.01)
+% numLags, the number of lags beyond the Theiler window to analyze, in samples (default: 100)
+% past, Theiler window, excluding neighbors that are close only because they are close in
+%       time: {'ac', k} for k times the first zero-crossing of the autocorrelation
+%       function, or a number of samples (see BF_TheilerWindow; default: {'ac', 1})
+% Nref, number of reference points, spaced evenly through the series (-1 uses all points;
+%       default: -1). A fixed number keeps the number of neighbors counted at each lag, and
+%       so the sampling noise of the histogram, independent of the series length (neighbors
+%       are still sought among all points).
+% embedParams, the embedding, as {tau, m}, to feed into BF_Embed (default: {'ac', 'fnn'})
 %
-% ---OUTPUTS: include basic measures from the histogram, including the occurrence of
-% peaks, spread, proportion of zeros, and the distributional entropy.
+% ---OUTPUTS: measures of the return-time profile (the neighbor count at each lag relative to
+% chance), and of the histogram of its values:
+% max, std, iqr, the maximum, standard deviation and interquartile range of the profile
+% pzeros, the proportion of lags with no neighbors
+% pg05, the proportion of lags at which the profile exceeds half its maximum
+% meanpeaksep, maxpeaksep, minpeaksep, rangepeaksep, stdpeaksep, statistics of the spacings
+%      between successive crossings of half the maximum, as a proportion of the number of
+%      lags (stdpeaksep is divided by the square root of the number of lags instead; all
+%      are NaN with fewer than 3 crossings)
+% statrtys, statrtym, the ratio of the standard deviation (statrtys) or mean (statrtym) of
+%      the profile over the first half of the lags to that over the second half
+% hhist, the entropy of the profile as a distribution over lags
+% hcgdist, rangecgdist, pzeroscgdist, the entropy, range and proportion of zeros of the
+%      profile after summing it into 20 equal bins of lags (as a distribution over bins)
+% maxhisthist, phisthistmin, hhisthist, the maximum, the first (lowest-value) bin
+%      probability, and the entropy of the histogram of profile values (square-root bins)
+%
+% ---REFERENCES:
+% Marwan et al., Phys. Rep. 438, 237 (2007) (recurrence quantification analysis).
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

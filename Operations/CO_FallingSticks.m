@@ -20,19 +20,36 @@ function out = CO_FallingSticks(y)
 % intervening short one) that the purely local (i, i+1) comparison cannot
 % see.
 %
-% ---INPUTS:
-% y, the input time series (assumed z-scored: the sign split is around the
-%       mean, matching CO_StickAngles's convention)
-%
-% ---OUTPUTS: statistics on the resulting fall-angle sequence (location,
-% spread, shape, persistence), on the asymmetry between the positive and
-% negative branches, and on the three collision types a fall can end in --
-% falling flat, hitting the immediately next stick, or skipping over one
-% or more sticks to hit a farther one -- and the two ways a hit can occur
-% -- trunk-strike (case 1) vs. tip-strike/topple-over (case 2).
-%
 % Adapted from a Python 'FALLstick' reference implementation by Eugene Chon
 % <eugenechon04@gmail.com>.
+%
+% ---INPUTS:
+% y, the input time series (assumed z-scored: the sign split is around the
+%       mean, matching CO_StickAngles's convention; heights are in z-scored units
+%       and horizontal distances in samples)
+%
+% ---OUTPUTS:
+% Fall angles are in radians from the vertical: 0 is upright, pi/2 is flat. The last
+% stick of each sign has no later stick and contributes no angle (but counts as
+% falling flat). Suffixes _p, _n and _all refer to the positive sticks, the
+% negative sticks and both.
+% mean_p, median_p, mean_n, median_n, mean_all, median_all, the mean and median fall
+%       angle,
+% std_all, the standard deviation of all fall angles,
+% diff_pn, mean_p - mean_n, the asymmetry between positive and negative sticks,
+% propFlat_p, propFlat_n, propFlat_all, the proportion of sticks that fall flat,
+% propSkip_p, propSkip_n, propSkip_all, of the sticks that hit another stick, the
+%       proportion that skip over one or more sticks to hit a farther one,
+% propCase2_p, propCase2_n, propCase2_all, the proportion of sticks whose fall ends
+%       in a tip-strike (topple-over, case 2) rather than a trunk-strike (case 1);
+%       flat falls count as case 1,
+% skewness_all, kurtosis_all, q10_all, the skewness, kurtosis and 10th percentile
+%       of all fall angles (the 90th percentile is omitted: it was always the
+%       pi/2 flat-fall spike),
+% tau_p, tau_n, the first zero-crossing of the autocorrelation function of the
+%       sequence of fall angles of the positive or negative sticks (interpolated),
+% ac1_p, ac1_n, the lag-1 autocorrelation of those sequences.
+% Statistics with no sticks to work on are NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

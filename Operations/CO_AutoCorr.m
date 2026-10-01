@@ -1,28 +1,34 @@
 function out = CO_AutoCorr(y, tau, whatMethod)
-% CO_AutoCorr   Compute the autocorrelation of an input time series
+% CO_AutoCorr   The autocorrelation of a time series at one or more lags.
+%
+% Computes the autocorrelation at the given lag(s): the correlation between y(t) and
+% y(t+tau). The default 'Fourier' method gets the whole autocorrelation function from the
+% power spectrum (Wiener-Khinchin) and normalizes it by its value at lag 0, as does
+% MATLAB's autocorr.
 %
 % ---INPUTS:
-% y, a scalar time series column vector.
+% y, a scalar time series column vector
+% tau, the time delay. If tau is a scalar, returns the autocorrelation of y at that
+%      lag. If tau is a vector, returns the autocorrelations of y at that set of lags.
+%      Can set tau empty, [], to return the full function for the 'Fourier' estimation
+%      method. Default: 1.
+% whatMethod, the method of computing the autocorrelation: 'Fourier' (the default),
+%             'TimeDomainStat', or 'TimeDomain'
 %
-% tau, the time-delay. If tau is a scalar, returns autocorrelation for y at that
-%       lag. If tau is a vector, returns autocorrelations for y at that set of
-%       lags. Can set tau empty, [], to return the full function for the
-%       'Fourier' estimation method.
-%
-% whatMethod, the method of computing the autocorrelation: 'Fourier',
-%             'TimeDomainStat', or 'TimeDomain'.
-%
-% ---OUTPUT: the autocorrelation at the given time lag.
+% ---OUTPUTS:
+% out, the autocorrelation at the given time lag (one value per lag in
+%       tau; the full function from lag 0 if tau is empty). Lags that are negative or
+%       longer than the series give NaN for 'Fourier'.
 %
 % ---NOTES:
-% Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time
-% series.
+% Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time series.
 %
-% Computing mean/std across the full time series makes a significant difference
-% for short time series, but can produce values outside [-1,+1]. The
-% filtering-based method used by Matlab's autocorr, is probably the best for
-% short time series, and is implemented here by specifying: whatMethod =
-% 'Fourier'.
+% Computing the mean and standard deviation across the full time series
+% ('TimeDomainStat') makes a significant difference for short time series, but can
+% produce values outside [-1,+1]. The filtering-based method used by MATLAB's autocorr
+% is probably the best for short time series, and is implemented here by specifying
+% whatMethod = 'Fourier'. 'TimeDomain' takes the mean and standard deviation of each
+% lagged portion separately.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,22 +1,25 @@
 function glscf = CO_GLSCF(y, alpha, beta, tau)
-% CO_GLSCF  The generalized linear self-correlation function of a time series.
+% CO_GLSCF   The generalized linear self-correlation function of a time series.
 %
-% This function was introduced in Queiros and Moyano in Physica A, Vol. 383, pp.
-% 10--15 (2007) in the paper "Yet on statistical properties of traded volume:
-% Correlation and mutual information at different value magnitudes"
-% https://www.sciencedirect.com/science/article/pii/S0378437107004645
-%
-% The function considers magnitude correlations.
+% Computes the Pearson correlation between |y(t)|^alpha and |y(t+tau)|^beta: the
+% correlation between the alpha-th power of the magnitude of the series now and the
+% beta-th power of its magnitude tau samples later. When alpha = beta this estimates
+% how values of the same order of magnitude are related in time; when alpha ~= beta
+% it estimates correlations between different magnitudes of the time series.
 %
 % ---INPUTS:
 % y, the input time series
-% alpha and beta are real and nonzero parameters
-% tau is the time-delay (can also be 'tau' to set to first zero-crossing of the ACF)
+% alpha, the power applied to the magnitude at time t (real and nonzero)
+% beta, the power applied to the magnitude at time t+tau (real and nonzero)
+% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
+%      function)
 %
-% When alpha = beta estimates how values of the same order of magnitude are
-% related in time
-% When alpha ~= beta, estimates correlations between different magnitudes of the
-% time series.
+% ---OUTPUTS:
+% glscf, a scalar: the generalized self-correlation at that delay.
+%
+% ---REFERENCES:
+% Queiros and Moyano, "Yet on statistical properties of traded volume: Correlation and
+% mutual information at different value magnitudes", Physica A 383, 10--15 (2007).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

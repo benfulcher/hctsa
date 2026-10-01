@@ -1,28 +1,53 @@
 function out = SB_MotifTwo(y, binarizeHow, tau)
-% SB_MotifTwo   Local motifs in a binary symbolization of the time series
+% SB_MotifTwo   Local motifs in a binary symbolization of the time series.
 %
-% Coarse-graining is performed by a given binarization method.
+% Coarse-graining is performed by a given binarization method, giving a string of
+% two symbols, u and d. The probabilities of all words of 1, 2, 3 and 4 symbols
+% (counted at every position, overlapping) are returned, with the Shannon entropy
+% of the word distribution at each length.
 %
 % ---INPUTS:
 % y, the input time series
-% binarizeHow, the binary transformation method:
-%       (i) 'diff': incremental time-series increases are encoded as 1, and
-%                   decreases as 0,
-%       (ii) 'mean': time-series values above its mean are given 1, and those
-%                    below the mean are 0,
-%       (iii) 'median': time-series values above the median are given 1, and
-%       those below the median 0.
-%
-% tau, the time-delay to symbolize consecutive words at (default: 1, i.e.,
-%      consecutive samples). Can also set tau to 'ac' to use the first
-%      zero-crossing of the autocorrelation function, matching the lag
-%      used by SB_TransitionMatrix -- useful since 'diff'/'mean'/'median'
-%      words at consecutive samples of a smooth, oversampled signal can be
-%      dominated by trivial local structure.
+% binarizeHow, the binary transformation method (default: 'diff'):
+%    (i) 'diff': incremental time-series increases are encoded as 1 (u), and
+%        decreases or no change as 0 (d)
+%    (ii) 'mean': time-series values above its mean are given 1 (u), and those at
+%        or below the mean are 0 (d)
+%    (iii) 'median': time-series values above the median are given 1 (u), and
+%        those at or below the median 0 (d)
+% tau, the time delay at which to symbolize consecutive words (default: 1, i.e.,
+%    consecutive samples). The series is first downsampled by tau (using
+%    resample). Can also be 'ac' to use the first zero-crossing of the
+%    autocorrelation function, matching the lag used by SB_TransitionMatrix; useful
+%    since 'diff'/'mean'/'median' words at consecutive samples of a smooth,
+%    oversampled signal can be dominated by trivial local structure.
 %
 % ---OUTPUTS:
-% Probabilities of words in the binary alphabet of lengths 1, 2, 3, and 4, and
-% their entropies.
+% A structure with fields (u and d are the symbols 1 and 0; for 'diff', u is a step
+% up and d a step down or flat):
+% u, d, the proportions of the two symbols (they sum to 1; hctsa's default feature
+%    set uses just u)
+% Probabilities of the words of length 2:
+% uu, ud, du, dd
+% Probabilities of the words of length 3:
+% uuu, uud, udu, udd, duu, dud, ddu, ddd
+% Probabilities of the words of length 4:
+% uuuu, uuud, uudu, uudd, uduu, udud, uddu, uddd, duuu, duud, dudu, dudd,
+%     dduu, ddud, dddu, dddd
+% Entropies of the word distributions, in nats, with a Miller-Madow correction for
+% the finite number of words (see f_entropy below):
+% h, entropy of single symbols
+% hh, entropy of words of length 2
+% hhh, entropy of words of length 3
+% hhhh, entropy of words of length 4
+% NaN (instead of a structure) is returned if tau cannot be determined or the
+% symbolized sequence is shorter than 5.
+%
+% ---NOTES:
+% In f_entropy, the textbook Miller-Madow degrees of freedom (occupied bins - 1)
+% are reduced by wordLength*(alphabetSize - 1), on the argument that the
+% coarse-graining fixes the marginal frequencies of the symbols (see the comments
+% in f_entropy).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

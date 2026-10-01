@@ -1,8 +1,9 @@
 function out = MD_Porta(x,numLevels)
-% MD_Porta      Porta's symbolic-dynamics word-type indices.
+% MD_Porta   Porta's symbolic-dynamics word-type indices.
 %
-% Quantizes the time series into a small number of levels and classifies
-% consecutive length-3 "words" of symbols by their pattern of variation:
+% Quantizes the time series into a small number of levels (numLevels equal-width
+% bins spanning its range, by discretize) and classifies consecutive length-3
+% "words" of symbols by their pattern of variation:
 %   0V   -- no variation (all three symbols equal)
 %   1V   -- one variation (exactly one of the two transitions is flat)
 %   2LV  -- two like variations (both transitions move the same direction)
@@ -11,18 +12,23 @@ function out = MD_Porta(x,numLevels)
 % Originally developed for heart-rate-variability analysis, quantifying the
 % complexity/regularity of the symbolic dynamics of RR interval sequences.
 %
-% cf. A. Porta et al., "Quantifying the strength of the linear and
-% nonlinear relationships between heart period and arterial pressure",
-% IEEE Trans. Biomed. Eng. 45(8) 1017 (1998)
-%
 % ---INPUTS:
 % x, the input time series
-% numLevels, the number of quantization levels (default: 6, as in the
-%            original papers)
+% numLevels, the number of quantization levels (default: 6, as in the original
+%    papers)
 %
 % ---OUTPUTS:
-% out.pV0, out.pV1, out.pV2LV, out.pV2UV: percentage of length-3 words of
-% each type
+% A structure with fields:
+% pV0, the percentage of length-3 words with no variation
+% pV1, the percentage of length-3 words with one variation
+% pV2LV, the percentage of length-3 words with two like variations
+% pV2UV, the percentage of length-3 words with two unlike variations
+% All four are NaN for a constant series.
+%
+% ---REFERENCES:
+% A. Porta et al., "Quantifying the strength of the linear and nonlinear
+% relationships between heart period and arterial pressure", IEEE Trans. Biomed.
+% Eng. 45(8) 1017 (1998).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,67 +1,52 @@
 function out = PP_Compare(y, detrndmeth)
-% PP_Compare    Compare how time-series properties change after pre-processing.
+% PP_Compare   How time-series properties change after a preprocessing step.
 %
-% Applies a given pre-processing transformation to the time series, and returns
-% statistics on how various time-series properties change as a result.
-%
-% Inputs are structured in a clunky way, unfortunately:
+% Applies a given preprocessing transformation (detrending, differencing,
+% filtering or resampling) to the time series, z-scores the original and the
+% processed series, and returns the ratio of each of a set of statistics for the
+% processed series to its value for the original. The statistics compare
+% stationarity measures (StatAv, and the variation of the local mean and of the
+% local standard deviation across windows), distributional fits (a Gaussian fit
+% to the kernel-smoothed distribution, and the discrepancy from a fitted normal
+% distribution) and the effect of trimming outliers.
 %
 % ---INPUTS:
 % y, the input time series
-% detrndmeth, the method to use for detrending:
-%      (i) 'poly': polynomial detrendings, both linear and quadratic. Can
-%                  be of the following forms:
-%            (a) polynomial of given order: 'poly1', 'poly2', 'poly3',
-%                'poly4', 'poly5', 'poly6', 'poly7', 'poly8', 'poly9'
-%            (b) fit best polynomial: 'polybest' determines 'best' by
-%                            various tests (e.g., whiteness of residuals,
-%                            etc.)
-%            (c) 'fitstrong' only fits if a 'strong' trend.
-%      (ii) 'sin': sinusoidal detrending with either one or two frequency
-%                components,
-%            (a) fit a sine series of a given order
-%               Fits a form like: a1*sin(b1*x+c1) + a2*sin(b2*x+c2) + ...
-%               Additional number determines how many terms to include in the
-%               series: 'sin1', 'sin2', 'sin3', 'sin4', 'sin5', 'sin6', 'sin7',
-%               'sin8'
-%            (b) 'sin_st1': fit only if a strong trend (i.e., if the amplitudes
-%                                           are above a given threshold)
-%      (iii) 'spline': removes a least squares spline using Matlab's
-%                      Spline Toolbox function spap2
-%                      Input of the form 'spline<nknots><interpolant_order>'
-%                      e.g., 'spline45' uses four knots and 5th order
-%                      interpolants (Implements a least squares spline via the
-%                      spline toolbox function spap2)
-%      (iv) 'diff': takes incremental differences of the time series. Of form
-%                 'diff<ndiff>' where ndiff is the number of differencings to
-%                 perform. e.g., 'diff3' performs three recursive differences
-%      (v) 'medianf': a running median filter using a given window lengths
-%                   Of form 'medianf<n>' where n is the window length.
-%                   e.g., 'medianf3' takes a running median using the median of
-%                     every 3 consecutive values as a point in the filtered
-%                     time series. Uses the Signal Processing Toolbox
-%                     function medfilt1
-%      (vi) 'rav': running mean filter of a given window length.
-%                  Uses Matlab's filter function to perform a running
-%                  average of order n. Of form 'rav<n>' where n is the order of
-%                  the running average.
-%      (vii) 'resample': resamples the data by a given ratio using the resample
-%                        function in Matlab.
-%                        Of form 'resample_<p>_<q>', where the ratio p/q is the
-%                        new sampling rate e.g., 'resample_1_2' will downsample
-%                        the signal by one half e.g., resample_10_1' will
-%                        resample the signal to 10 times its original length
-%      (viii) 'logr': takes log returns of the data. Only valid for positive
-%                       data, else returns a NaN.
-%      (ix) 'boxcox': makes a Box-Cox transformation of the data. Only valid for
-%                     positive only data; otherwise returns a NaN.
+% detrndmeth, the preprocessing to apply (the code's default, 'medianf', has no
+%       window length and so is rejected as invalid; always give one, e.g., 'medianf3'):
+%       'poly<n>': remove a polynomial of order n = 1-9 (Curve Fitting Toolbox),
+%           e.g., 'poly1', a linear detrending
+%       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(b1*x+c1) + ...
+%           (Curve Fitting Toolbox), e.g., 'sin1'
+%       'spline<npieces><order>': remove a least-squares spline fitted with
+%           spap2 (Spline Toolbox) with the given number of polynomial pieces and
+%           spline order, e.g., 'spline24', a cubic spline with 2 pieces
+%       'diff<n>': take n successive differences, e.g., 'diff3'
+%       'medianf<n>': a running median filter of length n (medfilt1), e.g., 'medianf3'
+%       'rav<n>': a running mean filter of length n (filter), e.g., 'rav5'
+%       'resample_<p>_<q>': resample the series by the ratio p/q (resample); e.g.,
+%           'resample_1_2' halves the length and 'resample_10_1' multiplies it by 10
+%       'logr': log returns (positive data only; otherwise NaN)
+%       'boxcox': a Box-Cox transformation (positive data only; otherwise NaN)
 %
-% If multiple detrending methods are specified, they should be in a cell of
-% strings; the methods will be executed in order, e.g., {'poly1','sin1'} does a
-% linear polynomial then a simple one-frequency seasonal detrend (in that order)
-%
-% ---OUTPUTS: include comparisons of stationarity and distributional measures
-% between the original and transformed time series.
+% ---OUTPUTS: the ratio, processed to original, of each of these statistics:
+% statav2, StatAv with 2 segments (SY_StatAv)
+% swms2_2, swms5_1, swms10_1, the standard deviation of the window means across
+%       windows (SY_SlidingWindow 'mean'), with 2 windows overlapping by half, and
+%       5 and 10 non-overlapping windows
+% swss2_1, swss5_1, swss10_1, the same for the window standard deviations
+%       (SY_SlidingWindow 'std')
+% gauss1_kd_r2, gauss1_kd_resAC1, gauss1_kd_resruns, the R^2, the lag-1
+%       autocorrelation of the residuals, and the runs-test p-value of the residuals
+%       of a Gaussian fit to the kernel-smoothed distribution (DN_SimpleFit)
+% kscn_peaksepy, kscn_peaksepx, kscn_olapint, kscn_relent, the peak separation in
+%       height and in position, the overlap integral and the relative entropy of the
+%       kernel-smoothed distribution against the best-fitting normal
+%       (DN_CompareKSFit)
+% olbt_m2, olbt_m5, olbt_s5, the mean after trimming the 2% and 5% most extreme
+%       values at each end, and the standard deviation after trimming 5% (DN_OutlierTest)
+% A scalar NaN is returned if the processed series is identically zero (or, for
+% 'logr' and 'boxcox', if the data are not all positive).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

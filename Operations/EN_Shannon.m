@@ -1,23 +1,42 @@
 function out = EN_Shannon(y, numBin, depth)
-% EN_Shannon     Approximate Shannon entropy of a time series.
+% EN_Shannon   Approximate Shannon entropy of a time series.
 %
-% Uses an numBin-bin encoding and depth-symbol sequences.
-% Uniform population binning is used, and the implementation uses Michael Small's code
-% MS_shannon.m (renamed from the original, simply shannon.m)
+% Uses a numBin-bin encoding and depth-symbol sequences. The series is coarse-grained
+% into numBin symbols using uniform population binning (thresholds at equally
+% spaced quantiles, so each symbol is used about equally often), every overlapping
+% word of depth successive symbols is counted, and the Shannon entropy of the word
+% distribution, -sum(p.*log(p)) in nats, is divided by depth to give the entropy
+% per symbol (the entropy otherwise scales with depth).
 %
-% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
-% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
-% Vol. 52 (2005)
-% Michael Small's code is available at available at http://small.eie.polyu.edu.hk/matlab/
+% In this wrapper function, you can evaluate the code at a given numBin and depth,
+% or across a range of depths (or of numbers of bins) to return statistics on how
+% the obtained entropies change.
 %
-% In this wrapper function, you can evaluate the code at a given n and d, and
-% also across a range of depth and numBin to return statistics on how the obtained
-% entropies change.
+% The implementation uses Michael Small's code MS_shannon.m (renamed from the
+% original, simply shannon.m), available at http://small.eie.polyu.edu.hk/matlab/
 %
 % ---INPUTS:
 % y, the input time series
-% numBin, the number of bins to discretize the time series into (i.e., alphabet size)
-% depth, the length of strings to analyze
+% numBin, the number of bins to discretize the time series into (i.e., alphabet
+%    size) (default: 2). Can be a vector (e.g., 2:10) if depth is a single number.
+% depth, the length of strings (words) to analyze (default: 3). Can be a vector
+%    (e.g., 1:10) if numBin is a single number.
+%
+% ---OUTPUTS:
+% If numBin and depth are both single numbers, a scalar: the Shannon entropy per
+% symbol. If one of them is a vector, a structure with fields summarizing the
+% entropy per symbol across the range tested:
+% maxent, the maximum
+% minent, the minimum
+% medent, the median
+% meanent, the mean
+% stdent, the standard deviation
+% (Both numBin and depth being vectors is not implemented and gives an error.)
+%
+% ---REFERENCES:
+% M. Small, "Applied Nonlinear Time Series Analysis: Applications in Physics,
+% Physiology, and Finance", World Scientific, Nonlinear Science Series A, Vol. 52
+% (2005).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,18 +1,43 @@
 function out = CO_Embed2(y, tau)
-% CO_Embed2    Statistics of the time series in a 2-dimensional embedding space
+% CO_Embed2   Statistics of the time series in a 2-dimensional delay embedding.
 %
-% Embeds the (z-scored) time series in a two-dimensional time-delay
-% embedding space with a given time-delay, tau, and outputs a set of
-% statistics about the structure in this space, including angular
-% distribution, etc.
+% Embeds the (z-scored) time series in a two-dimensional time-delay embedding, the
+% points (y(t), y(t+tau)), and returns statistics on the trajectory: the angles of
+% the steps between successive points (their autocorrelation, mean, spread and
+% histogram), how the angle distribution, the distances of points from the origin
+% and the area covered change over fifths of the series, and the area spanned by
+% the points nearest the origin relative to all points (outliers).
 %
 % ---INPUTS:
-% y, the column-vector time series
-% tau, the time-delay (can be 'tau' for first zero-crossing of ACF)
+% y, the input time series (a z-scored column vector)
+% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
+%      function, capped at N/10)
 %
-% ---OUTPUTS: include the distribution of angles between successive points in the
-% space, stationarity of this angular distribution, euclidean distances from the
-% origin, and statistics on outliers.
+% ---OUTPUTS:
+% theta_ac1, theta_ac2, theta_ac3, the autocorrelation of the sequence of step angles
+%       (measured from the horizontal, in (-pi/2, pi/2)) at lags 1, 2 and 3,
+% theta_mean, theta_std, the mean and standard deviation of the step angles,
+% hist10std, the standard deviation of the proportions in a 10-bin histogram of
+%       the angles,
+% histent, the entropy of that angle distribution (nats; at most log(pi)),
+% stdb1, stdb2, stdb3, stdb4, the standard deviation over four angle bins of the
+%       proportions of angles in the first four fifths of the series (see NOTES),
+% eucdm1, eucdm2, eucdm3, eucdm4, eucdm5, the mean distance of the points from the origin in each fifth
+%       of the series,
+% std_eucdm, mean_eucdm, the standard deviation and mean of those five means,
+% eucds1, eucds2, eucds3, eucds4, eucds5, the standard deviation of the distance from the origin in
+%       each fifth,
+% std_eucds, mean_eucds, the standard deviation and mean of those five values,
+% stdspana, meanspana, the standard deviation and mean across fifths of the area of
+%       the bounding rectangle of the points,
+% areas_all, the area of the bounding rectangle of all points,
+% areas_50, the same for the half of the points nearest the origin,
+% arearat, the ratio areas_50/areas_all.
+%
+% ---NOTES:
+% stdb1, ..., stdb4 are the spread across the four angle bins within each of the
+% first four fifths, not (as the code comment suggests) the variation across fifths
+% of the proportion in each bin.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

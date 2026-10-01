@@ -1,27 +1,47 @@
 function out = SP_SpectralTimeFreq(y, numWindows)
-% SP_SpectralTimeFreq  Time-varying spectral statistics from a spectrogram.
+% SP_SpectralTimeFreq   Time-varying spectral statistics from a spectrogram.
 %
-% SP_Summaries computes statistics from a single, static spectral estimate of
-% the whole time series. This function instead divides the series into
-% overlapping windows and tracks how the spectral content changes across
-% them, using Matlab's Signal Processing Toolbox:
+% SP_Summaries computes statistics from a single, static spectral estimate of the
+% whole time series. This function instead divides the series into overlapping
+% windows and tracks how the spectral content changes across them, using Matlab's
+% Signal Processing Toolbox:
 %
-% (i) Spectral kurtosis: for each frequency bin, the kurtosis of that bin's
-%     power across all windows. High values flag a frequency band whose
-%     energy is concentrated in occasional bursts rather than spread evenly
-%     over time (e.g., a transient, impulsive fault).
+% (i) Spectral kurtosis: for each frequency bin, the kurtosis of that bin's power
+%     across all windows. High values flag a frequency band whose energy is
+%     concentrated in occasional bursts rather than spread evenly over time
+%     (e.g., a transient, impulsive fault).
 %
-% (ii) Instantaneous spectral entropy: the Shannon entropy of the power
-%      spectrum computed separately in each window, giving one entropy value
-%      per window. Variation in this sequence flags a time series whose
-%      spectral character is not stationary.
+% (ii) Instantaneous spectral entropy: the Shannon entropy of the power spectrum
+%      computed separately in each window, giving one entropy value per window.
+%      Variation in this sequence flags a time series whose spectral character is
+%      not stationary.
+%
+% Each window is a Hamming window of max(8, round(N/numWindows)) samples with 50%
+% overlap, so about 2*numWindows - 1 windows result.
 %
 % ---INPUTS:
-%
 % y, the input time series
+% numWindows, sets the window length to N/numWindows samples (at least 8), with
+%             50% overlap (default: 20). The function errors if fewer than 4
+%             windows fit.
 %
-% numWindows, the target number of overlapping windows (50% overlap) to
-%             divide the series into (default: 20)
+% ---OUTPUTS:
+% sk_max, sk_mean, sk_std, sk_range: maximum, mean, standard deviation and range,
+%         over frequencies, of the spectral kurtosis
+% sk_fracAboveThresh, the fraction of frequencies whose spectral kurtosis exceeds
+%         the 95% Gaussian-null threshold (non-Gaussian, bursty behavior)
+% sk_freqAtMax, the angular frequency (2*pi*f, matching SP_Summaries) at which the
+%         spectral kurtosis is largest
+% sk_meanSpread, the mean of the spread output of spectralKurtosis
+% sk_meanCentroid, the centroid output of spectralKurtosis as an angular
+%         frequency (2*pi*mean(centroid)); not registered as a feature
+% se_mean, se_std, se_max, se_min, se_range: mean, standard deviation, maximum,
+%         minimum and range, over windows, of the spectral entropy
+%
+% ---NOTES:
+% sk_meanSpread and sk_meanCentroid are NaN on older MATLAB releases that lack the
+% five-output form of spectralKurtosis (the kurtosis itself is then computed
+% directly from the spectrogram).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

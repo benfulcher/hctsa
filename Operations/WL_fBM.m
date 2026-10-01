@@ -1,19 +1,24 @@
 function out = WL_fBM(y)
-% WL_fBM   Parameters of fractional Gaussian noise/Brownian motion in a time series
+% WL_fBM   Hurst exponent of a time series treated as a fractional Brownian motion.
 %
-% Uses the wfbmesti function from Matlab's Wavelet Toolbox
+% Uses the wfbmesti function from Matlab's Wavelet Toolbox, which assumes the input
+% is a path of fractional Brownian motion.
 %
-% ---INPUT:
-% y, the time series to analyze.
+% ---INPUTS:
+% y, the time series to analyze
 %
-% ---OUTPUTS: two Hurst-exponent estimates from wfbmesti's second-order-
-% derivative estimators: a plain version (H_deriv2) and a wavelet-based
-% version of the same (H_deriv2Wavelet, using a fixed sym5 filter).
-% wfbmesti's third estimator (a wavelet-variance-vs-level regression, fixed
-% to a Haar decomposition regardless of the wavelet used elsewhere in this
-% codebase) is not returned here: WL_modwtvar's decaySlope estimates the
-% same quantity via the MODWT's unbiased, boundary-corrected variance
-% decomposition, a more principled route to the same scaling exponent.
+% ---OUTPUTS:
+% H_deriv2, the Hurst exponent from wfbmesti's second-order discrete derivative
+%        estimator
+% H_deriv2Wavelet, the Hurst exponent from the wavelet-based version of the same
+%        estimator (using a fixed sym5 filter)
+%
+% ---NOTES:
+% wfbmesti's third estimator (a wavelet-variance-vs-level regression, fixed to a Haar
+% decomposition regardless of the wavelet used elsewhere in this codebase) is not
+% returned here: WL_modwtvar's decaySlope estimates the same quantity via the
+% MODWT's unbiased, boundary-corrected variance decomposition, a more principled
+% route to the same scaling exponent.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
