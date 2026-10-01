@@ -1,18 +1,34 @@
 function out = WL_Coeffs(y, wname, level)
-% WL_Coeffs     Wavelet decomposition of the time series.
+% WL_Coeffs   How quickly the sorted magnitudes of a wavelet detail signal decay from their maximum.
 %
-% Performs a wavelet decomposition of the time series using a given wavelet at a
-% given level and returns a set of statistics on the coefficients obtained.
+% Performs a discrete wavelet decomposition (wavedec) of the time series using a
+% given wavelet down to a given level, reconstructs the detail signal at that
+% level alone (wrcoef, which has the same length N as the series), and sorts its
+% magnitudes from largest to smallest. For each of a set of fractions p of the
+% maximum, it returns the position in the sorted list, as a proportion of N, where
+% the magnitudes first fall below p times the maximum. Small values indicate that
+% a few large excursions dominate the detail at that scale.
 %
 % Uses Matlab's Wavelet Toolbox.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % wname, the wavelet name, e.g., 'db3' (see Wavelet Toolbox Documentation for
-%                                       all options)
+%        all options; default: 'db3')
+% level, the level of wavelet decomposition (an integer, or 'max' for the maximum
+%        level given by wmaxlev; default: 3). A level too large for the series
+%        returns NaN.
 %
-% level, the level of wavelet decomposition
+% ---OUTPUTS:
+% wb99m, wb90m, wb75m, wb50m, wb25m, wb10m, wb1m: the position (as a proportion of
+%        the series length) in the sorted detail magnitudes at which they first
+%        fall below 99%, 90%, 75%, 50%, 25%, 10%, 1% of their maximum ('where below
+%        _ of maximum'). NaN if they never do.
+%
+% ---NOTES:
+% The mean, maximum and median of the detail coefficients are not returned, since
+% they duplicate WL_DWTCoeff's per-level stdd/noisestd fields (r > 0.98 on real
+% data); the decay-shape profile above is this function's distinct contribution.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

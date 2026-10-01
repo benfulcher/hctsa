@@ -1,75 +1,58 @@
 function out = SP_Bicoherence(y, segLength, maxN, numSurr)
-% SP_Bicoherence   Squared bicoherence of a time series
+% SP_Bicoherence   Quadratic phase coupling between frequencies, from the squared bicoherence.
 %
-% Estimates the bicoherence, a normalized bispectrum, using the standard
-% segment-averaging (indirect FFT) method: the series is split into
-% overlapping segments (50% overlap, as many as fit), each segment is
-% demeaned, Hamming-windowed, and Fourier transformed, and the resulting
-% per-segment Fourier coefficients are combined into a triple-product
-% estimate of the bispectrum B(f1,f2) = <X(f1) X(f2) X*(f1+f2)>, averaged
-% over segments and normalized to give the squared bicoherence
-% bic2(f1,f2) = |B(f1,f2)|^2 / (<|X(f1)X(f2)|^2> <|X(f1+f2)|^2>), which is
+% Estimates the bicoherence, a normalized bispectrum, by segment averaging: the
+% series is split into overlapping segments (50% overlap, as many as fit), each
+% segment is demeaned, Hamming-windowed and Fourier transformed, and the
+% per-segment Fourier coefficients are combined into the bispectrum estimate
+% B(f1,f2) = <X(f1) X(f2) X*(f1+f2)>, averaged over segments. The squared
+% bicoherence is bic2(f1,f2) = |B(f1,f2)|^2 / (<|X(f1)X(f2)|^2> <|X(f1+f2)|^2>),
 % bounded in [0,1] by the Cauchy-Schwarz inequality.
 %
-% This is a different quantity from other 3rd-moment
-% asymmetry/nonlinearity statistics (CO_trev, CO_TC3, SY_RampingWindows'
-% asymAC1) which collapse all frequency structure into a single
-% time-domain number per lag, so nonlinear coupling that's localized to a
-% specific pair of frequency bands can average out to near zero. The
-% bicoherence instead resolves quadratic phase coupling per frequency
-% pair, directly detecting whether energy at f1 and f2 is
-% phase-coupled to energy at f1+f2 (the frequency-domain signature of a
-% quadratic nonlinearity). A single-lag time-domain moment
-% cannot distinguish this from a nonlinearity spread evenly across all
-% frequencies.
+% This differs from other 3rd-moment asymmetry/nonlinearity statistics (CO_trev,
+% CO_TC3, SY_RampingWindows' asymAC1), which collapse all frequency structure
+% into a single time-domain number per lag, so nonlinear coupling localized to
+% a specific pair of frequency bands can average out to near zero. The
+% bicoherence resolves quadratic phase coupling per frequency pair, directly
+% detecting whether energy at f1 and f2 is phase-coupled to energy at f1+f2 (the
+% frequency-domain signature of a quadratic nonlinearity).
 %
 % ---INPUTS:
 % y, the input time series
-%
-% segLength, the length (in samples) of each FFT segment. Segments
-%            overlap by 50% and as many as fit in the series are
-%            averaged over; the number of segments used, K, sets both
-%            the variance of the bicoherence estimate and the
-%            asymptotic significance threshold's precision (default: 64).
-%
-% maxN, the maximum number of samples to consider. Longer series are
-%       cropped to their first maxN points, bounding runtime for
-%       pathologically long series (cf. NL_RQA/NL_ZeroOneTest's maxN,
-%       same rationale, though here cost scales ~linearly with N via the
-%       number of segments K, rather than superlinearly, so this is a
-%       safety margin rather than a necessity). Can be 'full' to disable
-%       cropping (default).
-%
-% numSurr, the number of random-phase surrogates (SD_MakeSurrogates 'RP',
-%          which preserve the power spectrum but destroy any phase
-%          coupling) used to empirically calibrate the significance
-%          threshold below, in place of its asymptotic approximation.
-%          The threshold is the (1 - alpha) quantile of squared
-%          bicoherence values pooled across all frequency pairs *and* all
-%          surrogates -- pooling across the whole principal domain gives
-%          a large effective sample even for a modest numSurr, since the
-%          quantity being calibrated is a single global threshold, not a
-%          per-triad one (default: 25).
+% segLength, the length (in samples) of each FFT segment (default: 64; at least
+%            16). Segments overlap by 50% and as many as fit are averaged; the
+%            number of segments K sets the variance of the bicoherence estimate.
+%            Fewer than 8 segments gives NaN.
+% maxN, the maximum number of samples to consider: longer series are cropped to
+%       their first maxN points. 'full' disables cropping (default).
+% numSurr, the number of random-phase surrogates (SD_MakeSurrogates 'RP', which
+%          preserve the power spectrum but destroy phase coupling) used to
+%          calibrate the significance threshold empirically, in place of its
+%          asymptotic approximation (default: 25). The threshold is the 95%
+%          quantile of squared bicoherence values pooled across all frequency
+%          pairs and all surrogates.
 %
 % ---OUTPUTS:
-% Mean, maximum, standard deviation, and skewness of the squared
-% bicoherence over the non-redundant principal domain of frequency pairs
-% (0 < f1 <= f2, f1 + f2 <= Nyquist); the mean squared bicoherence
-% restricted to the self-coupling diagonal f1 = f2 (quadratic harmonic
-% distortion -- the frequency-resolved analogue of CO_trev/CO_TC3's
-% single time-domain statistics); the proportion of frequency pairs
-% exceeding a surrogate-calibrated 95% significance threshold for
-% quadratic phase coupling; the ratio of that empirical threshold to the
-% standard analytic large-K approximation (K * bic2 ~ Exp(1)
-% asymptotically under the null of a linear, ~Gaussian process, giving
-% threshold -log(alpha)/K) -- a ratio far from 1 flags that the
-% asymptotic approximation is untrustworthy for this series (e.g. because
-% of non-stationarity), which real data was empirically found to trigger
-% (see SP_Bicoherence's curation notes); and the Shannon entropy of the
-% bicoherence surface (normalized to [0,1] by its maximum, i.e. the
-% uniform-distribution entropy), reflecting whether any detected coupling
-% is concentrated in a few frequency pairs or diffuse across many (cf.
-% "bispectral index"-type measures used in EEG analysis).
+% meanBic, maxBic, stdBic, skewBic: mean, maximum, standard deviation and
+%          skewness of the squared bicoherence over the non-redundant principal
+%          domain of frequency pairs (0 < f1 <= f2, f1 + f2 <= Nyquist)
+% entropy, the Shannon entropy of the bicoherence surface, normalized to [0,1] by
+%          the uniform-distribution entropy: whether coupling is concentrated in
+%          a few frequency pairs or diffuse across many
+% meanBicDiag, the mean squared bicoherence on the self-coupling diagonal f1 = f2
+%          (quadratic harmonic distortion)
+% propSig, the proportion of frequency pairs exceeding the surrogate-calibrated
+%          95% significance threshold
+% threshRatio, the ratio of that empirical threshold to the standard analytic
+%          large-K approximation (K * bic2 ~ Exp(1) under the null of a linear,
+%          ~Gaussian process, giving threshold -log(0.05)/K). A ratio far from 1
+%          flags that the asymptotic approximation is untrustworthy for this
+%          series (e.g., because of non-stationarity), which real data was
+%          empirically found to trigger.
+%
+% ---NOTES:
+% The surrogates are generated with the random seed reset to its default, so the
+% output is reproducible.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

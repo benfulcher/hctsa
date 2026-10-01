@@ -1,68 +1,81 @@
 function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidthLimits, segLength, maxSegments)
-% SP_Specparam   Separates the power spectrum into aperiodic (1/f) and periodic (oscillatory) components
+% SP_Specparam   Separates the power spectrum into aperiodic (1/f) and periodic (oscillatory) components.
 %
-% Parameterizes the power spectrum as a smooth aperiodic '1/f' background
-% plus a small number of Gaussian peaks sitting on top of it, in the
-% spirit of the FOOOF/specparam algorithm (Donoghue et al., "Parameterizing
-% neural power spectra into periodic and aperiodic components", Nature
-% Neuroscience 23: 1655 (2020)).
+% Parameterizes the power spectrum as a smooth aperiodic '1/f' background plus a
+% small number of Gaussian peaks sitting on top of it, in the spirit of the
+% FOOOF/specparam algorithm (Donoghue et al.).
 %
-% The motivation is that hctsa's existing spectral peak statistics and its
-% 1/f slope fits are computed independently of one another, and each
-% therefore contaminates the other:
-%   - SP_Summaries' peak fields (numPromPeaks_*, maxProm, ...) measure
-%     prominence against the local spectrum, so a peak's apparent size
-%     conflates a genuine oscillation with however steeply the aperiodic
-%     background happens to be falling underneath it.
-%   - SP_Summaries' linfitloglog_* fields fit a straight line through
-%     log-log spectrum over fixed ranges, with any oscillatory peaks left
-%     in -- so strong peaks drag the fitted slope away from the true
-%     background exponent.
-% Fitting both together, and iterating (peaks are removed before the
-% aperiodic component is re-fit), is what decouples them.
+% The motivation is that hctsa's existing spectral peak statistics and its 1/f
+% slope fits are computed independently of one another, and each therefore
+% contaminates the other:
+%   - SP_Summaries' peak fields (numPromPeaks_*, ...) measure prominence against
+%     the local spectrum, so a peak's apparent size conflates a genuine
+%     oscillation with however steeply the aperiodic background happens to be
+%     falling underneath it.
+%   - SP_Summaries' linfitloglog_* fields fit a straight line through the log-log
+%     spectrum over fixed ranges, with any oscillatory peaks left in, so strong
+%     peaks drag the fitted slope away from the true background exponent.
+% Fitting both together, and iterating (peaks are removed before the aperiodic
+% component is re-fit), decouples them.
+%
+% The spectrum is a Welch estimate (Hamming windows of length segLength, 50%
+% overlap), restricted to frequencies with at least 5 cycles per segment. A robust
+% straight line in log-log gives a first aperiodic fit; then up to maxNPeaks
+% Gaussian peaks (in log10 frequency) are extracted from the flattened spectrum
+% one at a time, and the aperiodic component is finally re-fit with the peaks
+% removed.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % aperiodicMode, the form of the aperiodic component:
-%           (i) 'fixed': b - chi*log10(f), a straight line in log-log,
-%               i.e. pure power-law
-%           (ii) 'knee': b - log10(k + f^chi), which additionally allows
-%               the spectrum to flatten off below a 'knee' frequency, as
-%               real spectra commonly do. Note the knee model is not
-%               identifiable when the data has no actual knee (k -> 0),
-%               so it falls back to the 'fixed' fit if the optimization
-%               fails or returns a degenerate knee.
-%
-% maxNPeaks, the maximum number of Gaussian peaks to extract (default: 4).
-%
+%           (i) 'fixed': b - chi*log10(f), a straight line in log-log, i.e., a
+%               pure power law
+%           (ii) 'knee': b - log10(k + f^chi), which additionally allows the
+%               spectrum to flatten off below a 'knee' frequency, as real spectra
+%               commonly do. The knee model is not identifiable when the data has
+%               no actual knee (k -> 0), so it falls back to the 'fixed' fit if
+%               the optimization fails or returns a degenerate knee.
+% maxNPeaks, the maximum number of Gaussian peaks to extract (default: 4)
 % peakThreshold, how far above the noise a candidate peak must stand to be
-%           accepted (default: 1). This is expressed as a multiple of the
-%           largest deviation that noise alone would be expected to
-%           produce -- specifically of sqrt(2*log(nBins)) robust standard
-%           deviations of the flattened spectrum, nBins being the number
-%           of frequency bins searched. Expressing it that way (rather
-%           than as a plain multiple of sigma) is necessary because the
-%           test is applied to the maximum over all bins: a fixed small
-%           multiple of sigma fires on pure noise essentially always,
-%           and the correction adapts as nBins changes. So a value of 1
-%           means 'must exceed what noise alone would give', and larger
-%           values are correspondingly more conservative.
-%
-% peakWidthLimits, two-element [min, max] on Gaussian peak standard
-%           deviation, in log10-frequency units (default: [0.02, 0.5]).
-%           Bounding the width both stops the optimizer fitting a single
-%           enormously wide 'peak' that is really leftover aperiodic
-%           background, and stops it fitting single-bin spectral noise.
+%           accepted (default: 1), as a multiple of the largest deviation that
+%           noise alone would be expected to produce: sqrt(2*log(nBins)) robust
+%           (MAD-based) standard deviations of the flattened spectrum, nBins
+%           being the number of frequency bins searched. A value of 1 means 'must
+%           exceed what noise alone would give'; larger values are more
+%           conservative.
+% peakWidthLimits, a two-element [min, max] on the Gaussian peak standard
+%           deviation, in log10-frequency units (default: [0.02, 0.5]). This
+%           stops the optimizer fitting an enormously wide 'peak' that is really
+%           leftover background, or a single-bin spectral noise spike.
+% segLength, the Welch segment length in samples (default: [], which uses
+%           max(round(N/8), 32), so longer series buy both finer frequency
+%           resolution and more segments to average)
+% maxSegments, the maximum number of segments to use, taking only the first
+%           segLength + (maxSegments-1)*floor(segLength/2) samples (default: Inf,
+%           i.e., all the data)
 %
 % ---OUTPUTS:
-% The aperiodic parameters (exponent, offset, and for 'knee' mode the knee
-% parameter); the number of peaks found above threshold, and the centre
-% frequency, height and bandwidth of the largest; the total power in the
-% periodic component and the fraction of spectral power it accounts for;
-% and the quality of the combined fit (R^2 and mean absolute error).
+% apExponent, the aperiodic exponent chi
+% apOffset, the aperiodic level (log10 power) evaluated at frequency 0.1 cycles
+%           per sample, rather than the intercept at f = 1 (above Nyquist)
+% apKnee, the knee parameter k (only in 'knee' mode)
+% numPeaks, the number of peaks found above threshold
+% maxPeakFreq, the centre frequency (cycles per sample) of the tallest peak
+% maxPeakPower, the height of the tallest peak above the aperiodic background
+%           (log10 power)
+% maxPeakBW, the width (standard deviation, in log10 frequency) of the tallest peak
+% totalPeakPower, the sum of the heights of all peaks (log10 power)
+% periodicFraction, sum(peaks^2) / sum((logS - mean(logS))^2): the share of the
+%           variation of the log10 spectrum accounted for by the periodic component
+% modelR2, modelMAE, the R^2 and mean absolute error of the combined
+%           (aperiodic + periodic) fit to the log10 spectrum
+% (maxPeakFreq, maxPeakPower and maxPeakBW are NaN if no peaks are found.)
 %
-% ---WHICH OUTPUTS ARE REGISTERED, AND WHY:
+% ---REFERENCES:
+% Donoghue et al., "Parameterizing neural power spectra into periodic and
+% aperiodic components", Nature Neuroscience 23: 1655 (2020).
+%
+% ---NOTES: Which outputs are registered, and why:
 % Seven of the ten are registered: apExponent, apOffset, numPeaks,
 % maxPeakFreq, maxPeakPower, maxPeakBW and periodicFraction. The
 % exclusions are measured rather than assumed:

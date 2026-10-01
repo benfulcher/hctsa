@@ -1,22 +1,50 @@
 function out = WL_cwt(y, wname, maxScale)
-% WL_cwt    Continuous wavelet transform of a time series
+% WL_cwt   Statistics of the continuous wavelet transform of a time series.
 %
-% Uses the function cwt from Matlab's Wavelet Toolbox.
+% Computes the continuous wavelet transform (cwt from Matlab's Wavelet Toolbox) at
+% scales 1, ..., maxScale, takes the coefficients C and the scaled power SC (the
+% percentage of total energy in each coefficient, as displayed in a scalogram), and
+% returns statistics on the coefficients, on the distribution of the scaled power
+% (its gamma fit and entropy), on the power summed across scales as a function of
+% time, and on how the power differs between the two halves of the series.
 %
 % ---INPUTS:
 % y, the input time series
+% wname, the wavelet name. For a continuous wavelet transform, a proper continuous
+%        analyzing wavelet like 'morl' (Morlet) is the standard choice; discrete
+%        orthogonal wavelets like 'db3' are also accepted (via their associated
+%        scaling function) and give a genuinely different, complementary
+%        decomposition (see Wavelet Toolbox Documentation for all options;
+%        default: 'db3')
+% maxScale, the maximum scale of wavelet analysis (default: 32)
 %
-% wname, the wavelet name. For a continuous wavelet transform, a proper
-%           continuous analyzing wavelet like 'morl' (Morlet) is the
-%           standard choice; discrete orthogonal wavelets like 'db3' are
-%           also accepted (via their associated scaling function) and
-%           give a genuinely different, complementary decomposition (see
-%           Wavelet Toolbox Documentation for all options).
+% ---OUTPUTS:
+% meanC, meanabsC, medianabsC, maxabsC: the mean, mean magnitude, median magnitude
+%        and maximum magnitude of the coefficients
+% maxonmeanC, maxonmeanSC: the maximum relative to the mean, of the coefficient
+%        magnitudes and of the scaled power
+% pover99, pover98, pover95, pover90, pover80: the energy (in percent) in
+%        coefficients whose scaled power exceeds 99%, 98%, 95%, 90%, 80% of its
+%        maximum, divided by the number of coefficients
+% gam1, gam2: the shape and scale parameters of a gamma distribution fitted to the
+%        scaled power (gamfit)
+% SC_h: the entropy of the scaled power over all coefficients (in nats)
+% dd_SC_h: the entropy of the maximum scaled power in each of 10 equal time boxes at
+%        each scale
+% max_ssc, min_ssc, maxonmed_ssc, std_ssc: the maximum, minimum, maximum relative to
+%        the median, and standard deviation over time of the scaled power summed
+%        across scales
+% pcross_maxssc50: the number of crossings of half its maximum by the summed power,
+%        divided by N - 1
+% stat_2_m_s: the mean of the standard deviations of the scaled power in the two
+%        halves of the series, relative to the mean scaled power
+% stat_2_s_m, stat_2_s_s: the standard deviation of the two halves' means (_m) and
+%        of their standard deviations (_s), relative to the standard deviation of
+%        the scaled power
 %
-% maxScale, the maximum scale of wavelet analysis.
-%
-% ---OUTPUTS: statistics on the coefficients, entropy, and results of
-% coefficients summed across scales.
+% ---NOTES:
+% The scaled power SC is normalized to the total energy, so several of these statistics
+% depend on the series length.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

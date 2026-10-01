@@ -1,18 +1,30 @@
 function out = WL_DWTCoeff(y, wname, level)
-% WL_DWTCoeff   Discrete wavelet transform coefficients.
+% WL_DWTCoeff   Statistics of the discrete wavelet transform detail coefficients at each level.
 %
-% Decomposes the time series using a given wavelet and outputs statistics on the
-% coefficients obtained up to a maximum level, level.
+% Decomposes the time series using a given wavelet (wavedec) and outputs statistics
+% on the detail coefficients at each level, up to a maximum level, level. Level 1
+% is the finest scale; level j captures variations on a time scale of roughly 2^j
+% samples. Uses Matlab's Wavelet Toolbox.
 %
 % ---INPUTS:
-%
 % y, the input time series
-%
 % wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
-%           Documentation)
-%
+%        Documentation; default: 'db3')
 % level, the level of wavelet decomposition (can be set to 'max' for the maximum
-%               level determined by wmaxlev)
+%        level determined by wmaxlev; default: 3). If it exceeds the maximum the
+%        decomposition stops at the maximum and the remaining levels are NaN.
+%
+% ---OUTPUTS:
+% For each level k = 1, ..., level:
+% maxd_lk, the maximum detail coefficient at level k (maxd_l1, maxd_l2, maxd_l3,
+%          maxd_l4, maxd_l5, ...)
+% mind_lk, the minimum detail coefficient at level k (mind_l1, mind_l2, mind_l3,
+%          mind_l4, mind_l5, ...)
+% stdd_lk, the standard deviation of the detail coefficients at level k (stdd_l1,
+%          stdd_l2, stdd_l3, stdd_l4, stdd_l5, ...)
+% noisestd_lk, the robust estimate of the noise standard deviation from the detail
+%          coefficients at level k (wnoisest; noisestd_l1, noisestd_l2, noisestd_l3,
+%          noisestd_l4, noisestd_l5, ...)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

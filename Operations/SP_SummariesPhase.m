@@ -1,90 +1,72 @@
 function out = SP_SummariesPhase(y)
 % SP_SummariesPhase   Statistics of the Fourier phase spectrum of a time series.
 %
-% cf. SP_Summaries, which characterizes the *magnitude* spectrum in
-% detail but discards phase entirely -- the only other place phase
-% appears anywhere in this codebase is SD_MakeSurrogates.m, which
-% *randomizes* it to build a null-model surrogate (a phase-randomized
-% surrogate keeps the magnitude spectrum exactly, and is meant to
-% destroy everything phase carries). For a linear, Gaussian stochastic
-% process, Fourier phases are theoretically i.i.d. uniform on
-% (-pi,pi] -- that's exactly why phase randomization works as a
-% surrogate null model (cf. J. Theiler et al., "Testing for nonlinearity
-% in time series: the method of surrogate data", Physica D 58(1-4), 77
-% (1992)). This operation characterizes the phase spectrum directly:
-% deviations from uniformity/independence across frequency are a direct
-% signature of determinism, nonlinearity, or transient/localized
-% structure that the magnitude spectrum alone cannot see.
+% cf. SP_Summaries, which characterizes the magnitude spectrum in detail but
+% discards phase entirely. The only other place phase appears in this codebase is
+% SD_MakeSurrogates, which randomizes it to build a null-model surrogate. For a
+% linear, Gaussian stochastic process, Fourier phases are theoretically i.i.d.
+% uniform on (-pi,pi], which is why phase randomization works as a surrogate null
+% model. This operation characterizes the phase spectrum directly: deviations
+% from uniformity or independence across frequency are a direct signature of
+% determinism, nonlinearity, or transient/localized structure that the magnitude
+% spectrum alone cannot see.
 %
-% Phases are weighted by their bin's magnitude throughout (a standard
-% approach in circular statistics for data of uneven reliability): a
-% single pure tone concentrates essentially all energy in 1-2 bins, and
-% every other bin's magnitude is set by numerical noise, so its "phase"
-% is meaningless and must not be allowed to swamp an unweighted
-% average. The DC and Nyquist bins (both purely real, phase undefined in
-% the usual oscillatory sense) are excluded throughout.
+% The FFT is of the mean-subtracted series, zero-padded to a power of 2, with the
+% phase referenced to the centre of the series. Phases are weighted by their bin's
+% magnitude throughout (a standard approach in circular statistics for data of
+% uneven reliability): a single pure tone concentrates essentially all energy in
+% 1-2 bins, and every other bin's phase is set by numerical noise and must not
+% swamp an unweighted average. The DC and Nyquist bins (both purely real, phase
+% undefined in the usual oscillatory sense) are excluded throughout.
 %
 % ---INPUTS:
 % y, the input time series
 %
 % ---OUTPUTS:
 % R, the magnitude-weighted mean resultant length of the phases (circular
-%       concentration; cf. N.I. Fisher, "Statistical Analysis of Circular
-%       Data", 1993): 0 for phases with no common preferred direction
-%       (e.g. white noise), up to 1 if every frequency component shares
-%       the same phase (e.g. an impulse located at the very start of the
-%       series -- every component is in phase there by construction).
-%       Validated on white noise (R ~ 0.028 +/- 0.015 over 300 trials, an
-%       empirical null) vs. a periodic sine wave (R ~ 0.22) and a linear
-%       chirp (R ~ 0.46), both clearly separated from the null.
-% phEnt, the (magnitude-weighted, 20-bin-histogram) Shannon entropy of
-%       the phase distribution, normalized to [0,1] by log(20) -- 1 for a
-%       uniform phase distribution, lower for a concentrated one.
-%       Anti-correlated with R (r=-0.88 on Empirical1000) but not a
-%       deterministic function of it -- entropy is sensitive to the full
-%       shape of the phase distribution (e.g. bimodal, two opposite
-%       preferred phases), which R alone (only the first circular
-%       moment) cannot distinguish from uniformity.
-% groupDelay, the negative slope of a magnitude-weighted linear fit of
-%       unwrapped phase against angular frequency, with the phase
-%       referenced to the CENTRE of the series and the result expressed
-%       as a fraction of the series length: the delay of the series'
-%       energy relative to its midpoint. ~0 for a stationary series; a
-%       unit impulse at sample 500 of 2000 gives -0.25, at sample 1500
-%       gives +0.25. (Audit, 2026-09: previously referenced to the first
-%       sample, which made this ~N/2 for any stationary series, aliased
-%       under unwrap once N approached the FFT length, and so tracked
-%       series length rather than the data -- Spearman 0.47 with N on
-%       Empirical1000.)
-% phaseLinearity, the weighted RMSE of that same linear fit, normalized
-%       by sqrt(#frequency bins) -- how far the phase-frequency
-%       relationship is from a pure linear (i.e. pure-delay) one, on a
-%       scale where an unstructured (random-walk) unwrapped phase gives
-%       ~0.4 regardless of series length. (Previously un-normalized, so
-%       it grew as sqrt(N): Spearman 0.78 with N on Empirical1000.)
-% phaseUnwrapAC1, the magnitude-weighted lag-1 autocorrelation of
-%       consecutive unwrapped-phase increments across frequency: near
-%       zero when the local group delay is roughly constant/unstructured
-%       across frequency, large and positive when it varies smoothly and
-%       systematically with frequency. Strongly and specifically
-%       diagnostic of dispersive/frequency-dependent-delay structure: a
-%       linear chirp (whose entire defining property is a
-%       frequency-dependent delay) gave phaseUnwrapAC1 ~ 0.86, starkly
-%       separated from every other synthetic test signal (all within
-%       +/-0.02 of zero).
+%       concentration): 0 for phases with no common preferred direction (e.g.,
+%       white noise), up to 1 if every frequency component shares the same phase
+%       (e.g., an impulse at the very start of the series)
+% phEnt, the magnitude-weighted Shannon entropy of the phase distribution
+%       (20-bin histogram), normalized to [0,1] by log(20): 1 for a uniform phase
+%       distribution, lower for a concentrated one
+% groupDelay, the negative slope of a magnitude-weighted linear fit of unwrapped
+%       phase against angular frequency, as a fraction of the series length: the
+%       delay of the series' energy relative to its midpoint. About 0 for a
+%       stationary series; a unit impulse at sample 500 of 2000 gives -0.25, and
+%       at sample 1500 gives +0.25
+% phaseLinearity, the weighted RMSE of that linear fit, normalized by
+%       sqrt(#frequency bins): how far the phase-frequency relationship is from a
+%       pure delay
+% magPhaseCorr, the linear correlation between magnitude and raw phase across bins
+% phaseUnwrapAC1, the magnitude-weighted lag-1 autocorrelation of consecutive
+%       unwrapped-phase increments across frequency: near zero when the local group
+%       delay is unstructured across frequency, large and positive when it varies
+%       smoothly and systematically with frequency
 %
-% magPhaseCorr, the linear correlation between magnitude and raw phase
-%       across bins. The weakest-validated of the six statistics here:
-%       inconsistent across synthetic test signals (all within +/-0.06 of
-%       zero) and weakly correlated with everything else on Empirical1000
-%       (max |r| against any existing feature was only 0.29; internal
-%       correlation with the other five statistics here was likewise
-%       weak, max |r| = 0.11). Kept anyway, in the spirit of hctsa's
-%       general preference for including a plausible statistic even
-%       without a clear validating signal on this particular dataset,
-%       rather than excluding it outright -- weak correlation with
-%       everything tested so far is not the same as no correlation with
-%       anything a downstream analysis might care about.
+% ---REFERENCES:
+% J. Theiler et al., "Testing for nonlinearity in time series: the method of
+% surrogate data", Physica D 58(1-4), 77 (1992).
+% N.I. Fisher, "Statistical Analysis of Circular Data" (1993).
+%
+% ---NOTES:
+% Validation, from the original docstring. R: white noise gave R ~ 0.028 +/- 0.015
+% over 300 trials (an empirical null), a periodic sine wave R ~ 0.22 and a linear
+% chirp R ~ 0.46. phEnt is anti-correlated with R (r = -0.88 on Empirical1000) but
+% not a function of it: entropy is sensitive to the full shape of the phase
+% distribution (e.g., bimodal), which R cannot distinguish from uniformity.
+% groupDelay was previously referenced to the first sample, which made it ~N/2 for
+% any stationary series and aliased under unwrap (Spearman 0.47 with N on
+% Empirical1000); phaseLinearity was previously un-normalized and grew as sqrt(N)
+% (Spearman 0.78 with N); on the normalized scale an unstructured (random-walk)
+% unwrapped phase gives ~0.4 regardless of series length (audit, 2026-09).
+% phaseUnwrapAC1 is strongly diagnostic of dispersive, frequency-dependent delay: a
+% linear chirp gave ~0.86, while every other synthetic test signal was within
+% +/-0.02 of zero. magPhaseCorr is the weakest-validated statistic: inconsistent
+% across synthetic signals (all within +/-0.06 of zero), and weakly correlated with
+% everything else on Empirical1000 (max |r| 0.29 against any existing feature, 0.11
+% against the other five here). It is kept in the spirit of hctsa's general
+% preference for including a plausible statistic.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

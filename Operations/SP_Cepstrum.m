@@ -1,54 +1,60 @@
 function out = SP_Cepstrum(y, maxPeriod, minPeriod)
-% SP_Cepstrum   Cepstral statistics: harmonic (comb) structure of the power spectrum
+% SP_Cepstrum   Harmonic (comb) structure of the power spectrum, from the real cepstrum.
 %
-% Computes the real cepstrum, the inverse Fourier transform of the log
-% magnitude spectrum, and summarizes the structure of its dominant peak.
+% Computes the real cepstrum, the inverse Fourier transform of the log magnitude
+% spectrum (after subtracting a degree-4 polynomial in frequency from the log
+% spectrum, to remove its smooth envelope), and summarizes its dominant peak.
 %
-% The cepstrum answers a question none of hctsa's other spectral
-% operations ask: whether the peaks in the spectrum are *harmonically
-% related* to one another. SP_Summaries counts and characterizes spectral
-% peaks (numPeaks, maxProm, peakPower_*), but those statistics are
-% identical for a signal with a fundamental plus five harmonics and one
-% with five arbitrarily-placed peaks. A harmonic series is a comb of
-% peaks evenly spaced by the fundamental frequency f0, which is itself a
-% periodicity *in the spectrum*; taking the spectrum of the log spectrum
-% collapses that whole comb into a single cepstral peak at a quefrency
-% ('frequency' spelled backwards -- the cepstral axis has units of time)
-% equal to the fundamental period 1/f0.
+% The cepstrum asks whether the peaks in the spectrum are harmonically related
+% to one another, which none of hctsa's other spectral operations ask.
+% SP_Summaries counts and characterizes spectral peaks, but those statistics are
+% identical for a signal with a fundamental plus five harmonics and one with five
+% arbitrarily-placed peaks. A harmonic series is a comb of peaks evenly spaced by
+% the fundamental frequency f0, which is itself a periodicity in the spectrum;
+% taking the spectrum of the log spectrum collapses that whole comb into a single
+% cepstral peak at a quefrency ('frequency' spelled backwards; the cepstral axis
+% has units of time) equal to the fundamental period 1/f0.
 %
-% Note SP_Summaries' spectral autocorrelation fields (ac1/ac2/tau) do not
-% cover this: they are evaluated at lags of 1-2 frequency bins and at the
-% ACF's first zero crossing, all far too short-lag to detect harmonic
-% spacing, which is typically tens of bins. The cepstrum is also a
-% different proposition from time-domain periodicity operations
-% (PD_PeriodicityWang, CO_AutoCorr on the raw series): it is computed
-% from the log spectrum, so it is blind to phase and responds to
+% The spectral autocorrelation fields of SP_Summaries (ac1/ac2/tau) do not cover
+% this: they are evaluated at lags of 1-2 frequency bins and at the ACF's first
+% zero crossing, all far too short-lag to detect harmonic spacing, which is
+% typically tens of bins. The cepstrum is also different from time-domain
+% periodicity operations (PD_PeriodicityWang, CO_AutoCorr on the raw series): it
+% is computed from the log spectrum, so it is blind to phase and responds to
 % multiplicative rather than additive structure, which is why it remains
-% sensitive to a harmonic series sitting on top of a strong 1/f
-% background.
+% sensitive to a harmonic series sitting on top of a strong 1/f background.
 %
 % ---INPUTS:
 % y, the input time series
+% maxPeriod, the longest fundamental period (in samples) to search for (default:
+%            100). A fixed number of samples, not a fraction of the series
+%            length, so that the quefrency statistics do not partly restate N.
+%            Series shorter than 4*maxPeriod return NaN.
+% minPeriod, the shortest fundamental period (in samples) to search for (default:
+%            4). The low-quefrency end of the cepstrum encodes the smooth
+%            spectral envelope (overall tilt) and is excluded. A period of 4
+%            samples is also about the shortest that can support a harmonic
+%            series: the second harmonic of f0 = 0.25 cycles/sample is already
+%            at the Nyquist frequency.
 %
-% maxPeriod, the longest fundamental period (in samples) to search for
-%            (default: 100). Deliberately a fixed number of samples
-%            rather than a fraction of the series length: making the
-%            search range scale with N would make the resulting
-%            quefrency statistics partly a restatement of N rather than
-%            of the data (cf. the N-dependence bug found in
-%            SP_Summaries' tau). Series shorter than 4*maxPeriod (i.e.
-%            too short to contain several cycles of the longest period
-%            searched) return NaN rather than an unreliable estimate.
+% ---OUTPUTS:
+% period, the estimated fundamental period in samples (quefrency of the dominant
+%         cepstral peak); only meaningful when CPP/peakRatio indicate a genuine peak
+% peak, the height of that peak (not registered as a feature)
+% CPP, the cepstral peak prominence: the peak height above a linear regression fit
+%         through the cepstrum across the search range
+% peakRatio, the peak height above the mean cepstrum over the search range, in
+%         units of the standard deviation of the cepstrum over that range
+% rahmonicRatio, the cepstrum at twice the peak quefrency above the fitted
+%         baseline, relative to the peak above the baseline (a genuine harmonic
+%         comb repeats at multiples of the fundamental period; an isolated fluke
+%         does not). NaN if the peak is not above the baseline or twice its
+%         quefrency is out of range.
+% meanCeps, the mean of the cepstrum over the search range
+% stdCeps, the standard deviation of the cepstrum over the search range (not
+%         registered as a feature)
 %
-% minPeriod, the shortest fundamental period (in samples) to search for
-%            (default: 4). The low-quefrency end of the cepstrum encodes
-%            the smooth spectral envelope (overall tilt / 1-f slope)
-%            rather than harmonic structure, so it is excluded. A period
-%            of 4 samples is also about the shortest that can support a
-%            harmonic series at all: the second harmonic of f0 = 0.25
-%            cycles/sample already sits at the Nyquist frequency.
-%
-% ---WHAT THIS DOES AND DOESN'T DETECT (validated on synthetic signals):
+% ---NOTES: What this does and does not detect (validated on synthetic signals):
 % Because it detects a *comb*, this operation responds to harmonic
 % richness, not to periodicity as such -- which is what makes it
 % complementary to time-domain periodicity operations rather than a
