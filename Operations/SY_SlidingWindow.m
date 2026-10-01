@@ -1,64 +1,67 @@
 function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
-% SY_SlidingWindow  Sliding window measures of stationarity.
+% SY_SlidingWindow   How a local statistic changes across windows sliding along the series.
 %
-% This function is based on sliding a window along the time series, measuring
-% some quantity in each window, and outputting some summary of this set of local
-% estimates of that quantity.
-%
-% Another way of saying it: calculate 'windowStat' in each window, and computes
-% 'acrossWinStat' for the set of statistics calculated in each window.
+% Slides a window along the time series, measures a statistic (windowStat) in each
+% window, and outputs a summary (acrossWinStat) of this set of local estimates of
+% that statistic. Each window is 1/numSeg of the series long and moves on by
+% 1/incMove of its own length at each step. A stationary series gives similar
+% values in every window.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
-% windowStat, the measure to calculate in each window:
-%               (i) 'mean', mean
-%               (ii) 'std', standard deviation
-%               (iii) 'ent', distribution entropy
-%               (iv) 'mom3', skewness
-%               (v) 'mom4', kurtosis
-%               (vi) 'mom5', the fifth moment of the distribution
-%               (vii) 'lillie', the Lilliefors test statistic (KS-type distance
-%                   from a Gaussian CDF) -- not its p-value, which MATLAB clips
-%                   to a lookup-table boundary once data is clearly non-Gaussian
-%               (viii) 'AC1', the lag-1 autocorrelation
-%               (ix) 'permen', normalized Permutation Entropy, PermEn(3,1)
-%                   -- a single ordinal/dynamical-complexity entropy measure,
-%                   used in place of ApEn/SampEn: those are biased on the
-%                   short windows this function typically operates on
-%                   (numSeg=10 segments), whereas permutation entropy's
-%                   pattern-count estimator degrades more gracefully at
-%                   small sample sizes
-%               (x) 'specen', normalized Shannon spectral entropy of the
-%                   window's power spectrum (window mean removed before the
-%                   FFT) -- captures whether the *frequency content* drifts
-%                   across the record, distinct from all the above
-%                   time-domain measures
-%               (xi) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within
-%                   the window -- a nonlinear, time-asymmetric variant of
-%                   AC1 (cf. SY_RampingWindows.m, which trends this same
-%                   statistic across segments rather than summarizing its
-%                   spread across windows as done here)
+% windowStat, the measure to calculate in each window (default: 'mean'):
+%       (i) 'mean', the mean
+%       (ii) 'std', the standard deviation
+%       (iii) 'ent', distribution entropy (kernel-smoothed)
+%       (iv) 'mom3', the skewness (standardized third moment)
+%       (v) 'mom4', the kurtosis (standardized fourth moment)
+%       (vi) 'mom5', the standardized fifth moment of the distribution
+%       (vii) 'lillie', the Lilliefors test statistic (a KS-type distance from a
+%           Gaussian CDF), not its p-value, which MATLAB clips to a lookup-table
+%           boundary once the data are clearly non-Gaussian
+%       (viii) 'AC1', the lag-1 autocorrelation
+%       (ix) 'permen', normalized permutation entropy, PermEn(3,1): a single
+%           ordinal/dynamical-complexity entropy measure, used in place of
+%           ApEn/SampEn, which are biased on the short windows this function
+%           typically operates on (numSeg = 10 segments), whereas permutation
+%           entropy's pattern-count estimator degrades more gracefully at small
+%           sample sizes
+%       (x) 'specen', normalized Shannon spectral entropy of the window's power
+%           spectrum (window mean removed before the FFT); captures whether the
+%           *frequency content* drifts across the record, distinct from all the
+%           above time-domain measures
+%       (xi) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within the window: a
+%           nonlinear, time-asymmetric variant of AC1 (cf. SY_RampingWindows, which
+%           trends a related statistic, mean(x_t*x_{t+1}*(x_{t+1} - x_t)), across
+%           segments rather than summarizing its spread across windows as done here)
 %
-% acrossWinStat, controls how the obtained sequence of local estimates is
-%                   compared (as a ratio to the full time series):
-%                       (i) 'std': standard deviation
-%                       (ii) 'ent' (kernel-smoothed) distributional entropy
-%                       (iii) 'permen': normalized Permutation Entropy, PermEn(3,1)
-%                           of the sequence of local estimates
+% acrossWinStat, how the obtained sequence of local estimates is summarized
+%       (default: 'std'):
+%       (i) 'std': standard deviation, divided by that of the full time series
+%       (ii) 'ent': (kernel-smoothed) distributional entropy
+%       (iii) 'permen': normalized permutation entropy, PermEn(3,1), of the
+%           sequence of local estimates
 %
-% numSeg, the number of segments to divide the time series up into, thus
-%       controlling the window length
+% numSeg, the number of segments to divide the time series into, thus controlling
+%       the window length, floor(N/numSeg) (default: 5)
 %
-% incMove, the increment to move the window at each iteration, as 1/fraction of the
-%       window length (e.g., incMove = 2, means the window moves half the length of the
-%       window at each increment)
+% incMove, the increment to move the window at each iteration, as 1/fraction of
+%       the window length (e.g., incMove = 2 means the window moves half the length
+%       of the window at each increment; default: 2)
 %
-% NOTE: SY_SlidingWindow(y,'mean','std',X,1) is the same as StatAvX, computed as
-%                       SY_StatAv(y,'seg',X);
-% cf. "Heart rate control in normal and aborted-SIDS infants", S. M. Pincus et al.
-%           Am J. Physiol. Regul. Integr. Comp. Physiol. 264(3) R638 (1993)
+% ---OUTPUTS:
+% a scalar: the summary, acrossWinStat, of the local estimates of windowStat. NaN
+% if the windows are too short, or if all window statistics are NaN.
+%
+% ---REFERENCES:
+% S. M. Pincus et al., "Heart rate control in normal and aborted-SIDS infants",
+% Am. J. Physiol. Regul. Integr. Comp. Physiol. 264(3), R638 (1993).
+%
+% ---NOTES:
+% SY_SlidingWindow(y,'mean','std',X,1) is the same as StatAvX, computed as
+% SY_StatAv(y,'seg',X), except that when the length of the series is not a multiple
+% of X the sliding window can contain more than X windows.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

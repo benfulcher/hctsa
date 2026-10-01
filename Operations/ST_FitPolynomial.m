@@ -1,15 +1,18 @@
 function out = ST_FitPolynomial(y, k)
-% ST_FitPolynomial   Goodness of a polynomial fit to a time series
+% ST_FitPolynomial   Goodness of a polynomial fit to a time series.
 %
-% Usually kind of a stupid thing to do with a time series, but it's sometimes
-% somehow informative for time series with large trends.
+% Fits a polynomial of order k in time (t = 1, ..., N) to the time series by least
+% squares, and returns the root-mean-square error of the fit. Usually a blunt
+% thing to do with a time series, but it is sometimes informative for time series
+% with large trends.
 %
 % ---INPUTS:
-% y, the input time series.
-% k, the order of the polynomial to fit to y.
+% y, the input time series
 %
-% ---OUTPUT:
-% RMS error of the fit.
+% k, the order of the polynomial to fit to y (default: 1, a straight line)
+%
+% ---OUTPUTS:
+% a scalar: the root-mean-square error of the fit, sqrt(mean((y - fit).^2))
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

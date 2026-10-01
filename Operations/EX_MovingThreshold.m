@@ -1,26 +1,37 @@
 function out = EX_MovingThreshold(y, a, b)
-% EX_MovingThreshold    Moving threshold model for extreme events in a time series
+% EX_MovingThreshold   Moving threshold model for extreme events in a time series.
 %
-% Inspired by an idea contained in:
-% "Reactions to extreme events: Moving threshold model"
-% Altmann et al., Physica A 364, 435--444 (2006)
+% A barrier q is kept that classes each new point as 'extreme' or not. It begins
+% at 1 (one standard deviation, as y is z-scored). At each step, if the absolute
+% value of the next data point is greater than the barrier (|y(i)| > q(i-1)), the
+% barrier is 'kicked' up to (1+a)*|y(i)|, above the new observation; otherwise it
+% decays by a proportion b: q(i) = (1-b)*q(i-1). The outputs summarize the
+% barrier, its distance above the series, and the occurrence of kicks.
 %
-% This algorithm is based on this idea: it uses the occurrence of extreme events
-% to modify a hypothetical 'barrier' that classes new points as 'extreme' or not.
-% The barrier begins at sigma, and if the absolute value of the next data point
-% is greater than the barrier, the barrier is increased by a proportion 'a',
-% otherwise the position of the barrier is decreased by a proportion 'b'.
+% Inspired by an idea contained in the reference below.
 %
 % ---INPUTS:
 % y, the input (z-scored) time series
-% a, the barrier jump parameter (in extreme event)
-% b, the barrier decay proportion (in absence of extreme event)
 %
-% ---OUTPUTS: the mean, spread, maximum, and minimum of the time series for the
-% barrier, the mean of the difference between the barrier and the time series
-% values, and statistics on the occurrence of 'kicks' (times at which the
-% threshold is modified), and by how much the threshold changes on average.
+% a, the barrier jump parameter, applied after an extreme event (default: 1)
 %
+% b, the barrier decay proportion, in the absence of an extreme event, between 0
+%       and 1 (default: 0.1)
+%
+% ---OUTPUTS:
+% meanq, medianq, iqrq, maxq, minq, stdq: the mean, median, interquartile range,
+%       maximum, minimum, and standard deviation of the barrier q
+% meanqover, the mean of the barrier minus the absolute value of the series
+% pkick, the proportion of steps (out of N-1) at which a kick occurs
+% meankicksize, the mean increase of the barrier at a kick
+% meankickf, mediankickf, stdkickf: the mean, median, and standard deviation of
+%       the intervals (in samples) between successive kicks
+%
+% ---REFERENCES:
+% Altmann et al., "Reactions to extreme events: Moving threshold model",
+% Physica A 364, 435-444 (2006).
+%
+% ---NOTES:
 % In future could make a variant operation that optimizes a and b to minimize the
 % quantity meanqover/pkick (hugged the shape as close as possible with the
 % minimum number of kicks), and returns a and b...?

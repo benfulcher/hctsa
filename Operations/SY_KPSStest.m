@@ -1,24 +1,38 @@
 function out = SY_KPSStest(y, lags)
 % SY_KPSStest   The KPSS stationarity test.
 %
-% The KPSS stationarity test, of Kwiatkowski, Phillips, Schmidt, and Shin:
-% "Testing the null hypothesis of stationarity against the alternative of a
-% unit root: How sure are we that economic time series have a unit root?"
-% Kwiatkowski, Denis and Phillips, Peter C. B. and Schmidt, Peter and Shin, Yongcheol
-% J. Econometrics, 54(1-3) 159 (2002)
+% The KPSS stationarity test, of Kwiatkowski, Phillips, Schmidt, and Shin, using
+% the function kpsstest from MATLAB's Econometrics Toolbox. The null hypothesis is
+% that a univariate time series is trend stationary; the alternative hypothesis
+% is that it is a non-stationary unit-root process. Large test statistics and
+% small p-values reject stationarity.
 %
-% Uses the function kpsstest from Matlab's Econometrics Toolbox. The null
-% hypothesis is that a univariate time series is trend stationary, the
-% alternative hypothesis is that it is a non-stationary unit-root process.
-%
-% The code can implemented for a specific time lag, tau. Alternatively, measures
-% of change in p-values and test statistics will be outputted if the input is a
-% vector of time lags.
+% For a scalar lag, the test statistic and p-value are returned. If the input is
+% a vector of lags, statistics on how the test statistics and p-values change
+% across these lags are returned instead.
 %
 % ---INPUTS:
 % y, the input time series
-% lags, can be either a scalar (returns basic test statistic and p-value), or
-%                   vector (returns statistics on changes across these time lags)
+%
+% lags, the number of autocovariance lags used in the long-run variance estimate.
+%       Either a scalar (returns the test statistic and p-value) or a vector
+%       (returns statistics on changes across these lags). Default: 0.
+%
+% ---OUTPUTS:
+% For scalar lags:
+% stat, the KPSS test statistic
+% pValue, the p-value of the test
+% For vector lags:
+% maxpValue, minpValue: the maximum and minimum p-value across lags
+% maxstat, minstat: the maximum and minimum test statistic across lags
+% lagmaxstat, lagminstat: the lag at which the test statistic is largest and
+%       smallest (the first such lag in the case of a tie)
+%
+% ---REFERENCES:
+% Kwiatkowski, Denis and Phillips, Peter C. B. and Schmidt, Peter and Shin,
+% Yongcheol, "Testing the null hypothesis of stationarity against the alternative
+% of a unit root: How sure are we that economic time series have a unit root?",
+% J. Econometrics 54(1-3) 159 (2002).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
