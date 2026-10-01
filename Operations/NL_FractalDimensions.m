@@ -1,37 +1,15 @@
 function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, steps, embedParams, randomSeed)
-% NL_FractalDimensions    Fractal dimension spectrum, D(q), of a time series.
+% NL_FractalDimensions   The spectrum of generalized (fractal) dimensions of the delay embedding, estimated from nearest-neighbor distances.
 %
-% ---INPUTS:
-% y, column vector of time series data
-% kmin, minimum number of neighbours for each reference point
-% kmax, maximum number of neighbours for each reference point
-% Nref, number of randomly-chosen reference points (-1: use all points)
-% gstart, starting value for moments
-% gend, end value for moments
-% past [opt], Theiler window of samples to exclude before and after each
-%             reference index: {'ac', k} for k times the first zero-crossing
-%             of the autocorrelation function, or a number of samples (see
-%             BF_TheilerWindow; default: {'ac', 1})
-% steps [opt], number of moments to calculate (default=32);
-% embedParams, how to embed the time series using a time-delay reconstruction
-% randomSeed [opt], whether (and how) to reset the random seed, using
-%             BF_ResetSeed, before choosing reference points (relevant
-%             whenever Nref ~= -1, since that involves a random subsample of
-%             points). Defaults to 'default' (a fixed seed) so this operation
-%             is reproducible by default rather than genuinely stochastic
-%             run-to-run.
-%
-% ---OUTPUTS: include basic statistics of D(q) and q, statistics from a linear fit,
-% and an exponential fit of the form D(q) = Aexp(Bq) + C.
-%
-% Computed natively in MATLAB. This operation previously used TSTOOL's
-% 'fracdims', whose actual computation (tstoolbox/@signal/fracdims.m is
-% just a thin wrapper; the real work is in the compiled
-% mex-dev/GeneralizedDimensionEstimation/gendimest.cpp, vendored in this
-% repo under Toolboxes/OpenTSTOOL) turned out to be a well-defined,
-% published, citable method rather than an undocumented black box:
-% "Generalized Dimensions from Nearest Neighbor Information", P. Schram
-% and W. van der Water. Reproduced exactly here:
+% Estimates D(q), the generalized dimension of the time-delay embedding as a
+% function of the order of the moment, from the distances of reference points to
+% their nearest neighbors. This operation previously used TSTOOL's 'fracdims',
+% whose actual computation (tstoolbox/@signal/fracdims.m is just a thin wrapper;
+% the real work is in the compiled mex-dev/GeneralizedDimensionEstimation/
+% gendimest.cpp, vendored in this repo under Toolboxes/OpenTSTOOL) turned out to
+% be a well-defined, published method rather than an undocumented black box,
+% "Generalized Dimensions from Nearest Neighbor Information", P. Schram and
+% W. van der Water. It is reproduced exactly here in native MATLAB:
 %
 % For each of Nref reference points, find the distances to its 1st..kmax-th
 % nearest neighbors (excluding a Theiler window of "past" samples). For
@@ -47,7 +25,41 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % measured moments M(kmin:kmax) under a robust (log(1+0.5*e^2)) error,
 % found via nested 1-D minimization (MATLAB's fminbnd stands in directly
 % for the original's hand-rolled Brent's-method minimizer -- the same
-% algorithm). Finally q(gamma) = 1 - gamma/D(gamma).
+% algorithm). Finally q(gamma) = 1 - gamma/D(gamma). The outputs summarize D
+% and q across the moments, and a straight-line fit of D against q.
+%
+% ---INPUTS:
+% y, column vector of time series data
+% kmin, minimum number of neighbours for each reference point
+% kmax, maximum number of neighbours for each reference point
+% Nref, number of randomly-chosen reference points (-1: use all points; a
+%       number between 0 and 1: that proportion of the embedded points)
+% gstart, starting value for moments
+% gend, end value for moments
+% past [opt], Theiler window of samples to exclude before and after each
+%             reference index: {'ac', k} for k times the first zero-crossing
+%             of the autocorrelation function, or a number of samples (see
+%             BF_TheilerWindow; default: {'ac', 1})
+% steps [opt], number of moments to calculate (default=32);
+% embedParams, how to embed the time series using a time-delay reconstruction,
+%              as {tau,m} (inputs to BF_Embed; default: {'ac','fnn'})
+% randomSeed [opt], whether (and how) to reset the random seed, using
+%             BF_ResetSeed, before choosing reference points (relevant
+%             whenever Nref ~= -1, since that involves a random subsample of
+%             points). Defaults to 'default' (a fixed seed) so this operation
+%             is reproducible by default rather than genuinely stochastic
+%             run-to-run.
+%
+% ---OUTPUTS:
+% rangeDq, maxDq, meanDq: range, maximum and mean of D across the moments
+% maxq, rangeq, meanq: maximum, range and mean of q across the moments
+% linfit_a, linfit_b: slope and intercept of a linear fit of D against q
+% linfit_rmsqres: root-mean-square residual of that fit
+%
+% ---REFERENCES:
+% P. Schram and W. van der Water, "Generalized Dimensions from Nearest Neighbor
+% Information" (journal and year not given in the original docstring).
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,37 +1,52 @@
 function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
-% NL_GPCorrSum correlation sum scaling by Grassberger-Proccacia algorithm
+% NL_GPCorrSum   How the number of close pairs of points in the delay embedding grows with distance (the correlation sum and its scaling).
+%
+% Computes the correlation sum, C(epsilon), the fraction of pairs of
+% time-delay-embedded points closer than epsilon, by the Grassberger-Procaccia
+% algorithm. It uses TISEAN's d2 (rather than TSTOOL's corrsum/corrsum2, which
+% this operation used previously). d2's raw correlation-sum output (its .c2
+% file, also used by NL_d2.m) gives (r, C(r)) pairs directly; only doTwo = 1 (the
+% corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
+% (corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent and was
+% never used by any of this operation's own mop-file entries. For a
+% low-dimensional attractor, ln C rises linearly with ln(epsilon), with a slope
+% equal to the correlation dimension. The outputs summarize the range of
+% ln(epsilon) and ln C(epsilon), and iteratively re-weighted least squares
+% linear fits to the log-log plot using the robustfit function in MATLAB's
+% Statistics Toolbox.
 %
 % ---INPUTS:
 % y, column vector of time-series data
 % Nref, number of (randomly-chosen) reference points (-1: use all points,
-%       if a decimal, then use this fraction of the time series length)
-% r, maximum search radius relative to attractor size, 0 < r < 1
+%       if a decimal, then use this fraction of the time series length;
+%       default: 500)
+% r, maximum search radius, in units of std(y)*sqrt(m) where m is the embedding
+%    dimension (default: 0.05)
 % thwin, Theiler window of samples to exclude before and after each reference
 %        index: {'ac', k} for k times the first zero-crossing of the autocorrelation
-%        function, or a number of samples (see BF_TheilerWindow)
-% nbins, number of partitioned bins
+%        function, or a number of samples (see BF_TheilerWindow; default: {'ac',1})
+% nbins, number of radii (log-spaced) at which the correlation sum is found
+%        (default: 20)
 % embedParams, embedding parameters to feed BF_Embed.m for embedding the
-%               signal in the form {tau,m}
-% doTwo, if this is set to 1, will use corrsum, if set to 2, will use corrsum2.
-%           For corrsum2, n specifies the number of pairs per bin. Default is 1,
-%           to use corrsum.
+%              signal in the form {tau,m} (default: {'ac','fnn'})
+% doTwo, only 1 (the default) is supported
 %
-% ---OUTPUTS: basic statistics on the correlation-sum scaling, including
-% iteratively re-weighted least squares linear fits to log-log plots using
-% the robustfit function in Matlab's Statistics Toolbox.
+% ---OUTPUTS: only radii with a finite ln C(epsilon) are used.
+% minlnr, maxlnr: the smallest and largest ln(epsilon)
+% minlnCr, maxlnCr, rangelnCr, meanlnCr: the minimum, maximum, range and mean of
+%        ln C(epsilon)
+% robfit_a1, robfit_a2: intercept and slope of a robust linear fit of ln C against
+%        ln(epsilon) (the slope estimates the correlation dimension)
+% robfit_sigrat: ratio of the ordinary least-squares to the robust estimate of the
+%        residual standard deviation
+% robfit_s: the robust estimate of the residual standard deviation
+% robfit_sea1, robfit_sea2: standard errors of the intercept and the slope
+% robfitresmeanabs, robfitresmeansq: mean absolute and mean squared residual
+% robfitresac1: lag-1 autocorrelation of the residuals
 %
-% Uses TISEAN's d2 (rather than TSTOOL's corrsum/corrsum2, which this
-% operation used previously) to compute the correlation sum for a
-% time-delay-embedded time series by the Grassberger-Procaccia algorithm.
-% d2's raw correlation-sum output (its .c2 file, also used by
-% NL_d2.m) gives (ln r, C(r)) pairs directly; only doTwo = 1 (the
-% corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
-% (corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent and was
-% never used by any of this operation's own mop-file entries.
-%
-% cf. "Characterization of Strange Attractors", P. Grassberger and I. Procaccia,
-% Phys. Rev. Lett. 50(5) 346 (1983)
-
+% ---REFERENCES:
+% P. Grassberger and I. Procaccia, "Characterization of Strange Attractors",
+% Phys. Rev. Lett. 50(5), 346 (1983).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

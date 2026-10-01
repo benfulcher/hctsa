@@ -1,32 +1,46 @@
 function out = NL_BoxCorrDim(y, numBins, embedParams)
-% NL_BoxCorrDim  Correlation dimension of a time series.
+% NL_BoxCorrDim   How the box-counting entropy of a delay embedding grows with embedding dimension.
 %
-% Estimates the correlation dimension of a time-delay embedded time series
-% using a box-counting approach, via TISEAN's 'boxcount' (this operation
-% previously used TSTOOL's 'corrdim').
-%
-% 'boxcount' estimates the Renyi entropy of order Q (Q = 2.0 here, giving
-% the box-counting correlation entropy/dimension) via partitioning, for
-% every embedding dimension 1:m and a sweep of length scales, writing (for
-% each embedding dimension d) both the raw entropy H_Q(epsilon,d) and its
-% increment over the (d-1)-dimensional embedding, H_Q(epsilon,d) -
-% H_Q(epsilon,d-1) -- it is this increment (which approaches the
-% correlation dimension itself as d grows) that plays the role of TSTOOL's
-% corrdim matrix, whose columns/rows this operation's output statistics
-% below already summarise as per-embedding-dimension and per-length-scale
-% local dimension estimates.
+% Time-delay embeds the series in d = 1,...,m dimensions and partitions the
+% space into boxes of side epsilon, using TISEAN's 'boxcount' (this operation
+% previously used TSTOOL's 'corrdim'). With p_i the fraction of embedded points
+% in box i, boxcount gives the order-2 Renyi (collision) entropy
+% H(epsilon,d) = -log(sum_i p_i^2) for a sweep of numBins box sizes, from the
+% full range of the series downward, and the increment over the
+% (d-1)-dimensional embedding, I(epsilon,d) = H(epsilon,d) - H(epsilon,d-1)
+% (for d = 1, I is H itself). The matrix I (length scales by embedding
+% dimensions) is summarized by its mean, median and minimum across length
+% scales for each dimension, across dimensions for each length scale, and
+% overall.
 %
 % ---INPUTS:
 % y, column vector of time series data
 % numBins, number of length-scale (epsilon) values in the box-counting sweep
-%          (TSTOOL's own "maximum number of partitions per axis" doesn't
-%          have an exact TISEAN equivalent; this is the closest analogue --
-%          it controls the resolution of the length-scale sweep the same
-%          way numBins previously did).
-% embedParams [opt], embedding parameters as {tau,m} in 2-entry cell for a
-%                   time-delay, tau, and embedding dimension, m. As inputs to BF_Embed.
+%          (default: 100). TSTOOL's "maximum number of partitions per axis" has no
+%          exact TISEAN equivalent; this is the closest analogue.
+% embedParams [opt], embedding parameters as {tau,m} in a 2-entry cell, a
+%          time delay, tau, and embedding dimension, m, as inputs to BF_Embed
+%          (default: {'ac','fnn'})
 %
-% ---OUTPUTS: Simple summaries of the outputs from boxcount.
+% ---OUTPUTS: a structure of summaries of the matrix I(epsilon,d), with d the
+% embedding dimension and r the index of the length scale (r = 1 is the full
+% range of the series, larger r are finer scales):
+% meand<d>, mediand<d>, mind<d>: mean, median and minimum of I over length
+%          scales, at embedding dimension d = 2,...,m
+% meanr<r>, medianr<r>, minr<r>: mean, median and minimum of I over embedding
+%          dimensions 1,...,m, at length scale r = 2,...,numBins
+% meanchr<r>: mean change of I from one embedding dimension to the next, at
+%          length scale r = 2,...,numBins
+% stdmean, stdmedian: standard deviation, across embedding dimensions, of the
+%          mean (or median) of I over length scales
+% medianstretch, minstretch, iqrstretch: median, minimum and interquartile
+%          range of I over all length scales and embedding dimensions
+%
+% ---NOTES:
+% The increment I approaches the entropy rate of the process (the K2 entropy,
+% per delay step) rather than a slope against log(epsilon), so these features
+% are entropy-rate-like even though the function is named for the correlation
+% dimension.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,5 +1,5 @@
 function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
-% NL_LyapSpec   Spectrum of Lyapunov exponents of a time series.
+% NL_LyapSpec   The spectrum of Lyapunov exponents of the delay-embedded trajectory, showing how it stretches and contracts in each direction.
 %
 % Estimates the full spectrum of m Lyapunov exponents (not just the
 % largest -- cf. NL_LargestLyap, which wraps TISEAN's 'lyap_r', a
@@ -16,32 +16,7 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 % expansion/contraction across all m embedded directions, from which
 % overall dissipation rate (sum of all exponents) and an estimate of the
 % attractor's fractal dimension (Kaplan-Yorke conjecture) can both be
-% derived, cf. ---OUTPUTS below.
-%
-% cf. M. Sano & Y. Sawada, "Measurement of the Lyapunov spectrum from a
-% chaotic time series", Phys. Rev. Lett. 55(10), 1082 (1985).
-%
-% J. Kaplan & J. Yorke, "Chaotic behavior of multidimensional difference
-% equations", in Functional Differential Equations and Approximation of
-% Fixed Points, Lecture Notes in Mathematics 730, 204-227 (1979) -- for
-% the Kaplan-Yorke dimension conjecture used in KYdim below.
-%
-% ---NOTE on a validated pathology and how it's handled: for series that
-% sit *exactly* on a low-dimensional manifold with no measurement noise
-% (e.g. a textbook periodic sine wave, or the logistic map, both tested
-% directly), embedding in m=3 dimensions over-embeds by one or two
-% spurious directions, and the local-Jacobian estimation becomes
-% ill-conditioned -- producing large, spurious *positive* exponents that
-% look like chaos but aren't (e.g. a clean sine wave gave LE1 = 0.46 at
-% m=3, vs. the correct near-zero pair obtained at m=2). This is very
-% unlikely to affect real (noisy) empirical data, but does bite on clean
-% synthetic benchmark series (of which hctsa's own test suites include a
-% few, e.g. dynamical-system-generated series). Since even a tiny amount
-% of noise resolves it (0.1% of the series' own std was already enough
-% to fix the sine-wave case above, giving LE1 = -0.0003), a fixed,
-% reproducibly-seeded dither at that level is added internally before
-% embedding -- negligible next to any real measurement noise, but enough
-% to break the exact degeneracy.
+% derived, cf. the outputs below.
 %
 % ---INPUTS:
 % y, the input time series
@@ -111,6 +86,29 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 %       dimension from the exponent spectrum alone. Capped at 3 if even
 %       LE1+LE2+LE3 is >= 0 (formula doesn't apply; indicates m=3 wasn't
 %       enough to see the attractor's contracting directions at all)
+%
+% ---REFERENCES:
+% M. Sano and Y. Sawada, "Measurement of the Lyapunov spectrum from a chaotic time series", Phys. Rev. Lett. 55(10), 1082 (1985).
+% J. Kaplan and J. Yorke, "Chaotic behavior of multidimensional difference equations", in Functional Differential Equations and Approximation of Fixed Points, Lecture Notes in Mathematics 730, 204-227 (1979) (for the Kaplan-Yorke dimension conjecture used in KYdim).
+%
+% ---NOTES:
+% A validated pathology and how it's handled: for series that
+% sit *exactly* on a low-dimensional manifold with no measurement noise
+% (e.g. a textbook periodic sine wave, or the logistic map, both tested
+% directly), embedding in m=3 dimensions over-embeds by one or two
+% spurious directions, and the local-Jacobian estimation becomes
+% ill-conditioned -- producing large, spurious *positive* exponents that
+% look like chaos but aren't (e.g. a clean sine wave gave LE1 = 0.46 at
+% m=3, vs. the correct near-zero pair obtained at m=2). This is very
+% unlikely to affect real (noisy) empirical data, but does bite on clean
+% synthetic benchmark series (of which hctsa's own test suites include a
+% few, e.g. dynamical-system-generated series). Since even a tiny amount
+% of noise resolves it (0.1% of the series' own std was already enough
+% to fix the sine-wave case above, giving LE1 = -0.0003), a fixed,
+% reproducibly-seeded dither at that level is added internally before
+% embedding -- negligible next to any real measurement noise, but enough
+% to break the exact degeneracy.
+%
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

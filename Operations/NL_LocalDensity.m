@@ -1,5 +1,5 @@
 function out = NL_LocalDensity(y, NNR, past, embedParams)
-% NL_LocalDensity     Local density estimates in the time-delay embedding space
+% NL_LocalDensity   How densely the delay-embedded trajectory is sampled around each of its points, and how that density changes along the orbit.
 %
 % Computes a standard k-nearest-neighbor local density estimate at each
 % point of the time-delay embedding: density(i) is proportional to
@@ -15,23 +15,28 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % every point in a given call, so it cancels out of all of the relative
 % statistics below (min/max/std/mean/median/autocorrelation).
 %
+% The result is a series of density values in the time order of the embedded
+% points, of length N - (m-1)*tau. The outputs describe its distribution and its
+% serial dependence.
+%
 % ---INPUTS:
-%
 % y, the time series as a column vector
-%
-% NNR, number of nearest neighbours to compute
-%
-% past, Theiler window of time-correlated points to discard: {'ac', k} for k times the first zero-crossing of the autocorrelation
-%       function, or a number of samples (see BF_TheilerWindow)
-%
+% NNR, number of nearest neighbours to compute (default: 3)
+% past, Theiler window of time-correlated points to discard: {'ac', k} for k times
+%       the first zero-crossing of the autocorrelation function, or a number of
+%       samples (see BF_TheilerWindow; default: {'ac',1})
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
-%               tau and m can be characters specifying a given automatic method
-%               of determining tau and/or m (see BF_Embed).
+%              tau and m can be characters specifying a given automatic method
+%              of determining tau and/or m (see BF_Embed; default: {'ac','fnn'})
 %
-% ---OUTPUTS: various statistics on the local density estimates at each point in
-% the time-delay embedding, including the minimum and maximum values, the range,
-% the standard deviation, mean, median, and autocorrelation.
-
+% ---OUTPUTS: statistics of the local density series (up to the constant above):
+% minden, maxden, iqrden, rangeden, stdden, meanden, medianden: minimum, maximum,
+%       interquartile range, range, standard deviation, mean and median
+% ac1den, ac2den, ac3den, ac4den, ac5den: autocorrelation at lags 1 to 5
+% tauacden: the first zero-crossing of the autocorrelation function (with
+%       interpolation)
+% taumiden: the first minimum of the automutual information
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
