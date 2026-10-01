@@ -10,33 +10,39 @@ function out = HT_DistributionTest(x, theTest, theDistn, numBins)
 % series it underflows to zero for almost every fit), whereas the effect sizes
 % here are comparable across lengths.
 %
-% We fit Gaussian, Extreme Value, Uniform, Beta, Rayleigh, Exponential, Gamma,
-% Log-Normal, and Weibull distributions, using code described for DN_M_kscomp.
+% The distributions are fitted by maximum likelihood with MATLAB's Statistics
+% Toolbox: normfit, evfit, unifit, betafit, raylfit, expfit, gamfit, lognfit
+% and wblfit. For the beta distribution, the data are first rescaled to lie
+% inside (0, 1). NaN is returned if the data fall outside the support of the
+% distribution (negative values for the Rayleigh, exponential and gamma
+% distributions; non-positive values for the log-normal and Weibull
+% distributions).
 %
 % ---INPUTS:
 % x, the input data vector
 % theTest, the goodness-of-fit statistic to compute:
-%           (i) 'chi2gof': chi^2 goodness of fit statistic per observation, chi^2/N
+%           (i) 'chi2gof': chi^2 goodness of fit statistic per observation,
+%                   chi^2/N (MATLAB's chi2gof pools bins that have few
+%                   expected counts)
 %           (ii) 'ks': Kolmogorov-Smirnov statistic, D (maximum CDF difference)
 %           (iii) 'lillie': Lilliefors statistic (the same D as 'ks' for the
-%                       same fitted parameters; the tests differ only in the
-%                       null distribution used for a p-value)
-%
+%                   same fitted parameters; the tests differ only in the
+%                   null distribution used for a p-value). Implemented only
+%                   for 'norm', 'ev' and 'exp'; NaN otherwise.
 % theDistn, the distribution to fit:
-%           (i) 'norm' (Normal)
-%           (ii) 'ev' (Extreme value)
-%           (iii) 'uni' (Uniform)
-%           (iv) 'beta' (Beta)
+%           (i) 'norm' (Gaussian)
+%           (ii) 'ev' (extreme value)
+%           (iii) 'uni' (uniform)
+%           (iv) 'beta' (beta)
 %           (v) 'rayleigh' (Rayleigh)
-%           (vi) 'exp' (Exponential)
-%           (vii) 'gamma' (Gamma)
-%           (viii) 'logn' (Log-normal)
+%           (vi) 'exp' (exponential)
+%           (vii) 'gamma' (gamma)
+%           (viii) 'logn' (log-normal)
 %           (ix) 'wbl' (Weibull)
-%
 % numBins, the number of bins to use for the chi2 goodness of fit test
 %
-% All of these functions for hypothesis testing are implemented in Matlab's
-% Statistics Toolbox.
+% ---OUTPUTS:
+% a scalar: the goodness-of-fit statistic.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

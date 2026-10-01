@@ -1,36 +1,70 @@
 function out = NW_VisibilityGraph(y, meth, maxL)
-% NW_VisibilityGraph    Visibility graph analysis of a time series.
+% NW_VisibilityGraph   Visibility graph analysis of a time series.
 %
-% Constructs a visibility graph of the time series and returns various
-% statistics on the properties of the resulting network.
-%
-% cf.: "From time series to complex networks: The visibility graph"
-% Lacasa, Lucas and Luque, Bartolo and Ballesteros, Fernando and Luque, Jordi
-% and Nuno, Juan Carlos P. Natl. Acad. Sci. USA. 105(13) 4972 (2008)
-%
-% "Horizontal visibility graphs: Exact results for random time series"
-% Luque, B. and Lacasa, L. and Ballesteros, F. and Luque, J.
-% Phys. Rev. E. 80(4) 046103 (2009)
+% Constructs a visibility graph of the time series, with one node per sample,
+% and returns statistics on the distribution of the number of links per node
+% (the degree). In the natural visibility graph ('norm'), two samples are linked
+% if the straight line between them passes above every sample in between. In
+% the horizontal visibility graph ('horiz'), they are linked if a horizontal
+% line between them passes above every sample in between. The outputs
+% summarize the degrees (mode, mean, spread, extremes, and heaviness of the
+% upper tail), the entropy of their histogram, fits of Gaussian, exponential
+% and power-law curves to that histogram and of an extreme-value distribution
+% to the degrees, and the autocorrelation of the sequence of degrees taken in
+% time order.
 %
 % ---INPUTS:
-%
 % y, the time series (a column vector)
-%
-% meth, the method for constructing:
-%           (i) 'norm': the normal visibility definition
-%           (ii) 'horiz': uses only horizonatal lines to link nodes/datums
-%
-% maxL, the maximum number of samples to consider. Due to memory constraints,
-%               only the first maxL (5000 by default) points of time series are
-%               analyzed. Longer time series are reduced to their first maxL
-%               samples. Set to 'full' to analyze the entire time series with
-%               no cropping (a warning is raised, but no cropping occurs, if
-%               the series exceeds 10000 samples, since computation may be slow).
+% meth, the method for constructing the graph (default: 'horiz'):
+%           (i) 'norm': the natural visibility definition
+%           (ii) 'horiz': uses only horizontal lines to link nodes/datums
+% maxL, the maximum number of samples to consider (default: 5000). Due to
+%       memory constraints, only the first maxL points of a longer time series
+%       are analyzed (a warning is raised). Set to 'full' to analyze the entire
+%       time series with no cropping (a warning is raised, but no cropping
+%       occurs, if the series exceeds 10000 samples, since computation may be
+%       slow).
 %
 % ---OUTPUTS:
+% modek, propmode: the most common degree, and the proportion of nodes that
+%       have it
+% meank, mediank, stdk: the mean, median and standard deviation of the degrees
+% maxk, mink, rangek, iqrk: the maximum, minimum, range and interquartile
+%       range of the degrees
+% skewnessk: the skewness of the degrees
+% maxonmedian: the maximum degree divided by the median degree
+% ol90: the mean of the degrees between the 5th and 95th percentiles, divided
+%       by the mean of all degrees
+% olu90: how far the mean of the top 5% of degrees lies above the overall
+%       mean, in standard deviations of the degrees
+% dgaussk_r2, dgaussk_adjr2, dgaussk_rmse, dgaussk_resAC1, dgaussk_resAC2,
+% dgaussk_resruns: goodness of fit (R^2, adjusted R^2, root-mean-square error),
+%       autocorrelation of the residuals at lags 1 and 2, and a runs test
+%       p-value, for a single Gaussian fitted to the histogram of degrees
+%       (DN_SimpleFit, with as many bins as the range of the degrees)
+% dexpk_r2, dexpk_adjr2, dexpk_rmse, dexpk_resAC1, dexpk_resAC2,
+% dexpk_resruns: the same, for a single exponential fitted to the histogram
+% dpowerk_r2, dpowerk_adjr2, dpowerk_rmse, dpowerk_resAC1, dpowerk_resAC2,
+% dpowerk_resruns: the same, for a power law fitted to the histogram
+% gaussnlogL, expnlogL: the mean negative log-likelihood per node of a Gaussian
+%       and of an exponential distribution fitted to the degrees
+% evparam1, evparam2, evnlogL: the location and scale parameters of an
+%       extreme-value distribution fitted to the degrees, and its mean
+%       negative log-likelihood per node
+% entropy: the entropy of the histogram of degrees (EN_DistributionEntropy,
+%       with square-root binning), in nats
+% kac1, kac2, kac3: the autocorrelation of the degree sequence, in time order,
+%       at lags 1, 2 and 3
+% ktau: the lag at which the autocorrelation of the degree sequence first
+%       crosses zero (interpolated)
 %
-% Statistics on the degree distribution, including the mode, mean, spread,
-% histogram entropy, and fits to gaussian, exponential, and power-law distributions.
+% ---REFERENCES:
+% Lacasa, Luque, Ballesteros, Luque and Nuno, "From time series to complex
+% networks: The visibility graph", P. Natl. Acad. Sci. USA 105(13), 4972
+% (2008).
+%
+% Luque, Lacasa, Ballesteros and Luque, "Horizontal visibility graphs: Exact
+% results for random time series", Phys. Rev. E 80(4), 046103 (2009).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

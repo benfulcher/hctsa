@@ -1,10 +1,18 @@
 function out = DN_TrimmedMean(y, n)
-% DN_TrimmedMean    Mean of the trimmed time series using trimmean.
+% DN_TrimmedMean   Mean of a data vector after trimming its extreme values.
+%
+% Computes the mean after discarding a percentage of the highest and lowest
+% values, using trimmean. The percentage n is the total excluded, split
+% equally between the two ends, so n = 10 excludes the highest 5% and the
+% lowest 5%. n = 0 gives the ordinary mean, and n = 50 the interquartile mean.
 %
 % ---INPUTS:
 % y, the input time series
-% n, the percent of highest and lowest values in y to exclude from the mean
-%     calculation
+% n, the total percentage of the data to exclude from the mean, half from the
+%       highest and half from the lowest values (default: 0)
+%
+% ---OUTPUTS:
+% a scalar: the trimmed mean.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

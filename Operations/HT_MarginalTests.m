@@ -1,5 +1,5 @@
 function p = HT_MarginalTests(y, theTest)
-% HT_MarginalTests     p-value of a hypothesis test about the marginal distribution of values.
+% HT_MarginalTests   p-value of a hypothesis test about the distribution of values.
 %
 % These tests ask a question about the distribution of the values in the time
 % series (its center, spread, symmetry, or shape) and are insensitive to the
@@ -7,28 +7,31 @@ function p = HT_MarginalTests(y, theTest)
 % same p-value. For tests of the temporal (serial) structure of the series, see
 % HT_IndependenceTests.
 %
-% Tests are implemented as functions in Matlab's Statistics Toolbox.
+% Tests are implemented as functions in MATLAB's Statistics Toolbox.
 %
 % ---INPUTS:
 % y, the input time series
-%
-% theTest, the hypothesis test to perform (and the null hypothesis that it tests):
+% theTest, the hypothesis test to perform (and the null hypothesis that it
+%       tests):
 %           (i) 'signtest': sign test, the data are a random sample from a
 %                       continuous distribution with a median of zero
-%           (ii) 'signrank': Wilcoxon signed rank test, the data are a random sample
-%                       from a continuous, symmetric distribution with a median of zero
-%           (iii) 'jbtest': Jarque-Bera test of composite normality, the data are
-%                       drawn from a normal distribution with unknown mean and variance
-%                       (the test statistic is based on the sample skewness and kurtosis)
+%           (ii) 'signrank': Wilcoxon signed rank test, the data are a random
+%                       sample from a continuous, symmetric distribution with
+%                       a median of zero
+%           (iii) 'jbtest': Jarque-Bera test of composite normality, the data
+%                       are drawn from a normal distribution with unknown mean
+%                       and variance (the test statistic is based on the
+%                       sample skewness and kurtosis)
 %           (iv) 'vartest': variance test, the data are drawn from a normal
 %                       distribution with a variance of one (and unknown mean)
-%           (v) 'ztest': Z-test, the data are drawn from a normal distribution with
-%                       a mean of zero and a (known) standard deviation of one
+%           (v) 'ztest': Z-test, the data are drawn from a normal distribution
+%                       with a mean of zero and a (known) standard deviation of
+%                       one
 %
-% ---OUTPUT:
-% The p-value of the specified test: the probability, under the null hypothesis
-% above, of a test statistic at least as extreme as that observed. Small values
-% are evidence against the null hypothesis.
+% ---OUTPUTS:
+% p, the p-value of the specified test: the probability, under the null
+% hypothesis above, of a test statistic at least as extreme as that observed.
+% Small values are evidence against the null hypothesis.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

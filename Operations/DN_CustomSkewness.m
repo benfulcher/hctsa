@@ -1,13 +1,24 @@
 function out = DN_CustomSkewness(y, whatSkew)
-% DN_CustomSkewness     Custom skewness measures
+% DN_CustomSkewness   Custom skewness measures.
 %
-% Compute the Pearson or Bowley skewness
+% Computes a Pearson or Bowley measure of the asymmetry of the distribution of
+% values. All are 0 for a symmetric distribution, and positive when the longer
+% tail is on the right.
 %
 % ---INPUTS:
 % y, the input time series
+% whatSkew, the skewness measure to calculate:
+%           'pearsonMode': Pearson's first skewness coefficient,
+%                   (mean - mode)/std, with the mode estimated by
+%                   DN_HistogramMode(y, 'auto')
+%           'pearson' or 'pearsonMedian': Pearson's second skewness
+%                   coefficient, 3*(mean - median)/std
+%           'bowley': Bowley's quartile skewness, (Q3 + Q1 - 2*Q2)/(Q3 - Q1)
 %
-% whatSkew, the skewness measure to calculate, either 'pearson' or 'bowley'
+% ---OUTPUTS:
+% a scalar: the chosen skewness measure.
 %
+% ---NOTES:
 % cf. https://mathworld.wolfram.com/PearsonsSkewnessCoefficients.html
 
 % ------------------------------------------------------------------------------

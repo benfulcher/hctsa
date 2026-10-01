@@ -1,17 +1,18 @@
 function out = DN_ProportionValues(x, propWhat)
-% DN_ProportionValues   Proportion of values in a data vector.
+% DN_ProportionValues   Proportion of values in a data vector of a given kind.
 %
-% Returns statistics on the values of the data vector: the proportion of zeros,
-% the proportion of positive values, and the proportion of values greater than or
+% Returns the proportion of values that are zero, positive, or greater than or
 % equal to zero.
 %
 % ---INPUTS:
 % x, the input time series
-%
-% propWhat, the proportion of a given type of value in the time series:
+% propWhat, the type of value to count (default: 'positive'):
 %           (i) 'zeros': values that equal zero
 %           (ii) 'positive': values that are strictly positive
 %           (iii) 'geq0': values that are greater than or equal to zero
+%
+% ---OUTPUTS:
+% a scalar: the proportion of the values of the given type.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

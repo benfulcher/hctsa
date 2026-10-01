@@ -1,11 +1,25 @@
 function out = DN_WithinP(x, p, meanOrMedian)
-% DN_WithinP    Proportion of data points within p standard deviations of the mean.
+% DN_WithinP   Proportion of data points within a distance of the center of the distribution.
+%
+% Returns the proportion of data points that lie within p units of the center
+% of the distribution. With 'mean', the center is the mean and the unit is the
+% standard deviation. With 'median', the center is the median and the unit is
+% 1.35 times the interquartile range.
 %
 % ---INPUTS:
 % x, the input data vector
-% p, the number (proportion) of standard deviations.
-% meanOrMedian, whether to use units of 'mean' and standard deviation, or median
-%               and rescaled interquartile range
+% p, the number of units on each side of the center (default: 1)
+% meanOrMedian, the center and unit to use (default: 'mean'):
+%           'mean': the mean and standard deviation
+%           'median': the median and 1.35*iqr(x)
+%
+% ---OUTPUTS:
+% a scalar: the proportion of data points within p units of the center.
+%
+% ---NOTES:
+% For 'median', the unit is 1.35*iqr(x). The interquartile range of a Gaussian
+% distribution is about 1.35 standard deviations, so a robust estimate of the
+% standard deviation would instead be iqr(x)/1.35.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

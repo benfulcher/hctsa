@@ -1,10 +1,11 @@
 function out = ST_Length(y)
-% ST_Length     Length of an input data vector.
+% ST_Length   Length of a data vector.
 %
-% ---INPUT:
-% y, data vector
+% ---INPUTS:
+% y, the input data vector
 %
-% ---OUTPUT: the length of the time series
+% ---OUTPUTS:
+% a scalar: the number of samples in y.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

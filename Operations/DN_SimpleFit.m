@@ -1,37 +1,45 @@
 function out = DN_SimpleFit(x, dmodel, numBins)
-% DN_SimpleFit  Fit a simple model to the distribution of time-series values.
+% DN_SimpleFit   Fits a simple curve to the distribution of the values.
 %
-% Uses the 'fit' function from Matlab's Curve Fitting Toolbox to fit a simple
-% parametric model to an estimate of the distribution of values in the time
-% series, ignoring their temporal ordering.
-%
-% The distribution of time-series values is estimated using either a
-% kernel-smoothed density via the Matlab function ksdensity with the default
-% width parameter, or by a histogram with a specified number of bins, numBins.
-%
-% Deprecated: fits of time-series models (sinusoids or Fourier series) against
-% time have moved to SP_SinusoidFit, since they depend on the temporal ordering
-% of the data. For backward compatibility, the time-series models ('sin1',
-% 'sin2', 'sin3', 'fourier1', 'fourier2', 'fourier3') are still accepted here:
-% the call is passed on to SP_SinusoidFit (with identical outputs) after issuing
-% a one-time 'hctsa:deprecated' warning.
+% Uses the fit function from MATLAB's Curve Fitting Toolbox to fit a simple
+% parametric curve to an estimate of the distribution of values in the time
+% series, ignoring their temporal ordering. The distribution is estimated
+% either as a histogram, with a specified number of bins, or as a
+% kernel-smoothed density (ksdensity, with its default width). The outputs
+% measure the goodness of fit, and test the residuals (in order of increasing
+% value) for remaining structure.
 %
 % ---INPUTS:
 % x, the input time series
-%
 % dmodel, the distribution model to fit:
-%           (i) 'gauss1'
-%           (ii) 'gauss2'
-%           (iii) 'exp1'
-%           (iv) 'power1'
-%       (The deprecated time-series models 'sin1', 'sin2', 'sin3', 'fourier1',
-%       'fourier2', 'fourier3' are dispatched to SP_SinusoidFit.)
+%           (i) 'gauss1': a single Gaussian
+%           (ii) 'gauss2': a sum of two Gaussians
+%           (iii) 'exp1': an exponential, a*exp(b*x)
+%           (iv) 'power1': a power law, a*x^b (cannot be fit if any bin center
+%                   is not positive; NaN is returned)
+% numBins, how to estimate the distribution (default: 'sqrt'):
+%           a text option: the name of a binning rule for histcounts,
+%                   e.g., 'sqrt' uses the square root of the number of data
+%                   points as the number of bins
+%           a positive integer: the number of bins in the histogram
+%           0: use ksdensity instead of a histogram
 %
-% numBins, the number of bins for a histogram-estimate of the distribution of
-%       time-series values. If numBins = 0, uses ksdensity instead of histogram.
+% ---OUTPUTS:
+% r2, the R^2 goodness of fit
+% adjr2, R^2 adjusted for the number of fitted parameters
+% rmse, the root-mean-square error of the fit (in counts per bin for a
+%       histogram, or in density units for ksdensity)
+% resAC1, resAC2, the autocorrelation of the residuals, in order of
+%       increasing value, at lags 1 and 2
+% resruns, the p-value of a runs test on the residuals
 %
-% ---OUTPUTS: the goodness of fit, R^2, root mean square error, the
-% autocorrelation of the residuals, and a runs test on the residuals.
+% ---NOTES:
+% Fits of time-series models (sinusoids or Fourier series) against time have
+% moved to SP_SinusoidFit, since they depend on the temporal ordering of the
+% data. For backward compatibility, the time-series models ('sin1', 'sin2',
+% 'sin3', 'fourier1', 'fourier2', 'fourier3') are still accepted here: the
+% call is passed on to SP_SinusoidFit (with identical outputs) after issuing a
+% one-time 'hctsa:deprecated' warning.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

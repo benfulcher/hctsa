@@ -1,23 +1,34 @@
 function out = DN_Moments(y, theMom, doNormalize)
-% DN_Moments    A moment of the distribution of the input time series.
+% DN_Moments   A moment of the distribution of the values of a time series.
+%
+% The central moment of order theMom of the values, ignoring their order in
+% time, using the moment function from MATLAB's Statistics Toolbox. By
+% default it is standardized by std(y)^theMom to give a scale-invariant
+% quantity: theMom = 3 is then the skewness and theMom = 4 the kurtosis (3 for
+% a Gaussian).
 %
 % ---INPUTS:
 % y, the input data vector
-% theMom, the moment to calculate (a scalar)
-% doNormalize, whether to normalize by std(y)^theMom, giving the proper
-%              scale-invariant standardized moment (true, default -- e.g.,
-%              theMom=3 is skewness, theMom=4 is kurtosis), or to return
-%              the raw, unnormalized central moment (false).
+% theMom, the order of the moment to calculate (a scalar)
+% doNormalize, whether to normalize by std(y)^theMom, giving the
+%       scale-invariant standardized moment (true, the default), or to return
+%       the raw, unnormalized central moment (false)
 %
-% Uses the moment function from Matlab's Statistics Toolbox.
+% ---OUTPUTS:
+% a scalar: the standardized or raw central moment of order theMom.
 %
-% NOTE: prior to 2026-08, this always divided by std(y)^1 regardless of
-% theMom, which is neither the raw central moment nor a scale-invariant
-% standardized moment -- it has no statistical meaning beyond the special
-% case where y is already unit-variance (where it happens to coincide
-% with the standardized moment, since std(y)^1 = std(y)^theMom = 1). Any
-% code relying on that specific (unintended) behavior on non-unit-variance
-% input should now pass doNormalize=false and account for the change.
+% ---NOTES:
+% Prior to 2026-08, this always divided by std(y)^1 regardless of theMom,
+% which is neither the raw central moment nor a scale-invariant standardized
+% moment: it has no statistical meaning beyond the special case where y is
+% already unit-variance (where it coincides with the standardized moment,
+% since std(y)^1 = std(y)^theMom = 1). Any code relying on that specific
+% (unintended) behavior on non-unit-variance input should now pass
+% doNormalize = false and account for the change.
+%
+% The moment function averages over N values, but std normalizes by N - 1, so
+% for short series the standardized moments are slightly smaller than the
+% textbook ones.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,12 +1,15 @@
 function out = DN_Quantile(y, p)
-% DN_Quantile   Quantile of the data vector
+% DN_Quantile   Quantile of a data vector.
 %
-% Calculates the quantile value at a specified proportion, p, using the
-% Statistics Toolbox function, quantile.
+% Calculates the quantile of the values at a specified proportion, p, using
+% the quantile function from MATLAB's Statistics Toolbox.
 %
 % ---INPUTS:
 % y, the input data vector
-% p, the quantile proportion
+% p, the quantile proportion, from 0 to 1 (default: 0.5, the median)
+%
+% ---OUTPUTS:
+% a scalar: the value below which a proportion p of the data lie.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,28 +1,45 @@
 function out = MD_hrv_classic(y)
-% MD_hrv_classic    Classic heart rate variability (HRV) statistics.
+% MD_hrv_classic   Classic heart rate variability (HRV) statistics.
 %
-% Typically assumes an NN/RR time series in units of seconds.
+% Typically assumes an NN/RR time series in units of seconds. Returns the pNNx
+% measures (the proportion of successive differences larger than x/1000), the
+% proportions of power in the very-low, low and high frequency bands of a
+% Hann-windowed periodogram and the ratio of low to high, the triangular
+% histogram index, and Poincare plot measures. The frequency bands are applied
+% to the periodogram's normalized frequency in radians per sample, not in hertz.
 %
 % ---INPUTS:
-% y, the input time series.
+% y, the input time series
 %
-% Includes:
-%  (i) pNNx
-%  cf. "The pNNx files: re-examining a widely used heart rate variability
-%           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
+% ---OUTPUTS:
+% pnn5, pnn10, pnn20, pnn30, pnn40: proportion of successive differences of y
+%       larger than 0.005, 0.010, 0.020, 0.030 and 0.040 (x/1000)
+% lfhf, the ratio of power in the low-frequency band (0.04 to 0.15) to that in
+%       the high-frequency band (0.15 to 0.4)
+% vlf, the percentage of total power in the very-low-frequency band (below
+%       0.04)
+% lf, the percentage of total power in the low-frequency band (0.04 to 0.15)
+% hf, the percentage of total power in the high-frequency band (0.15 to 0.4)
+% tri, the triangular index: the length of the series divided by the count in
+%       the fullest of 10 equal-width histogram bins
+% SD1, the short-term variability from the Poincare plot: the standard
+%       deviation of successive differences, divided by sqrt(2), times 1000
+% SD2, the long-term variability from the Poincare plot,
+%       sqrt(2*std(y)^2 - std(diff(y))^2/2), times 1000
 %
-%  (ii) Power spectral density ratios in different frequency ranges
-%   cf. "Heart rate variability: Standards of measurement, physiological
-%       interpretation, and clinical use",
-%       M. Malik et al., Eur. Heart J. 17(3) 354 (1996)
+% ---REFERENCES:
+% Mietus et al., "The pNNx files: re-examining a widely used heart rate
+% variability measure", Heart 88(4), 378 (2002).
 %
-%  (iii) Triangular histogram index, and
+% Malik et al., "Heart rate variability: Standards of measurement,
+% physiological interpretation, and clinical use", Eur. Heart J. 17(3), 354
+% (1996).
 %
-%  (iv) Poincare plot measures
-%  cf. "Do existing measures of Poincare plot geometry reflect nonlinear
-%       features of heart rate variability?"
-%       M. Brennan, et al., IEEE T. Bio.-Med. Eng. 48(11) 1342 (2001)
+% Brennan et al., "Do existing measures of Poincare plot geometry reflect
+% nonlinear features of heart rate variability?", IEEE T. Bio.-Med. Eng.
+% 48(11), 1342 (2001).
 %
+% ---NOTES:
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
 
