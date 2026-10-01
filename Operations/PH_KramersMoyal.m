@@ -1,5 +1,5 @@
 function out = PH_KramersMoyal(y, tau, numBins)
-% PH_KramersMoyal   State-dependent drift and diffusion (Kramers-Moyal coefficients).
+% PH_KramersMoyal   How the series' average drift and noise intensity depend on its current level, from its increments.
 %
 % Treats the time series as a sampled Langevin process,
 %   dx = D1(x) dt + sqrt(2 D2(x)) dW,
@@ -23,11 +23,14 @@ function out = PH_KramersMoyal(y, tau, numBins)
 % The linear drift slope is closely related to the lag-tau autocorrelation and is
 % reported for reference.
 %
+% The output is NaN if there are fewer than 20*numBins increments, or if tied values
+% make the quantile bins coincide.
+%
 % ---INPUTS:
 % y, the input time series (z-scored in hctsa)
 % tau, the increment lag, in samples; or 'ac' for the first zero-crossing of the
-%       autocorrelation function
-% numBins, the number of equiprobable bins used to condition on x
+%       autocorrelation function (default: 1)
+% numBins, the number of equiprobable bins used to condition on x (default: 15)
 %
 % ---OUTPUTS:
 % driftLin, driftQuad, driftCubic: coefficients of a count-weighted cubic fit of
@@ -36,10 +39,12 @@ function out = PH_KramersMoyal(y, tau, numBins)
 %       is removed by the cubic fit (0 = linear drift)
 % diffSlope, diffCurv: linear and quadratic coefficients of a quadratic fit of
 %       D2(x), each relative to the fitted D2 at x = 0 (0 = additive noise)
-% diffTailRatio: mean D2 in the outer bins / mean D2 in the central bins
-% pawula: mean over bins of D4/D2^2 (0.5 for Gaussian increments; larger for
-%       jumps). Unlike the shape of D2, this is not changed by a monotone
-%       transformation of the data, which maps a diffusion to another diffusion.
+% diffTailRatio: mean D2 in the outer bins (the lowest and highest fifth of the
+%       bins) / mean D2 in the central bins
+% pawula: mean over bins of D4/D2^2 (tau/2 for Gaussian increments, i.e., 0.5 for
+%       tau = 1; larger for jumps). Unlike the shape of D2, this is not changed by a
+%       monotone transformation of the data, which maps a diffusion to another
+%       diffusion.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

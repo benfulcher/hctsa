@@ -1,11 +1,13 @@
 function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
-% MF_hmm_CompareNStates     Hidden Markov Model (HMM) fitting to a time series.
+% MF_hmm_CompareNStates   How the fit of hidden Markov models to the series changes with the number of hidden states.
 %
-% Fits HMMs with different numbers of states, and compares the resulting
-% test-set likelihoods.
+% Fits Gaussian hidden Markov models (HMMs) with different numbers of states to
+% the first trainp proportion of the time series (each with at most 30 cycles of
+% EM), and compares the resulting log-likelihoods per sample on the training part
+% and on the held-out remainder.
 %
 % The code relies on Zoubin Gharamani's implementation of HMMs for real-valued
-% Gassian-distributed observations, including the hmm and hmm_cl routines (
+% Gaussian-distributed observations, including the hmm and hmm_cl routines (
 % renamed ZG_hmm and ZG_hmm_cl here).
 % Implementation of HMMs for real-valued Gaussian observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
@@ -17,13 +19,25 @@ function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
 % y, the input time series
 %
 % trainp, the initial proportion of the time series to train the model on
+%         (default: 0.6)
 %
-% nstater, the vector of state numbers to compare. E.g., (2:4) compares a number
-%               of states 2, 3, and 4.
+% nstater, the vector of numbers of states to compare (default: 2:4)
 %
-% ---OUTPUTS: statistics on how the log likelihood of the test data changes with
-% the number of states n_{states}$. We implement the code for p_{train} = 0.6$
-% as n_{states}$ varies across the range n_{states} = 2, 3, 4$.
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%             (done once, before the first fit)
+%
+% ---OUTPUTS:
+% meanLLtrain, maxLLtrain: mean and maximum across models of the log-likelihood per
+%       sample on the training part
+% meanLLtest, maxLLtest: mean and maximum across models of the log-likelihood per
+%       sample on the test part
+% chLLtrain, chLLtest: change in training and test log-likelihood per sample from
+%       the model with the fewest states to the one with the most
+% meandiffLLtt: mean across models of the absolute difference between the test and
+%       training log-likelihoods per sample
+% LLtestdiff1, LLtestdiff2, ...: change in test log-likelihood per sample from the
+%       i-th to the (i+1)-th number of states in nstater (one fewer than the
+%       number of models)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

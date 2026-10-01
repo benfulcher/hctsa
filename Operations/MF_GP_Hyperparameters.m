@@ -1,38 +1,73 @@
 function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed)
-% MF_GP_Hyperparameters    Gaussian Process time-series model parameters and goodness of fit
+% MF_GP_Hyperparameters   Fits a Gaussian process to the series and reports its fitted kernel parameters and goodness of fit.
+%
+% Models the series as a smooth function of time using a Gaussian process (GP).
+% A zero-mean GP with a Gaussian likelihood is fitted using the covariance
+% function covFunc, e.g., (i) a sum of squared exponential and noise terms, or
+% (ii) a sum of squared exponential, periodic, and noise terms. The log
+% hyperparameters are found by maximizing the marginal likelihood (at most 50
+% function evaluations), starting from a data-informed initial guess. Goodness of
+% fit is summarized by the marginal likelihood, the error of the fitted mean, and
+% the GP's predictive standard deviation.
+%
+% Fitting is O(N^3), so the model is fitted to at most maxN samples from the time
+% series, chosen by (i) resampling the time series down to this many points,
+% (ii) taking the first maxN samples, or (iii) taking random samples.
+% Times are the sample indices (squishorsquash = 1), so length scales and periods
+% are in samples of the cut series. The output is NaN if the fit fails or if the
+% fitted mean is nearly constant (standard deviation below 0.01).
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 %
-% The code can accomodate a range of covariance functions, e.g.:
-% (i) a sum of squared exponential and noise terms, and
-% (ii) a sum of squared exponential, periodic, and noise terms.
-%
-% The model is fitted to <> samples from the time series, which are
-% chosen by:
-% (i) resampling the time series down to this many data points,
-% (ii) taking the first 200 samples from the time series, or
-% (iii) taking random samples from the time series.
-%
 % ---INPUTS:
-% y, the input time series
+% y, the input time series (should be z-scored)
 %
-% covFunc, the covariance function, in the standard form of the gmpl package
+% covFunc, the covariance function, in the standard form of the gpml package
+%           (default: {'covSum',{'covSEiso','covNoise'}})
 %
-% squishorsquash, whether to squash onto the unit interval, or spread across 1:N
+% squishorsquash, how to set the time index: if nonzero (default), t = 1:N;
+%           if zero, t is spread across the unit interval, linspace(0,1,N)
 %
 % maxN, the maximum length of time series to consider -- inputs greater than
-%           this length are resampled down to maxN. Can be set to 0 or
+%           this length are resampled down to maxN (default: 500). A value
+%           below 1 is a proportion of the length. Can be set to 0 or
 %           'full' to disable resampling and use the whole series (GP
 %           hyperparameter fitting is O(N^3), so this can get slow well
 %           before reaching hctsa's other, more generous maxN caps).
 %
-% resampleHow, specifies the method of how to resample time series longer than maxN
+% resampleHow, how to cut time series longer than maxN down to maxN points:
+%           'resample' (default): resample the whole series down,
+%           'first': take the first maxN samples,
+%           'random_i': take maxN random samples (unevenly spaced),
+%           'random_consec': take maxN consecutive samples from a random position,
+%           'random_both': take maxN consecutive samples from a random position,
+%                          then a random fifth of them
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
 %             for settings of resampleHow that involve random number generation
 %
+% ---OUTPUTS:
+% logh1, logh2, logh3, logh4, logh5, logh6: the log hyperparameters of the fitted covariance function, in
+%       the order of its components within covSum (the number depends on covFunc):
+%       covSEiso: [log length scale, log amplitude];
+%       covPeriodic: [log length scale, log period, log amplitude];
+%       covMaterniso(3): [log length scale, log amplitude];
+%       covRQiso: [log length scale, log amplitude, log shape parameter alpha];
+%       covNoise: [log noise standard deviation].
+% mlikelihood: the negative log marginal likelihood of the fitted model
+% stde: root-mean-square error of the GP mean at the sampled times
+% meanabs_std: mean absolute error of the GP mean, in units of the GP's
+%       predictive standard deviation at each sampled time
+% std_mu_data: standard deviation of the GP mean at the sampled times (if not close
+%       to one, the GP has not followed the z-scored data)
+% std_S_data: standard deviation of the GP's predictive standard deviation at the
+%       sampled times
+% maxS, minS, meanS: maximum, minimum, and mean of the GP's predictive standard
+%       deviation over 1000 equally spaced times spanning the sampled series
+%
 % ---NOTES:
+% (The audit notes below are the earlier notes on this function, unchanged.)
 % GARCH-suite-style audit, 2026-08-11. Two issues found and fixed for the
 % covSEiso+covPeriodic+covNoise variants:
 % (1) The installed gpml (v4.2)'s covPeriodic takes 3 hyperparameters (period,

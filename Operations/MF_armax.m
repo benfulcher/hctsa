@@ -1,5 +1,12 @@
 function out = MF_armax(y, orders, pTrain, numSteps)
-% MF_armax  Statistics on a fitted ARMA model.
+% MF_armax   The coefficients of a fitted ARMA model, and how well it predicts the later part of the series.
+%
+% Fits an autoregressive moving-average (ARMA) model with orders [p, q] to the whole
+% time series, using armax from Matlab's System Identification Toolbox. The
+% coefficients, their uncertainties, and the goodness of fit are from this fit.
+% The model is then fitted again to the first pTrain proportion of the time series
+% and used to predict the remainder numSteps samples ahead; the prediction
+% residuals (data minus prediction) are summarized with MF_ResidualAnalysis.
 %
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
 % Identification Toolbox
@@ -9,17 +16,40 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % y, the input time series
 %
 % orders, a two-vector for p and q, the AR and MA components of the model,
-%           respectively
+%           respectively (default: [3, 3])
 %
 % pTrain, the proportion of data to train the model on (the remainder is used
-%           for testing)
+%           for testing; default: 0.8)
 %
-% numSteps, number of steps to predict into the future for testing the model.
+% numSteps, number of steps to predict into the future for testing the model
+%           (default: 1)
 %
+% ---OUTPUTS:
+% From the model fitted to the entire time series, in the Matlab convention
+% y(t) + a1 y(t-1) + ... + ap y(t-p) = e(t) + c1 e(t-1) + ... + cq e(t-q):
+% AR_1, AR_2, AR_3: the AR coefficients a1, ..., ap (the negatives of the usual AR
+%       coefficients)
+% MA_1, MA_2: the MA coefficients c1, ..., cq
+% maxda, maxdc: the largest uncertainty (standard deviation) of the AR and MA
+%       coefficients
+% noisevar, lossfn, fpe: the noise variance, loss function, and Akaike's final
+%       prediction error of the fit
+% From the residuals of the predictions of the held-out portion (MF_ResidualAnalysis):
+% meane, meanabs, stde, maxonstd: mean, mean absolute value, standard deviation,
+%       and largest absolute value (in standard deviations) of the residuals
+% ac1, ac2, ac3: residual autocorrelation at lags 1 to 3
+% propbth: proportion of the first 25 residual autocorrelations within the
+%       significance band (|r| < 2.6/sqrt(N))
+% ftbth: the first lag at which the residual autocorrelation is within that band
+% taurat: ratio of the residual decorrelation time to the data decorrelation time
+% sws, swm: variability of the residual standard deviation and mean across 5 windows
+% normksstat: Kolmogorov-Smirnov statistic of the residuals against a Gaussian
+% popt, minsbc: the order of the best AR model fitted to the residuals (chosen by
+%       SBC, from 1 to 10) and its SBC
 %
-% ---OUTPUTS: include the fitted AR and MA coefficients, the goodness of fit in
-% the training data, and statistics on the residuals from using the fitted model
-% to predict the testing data.
+% ---NOTES:
+% The held-out portion starts at sample floor(pTrain*N), overlapping the training
+% portion by one sample.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

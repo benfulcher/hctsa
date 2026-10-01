@@ -1,14 +1,14 @@
 function out = MF_hmm_Fit(y, trainp, numStates, randomSeed)
-% MF_hmm_Fit    Fits a Hidden Markov Model to sequential data.
+% MF_hmm_Fit   A hidden Markov model fitted to the first part of the series, and how well it describes the rest.
 %
-% Actually highly stochastic, so for reproducible results helps to reset the
-% random seed...
+% Fits a hidden Markov model (HMM) with Gaussian emissions to the first trainp
+% proportion of the time series, then evaluates its likelihood on the remainder.
+% The emissions of all states share one variance (a tied covariance). The model is
+% trained with at most 30 cycles of EM (Baum-Welch), or until convergence.
 %
-% ---INPUTS:
-% y, the input time series
-% trainp, the proportion of data to train on, 0 < trainp < 1
-% numStates, the number of states in the HMM
-
+% Actually highly stochastic (EM starts from random parameters), so for
+% reproducible results helps to reset the random seed...
+%
 % Uses Zoubin Gharamani's implementation of HMMs for real-valued Gaussian
 % observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
@@ -16,6 +16,27 @@ function out = MF_hmm_Fit(y, trainp, numStates, randomSeed)
 % http://www.gatsby.ucl.ac.uk/~zoubin/software/hmm.tar.gz
 %
 % Uses ZG_hmm (renamed from hmm) and ZG_hmm_cl (renamed from hmm_cl)
+%
+% ---INPUTS:
+% y, the input time series
+% trainp, the proportion of data to train on, 0 < trainp < 1 (default: 0.8)
+% numStates, the number of states in the HMM (default: 3)
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%
+% ---OUTPUTS:
+% Mu_1, Mu_2, Mu_3: the state means, sorted from lowest to highest (one per state)
+% meanMu, rangeMu, maxMu, minMu: mean, range, maximum, and minimum of the state means
+% Cov: the variance of the emissions, shared by all states
+% Pmeandiag: mean of the diagonal of the transition matrix (probability of staying
+%       in a state)
+% stdmeanP: standard deviation across states of the mean probability of moving into
+%       each state
+% maxP, meanP, stdP: maximum, mean (always 1/numStates), and standard deviation of
+%       the transition probabilities
+% LLtrainpersample: the highest log-likelihood per sample reached on the training part
+% nit: the number of EM iterations used
+% LLtestpersample: the log-likelihood per sample of the test part
+% LLdifference: LLtestpersample - LLtrainpersample
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
