@@ -1,24 +1,29 @@
 function out = CO_HistogramAMI(y, tau, meth, numBins)
-% CO_HistogramAMI      The automutual information of the distribution using histograms.
+% CO_HistogramAMI   Automutual information of a time series, from a 2-d histogram.
 %
-% The approach used to bin the data is provided.
+% Estimates the mutual information (in nats) between y(t) and y(t+tau) from the
+% joint histogram of the two, with a Miller-Madow (Panzeri-Treves) correction for
+% the upward bias of the plug-in estimate (about (Mxy - Mx - My + 1)/(2n) nats, for
+% Mxy, Mx, My occupied joint and marginal bins and n samples). The corrected
+% estimate is not clamped at zero, so it can be slightly negative for independent
+% data.
 %
 % ---INPUTS:
-%
 % y, the input time series
+% tau, the time lag, or a vector of lags (1 by default). Can also be 'ac' or 'tau',
+%      to use the first zero-crossing of the autocorrelation function.
+% meth, how the bin edges are chosen (default 'even'):
+%       'even': evenly spaced bins through the range of the time series,
+%       'std1', 'std2': numBins bins across -1 to 1 or -2 to 2 (the series is
+%                       assumed to be z-scored), plus an extra bin beyond each
+%                       edge that the series exceeds, to include outliers,
+%       'quantiles': equiprobable bins chosen using quantiles.
+% numBins, the number of bins (default 10)
 %
-% tau, the time-lag (1 by default)
-%
-% meth, the method of computing automutual information:
-%           (i) 'even': evenly-spaced bins through the range of the time series,
-%           (ii) 'std1', 'std2': bins that extend only up to a multiple of the
-%                                standard deviation from the mean of the time
-%                                series to exclude outliers,
-%           (iii) 'quantiles': equiprobable bins chosen using quantiles.
-%
-% numBins, the number of bins, required by some methods, meth (see above)
-%
-% ---OUTPUT: the automutual information calculated in this way.
+% ---OUTPUTS:
+% For a single lag, a scalar: the automutual information at that lag.
+% For several lags, a structure with fields ami1, ami2, ami3, ami4, ami5, ...: the automutual information at
+%       the first, second, ... lag in tau.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

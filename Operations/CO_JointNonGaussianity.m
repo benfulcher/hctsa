@@ -2,105 +2,82 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % CO_JointNonGaussianity   Tests for non-Gaussianity of the joint, time-lagged embedding distribution.
 %
 % Embeds the time series in m dimensions at time delay tau (e.g., the pair
-% (x_t,x_{t+tau}) for m=2, or the triple (x_t,x_{t+tau},x_{t+2tau}) for
-% m=3) and tests whether the resulting point cloud is consistent with a
-% multivariate Gaussian.
+% (x_t,x_{t+tau}) for m=2, or the triple (x_t,x_{t+tau},x_{t+2tau}) for m=3) and
+% tests whether the resulting point cloud is consistent with a multivariate Gaussian.
 %
-% cf. existing Gaussianity tests acting on marginal distribution
-% (HT_DistributionTest, DN_CompareKSFit), which all
-% A linear (e.g., AR(1)) Gaussian process has a Gaussian marginal
-% *and* a Gaussian joint embedding distribution;
-% a nonlinear or non-reversible process can look
-% Gaussian marginally while its lagged joint distribution is visibly
-% non-elliptical (curved, multimodal, or heavy/light-tailed along
-% directions the marginal alone cannot see).
-% cf. also time-irreversibility metrics like CO_trev/CO_TC3
-% (which use a single third-moment statistic of lagged
-% pairs/triples as a nonlinearity probe) but this is perhaps more general as
-% : it tests the whole joint shape rather than one moment combination.
+% A linear (e.g., AR(1)) Gaussian process has a Gaussian marginal *and* a Gaussian
+% joint embedding distribution; a nonlinear or non-reversible process can look
+% Gaussian marginally while its lagged joint distribution is visibly non-elliptical
+% (curved, multimodal, or heavy/light-tailed along directions the marginal alone
+% cannot see). cf. the Gaussianity tests acting on the marginal distribution
+% (HT_DistributionTest, DN_CompareKSFit), and time-irreversibility metrics like
+% CO_trev/CO_TC3 (which use a single third-moment statistic of lagged pairs/triples
+% as a nonlinearity probe); this tests the whole joint shape rather than one moment
+% combination.
 %
-% Two complementary statistics are computed, both based on Mardia's
-% (1970) classical multivariate normality measures, chosen because they
-% generalize to any embedding dimension m via the same formula (so m=2
-% and m=3 are the same code path) and because they reduce, at m=1, to
-% ordinary skewness/kurtosis -- the natural multivariate extension of
-% what DN_Moments already computes:
-%   (i)  Mardia's multivariate skewness, b1 -- detects asymmetry/curvature
-%        of the joint distribution (e.g., a banana-shaped point cloud).
-%        Population value is 0 for any joint Gaussian.
-%   (ii) Mardia's multivariate kurtosis, b2 -- detects joint tail weight/
-%        peakedness relative to a Gaussian ellipsoid. Population value is
-%        m(m+2) for any joint Gaussian (e.g., 8 at m=2, 15 at m=3).
-% As a complementary, distribution-shape-sensitive check, the squared
-% Mahalanobis distances of each embedded point to the sample mean (which
-% are exactly the per-point terms underlying Mardia's kurtosis) are
-% compared against their theoretical shape under joint Gaussianity,
-% chi^2_m, via a Kolmogorov-Smirnov D-statistic -- this can catch
-% departures (e.g., a bimodal or ring-shaped cloud) that the two summary
-% moments can miss.
+% Two complementary statistics are based on Mardia's classical multivariate normality
+% measures, chosen because they generalize to any embedding dimension m via the same
+% formula and because they reduce, at m=1, to ordinary skewness/kurtosis (the natural
+% multivariate extension of what DN_Moments computes):
+%   (i)  Mardia's multivariate skewness, b1: detects asymmetry/curvature of the joint
+%        distribution (e.g., a banana-shaped point cloud). Population value is 0 for
+%        any joint Gaussian.
+%   (ii) Mardia's multivariate kurtosis, b2: detects joint tail weight/peakedness
+%        relative to a Gaussian ellipsoid. Population value is m(m+2) for any joint
+%        Gaussian (e.g., 8 at m=2, 15 at m=3).
+% As a complementary check, the squared Mahalanobis distances of each embedded point to
+% the sample mean (the per-point terms underlying Mardia's kurtosis) are compared with
+% their theoretical distribution under joint Gaussianity, chi^2_m, via a
+% Kolmogorov-Smirnov D-statistic. This can catch departures (e.g., a bimodal or
+% ring-shaped cloud) that the two summary moments can miss.
 %
-% NOTE ON SIGNIFICANCE: only *raw* statistics are returned, not p-values.
-% Mardia's classical asymptotic null distributions assume the N embedded
-% points are iid draws, but consecutive embedded vectors overlap in m-1
-% coordinates and are therefore strongly autocorrelated, which inflates
-% the naive asymptotic test statistics (empirically, up to ~30% false
-% positives at a nominal 5% level on a purely linear-Gaussian AR(1)
-% process, worse at higher m). This is the same reason CO_trev/CO_TC3
-% report raw statistics rather than p-values; for significance
-% testing against a null that respects the series' own autocorrelation
-% structure, compare these statistics to their distribution over
-% surrogates (cf. SD_SurrogateTest, SD_MakeSurrogates).
-%
-% The skewness statistic additionally excludes near-diagonal pairs
-% (|i-j| <= theilerWin) from its double sum: for correlated (not just
-% independent) jointly-Gaussian points, the third moment of their
-% Mahalanobis inner product is *not* zero (only the independent case has
-% this symmetry), so nearby, strongly-autocorrelated pairs bias the raw
-% statistic away from zero even under true joint Gaussianity. (The
-% same rationale as NL_RQA's Theiler window, but applied to a third-moment sum
-% instead of a distance threshold).
-% Empirically this removes most, but not
-% all, of the bias (e.g., at m=7 on an AR(1) process, ~0.18 -> ~0.07); the
-% residual is the classical small-sample bias of using the *sample*
-% covariance to whiten the same points being tested (present even for iid
-% data), which widening the window further does not touch.
+% The skewness statistic excludes near-diagonal pairs (|i-j| <= theilerWin) from its
+% double sum: for correlated jointly-Gaussian points, the third moment of their
+% Mahalanobis inner product is not zero, so nearby, strongly autocorrelated pairs bias
+% the raw statistic away from zero even under true joint Gaussianity. This removes most,
+% but not all, of the bias (e.g., at m=7 on an AR(1) process, ~0.18 -> ~0.07); the
+% residual is the classical small-sample bias of whitening with the sample covariance of
+% the points being tested.
 %
 % ---INPUTS:
 % y, the input time series
-%
-% tau, the time delay for the embedding (can be 'ac' or 'mi', or an
-%      integer, cf. BF_Embed). Default: 'ac'.
-%
-% m, the embedding dimension (can be an integer, or {'fnn',th}, cf.
-%    BF_Embed). Default: 2, for the pairwise joint distribution
-%    (x_t,x_{t+tau}); set to 3 for the triple-wise joint distribution
-%    (x_t,x_{t+tau},x_{t+2tau}).
-%
-% theilerWin, the number of temporally-adjacent embedded points excluded
-%             from the skewness double sum (|i-j| <= theilerWin), to
-%             reduce the correlated-pair bias described above: {'ac', k}
-%             for k times the first zero-crossing of the autocorrelation
-%             function, or a number of samples (see BF_TheilerWindow).
-%             Default: {'ac', 1}.
-%
-% maxN, the maximum number of embedded points used for the skewness
-%       statistic (default: 10000; 'full' to disable). Legacy cap: the
-%       skewness double sum used to be evaluated through an N x N Gram
-%       matrix, O(N^2) in time and memory, which this bounded. It is now
-%       evaluated exactly through the third-moment tensor in O(N d^3)
-%       (see the code), so the cap costs nothing to lift -- it is honored
-%       only so that values are unchanged from earlier computations on
-%       series with more than maxN embedded points. The mean, covariance,
-%       kurtosis and KS statistic always use the full embedded series.
+% tau, the time delay for the embedding (can be 'ac' or 'mi', or an integer, cf.
+%      BF_Embed). Default: 'ac'.
+% m, the embedding dimension (an integer, or {'fnn',th}, cf. BF_Embed). Default: 2, for
+%    the pairwise joint distribution (x_t,x_{t+tau}); set to 3 for the triple-wise joint
+%    distribution (x_t,x_{t+tau},x_{t+2tau}).
+% theilerWin, the number of temporally adjacent embedded points excluded from the
+%             skewness double sum (|i-j| <= theilerWin): {'ac', k} for k times the first
+%             zero-crossing of the autocorrelation function, or a number of samples (see
+%             BF_TheilerWindow). Default: {'ac', 1}.
+% maxN, the maximum number of embedded points used for the skewness statistic (default:
+%       10000; 'full' to disable). A legacy cap, from when the skewness double sum was
+%       evaluated through an N x N Gram matrix (O(N^2)); it is now evaluated exactly
+%       through the third-moment tensor in O(N d^3), so the cap is kept only so that
+%       values are unchanged from earlier computations. The mean, covariance, kurtosis and
+%       KS statistic always use the full embedded series.
 %
 % ---OUTPUTS:
-% Mardia's raw multivariate skewness (Theiler-windowed) and multivariate
-% kurtosis, and the Mahalanobis-distance-vs-chi^2 Kolmogorov-Smirnov
-% D-statistic. All are unitless departure-from-joint-Gaussianity
-% magnitudes with no attached significance level (see note above).
+% mardiaSkew, Mardia's raw multivariate skewness (Theiler-windowed),
+% mardiaKurt, Mardia's raw multivariate kurtosis,
+% mahalKSstat, the Kolmogorov-Smirnov D-statistic of the squared Mahalanobis distances
+%       against chi^2_m.
+% All are unitless departure-from-joint-Gaussianity magnitudes with no attached
+% significance level (see NOTES). The output is a single NaN if the embedding fails,
+% has too few points, or has a near-singular covariance.
 %
-% cf. K.V. Mardia, "Measures of multivariate skewness and kurtosis with
-% applications", Biometrika 57(3) 519 (1970).
+% ---REFERENCES:
+% Mardia, "Measures of multivariate skewness and kurtosis with applications",
+% Biometrika 57(3), 519 (1970).
+%
+% ---NOTES:
+% Only raw statistics are returned, not p-values. Mardia's classical asymptotic null
+% distributions assume the N embedded points are iid draws, but consecutive embedded
+% vectors overlap in m-1 coordinates and are strongly autocorrelated, which inflates the
+% naive test statistics (empirically up to ~30% false positives at a nominal 5% level on
+% a linear-Gaussian AR(1) process, worse at higher m). This is also why CO_trev/CO_TC3
+% report raw statistics. For significance testing, compare to the distribution over
+% surrogates (cf. SD_SurrogateTest, SD_MakeSurrogates).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,5 +1,5 @@
 function out = CO_AutoCorrX2Shape(y, maxLag)
-% CO_AutoCorrX2Shape   Shape of the time-reversibility profile of a time series.
+% CO_AutoCorrX2Shape   Shape of the time-irreversibility (leverage-type) lag profile.
 %
 % CO_AutoCorrX2 computes two asymmetric, 'leverage'-type lag-profiles:
 %
@@ -10,28 +10,47 @@ function out = CO_AutoCorrX2Shape(y, maxLag)
 % correlation structure contributes equally to both); a systematic difference,
 %   diff(tau) = forward(tau) - backward(tau),
 % is therefore a lag-resolved time-irreversibility statistic, generalizing the
-% single-lag trev/tc3-style statistics to a full profile, cf. the
-% leverage-effect correlation function of Bouchaud, Matacz & Potters, Phys.
-% Rev. Lett. 87, 228701 (2001).
+% single-lag trev/tc3-style statistics to a full profile.
 %
-% This function characterizes the SHAPE of diff(tau) across lags -- its decay,
-% persistence, and extrema -- mirroring how CO_AutoCorrShape characterizes the
-% shape of the ordinary ACF. (An earlier version of this function instead
-% characterized the forward and backward profiles' shapes separately, but on
-% 300 real time series from INP_Empirical1000.mat their shape descriptors
-% (centroid decay timescale, profile-autocorrelation, etc.) were correlated at
-% r=0.84-0.97 with each other -- i.e., overwhelmingly redundant, since both
-% profiles inherit most of their shape from whatever ordinary linear
-% correlation the series has. The difference profile cancels that shared
-% component and isolates the genuinely asymmetric/nonlinear structure.)
+% This function characterizes the SHAPE of diff(tau) across lags 1, ..., maxLag:
+% its size, decay, smoothness, extrema and sign changes, mirroring how
+% CO_AutoCorrShape characterizes the shape of the ordinary ACF. (An earlier version
+% characterized the forward and backward profiles' shapes separately, but on 300
+% real time series from INP_Empirical1000.mat their shape descriptors were
+% correlated at r=0.84-0.97 with each other, since both profiles inherit most of
+% their shape from the ordinary linear correlation. The difference profile
+% cancels that shared component.)
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored: zero mean, unit variance)
-% maxLag, the maximum lag to compute the profile up to. Can be a positive
-%       integer, or the string 'doubleDrown', which sets it to twice the
-%       first zero-crossing of the ordinary (linear) autocorrelation
-%       function (cf. the 'doubleDrown' option of CO_AutoCorrShape), bounded
-%       to lie in [10, floor(N/4)].
+% maxLag, the maximum lag of the profile: a positive integer, or 'doubleDrown'
+%         (the default), which sets it to twice the first zero-crossing of the
+%         ordinary autocorrelation function (cf. the 'doubleDrown' option of
+%         CO_AutoCorrShape), at least 10 and at most floor(N/4).
+%
+% ---OUTPUTS:
+% diff1, diff(1), the lag-1 irreversibility (cf. CO_trev),
+% sumdiff, meandiff, meanabsdiff, rmsdiff, the sum, mean, mean absolute value and
+%       root-mean-square of diff(tau) over lags 1 to maxLag,
+% centroiddiff, the centroid lag of |diff(tau)|: sum(tau*|diff|)/sum(|diff|),
+% ac1diff, the lag-1 autocorrelation of diff(tau) treated as a series,
+% nminima, nmaxima, the number of local minima and maxima of diff(tau),
+% pextrema, the proportion of lags that are local extrema,
+% firstsignchangediff, the number of lags before diff(tau) first changes sign (maxLag
+%       if it never does),
+% corrfwdbwd, the correlation between the forward and backward profiles,
+% maxLag, the maximum lag used.
+%
+% All outputs are NaN (a single NaN, not a structure) if the profile has fewer than
+% 5 lags or contains NaN values.
+%
+% ---REFERENCES:
+% Bouchaud, Matacz & Potters, Phys. Rev. Lett. 87, 228701 (2001) (the
+% leverage-effect correlation function).
+%
+% ---NOTES:
+% For N < 40 the 'doubleDrown' bound floor(N/4) is below 10, so maxLag can be
+% below 10.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

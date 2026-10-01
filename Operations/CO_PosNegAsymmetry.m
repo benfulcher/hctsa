@@ -12,17 +12,29 @@ function out = CO_PosNegAsymmetry(y)
 % ---INPUTS:
 % y, the input time series (assumed z-scored: the regime split threshold is 0)
 %
-% ---OUTPUTS: the conditional volatility and one-step autocorrelation of the
-%            positive/negative regimes, and normalized contrasts between
-%            them (the volatility contrast is a leverage-effect-style
-%            statistic; the autocorrelation contrast is a threshold-AR(1)-
-%            style statistic). Also isolates the two zero-crossing
-%            transition types (positive-to-negative, negative-to-positive)
-%            -- posMask/negMask are conditioned on the current value only,
-%            so they mix crossing and non-crossing steps together; the
-%            crossing-specific fields ask instead whether the jump *at* a
-%            regime switch is itself asymmetric (e.g. sharper downward
-%            crossings than upward ones).
+% ---OUTPUTS:
+% propPos, the proportion of steps that start in the positive regime (y >= 0),
+% volPos, volNeg, the standard deviation of the one-step changes that start in the
+%       positive or negative regime,
+% volAsym, (volPos - volNeg) divided by the standard deviation of all one-step
+%       changes (a leverage-effect-style contrast),
+% ac1Pos, ac1Neg, the correlation between y(t) and y(t+1) over steps that start in
+%       the positive or negative regime,
+% ac1Asym, ac1Pos - ac1Neg (a threshold-AR(1)-style contrast).
+% Also isolates the two zero-crossing transition types, positive-to-negative (PN,
+% downward) and negative-to-positive (NP, upward). posMask/negMask are conditioned
+% on the current value only, so they mix crossing and non-crossing steps; the
+% crossing-specific fields ask instead whether the jump *at* a regime switch is
+% itself asymmetric (e.g., sharper downward crossings than upward ones):
+% propPN, propNP, the proportion of steps that are downward or upward crossings,
+% volPN, volNP, the standard deviation of the one-step changes at downward or
+%       upward crossings,
+% volAsymCross, (volPN - volNP) divided by the standard deviation of all one-step
+%       changes,
+% ac1PN, ac1NP, the correlation between y(t) and y(t+1) over downward or upward
+%       crossings,
+% ac1AsymCross, ac1PN - ac1NP.
+% Contrasts and statistics are NaN if a regime has fewer than 2 steps.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

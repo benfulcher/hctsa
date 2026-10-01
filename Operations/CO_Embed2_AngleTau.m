@@ -1,13 +1,26 @@
 function out = CO_Embed2_AngleTau(y, maxTau)
-% CO_Embed2_AngleTau Angle autocorrelation in a 2-dimensional embedding space
+% CO_Embed2_AngleTau   Angle autocorrelation in a 2-dimensional delay embedding, over delays.
 %
-% Investigates how the autocorrelation of angles between successive points in
-% the two-dimensional time-series embedding change as tau varies from
-% tau = 1, 2, ..., maxTau.
+% Investigates how the autocorrelation of the angles between successive points in
+% the two-dimensional delay embedding (y(t), y(t+tau)) changes as tau varies from
+% 1, 2, ..., maxTau. For each tau the angle of each step is measured from the
+% horizontal, as in CO_Embed2, and its autocorrelation is taken at lags 1, 2 and 3.
+% The outputs summarize the three resulting curves as a function of tau.
 %
 % ---INPUTS:
 % y, a column vector time series
-% maxTau, the maximum time lag to consider
+% maxTau, the maximum time delay to consider
+%
+% ---OUTPUTS:
+% ac1_thetaac1, ac1_thetaac2, ac1_thetaac3, the lag-1 autocorrelation (across tau)
+%       of the lag-1, lag-2 and lag-3 angle autocorrelations,
+% mean_thetaac1, mean_thetaac2, mean_thetaac3, their means across tau,
+% max_thetaac1, max_thetaac2, max_thetaac3, their maxima,
+% min_thetaac1, min_thetaac2, min_thetaac3, their minima,
+% meanrat_thetaac12, the ratio mean_thetaac1/mean_thetaac2,
+% diff_thetaac12, the sum across tau of the absolute difference between the lag-2
+%       and lag-1 angle autocorrelations.
+% The output is a single NaN if the series is too short to embed.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

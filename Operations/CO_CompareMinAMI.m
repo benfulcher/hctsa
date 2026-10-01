@@ -1,25 +1,27 @@
 function out = CO_CompareMinAMI(y, binMethod, numBins)
-% CO_CompareMinAMI  Variability in first minimum of automutual information
+% CO_CompareMinAMI   Variability of the first minimum of the automutual information.
 %
-% Finds the first minimum of the automutual information by various different
-% estimation methods, and sees how this varies over different coarse-grainings
-% of the time series.
-%
-% The function returns a set of statistics on the set of first minimums of the
-% automutual information function obtained over a range of the number of bins
-% used in the histogram estimation, when specifying 'numBins' as a vector
+% Finds the first minimum of the automutual information (AMI), as estimated by
+% CO_HistogramAMI, for each number of histogram bins in numBins, up to a maximum
+% lag of round(N/2) (set to this maximum if no minimum is found). The function
+% returns statistics on the resulting set of first-minimum lags, which measure how
+% sensitive the AMI timescale is to the coarse-graining of the time series.
 %
 % ---INPUTS:
 % y, the input time series
+% binMethod, the method for estimating mutual information (the meth input to
+%            CO_HistogramAMI): 'even', 'std1', 'std2' or 'quantiles'
+% numBins, the numbers of bins to compare over (a scalar or a vector; default 10)
 %
-% binMethod, the method for estimating mutual information (input to CO_HistogramAMI)
-%
-% numBins, the number of bins for the AMI estimation to compare over (can be a
-%           scalar or vector)
-%
-% Outputs include the minimum, maximum, range, number of unique values, and the
-% position and periodicity of peaks in the set of automutual information
-% minimums.
+% ---OUTPUTS:
+% min, max, range, median, mean, std, the minimum, maximum, range, median, mean and
+%       standard deviation of the first-minimum lags,
+% nunique, the number of unique first-minimum lags,
+% mode, the most common first-minimum lag,
+% modef, the proportion of the bin numbers that give that most common lag,
+% conv4, the mean first-minimum lag for the last five bin numbers,
+% nlocmax, the number of local maxima of the first-minimum lag, as a function of
+%       the number of bins, that lie more than one standard deviation above the mean.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

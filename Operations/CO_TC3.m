@@ -1,23 +1,26 @@
 function out = CO_TC3(y, tau)
-% CO_TC3    Normalized nonlinear autocorrelation function, tc3.
+% CO_TC3   Normalized nonlinear autocorrelation, tc3.
 %
-% Computes the tc3 function, a normalized nonlinear autocorrelation, at a
-% given time-delay, tau.
-% Statistic is for two time-delays, normalized in terms of a single time delay.
-% Used as a test statistic for higher order correlational moments in surrogate
-% data analysis.
+% Computes the tc3 function, a normalized nonlinear autocorrelation, at a given
+% time delay, tau: the mean of y(t)*y(t+tau)*y(t+2*tau) divided by
+% |mean(y(t)*y(t+tau))|^(3/2). The statistic is for two time delays, normalized in
+% terms of a single time delay. It is used as a test statistic for higher-order
+% correlational moments in surrogate data analysis. See the documentation of the
+% TSTOOL package (http://www.physik3.gwdg.de/tstool/) for further details
+% (http://www.physik3.gwdg.de/tstool/manual.pdf).
 %
 % ---INPUTS:
-% y, input time series
-% tau, time lag
+% y, the input time series
+% tau, the time lag (default 'ac'; can be 'ac' or 'mi' to set it as the first
+%      zero-crossing of the autocorrelation function, or the first minimum of the
+%      automutual information function, respectively)
 %
 % ---OUTPUTS:
-% The raw tc3 expression, its magnitude, the numerator and its magnitude, and
-% the denominator.
-%
-% See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
-% for further details about this function
-% (i.e., http://www.physik3.gwdg.de/tstool/manual.pdf)
+% raw, the tc3 expression, mean(y(t)*y(t+tau)*y(t+2*tau)) / |mean(y(t)*y(t+tau))|^(3/2),
+% abs, its magnitude,
+% num, the numerator, mean(y(t)*y(t+tau)*y(t+2*tau)),
+% absnum, the magnitude of the numerator,
+% denom, the denominator, |mean(y(t)*y(t+tau))|^(3/2).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,25 +1,39 @@
 function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
-% CO_Embed2_Shapes Shape-based statistics in a 2-d embedding space
+% CO_Embed2_Shapes   Shape-based statistics in a 2-d embedding space.
 %
-% Takes a shape and places it on each point in the two-dimensional time-delay
-% embedding space sequentially. This function counts the points inside this shape
-% as a function of time, and returns statistics on this extracted time series.
+% Takes a shape and places it on each point in the two-dimensional delay embedding
+% (y(t), y(t+tau)) in turn. For each point, it records the fraction of the other
+% points (outside a Theiler window) that are inside the shape, giving a time series
+% of the local density along the trajectory, and returns statistics on this
+% extracted time series.
 %
 % ---INPUTS:
-% y, the input time-series as a (z-scored) column vector
-% tau, the time-delay
-% shape, has to be 'circle' for now...
-% r, the radius of the circle
-% theilerWin, Theiler window: points closer in time than this are not counted
+% y, the input time series as a (z-scored) column vector
+% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
+%      function, capped at N/10)
+% shape, the shape (only 'circle' for now; default)
+% r, the radius of the circle (default 1)
+% theilerWin, the Theiler window: points closer in time than this are not counted
 %       as neighbors, since they are close in the embedding only because
 %       successive values are correlated ({'ac', k} for k times the first
 %       zero-crossing of the autocorrelation function, or a number of samples;
 %       see BF_TheilerWindow; default: {'ac', 1}; 0 counts every other point)
 %
 % ---OUTPUTS:
-% The constructed time series of the number of nearby points, and
-% include the autocorrelation, spread (std, IQR), median, mode, histogram
-% entropy, and stationarity over fifths of the time series.
+% ac1, ac2, ac3, the autocorrelation of the local-density series at lags 1, 2 and 3,
+% tau, the first zero-crossing of its autocorrelation function (interpolated),
+% std, median, mean, iqr, the standard deviation, median, mean and interquartile
+%       range of the local density,
+% iqronrange, the interquartile range divided by the range,
+% mode_val, the proportion of values in the most common bin of a histogram (square
+%       root binning),
+% mode, the center of that bin,
+% hist_ent, sum(p*log(p)) over the histogram bins (minus the Shannon entropy),
+% statav5_m, the standard deviation across fifths of the series of the mean local
+%       density, divided by the standard deviation of the whole series,
+% statav5_s, the same for the standard deviation of the local density.
+% If no point has any neighbor within r, a fixed set of values is returned (std,
+% median, mean, iqr, hist_ent = 0; mode_val = 1; mode = 0; the rest NaN).
 %
 % ---NOTES:
 % `max` was dropped 2026-08-11: redundancy-checked against `mean`/`std` on
