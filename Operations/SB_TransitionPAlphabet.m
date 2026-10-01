@@ -1,24 +1,62 @@
 function out = SB_TransitionPAlphabet(y, numGroups, tau)
-% SB_TransitionPAlphabet    How transition probabilities change with alphabet size.
+% SB_TransitionPAlphabet   How transition probabilities change with alphabet size.
 %
-% Discretization is done by quantile separation.
+% The time series is discretized by quantile separation into numGroups equally
+% populated groups, for each alphabet size in a range (default 2 to 10). At each
+% size, the matrix T of consecutive-pair frequencies is formed (T(i,j) is the
+% number of times group i is followed by group j, divided by N - 1, so it sums to
+% 1) and eight statistics of it are computed: the mean and maximum of its diagonal,
+% its trace, its asymmetry sum(sum(abs(T - T'))), the trace of its covariance
+% matrix, and the standard deviation, maximum and minimum of its eigenvalues.
+% Exponential decays a*exp(b*x) (and some linear fits and change-point statistics)
+% are then fitted to how these change with the alphabet size x. Requires the Curve
+% Fitting Toolbox.
 %
 % ---INPUTS:
-%
 % y, the input time series
+% numGroups, the number of groups in the coarse-graining: a vector of alphabet
+%    sizes to compare across this range (default: 2:10; each must be at least 2).
+%    A scalar numGroups, together with a vector tau, is not supported (it errors).
+% tau, the time delay at which to analyze the transition matrices (default: 1). We
+%    can either downsample the time series at this lag and then do the
+%    discretization as normal, or do the discretization and then just look at this
+%    discrete lag. Here we do the former (using resample). Can also be 'ac' to use
+%    the first zero-crossing of the autocorrelation function (capped at
+%    floor(N/50) for a series of length N).
 %
-% numGroups, the number of groups in the coarse-graining (scalar for constant, or a
-%       vector of numGroups to compare across this range)
-%
-% tau: the time-delay; transition matricies corresponding to this time-delay. We
-%      can either downsample the time series at this lag and then do the
-%      discretization as normal, or do the discretization and then just
-%      look at this dicrete lag. Here we do the former. (scalar for
-%      constant tau, vector for range to vary across)
-%
-% ---OUTPUTS: include the decay rate of the sum, mean, and maximum of diagonal
-% elements of the transition matrices, changes in symmetry, and the eigenvalues
-% of the transition matrix.
+% ---OUTPUTS:
+% A structure with fields (NaN if tau cannot be determined). The five fit
+% statistics of each exponential fit are the amplitude a, the rate b, R^2, adjusted
+% R^2 and the root-mean-square error:
+% Exponential fit to the mean of the diagonal elements of T:
+% meandiagfexp_a, meandiagfexp_b, meandiagfexp_r2, meandiagfexp_adjr2,
+%     meandiagfexp_rmse
+% Exponential fit to the maximum of the diagonal elements of T:
+% maxdiagfexp_a, maxdiagfexp_b, maxdiagfexp_r2, maxdiagfexp_adjr2,
+%     maxdiagfexp_rmse
+% Exponential fit to the trace of T:
+% trfexp_a, trfexp_b, trfexp_r2, trfexp_adjr2, trfexp_rmse
+% Adjusted R^2 of a linear fit to the trace of T, over the alphabet sizes at which
+% it is above a fifth, or a tenth, of its value for the smallest alphabet:
+% trflin5_adjr2, trflin10adjr2
+% Asymmetry of T, sum(sum(abs(T - T'))): the slope of a linear fit against alphabet
+% size, and the position in the list of alphabet sizes where its mean before and
+% after differs most (a t-statistic criterion):
+% symd_a, symd_risept
+% Trace of the covariance matrix of T: the jump from the first to the second
+% alphabet size, and the exponential fit (excluding the first alphabet size if
+% there is a jump up):
+% trcov_jump
+% trcovfexp_a, trcovfexp_b, trcovfexp_r2, trcovfexp_adjr2, trcovfexp_rmse
+% Exponential fit to the standard deviation of the eigenvalues of T:
+% stdeigfexp_a, stdeigfexp_b, stdeigfexp_r2, stdeigfexp_adjr2,
+%     stdeigfexp_rmse
+% Exponential fit to the maximum (real) eigenvalue of T:
+% maxeig_fexpa, maxeig_fexpb, maxeig_fexpr2, maxeig_fexpadjr2,
+%     maxeig_fexprmse
+% Exponential fit to the minimum (real) eigenvalue of T:
+% mineigfexp_a, mineigfexp_b, mineigfexp_r2, mineigfexp_adjr2,
+%     mineigfexp_rmse
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

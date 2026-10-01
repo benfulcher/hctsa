@@ -1,21 +1,31 @@
 function out = ST_SimpleStats(x, whatStat)
-% ST_SimpleStats   Basic statistics about an input time series
+% ST_SimpleStats   Basic count-based statistics about an input time series.
+%
+% Returns one of a few simple statistics: the proportion of zero-crossings, the
+% proportions of local maxima or minima, the ratio of crossings of +1 to crossings
+% of -1 standard deviations, or the ratio of the mean-crossings of the detrended
+% series to those of the original series.
 %
 % ---INPUTS:
 % x, the input time series
-%
 % whatStat, the statistic to return:
-%          (i) 'zcross': the proportionof zero-crossings of the time series
-%                        (z-scored input thus returns mean-crossings)
-%          (ii) 'maxima': the proportion of the time series that is a local maximum
-%          (iii) 'minima': the proportion of the time series that is a local minimum
-%          (iv) 'pmcross': the ratio of the number of times that the (ideally
-%                          z-scored) time-series crosses +1 (i.e., 1 standard
-%                          deviation above the mean) to the number of times
-%                          that it crosses -1 (i.e., 1 standard deviation below
-%                          the mean)
-%          (v) 'zsczcross': the ratio of zero crossings of raw to detrended
-%                           time series where the raw has zero mean
+%    (i) 'zcross': the proportion of zero-crossings of the time series, the number
+%        of sign changes between successive values divided by the length of the
+%        series (a z-scored input thus returns mean-crossings)
+%    (ii) 'maxima': the proportion of the time series that is a local maximum
+%        (greater than both neighbors; divided by N - 1)
+%    (iii) 'minima': the proportion of the time series that is a local minimum
+%        (smaller than both neighbors; divided by N - 1)
+%    (iv) 'pmcross': the ratio of the number of times that the (ideally z-scored)
+%        time series crosses +1 (i.e., 1 standard deviation above the mean) to the
+%        number of times that it crosses -1 (i.e., 1 standard deviation below the
+%        mean); NaN if it never crosses -1
+%    (v) 'zsczcross': the ratio of the number of mean-crossings of the linearly
+%        detrended time series to that of the z-scored original series; NaN if the
+%        original never crosses its mean
+%
+% ---OUTPUTS:
+% a scalar: the requested statistic.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
