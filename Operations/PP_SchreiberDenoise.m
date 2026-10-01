@@ -1,65 +1,72 @@
 function out = PP_SchreiberDenoise(y, m, d, numIter, neighborhoodStd)
 % PP_SchreiberDenoise   Nonlinear noise reduction, and how it changes the series.
 %
-% Applies Schreiber's simple nonlinear noise-reduction method -- replace each
-% embedded point by the average of its state-space neighbors -- via TISEAN's
-% 'nrlazy' (the whole-vector-correcting C reimplementation of the original
-% single-component-correcting Fortran 'lazy'; TISEAN's own documentation
-% reports nrlazy tends to do better than lazy on flow-like data, which is
-% most of what hctsa sees):
+% Applies Schreiber's simple nonlinear noise-reduction method, replacing each
+% embedded point by the average of its state-space neighbors, using TISEAN's
+% 'nrlazy' (a C reimplementation that corrects the whole embedding vector, of the
+% original single-component-correcting Fortran 'lazy'; TISEAN's own documentation
+% reports that nrlazy tends to do better than lazy on flow-like data, which is
+% most of what hctsa sees). The method is that of
 %
 % Schreiber, T. "Extremely simple nonlinear noise reduction method",
 % Phys. Rev. E 47, 2401 (1993).
 %
-% This is the denoising stage of the same Chaos Decision Tree Algorithm
-% pipeline as CO_Oversampling (its oversampling-diagnosis stage) and
-% NL_ZeroOneTest (its chaos-classification stage):
+% It is the first stage of the pipeline of Toker et al., used by CO_Oversampling
+% (for diagnosing oversampling) and NL_ZeroOneTest (for classifying chaos).
 %
-% Toker, D. et al. "A simple method for detecting chaos in nature",
-% Commun. Biol. 3, 11 (2020). DOI: 10.1038/s42003-019-0715-9
-%
-% Denoising is not itself a scalar feature, so -- following the same idiom
-% as PP_Compare/PP_ModelFit -- this reports how several time-series
-% properties change as a result of applying it:
-% - rmsCorrection, corrOrigDenoised: how much/little the series changed.
-% - fracVarRemoved: the fraction of variance attributed to noise (removed).
-% - ac1Change: change in lag-1 autocorrelation (denoising should smooth the
-%   series, increasing it).
-% - meanNeighbors, fracNoCorrection: nrlazy's own per-point neighbor counts
-%   (a neighbor count of 1 means no correction was possible/applied at that
-%   point -- diagnoses whether neighborhoodStd was too small for this data).
-% - KDenoised, KChange: this pipeline's actual point in denoising first is
-%   to make NL_ZeroOneTest's 0-1 test for chaos more reliable on noisy data
-%   (measurement noise inflates the apparent diffusion of the test's
-%   (p,q) trajectory) -- KDenoised is NL_ZeroOneTest's K statistic computed
-%   on the denoised series, and KChange = KDenoised - K(y) directly answers
-%   "does removing noise change the chaos verdict for this series?" (K(y)
-%   itself isn't reported here since it's already registered directly via
-%   NL_ZeroOneTest -- reporting it again here would be a pure duplicate).
+% Denoising is not itself a scalar feature, so, following the same idea as
+% PP_Compare and PP_ModelFit, this function reports how several properties of the
+% series change as a result of applying it.
 %
 % ---INPUTS:
 % y, the input time series
-% m, the embedding dimension (nrlazy '-m', default 5)
-% d, the embedding delay (nrlazy '-d', default 1)
-% numIter, the number of correction passes (nrlazy '-i'; more iterations
-%          denoise more aggressively but risk distorting real dynamics --
-%          TISEAN's own default, and most published use, is 1)
-% neighborhoodStd, neighborhood radius in units of the data's standard
-%          deviation (nrlazy '-v'; scale-invariant, unlike the raw '-r'
-%          alternative which is a fixed data-interval fraction)
+% m, the embedding dimension (nrlazy '-m'; default 5)
+% d, the embedding delay (nrlazy '-d'; default 1)
+% numIter, the number of correction passes (nrlazy '-i'; more iterations denoise
+%       more aggressively but risk distorting real dynamics; TISEAN's own default,
+%       and most published use, is 1)
+% neighborhoodStd, the neighborhood radius in units of the standard deviation of
+%       the data (nrlazy '-v'; scale-invariant, unlike the raw '-r' option, which
+%       is a fixed fraction of the data interval; default 0.5)
 %
 % ---OUTPUTS:
-% rmsCorrection, fracVarRemoved, corrOrigDenoised, ac1Change, meanNeighbors,
-% fracNoCorrection, KDenoised, KChange (see above)
+% rmsCorrection, the root-mean-square size of the correction made to the series
+% fracVarRemoved, 1 - var(denoised) / var(original): the fraction of the variance
+%       attributed to noise and removed
+% corrOrigDenoised, the correlation coefficient between the original and denoised series
+% ac1Change, the lag-1 autocorrelation of the denoised series minus that of the
+%       original (denoising should smooth the series, increasing it)
+% meanNeighbors, the mean number of neighbors per point found by nrlazy, counting
+%       the point itself
+% fracNoCorrection, the fraction of points with a neighbor count of 1, that is, with
+%       no neighbors besides themselves, so that no correction was possible there
+%       (diagnoses whether neighborhoodStd was too small for these data)
+% KDenoised, the statistic K of the 0-1 test for chaos (NL_ZeroOneTest) computed
+%       on the denoised series. The point of denoising first in the source
+%       pipeline is to make the 0-1 test more reliable on noisy data, since
+%       measurement noise inflates the apparent diffusion of the test's (p,q)
+%       trajectory.
+% KChange, KDenoised minus K of the original series, which answers "does removing
+%       noise change the chaos verdict for this series?" (K of the original is not
+%       reported here since it is already registered directly via NL_ZeroOneTest)
+% All fields are NaN if the series is too short for the embedding, or if nrlazy
+% gives no usable output.
 %
-% Redundancy check (Empirical1000, m=5,d=1,v=0.3, numIter in {1,4}): all
-% fields stay well clear of the usual r>=0.9 threshold except two borderline,
-% inconsistent-across-numIter cases -- fracNoCorrection (r=0.90 at numIter=1
-% vs NL_TISEAN_fnn's neighborhood-size fields, but only 0.89 at numIter=4)
-% and KDenoised (r=0.90 at numIter=1 vs SP_Summaries' spectral log-log slope
-% fields, but only 0.89 at numIter=4) -- both sensible mechanistic overlaps
-% (local embedding-space density; broadband-vs-periodic structure) rather
-% than duplicates, and too marginal/inconsistent to drop.
+% ---REFERENCES:
+% T. Schreiber, "Extremely simple nonlinear noise reduction method", Phys. Rev. E
+% 47, 2401 (1993).
+% D. Toker et al., "A simple method for detecting chaos in nature", Commun. Biol.
+% 3, 11 (2020).
+%
+% ---NOTES:
+% Redundancy check (Empirical1000, m = 5, d = 1, v = 0.3, numIter in {1, 4}): all
+% fields stay well clear of the usual r >= 0.9 threshold except two borderline,
+% inconsistent-across-numIter cases: fracNoCorrection (r = 0.90 at numIter = 1
+% against NL_TISEAN_fnn's neighborhood-size fields, but 0.89 at numIter = 4) and
+% KDenoised (r = 0.90 at numIter = 1 against SP_Summaries' spectral log-log slope
+% fields, but 0.89 at numIter = 4). Both are sensible mechanistic overlaps (local
+% embedding-space density; broadband versus periodic structure) rather than
+% duplicates, and too marginal and inconsistent to drop.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

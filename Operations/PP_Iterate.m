@@ -1,19 +1,49 @@
 function out = PP_Iterate(y, dtMeth)
-% PP_Iterate  How time-series properties change in response to iterative pre-processing.
+% PP_Iterate   How time-series properties change as a preprocessing step is applied more and more strongly.
 %
-% The pre-processing transformation is iteratively applied to the time series.
+% A preprocessing transformation is applied to the time series with increasing
+% strength (for the number of times, or the window size, given by the method), and
+% a set of statistics is computed on the processed series at each strength. Each
+% statistic's profile across the strengths is then z-scored and summarized by
+% a trend (the sum of its successive differences, i.e., last minus first value)
+% and a jump (the largest t-statistic for a step change in the mean, over all
+% split points).
 %
 % ---INPUTS:
-%
 % y, the input time series
+% dtMeth, the preprocessing to apply:
+%       'spline': remove a least-squares cubic spline with 1, ..., 20 pieces
+%       'diff': take incremental differences, 1, ..., 5 times (the method hctsa uses)
+%       'medianf': a median filter with 25 window lengths from 1 to N/25
+%       'rav': a running mean filter with 25 window lengths from 1 to N/25
+%       'resampleup': progressively upsample the series, by factors 1, ..., 20
+%       'resampledown': progressively downsample the series, by factors 1, ..., 20
 %
-% dtMeth, the detrending method to apply:
-%           (i) 'spline' removes a spine fit,
-%           (ii) 'diff' takes incremental differences,
-%           (iii) 'medianf' applies a median filter,
-%           (iv) 'rav' applies a running mean filter,
-%           (v) 'resampleup' progressively upsamples the time series,
-%           (vi) 'resampledown' progressively downsamples the time series.
+% ---OUTPUTS: for each of the following statistics, measured on the (z-scored)
+% processed series at each strength, a trend (the field name ending _trend) and a
+% jump (ending _jump) of its profile across the strengths:
+% statav5_trend, statav5_jump: StatAv with 5 segments
+% swms5_2_trend, swms5_2_jump: the standard deviation of the window means in
+%       5 windows overlapping by half
+% swss5_2_trend, swss5_2_jump: the standard deviation of the window standard
+%       deviations in 5 windows overlapping by half, relative to that of the
+%       original series
+% gauss1_kd_trend, gauss1_kd_jump: the root-mean-square error of a Gaussian fit
+%       to the kernel-smoothed distribution of values
+% gauss1_hsqrt_trend, gauss1_hsqrt_jump: the root-mean-square error of a Gaussian
+%       fit to a histogram of the values (square-root rule for the number of bins)
+% norm_kscomp_trend, norm_kscomp_jump: the area between the kernel-smoothed
+%       distribution of the values and the best-fitting normal distribution
+% ol_trend, ol_jump: the mean after trimming the 5% highest and 5% lowest values
+% xcn1_trend, xcn1_jump, xc1_trend, xc1_jump: the cross-correlation between the
+%       original and processed series at lags -1 and +1
+% normdiff_trend, normdiff_jump: the distance between the original and
+%       processed series, norm(y - y_processed) / N
+% (The last three statistics need the processed series to be as long as the
+% original, so they are NaN for 'diff'.)
+%
+% ---NOTES:
+% Requires the Curve Fitting Toolbox.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

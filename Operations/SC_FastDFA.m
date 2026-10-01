@@ -1,14 +1,33 @@
 function out = SC_FastDFA(y)
-% SC_FastDFA   Matlab wrapper for Max Little's ML_fastdfa code
+% SC_FastDFA   Scaling exponent of the time series, from fast detrended fluctuation analysis.
 %
-% Measures the scaling exponent of the time series using a fast implementation
-% of detrended fluctuation analysis (DFA).
+% Detrended fluctuation analysis (DFA) measures how the size of the fluctuations
+% of a series grows with the timescale. The series is integrated (cumulative
+% sum) and cut into windows of s samples; a straight line is fitted to the
+% integrated series in each window and subtracted; and the fluctuation F(s) is
+% the root-mean-square of what is left, over the whole series. For a
+% self-similar series F(s) ~ s^alpha, and the output is the exponent alpha: the
+% slope of log F(s) against log s. White noise gives alpha of about 0.5,
+% persistent (long-memory) series give alpha > 0.5 (about 1 for 1/f noise), and
+% a random walk gives about 1.5.
 %
-% ---INPUT:
-% y, the input time series, is fed straight into the fastdfa script.
+% This is a wrapper for Max Little's ML_fastdfa (Toolboxes/Max_Little/fastdfa),
+% which chooses the window sizes itself: the series length divided by 1, 2, 4, 8,
+% ..., from the whole series down to windows of about 3 to 5 samples. The slope
+% is a least-squares line through log10(F) against log10(s) over all of these
+% scales, weighted equally.
+%
+% ---INPUTS:
+% y, the input time series, is fed straight into ML_fastdfa as a column vector.
+%
+% ---OUTPUTS:
+% a scalar: the DFA scaling exponent, alpha.
+%
+% ---NOTES:
+% The original fastdfa code is by Max A. Little, publicly available at
+% http://www.maxlittle.net/software/index.php (see the header of ML_fastdfa.m for
+% how to cite it).
 
-% The original fastdfa code is by Max A. Little and publicly-available at
-% http://www.maxlittle.net/software/index.php
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
