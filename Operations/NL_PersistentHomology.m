@@ -1,104 +1,107 @@
 function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 % NL_PersistentHomology   Topological data analysis of a time-delay embedding.
 %
-% Time-delay embeds the time series (Takens' theorem) and computes the
-% persistent homology of the resulting point cloud under a Vietoris-Rips
-% filtration, via the ripser tool (Bauer, J. Appl. Comput. Topol. 5, 391
-% (2021)). A clean periodic/quasi-periodic orbit traces out a loop in
-% embedding space, which shows up as one strongly persistent 1-dimensional
-% (H1) topological feature; a noisy or aperiodic point cloud does not. This
-% is the same underlying idea as Perea & Harer's sliding-window persistence
-% approach to periodicity quantification (Found. Comput. Math. 15, 799
-% (2015)), applied here directly to a plain time-delay embedding rather than
-% their specific sliding-window/point-cloud construction.
+% Time-delay embeds the time series (Takens' theorem) and computes the persistent
+% homology of the resulting point cloud under a Vietoris-Rips filtration, via the ripser
+% tool (Bauer, J. Appl. Comput. Topol. 5, 391 (2021)). A clean periodic/quasi-periodic
+% orbit traces out a loop in embedding space, which shows up as one strongly persistent
+% 1-dimensional (H1) topological feature; a noisy or aperiodic point cloud does not. This
+% is the same underlying idea as Perea & Harer's sliding-window persistence approach to
+% periodicity quantification (Found. Comput. Math. 15, 799 (2015)), applied here directly
+% to a plain time-delay embedding rather than their specific sliding-window/point-cloud
+% construction.
 %
-% Persistent homology itself is standard computational topology (see, e.g.,
-% Edelsbrunner & Harer, "Computational Topology: An Introduction", AMS,
-% 2010); ripser computes it efficiently by never explicitly enumerating
-% higher-dimensional simplices (unlike a brute-force approach, whose
-% simplex-enumeration cost grows combinatorially with point-cloud size),
-% which is what makes this tractable on production-length time series.
+% Persistent homology itself is standard computational topology (see, e.g., Edelsbrunner &
+% Harer, "Computational Topology: An Introduction", AMS, 2010); ripser computes it
+% efficiently by never explicitly enumerating higher-dimensional simplices, which is what
+% makes this tractable on production-length time series.
 %
-%---INPUTS:
+% All persistence values are divided by a Rips filtration threshold (the largest pairwise
+% distance in a 300-point subsample of the cloud), so they are comparable in scale across
+% input series. Infinite (essential) intervals are dropped. The output is NaN if the
+% embedding fails, has fewer than 20 points, or is degenerate (e.g., a constant series).
+%
+% ---INPUTS:
 % y, scalar time series as a column vector
+% tau, time delay for the embedding: a positive integer, 'ac' or 'mi' (cf. BF_Embed), or
+%      'periodWelch' (specific to this operation; see ---NOTES). Default: 'mi'
+% m, embedding dimension, a positive integer. Default: 3
+% maxDim, maximum homology dimension to compute (only dimensions 0 and 1 are used by the
+%         outputs below; higher dimensions are far more expensive). Default: 1
+% maxN, the maximum number of embedded points to feed to ripser; longer embeddings are
+%       reduced to maxN points by an evenly-spaced subsample, or 'full' to disable
+%       (with a warning above 4000 points). Default: 1000
 %
-% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed, or
-%      'periodWelch', an option specific to this operation -- see the note in
-%      the code on why a fixed tau performs much worse here than for most
-%      other embedding-based operations, and the m-parameter note below for
-%      why 'periodWelch' exists; default 'mi')
+% ---OUTPUTS:
+% maxPersistenceH1, persistence of the most persistent loop (H1 interval)
+% totalPersistenceH1, total persistence of all (finite) loops
+% persistenceEntropyH1, Shannon entropy of the distribution of loop persistences (low
+%                       when one dominant loop, high when many comparable ones; 0 if
+%                       there are no finite H1 intervals)
+% totalPersistenceH0, total persistence of the (finite) H0 intervals, capturing the
+%                     clustering structure of the point cloud at small scales
 %
-% m, embedding dimension (a positive integer; needs m >= 2 for a loop to be
-%    representable at all, and m >= 3 to avoid self-intersections distorting
-%    the topology of anything but the simplest orbits -- Takens' theorem
-%    generically guarantees an m>=3 embedding of a 1-dimensional attractor
-%    is free of such artifacts).
+% ---REFERENCES:
+% Bauer, J. Appl. Comput. Topol. 5, 391 (2021) (ripser).
+% Perea & Harer, Found. Comput. Math. 15, 799 (2015) (sliding-window persistence).
+% Edelsbrunner & Harer, "Computational Topology: An Introduction", AMS, 2010.
 %
-%    A companion mop is registered at a deliberately under-embedded m=2:
-%    self-intersections aren't purely artifacts to be unfolded away -- a
-%    curve's own shape in a *specific* low-dimensional projection can itself
-%    carry information a Takens-safe embedding discards. Verified directly:
-%    two-harmonic signals sin(t)+0.6*sin(2t+phi) with phi=0 vs phi=1.4 are
-%    indistinguishable by any phase-blind spectral feature (|FFT| depends
-%    only on harmonic amplitudes, not phi, by construction) but separate
-%    cleanly at m=2 -- almost entirely as a difference in the single
-%    dominant loop's persistence, not its count, despite the naive
-%    expectation of a literal figure-eight (two independent 1-cycles); see
-%    the m=3 default, where the gap collapses substantially, consistent
-%    with the effect being tied to the specific 2D projection rather than
-%    the intrinsic topology of the (here, truly 1-dimensional) attractor.
+% ---NOTES:
+% m: needs m >= 2 for a loop to be representable at all, and m >= 3 to avoid
+%    self-intersections distorting the topology of anything but the simplest orbits
+%    (Takens' theorem generically guarantees an m >= 3 embedding of a 1-dimensional
+%    attractor is free of such artifacts).
 %
-%    This m=2 companion mop uses tau='periodWelch' (see the tau-note in the
-%    code), not 'mi'. 'mi' was tried first and looked promising (maxPersistenceH1
-%    0.35 vs 0.63, ~30 std devs apart across 30 reps) but turned out to be
-%    largely lucky, not principled: a tau sweep over the same construction
-%    showed the discrimination effect's sign/magnitude oscillates with the
-%    embedding delay (ratio ranged 0.12x-1.81x across integer tau), and 'mi'
-%    happened to land on the single best point in that sweep at only one of
-%    three sampling rates tested -- at the other two, it agreed with the
-%    (much worse-performing) 'ac' heuristic. A harmonic-ratio variant of the
-%    same construction (1:3 instead of 1:2) additionally showed the *sign*
-%    of the effect isn't stable across related constructions either.
-%    'periodWelch' doesn't fix the sign-instability (nothing about tau
-%    selection can), but it does fix the sampling-rate sensitivity: it
-%    targets a fixed *physical* delay (not an absolute index count) by
-%    normalizing against the series' own estimated dominant period, so the
-%    same relative embedding delay is used regardless of how finely the
-%    series happens to be sampled.
+%    A companion mop is registered at a deliberately under-embedded m = 2:
+%    self-intersections aren't purely artifacts to be unfolded away -- a curve's own shape
+%    in a *specific* low-dimensional projection can itself carry information a Takens-safe
+%    embedding discards. Verified directly: two-harmonic signals
+%    sin(t)+0.6*sin(2t+phi) with phi=0 vs phi=1.4 are indistinguishable by any phase-blind
+%    spectral feature (|FFT| depends only on harmonic amplitudes, not phi, by
+%    construction) but separate cleanly at m = 2 -- almost entirely as a difference in the
+%    single dominant loop's persistence, not its count, despite the naive expectation of a
+%    literal figure-eight (two independent 1-cycles); see the m = 3 default, where the gap
+%    collapses substantially, consistent with the effect being tied to the specific 2D
+%    projection rather than the intrinsic topology of the (here, truly 1-dimensional)
+%    attractor.
 %
-% maxDim, maximum homology dimension to compute (0 and 1 are the only
-%         dimensions used by the outputs below; higher dimensions are far
-%         more expensive and not currently exposed as separate fields)
+%    This m = 2 companion mop uses tau = 'periodWelch', not 'mi'. 'mi' was tried first and
+%    looked promising (maxPersistenceH1 0.35 vs 0.63, ~30 std devs apart across 30 reps)
+%    but turned out to be largely lucky, not principled: a tau sweep over the same
+%    construction showed the discrimination effect's sign/magnitude oscillates with the
+%    embedding delay (ratio ranged 0.12x-1.81x across integer tau), and 'mi' happened to
+%    land on the single best point in that sweep at only one of three sampling rates
+%    tested -- at the other two, it agreed with the (much worse-performing) 'ac'
+%    heuristic. A harmonic-ratio variant of the same construction (1:3 instead of 1:2)
+%    additionally showed the *sign* of the effect isn't stable across related constructions
+%    either. 'periodWelch' doesn't fix the sign-instability (nothing about tau selection
+%    can), but it does fix the sampling-rate sensitivity: it targets a fixed *physical*
+%    delay (not an absolute index count) by normalizing against the series' own estimated
+%    dominant period, so the same relative embedding delay is used regardless of how
+%    finely the series happens to be sampled. (In the code the delay is
+%    round(period*5/(2*pi)) samples, falling back to 'mi' if no prominent spectral peak is
+%    found.)
 %
-% maxN, the maximum number of embedded points to feed to ripser. Vietoris-
-%       Rips persistent homology cost grows steeply with point-cloud size, so
-%       longer embeddings are reduced to maxN points via an evenly-spaced
-%       (not random, not a truncation to an early window) subsample of the
-%       embedded point cloud -- this keeps coverage of the full reconstructed
-%       attractor rather than just an early time window, unlike e.g. NL_RQA's
-%       maxN, which crops the raw series instead (RQA's per-pair cost is what
-%       forces that choice there; here the embedding itself is cheap and only
-%       the point count handed to ripser needs capping). Can be set to 'full'
-%       to disable, with a warning above 4000 points, where cost (per the
-%       profile below) is already into the tens of seconds and grows steeply
-%       from there -- empirically, ~12000 points is enough to exceed
-%       BF_RipserSystem's own 600s subprocess timeout outright.
+% tau: a fixed tau performs much worse here than for most other embedding-based
+%    operations (see the comment in the code on the default).
 %
-%---OUTPUTS: summary statistics of the H1 (loop) persistence diagram --
-% maximum persistence (strength of the single most persistent loop), total
-% persistence, and the Shannon entropy of the persistence distribution (one
-% dominant loop vs. many comparable ones) -- plus total H0 persistence,
-% capturing clustering structure of the point cloud at small scales. All
-% persistence values are normalized by the Rips filtration threshold used,
-% so they are comparable in scale across different input series.
+% maxN: Vietoris-Rips persistent homology cost grows steeply with point-cloud size, so
+%    longer embeddings are reduced via an evenly-spaced (not random, not a truncation to an
+%    early window) subsample of the embedded point cloud -- this keeps coverage of the
+%    full reconstructed attractor rather than just an early time window, unlike e.g.
+%    NL_RQA's maxN, which crops the raw series instead (RQA's per-pair cost is what forces
+%    that choice there; here the embedding itself is cheap and only the point count handed
+%    to ripser needs capping). With maxN = 'full', a warning is given above 4000 points,
+%    where cost is already into the tens of seconds and grows steeply from there --
+%    empirically, ~12000 points is enough to exceed BF_RipserSystem's own 600 s subprocess
+%    timeout outright.
 %
-% (An earlier candidate field, a count of "significant" H1 intervals above a
-% fixed normalized-persistence threshold, was dropped after checking against
-% real data (Bonn EEG, Empirical1000): it was 0 for 149/150 Bonn EEG series
-% -- real (noisy, imperfectly periodic) data essentially never clears a
-% fixed significance bar tuned by eye against a clean sine wave, so the
-% field carried almost no information. maxPersistenceH1 above captures the
-% same underlying signal as a continuous quantity instead.)
+% An earlier candidate field, a count of "significant" H1 intervals above a fixed
+% normalized-persistence threshold, was dropped after checking against real data (Bonn
+% EEG, Empirical1000): it was 0 for 149/150 Bonn EEG series -- real (noisy, imperfectly
+% periodic) data essentially never clears a fixed significance bar tuned by eye against a
+% clean sine wave, so the field carried almost no information. maxPersistenceH1 captures
+% the same underlying signal as a continuous quantity instead.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

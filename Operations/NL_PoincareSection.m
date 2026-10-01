@@ -1,39 +1,59 @@
 function out = NL_PoincareSection(y, ref, embedParams)
 % NL_PoincareSection   Poincare section analysis of a time series.
 %
-% Time-delay embeds the time series and computes a Poincare section using
-% TISEAN's 'poincare', which cuts the trajectory on a fixed embedding
-% coordinate (the last, by convention) held at its own mean, in a single
-% crossing direction.
+% Time-delay embeds the time series in three dimensions and computes a Poincare section
+% using TISEAN's 'poincare', which cuts the trajectory on a fixed embedding coordinate (the
+% last, by convention) held at its own mean, in a single crossing direction. Each crossing
+% gives a point (x, y) on the 2-dimensional section: the other two embedding coordinates
+% at the (interpolated) crossing. The outputs describe this cloud of points: the proportion
+% of time points that cross; the spread, range and autocorrelation of x, y and of the
+% distance D from the mean of the points; the distances between successive points; and
+% how the points fill a grid of cells whose edges are quantiles of each coordinate.
 %
 % ---INPUTS:
 % y, the input time series
-%
-% ref: 'max' or 'min', selecting the crossing direction. This operation
-%      previously used TSTOOL's 'poincare', which cut a hyperplane
-%      orthogonal to the local tangent vector at a chosen reference point in
-%      the time series -- a construction TISEAN has no equivalent for.
-%      'ref' is repurposed here to instead pick which of the two possible
-%      crossing directions to use: 'max' selects crossings heading toward a
-%      local maximum (ascending through the mean, TISEAN's "from below",
-%      -C0); 'min' selects crossings heading toward a local minimum
+% ref, 'max' or 'min', selecting the crossing direction (default: 'max'):
+%      'max' selects crossings heading toward a local maximum (ascending through the mean,
+%      TISEAN's "from below", -C0); 'min' selects crossings heading toward a local minimum
 %      (descending through the mean, "from above", -C1).
+% embedParams, the usual thing to give BF_Embed for the time-delay embedding, as {tau,m}
+%      (default: {'mi',3}). m is forced to 3, so that the Poincare section is
+%      2-dimensional.
 %
-% embedParams: the usual thing to give BF_Embed for the time-delay embedding, as
-%               {tau,m}. m is forced to 3 -- i.e., embed in a 3
-%               dimensional space so that the Poincare section is 2-dimensional.
+% ---OUTPUTS: (x and y are the coordinates of the points on the section; ds the distances
+% between successive points; D the distances of the points from their mean position)
+% pcross, the number of section points divided by the length of the time series
+% maxx, minx, stdx, iqrx, meanx: maximum, minimum, standard deviation, interquartile range
+%      and mean of the x coordinates
+% ac1x, ac2x: autocorrelation of the x coordinates at lags 1 and 2
+% tauacx: first zero-crossing of the autocorrelation function of the x coordinates
+% maxy, miny, stdy, iqry, meany, ac1y, ac2y, tauacy: the same for the y coordinates
+% boxarea, the area of the bounding box of the points: range(x)*range(y)
+% pwithinr01, pwithin02, pwithin03, pwithin05, pwithin1, pwithin2: the proportion of
+%      successive points within a distance of 0.1, 0.2, 0.3, 0.5, 1 and 2, respectively
+% meands, maxds, minds, iqrds: mean, maximum, minimum and interquartile range of ds
+% maxD, minD, stdD, iqrD, meanD, ac1D, ac2D, tauacD: the same statistics as for x, but for D
+% maxpbox5, minpbox5, zerospbox5, meanpbox5, rangepbox5, hboxcounts5, tracepbox5:
+%      statistics of the proportions of points in the cells of a 5 by 5 grid whose edges
+%      are quantiles of x and y: maximum, minimum, number of empty cells, mean, range, the
+%      Miller-Madow-corrected entropy of the occupancy (in nats), and the sum of the
+%      diagonal (the proportion of points in cells where the x and y quantile bins match)
+% maxpbox10, minpbox10, zerospbox10, meanpbox10, rangepbox10, hboxcounts10, tracepbox10:
+%      the same for a 10 by 10 grid
+% The output is NaN if the embedding fails or the section has fewer than 2 points.
 %
-% ---OUTPUTS: include statistics on the x- and y- components of these vectors on the
-% Poincare surface, on distances between adjacent points, distances from the
-% mean position, and the entropy of the vector cloud.
-%
-% Uses TISEAN's 'poincare' (this operation previously used TSTOOL's
-% 'poincare', a different construction -- see 'ref' above).
+% ---REFERENCES:
 % TISEAN: https://www.pks.mpg.de/tisean/
-
-% Another thing that could be cool to do is to analyze variation in the plots as
-% ref changes... (not done here)
 %
+% ---NOTES:
+% This operation previously used TSTOOL's 'poincare', which cut a hyperplane orthogonal to
+% the local tangent vector at a chosen reference point in the time series -- a construction
+% TISEAN has no equivalent for. 'ref' is repurposed here to instead pick which of the two
+% possible crossing directions to use.
+%
+% Another thing that could be cool to do is to analyze variation in the plots as ref
+% changes... (not done here)
+
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

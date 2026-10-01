@@ -1,51 +1,70 @@
 function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, randomSeed)
-% SD_SurrogateTest   Analyzes test statistics obtained from surrogate time series
+% SD_SurrogateTest   Compares test statistics of a time series to those of its surrogates.
 %
-% This function is based on information found in:
-% "Surrogate data test for nonlinearity including nonmonotonic transforms"
-% D. Kugiumtzis Phys. Rev. E 62(1) R25 (2000)
-%
-% The generation of surrogates is done by the periphery function,
-% SD_MakeSurrogates
+% Generates surrogate time series (using the periphery function, SD_MakeSurrogates) and
+% evaluates one or more test statistics on both the original series and each surrogate. For
+% each statistic, the outputs measure how consistent the series' value is with the
+% distribution of the surrogates' values: a z-test (assuming a Gaussian distribution), a
+% kernel-smoothed density, a distance from the median in interquartile ranges, and a
+% rank-based p-value.
 %
 % ---INPUTS:
 % x, the input time series
-%
-% surrMeth, the method for generating surrogate time series:
-%       (i) 'RP': random phase surrogates that maintain linear correlations in
-%                 the data but destroy any nonlinear structure through phase
-%                 randomization
-%       (ii) 'AAFT': the amplitude-adjusted Fourier transform method maintains
-%                    linear correlations but destroys nonlinear structure
-%                    through phase randomization, yet preserves the approximate
-%                    amplitude distribution,
-%       (iii) 'TFT': preserves low-frequency phases but randomizes high-frequency phases (as a way of dealing
-%                    with non-stationarity, cf.:
-%               "A new surrogate data method for nonstationary time series",
-%                   D. L. Guarin Lopez et al., arXiv 1008.1804 (2010)
-%
-% numSurrs, the number of surrogates to compute (default is 99 for a 0.01
-%         significance level 1-sided test)
-%
+% surrMeth, the method for generating surrogate time series (default: 'RP'):
+%       (i) 'RP': random phase surrogates that maintain linear correlations in the data but
+%                 destroy any nonlinear structure through phase randomization
+%       (ii) 'AAFT': the amplitude-adjusted Fourier transform method maintains linear
+%                    correlations but destroys nonlinear structure through phase
+%                    randomization, yet preserves the approximate amplitude distribution
+%       (iii) 'TFT': preserves low-frequency phases but randomizes high-frequency phases
+%                    (as a way of dealing with non-stationarity)
+% numSurrs, the number of surrogates to compute (default: 99, for a 0.01 significance level
+%         1-sided test)
 % extrap, extra parameter, the cut-off frequency for 'TFT'
-%
-% theTestStat, the test statistic to evalute on all surrogates and the original
-%           time series. Can specify multiple options in a cell and will return
-%           output for each specified test statistic:
-%           (i) 'ami': the automutual information at lag 1, cf.
-%                 "Testing for nonlinearity in irregular fluctuations with
-%                 long-term trends" T. Nakamura and M. Small and Y. Hirata,
-%                 Phys. Rev. E 74(2) 026205 (2006)
-%           (ii) 'fmmi': the first minimum of the automutual information
-%                       function
-%           (iii) 'o3': a third-order statistic used in: "Surrogate time
-%                 series", T. Schreiber and A. Schmitz, Physica D 142(3-4) 346
-%                 (2000)
-%           (iv) 'tc3': a time-reversal asymmetry measure. Outputs of the
-%                 function include a z-test between the two distributions, and
-%                 some comparative rank-based statistics.
-%
+% theTestStat, the test statistic to evaluate on all surrogates and the original time
+%           series. Can specify multiple options in a cell and will return output for each
+%           specified test statistic:
+%           (i) 'ami1': the automutual information at lag 1 (Gaussian approximation, via
+%                 IN_AutoMutualInfo); tested one-sided (surrogates should have lower values)
+%           (ii) 'fmmi': the first minimum of the automutual information function; tested
+%                 one-sided
+%           (iii) 'o3': a third-order statistic, the mean cubed increment at lag 1; tested
+%                 two-sided
+%           (iv) 'tc3': a time-reversal asymmetry measure, CO_TC3 at lag 1; tested two-sided
+%           (v) 'nlpe': the mean squared nonlinear prediction error (slow; one-sided)
+%           (vi) 'fnn': the proportion of false nearest neighbors in 2 dimensions (very
+%                 slow; one-sided)
+%           (the default value in the code is 'AMI', which matches none of these; see
+%           ---NOTES)
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%
+% ---OUTPUTS: for each requested test statistic s (ami for 'ami1', fmmi, o3, tc3, nlpe, fnn),
+% five fields named with the prefix s_ (e.g., ami_p, ami_zscore, ami_f, ami_mediqr,
+% ami_prank, and likewise fmmi_p, fmmi_zscore, fmmi_f, fmmi_mediqr, fmmi_prank, o3_p,
+% o3_zscore, o3_f, o3_mediqr, o3_prank, tc3_p, tc3_zscore, tc3_f, tc3_mediqr, tc3_prank,
+% and the same for nlpe_ and fnn_):
+% s_p, the p-value of a one- or two-sided z-test of the series' value against the Gaussian
+%      distribution fitted to the surrogates' values
+% s_zscore, the corresponding z-statistic
+% s_f, the kernel-smoothed density of the (z-scored) surrogates' values at the (z-scored)
+%      value for the series (0 if outside the range of the density estimate)
+% s_mediqr, the distance of the series' value from the surrogates' median, in interquartile
+%      ranges (NaN if the interquartile range is 0)
+% s_prank, a rank-based p-value of the series' value among the surrogates' values
+%
+% ---REFERENCES:
+% Kugiumtzis, "Surrogate data test for nonlinearity including nonmonotonic transforms",
+% Phys. Rev. E 62(1) R25 (2000).
+% Guarin Lopez et al., "A new surrogate data method for nonstationary time series", arXiv
+% 1008.1804 (2010).
+% Nakamura, Small and Hirata, "Testing for nonlinearity in irregular fluctuations with
+% long-term trends", Phys. Rev. E 74(2) 026205 (2006).
+% Schreiber and Schmitz, "Surrogate time series", Physica D 142(3-4) 346 (2000).
+%
+% ---NOTES:
+% The code looks for the test statistic name 'ami1', not 'ami' as the previous documentation
+% said, and its default value 'AMI' matches nothing, so calling without theTestStat does not
+% produce any output.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

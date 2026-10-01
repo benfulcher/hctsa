@@ -1,38 +1,54 @@
 function out = NL_SSA(y, L)
-% NL_SSA  Singular Spectrum Analysis of a time series.
+% NL_SSA   Singular spectrum analysis (SSA): trend, oscillation, and separability structure.
 %
-% Constructs the trajectory (Hankel) matrix of the time series using a
-% window length L (i.e., a time-delay embedding with delay tau = 1), and
-% performs an uncentered singular value decomposition of the result.
+% Constructs the trajectory (Hankel) matrix of the time series using a window length L
+% (i.e., a time-delay embedding with delay tau = 1), and performs an uncentered singular
+% value decomposition of the result.
 %
-% Unlike NL_EmbedPCA (which centers the embedded data before decomposing it,
-% and allows a general embedding delay), this implements classic "Basic SSA":
-% a fixed delay of 1, no centering (so that a genuine trend is not removed
-% before decomposition), and diagonal averaging ("Hankelization") of the
-% leading elementary matrices back into component time series. Statistics
-% are computed on the singular-value pairing structure, and on the
-% reconstructed leading trend/oscillatory components themselves, rather than
-% on the raw eigenvalue spectrum (which NL_EmbedPCA already covers).
+% Unlike NL_EmbedPCA (which centers the embedded data before decomposing it, and allows a
+% general embedding delay), this implements classic "Basic SSA": a fixed delay of 1, no
+% centering (so that a genuine trend is not removed before decomposition), and diagonal
+% averaging ("Hankelization") of the leading elementary matrices back into component time
+% series. Statistics are computed on the singular-value pairing structure, and on the
+% reconstructed leading trend/oscillatory components themselves, rather than on the raw
+% eigenvalue spectrum (which NL_EmbedPCA already covers).
 %
-% "Extracting qualitative dynamics from experimental data"
-% D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
-%
-% "Analysis of Time Series Structure: SSA and Related Techniques"
-% N. Golyandina, V. Nekrutkin, A. Zhigljavsky, Chapman & Hall/CRC (2001)
+% Individual eigentriples within a near-degenerate pair are not uniquely determined by the
+% SVD, so all outputs are computed from basis-independent quantities: singular-value gaps,
+% or sums of whole blocks of components rather than single components.
 %
 % ---INPUTS:
 % y, the input time series
+% L, the window length (default: min(floor(N/4), 200), where N is the length of y). Must
+%    satisfy 4 <= L <= floor(N/2). The default is capped at 200 because the SVD costs
+%    O(N*L^2); an explicitly specified L is not capped.
 %
-% L, the window length (default: floor(N/4)). Must satisfy 4 <= L <= floor(N/2).
+% ---OUTPUTS:
+% gap1, gap2, gap3, gap4, gap5: the relative gaps (sigma_i - sigma_{i+1})/sigma_i between consecutive
+%       singular values of the trajectory matrix (NaN if there are too few singular values).
+%       Small gaps are the signature of a paired (oscillatory) mode; a large gap signals a
+%       well-separated mode (e.g., a trend), or the boundary between structure and noise.
+% sepIdx: the index of the largest of the first (up to) six relative gaps; components
+%       1, ..., sepIdx are taken as the leading "structured" block, the rest as residual.
+% trend_rho: Spearman correlation with time of the leading block reconstructed as a series
+% trend_r2: proportion of the variance of that reconstructed series explained by a linear
+%       trend in time (NaN if it is constant)
+% pairperiod: the period (in samples) of the most tightly paired mode within the leading
+%       block (the pair with the smallest relative gap among components 1, ..., sepIdx),
+%       estimated as 2*(N-1)/(number of sign changes of the pair's reconstruction); NaN if
+%       sepIdx = 1 or the reconstruction has no sign change
+% wcorr_leadresid: the weighted correlation between the leading block and the residual.
+%       Near 0 means the leading block is cleanly separated from the rest of the series;
+%       near 1 means the decomposition has not resolved a clean structured/residual split
+%       (e.g., for white noise).
+% The output is NaN if L is unsuitable or the trajectory matrix has fewer than 4 singular
+% values.
 %
-% ---OUTPUTS: Statistics on the singular-value pairing/decay structure
-% (gap1-gap5, sepIdx), and on the reconstructed leading block of components as
-% a whole (trend strength trend_r2/trend_rho, dominant period of its most
-% tightly-paired internal mode pairperiod, and w-correlation-based separability
-% from the residual wcorr_leadresid). Individual eigentriples within a
-% near-degenerate pair are not uniquely determined by the SVD, so all outputs
-% are computed from basis-independent quantities: singular-value gaps, or sums
-% of whole blocks of components rather than single components.
+% ---REFERENCES:
+% D. S. Broomhead and G. P. King, "Extracting qualitative dynamics from experimental data",
+% Physica D 20(2-3) 217 (1986).
+% N. Golyandina, V. Nekrutkin, A. Zhigljavsky, "Analysis of Time Series Structure: SSA and
+% Related Techniques", Chapman & Hall/CRC (2001).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
