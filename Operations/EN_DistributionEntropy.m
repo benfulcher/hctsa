@@ -1,32 +1,42 @@
 function out = EN_DistributionEntropy(y, histOrKS, numBins, olremp)
-% EN_DistributionEntropy    Distributional entropy.
+% EN_DistributionEntropy   Entropy of the distribution of values in a time series.
 %
-% Estimates of entropy from the distribution of a data vector. The
-% distribution is estimated either using a histogram with numBins bins, or as a
-% kernel-smoothed distribution, using the ksdensity function from Matlab's
-% Statistics Toolbox with width parameter, w (specified as the iunput numBins).
+% Estimates the entropy of the distribution of a data vector, ignoring the order
+% of values in time. The distribution is estimated either with a histogram or as
+% a kernel-smoothed density (using ksdensity from Matlab's Statistics Toolbox,
+% evaluated on a grid of 200 points spanning the 0.1%-99.9% quantile range plus a
+% 10% margin). The entropy is -sum(p.*log(p./w)), where p is the probability in
+% each cell and w the cell width, so it estimates a differential entropy (in
+% nats) and depends on the scale of the data. For the histogram estimate, a
+% Miller-Madow correction for the finite sample, (number of nonempty bins - 1)/
+% (2*length(y)), is added.
 %
-% An optional additional parameter can be used to remove a proportion of the
-% most extreme positive and negative deviations from the mean as an initial
-% pre-processing.
+% An optional additional parameter can be used to remove a proportion of the most
+% extreme values at both ends of the distribution as an initial preprocessing.
 %
 % ---INPUTS:
-%
 % y, the input time series
+% histOrKS, 'hist' for a histogram, or 'ks' for a kernel-smoothed density
+%    (default: 'hist')
+% numBins, for 'hist': either a positive integer, giving the number of
+%        equal-width bins, or the name of a rule for choosing the bin width
+%        passed to histcounts ('auto', 'fd', 'sqrt', 'sturges', ...);
+%        for 'ks': a positive real number, the width parameter for ksdensity, or
+%        empty for the default (automatically chosen) width, which is optimal for
+%        a Gaussian distribution
+%        (default: 10)
+% olremp [optional], the proportion of values to remove at both extremes (by
+%        quantile; e.g., olremp = 0.01 keeps only the middle 98% of the data; 0
+%        keeps all data). This parameter ought to be less than 0.5, which keeps
+%        none of the data. If olremp is nonzero, the output is the difference in
+%        entropy from removing the outliers (full data minus trimmed data).
+%        (default: 0)
 %
-% histOrKS: 'hist' for histogram, or 'ks' for ksdensity
-%
-% numBins: (*) (for 'hist'): an integer, uses a histogram with that many bins
-%          (*) (for 'ks'): a positive real number, for the width parameter for
-%                       ksdensity (can also be empty for default width
-%                                       parameter, optimum for Gaussian)
-%
-% olremp [opt]: the proportion of outliers at both extremes to remove
-%               (e.g., if olremp = 0.01; keeps only the middle 98% of data; 0
-%               keeps all data. This parameter ought to be less than 0.5, which
-%               keeps none of the data).
-%               If olremp is specified, returns the difference in entropy from
-%               removing the outliers.
+% ---OUTPUTS:
+% a scalar: the entropy estimate (in nats), or, if olremp is nonzero, the
+% entropy of the full time series minus that of the trimmed time series.
+% NaN if everything is removed by the trimming, or if the 'ks' grid range is
+% degenerate (near-constant series).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

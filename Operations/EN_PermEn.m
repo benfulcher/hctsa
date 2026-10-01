@@ -1,17 +1,38 @@
 function out = EN_PermEn(y, m, tau)
-% EN_PermEn     Permutation Entropy of a time series.
+% EN_PermEn   Permutation entropy of a time series.
 %
-% "Permutation Entropy: A Natural Complexity Measure for Time Series"
-% C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
+% Bandt and Pompe's permutation entropy. The series is cut into overlapping runs
+% of m values, spaced tau samples apart, and each run is replaced by its ordinal
+% pattern (the order its m values would take if sorted, one of m! possible
+% patterns). The permutation entropy is the Shannon entropy of how often each
+% pattern occurs; it depends only on the order of the values, not their size.
+% Also returns the version normalized by log2(m!), and an adapted implementation
+% by Bruce Land and Damian Elias.
 %
 % ---INPUTS:
 % y, the input time series
-% m, the embedding dimension (or order of the permutation entropy)
-% tau, the time-delay for the embedding
+% m, the embedding dimension (the order of the permutation entropy; default: 2)
+% tau, the time delay for the embedding (default: 1); can also be 'ac' (first
+%    zero-crossing of the autocorrelation function) or 'mi' (first minimum of
+%    the automutual information), as in BF_Embed
 %
-% ---OUTPUT:
-% Outputs the permutation entropy and normalized version computed according to
-% different implementations
+% ---OUTPUTS:
+% A structure with fields:
+% permEn, the permutation entropy in bits, -sum(p.*log2(p)) over the ordinal-
+%    pattern probabilities p
+% normPermEn, permEn normalized by log2(m!), from 0 to 1
+% permEnLE, the Land-Elias version: the entropy in nats, with probabilities below
+%    1/(number of embedding vectors) raised to that floor, divided by (m - 1)
+% NaN (instead of a structure) is returned if the series is too short to embed
+% (fewer than 5 embedding vectors).
+%
+% ---REFERENCES:
+% C. Bandt and B. Pompe, "Permutation Entropy: A Natural Complexity Measure for
+% Time Series", Phys. Rev. Lett. 88(17) 174102 (2002).
+%
+% ---NOTES:
+% The Land-Elias version is adapted from
+% http://people.ece.cornell.edu/land/PROJECTS/Complexity/ (logisticPE.m).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

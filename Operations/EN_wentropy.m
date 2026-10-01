@@ -1,20 +1,28 @@
 function out = EN_wentropy(y, waveletName, level)
 % EN_wentropy   Wavelet entropy of a time series.
 %
-% Decomposes y via the maximal-overlap discrete wavelet transform (MODWT)
-% into a set of scales, computes each scale's share of the signal's total
-% energy, p_j = E_j / sum(E), and returns the Shannon entropy of this
-% relative-energy distribution across scales, normalized to [0,1] by its
-% maximum possible value, log2(numLevels).
-%
-% cf. O. A. Rosso, S. Blanco, J. Yordanova, V. Kolev, A. Figliola, M.
-% Schuermann, E. Basar, "Wavelet entropy: a new tool for analysis of short
-% duration brain electrical signals", J. Neurosci. Methods 105(1) 65 (2001).
+% Decomposes y via the maximal-overlap discrete wavelet transform (MODWT) into a
+% set of scales, computes each scale's share of the signal's total energy,
+% p_j = E_j / sum(E), and returns the Shannon entropy of this relative-energy
+% distribution across scales, normalized to [0,1] by its maximum possible value,
+% log2(numLevels). Low values mean the energy is concentrated in few scales; high
+% values that it is spread evenly across scales. Uses MATLAB's wentropy (Wavelet
+% Toolbox).
 %
 % ---INPUTS:
 % y, the input time series
-% waveletName [opt], the wavelet used for the MODWT decomposition (default: 'sym4')
-% level [opt], the number of decomposition levels (default: 5)
+% waveletName [optional], the wavelet used for the MODWT decomposition (default:
+%    'sym4')
+% level [optional], the number of decomposition levels (default: 5)
+%
+% ---OUTPUTS:
+% a scalar: the normalized wavelet entropy (NaN if the decomposition fails, e.g.,
+% for a series too short for the requested number of levels).
+%
+% ---REFERENCES:
+% O. A. Rosso, S. Blanco, J. Yordanova, V. Kolev, A. Figliola, M. Schuermann,
+% E. Basar, "Wavelet entropy: a new tool for analysis of short duration brain
+% electrical signals", J. Neurosci. Methods 105(1) 65 (2001).
 %
 % ---NOTES:
 % level is fixed by default (rather than left to wentropy's automatic

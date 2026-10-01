@@ -1,34 +1,75 @@
 function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasses)
-% EN_MSE  Multiscale entropy of a time series
+% EN_MSE   Multiscale entropy of a time series.
 %
-% As per "Multiscale entropy analysis of biological signals",
-% Costa, Goldberger and Peng, PRE, 71, 021906 (2005)
-% http://physionet.comp.nus.edu.sg/physiotools/mse/papers/pre-2005.pdf
+% At each scale s the time series is coarse-grained by averaging over
+% non-overlapping windows of s samples (scale 1 is the original series), and the
+% entropy of the coarse-grained series is computed: by default the sample entropy,
+% SampEn(m,r) (EN_SampEn), as in the multiscale entropy of Costa et al. Scales are
+% handled as Composite Multiscale Entropy: the value at scale s is the mean over
+% all s possible starting offsets of the windows, instead of just offset 0 (see
+% NOTES). Scales for which the coarse-grained series has fewer than 20 samples are
+% skipped. The entropy is also summarized across scales (extremes and where they
+% occur, mean, spread, trend).
 %
 % ---INPUTS:
-% scaleRange: a vector of scales (default: 1:10)
-% m: embedding dimension/length of sequence to match (default: 2)
-% r: similarity threshold for matching (default: 0.15)
-% preProcessHow: how to preprocess the data (default: do not)
+% y, the input time series
+% scaleRange, a vector of scales (default: 1:10)
+% m, the embedding dimension (length of sequence to match) (default: 2)
+% r, the similarity threshold for matching, passed to EN_SampEn as an absolute
+%    value, so it is not rescaled with the scale (default: 0.15). It is a fraction
+%    of the standard deviation of the input if y is z-scored (as in hctsa).
+% preProcessHow, how to preprocess the data before coarse-graining (default: do
+%    not). The preprocessed series (BF_PreProcess) is z-scored. Options include
+%    'diff1' (incremental differences) and 'rescale_tau' (first coarse-grain at
+%    the first zero-crossing of the autocorrelation function).
+% whatEntropy, which entropy to evaluate at each scale:
+%    'sampen' (default): sample entropy, the classical multiscale entropy of Costa
+%        et al.
+%    'dispen': normalized dispersion entropy (EN_DispEn, with tau = 1), i.e.,
+%        multiscale dispersion entropy (MDE); cf. H. Azami, M. Rostaghi,
+%        D. Abasolo, J. Escudero, "Refined Composite Multiscale Dispersion
+%        Entropy and its Application to Biomedical Signals", IEEE Trans.
+%        Biomed. Eng. 64(12) 2872 (2017).
+%    'fdispen': the fluctuation-based variant of the same.
+%    r is unused for the dispersion-based settings (they partition amplitude into
+%    classes rather than applying a distance tolerance), and output field names
+%    carry the corresponding suffix (dispen_s1, meanDispEn, ...) so that the
+%    'sampen' outputs are unchanged.
+% numClasses, the number of amplitude classes for the dispersion-based settings
+%    (default: 6, EN_DispEn's own default); unused for 'sampen'.
 %
-% whatEntropy: which entropy to evaluate at each scale:
-%       (i) 'sampen' (default), Sample Entropy -- the classical Multiscale
-%           Entropy of Costa et al.
-%       (ii) 'dispen', normalized Dispersion Entropy (EN_DispEn), i.e.
-%            Multiscale Dispersion Entropy (MDE); cf. H. Azami, M. Rostaghi,
-%            D. Abasolo, J. Escudero, "Refined Composite Multiscale Dispersion
-%            Entropy and its Application to Biomedical Signals", IEEE Trans.
-%            Biomed. Eng. 64(12) 2872 (2017).
-%       (iii) 'fdispen', the fluctuation-based variant of the same.
-%       Note r is unused for the dispersion-based settings (they partition
-%       amplitude into classes rather than applying a distance tolerance), and
-%       output field names carry the corresponding suffix (dispen_s1,
-%       meanDispEn, ...) so that the 'sampen' outputs are unchanged.
+% ---OUTPUTS:
+% A structure with fields (for the sample entropy setting; for 'dispen' and
+% 'fdispen' the entropy-specific names change as given in brackets):
+% sampen_s1, sampen_s2, sampen_s3, sampen_s4, sampen_s5, sampen_s6, sampen_s7,
+%     sampen_s8, sampen_s9, sampen_s10 [dispen_s1, ... or fdispen_s1, ...], the
+%     entropy at each scale in scaleRange (named by the scale; these names are for
+%     the default scaleRange)
+% maxSampEn [maxDispEn, maxFDispEn], the maximum entropy across scales
+% maxScale, the scale at which the maximum occurs
+% minSampEn [minDispEn, minFDispEn], the minimum entropy across scales
+% minScale, the scale at which the minimum occurs
+% meanSampEn [meanDispEn, meanFDispEn], the mean entropy across scales
+% stdSampEn [stdDispEn, stdFDispEn], the standard deviation of the entropy across
+%     scales
+% cvSampEn [cvDispEn, cvFDispEn], the coefficient of variation of the entropy
+%     across scales (stdSampEn/meanSampEn)
+% meanch, the mean change in entropy from one scale to the next
+% slope, the slope of a robust linear fit (robustfit) of entropy against scale
+%     (NaN unless at least 4 scales have valid values)
+% slopeSE, the standard error of that slope
+% A scalar NaN is returned instead if no scale has enough samples.
 %
-% numClasses: the number of amplitude classes for the dispersion-based
-%       settings (default 6, EN_DispEn's own default); unused for 'sampen'.
+% ---REFERENCES:
+% Costa, Goldberger and Peng, "Multiscale entropy analysis of biological
+% signals", Phys. Rev. E 71, 021906 (2005).
+% http://physionet.comp.nus.edu.sg/physiotools/mse/papers/pre-2005.pdf
 %
-% ---WHY THE DISPERSION SETTING EXISTS:
+% Original C implementation and docs here:
+% http://physionet.org/physiotools/mse/tutorial/node3.html
+%
+% ---NOTES:
+% Why the dispersion setting exists:
 % Validated before registering, against the SampEn default on matched data
 % (2026-09-23). The dispersion variant is not measuring something unrelated --
 % meanDispEn correlates 0.88 with the SampEn family -- it estimates a similar
@@ -46,11 +87,6 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % and maxScale (0.669) -- so the fields with the *lowest* redundancy against
 % the library were, in this case, the least trustworthy ones.
 %
-%
-% Original C implementation and docs here:
-% http://physionet.org/physiotools/mse/tutorial/node3.html
-%
-% ---NOTES:
 % Audit, 2026-08-11. The classic Costa coarse-graining at scale s uses a
 % single, arbitrary non-overlapping partition of the series starting at the
 % first sample -- but s-1 other equally-valid partitions exist (starting at

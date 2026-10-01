@@ -1,32 +1,54 @@
 function out = EN_SampEn(y, M, r, preProcessHow)
-% EN_SampEn     Sample Entropy of a time series
+% EN_SampEn   Sample entropy of a time series.
 %
-% SampEn(m,r), using code from PhysioNet.
+% SampEn(m,r), using code from PhysioNet. Every run of m consecutive values is
+% compared with every other run (not with itself); two runs match when each pair
+% of corresponding values differs by less than r. SampEn(m,r) is -log(A/B), where
+% B is the number of pairs of runs that match over m values and A is the number
+% that still match when extended by one more value. Low values indicate regular,
+% predictable series; high values irregular ones. Unlike approximate entropy
+% (EN_ApEn), self-matches are excluded.
 %
-% Uses a compiled C version of the code if available, otherwise uses a (slower)
-% Matlab implementation (which can actually be faster for shorter time series
-% due to overheads of reading/writing to disk)
-%
-% The publicly-available PhysioNet Matlab code, sampenc (renamed here to
-% RN_sampenc) is available from:
+% Uses a compiled C version of the code (sampen_mex). The publicly-available
+% PhysioNet Matlab code, sampenc (renamed here to PN_sampenc) is available from:
 % http://www.physionet.org/physiotools/sampen/matlab/1.1/sampenc.m
 %
-% cf. "Physiological time-series analysis using approximate entropy and sample
-% entropy", J. S. Richman and J. R. Moorman, Am. J. Physiol. Heart Circ.
-% Physiol., 278(6) H2039 (2000)
-%
-% This function can also calculate the SampEn of successive increments of time
-% series, i.e., we using an incremental differencing pre-processing, as
-% used in the so-called Control Entropy quantity:
-%
-% "Control Entropy: A complexity measure for nonstationary signals"
-% E. M. Bollt and J. Skufca, Math. Biosci. Eng., 6(1) 1 (2009)
+% This function can also calculate the SampEn of successive increments of a time
+% series, i.e., using an incremental differencing preprocessing, as used in the
+% so-called Control Entropy quantity.
 %
 % ---INPUTS:
 % y, the input time series
-% M, the embedding dimension
-% r, the threshold
-% preProcessHow [opt], (i) 'diff1', incremental differencing (as per 'Control Entropy').
+% M, the maximum embedding dimension: SampEn is returned for m = 0, 1, ..., M
+%    (default: 2)
+% r, the threshold for judging two values similar, in the same (absolute) units
+%    as y (default: 0.1*std(y)). To use a fraction of the standard deviation,
+%    pass that fraction times std(y), or apply the function to a z-scored series.
+% preProcessHow [optional], (i) 'diff1', incremental differencing (as per
+%    'Control Entropy'). The threshold r is applied to the differenced series.
+%    Default: no preprocessing.
+%
+% ---OUTPUTS:
+% A structure with fields:
+% sampen0, sampen1, sampen2, sampen3, sampen4, sampen5, ... sampenM: the
+%    sample entropy for each run length m = 0, ..., M (sampen0 is -log of the
+%    probability that two values are within r of each other)
+% quadSampEn0, ..., quadSampEnM: the quadratic sample entropy, sampenm + log(2*r),
+%    which allows better comparison across values of r
+% meanchsampen: the mean change in sample entropy across run lengths,
+%    mean(diff([sampen0, ..., sampenM])) (only returned if M > 1)
+%
+% ---REFERENCES:
+% J. S. Richman and J. R. Moorman, "Physiological time-series analysis using
+% approximate entropy and sample entropy", Am. J. Physiol. Heart Circ. Physiol.,
+% 278(6) H2039 (2000).
+%
+% E. M. Bollt and J. Skufca, "Control Entropy: A complexity measure for
+% nonstationary signals", Math. Biosci. Eng., 6(1) 1 (2009).
+%
+% ---NOTES:
+% The quadratic sample entropy follows Lake (2006), as cited in the original code
+% comments (no fuller citation is given there).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

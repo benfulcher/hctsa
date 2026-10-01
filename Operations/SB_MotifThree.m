@@ -1,23 +1,57 @@
 function out = SB_MotifThree(y, cgHow, tau)
-% SB_MotifThree     Motifs in a coarse-graining of a time series to a 3-letter alphabet
+% SB_MotifThree   Motifs in a coarse-graining of a time series to a 3-letter alphabet.
 %
-% (As SB_MotifTwo but with a 3-letter alphabet)
+% As SB_MotifTwo but with a 3-letter alphabet. The time series (or its increments) is
+% coarse-grained into three symbols, a, b and c, each used about equally often (a
+% equiprobable alphabet), and the probabilities of all words of length 1, 2, 3 and 4
+% (counted at every position, overlapping) are returned with the Shannon entropy
+% of the word distribution at each length.
 %
 % ---INPUTS:
-% y, time series to analyze
-% cgHow, the coarse-graining method to use:
-%       (i) 'quantile': equiprobable alphabet by time-series value
-%       (ii) 'diffquant': equiprobably alphabet by time-series increments
-%
-% tau, the time-delay to symbolize consecutive words at (default: 1, i.e.,
-%      consecutive samples). Can also set tau to 'ac' to use the first
-%      zero-crossing of the autocorrelation function, matching the lag
-%      used by SB_TransitionMatrix -- useful since words at consecutive
-%      samples of a smooth, oversampled signal can be dominated by trivial
-%      local structure.
+% y, the time series to analyze
+% cgHow, the coarse-graining method to use (default: 'quantile'):
+%    (i) 'quantile': equiprobable alphabet by time-series value (a: lowest third,
+%        c: highest third)
+%    (ii) 'diffquant': equiprobable alphabet by time-series increments (a: the
+%        most negative third of the increments, c: the most positive third)
+% tau, the time delay at which to symbolize consecutive words (default: 1, i.e.,
+%    consecutive samples). The series is first downsampled by tau (using resample).
+%    Can also be 'ac' to use the first zero-crossing of the autocorrelation
+%    function, matching the lag used by SB_TransitionMatrix; useful since words at
+%    consecutive samples of a smooth, oversampled signal can be dominated by
+%    trivial local structure.
 %
 % ---OUTPUTS:
-% Statistics on words of length 1, 2, 3, and 4.
+% A structure with fields:
+% Probabilities of the symbols (length-1 words), as a proportion of the
+% sequence:
+% a, b, c
+% Probabilities of words of length 2 (the 9 two-letter words):
+% aa, ab, ac, ba, bb, bc, ca, cb, cc
+% Probabilities of words of length 3 (the 27 three-letter words):
+% aaa, aab, aac, aba, abb, abc, aca, acb, acc, baa, bab, bac, bba, bbb, bbc,
+%     bca, bcb, bcc, caa, cab, cac, cba, cbb, cbc, cca, ccb, ccc
+% Probabilities of words of length 4 (the 81 four-letter words):
+% aaaa, aaab, aaac, aaba, aabb, aabc, aaca, aacb, aacc, abaa, abab, abac,
+%     abba, abbb, abbc, abca, abcb, abcc, acaa, acab, acac, acba, acbb,
+%     acbc, acca, accb, accc, baaa, baab, baac, baba, babb, babc, baca,
+%     bacb, bacc, bbaa, bbab, bbac, bbba, bbbb, bbbc, bbca, bbcb, bbcc,
+%     bcaa, bcab, bcac, bcba, bcbb, bcbc, bcca, bccb, bccc, caaa, caab,
+%     caac, caba, cabb, cabc, caca, cacb, cacc, cbaa, cbab, cbac, cbba,
+%     cbbb, cbbc, cbca, cbcb, cbcc, ccaa, ccab, ccac, ccba, ccbb, ccbc,
+%     ccca, cccb, cccc
+% Entropies of the word distributions, in nats, with a Miller-Madow correction for
+% the finite number of words (see f_entropy below):
+% h, entropy of single symbols
+% hh, entropy of words of length 2
+% hhh, entropy of words of length 3
+% hhhh, entropy of words of length 4
+% NaN (instead of a structure) is returned if tau cannot be determined.
+%
+% ---NOTES:
+% In f_entropy, the textbook Miller-Madow degrees of freedom (occupied bins - 1)
+% are reduced by wordLength*(alphabetSize - 1), because the coarse-graining
+% fixes the marginal frequencies of the symbols.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
