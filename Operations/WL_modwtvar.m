@@ -7,7 +7,7 @@ function out = WL_modwtvar(y, wname, level)
 % elsewhere in this codebase, the MODWT is shift-invariant and its associated
 % variance estimator (modwtvar) is unbiased and accounts for boundary-affected
 % coefficients at each level, which is the standard approach for a scale-wise
-% variance decomposition (Percival and Walden).
+% variance decomposition (Percival and Walden, 2000).
 %
 % ---INPUTS:
 % y, the input time series
@@ -26,6 +26,11 @@ function out = WL_modwtvar(y, wname, level)
 %        wavelet-based scaling exponent, analogous to a Hurst estimate but using the
 %        MODWT's unbiased, boundary-corrected variance rather than an ad hoc
 %        regression on raw coefficients
+%
+% ---REFERENCES:
+% D.B. Percival and A.T. Walden, "Wavelet Methods for Time Series Analysis",
+% Cambridge University Press, Cambridge (2000). DOI: 10.1017/CBO9780511841040
+% (the MODWT is treated on pp. 159-205 and the wavelet variance on pp. 295-339).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

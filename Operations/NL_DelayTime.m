@@ -29,6 +29,15 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % meantau, stdtau, mintau, maxtau: mean, standard deviation, minimum and
 %           maximum of the curve over delays 0,...,maxDelay
 %
+% ---REFERENCES:
+% C. Merkwirth, U. Parlitz, I. Wedekind, D. Engster and W. Lauterborn, "OpenTSTOOL
+% User Manual", Version 1.2 (February 2009), Drittes Physikalisches Institut,
+% Universitaet Goettingen (section 6.20.3.17, 'delaytime', p. 53: "Compute optimal
+% delaytime for a scalar timeseries with method of Parlitz and Wichard").
+% The method is attributed to Parlitz and Wichard only in TSTOOL's documentation
+% and source (tstoolbox/@signal/delaytime.m); no journal paper describing it was
+% found in Crossref, arXiv or a web search.
+%
 % ---NOTES:
 % Computed natively in MATLAB. TSTOOL's own 'delaytime' code
 % (tstoolbox/@signal/delaytime.m, vendored in this repo under

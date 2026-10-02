@@ -76,13 +76,30 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %                 persistence (NaN if fewer than 10 poles are valid)
 %
 % ---REFERENCES:
-% Freitas, Freitas & Todd (2010).
-% Lucarini et al., "Extremes and Recurrence in Dynamical Systems" (2016).
-% Faranda, Messori & Yiou (2017).
-% Faranda, Freitas, Guiraud & Vaienti (2014), Props 1-2.
-% Caby, Faranda, Vaienti & Yiou, J. Stat. Phys. (2019), Eqs 19/21.
-% Süveges (2007).
-% (Titles and volume numbers are not given in the original docstring.)
+% A.C.M. Freitas, J.M. Freitas and M. Todd, "Hitting time statistics and extreme value
+% theory", Probab. Theory Relat. Fields 147(3-4), 675-710 (2010).
+% DOI: 10.1007/s00440-009-0221-y
+%
+% V. Lucarini, D. Faranda, A.C.G.M.M. de Freitas, J.M. de Freitas, M. Holland, T. Kuna,
+% M. Nicol, M. Todd and S. Vaienti, "Extremes and Recurrence in Dynamical Systems",
+% Wiley (2016). DOI: 10.1002/9781118632321
+%
+% D. Faranda, G. Messori and P. Yiou, "Dynamical proxies of North Atlantic
+% predictability and extremes", Sci. Rep. 7, 41278 (2017). DOI: 10.1038/srep41278
+%
+% D. Faranda, J.M. Freitas, P. Guiraud and S. Vaienti, "Sampling local properties of
+% attractors via extreme value theory", Chaos Solitons Fractals 74, 55-66 (2015)
+% (arXiv:1407.0412, July 2014; Propositions 1 and 2). DOI: 10.1016/j.chaos.2015.01.016
+% (The "Faranda, Freitas, Guiraud & Vaienti (2014), Props 1-2" of earlier versions of
+% this docstring was matched to this paper by authors, year and the existence of its
+% Propositions 1 and 2; the proposition contents were not compared.)
+%
+% Th. Caby, D. Faranda, S. Vaienti and P. Yiou, "On the computation of the extremal
+% index for time series", J. Stat. Phys. 179(5-6), 1666-1697 (2019) (Eqs 19/21).
+% DOI: 10.1007/s10955-019-02423-z
+%
+% M. Süveges, "Likelihood estimation of the extremal index", Extremes 10(1-2),
+% 41-55 (2007). DOI: 10.1007/s10687-007-0034-2
 %
 
 % ------------------------------------------------------------------------------

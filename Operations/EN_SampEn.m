@@ -46,9 +46,21 @@ function out = EN_SampEn(y, M, r, preProcessHow)
 % E. M. Bollt and J. Skufca, "Control Entropy: A complexity measure for
 % nonstationary signals", Math. Biosci. Eng., 6(1) 1 (2009).
 %
+% D.E. Lake, "Renyi entropy measures of heart rate Gaussianity", IEEE Trans. Biomed.
+% Eng. 53(1), 21-27 (2006), for the quadratic sample entropy (quadSampEn).
+% DOI: 10.1109/TBME.2005.859782
+%
+% D.E. Lake and J.R. Moorman, "Accurate estimation of entropy in very short
+% physiological time series: the problem of atrial fibrillation detection in
+% implanted ventricular devices", Am. J. Physiol. Heart Circ. Physiol. 300(1),
+% H319-H325 (2011), for COSEn (the commented-out variant below).
+% DOI: 10.1152/ajpheart.00561.2010
+%
 % ---NOTES:
-% The quadratic sample entropy follows Lake (2006), as cited in the original code
-% comments (no fuller citation is given there).
+% The code comments cite the quadratic sample entropy only as "Lake (2006)" and
+% COSEn as "Lake and Moorman, 2011"; the full references above were matched to
+% those author-year citations (by author, year and subject) and not confirmed
+% against the original code's source.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

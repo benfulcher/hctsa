@@ -32,14 +32,18 @@ function out = EN_PermEnComplexity(y, m, tau)
 % vectors).
 %
 % ---REFERENCES:
-% Rosso, Larrondo, Martin, Plastino and Fuentes, "Distinguishing Noise from
-% Chaos", Phys. Rev. Lett. 99, 154102 (2007).
+% O.A. Rosso, H.A. Larrondo, M.T. Martin, A. Plastino and M.A. Fuentes,
+% "Distinguishing noise from chaos", Phys. Rev. Lett. 99, 154102 (2007).
+% DOI: 10.1103/PhysRevLett.99.154102
 %
-% Martin, Plastino and Rosso, Physica A 369(2) 439 (2006), for the Q_0
-% normalization.
+% M.T. Martin, A. Plastino and O.A. Rosso, "Generalized statistical complexity
+% measures: Geometrical and analytical properties", Physica A 369(2), 439-462
+% (2006), for the Q_0 normalization. DOI: 10.1016/j.physa.2005.11.053
 %
-% Lamberti, Martin, Plastino and Rosso, Physica A 334(1-2) 119 (2004), for the
+% P.W. Lamberti, M.T. Martin, A. Plastino and O.A. Rosso, "Intensive entropic
+% non-triviality measure", Physica A 334(1-2), 119-131 (2004), for the
 % Jensen-Shannon statistical complexity construction.
+% DOI: 10.1016/j.physa.2003.11.005
 %
 % ---NOTES:
 % At m = 2 there are only two ordinal states, so H and C are both unimodal,

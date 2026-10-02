@@ -42,8 +42,12 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %                     clustering structure of the point cloud at small scales
 %
 % ---REFERENCES:
-% Bauer, J. Appl. Comput. Topol. 5, 391 (2021) (ripser).
-% Perea & Harer, Found. Comput. Math. 15, 799 (2015) (sliding-window persistence).
+% U. Bauer, "Ripser: efficient computation of Vietoris-Rips persistence barcodes",
+% J. Appl. Comput. Topol. 5(3), 391-423 (2021) (ripser). DOI: 10.1007/s41468-021-00071-5
+%
+% J.A. Perea and J. Harer, "Sliding windows and persistence: an application of
+% topological methods to signal analysis", Found. Comput. Math. 15(3), 799-838 (2015)
+% (sliding-window persistence). DOI: 10.1007/s10208-014-9206-z
 % Edelsbrunner & Harer, "Computational Topology: An Introduction", AMS, 2010.
 %
 % ---NOTES:

@@ -39,17 +39,19 @@ function out = NW_OrdinalPartitionNetwork(y, d, tau)
 % embedding fails or there are fewer than 30 embedded points.
 %
 % ---REFERENCES:
-% C.W. Kulp, J.M. Chobot, H.R. Freitas, G.D. Sprechini, "Using ordinal partition
-% transition networks to analyze ECG data", Chaos 26, 073114 (2016).
+% C.W. Kulp, J.M. Chobot, H.R. Freitas and G.D. Sprechini, "Using ordinal partition
+% transition networks to analyze ECG data", Chaos 26(7), 073114 (2016).
+% DOI: 10.1063/1.4959537
 %
-% M. McCullough, M. Small, T. Stemler, H.H.-C. Iu, "Time lagged ordinal partition
-% networks for capturing dynamics of continuous dynamical systems", Chaos 25,
-% 053101 (2015). The original (weighted) ordinal partition transition network, of
-% which the unweighted version of Kulp et al. (used here) is a variant.
+% M. McCullough, M. Small, T. Stemler and H.H.-C. Iu, "Time lagged ordinal partition
+% networks for capturing dynamics of continuous dynamical systems", Chaos 25(5),
+% 053101 (2015). DOI: 10.1063/1.4919075
+% The original (weighted) ordinal partition transition network, of which the
+% unweighted version of Kulp et al. (used here) is a variant.
 %
-% C. Bandt and B. Pompe, "Permutation Entropy: A Natural Complexity Measure for
-% Time Series", Phys. Rev. Lett. 88(17) 174102 (2002). The underlying
-% ordinal-pattern symbolization.
+% C. Bandt and B. Pompe, "Permutation entropy: a natural complexity measure for time
+% series", Phys. Rev. Lett. 88(17), 174102 (2002). DOI: 10.1103/PhysRevLett.88.174102
+% The underlying ordinal-pattern symbolization.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

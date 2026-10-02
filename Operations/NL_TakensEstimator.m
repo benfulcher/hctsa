@@ -37,7 +37,10 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % heavily quantized data).
 %
 % ---REFERENCES:
-% F. Takens, "Detecting strange attractors in turbulence", Lect. Notes Math. 898 p366 (1981).
+% F. Takens, "On the numerical determination of the dimension of an attractor", in
+% B.L.J. Braaksma, H.W. Broer and F. Takens (eds.), Dynamical Systems and
+% Bifurcations (Groningen, 1984), Lecture Notes in Mathematics 1125, 99-106,
+% Springer, Berlin (1985). DOI: 10.1007/BFb0075637
 %
 % ---NOTES:
 % For high embedding dimensions of noise-like series no pair may fall within eup at all,

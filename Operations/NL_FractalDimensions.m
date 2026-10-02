@@ -8,8 +8,9 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % the real work is in the compiled mex-dev/GeneralizedDimensionEstimation/
 % gendimest.cpp, vendored in this repo under Toolboxes/OpenTSTOOL) turned out to
 % be a well-defined, published method rather than an undocumented black box,
-% "Generalized Dimensions from Nearest Neighbor Information", P. Schram and
-% W. van der Water. It is reproduced exactly here in native MATLAB:
+% "Generalized dimensions from near-neighbor information", W. van de Water and
+% P. Schram (Phys. Rev. A 37(8), 3118-3125, 1988; an earlier version of this text
+% wrote "Schram and van der Water"). It is reproduced exactly here in native MATLAB:
 %
 % For each of Nref reference points, find the distances to its 1st..kmax-th
 % nearest neighbors (excluding a Theiler window of "past" samples). For
@@ -57,8 +58,8 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % linfit_rmsqres: root-mean-square residual of that fit
 %
 % ---REFERENCES:
-% P. Schram and W. van der Water, "Generalized Dimensions from Nearest Neighbor
-% Information" (journal and year not given in the original docstring).
+% W. van de Water and P. Schram, "Generalized dimensions from near-neighbor
+% information", Phys. Rev. A 37(8), 3118-3125 (1988). DOI: 10.1103/PhysRevA.37.3118
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

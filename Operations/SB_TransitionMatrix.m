@@ -14,7 +14,8 @@ function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
 % returned, as well as lam2mod, a statistic of the row-normalized matrix P.
 %
 % Related to the idea of quantile graphs from time series.
-% cf. Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
+% cf. A.S.L.O. Campanharo, M.I. Sirer, R.D. Malmgren, F.M. Ramos and L.A.N. Amaral,
+% "Duality between time series and networks", PLoS ONE 6(8), e23378 (2011).
 % https://doi.org/10.1371/journal.pone.0023378
 %
 % ---INPUTS:

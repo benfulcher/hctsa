@@ -74,7 +74,8 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 %       negative, is usually also the least reliably estimated of the
 %       three)
 % sumPos, the sum of the positive exponents -- an upper bound on the
-%       Kolmogorov-Sinai entropy via Pesin's identity
+%       Kolmogorov-Sinai entropy (Ruelle's inequality), with equality
+%       (Pesin's identity) under conditions such as an SRB measure
 % numPos, the number of positive exponents
 % sumAll, the sum of LE1+LE2+LE3 -- the average phase-space
 %       expansion/contraction rate (negative for a dissipative system;
@@ -89,7 +90,9 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 %
 % ---REFERENCES:
 % M. Sano and Y. Sawada, "Measurement of the Lyapunov spectrum from a chaotic time series", Phys. Rev. Lett. 55(10), 1082 (1985).
-% J. Kaplan and J. Yorke, "Chaotic behavior of multidimensional difference equations", in Functional Differential Equations and Approximation of Fixed Points, Lecture Notes in Mathematics 730, 204-227 (1979) (for the Kaplan-Yorke dimension conjecture used in KYdim).
+% J.L. Kaplan and J.A. Yorke, "Chaotic behavior of multidimensional difference equations", in H.-O. Peitgen and H.-O. Walther (eds.), Functional Differential Equations and Approximation of Fixed Points, Lecture Notes in Mathematics 730, 204-227, Springer, Berlin (1979) (for the Kaplan-Yorke dimension conjecture used in KYdim). DOI: 10.1007/BFb0064319
+% D. Ruelle, "An inequality for the entropy of differentiable maps", Bol. Soc. Bras. Mat. 9(1), 83-87 (1978) (the upper bound on the KS entropy by the sum of the positive exponents). DOI: 10.1007/BF02584795
+% Ya.B. Pesin, "Characteristic Lyapunov exponents and smooth ergodic theory", Russ. Math. Surv. 32(4), 55-114 (1977) (equality of the two under conditions). DOI: 10.1070/RM1977v032n04ABEH001639
 %
 % ---NOTES:
 % A validated pathology and how it's handled: for series that

@@ -45,9 +45,12 @@ function out = SP_SummariesPhase(y)
 %       smoothly and systematically with frequency
 %
 % ---REFERENCES:
-% J. Theiler et al., "Testing for nonlinearity in time series: the method of
-% surrogate data", Physica D 58(1-4), 77 (1992).
-% N.I. Fisher, "Statistical Analysis of Circular Data" (1993).
+% J. Theiler, S. Eubank, A. Longtin, B. Galdrikian and J. Doyne Farmer, "Testing for
+% nonlinearity in time series: the method of surrogate data", Physica D 58(1-4),
+% 77-94 (1992). DOI: 10.1016/0167-2789(92)90102-S
+%
+% N.I. Fisher, "Statistical Analysis of Circular Data", Cambridge University Press,
+% Cambridge (1993). DOI: 10.1017/CBO9780511564345
 %
 % ---NOTES:
 % Validation, from the original docstring. R: white noise gave R ~ 0.028 +/- 0.015
