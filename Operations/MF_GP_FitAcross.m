@@ -72,8 +72,6 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-doplot = 0; % set to 1 to visualize behavior
-
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
@@ -150,21 +148,6 @@ try
 	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt, ts); % evaluate at new time points, ts
 catch emsg
 	error('Error running Gaussian Process regression on time series: %s', emsg.message);
-end
-
-%% For Plotting
-if doplot
-	xstar = linspace(min(t), max(t), 1000)';
-	[mu, S2] = gpr(loghyper, covFunc, t, y, ts);
-	S2p = S2 - exp(2 * loghyper(3)); % remove noise from predictions
-	S2p = S2;
-	figure('color', 'w');
-	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
-	fill([ts; flipdim(ts, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8);
-	% grayscale error bars
-	hold on;
-	plot(ts, mu, 'k-', 'LineWidth', 2); % mean function
-	plot(ts, y(ts), '.-k'); % original data
 end
 
 % ------------------------------------------------------------------------------

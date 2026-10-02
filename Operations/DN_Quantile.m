@@ -45,7 +45,7 @@ if nargin < 2
 	p = 0.5;
 end
 if ~isnumeric(p) || (p < 0) || (p > 1)
-	error('p must specify a proportion, in (0,1)');
+	error('p must specify a proportion, in [0,1]');
 end
 
 out = quantile(y, p);

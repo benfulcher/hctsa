@@ -170,7 +170,7 @@ qList(qList == 0) = 0.0001;
 signal = y;
 
 prof = cumsum(signal);
-slength = size(prof);
+slength = size(prof, 1);
 
 numIncrements = 20;
 sListFull = unique(round(linspace(minScale, maxScale, numIncrements)));

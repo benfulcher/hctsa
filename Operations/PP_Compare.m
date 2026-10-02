@@ -12,8 +12,7 @@ function out = PP_Compare(y, detrndmeth)
 %
 % ---INPUTS:
 % y, the input time series
-% detrndmeth, the preprocessing to apply (the code's default, 'medianf', has no
-%       window length and so is rejected as invalid; always give one, e.g., 'medianf3'):
+% detrndmeth, the preprocessing to apply (default: 'medianf3'):
 %       'poly<n>': remove a polynomial of order n = 1-9 (Curve Fitting Toolbox),
 %           e.g., 'poly1', a linear detrending
 %       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(b1*x+c1) + ...
@@ -80,7 +79,7 @@ function out = PP_Compare(y, detrndmeth)
 % ------------------------------------------------------------------------------
 %% Check inputs, set default:
 if nargin < 2 || isempty(detrndmeth)
-	detrndmeth = 'medianf'; % median filter by default
+	detrndmeth = 'medianf3'; % median filter by default
 end
 
 % -------------------------------------------------------------------------------
@@ -97,7 +96,7 @@ r = (1:N)'; % the time-range over which to fit
 
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
-if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isempty(str2double(detrndmeth(5)))
+if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isnan(str2double(detrndmeth(5)))
 
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
@@ -107,7 +106,7 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isempty(str2do
 	y_d = y - y_fit;
 
 	% 2) Seasonal detrend
-elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
+elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isnan(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
 
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
@@ -117,7 +116,7 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isempty(str
 	y_d = y - y_fit;
 
 	% 3) Spline detrend
-elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
+elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isnan(str2double(detrndmeth(7))) && ~isnan(str2double(detrndmeth(8)))
 	nknots = str2double(detrndmeth(7));
 	intp = str2double(detrndmeth(8));
 
@@ -129,17 +128,17 @@ elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isempty(
 	y_d = y - y_spl';
 
 	% 4) Differencing
-elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isempty(str2double(detrndmeth(5)))
+elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isnan(str2double(detrndmeth(5)))
 	ndiffs = str2double(detrndmeth(5));
 	y_d = diff(y, ndiffs); % difference the series n times
 
 	% 5) Median Filter
-elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isempty(str2double(detrndmeth(8:end)))
+elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isnan(str2double(detrndmeth(8:end)))
 	n = str2double(detrndmeth(8:end)); % order of filtering
 	y_d = medfilt1(y, n);
 
 	% 6) Running Average
-elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isempty(str2double(detrndmeth(4:end)))
+elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isnan(str2double(detrndmeth(4:end)))
 	n = str2double(detrndmeth(4:end)); % the window size
 	y_d = filter(ones(1, n) / n, 1, y);
 
