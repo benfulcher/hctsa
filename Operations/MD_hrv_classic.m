@@ -110,7 +110,11 @@ end
 if sigD <= tolD
 	sigD = NaN;
 end
-PNNxfn = @(c) mean(Dy > c * sigD);
+if isnan(sigD)
+	PNNxfn = @(c) NaN; % (a comparison with NaN would otherwise give 0)
+else
+	PNNxfn = @(c) mean(Dy > c * sigD);
+end
 
 out.pnnrel025 = PNNxfn(0.25);
 out.pnnrel05 = PNNxfn(0.5);
