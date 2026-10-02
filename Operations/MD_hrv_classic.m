@@ -100,13 +100,14 @@ N = length(y); % time-series length
 % standard deviation of the increments, so the measure does not depend on the units.
 Dy = abs(diffy);
 sigD = median(abs(diffy - median(diffy))) / 0.6745; % robust (MAD-based) SD of increments
-if sigD == 0
+tolD = 1e-10 * std(y); % treat a spread below this (rounding error) as zero
+if sigD <= tolD
 	% Over half the increments are equal (e.g., a quantized series): fall back to the
 	% mean absolute deviation about the median (consistent with the SD for Gaussian
 	% increments). Zero only if all the increments are equal, in which case NaN.
 	sigD = mean(abs(diffy - median(diffy))) * sqrt(pi / 2);
 end
-if sigD == 0
+if sigD <= tolD
 	sigD = NaN;
 end
 PNNxfn = @(c) mean(Dy > c * sigD);
