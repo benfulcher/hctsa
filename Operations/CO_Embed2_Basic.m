@@ -8,7 +8,7 @@ function out = CO_Embed2_Basic(y, tau)
 % ---INPUTS:
 % y, the input time series
 % tau, the time lag (default 1; can be set to 'tau' to use the first zero-crossing of
-%      the autocorrelation function, with no upper cap)
+%      the autocorrelation function, capped at N/10)
 %
 % ---OUTPUTS:
 % updiag01, updiag05, the fraction of points within 0.1 or 0.5 (vertically) of the
@@ -66,6 +66,13 @@ doPlot = false; % plot outputs to a figure
 if strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		out = NaN; return
+	end
+	% Cannot set the time delay greater than 10% the length of the time series
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
+	end
 end
 if isnan(tau)
 	out = NaN; return

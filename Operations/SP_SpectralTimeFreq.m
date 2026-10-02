@@ -22,8 +22,8 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 % ---INPUTS:
 % y, the input time series
 % numWindows, sets the window length to N/numWindows samples (at least 8), with
-%             50% overlap (default: 20). The function errors if fewer than 4
-%             windows fit.
+%             50% overlap (default: 20). If fewer than 4 windows fit, all
+%             outputs are NaN.
 %
 % ---OUTPUTS:
 % sk_max, sk_mean, sk_std, sk_range: maximum, mean, standard deviation and range,
@@ -32,16 +32,22 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 %         the 95% Gaussian-null threshold (non-Gaussian, bursty behavior)
 % sk_freqAtMax, the angular frequency (2*pi*f, matching SP_Summaries) at which the
 %         spectral kurtosis is largest
-% sk_meanSpread, the mean of the spread output of spectralKurtosis
-% sk_meanCentroid, the centroid output of spectralKurtosis as an angular
-%         frequency (2*pi*mean(centroid)); not registered as a feature
+% sk_meanSpread, the mean over frequencies of the standard deviation across windows
+%         of the power in each frequency bin (the spread output of
+%         spectralKurtosis); the power is |FFT|^2/(0.5*sum(window)^2), so it
+%         scales with the variance of the series and as 1/(window length)
+% sk_meanCentroid, 2*pi times the mean over frequencies of the mean across windows
+%         of the same power (the centroid output of spectralKurtosis, which for
+%         unscaled spectral kurtosis is a mean power, not a frequency); not
+%         registered as a feature
 % se_mean, se_std, se_max, se_min, se_range: mean, standard deviation, maximum,
 %         minimum and range, over windows, of the spectral entropy
 %
 % ---NOTES:
-% sk_meanSpread and sk_meanCentroid are NaN on older MATLAB releases that lack the
-% five-output form of spectralKurtosis (the kurtosis itself is then computed
-% directly from the spectrogram).
+% All outputs are computed directly from the spectrogram, so they do not depend on
+% the MATLAB release (on releases without the five-output form of spectralKurtosis,
+% sk_meanSpread and sk_meanCentroid used to be NaN). The values equal those of the
+% toolbox function's outputs to rounding error.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -105,37 +111,36 @@ window = hamming(winLength);
 hopLength = winLength - noverlap;
 numFrames = floor((Ny - winLength) / hopLength) + 1;
 if numFrames < 4
-	error('Time series (N=%u) too short for a %u-window spectrogram', Ny, numWindows);
+	% Too short for across-window statistics to mean anything: NaN for all outputs
+	out = NaN; return
 end
 
 % ------------------------------------------------------------------------------
 % Spectral kurtosis: kurtosis across windows, per frequency bin
 % ------------------------------------------------------------------------------
-% MATLAB version compatibility: spectralKurtosis output signatures vary across
-% releases (e.g., older releases can return fewer outputs).
-try
-	[kurt, spread, centroid, thresh, fout] = spectralKurtosis(y, Fs, ...
-				'Window', window, 'OverlapLength', noverlap, ...
-				'Scaled', false, 'ConfidenceLevel', 0.95);
-catch
-	% Older releases: the five-output, per-frequency form above is not
-	% available. (The previous fallback here called spectralKurtosis with two
-	% outputs, which in those releases is the Audio Toolbox function returning
-	% the kurtosis of the spectrum PER FRAME and, as second output, the
-	% spectral spread -- a different quantity, and not a frequency axis.)
-	% Compute the same estimator directly from the spectrogram: MATLAB's
-	% unscaled spectral kurtosis is SK(f) = ((K+1)/(K-1)) <|X|^4>/<|X|^2>^2 - 2
-	% over K frames (Antoni 2006), with the Gaussian-null threshold
-	% 2 z_{(1+p)/2}/sqrt(K). Verified identical (to ~1e-15) to the toolbox
-	% call above for several series lengths.
-	[Sxx, fout] = spectrogram(y, window, noverlap, winLength, Fs);
-	P = abs(Sxx).^2;
-	K = size(P, 2);
-	kurt = ((K + 1) / (K - 1)) * mean(P.^2, 2) ./ mean(P, 2).^2 - 2;
-	thresh = 2 * norminv(1 - (1 - 0.95) / 2) / sqrt(K);
-	spread = NaN;
-	centroid = NaN;
+% Everything is computed directly from the spectrogram, so that the outputs do
+% not depend on the MATLAB release (the outputs of spectralKurtosis differ
+% between releases, and older ones lack the per-frequency form). The values are
+% those of [kurt, spread, centroid, thresh, fout] = spectralKurtosis(y, Fs,
+% 'Window', window, 'OverlapLength', noverlap, 'Scaled', false, 'ConfidenceLevel',
+% 0.95), which are all functions of P, the power in each frequency bin and
+% window, normalized as |FFT|^2/(0.5*sum(window)^2) and halved at zero frequency
+% (and at the Nyquist frequency for an even window length), with K windows:
+%   kurt = ((K+1)/(K-1)) <P^2>/<P>^2 - 2, means over windows (Antoni 2006);
+%   spread = standard deviation of P across windows; and
+%   centroid = <P>, the mean of P across windows (named a centroid by MATLAB, but
+%              with Scaled = false it is a mean power, not a frequency).
+[Sxx, fout] = spectrogram(y, window, noverlap, winLength, Fs);
+P = abs(Sxx).^2 / (0.5 * sum(window)^2);
+P(1, :) = 0.5 * P(1, :); % zero frequency
+if rem(winLength, 2) == 0
+	P(end, :) = 0.5 * P(end, :); % Nyquist frequency
 end
+K = size(P, 2); % number of windows
+kurt = ((K + 1) / (K - 1)) * mean(P.^2, 2) ./ mean(P, 2).^2 - 2;
+thresh = 2 * sqrt(2) * erfcinv(1 - 0.95) / sqrt(K); % 95% Gaussian-null threshold
+spread = std(P, 0, 2);
+centroid = mean(P, 2);
 
 out.sk_max = max(kurt);
 out.sk_mean = mean(kurt);
@@ -144,16 +149,8 @@ out.sk_range = max(kurt) - min(kurt);
 out.sk_fracAboveThresh = mean(kurt > thresh); % fraction of frequencies with non-Gaussian, bursty behavior
 [~, i_max] = max(kurt);
 out.sk_freqAtMax = 2 * pi * fout(i_max); % angular frequency, matching SP_Summaries convention
-if all(isnan(spread))
-	out.sk_meanSpread = NaN;
-else
-	out.sk_meanSpread = mean(spread);
-end
-if all(isnan(centroid))
-	out.sk_meanCentroid = NaN;
-else
-	out.sk_meanCentroid = 2 * pi * mean(centroid);
-end
+out.sk_meanSpread = mean(spread);
+out.sk_meanCentroid = 2 * pi * mean(centroid);
 
 % ------------------------------------------------------------------------------
 % Instantaneous spectral entropy: entropy per window, across windows

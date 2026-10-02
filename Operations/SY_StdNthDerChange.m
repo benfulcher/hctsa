@@ -21,7 +21,8 @@ function out = SY_StdNthDerChange(y, maxd)
 % represent (on a 20-series sample of the Bonn EEG dataset, 20/20 showed this
 % interior minimum, with a median exponential-fit r^2 of only 0.11). The minOrder,
 % minOrderInterp, minRatio, overDiffRatio, and isInterior outputs characterize this
-% directly, alongside the exponential fit. Needs the Curve Fitting Toolbox.
+% directly, alongside the exponential fit. Needs the Curve Fitting Toolbox; if the
+% exponential fit fails, the fexp_* outputs are NaN and the others are still returned.
 %
 % ---INPUTS:
 % y, the input time series
@@ -95,13 +96,22 @@ end
 % Fit exponential growth/decay using the Curve-Fitting Toolbox
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, 0.5 * sign(ms(end) - ms(1))]);
 f = fittype('a*exp(b*x)', 'options', s);
-[c, gof] = fit((1:maxd)', ms, f);
-out.fexp_a = c.a;
-out.fexp_b = c.b; % this is important
-out.fexp_r2 = gof.rsquare; % this is more important!
-% fexp_adjr2 dropped: near-duplicate of fexp_r2 (adjustment is for 2 free
-% parameters against maxd=10 data points, so it barely moves).
-out.fexp_rmse = gof.rmse;
+try
+	[c, gof] = fit((1:maxd)', ms, f);
+	out.fexp_a = c.a;
+	out.fexp_b = c.b; % this is important
+	out.fexp_r2 = gof.rsquare; % this is more important!
+	% fexp_adjr2 dropped: near-duplicate of fexp_r2 (adjustment is for 2 free
+	% parameters against maxd=10 data points, so it barely moves).
+	out.fexp_rmse = gof.rmse;
+catch
+	% The fit failed (e.g., non-finite values): NaN for the fit fields, but
+	% still report the directly computed minimum-order statistics below
+	out.fexp_a = NaN;
+	out.fexp_b = NaN;
+	out.fexp_r2 = NaN;
+	out.fexp_rmse = NaN;
+end
 
 % ------------------------------------------------------------------------------
 %% Directly characterize the minimum-variance differencing order

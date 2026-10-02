@@ -64,7 +64,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %
 % ---OUTPUTS:
 % propValidPoles, proportion of poles that gave a valid local dimension (at
-%                 least 15 exceedances); a diagnostic of whether q, nPoles and
+%                 least 15 exceedances; such a pole also has a valid persistence,
+%                 as long as mOrder is smaller than the number of returns used);
+%                 a diagnostic of whether q, nPoles and
 %                 the series length were adequate, not a property of the dynamics
 % meanLocalDim, stdLocalDim, mean and standard deviation of the local dimension
 %                 across poles

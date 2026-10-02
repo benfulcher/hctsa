@@ -13,7 +13,8 @@ function out = HT_DistributionTest(x, theTest, theDistn, numBins)
 % The distributions are fitted by maximum likelihood with MATLAB's Statistics
 % Toolbox: normfit, evfit, unifit, betafit, raylfit, expfit, gamfit, lognfit
 % and wblfit. For the beta distribution, the data are first rescaled to lie
-% inside (0, 1). NaN is returned if the data fall outside the support of the
+% inside (0, 1), as (x - min + 0.01*std)/(max - min + 0.02*std) (the same
+% rescaling as in DN_CompareKSFit). NaN is returned if the data fall outside the support of the
 % distribution (negative values for the Rayleigh, exponential and gamma
 % distributions; non-positive values for the log-normal and Weibull
 % distributions).
@@ -85,7 +86,7 @@ switch theDistn
 		[a, b] = unifit(x);
 	case 'beta'
 		% clumsily scale to the range (0,1)
-		x = (x - min(x) + 0.01 * std(x)) / (max(x) - min(x) + 0.01 * std(x));
+		x = (x - min(x) + 0.01 * std(x)) / (max(x) - min(x) + 0.02 * std(x)); % same rescaling as DN_CompareKSFit; keeps x inside (0,1)
 		a = betafit(x);        % then fit
 	case 'rayleigh'
 		if any(x < 0)

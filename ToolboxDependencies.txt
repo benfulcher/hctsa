@@ -113,7 +113,6 @@ DT_IsSeasonal.m
 EN_Randomize.m
 FC_LocalSimple.m
 FC_LoopLocalSimple.m
-NL_FractalDimensions.m
 NL_LargestLyap.m
 NW_VisibilityGraph.m
 PD_PeriodicityWang.m

@@ -195,7 +195,11 @@ gmModels = cell(kMax, 1);
 % reproducible results independent of what ran before this operation:
 rngState = rng(0, 'twister');
 try
-	gmModels{1} = fitgmdist(y_gmm, 1);
+	% (same covariance regularization and replicates as the k >= 2 fits below, so
+	% that the BIC values are comparable and the fit survives a near-singular cloud)
+	gmModels{1} = fitgmdist(y_gmm, 1, 'CovarianceType', 'full', ...
+							'RegularizationValue', regVal, 'Replicates', 3, ...
+							'Options', gmOptions, 'Start', 'plus');
 	BIC(1) = gmModels{1}.BIC;
 catch
 	% A single-component Gaussian fit failing (degenerate covariance) means

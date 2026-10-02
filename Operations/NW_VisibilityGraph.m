@@ -41,7 +41,10 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 % dgaussk_resruns: goodness of fit (R^2, adjusted R^2, root-mean-square error),
 %       autocorrelation of the residuals at lags 1 and 2, and a runs test
 %       p-value, for a single Gaussian fitted to the histogram of degrees
-%       (DN_SimpleFit, with as many bins as the range of the degrees)
+%       (DN_SimpleFit, with as many bins as the range of the degrees); the
+%       root-mean-square error is in units of probability density of the degrees
+%       divided by their standard deviation, so it does not depend on the number
+%       of nodes
 % dexpk_r2, dexpk_adjr2, dexpk_rmse, dexpk_resAC1, dexpk_resAC2,
 % dexpk_resruns: the same, for a single exponential fitted to the histogram
 % dpowerk_r2, dpowerk_adjr2, dpowerk_rmse, dpowerk_resAC1, dpowerk_resAC2,

@@ -57,13 +57,16 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 % The walker compared with the time series:
 % sw_meanabsdiff: mean absolute difference between y and w
 % sw_taudiff: first zero-crossing of the autocorrelation function of y minus that of w
-% sw_stdrat, sw_ac1rat, sw_minrat, sw_maxrat: ratios of the standard deviation, lag-1
-%       autocorrelation, minimum, and maximum of w to those of y
+% sw_stdrat, sw_minrat, sw_maxrat: ratios of the standard deviation, minimum, and
+%       maximum of w to those of y
+% sw_ac1diff: lag-1 autocorrelation of w minus that of y
 % sw_propcross: proportion of steps at which w crosses y
 % sw_ansarib_pval: p-value of an Ansari-Bradley test comparing the distributions of
 %       w and y
-% sw_distdiff: sum of absolute differences between kernel-smoothed densities of y and
-%       w, on a common grid of 200 points
+% sw_distdiff: integral of the absolute difference between the kernel-smoothed
+%       densities of y and w (evaluated on a common grid of 200 points and summed
+%       times the grid spacing, so it is at most 2 and does not depend on
+%       the range of the data)
 % The residual, w - y:
 % res_runstest: p-value of a runs test for randomness
 % res_swss5_1: variability of the residual's standard deviation across 5 windows
@@ -250,7 +253,7 @@ out.w_propzcross = sum(w(1:end - 1) .* w(2:end) < 0) / (N - 1);
 out.sw_meanabsdiff = mean(abs(y - w));
 out.sw_taudiff = CO_FirstCrossing(y, 'ac', 0, 'continuous') - CO_FirstCrossing(w, 'ac', 0, 'continuous');
 out.sw_stdrat = std(w) / std(y); % will be the same as w_std for z-scored signal
-out.sw_ac1rat = out.w_ac1 / CO_AutoCorr(y, 1);
+out.sw_ac1diff = out.w_ac1 - CO_AutoCorr(y, 1, 'Fourier'); % a difference, not a ratio, which blows up when y has ac1 near 0
 out.sw_minrat = min(w) / min(y);
 out.sw_maxrat = max(w) / max(y);
 out.sw_propcross = sum((w(1:end - 1) - y(1:end - 1)) .* (w(2:end) - y(2:end)) < 0) / (N - 1);
@@ -267,7 +270,7 @@ out.sw_ansarib_pval = pval; % p-value from the test
 
 r = linspace(min(min(y), min(w)), max(max(y), max(w)), 200); % make range of ksdensity uniform across all subsegments
 dy = ksdensity(y, r); dw = ksdensity(w, r); % the kernel-smoothed distributions
-out.sw_distdiff = sum(abs(dy - dw));
+out.sw_distdiff = sum(abs(dy - dw)) * (r(2) - r(1)); % integral of |density difference| (grid spacing x sum)
 
 % (iii) Looking at residuals between time series and walker
 res = w - y;
