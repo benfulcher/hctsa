@@ -270,22 +270,25 @@ end
 
 % ------------------------------------------------------------------------------
 function xf = SUB_fit_exp_smooth(x, a)
-	% Iterate over rolling window:
+	% The forecast of x(ii+1) restarts the smoother at the start of the series, with
+	% initial value s(1) = mean(x(1:ii-1)), and runs s(jj) = a*x(jj) + (1-a)*s(jj-1)
+	% for jj = 2:ii. Unrolling the recursion, the forecast is
+	%   s(ii) = (1-a)^(ii-1)*mean(x(1:ii-1)) + sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj),
+	% where the sum is itself a one-pole filter of x(2:end), so all forecasts are
+	% found in O(N) rather than by restarting the loop at every ii.
+	x = x(:);
 	ntrain = length(x);
 	xf = zeros(ntrain, 1);
-
-	for ii = 2:ntrain - 1
-		s = zeros(ntrain, 1);
-		s(1) = mean(x(1:ii - 1));
-
-		% Loop to smooth data within the window size
-		for jj = 2:ii
-			s(jj) = a * x(jj) + (1 - a) * s(jj - 1);
-		end
-
-		% S(t) = Xf(t) is forecasted value for X(t+1)
-		xf(ii + 1, 1) = s(ii);
+	if ntrain < 3
+		return
 	end
+
+	ii = (2:ntrain - 1)';
+	runMean = cumsum(x(1:ntrain - 2)) ./ (1:ntrain - 2)'; % mean(x(1:ii-1))
+	ewma = filter(a, [1, -(1 - a)], [0; x(2:end)]); % sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj)
+
+	% S(t) = Xf(t) is forecasted value for X(t+1)
+	xf(ii + 1) = (1 - a).^(ii - 1) .* runMean + ewma(ii);
 end
 
 end

@@ -20,7 +20,8 @@ function out = FC_LocalSimple(y, forecastMeth, trainLength)
 %
 % trainLength, the number of past values used to forecast the next value (default
 %          3), or 'ac' to use the first zero-crossing of the autocorrelation
-%          function of y (discrete, from CO_FirstCrossing).
+%          function of y (discrete, from CO_FirstCrossing); for 'lfit' this is
+%          at least 2, since a line cannot be fitted to a single point.
 %
 % ---OUTPUTS:
 % meane, mean of the residuals (the bias of the forecast)
@@ -88,6 +89,9 @@ N = length(y); % Time-series length
 if strcmp(trainLength, 'ac')
 	% Make it first zero-crossing of ACF:
 	lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if strcmp(forecastMeth, 'lfit') && ~isnan(lp)
+		lp = max(lp, 2); % a straight line needs at least two points
+	end
 else
 	lp = trainLength; % the length of the subsegment preceeding to use to predict the subsequent value
 end
