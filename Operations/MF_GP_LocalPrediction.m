@@ -60,8 +60,9 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % The 'standard errors' in the code (stderrs) are 2*sqrt(S2), i.e., 95% error
 % bars, so the outputs ending in _std are in units of these, not of one standard
 % deviation. The predictive variance S2 includes the likelihood noise.
-% For 'randomgap', the random seed is reset in every window, so with a fixed seed
-% every window uses the same random split.
+% For 'randomgap', the random seed is reset once, before the loop over windows, so
+% each window gets a different random split, but the sequence of splits is the
+% same on every run (with a fixed seed).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -162,6 +163,12 @@ mlikelihoods = zeros(numPreds, 1); % marginal likelihoods of model
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
 
+% Control the random seed (for reproducibility), once, before the loop over windows
+% (so that the windows get different random splits):
+if strcmp(pmode, 'randomgap')
+	BF_ResetSeed(randomSeed);
+end
+
 for i = 1:numPreds
 	%% (0) Set up test and training sets
 	switch pmode
@@ -175,9 +182,6 @@ for i = 1:numPreds
 			ys = y(rs); % test data
 
 		case 'randomgap'
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-
 			t = (1:numTrain + numTest)';
 			r = randperm(numTrain + numTest);
 			yy = y(spns(i):spns(i) + numTrain + numTest - 1);
