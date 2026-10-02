@@ -44,10 +44,11 @@ function out = SB_MotifTwo(y, binarizeHow, tau)
 % symbolized sequence is shorter than 5.
 %
 % ---NOTES:
-% In f_entropy, the textbook Miller-Madow degrees of freedom (occupied bins - 1)
-% are reduced by wordLength*(alphabetSize - 1), on the argument that the
-% coarse-graining fixes the marginal frequencies of the symbols (see the comments
-% in f_entropy).
+% In f_entropy, the Miller-Madow degrees of freedom are the textbook (occupied bins
+% - 1) for the 'diff' and 'mean' binarizations. For 'median' they are reduced by
+% wordLength*(alphabetSize - 1), because the median split fixes the marginal
+% frequencies of the symbols (see the comments in f_entropy). SB_MotifThree, whose
+% quantile-based coarse-graining fixes the marginals, keeps the reduced form.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -98,6 +99,11 @@ end
 % Generate a binarized version of the input time series:
 yBin = BF_Binarize(y, binarizeHow);
 
+% A median split fixes the marginal frequencies of the two symbols (half the points
+% on either side), which reduces the degrees of freedom of the entropy correction
+% (see f_entropy). 'diff' and 'mean' do not fix them:
+fixedMarginals = strcmp(binarizeHow, 'median');
+
 % Define the length of the new, symbolized sequence: N
 N = length(yBin);
 
@@ -120,7 +126,7 @@ r0 = (yBin == 0);
 out.u = mean(r1); % proportion 1 (corresponds to a movement up for 'diff')
 out.d = mean(r0); % proportion 0 (corresponds to a movement down for 'diff')
 pp = [out.d, out.u];
-out.h = f_entropy(pp, N, 1, 2); % Miller-Madow, marginal-constrained df
+out.h = f_entropy(pp, N, 1, 2, fixedMarginals); % Miller-Madow
 
 % -------------------------------------------------------------------------------
 %% Binary sequences of length 2:
@@ -145,7 +151,7 @@ out.ud = mean(r10); % up, down
 out.uu = mean(r11); % up, up
 
 pp = [out.dd, out.du, out.ud, out.uu];
-out.hh = f_entropy(pp, N - 1, 2, 2); % Miller-Madow, marginal-constrained df
+out.hh = f_entropy(pp, N - 1, 2, 2, fixedMarginals); % Miller-Madow
 
 % ------------------------------------------------------------------------------
 %% 3
@@ -184,7 +190,7 @@ out.uud = mean(r110);
 out.uuu = mean(r111);
 
 ppp = [out.ddd, out.ddu, out.dud, out.duu, out.udd, out.udu, out.uud, out.uuu];
-out.hhh = f_entropy(ppp, N - 2, 3, 2); % Miller-Madow, marginal-constrained df
+out.hhh = f_entropy(ppp, N - 2, 3, 2, fixedMarginals); % Miller-Madow
 
 % ------------------------------------------------------------------------------
 %% 4
@@ -252,26 +258,29 @@ out.uuuu = mean(r1111);
 
 pppp = [out.dddd, out.dddu, out.ddud, out.dduu, out.dudd, out.dudu, out.duud, out.duuu, out.uddd, ...
 		out.uddu, out.udud, out.uduu, out.uudd, out.uudu, out.uuud, out.uuuu];
-out.hhhh = f_entropy(pppp, N - 3, 4, 2); % Miller-Madow, marginal-constrained df
+out.hhhh = f_entropy(pppp, N - 3, 4, 2, fixedMarginals); % Miller-Madow
 
 % -------------------------------------------------------------------------------
-function h = f_entropy(p, numSamples, wordLength, alphabetSize)
+function h = f_entropy(p, numSamples, wordLength, alphabetSize, fixedMarginals)
 	% Miller-Madow-corrected entropy of a probability array, in nats (log(0)=0).
 	%
-	% df is reduced for the marginal constraints the coarse-graining imposes:
-	% the textbook (occupied bins - 1) over-corrects, because each of the
-	% wordLength positions has a (near-)fixed marginal, removing
-	% wordLength*(alphabetSize-1) degrees of freedom. For words of length 1
-	% that leaves df = 0, which is correct -- a median split puts exactly half
-	% the points either side, so the plug-in entropy is exactly log 2 with no
-	% sampling variation to bias-correct. Applying the textbook correction there
-	% turned SB_MotifTwo_median_h from a constant into a pure function of N
-	% (eta^2 against length 0.000 -> 1.000). See SB_MotifThree for the measured
-	% change by word length.
+	% The degrees of freedom are the textbook (occupied bins - 1). When the
+	% coarse-graining fixes the marginal frequencies of the symbols
+	% (fixedMarginals, for a median split), df is reduced by
+	% wordLength*(alphabetSize-1), since each of the wordLength positions then has
+	% a (near-)fixed marginal. For words of length 1 that leaves df = 0, which is
+	% correct -- a median split puts exactly half the points either side, so the
+	% plug-in entropy is exactly log 2 with no sampling variation to bias-correct.
+	% Applying the textbook correction there turned SB_MotifTwo_median_h from a
+	% constant into a pure function of N (eta^2 against length 0.000 -> 1.000).
+	% See SB_MotifThree for the measured change by word length.
 	r = (p > 0);
 	h = -sum(p(r) .* log(p(r)));
 	if nargin > 3 && numSamples > 0
-		df = sum(r(:)) - 1 - wordLength * (alphabetSize - 1);
+		df = sum(r(:)) - 1;
+		if fixedMarginals
+			df = df - wordLength * (alphabetSize - 1);
+		end
 		if df > 0
 			h = h + df / (2 * numSamples);
 		end
