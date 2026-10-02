@@ -38,8 +38,6 @@ function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
 %       skewness, and kurtosis of the subset, abs(1 - subset/global)
 % ac1, the relative error of the lag-1 autocorrelation of the subset (computed on
 %       the subset taken as a sequence, so for 'unicg' on the subsampled series)
-% permen, the normalized permutation entropy PermEn(3,1) of the subset divided by
-%       that of the full time series (NaN if the latter is 0)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -156,14 +154,15 @@ if globalKurtosis == 0, out.kurtosis = NaN; else, out.kurtosis = abs(1 - kurtosi
 globalAC1 = CO_AutoCorr(y, 1, 'Fourier');
 if globalAC1 == 0, out.ac1 = NaN; else, out.ac1 = abs(1 - CO_AutoCorr(y(r), 1, 'Fourier') / globalAC1); end % how far from true
 
+% Commented out to save compute: out.permen is not a registered operation.
 % PermEn(3,1) in place of SampEn(1,0.1): cheaper and more stable on the
 % short subsets ('l' with small n, or small 'p') this operation can produce.
-permEn_struct_r = EN_PermEn(y(r), 3, 1);
-permEn_struct = EN_PermEn(y, 3, 1);
-if ~isstruct(permEn_struct_r) || ~isstruct(permEn_struct) || permEn_struct.normPermEn == 0
-	out.permen = NaN;
-else
-	out.permen = permEn_struct_r.normPermEn / permEn_struct.normPermEn;
-end
+% permEn_struct_r = EN_PermEn(y(r), 3, 1);
+% permEn_struct = EN_PermEn(y, 3, 1);
+% if ~isstruct(permEn_struct_r) || ~isstruct(permEn_struct) || permEn_struct.normPermEn == 0
+% 	out.permen = NaN;
+% else
+% 	out.permen = permEn_struct_r.normPermEn / permEn_struct.normPermEn;
+% end
 
 end

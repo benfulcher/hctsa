@@ -235,7 +235,7 @@ out.stdstd = std(std(xperr));
 eigs = eig(xperr);
 imagEigs = imag(eigs);
 out.maximageig = max(imagEigs);
-out.minimageig = min(imagEigs); % covaries (negatively) with maximageig
+out.minimageig = min(imagEigs); % for a real matrix, eigenvalues come in conjugate pairs, so maximageig = -minimageig exactly
 
 realEigs = real(eigs);
 out.rangeeig = range(realEigs); % range of real parts of eigenvalues

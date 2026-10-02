@@ -8,10 +8,11 @@ function out = NL_BoxCorrDim(y, numBins, embedParams)
 % H(epsilon,d) = -log(sum_i p_i^2) for a sweep of numBins box sizes, from the
 % full range of the series downward, and the increment over the
 % (d-1)-dimensional embedding, I(epsilon,d) = H(epsilon,d) - H(epsilon,d-1)
-% (for d = 1, I is H itself). The matrix I (length scales by embedding
-% dimensions) is summarized by its mean, median and minimum across length
-% scales for each dimension, across dimensions for each length scale, and
-% overall.
+% (defined for d = 2,...,m; at d = 1, boxcount reports H itself, which is not an
+% increment, so d = 1 is excluded from all summaries). The matrix I (length scales
+% by embedding dimensions 2,...,m) is summarized by its mean, median and minimum
+% across length scales for each dimension, across dimensions for each length
+% scale, and overall.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -28,13 +29,13 @@ function out = NL_BoxCorrDim(y, numBins, embedParams)
 % meand<d>, mediand<d>, mind<d>: mean, median and minimum of I over length
 %          scales, at embedding dimension d = 2,...,m
 % meanr<r>, medianr<r>, minr<r>: mean, median and minimum of I over embedding
-%          dimensions 1,...,m, at length scale r = 2,...,numBins
-% meanchr<r>: mean change of I from one embedding dimension to the next, at
-%          length scale r = 2,...,numBins
-% stdmean, stdmedian: standard deviation, across embedding dimensions, of the
-%          mean (or median) of I over length scales
+%          dimensions 2,...,m, at length scale r = 2,...,numBins
+% meanchr<r>: mean change of I from one embedding dimension to the next
+%          (d = 2,...,m), at length scale r = 2,...,numBins
+% stdmean, stdmedian: standard deviation, across embedding dimensions 2,...,m, of
+%          the mean (or median) of I over length scales
 % medianstretch, minstretch, iqrstretch: median, minimum and interquartile
-%          range of I over all length scales and embedding dimensions
+%          range of I over all length scales and embedding dimensions 2,...,m
 %
 % ---NOTES:
 % The increment I approaches the entropy rate of the process (the K2 entropy,
@@ -166,6 +167,12 @@ end
 m = size(rs, 2); % number of embedding dimensions (= mMax)
 ldr = size(rs, 1); % number of length scales (= numBins)
 
+if m < 2
+	% The increment I is only defined from d = 2 (d = 1 holds H itself)
+	warning('Embedding dimension m = %u is too low for a box-counting entropy increment', m);
+	out = NaN; return
+end
+
 for i = 2:m
 	out.(sprintf('meand%u', i)) = mean(rs(:, i));
 	out.(sprintf('mediand%u', i)) = median(rs(:, i));
@@ -173,16 +180,17 @@ for i = 2:m
 end
 
 for i = 2:ldr
-	out.(sprintf('meanr%u', i)) = mean(rs(i, :));
-	out.(sprintf('medianr%u', i)) = median(rs(i, :));
-	out.(sprintf('minr%u', i)) = min(rs(i, :));
-	out.(sprintf('meanchr%u', i)) = mean(diff(rs(i, :)));
+	out.(sprintf('meanr%u', i)) = mean(rs(i, 2:end));
+	out.(sprintf('medianr%u', i)) = median(rs(i, 2:end));
+	out.(sprintf('minr%u', i)) = min(rs(i, 2:end));
+	out.(sprintf('meanchr%u', i)) = mean(diff(rs(i, 2:end)));
 end
 
-out.stdmean = std(mean(rs));
-out.stdmedian = std(median(rs));
+out.stdmean = std(mean(rs(:, 2:end)));
+out.stdmedian = std(median(rs(:, 2:end)));
 
-rsstretch = rs(:);
+rsstretch = rs(:, 2:end);
+rsstretch = rsstretch(:);
 out.medianstretch = median(rsstretch);
 out.minstretch = min(rsstretch); % same as at maximum embedding dimension, m, or usually at maximum ldr (18)
 out.iqrstretch = iqr(rsstretch);

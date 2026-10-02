@@ -36,8 +36,8 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % meanstd, the mean over embedding dimensions of the standard deviation of the local slope
 %       in the scaling range
 % bestscrd, the dimension estimate at the embedding dimension with the longest scaling range
-% longestscr, the longest scaling range (a difference of the TISEAN length-scale values at
-%       the ends of the range, over embedding dimensions)
+% longestscr, the longest scaling range (the difference of the logs of the TISEAN
+%       length-scale values at the ends of the range, over embedding dimensions)
 % The output is NaN for series shorter than 100 samples, constant series, or when no
 % scaling range can be found.
 %
@@ -264,7 +264,7 @@ for i = 1:length(c1dat)
 	c1sc(i, 1) = c1dat{i}(c1sc(i, 1), 1);
 	c1sc(i, 2) = c1dat{i}(c1sc(i, 2), 1);
 end
-c1sc(:, 6) = c1sc(:, 2) - c1sc(:, 1);
+c1sc(:, 6) = log(c1sc(:, 2)) - log(c1sc(:, 1)); % range of the scaling range in log length scale
 
 wherebestest = find(c1sc(:, 3) == min(c1sc(:, 3)), 1, 'first');
 out.bestestd = c1sc(wherebestest, 4);

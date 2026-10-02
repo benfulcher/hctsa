@@ -236,7 +236,7 @@ elseif (maxN > 0) && (N > maxN)
 			ii = randsample(N, maxN);
 			ii = sort(ii, 'ascend');
 			t = t(ii);
-			t = (t - min(t)) / max(t) * (maxN - 1) + 1; % respace from 1:maxN
+			t = (t - min(t)) / range(t) * (maxN - 1) + 1; % respace from 1:maxN
 			y = y(ii);
 
 		case 'random_consec' % takes maxN consecutive indicies from a random position in the time series

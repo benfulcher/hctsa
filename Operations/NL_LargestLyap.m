@@ -50,7 +50,7 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % ---OUTPUTS: statistics of the divergence curve p(t):
 % p1, p2, p3, p4, p5: p at steps 0 to 4 (p1 = 0 by construction)
 % maxp: the maximum of p
-% ncross08max, ncross09max (and ncross09maxold, a duplicate of ncross09max):
+% ncross08max, ncross09max:
 %       the number of times p crosses 80% (or 90%) of its maximum
 % pcross08max, pcross09max: those numbers as a proportion of the number of steps
 % to095max, to09max, to08max, to07max, to05max: the number of steps taken for p
@@ -268,8 +268,6 @@ out.maxp = max(p);
 
 % Number/proportion of crossings at 80% and 90% of maximum
 ncrossx = @(x) sum((p(1:end - 1) - x * max(p)) .* (p(2:end) - x * max(p)) < 0);
-
-out.ncross09maxold = sum((p(1:end - 1) - 0.9 * max(p)) .* (p(2:end) - 0.9 * max(p)) < 0);
 
 out.ncross08max = ncrossx(0.8);
 out.pcross08max = ncrossx(0.8) / (length(p) - 1);

@@ -34,8 +34,7 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %           (v) 'nlpe': the mean squared nonlinear prediction error (slow; one-sided)
 %           (vi) 'fnn': the proportion of false nearest neighbors in 2 dimensions (very
 %                 slow; one-sided)
-%           (the default value in the code is 'AMI', which matches none of these; see
-%           ---NOTES)
+%           (default: 'ami1')
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 % ---OUTPUTS: for each requested test statistic s (ami for 'ami1', fmmi, o3, tc3, nlpe, fnn),
@@ -50,7 +49,10 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %      value for the series (0 if outside the range of the density estimate)
 % s_mediqr, the distance of the series' value from the surrogates' median, in interquartile
 %      ranges (NaN if the interquartile range is 0)
-% s_prank, a rank-based p-value of the series' value among the surrogates' values
+% s_prank, a rank-based p-value of the series' value among the surrogates' values:
+%      (k + 1)/(numSurrs + 1), where k is the number of surrogates at least as extreme as
+%      the series in the tested direction (for two-sided tests, in its more extreme tail,
+%      with the result doubled and capped at 1)
 %
 % ---REFERENCES:
 % Kugiumtzis, "Surrogate data test for nonlinearity including nonmonotonic transforms",
@@ -62,9 +64,7 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % Schreiber and Schmitz, "Surrogate time series", Physica D 142(3-4) 346 (2000).
 %
 % ---NOTES:
-% The code looks for the test statistic name 'ami1', not 'ami' as the previous documentation
-% said, and its default value 'AMI' matches nothing, so calling without theTestStat does not
-% produce any output.
+% The test statistic is named 'ami1' (its outputs are prefixed 'ami_').
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -113,7 +113,7 @@ if nargin < 4
 end
 
 if nargin < 5 || isempty(theTestStat)
-	theTestStat = 'AMI'; % automutual information
+	theTestStat = 'ami1'; % automutual information at lag 1
 end
 
 if ischar(theTestStat)
@@ -316,20 +316,19 @@ function someStats = SDgivemestats(statx, statsurr, leftrightboth)
 
 	% rank statistic
 	[~, ix] = sort([statx; statsurr]);
-	xfitshere = find(ix == 1) - 1;
-	if strcmp(leftrightboth, 'right') % x statistic smaller than distribution
-		xfitshere = numSurrs + 1 - xfitshere; % how far from highest ranked value
+	numBelow = find(ix == 1) - 1; % number of surrogates below the series' value
+	numAtLeast = numSurrs - numBelow; % number of surrogates at least as large
+	if strcmp(leftrightboth, 'right') % series should be larger than the surrogates
+		numExtreme = numAtLeast;
 	elseif strcmp(leftrightboth, 'both')
-		xfitshere = min(xfitshere, numSurrs + 1 - xfitshere);
+		numExtreme = min(numBelow, numAtLeast); % the more extreme tail
+	else % 'left'
+		numExtreme = numBelow;
 	end
 
-	if isempty(xfitshere)
-		someStats.prank = 1 / (numSurrs + 1); % rank-based p-value
-	else
-		someStats.prank = (1 + xfitshere) / (numSurrs + 1); % rank-based p-value
-	end
+	someStats.prank = (numExtreme + 1) / (numSurrs + 1); % rank-based p-value
 	if strcmp(leftrightboth, 'both')
-		someStats.prank = someStats.prank * 2; % I think this factor should be in here
+		someStats.prank = min(2 * someStats.prank, 1); % two-sided: double, capped at 1
 	end
 
 	% DO PLOTTING:

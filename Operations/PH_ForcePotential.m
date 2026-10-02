@@ -12,9 +12,8 @@ function out = PH_ForcePotential(y, whatPotential, params)
 % (i) A quartic double-well potential with V(x) = x^4/4 - alpha^2 x^2/2, and so
 %     force F(x) = -x^3 + alpha^2 x, with wells at x = +alpha and x = -alpha.
 %
-% (ii) A sinusoidal potential specified by F(x) = sin(x/alpha)/alpha (the
-%     documented V(x) = -cos(x/alpha) would give a force of the opposite sign;
-%     see NOTES).
+% (ii) A sinusoidal potential with V(x) = -cos(x/alpha), and so force
+%     F(x) = -sin(x/alpha)/alpha.
 %
 % ---INPUTS:
 % y, the input time series
@@ -42,10 +41,10 @@ function out = PH_ForcePotential(y, whatPotential, params)
 % finaldev, the magnitude of the final position, |x(end)|
 %
 % ---NOTES:
-% For the sinusoidal potential the code uses F(x) = +sin(x/alpha)/alpha, which is
-% the gradient dV/dx of V(x) = -cos(x/alpha) rather than its negative: the
-% particle moves in the inverted potential. The integration step uses dt^2
-% where the constant-acceleration formula has dt^2 / 2.
+% The update is the semi-implicit (symplectic) Euler scheme, x(t) = x(t-1) + v(t) dt
+% with the new velocity v(t), which is the form written above. It is not the
+% constant-acceleration formula (which has dt^2/2 and is not symplectic): that
+% variant makes the double-well simulation blow up for many series and parameter sets.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -108,7 +107,7 @@ deltat = params(3); % time step
 switch whatPotential
 	case 'sine'
 		V = @(x) -cos(x / alpha);
-		F = @(x) sin(x / alpha) / alpha;
+		F = @(x) -sin(x / alpha) / alpha; % F = -dV/dx
 	case 'dblwell'
 		F = @(x) -x.^3 + alpha^2 * x; % the double well function (the force from a double well potential)
 		V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2;

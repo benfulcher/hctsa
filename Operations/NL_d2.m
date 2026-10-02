@@ -42,8 +42,9 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %       the correlation sum, over the best scaling range for each embedding dimension)
 % bend2_meangoodness, the mean goodness of those per-dimension scaling ranges
 % benmmind2_logminl, benmmind2_goodness, benmmind2_stabledim, benmmind2_linrmserr:
-%       logminl (the log of the length scale at position m_min in the list of scales),
-%       goodness, stabled and linrmserr of the per-dimension estimates over m
+%       logminl (the log of the smallest length scale of the scaling range found at
+%       embedding dimension m_min), goodness, stabled and linrmserr of the
+%       per-dimension estimates over m
 % d2_logminscr, d2_logmaxscr, d2_logscr, d2_goodness, d2_dimest, d2_dimstd: the joint
 %       scaling range (across embedding dimensions m_min and above) of the local slopes:
 %       the logs of its smallest and largest length scales, their difference, the goodness,
@@ -336,7 +337,9 @@ mminfulcherd2 = SUB_findmmin(benfindd2(:, 4));
 if isempty(mminfulcherd2.ri1)
 	out.benmmind2_logminl = NaN;
 else
-	out.benmmind2_logminl = log(d2dat_v(mminfulcherd2.ri1)); % minimum scale to observe a scaling range
+	% minimum scale to observe a scaling range: the start of the scaling range
+	% found for embedding dimension m_min (column 1 of benfindd2 indexes d2dat_v)
+	out.benmmind2_logminl = log(d2dat_v(benfindd2(mminfulcherd2.ri1, 1)));
 end
 out.benmmind2_goodness = mminfulcherd2.goodness;
 out.benmmind2_stabledim = mminfulcherd2.stabled;
@@ -407,7 +410,9 @@ mminfulcherd2g = SUB_findmmin(benfindd2g(:, 4));
 if isempty(mminfulcherd2g.ri1)
 	out.benmmind2g_logminl = NaN;
 else
-	out.benmmind2g_logminl = log(d2gdat_v(mminfulcherd2g.ri1)); % minimum scale to observe a scaling range
+	% minimum scale to observe a scaling range: the start of the scaling range
+	% found for embedding dimension m_min (column 1 of benfindd2g indexes d2gdat_v)
+	out.benmmind2g_logminl = log(d2gdat_v(benfindd2g(mminfulcherd2g.ri1, 1)));
 end
 out.benmmind2g_goodness = mminfulcherd2g.goodness;
 out.benmmind2g_stabledim = mminfulcherd2g.stabled;
@@ -737,7 +742,7 @@ function results = SUB_getslopes(x, Y)
 		% () find best scaling region in which to estimate gradient
 
 		mybad = zeros(length(stptr), length(endptr));
-		v = diff(Y(c, :)) .* dx; % make transformation to vector of local gradients
+		v = diff(Y(c, :)) ./ dx; % make transformation to vector of local gradients
 		vnorm = (v - min(v)) ./ (max(v) - min(v)); % normalize regardless of range
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)
@@ -779,7 +784,7 @@ function results = SUB_doesflatten(x, Y)
 	for c = 1:ndim
 		% regions that deviate least from zero
 		mybad = zeros(length(stptr), length(endptr));
-		v = diff(Y(c, :)) .* dx; % make transformation to vector of local gradients
+		v = diff(Y(c, :)) ./ dx; % make transformation to vector of local gradients
 		vnorm = abs(v) ./ max(abs(v));
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)

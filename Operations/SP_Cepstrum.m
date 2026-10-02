@@ -3,7 +3,8 @@ function out = SP_Cepstrum(y, maxPeriod, minPeriod)
 %
 % Computes the real cepstrum, the inverse Fourier transform of the log magnitude
 % spectrum (after subtracting a degree-4 polynomial in frequency from the log
-% spectrum, to remove its smooth envelope), and summarizes its dominant peak.
+% spectrum, fitted excluding the zero-frequency bin, to remove its smooth
+% envelope), and summarizes its dominant peak.
 %
 % The cepstrum asks whether the peaks in the spectrum are harmonically related
 % to one another, which none of hctsa's other spectral operations ask.
@@ -194,12 +195,14 @@ logMag = log(abs(X) + eps); % eps guards spectral nulls (|X| exactly 0)
 % component, so subtracting a fitted one leaves the comb ripple that the
 % cepstrum is meant to detect. Order 4 is enough to absorb a 1-f-style
 % tilt and gentle curvature without being flexible enough to start
-% fitting the ripple itself.
+% fitting the ripple itself. The fit excludes the zero-frequency (DC) bin: a
+% z-scored series has (almost) no power there, so log|X| at DC is a huge
+% negative outlier (about -30) that would otherwise bend the fitted envelope.
 envOrder = 4;
 nHalf = floor(NFFT / 2) + 1;
 halfLogMag = logMag(1:nHalf);
 fIdx = (0:nHalf - 1)' / (nHalf - 1); % normalized frequency axis for conditioning
-pEnv = polyfit(fIdx, halfLogMag, envOrder);
+pEnv = polyfit(fIdx(2:end), halfLogMag(2:end), envOrder);
 halfDetrended = halfLogMag - polyval(pEnv, fIdx);
 
 % Mirror back to a full Hermitian-symmetric spectrum so the cepstrum is real:
