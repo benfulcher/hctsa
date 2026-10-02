@@ -19,7 +19,10 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 %
 % numGroups, either specifies the size of the alphabet for 'quantile' and
 %       'diff' (must be 2 for 'updown'), or sets the time delay for the
-%       embedding subroutines
+%       embedding subroutines: a number of samples, or 'tau' for the first
+%       zero-crossing of the autocorrelation function (capped at floor(N/25) as
+%       for any delay). If that function is undefined (a constant series), no
+%       delay exists and the output is NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
