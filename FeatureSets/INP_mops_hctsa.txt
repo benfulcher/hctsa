@@ -91,6 +91,7 @@ CO_NonlinearAutocorr(x_z,[3,3],true)	        AC_nl_33_abs
 CO_NonlinearAutocorr(x_z,[0,3,4],false)	        AC_nl_034
 CO_NonlinearAutocorr(x_z,[0,3,5],false)	        AC_nl_035
 CO_NonlinearAutocorr(x_z,[0,3,6],false)	        AC_nl_036
+CO_NonlinearAutocorr(zscore(BF_PreProcess(x_z,'decimate_ac1e')),[0,3,6],false)	AC_nl_036_dec
 CO_NonlinearAutocorr(x_z,[4,4],false)	        AC_nl_44
 CO_NonlinearAutocorr(x_z,[0,4,4],false)	        AC_nl_044
 CO_NonlinearAutocorr(x_z,[4,4],true)	        AC_nl_44_abs
@@ -104,6 +105,7 @@ CO_NonlinearAutocorr(x_z,[6,6],false)	        AC_nl_66
 CO_NonlinearAutocorr(x_z,[0,6,6],false)	        AC_nl_066
 CO_NonlinearAutocorr(x_z,[6,6],true)	        AC_nl_66_abs
 CO_NonlinearAutocorr(x_z,[1,1,2],false)	        AC_nl_112
+CO_NonlinearAutocorr(zscore(BF_PreProcess(x_z,'decimate_ac1e')),[1,1,2],false)	AC_nl_112_dec
 CO_NonlinearAutocorr(x_z,[1,1,3],false)	        AC_nl_113
 CO_NonlinearAutocorr(x_z,[1,2,2],false)	        AC_nl_122
 CO_NonlinearAutocorr(x_z,[1,2,3],false)	            AC_nl_123
@@ -116,6 +118,7 @@ CO_NonlinearAutocorr(x_z,[2,3,3],false)	        AC_nl_233
 CO_NonlinearAutocorr(x_z,[2,4,6],false)	            AC_nl_246
 CO_NonlinearAutocorr(x_z,[1,2,3,4],false)	        AC_nl_1234
 CO_NonlinearAutocorr(x_z,[1,2,3,4],true)	        AC_nl_1234_abs
+CO_NonlinearAutocorr(zscore(BF_PreProcess(x_z,'decimate_ac1e')),[1,2,3,4],true)	AC_nl_1234_abs_dec
 CO_NonlinearAutocorr(x_z,[1,3,5,7],false)	        AC_nl_1357
 CO_NonlinearAutocorr(x_z,[1,3,5,7],true)	        AC_nl_1357_abs
 CO_NonlinearAutocorr(x_z,[2,4,6,8],false)	        AC_nl_2468
@@ -130,6 +133,7 @@ EN_ApEn(x_z,1,0.1)	ApEn1_01
 EN_ApEn(x_z,1,0.2)	ApEn1_02
 EN_ApEn(x_z,2,0.1)	ApEn2_01
 EN_ApEn(x_z,2,0.2)	ApEn2_02
+EN_ApEn(x_z,2,0.2,'ac1e')	ApEn2_02_ac1e
 CO_AddNoise(x_z,1,'even',10,'default')	CO_AddNoise_1_even_10
 CO_AddNoise(x_z,1,'gaussian',[],'default')    CO_AddNoise_1_gaussian
 CO_AddNoise(x_z,1,'kraskov1','4','default')    CO_AddNoise_1_kraskov1_4
@@ -256,6 +260,7 @@ CO_TimeRevKLD(x_z,'ac',2,3,{'ac',1},'full')	CO_TimeRevKLD_ac_2_3_ac1_full
 CO_TimeRevKLD(x_z,'ac',3,3,{'ac',1},'full')	CO_TimeRevKLD_ac_3_3_ac1_full
 CO_TranslateShape(x_z,'circle',1.5,'pts')	CO_TranslateShape_circle_15_pts
 CO_TranslateShape(x_z,'circle',2.5,'pts')	CO_TranslateShape_circle_25_pts
+CO_TranslateShape(zscore(BF_PreProcess(x_z,'decimate_ac1e')),'circle',2.5,'pts')	CO_TranslateShape_circle_25_pts_dec
 CO_TranslateShape(x_z,'circle',3.5,'pts')	CO_TranslateShape_circle_35_pts
 CO_TranslateShape(x_z,'rectangle',2,'pts')	CO_TranslateShape_rectangle_2_pts
 CO_trev(x_z,1)	CO_trev_1
@@ -281,6 +286,7 @@ CR_RAD(x_z,1,true)                 CR_RAD_1
 CR_RAD(x_z,2,true)                 CR_RAD_2
 CR_RAD(x_z,'tau',true)             CR_RAD_tau
 DK_crinkle(x_z)	DK_crinkle_statistic
+DK_crinkle(zscore(BF_PreProcess(x_z,'decimate_ac1e')))	DK_crinkle_statistic_dec
 DK_theilerQ(x_z)	DK_TheilerQ
 DK_timerev(x_z,1)	DK_timerev_1
 DK_timerev(x_z,2)	DK_timerev_2
@@ -444,12 +450,14 @@ EN_DistributionEntropy(x_z,'ks',[],0.2)	EN_DistributionEntropy_ks__02
 EN_DistributionEntropy(x_z,'ks',[],0.3)	EN_DistributionEntropy_ks__03
 EN_DistributionEntropy(x_z,'ks',[],0.05)	EN_DistributionEntropy_ks__005
 EN_LZComplexity(x_z,2,[])			EN_LZComplexity_2
+EN_LZComplexity(zscore(BF_PreProcess(x_z,'decimate_ac1e')),2,[])	EN_LZComplexity_2_dec
 EN_LZComplexity(x_z,2,'diff')		EN_LZComplexity_2_diff
 EN_LZComplexity(x_z,3,[])			EN_LZComplexity_3
 EN_LZComplexity(x_z,3,'diff')		EN_LZComplexity_3_diff
 EN_LZComplexity(x_z,4,[])			EN_LZComplexity_4
 EN_LZComplexity(x_z,4,'diff')		EN_LZComplexity_4_diff
 EN_LZComplexity(x_z,5,[])			EN_LZComplexity_5
+EN_LZComplexity(zscore(BF_PreProcess(x_z,'decimate_ac1e')),5,[])	EN_LZComplexity_5_dec
 EN_LZComplexity(x_z,5,'diff')		EN_LZComplexity_5_diff
 EN_LZComplexity(x_z,6,[])			EN_LZComplexity_6
 EN_LZComplexity(x_z,6,'diff')		EN_LZComplexity_6_diff
@@ -497,6 +505,7 @@ EN_rpde(x_z,3,'ac')             EN_rpde_3_ac
 EN_SampEn(x_z,5,0.1)	           EN_SampEn_5_01
 EN_SampEn(x_z,5,0.1,'diff1')	   EN_SampEn_5_01_diff1
 EN_SampEn(x_z,5,0.2)	           EN_SampEn_5_02
+EN_SampEn(zscore(BF_PreProcess(x_z,'decimate_ac1e')),5,0.2)	EN_SampEn_5_02_dec
 EN_SampEn(x_z,5,0.2,'diff1')	   EN_SampEn_5_02_diff1
 EN_SampEn(x_z,5,0.3)	           EN_SampEn_5_03
 EN_SampEn(x_z,5,0.05)	           EN_SampEn_5_005
@@ -506,15 +515,18 @@ EN_wentropy(x_z,'sym4',5)		EN_wentropy_sym4_5
 EX_ExtremeEventOrder(x_z,0.1)	EX_ExtremeEventOrder_01
 EX_ExtremeEventOrder(x_z,0.05)	EX_ExtremeEventOrder_005
 EX_MovingThreshold(x_z,0.1,0.1)	EX_MovingThreshold_01_01
+EX_MovingThreshold(zscore(BF_PreProcess(x_z,'decimate_ac1e')),0.1,0.1)	EX_MovingThreshold_01_01_dec
 EX_MovingThreshold(x_z,1,0.1)	EX_MovingThreshold_1_01
 EX_MovingThreshold(x_z,0.1,0.02)	EX_MovingThreshold_01_002
 EX_MovingThreshold(x_z,1,0.02)	EX_MovingThreshold_1_002
+EX_MovingThreshold(zscore(BF_PreProcess(x_z,'decimate_ac1e')),1,0.02)	EX_MovingThreshold_1_002_dec
 FC_LocalSimple(x_z,'lfit',2)	FC_LocalSimple_lfit2
 FC_LocalSimple(x_z,'lfit',3)	FC_LocalSimple_lfit3
 FC_LocalSimple(x_z,'lfit',4)	FC_LocalSimple_lfit4
 FC_LocalSimple(x_z,'lfit',5)	FC_LocalSimple_lfit5
 FC_LocalSimple(x_z,'lfit','ac')	FC_LocalSimple_lfittau
 FC_LocalSimple(x_z,'mean',1)	FC_LocalSimple_mean1
+FC_LocalSimple(zscore(BF_PreProcess(x_z,'decimate_ac1e')),'mean',1)	FC_LocalSimple_mean1_dec
 FC_LocalSimple(x_z,'mean',2)	FC_LocalSimple_mean2
 FC_LocalSimple(x_z,'mean',3)	FC_LocalSimple_mean3
 FC_LocalSimple(x_z,'mean',4)	FC_LocalSimple_mean4
@@ -592,6 +604,7 @@ IN_MultivariateAMI(x_z,'mi','kraskov2') IN_MultivariateAMI_mi_kraskov2
 MD_hrv_classic(x_z)	MD_hrv_classic
 MD_pNN(x)	MD_pNN_raw
 MD_PolVar(x_z,1,3)	MD_PolVar_1_3
+MD_PolVar(zscore(BF_PreProcess(x_z,'decimate_ac1e')),1,3)	MD_PolVar_1_3_dec
 MD_PolVar(x_z,0.1,3)	MD_PolVar_01_3
 MD_PolVar(x_z,1,4)	MD_PolVar_1_4
 MD_PolVar(x_z,0.1,4)	MD_PolVar_01_4
@@ -604,6 +617,7 @@ MD_PolVar(x_z,0.5,4)	MD_PolVar_05_4
 MD_PolVar(x_z,0.5,5)	MD_PolVar_05_5
 MD_PolVar(x_z,0.5,6)	MD_PolVar_05_6
 MD_Porta(x_z,6)	MD_Porta
+MD_Porta(zscore(BF_PreProcess(x_z,'decimate_ac1e')),6)	MD_Porta_dec
 MD_RawHRVMeas(x)	MD_RawHRVMeas
 MF_AR_arcov(x_z,1)	        MF_AR_arcov_1
 MF_AR_arcov(x_z,2)	        MF_AR_arcov_2
@@ -762,6 +776,7 @@ PP_SchreiberDenoise(x_z,5,1,4,0.3)	PP_SchreiberDenoise_5_1_4_03
 SB_BinaryStats_AR1(x_z,'diff')	    SB_BinaryStats_AR1_diff
 SB_BinaryStats_AR1(x_z,'mean')	    SB_BinaryStats_AR1_mean
 SB_BinaryStats(x_z,'diff')	    SB_BinaryStats_diff
+SB_BinaryStats(zscore(BF_PreProcess(x_z,'decimate_ac1e')),'diff')	SB_BinaryStats_diff_dec
 SB_BinaryStats(x_z,'iqr')	    SB_BinaryStats_iqr
 SB_BinaryStats(x_z,'mean')	    SB_BinaryStats_mean
 SB_BinaryGapHomogeneity(x_z,'gaps0')	SB_BinaryGapHomogeneity_gaps0
@@ -788,7 +803,9 @@ SB_TransitionMatrix(x_z,'updown',2,1)	SB_TransitionMatrix_ud21
 SB_TransitionPAlphabet(x_z,2:20,'ac')	SB_TransitionPAlphabet_20_ac
 SB_TransitionPAlphabet(x_z,2:40,1)	SB_TransitionPAlphabet_40_1
 SC_FastDFA(x_z)	    SC_FastDFA
+SC_FastDFA(zscore(BF_PreProcess(x_z,'decimate_ac1e')))	SC_FastDFA_dec
 SC_HiguchiFD(x_z,8)	SC_HiguchiFD_8
+SC_HiguchiFD(zscore(BF_PreProcess(x_z,'decimate_ac1e')),8)	SC_HiguchiFD_8_dec
 SC_FluctAnal(x_z,2,'dfa',50,0,[],true)	SC_FluctAnal_2_dfa_50_0_logi
 SC_FluctAnal(x_z,2,'dfa',50,1,2,true)	SC_FluctAnal_2_dfa_50_1_2_logi
 SC_FluctAnal(x_z,2,'dfa',50,1,3,true)	SC_FluctAnal_2_dfa_50_1_3_logi
