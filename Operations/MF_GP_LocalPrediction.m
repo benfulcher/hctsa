@@ -7,8 +7,8 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % with the true values. Each window is first standardized using the mean and
 % standard deviation of its training data. The outputs summarize the prediction
 % errors (absolute, and relative to the GP's own 95% error bar), the size of the
-% error bars, the fitted hyperparameters across windows, and the marginal
-% likelihoods.
+% error bars, the fitted hyperparameters across windows, and the per-point
+% negative log marginal likelihoods.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
@@ -53,8 +53,9 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %       deviation across windows of each log hyperparameter of the fitted
 %       covariance function (for squared exponential plus noise: log length scale,
 %       log amplitude, log noise standard deviation)
-% maxmlik, minmlik, stdmlik: maximum, minimum, and standard deviation across
-%       windows of the log marginal likelihood of the fitted model
+% maxnlml, minnlml, stdnlml: maximum, minimum, and standard deviation across
+%       windows of the negative log marginal likelihood of the fitted model on the
+%       training data of the window, divided by the number of training points
 %
 % ---NOTES:
 % The 'standard errors' in the code (stderrs) are 2*sqrt(S2), i.e., 95% error
@@ -158,7 +159,7 @@ hyp = struct; % structure for storing hyperparameter information in latest versi
 mus = zeros(numTest, numPreds); % predicted values
 stderrs = zeros(numTest, numPreds); % standard errors on predictions
 yss = zeros(numTest, numPreds); % test values
-mlikelihoods = zeros(numPreds, 1); % marginal likelihoods of model
+nlmls = zeros(numPreds, 1); % negative log marginal likelihoods of model, per training point
 
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
@@ -244,8 +245,9 @@ for i = 1:numPreds
 
 	% Get marginal likelihood for this model with hyperparameters optimized
 	% over training data
-	% mlikelihoods(i) = - gpr(loghyper, covFunc, tt, yt);
-	mlikelihoods(i) = -gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt);
+	% nlmls(i) = gpr(loghyper, covFunc, tt, yt);
+	% (negative log marginal likelihood, gpml's nlZ, divided by the number of training points)
+	nlmls(i) = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt) / length(tt);
 
 	% ------------------------------------------------------------------------------
 	%% (2) Evaluate at test set (s)
@@ -354,12 +356,14 @@ end
 % ------------------------------------------------------------------------------
 %% (3) Marginal likelihood measures
 % ------------------------------------------------------------------------------
-% Best marginal neg-log-likelihood attained
-% Worst marginal neg-log-likelihood attained
-% spread in marginal neg-log-likelihoods
+% Worst (maximum) per-point marginal neg-log-likelihood attained
+% Best (minimum) per-point marginal neg-log-likelihood attained
+% spread in per-point marginal neg-log-likelihoods
+% (Previously maxmlik, minmlik and stdmlik: the log marginal likelihood, i.e., the
+%  negative of nlZ, summed over the training points rather than per point.)
 
-out.maxmlik = max(mlikelihoods);
-out.minmlik = min(mlikelihoods);
-out.stdmlik = std(mlikelihoods);
+out.maxnlml = max(nlmls);
+out.minnlml = min(nlmls);
+out.stdnlml = std(nlmls);
 
 end

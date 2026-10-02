@@ -6,8 +6,8 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % the time series values (the intermediate values, and the training points). Times are
 % the sample indices. The hyperparameters of the covariance function are learned by
 % maximizing the marginal likelihood (MF_GP_LearnHyperp), and the outputs summarize
-% the prediction error, the predictive mean and standard deviation, the marginal
-% likelihood, and the fitted hyperparameters. If the series is longer than 2000
+% the prediction error, the predictive mean and standard deviation, the per-point
+% negative log marginal likelihood, and the fitted hyperparameters. If the series is longer than 2000
 % samples, predictions are made at 2000 evenly spaced times. A NaN is returned if the
 % fit fails.
 %
@@ -31,8 +31,9 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % stdmu, the standard deviation of the predictive mean over the series
 % meanS, stdS, the mean and standard deviation of the predictive standard deviation
 %       over the series
-% mlikelihood, the negative log marginal likelihood of the whole series under the
-%       fitted GP
+% nlml, the negative log marginal likelihood of the whole series (or of the 2000
+%       resampled points) under the fitted GP, divided by the number of points, so
+%       that it does not grow with the length of the series
 % logh1, logh2, logh3, ...: the log hyperparameters of the covariance function, in
 %       gpml's order (for the squared-exponential plus noise covariance, the length
 %       scale, the signal amplitude, and the noise standard deviation)
@@ -163,12 +164,13 @@ out.stdmu = std(mu);
 out.meanS = mean(S);
 out.stdS = std(S);
 
-% Marginal Likelihood
+% Negative log marginal likelihood per point (gpml's nlZ divided by the number of
+% points, so that it does not grow with the number of points, up to 2000)
 try
-	% out.mlikelihood = - gpr(loghyper, covFunc, ts, y(ts));
-	out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts));
+	% out.nlml = - gpr(loghyper, covFunc, ts, y(ts));
+	out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts)) / length(ts);
 catch
-	out.mlikelihood = NaN;
+	out.nlml = NaN;
 end
 
 % Loghyperparameters

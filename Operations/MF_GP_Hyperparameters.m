@@ -7,7 +7,7 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % (ii) a sum of squared exponential, periodic, and noise terms. The log
 % hyperparameters are found by maximizing the marginal likelihood (at most 50
 % function evaluations), starting from a data-informed initial guess. Goodness of
-% fit is summarized by the marginal likelihood, the error of the fitted mean, and
+% fit is summarized by the per-point negative log marginal likelihood, the error of the fitted mean, and
 % the GP's predictive standard deviation.
 %
 % Fitting is O(N^3), so the model is fitted to at most maxN samples from the time
@@ -55,7 +55,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       covMaterniso(3): [log length scale, log amplitude];
 %       covRQiso: [log length scale, log amplitude, log shape parameter alpha];
 %       covNoise: [log noise standard deviation].
-% mlikelihood: the negative log marginal likelihood of the fitted model
+% nlml: the negative log marginal likelihood of the fitted model, divided by the number
+%       of points it was fitted to (so that it does not depend on the series length)
 % stde: root-mean-square error of the GP mean at the sampled times
 % meanabs_std: mean absolute error of the GP mean, in units of the GP's
 %       predictive standard deviation at each sampled time
@@ -324,8 +325,9 @@ end
 %% Other statistics???
 % ------------------------------------------------------------------------------
 
-% Negative log marginal likelihood using optimized hyperparameters
-out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y);
+% Negative log marginal likelihood using optimized hyperparameters, per point
+% (gpml's nlZ divided by the number of points fitted)
+out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y) / length(t);
 
 % Mean error from fit
 [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
