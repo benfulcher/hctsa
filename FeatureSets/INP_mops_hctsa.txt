@@ -813,6 +813,7 @@ SP_Bicoherence(x_z,64,'full',25)	SP_Bicoherence_64_full_25
 SP_Cepstrum(x_z,100,4)	SP_Cepstrum_100_4
 SP_PhaseAmpCoupling(x_z,5,'full',18)	SP_PhaseAmpCoupling_5_full_18
 SP_PhaseFluctuationScaling(x_z,0.01,16,10000)	SP_PhaseFluctuationScaling_001_16_10000
+SP_EnvelopeStats(x_z,0.01,0.05)	SP_EnvelopeStats_001_005
 SP_SinusoidFit(x_z,'sin1')	SP_SinusoidFit_sin1
 SP_SinusoidFit(x_z,'sin2')	SP_SinusoidFit_sin2
 SP_SinusoidFit(x_z,'sin3')	SP_SinusoidFit_sin3
@@ -838,6 +839,9 @@ ST_MomentCorr(x_z,0.02,0.2,'mean','std','sqrt')	ST_MomentCorr_002_02_mean_std_sq
 ST_MomentCorr(x_z,0.02,0.2,'median','iqr','abs')	ST_MomentCorr_002_02_median_iqr_abs
 ST_MomentCorr(x_z,0.02,0.2,'median','iqr','none')	ST_MomentCorr_002_02_median_iqr_none
 ST_MomentCorr(x_z,0.02,0.2,'median','iqr','sqrt')	ST_MomentCorr_002_02_median_iqr_sqrt
+ST_PeakIntervals(x_z,0.5)	ST_PeakIntervals_05
+ST_PeakIntervals(x_z,1)	ST_PeakIntervals_1
+ST_PeakIntervals(x_z,2)	ST_PeakIntervals_2
 ST_SimpleStats(x_z,'pmcross')	ST_SimpleStats_pmcross
 ST_SimpleStats(x_z,'zcross')	ST_SimpleStats_zcross
 SY_StatAv(x_z,'len',50)	StatAvl50
