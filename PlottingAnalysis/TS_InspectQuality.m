@@ -103,7 +103,7 @@ case {'full','all'}
 
 case 'reduced'
     % First find where problems exist, and only show these columns
-    qualityMean = nanmean(TS_Quality);
+    qualityMean = mean(TS_Quality,'omitnan');
     hadProblem = (qualityMean > 0);
 
     if sum(hadProblem)==0
@@ -195,7 +195,7 @@ case 'summary'
     % Summary as a line plot for operations that had some bad values
 
     % First find where problems exist, and only show these columns
-    qualityMean = nanmean(TS_Quality,1);
+    qualityMean = mean(TS_Quality,1,'omitnan');
     hadProblem = (qualityMean > 0);
 
     % Stop if there are no special values:

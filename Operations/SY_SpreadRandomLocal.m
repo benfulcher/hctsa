@@ -157,8 +157,8 @@ end
 % a scale given by the length l
 
 fs = zeros(numFeat, 2);
-fs(:, 1) = nanmean(qs); % the mean value of the feature across subsegments of the time series
-fs(:, 2) = nanstd(qs); % the spread of the feature across subsegments of the time series
+fs(:, 1) = mean(qs,'omitnan'); % the mean value of the feature across subsegments of the time series
+fs(:, 2) = std(qs,0,'omitnan'); % the spread of the feature across subsegments of the time series
 
 % mean* fields dropped: they re-estimate global summary statistics (already
 % covered elsewhere in hctsa) rather than measuring local variability/

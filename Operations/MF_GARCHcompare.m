@@ -270,28 +270,28 @@ BICs = BICs / N;
 % 'whole things'
 out.minLLF = min(LLFs(:));
 out.maxLLF = max(LLFs(:));
-out.meanLLF = nanmean(LLFs(:));
+out.meanLLF = mean(LLFs(:),'omitnan');
 out.minBIC = min(BICs(:));
 out.maxBIC = max(BICs(:));
-out.meanBIC = nanmean(BICs(:));
+out.meanBIC = mean(BICs(:),'omitnan');
 out.minAIC = min(AICs(:));
 out.maxAIC = max(AICs(:));
-out.meanAIC = nanmean(AICs(:));
+out.meanAIC = mean(AICs(:),'omitnan');
 out.minK = min(Ks(:));
 out.maxK = max(Ks(:));
-out.meanK = nanmean(Ks(:));
+out.meanK = mean(Ks(:),'omitnan');
 out.min_meanarchps = min(meanarchps(:));
 out.max_meanarchps = max(meanarchps(:));
-out.mean_meanarchps = nanmean(meanarchps(:));
+out.mean_meanarchps = mean(meanarchps(:),'omitnan');
 out.min_maxarchps = min(maxarchps(:));
 out.max_maxarchps = max(maxarchps(:));
-out.mean_maxarchps = nanmean(maxarchps(:));
+out.mean_maxarchps = mean(maxarchps(:),'omitnan');
 out.min_meanlbqps = min(meanlbqps(:));
 out.max_meanlbqps = max(meanlbqps(:));
-out.mean_meanlbqps = nanmean(meanlbqps(:));
+out.mean_meanlbqps = mean(meanlbqps(:),'omitnan');
 out.min_maxlbqps = min(maxlbqps(:));
 out.max_maxlbqps = max(maxlbqps(:));
-out.mean_maxlbqps = nanmean(maxlbqps(:));
+out.mean_maxlbqps = mean(maxlbqps(:),'omitnan');
 
 % 'bests' (orders)
 [a, b] = find(LLFs == max(LLFs(:)), 1, 'first');
@@ -310,7 +310,7 @@ out.bestqBIC = qr(b);
 % does changing the order (either p or q) have. Sometimes changing q will
 % have negligible effect -- we want to quantify this.
 
-out.Ks_vary_p = nanmean(nanstd(Ks)); % mean variation along p direction
-out.Ks_vary_q = nanmean(nanstd(Ks')); % mean variation along q direction
+out.Ks_vary_p = mean(std(Ks,0,'omitnan'),'omitnan'); % mean variation along p direction
+out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); % mean variation along q direction
 
 end

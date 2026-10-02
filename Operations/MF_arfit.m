@@ -292,11 +292,12 @@ perFiltered = per;
 perFiltered(perSpecial) = NaN;
 
 out.hasInfper = sum(perSpecial(1, :));
-out.meanper = nanmean(perFiltered(1, :));
-out.stdper = nanstd(perFiltered(1, :));
-out.maxper = nanmax(perFiltered(1, :));
-out.minper = nanmin(perFiltered(1, :));
-out.meanpererr = nanmean(per(2, :));
+out.meanper = mean(perFiltered(1, :),'omitnan');
+out.stdper = std(perFiltered(1, :),0,'omitnan');
+% (max and min ignore NaNs by default)
+out.maxper = max(perFiltered(1, :));
+out.minper = min(perFiltered(1, :));
+out.meanpererr = mean(per(2, :),'omitnan');
 
 out.meantau = mean(tau(1, :));
 out.maxtau = max(tau(1, :));

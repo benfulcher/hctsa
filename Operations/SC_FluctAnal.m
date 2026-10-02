@@ -333,8 +333,8 @@ else
 
 	out.logtausplit = logtt(breakPt);
 	out.ratsplitminerr = min(sserr) / out.ssr;
-	out.meanssr = nanmean(sserr);
-	out.stdssr = nanstd(sserr);
+	out.meanssr = mean(sserr,'omitnan');
+	out.stdssr = std(sserr,0,'omitnan');
 end
 
 if doPlot

@@ -102,7 +102,7 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % does not register). Refined Composite MSE (pooling raw match counts across offsets
 % before the log, per Wu et al. 2014) is theoretically marginally better, but needs
 % the raw A/B match counts that the fast compiled sampen_mex path does not expose;
-% plain averaging (using nanmean, matching this file's NaN-handling convention)
+% plain averaging (using mean(...,'omitnan'), matching this file's NaN-handling convention)
 % already resolves the instability -- across 2200 offset x scale combinations on real
 % data, 0% Inf and only 2% NaN (from too-short coarse-grained segments), both handled
 % safely.
@@ -234,7 +234,7 @@ for si = 1:numScales
 			end
 		end
 	end
-	sampEns(si) = nanmean(offsetSampEns);
+	sampEns(si) = mean(offsetSampEns,'omitnan');
 end
 
 % -------------------------------------------------------------------------------
@@ -269,17 +269,18 @@ end
 % Summary statistics of the variation:
 % -------------------------------------------------------------------------------
 % Maximum, and where it occurred
-[out.(['max' enName]), maxInd] = nanmax(sampEns);
+% (max and min ignore NaNs by default)
+[out.(['max' enName]), maxInd] = max(sampEns);
 out.maxScale = scaleRange(maxInd);
 % Minimum, and where it occurred
-[out.(['min' enName]), minInd] = nanmin(sampEns);
+[out.(['min' enName]), minInd] = min(sampEns);
 out.minScale = scaleRange(minInd);
 % Mean, std, coefficient of variation:
-out.(['mean' enName]) = nanmean(sampEns);
-out.(['std' enName]) = nanstd(sampEns);
+out.(['mean' enName]) = mean(sampEns,'omitnan');
+out.(['std' enName]) = std(sampEns,0,'omitnan');
 out.(['cv' enName]) = out.(['std' enName]) / out.(['mean' enName]);
 % Mean change across the range of scales:
-out.meanch = nanmean(diff(sampEns));
+out.meanch = mean(diff(sampEns),'omitnan');
 
 % Trend across scales: robust linear fit of SampEn vs. scale (a more
 % principled alternative to meanch's raw adjacent-scale averaging -- uses

@@ -83,7 +83,7 @@ if makeViolin
     end
 
     % Re-order groups by mean (excluding any NaNs, descending):
-    meanGroup = cellfun(@nanmean,dataCell);
+    meanGroup = cellfun(@(x) mean(x,'omitnan'),dataCell);
     [~,ix] = sort(meanGroup,'descend');
 
     extraParams = struct();

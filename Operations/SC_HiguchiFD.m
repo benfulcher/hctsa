@@ -110,7 +110,7 @@ for k = 1:kmax
 		idx = m:k:(m + nMax * k);
 		Lk(m) = sum(abs(diff(y(idx)))) * (N - 1) / (nMax * k) / k;
 	end
-	Lbar = nanmean(Lk);
+	Lbar = mean(Lk,'omitnan');
 	if ~isnan(Lbar) && Lbar > 0
 		logL(k) = log(Lbar);
 		logInvk(k) = log(1 / k);
