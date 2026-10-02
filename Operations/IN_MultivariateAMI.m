@@ -105,7 +105,7 @@ x_now = y_embed(:, 3);  % x_t
 if strcmp(tauMethod, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tauMethod, 'mi')
-	tau = CO_FirstMin(y, 'mi');
+	tau = BF_GetTau(y, 'mi');
 else
 	tau = tauMethod;
 end

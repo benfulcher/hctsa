@@ -74,7 +74,7 @@ elseif strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
-	tau = CO_FirstMin(y, 'mi');
+	tau = BF_GetTau(y, 'mi');
 	% tau is the first minimum of the automutual information function
 end
 if isnan(tau)

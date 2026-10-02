@@ -117,7 +117,7 @@ end
 if strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tau, 'mi')
-	tau = CO_FirstMin(y, 'mi');
+	tau = BF_GetTau(y, 'mi');
 end
 if isnan(tau)
 	out = NaN; return

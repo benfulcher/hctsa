@@ -119,7 +119,7 @@ end
 if strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete'); % first zero-crossing of autocorrelation function
 elseif strcmp(tau, 'mi')
-	tau = CO_FirstMin(y, 'mi'); % first minimum of automutual information function
+	tau = BF_GetTau(y, 'mi'); % min(first Kraskov AMI minimum, 1/e ACF time)
 end
 if isnan(tau)
 	out = NaN; return

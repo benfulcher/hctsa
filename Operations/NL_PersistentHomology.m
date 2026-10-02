@@ -145,7 +145,7 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %% Check inputs
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-    % 'mi' (first minimum of mutual information), not a fixed tau=1: loop
+    % 'mi' (an adaptive delay; see BF_GetTau), not a fixed tau=1: loop
     % shape -- and hence H1 persistence relative to point-cloud diameter --
     % is highly sensitive to this choice. A fixed tau=1 embedding of a
     % smooth periodic series is nearly collinear locally (adjacent samples

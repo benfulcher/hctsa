@@ -25,7 +25,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % just the recomputation but also any warning() side effect the
             % computation would have raised, which a couple of tests below
             % check for directly).
-            clear CO_AutoCorr CO_FirstMin BF_CheckToolbox CO_GLSCF
+            clear CO_AutoCorr CO_FirstMin BF_CheckToolbox CO_GLSCF BF_GetTau
         end
     end
 
@@ -184,6 +184,101 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             out1b = CO_FirstMin(firstSeries,'ac'); % must recompute correctly
 
             testCase.verifyEqual(out1a, out1b);
+        end
+
+        %-------------------------------------------------------------
+        % BF_GetTau (adaptive time delays)
+        %-------------------------------------------------------------
+        function test_BF_GetTau_ac1e_AR1(testCase)
+            % For an AR(1) process, rho(k) = phi^k, so the 1/e crossing is at
+            % -1/log(phi) = 9.49 for phi = 0.9: the floored delay should be ~9.
+            rng(21);
+            y = filter(1, [1, -0.9], randn(5000,1));
+            tau = BF_GetTau(y,'ac1e');
+            testCase.verifyGreaterThanOrEqual(tau, 7);
+            testCase.verifyLessThanOrEqual(tau, 11);
+        end
+
+        function test_BF_GetTau_ac1e_IsFloorOfCrossing(testCase)
+            % The delay is the largest lag with ACF >= 1/e, so the ACF at tau is
+            % at least 1/e and at tau + 1 is below it.
+            rng(22);
+            y = filter(ones(8,1)/8, 1, randn(2000,1));
+            tau = BF_GetTau(y,'ac1e');
+            acf = CO_AutoCorr(y, [tau, tau + 1], 'Fourier');
+            testCase.verifyGreaterThanOrEqual(acf(1), 1/exp(1));
+            testCase.verifyLessThan(acf(2), 1/exp(1));
+        end
+
+        function test_BF_GetTau_ScalesWithSamplingRate(testCase)
+            % Sampling a smooth process at half the rate should roughly halve
+            % the delay (exactly, up to estimation noise and flooring).
+            rng(23);
+            y = filter(1, [1, -0.97], randn(20000,1));
+            tauFull = BF_GetTau(y,'ac1e');
+            tauHalf = BF_GetTau(y(1:2:end),'ac1e');
+            testCase.verifyLessThanOrEqual(abs(tauHalf - tauFull/2), 2);
+        end
+
+        function test_BF_GetTau_MapsKeepUnitDelay(testCase)
+            % A chaotic map decorrelates within a step (ACF(1) ~ 0), so both
+            % adaptive rules keep tau = 1, retaining the one-step recurrence,
+            % even though its (nonlinear) automutual information decays slowly.
+            N = 2000;
+            x = zeros(N,1);
+            x(1) = 0.3;
+            for t = 2:N
+                x(t) = 3.8*x(t-1)*(1 - x(t-1));
+            end
+            y = zscore(x);
+            testCase.verifyEqual(BF_GetTau(y,'ac1e'), 1);
+            testCase.verifyEqual(BF_GetTau(y,'mi'), 1);
+        end
+
+        function test_BF_GetTau_MIIsAtMostAC1e(testCase)
+            % 'mi' is the smaller of the first Kraskov AMI minimum and 'ac1e'.
+            T = 40; % period of a noisy oscillation
+            rng(24);
+            y = filter(1, [1, -2*0.97*cos(2*pi/T), 0.97^2], randn(3000,1));
+            tauMI = BF_GetTau(y,'mi');
+            tauAC = BF_GetTau(y,'ac1e');
+            testCase.verifyGreaterThanOrEqual(tauMI, 1);
+            testCase.verifyLessThanOrEqual(tauMI, tauAC);
+        end
+
+        function test_BF_GetTau_ConstantSeriesIsNaN(testCase)
+            y = ones(100,1);
+            testCase.verifyTrue(isnan(BF_GetTau(y,'ac1e')));
+            testCase.verifyTrue(isnan(BF_GetTau(y,'mi')));
+        end
+
+        function test_BF_PreProcess_DecimateAC1e(testCase)
+            % Keeps every tau-th sample, with tau from BF_GetTau(y,'ac1e').
+            rng(25);
+            y = filter(1, [1, -0.9], randn(1000,1));
+            tau = BF_GetTau(y,'ac1e');
+            yDec = BF_PreProcess(y,'decimate_ac1e');
+            testCase.verifyEqual(yDec, y(1:tau:end));
+        end
+
+        function test_BF_Embed_AC1eDelay(testCase)
+            rng(26);
+            y = filter(1, [1, -0.9], randn(1000,1));
+            params = BF_Embed(y,'ac1e',3,true);
+            testCase.verifyEqual(params, [BF_GetTau(y,'ac1e'), 3]);
+        end
+
+        function test_EN_ApEn_DelayDefaultUnchanged(testCase)
+            % The default delay must reproduce ApEn on consecutive samples
+            % (tau = 1), and an adaptive delay must give a finite value.
+            rng(27);
+            y = zscore(filter(1, [1, -0.9], randn(500,1)));
+            testCase.verifyEqual(EN_ApEn(y,2,0.2), EN_ApEn(y,2,0.2,1));
+            apenDelay = EN_ApEn(y,2,0.2,'ac1e');
+            testCase.verifyTrue(isfinite(apenDelay));
+            % A larger delay sees less redundancy between pattern elements of a
+            % smooth series, so ApEn increases:
+            testCase.verifyGreaterThan(apenDelay, EN_ApEn(y,2,0.2,1));
         end
 
         %-------------------------------------------------------------
