@@ -17,7 +17,10 @@ function out = NW_OrdinalPartitionNetwork(y, d, tau)
 % d, the ordinal pattern (embedding) dimension: windows of d consecutive
 %    (delay-tau-spaced) points are each mapped to their rank permutation, one of
 %    d! possible ordinal patterns (default: 3)
-% tau, the time delay (default: 1, as used throughout Kulp et al. 2016)
+% tau, the time delay (default: 1, as used throughout Kulp et al. 2016). An integer
+%    number of samples, or 'ac' (the first zero-crossing of the autocorrelation function)
+%    or 'mi' (the first minimum of the automutual information function) to set the delay
+%    from the series, as in the time-lagged networks of McCullough et al. 2015
 %
 % ---OUTPUTS:
 % A structure with fields:

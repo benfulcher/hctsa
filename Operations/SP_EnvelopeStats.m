@@ -1,0 +1,194 @@
+function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
+% SP_EnvelopeStats   Statistics of the amplitude envelope of the full series and of its dominant oscillation.
+%
+% Computes the instantaneous amplitude envelope |z(t)| of the analytic signal
+% z(t) = y(t) + i H[y](t), where H is the Hilbert transform, for (a) the full
+% series and (b) the dominant band: the frequency band of half-width
+% halfWidthFrac (as a fraction of the usable spectrum, at least 2 bins) around the
+% largest periodogram peak (the band convention of SP_PhaseFluctuationScaling and
+% SP_PhaseAmpCoupling, DC and Nyquist bins excluded). Each analytic signal comes
+% from the FFT: zeroing the bins outside the band (negative frequencies included)
+% and doubling the rest before an inverse FFT, with no toolbox needed.
+%
+% The envelope summaries describe amplitude modulation: how variable the
+% envelope is (coefficient of variation), how asymmetric and heavy-tailed its
+% distribution is (skewness, kurtosis), and how long it takes to decorrelate
+% (the 1/e timescale of its autocorrelation function). An unmodulated sinusoid
+% has a constant envelope (CV near 0); bursting or amplitude-modulated signals
+% have a large CV, and a high kurtosis for intermittent bursts.
+%
+% Baseline for Gaussian noise: the analytic signal of a stationary Gaussian
+% process is complex Gaussian, so its envelope is Rayleigh distributed:
+% CV = sqrt(4/pi - 1) = 0.5227, skewness 0.6311, kurtosis 3.2451 (checked
+% numerically on white noise for the full-band fields). Values of the CV below
+% this indicate an envelope steadier than noise (e.g., a sinusoid in noise follows
+% a Rice distribution), and above it an envelope more modulated than noise.
+%
+% To limit edge effects (the FFT filter is circular, so the series ends wrap
+% around), trimFrac of the samples are dropped from each end of the envelope and
+% phase before any summary is computed. Timescales are in samples (as elsewhere in
+% hctsa), so they scale with the sampling rate. The dominant-band fields of a
+% narrow band are based on few effectively independent envelope values (about
+% N times the band width), so they are biased toward lower CV for short series.
+%
+% ---INPUTS:
+% y, the input time series
+% halfWidthFrac, half-width of the dominant band around the largest spectral peak, as a
+%                fraction of the usable one-sided spectrum, and at least 2 bins
+%                (default: 0.01)
+% trimFrac, the fraction of samples dropped from each end of the analytic signal
+%           before computing summaries (default: 0.05)
+%
+% ---OUTPUTS:
+% full_cv, the envelope's coefficient of variation (standard deviation over mean), full series
+% full_skew, the envelope's skewness, full series
+% full_kurt, the envelope's kurtosis, full series
+% full_tau, the 1/e decay time (in samples) of the envelope's autocorrelation function, full series
+% dom_cv, dom_skew, dom_kurt, dom_tau, as above for the dominant band
+% dom_ifspread, a robust spread of the dominant band's instantaneous frequency
+%               (1.4826 times the median absolute deviation of the phase
+%               increments, in cycles per sample)
+% All fields are NaN for constant, non-finite, or very short (N < 50) series.
+% A 1/e timescale is NaN when the autocorrelation never falls below 1/e within N/2 lags.
+%
+% ---REFERENCES:
+% B. Boashash, "Estimating and interpreting the instantaneous frequency of a
+% signal. I. Fundamentals", Proc. IEEE 80(4), 520-538 (1992).
+%
+% ---NOTES:
+% Also computed during development but not kept, as redundant: the lag-1
+% envelope autocorrelation (r = 0.95 with the 1/e timescale for the full band;
+% near 1 for every series for a narrow band), and the instantaneous-frequency
+% spread relative to its median (r = 0.92 with SP_PhaseFluctuationScaling's meanFreq).
+
+% ------------------------------------------------------------------------------
+% Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
+% <http://www.benfulcher.com>
+%
+% If you use this code for your research, please cite the following two papers:
+%
+% (1) B.D. Fulcher and N.S. Jones, "hctsa: A Computational Framework for Automated
+% Time-Series Phenotyping Using Massive Feature Extraction, Cell Systems 5: 527 (2017).
+% DOI: 10.1016/j.cels.2017.10.001
+%
+% (2) B.D. Fulcher, M.A. Little, N.S. Jones, "Highly comparative time-series
+% analysis: the empirical structure of time series and their methods",
+% J. Roy. Soc. Interface 10(83) 20130048 (2013).
+% DOI: 10.1098/rsif.2013.0048
+%
+% This function is free software: you can redistribute it and/or modify it under
+% the terms of the GNU General Public License as published by the Free Software
+% Foundation, either version 3 of the License, or (at your option) any later
+% version.
+%
+% This program is distributed in the hope that it will be useful, but WITHOUT
+% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+% details.
+%
+% You should have received a copy of the GNU General Public License along with
+% this program. If not, see <http://www.gnu.org/licenses/>.
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
+%% Check inputs, set defaults
+% ------------------------------------------------------------------------------
+y = y(:);
+if nargin < 2 || isempty(halfWidthFrac)
+    halfWidthFrac = 0.01;
+end
+if nargin < 3 || isempty(trimFrac)
+    trimFrac = 0.05;
+end
+
+% Fixed set of output fields (NaN whenever a value is undefined):
+fldFull = {'full_cv', 'full_skew', 'full_kurt', 'full_tau'};
+fldDom = {'dom_cv', 'dom_skew', 'dom_kurt', 'dom_tau', 'dom_ifspread'};
+for f = [fldFull, fldDom]
+    out.(f{1}) = NaN;
+end
+
+N = length(y);
+if N < 50 || any(~isfinite(y)) || std(y) == 0
+    return
+end
+y = y - mean(y);
+
+% ------------------------------------------------------------------------------
+%% Frequency bins (DC and Nyquist excluded, as in SP_PhaseAmpCoupling)
+% ------------------------------------------------------------------------------
+halfN = floor(N / 2) + 1;
+if mod(N, 2) == 0
+    usableBins = 2:(halfN - 1);
+else
+    usableBins = 2:halfN;
+end
+Y = fft(y);
+
+% Samples dropped from each end of the (circularly computed) analytic signal:
+nTrim = max(1, round(trimFrac * N));
+keep = (nTrim + 1):(N - nTrim);
+
+% ------------------------------------------------------------------------------
+%% (a) Full band
+% ------------------------------------------------------------------------------
+Yfull = zeros(N, 1);
+Yfull(usableBins) = 2 * Y(usableBins);
+zFull = ifft(Yfull);
+envFull = abs(zFull(keep));
+[out.full_cv, out.full_skew, out.full_kurt, out.full_tau] = envelopeSummary(envFull);
+
+% ------------------------------------------------------------------------------
+%% (b) Dominant band: the largest periodogram peak +/- halfWidthBins
+% ------------------------------------------------------------------------------
+halfWidthBins = max(2, round(halfWidthFrac * length(usableBins)));
+if length(usableBins) < 4 * halfWidthBins
+    return
+end
+[~, iPeak] = max(abs(Y(usableBins)).^2);
+peakBin = usableBins(iPeak);
+bandBins = max(usableBins(1), peakBin - halfWidthBins):min(usableBins(end), peakBin + halfWidthBins);
+
+Ydom = zeros(N, 1);
+Ydom(bandBins) = 2 * Y(bandBins);
+zDom = ifft(Ydom);
+envDom = abs(zDom(keep));
+[out.dom_cv, out.dom_skew, out.dom_kurt, out.dom_tau] = envelopeSummary(envDom);
+
+% Instantaneous frequency (cycles per sample): the unwrapped phase increments
+% over the trimmed segment, summarized robustly (scaled MAD, which equals the
+% standard deviation for a Gaussian)
+phi = unwrap(angle(zDom(keep)));
+instFreq = diff(phi) / (2 * pi);
+out.dom_ifspread = 1.4826 * median(abs(instFreq - median(instFreq)));
+
+end
+
+% ------------------------------------------------------------------------------
+function [cv, sk, ku, tau] = envelopeSummary(env)
+% Distributional and autocorrelation summaries of an amplitude envelope
+cv = NaN; sk = NaN; ku = NaN; tau = NaN;
+n = length(env);
+m = mean(env);
+if ~(m > 0) || std(env) == 0
+    return
+end
+e = env - m;
+s2 = mean(e.^2);
+cv = sqrt(s2) / m; % population standard deviation over the mean
+sk = mean(e.^3) / s2^1.5;
+ku = mean(e.^4) / s2^2;
+
+% Autocorrelation of the envelope via the FFT (zero-padded, biased estimator)
+nfft = 2^nextpow2(2 * n);
+F = fft(e, nfft);
+acf = real(ifft(abs(F).^2));
+acf = acf(1:floor(n / 2) + 1) / acf(1); % lags 0..N/2
+iCross = find(acf < exp(-1), 1);
+if ~isempty(iCross) && iCross > 1
+    % linear interpolation between lags (iCross-2) and (iCross-1)
+    a0 = acf(iCross - 1);
+    a1 = acf(iCross);
+    tau = (iCross - 2) + (a0 - exp(-1)) / (a0 - a1);
+end
+end
