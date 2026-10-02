@@ -232,6 +232,8 @@ CO_JointNonGaussianity(x_z,'ac',3,{'ac',1},10000)	CO_JointNonGaussianity_ac_3_ac
 CO_MatrixProfile(x_z,{'ac',8},5000)	CO_MatrixProfile_ac_8_5000
 CO_PartialAutoCorr(x_z,20,'ols')  CO_PartialAutoCorr_20_ols
 CO_PosNegAsymmetry(x_z)	CO_PosNegAsymmetry_y
+CO_Quantilogram(x_z,1)	CO_Quantilogram_1
+CO_Quantilogram(x_z,'ac')	CO_Quantilogram_ac
 CO_RemovePoints(x_z,'absclose',0.1,'remove')	CO_RemovePoints_absclose_01_remove
 CO_RemovePoints(x_z,'absclose',0.5,'remove')	CO_RemovePoints_absclose_05_remove
 CO_RemovePoints(x_z,'absclose',0.8,'remove')	CO_RemovePoints_absclose_08_remove
@@ -394,6 +396,8 @@ DN_Spread(x,'iqr')			DN_Spread_iqr
 DN_Spread(x,'mad')			DN_Spread_mad
 DN_Spread(x,'mead')			DN_Spread_mead
 DN_Spread(x,'std')			DN_Spread_std
+DN_TailIndex(x_z,0.05)	DN_TailIndex_5
+DN_TailIndex(x_z,0.10)	DN_TailIndex_10
 DN_TrimmedMean(x,1)		DN_TrimmedMean_1
 DN_TrimmedMean(x,5)		DN_TrimmedMean_5
 DN_TrimmedMean(x,10)	DN_TrimmedMean_10
