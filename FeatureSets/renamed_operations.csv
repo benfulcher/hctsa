@@ -125,3 +125,8 @@ DN_RemovePoints_max_08_saturate_skewnessrat,DN_RemovePoints_max_08_saturate_skew
 DN_RemovePoints_min_01_saturate_skewnessrat,DN_RemovePoints_min_01_saturate_skewnessdiff,skewness ratio replaced by a difference (original skewness can be near 0)
 DN_RemovePoints_min_05_saturate_skewnessrat,DN_RemovePoints_min_05_saturate_skewnessdiff,skewness ratio replaced by a difference (original skewness can be near 0)
 DN_RemovePoints_min_08_saturate_skewnessrat,DN_RemovePoints_min_08_saturate_skewnessdiff,skewness ratio replaced by a difference (original skewness can be near 0)
+CO_TC3_ac_raw,CO_TC3_ac1e_raw,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
+CO_TC3_ac_abs,CO_TC3_ac1e_abs,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
+CO_TC3_ac_num,CO_TC3_ac1e_num,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
+CO_TC3_ac_absnum,CO_TC3_ac1e_absnum,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
+CO_TC3_ac_denom,CO_TC3_ac1e_denom,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)

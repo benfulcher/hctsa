@@ -11,9 +11,14 @@ function out = CO_TC3(y, tau)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time lag (default 'ac'; can be 'ac' or 'mi' to set it as the first
-%      zero-crossing of the autocorrelation function, or the first minimum of the
-%      automutual information function, respectively)
+% tau, the time lag, either an integer number of samples or a string that sets it
+%      from the series (default 'ac1e'):
+%      'ac1e': the first 1/e crossing of the autocorrelation function,
+%      'ac': the first zero-crossing of the autocorrelation function (kept for
+%            backward compatibility; for a series whose autocorrelation never
+%            crosses zero, or only at a very long lag, the lag is meaninglessly
+%            long, which is why 'ac1e' is the default),
+%      'mi': the first minimum of the automutual information function.
 %
 % ---OUTPUTS:
 % raw, the tc3 expression, mean(y(t)*y(t+tau)*y(t+2*tau)) / |mean(y(t)*y(t+tau))|^(3/2),
@@ -55,14 +60,17 @@ function out = CO_TC3(y, tau)
 %% Set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-	tau = 'ac';
+	tau = 'ac1e';
 end
 
 % ------------------------------------------------------------------------------
 % Set the time lag as a measure of the time-series correlation length
 % ------------------------------------------------------------------------------
-% Can set the time lag, tau, to be 'ac' or 'mi'
-if strcmp(tau, 'ac')
+% Can set the time lag, tau, to be 'ac1e', 'ac', or 'mi'
+if strcmp(tau, 'ac1e')
+	tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
+	% tau is the first 1/e crossing of the autocorrelation function
+elseif strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
