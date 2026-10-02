@@ -705,7 +705,7 @@ NL_FNN(x_z,'mi',10,{'ac',1},0,[],5)	NL_FNN_mi_10_ac1_f5
 NL_ZeroOneTest(x_z,20,'full')	NL_ZeroOneTest_20_full
 NW_OrdinalPartitionNetwork(x_z,4,1)	NW_OrdinalPartitionNetwork_4_1
 NW_VisibilityGraph(x_z,'horiz','full')	NW_VisibilityGraph_horiz_full
-NW_VisibilityGraph(x_z,'norm',5000)	    NW_VisibilityGraph_norm_5000
+NW_VisibilityGraph(x_z,'norm',20000)	    NW_VisibilityGraph_norm_20000
 PD_PeriodicityWang(x_z)	PD_PeriodicityWang
 PH_KramersMoyal(x_z,1,15)	PH_KramersMoyal_1_15
 PH_ForcePotential(x_z,'dblwell',[1,0.2,0.1])	PH_ForcePotential_dblwell_1_02_01

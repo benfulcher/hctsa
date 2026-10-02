@@ -18,12 +18,16 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 % meth, the method for constructing the graph (default: 'horiz'):
 %           (i) 'norm': the natural visibility definition
 %           (ii) 'horiz': uses only horizontal lines to link nodes/datums
-% maxL, the maximum number of samples to consider (default: 5000). Due to
-%       memory constraints, only the first maxL points of a longer time series
-%       are analyzed (a warning is raised). Set to 'full' to analyze the entire
-%       time series with no cropping (a warning is raised, but no cropping
-%       occurs, if the series exceeds 10000 samples, since computation may be
-%       slow).
+% maxL, the maximum number of samples to consider (default: 20000). Only the
+%       first maxL points of a longer time series are analyzed (a warning is
+%       raised), to bound the computation time. Set to 'full' to analyze the
+%       entire time series with no cropping (a warning is raised, but no
+%       cropping occurs, if the series exceeds 50000 samples, since computation
+%       of the natural visibility graph may be slow). Only the degrees are
+%       computed, with no adjacency matrix stored, so memory is not a concern:
+%       the horizontal graph takes O(N) time and the natural graph typically
+%       well under O(N^2) (a smooth random walk of 20000 samples takes about
+%       0.5 s; a worst-case series, with no early stop in the sweep, takes O(N^2)).
 %
 % ---OUTPUTS:
 % modek, propmode: the most common degree, and the proportion of nodes that
@@ -109,17 +113,17 @@ if nargin < 2
 	meth = 'horiz';
 end
 if nargin < 3 || isempty(maxL)
-	maxL = 5000; % crops time series longer than this maximum length
+	maxL = 20000; % crops time series longer than this maximum length
 end
 
 if ischar(maxL) && strcmp(maxL, 'full')
 	% No cropping -- but flag potentially slow computations for very long series:
-	slowThreshold = 10000;
-	if N > slowThreshold
+	slowThreshold = 50000;
+	if N > slowThreshold && strcmp(meth, 'norm')
 		warning(sprintf(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
 						 'visibility graph computation may be slow'], N, slowThreshold));
 	end
-elseif N > maxL % too long to store in memory
+elseif N > maxL % too long: crop
 	% ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
 	% could alter to take different subsets, or set a maximum distance range
 	% allowed to make a link (using sparse), etc.
@@ -136,87 +140,60 @@ y = y - min(y); % adjust so that minimum of y is at zero
 % ------------------------------------------------------------------------------
 switch meth
 	case 'norm'
-		% Normal (natural) visibility graph (Lacasa et al., 2008).
-		% Original code by Enyu Zhuang (Zoey), 23/9/13; substantially
-		% modified by Ben Fulcher, 26-8-2015; inlined here and reduced
-		% from an N x N gradient matrix to a single reused row vector
-		% (only the current row i was ever read), 4/8/2026.
-		A = zeros(N, N);
-		s = zeros(1, N); % gradient from i to each subsequent point j (reused per i)
+		% Natural visibility graph degrees by a forward sweep from each node i that keeps the
+		% largest slope seen so far: node j is visible from i iff its slope (y(j)-y(i))/(j-i)
+		% strictly exceeds that of every node in between. No adjacency matrix is stored.
+		% Once the running maximum slope m is positive, nodes beyond distance (max(y)-y(i))/m
+		% would have to lie above max(y), so the scan stops early.
+		k = zeros(1, N);
+		ymax = max(y);
 		for i = 1:(N - 1)
-			for j = i + 1:N
-				s(j) = (y(j) - y(i)) / (j - i);
-				if j == i + 1
-					A(i, j) = 1; % always visible to the next point
-				else
-					% Visible iff the gradient to every intermediate point
-					% is lower than the gradient straight to j:
-					for k = i + 1:j - 1
-						if s(k) >= s(j)
-							break;
-						elseif k == j - 1
-							A(i, j) = 1;
-						end
+			yi = y(i);
+			m = -Inf; % largest slope from i seen so far
+			jlim = N; % last node that can still be visible
+			j = i + 1;
+			while j <= jlim
+				sj = (y(j) - yi) / (j - i);
+				if sj > m
+					m = sj;
+					k(j) = k(j) + 1;
+					k(i) = k(i) + 1;
+					if m > 0
+						jlim = min(N, i + floor((ymax - yi) / m) + 1);
 					end
 				end
+				j = j + 1;
 			end
 		end
-		A = symmetrize(A);
 
 	case 'horiz'
-		% Horizontal visibility graph
-
-		% The graph has only O(N) edges, so accumulate (row,col) edge indices
-		% and build a sparse adjacency matrix at the end, instead of a dense
-		% N x N matrix (an O(N^2) allocation/initialization that's mostly
-		% zeros -- e.g., ~200MB at the default maxL=5000 cap):
-		yr = flipud(y); % reversed order time series
-		rows = zeros(2 * N, 1);
-		cols = zeros(2 * N, 1);
-		numEdges = 0;
-
-		% Node i is linked to the first point ahead of it with y >= y(i), and to
-		% the first point behind it with y >= y(i). Together these give exactly
-		% the horizontal visibility graph (y(k) < min(y(i),y(j)) for all i<k<j):
-		% an edge with y(j) >= y(i) is found from i looking forward, and one with
-		% y(i) > y(j) is found from j looking back. The comparisons must be >=,
-		% not >: with a strict > (as this code originally had), a point equal
-		% to y(i) neither terminates the search nor forms an edge, so equal-
-		% valued pairs were never linked and pairs separated by an equal-valued
-		% intermediate were linked when they should not be (verified against a
-		% brute-force HVG: identical for continuous data, but for a
-		% quantized series 154/440 edges were missing and 284 spurious edges
-		% were added).
+		% Horizontal visibility graph degrees in O(N) using a monotone stack of
+		% non-increasing values. Nodes j < i are linked iff every node between is
+		% strictly below min(y(j), y(i)).
+		k = zeros(1, N);
+		stack = zeros(N, 1);
+		sp = 0;
 		for i = 1:N
-			% Look forward to first point at or above this one, then stop
-			if i < N
-				nAhead = find(y(i + 1:end) >= y(i), 1, 'first');
-				if ~isempty(nAhead)
-					numEdges = numEdges + 1;
-					rows(numEdges) = i;
-					cols(numEdges) = i + nAhead;
-				end
+			yi = y(i);
+			poppedEqual = false;
+			% every stacked node at or below y(i) sees i (the first node ahead of it that is >= it)
+			while sp > 0 && y(stack(sp)) <= yi
+				j = stack(sp);
+				sp = sp - 1;
+				k(j) = k(j) + 1;
+				k(i) = k(i) + 1;
+				poppedEqual = (y(j) == yi);
 			end
-
-			% Look back to the first point at or above this one, then stop
-			if i > 1
-				nBack = find(yr(N - i + 2:end) >= yr(N - i + 1), 1, 'first');
-				if ~isempty(nBack)
-					numEdges = numEdges + 1;
-					rows(numEdges) = i - nBack;
-					cols(numEdges) = i;
-				end
+			% the nearest higher node behind i also sees i, unless an equal-valued node
+			% (popped just above) blocks it
+			if sp > 0 && ~poppedEqual
+				j = stack(sp);
+				k(j) = k(j) + 1;
+				k(i) = k(i) + 1;
 			end
+			sp = sp + 1;
+			stack(sp) = i;
 		end
-		% Every edge added above has row < col (no self-loops, strictly upper
-		% triangular), so collapsing any duplicate (row,col) pairs added from
-		% both directions back to 0/1 (sparse() sums duplicates) matches the
-		% original dense code's idempotent A(i,j)=1 assignment exactly:
-		A = double(sparse(rows(1:numEdges), cols(1:numEdges), 1, N, N) > 0);
-
-		% Symmetrize A (safe because A is strictly upper triangular: A and A'
-		% have disjoint nonzero support, so no double-counting):
-		A = A + A';
 	otherwise
 		error('Unknown visibility graph method ''%s''', meth);
 end
@@ -228,9 +205,6 @@ end
 % -------------------------------------------------------------------------------
 %% Degree distribution: basic statistics
 % -------------------------------------------------------------------------------
-k = sum(A); % the degree distribution
-k = full(k);
-
 out.modek = mode(k); % mode of degree distribution
 out.propmode = sum(k == mode(k)) / length(k); % proportion of nodes at the modal degree
 out.meank = mean(k); % mean number of links per node
@@ -352,12 +326,4 @@ out.kac2 = CO_AutoCorr(k, 2, 'Fourier');
 out.kac3 = CO_AutoCorr(k, 3, 'Fourier');
 out.ktau = CO_FirstCrossing(k, 'ac', 0, 'continuous');
 
-end
-
-% -------------------------------------------------------------------------------
-function A = symmetrize(A)
-	% Symmetrize an upper triangular matrix:
-	At = A';
-	lowerT = logical(tril(ones(size(A))));
-	A(lowerT) = At(lowerT);
 end
