@@ -7,22 +7,24 @@ function out = MF_ExpSmoothing(x, ntrain, alpha)
 % root-mean-square one-step prediction error over a training set (the first ntrain
 % samples): a coarse search over five values from 0.1 to 0.9, with a parabola fitted
 % to the three lowest errors, and then a finer search around its minimum. The chosen
-% alpha is then used to forecast the whole time series, from its third sample, and
-% the outputs report alpha and statistics of the residuals, from the shared residual
-% summary MF_ResidualAnalysis (at its 'full' level).
+% alpha is then used to forecast each sample after the training set from the samples
+% before it, and the outputs report alpha and statistics of the residuals of these
+% held-out forecasts, from the shared residual summary MF_ResidualAnalysis (at its
+% 'full' level).
 %
 % ---INPUTS:
 % x, the input time series
 %
 % ntrain, the number of samples to use for training (can be a proportion of the
 %           time-series length, if between 0 and 1). It is kept between 100 and 1000
-%           samples. Default is min(100, N). If the series is shorter than ntrain, a
-%           NaN is returned.
+%           samples. Default is min(100, N). If the series is shorter than ntrain, or
+%           fewer than 50 samples remain after the training set, a NaN is returned.
 %
 % alpha, the exponential smoothing parameter, or 'best' (default) to fit it on the
 %           training set.
 %
-% ---OUTPUTS (when alpha is 'best'):
+% ---OUTPUTS (when alpha is 'best'; the residual statistics are those of the
+% held-out samples, after the first ntrain):
 % alphamin, the fitted smoothing parameter (between 0.01 and 1)
 % alphamin_1, the first estimate of it: the minimum of the parabola fitted in the
 %           coarse search (not bounded to the interval 0 to 1)
@@ -52,8 +54,11 @@ function out = MF_ExpSmoothing(x, ntrain, alpha)
 % C. Chatfield, "The Analysis of Time Series", CRC Press LLC (2004).
 %
 % ---NOTES:
-% The residuals are those of the forecast over the whole series (from the third
-% sample), including the training portion, not only of a held-out remainder.
+% The residuals are those of the one-step forecasts of the held-out samples only
+% (samples ntrain+1 to N), so they are not biased by the fit of alpha to the
+% training set. Each forecast uses the samples before it, including earlier
+% held-out ones. For the registered call (ntrain = 0.5) at N = 1000, 500 samples
+% are held out.
 %
 % Code is adapted from that provided by Siddharth Arora (Siddharth.Arora@sbs.ox.ac.uk).
 
@@ -115,7 +120,7 @@ if ntrain < minTrain; % smaller than minimum training set size
 	ntrain = 100;
 end
 
-if N < ntrain % time series shorter than the size of the training set
+if N < ntrain + 50 % too few samples held out after the training set
 	fprintf(1, 'Time Series too short for exponential smoothing\n')
 	out = NaN; return
 end
@@ -243,8 +248,9 @@ end
 % Plot original time series and smoothed data using optimum values
 y = SUB_fit_exp_smooth(x, alpha);
 
-yp = y(3:N); % predicted
-xp = x(3:N); % original
+% Residuals only on the held-out part (after the ntrain samples used to fit alpha):
+yp = y(ntrain+1:N); % predicted
+xp = x(ntrain+1:N); % original
 e = yp - xp; % residuals
 % in_sample_error = sqrt(mean((yp-xp).^2));
 % out.insamplermse = in_sample_error;
@@ -262,7 +268,7 @@ end
 if doPlot
 	figure('color', 'w'); box('on')
 	t = 1:length(yp);
-	plot(t, x(3:N), 'b', t, y(3:N), 'k');
+	plot(t, xp, 'b', t, yp, 'k');
 	legend('Obs', 'Fit');
 	xlabel('Time');
 	ylabel('Amplitude');
@@ -277,14 +283,14 @@ function xf = SUB_fit_exp_smooth(x, a)
 	% where the sum is itself a one-pole filter of x(2:end), so all forecasts are
 	% found in O(N) rather than by restarting the loop at every ii.
 	x = x(:);
-	ntrain = length(x);
-	xf = zeros(ntrain, 1);
-	if ntrain < 3
+	nx = length(x);
+	xf = zeros(nx, 1);
+	if nx < 3
 		return
 	end
 
-	ii = (2:ntrain - 1)';
-	runMean = cumsum(x(1:ntrain - 2)) ./ (1:ntrain - 2)'; % mean(x(1:ii-1))
+	ii = (2:nx - 1)';
+	runMean = cumsum(x(1:nx - 2)) ./ (1:nx - 2)'; % mean(x(1:ii-1))
 	ewma = filter(a, [1, -(1 - a)], [0; x(2:end)]); % sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj)
 
 	% S(t) = Xf(t) is forecasted value for X(t+1)

@@ -47,6 +47,10 @@ function out = SP_SinusoidFit(y, model)
 % from which it was split because the distribution of values is unaffected by
 % temporal ordering, whereas these fits are not. r2 and adjr2 are not registered
 % for the sin1/sin2/sin3 mops (rmse is).
+% The fit starts from the Curve Fitting Toolbox's own start points, which do not
+% depend on the random number generator: repeated calls, and calls in fresh MATLAB
+% sessions, give identical outputs. Nonlinear least squares for sums of sinusoids
+% can nevertheless end in a local minimum, so the fit need not be the global best.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

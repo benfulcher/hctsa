@@ -30,28 +30,32 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 %         over frequencies, of the spectral kurtosis
 % sk_fracAboveThresh, the fraction of frequencies whose spectral kurtosis exceeds
 %         the 95% Gaussian-null threshold (non-Gaussian, bursty behavior)
-% sk_freqAtMax, the angular frequency (2*pi*f, matching SP_Summaries) at which the
-%         spectral kurtosis is largest
+% sk_freqAtMax, the angular frequency, in radians per sample (2*pi times the
+%         frequency in cycles per sample, from 0 to pi, matching SP_Summaries), at
+%         which the spectral kurtosis is largest
 % sk_relSpread, the relative spread of power across windows: the mean over
 %         frequencies of the standard deviation across windows of the power in each
-%         frequency bin (the spread output of spectralKurtosis), divided by the mean
-%         over frequencies of the mean power across windows. A coefficient of
-%         variation of the power: it is dimensionless and independent of the
-%         variance of the series and of the window length (about 1 for white
-%         noise). (Formerly sk_meanSpread, the unnormalized spread, which scaled
-%         with the variance of the series and as 1/(window length).)
-% sk_meanCentroid, 2*pi times the mean over frequencies of the mean across windows
-%         of the same power (the centroid output of spectralKurtosis, which for
-%         unscaled spectral kurtosis is a mean power, not a frequency); not
-%         registered as a feature
+%         frequency bin, divided by the mean over frequencies of the mean power
+%         across windows. Both are powers, so this is a dimensionless coefficient
+%         of variation of the power, independent of the variance of the series and
+%         of the window length (about 1 for white noise). (Formerly sk_meanSpread,
+%         the unnormalized spread, which scaled with the variance of the series and
+%         as 1/(window length); and sk_meanCentroid, a mean power, not a centroid
+%         frequency, which is no longer output.)
 % se_mean, se_std, se_max, se_min, se_range: mean, standard deviation, maximum,
-%         minimum and range, over windows, of the spectral entropy
+%         minimum and range, over windows, of the spectral entropy of each window's
+%         power spectrum. MATLAB's spectralEntropy is scaled by default: it is the
+%         Shannon entropy (base 2) of the one-sided relative power across frequency
+%         bins, divided by its maximum, log2 of the number of bins, so each
+%         window's value lies in [0,1]: 1 for a flat (white) spectrum, near 0 for a
+%         spectrum concentrated in a single frequency bin.
 %
 % ---NOTES:
 % All outputs are computed directly from the spectrogram, so they do not depend on
-% the MATLAB release (on releases without the five-output form of spectralKurtosis,
-% sk_relSpread and sk_meanCentroid used to be NaN). The values equal those of the
-% toolbox function's outputs to rounding error.
+% the MATLAB release (the five-output form of spectralKurtosis is not needed). The
+% values equal those of the toolbox function's outputs to rounding error. With
+% 'Scaled' false, the centroid output of spectralKurtosis is a mean power (not a
+% frequency), so it is used here only as the denominator of sk_relSpread.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -134,6 +138,8 @@ end
 %   spread = standard deviation of P across windows; and
 %   centroid = <P>, the mean of P across windows (named a centroid by MATLAB, but
 %              with Scaled = false it is a mean power, not a frequency).
+% Hence spread and centroid have the same units (power), and their ratio is
+% dimensionless.
 [Sxx, fout] = spectrogram(y, window, noverlap, winLength, Fs);
 P = abs(Sxx).^2 / (0.5 * sum(window)^2);
 P(1, :) = 0.5 * P(1, :); % zero frequency
@@ -152,9 +158,8 @@ out.sk_std = std(kurt);
 out.sk_range = max(kurt) - min(kurt);
 out.sk_fracAboveThresh = mean(kurt > thresh); % fraction of frequencies with non-Gaussian, bursty behavior
 [~, i_max] = max(kurt);
-out.sk_freqAtMax = 2 * pi * fout(i_max); % angular frequency, matching SP_Summaries convention
-out.sk_relSpread = mean(spread) / mean(centroid); % coefficient of variation of power across windows
-out.sk_meanCentroid = 2 * pi * mean(centroid);
+out.sk_freqAtMax = 2 * pi * fout(i_max); % radians per sample (fout in cycles per sample), matching SP_Summaries
+out.sk_relSpread = mean(spread) / mean(centroid); % dimensionless: power / power, a coefficient of variation of power across windows
 
 % ------------------------------------------------------------------------------
 % Instantaneous spectral entropy: entropy per window, across windows
