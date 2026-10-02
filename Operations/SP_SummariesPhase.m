@@ -52,19 +52,19 @@ function out = SP_SummariesPhase(y)
 % ---NOTES:
 % Validation, from the original docstring. R: white noise gave R ~ 0.028 +/- 0.015
 % over 300 trials (an empirical null), a periodic sine wave R ~ 0.22 and a linear
-% chirp R ~ 0.46. phEnt is anti-correlated with R (r = -0.88 on Empirical1000) but
+% chirp R ~ 0.46. phEnt is anti-correlated with R (r = -0.88 on real-world series) but
 % not a function of it: entropy is sensitive to the full shape of the phase
 % distribution (e.g., bimodal), which R cannot distinguish from uniformity.
 % groupDelay was previously referenced to the first sample, which made it ~N/2 for
 % any stationary series and aliased under unwrap (Spearman 0.47 with N on
-% Empirical1000); phaseLinearity was previously un-normalized and grew as sqrt(N)
+% real-world series); phaseLinearity was previously un-normalized and grew as sqrt(N)
 % (Spearman 0.78 with N); on the normalized scale an unstructured (random-walk)
-% unwrapped phase gives ~0.4 regardless of series length (audit, 2026-09).
+% unwrapped phase gives ~0.4 regardless of series length.
 % phaseUnwrapAC1 is strongly diagnostic of dispersive, frequency-dependent delay: a
 % linear chirp gave ~0.86, while every other synthetic test signal was within
 % +/-0.02 of zero. magPhaseCorr is the weakest-validated statistic: inconsistent
 % across synthetic signals (all within +/-0.06 of zero), and weakly correlated with
-% everything else on Empirical1000 (max |r| 0.29 against any existing feature, 0.11
+% everything else on real-world series (max |r| 0.29 against any existing feature, 0.11
 % against the other five here). It is kept in the spirit of hctsa's general
 % preference for including a plausible statistic.
 
@@ -168,7 +168,7 @@ resid = phUnwrap - X * beta;
 % (normalized by sqrt(#bins): the residual of an unstructured -- random-walk
 % -- unwrapped phase grows as sqrt(#bins), so without this the statistic
 % was mostly a restatement of series length: Spearman 0.78 with N on
-% Empirical1000, and 6.6 -> 34 for white noise from N = 500 to 10000)
+% real-world series, and 6.6 -> 34 for white noise from N = 500 to 10000)
 out.phaseLinearity = sqrt(sum(wgt .* resid.^2)) / sqrt(length(ww));
 
 % ------------------------------------------------------------------------------

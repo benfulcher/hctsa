@@ -262,8 +262,8 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
     % Normalized to a probability mass (fraction of all pooled
     % recurrence-time samples falling at the modal value), not the paper's
     % raw count -- the raw count scales directly with how many samples
-    % went in (checked empirically: r=0.84 with plain series length on
-    % the Empirical1000 dataset), which would make it a length artifact
+    % went in (checked empirically on real-world series: r=0.84 with plain series
+    % length), which would make it a length artifact
     % rather than a dynamical one.
     N_MPRT = max(counts) / numel(w);
 end

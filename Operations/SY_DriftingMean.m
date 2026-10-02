@@ -7,8 +7,7 @@ function out = SY_DriftingMean(y, segmentHow, l)
 % relative to the within-segment variance. A final partial segment is dropped.
 % Returns NaN if the segments are longer than the series.
 %
-% The idea is from a posting by Rune on the MATLAB Central newsreader:
-% http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
+% The idea is from a comp.soft-sys.matlab (MATLAB newsgroup) posting by Rune
 % ("It seems to me that you are looking for a measure for a drifting mean. If so,
 % this is what I would try: decide on a frame length N; split your signal in a
 % number of frames of length N; compute the means of each frame; compute the

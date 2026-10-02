@@ -222,7 +222,7 @@ end
 
 % NOTE: the rest of the raw generalized Hurst exponent h(q) -- its
 % q=qMin/qMax endpoints and its range/trend/std across q -- is NOT reported
-% here. Verified on both the Bonn EEG and Empirical1000 datasets (r>=0.95 on
+% here. Verified on two independent collections of real-world series (r>=0.95 on
 % BOTH, the bar for confirmed redundancy) that h(qMin) duplicates alphaMax,
 % h(qMax) duplicates alphaMin, and h(q)'s range/trend/std across q all
 % mutually duplicate alphaWidth (hqTrend is in fact a deterministic

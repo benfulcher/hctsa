@@ -41,11 +41,11 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %
 % ---NOTES:
 % For high embedding dimensions of noise-like series no pair may fall within eup at all,
-% giving NaN (~1/3 of Empirical1000 series for the m = 8 and m = 10 variants); the
+% giving NaN (~1/3 of real-world series for the m = 8 and m = 10 variants); the
 % TISEAN-based implementation returned a constant 14.3 in that situation -- 1/ln of d2's
 % radius-bin ratio, i.e. every pair in a single bin -- which was an artifact, not an
 % estimate. Where both are defined they agree to ~2% (median), Spearman 0.95-0.99 across
-% Empirical1000.
+% real-world series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -167,11 +167,11 @@ if numPairs == 0
 end
 % (No minimum pair count beyond that. Note that for high embedding
 % dimensions of noise-like series no pair may fall within eup at all, giving
-% NaN here (~1/3 of Empirical1000 series for the m = 8 and m = 10 variants);
+% NaN here (~1/3 of real-world series for the m = 8 and m = 10 variants);
 % the TISEAN-based implementation returned a constant 14.3 in that situation
 % -- 1/ln of d2's radius-bin ratio, i.e. every pair in a single bin -- which
 % was an artifact, not an estimate. Where both are defined they agree to
-% ~2% (median), Spearman 0.95-0.99 across Empirical1000.)
+% ~2% (median), Spearman 0.95-0.99 across real-world series.)
 
 out = numPairs / sumLog; % Takens' estimator: 1 / mean(ln(eup/r))
 

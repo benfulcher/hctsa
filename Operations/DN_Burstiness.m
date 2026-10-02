@@ -23,9 +23,9 @@ function out = DN_Burstiness(y)
 % Goh and Barabasi, "Burstiness and memory in complex systems", Europhys.
 % Lett. 81, 48002 (2008).
 %
-% ---NOTES:
-% B_Kim is the finite-size correction of Kim and Jo (2016), cited in the code
-% as http://arxiv.org/pdf/1604.01125v1.pdf
+% Kim and Jo, "Measuring burstiness for finite event sequences", Phys. Rev. E 94,
+% 032311 (2016). DOI: 10.1103/PhysRevE.94.032311 (the finite-size correction used
+% for B_Kim).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -65,7 +65,7 @@ out.B = (r - 1) / (r + 1);
 
 % -------------------------------------------------------------------------------
 % Improved burstiness statistic, accounting for scaling for finite time series
-% Kim and Jo, 2016, http://arxiv.org/pdf/1604.01125v1.pdf
+% Kim and Jo (2016), Phys. Rev. E 94, 032311
 N = length(y);
 out.B_Kim = (sqrt(N + 1) * r - sqrt(N - 1)) / ((sqrt(N + 1) - 2) * r + sqrt(N - 1));
 

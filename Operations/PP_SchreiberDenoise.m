@@ -59,7 +59,7 @@ function out = PP_SchreiberDenoise(y, m, d, numIter, neighborhoodStd)
 % 3, 11 (2020).
 %
 % ---NOTES:
-% Redundancy check (Empirical1000, m = 5, d = 1, v = 0.3, numIter in {1, 4}): all
+% Redundancy check (on real-world series, m = 5, d = 1, v = 0.3, numIter in {1, 4}): all
 % fields stay well clear of the usual r >= 0.9 threshold except two borderline,
 % inconsistent-across-numIter cases: fracNoCorrection (r = 0.90 at numIter = 1
 % against NL_TISEAN_fnn's neighborhood-size fields, but 0.89 at numIter = 4) and

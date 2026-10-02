@@ -170,8 +170,8 @@ out.Ts = m.Ts;
 out.noisevar = m.NoiseVariance; % a scalar number, basically the fpe
 out.lossfn = m.EstimationInfo.LossFcn; % basically the fpe
 out.fpe = m.EstimationInfo.FPE;
-% (Dropped: aic(m). Rank-identical to fpe -- Spearman 1.0000 on both the Bonn EEG
-%  and Empirical1000 datasets -- so only fpe is kept. The m_ prefix
+% (Dropped: aic(m). Rank-identical to fpe -- Spearman 1.0000 on two collections of
+%  real-world series -- so only fpe is kept. The m_ prefix
 %  on these fields has also been dropped: MF_armax reports the identical toolbox
 %  quantities under the bare names.)
 

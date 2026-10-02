@@ -14,7 +14,7 @@ function out = SY_DriftingMeanCUSUM(y)
 % meanYC22) duplicate what SY_Trend already computes on y's own cumsum (|r| >=
 % 0.79 on real EEG data, several essentially exact), so are dropped here.
 % stdBridge is also dropped: since the input is always z-scored (mean exactly 0),
-% std(bridge) tracks SY_Trend_stdYC almost exactly (r = 1.000 on Empirical1000).
+% std(bridge) tracks SY_Trend_stdYC almost exactly (r = 1.000 on real-world series).
 % Only maxBridge, posMaxBridge, and the robust-vs-OLS comparison statistics,
 % which SY_Trend does not provide, are returned.
 %

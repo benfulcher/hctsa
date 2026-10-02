@@ -16,7 +16,7 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 % phase) never stop diverging. An ordinary, cleanly periodic oscillation also
 % flattens quickly, but its short-window slope is close to zero as well; the
 % combination of an appreciable short-window rise and a later flattening is
-% closer to the paper's SNA signature (but see the audit note below).
+% closer to the paper's SNA signature (but see the note below).
 %
 % The original method uses empirical mode decomposition (EMD) to isolate the
 % dominant intrinsic mode. This implementation instead bandpasses around the
@@ -43,7 +43,7 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 % slope_diff, slope_short - slope_long
 % meanFreq, the mean rotation frequency of the isolated dominant component, in
 %              cycles per sample (correlates r = 0.90 with the SP_Summaries_*_maxw
-%              fields on the Bonn EEG dataset; kept as a free byproduct)
+%              fields on real EEG data; kept as a free byproduct)
 %
 % ---REFERENCES:
 % K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal analysis of
@@ -51,13 +51,13 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 % DOI: 10.1103/PhysRevE.77.046220
 %
 % ---NOTES:
-% NOTE (audit, 2026-09): the short-window slope does NOT behave as the
+% NOTE: the short-window slope does NOT behave as the
 % reasoning above would suggest. Because the phase comes from a narrow
 % band (a coherence length of ~N/(2*halfWidthBins) samples), it is smooth
 % at short lags for ANY input, so mean(|dphi(t+w) - dphi(t)|) grows
 % linearly with w there -- the trivial derivative regime -- and
 % slope_short is ~1 regardless of dynamics: 0.93-1.00 for 90% of the
-% Empirical1000 series (and 0.92 for a clean periodic signal, not ~0).
+% real-world series (and 0.92 for a clean periodic signal, not ~0).
 % slope_diff is consequently just 1 - slope_long (r = -0.98). The
 % informative quantity is slope_long alone: near 0 where the phase
 % fluctuation saturates (periodic, SNA-like), and positive where it keeps

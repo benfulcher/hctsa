@@ -73,14 +73,13 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % clean sine wave (bestK=4, dBIC~0.4, sep_mahal~1.3 -- curvature, not
 % multi-modality).
 %
-% Redundancy-checked (r>=0.9 threshold) against MF_hmm_Fit,
-% MF_hmm_CompareNStates, CO_Embed2_Shapes and NL_EmbedKernelPCA on Bonn EEG
-% (500 series, max|r|=0.79) and Empirical1000 (1000 series). On Empirical1000,
-% the pre-log1p sep_mahal correlated r=0.98 (Pearson) with
-% MF_hmm_CompareNStates.chLLtrain -- but this was entirely driven by two
-% chaotic-map series (logistic, Ricker) whose near-noiseless embeddings
-% collapse onto a thin curve, producing near-singular pooled covariance and
-% raw Mahalanobis separations >2000; Spearman r was only 0.50, and trimming
+% Redundancy-checked (r>=0.9 threshold) against MF_hmm_Fit, MF_hmm_CompareNStates,
+% CO_Embed2_Shapes and NL_EmbedKernelPCA on two collections of real-world series
+% (max|r|=0.79 on the first). On the second, the pre-log1p sep_mahal correlated
+% r=0.98 (Pearson) with MF_hmm_CompareNStates.chLLtrain -- but this was entirely
+% driven by two chaotic-map series (logistic, Ricker) whose near-noiseless
+% embeddings collapse onto a thin curve, producing near-singular pooled covariance
+% and raw Mahalanobis separations >2000; Spearman r was only 0.50, and trimming
 % the top 1% by |chLLtrain| dropped Pearson r to 0.21. The log1p compression
 % above (motivated independently, by the same degenerate cases) resolves this
 % apparent redundancy along with the numerical issue.
@@ -259,8 +258,8 @@ mahal_raw = sqrt(dMu / pooledCov * dMu');
 % near-deterministic embeddings (e.g. low-noise chaotic maps, whose points
 % collapse onto a thin curve), where pooledCov can be near-singular and
 % mahal_raw explodes to values in the thousands despite no real multi-modal
-% structure (empirically confirmed on the logistic/Ricker map series in the
-% Empirical1000 corpus: mahal_raw > 2000 vs. a typical well-separated
+% structure (empirically confirmed on logistic and Ricker map series:
+% mahal_raw > 2000 vs. a typical well-separated
 % two-regime process giving mahal_raw ~ 10-15). The log keeps sep_mahal
 % monotonic in separation while preventing these degenerate cases from
 % dominating any downstream (e.g. z-scored, correlation-based) analysis:

@@ -9,8 +9,8 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % System Identification Toolbox.
 %
 % The preprocessed versions come from PP_PreProcess, and only one representative of
-% each family is fitted: a redundancy check on 100 real series (Bonn EEG and
-% Empirical1000) found the other candidates correlated at r >= 0.95 with one of
+% each family is fitted: a redundancy check on 100 real series found the other
+% candidates correlated at r >= 0.95 with one of
 % these:
 %     d1: incremental differencing (first differences)
 %     d2: second differences
@@ -101,7 +101,7 @@ yp = PP_PreProcess(y, '', [], [], false, randomSeed); % doSpectral = false: spec
 
 % 'nothing' must stay first (it's the ratio denominator below); the rest are
 % the 5 non-redundant representatives (see header note). 'peaks_08' was
-% dropped 2026-08-15: r=0.985 with 'd2' on real EEG data, and 'd2' (simple
+% dropped: r=0.985 with 'd2' on real EEG data, and 'd2' (simple
 % 2nd-order differencing) is the more standard/interpretable of the pair.
 fields = {'nothing', 'd1', 'd2', 'p1_20', 'p2_5', 'rmgd'};
 numFields = length(fields);

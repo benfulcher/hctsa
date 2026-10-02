@@ -67,38 +67,27 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       deviation over 1000 equally spaced times spanning the sampled series
 %
 % ---NOTES:
-% (The audit notes below are the earlier notes on this function, unchanged.)
-% GARCH-suite-style audit, 2026-08-11. Two issues found and fixed for the
-% covSEiso+covPeriodic+covNoise variants:
-% (1) The installed gpml (v4.2)'s covPeriodic takes 3 hyperparameters (period,
-%     length-scale, magnitude), giving this covariance combination 6
-%     hyperparameters total -- but only logh1-logh5 were registered in
-%     FeatureSets/INP_ops_hctsa.txt (logh6, the noise term, was computed every
-%     call and silently discarded). Now registered.
-% (2) See MF_GP_LearnHyperp.m NOTES -- fixed a poor-initialization bug that
-%     was independently degrading the fit quality of this same covariance
-%     combination.
+% For the covSEiso+covPeriodic+covNoise variants: the installed gpml (v4.2)'s
+% covPeriodic takes 3 hyperparameters (period, length-scale, magnitude), giving this
+% covariance combination 6 hyperparameters in total, logh1-logh6 (logh6 is the noise
+% term). See the NOTES of MF_GP_LearnHyperp.m for how the hyperparameters are
+% initialized.
 %
-% Also fixed: the "statistics on variance" block below called the legacy
-% gpml v3.2 gpr() function directly on logHyper, rather than the modern
-% gp()/hyp-struct API used everywhere else in this file. gpr()'s own
-% hyperparameter-counting logic assumes every covSum component is a plain
-% string and crashes on degree-parameterized components like
-% {'covMaterniso',3} -- exactly what's needed below. Replaced with gp().
+% The "statistics on variance" block below uses the modern gp()/hyp-struct API rather
+% than the legacy gpml v3.2 gpr() function, whose hyperparameter-counting logic
+% assumes every covSum component is a plain string and so fails on
+% degree-parameterized components like {'covMaterniso',3}.
 %
-% Covariance-function coverage was previously narrow: covSEiso (+ optional
-% covPeriodic) only, despite the gpml toolbox already shipping Matern and
-% Rational Quadratic. Added covMaterniso(3) [smoothness/roughness class,
-% distinct from SE's infinite differentiability] and covRQiso [scale-mixture
-% of length-scales, for multi-scale structure]. Both validated on synthetic
-% ground truth (matching the discrimination-test methodology used for the
-% GARCH leverage/fat-tails additions) rather than a real-data correlation
-% check alone:
+% Covariance functions: covSEiso (+ optional covPeriodic), covMaterniso(3)
+% [smoothness/roughness class, distinct from SE's infinite differentiability] and
+% covRQiso [scale-mixture of length-scales, for multi-scale structure]. The latter two
+% were validated on synthetic ground truth rather than a real-data correlation check
+% alone:
 %   - Matern: fit covMaterniso(3)+noise and covSEiso+noise to data generated
 %     from a genuinely rough (Matern d=1) process vs. a genuinely smooth (SE)
 %     process. The relative fit-quality advantage (mlik_SE - mlik_Matern)
 %     cleanly separated the two groups (t=4.88, p<4e-5, n=15 realizations
-%     each). On real Bonn EEG data, Matern(3) fits substantially and
+%     each). On real EEG data, Matern(3) fits substantially and
 %     consistently better than SE (mlik advantage 170-565 nlZ units across
 %     15 series, no exceptions) -- a genuine, consistent finding that EEG is
 %     not well-described by SE's infinite-smoothness assumption.
@@ -108,11 +97,9 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %     fitted shape parameter alpha (logh3) cleanly separated the two groups
 %     (t=-3.56, p=0.0013, n=15 each; low alpha = heavier-tailed length-scale
 %     mixture = more multi-scale, alpha->inf recovers exact SE).
-% Registered minimally (one sampling-method variant each, 'first'), not
-% replicated across all three MF_GP_Hyperparameters sampling methods --
-% learned from the MF_GARCHfit_ar_P1_Q2 redundancy lesson (see
-% garch-suite-audit): add the minimum needed to test the finding, not every
-% combinatorial variant.
+% Each is registered as a single sampling-method variant ('first'), not replicated
+% across all three MF_GP_Hyperparameters sampling methods, to avoid redundant
+% registrations.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -18,7 +18,7 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 % Kendall's tau or Pearson's r, still registers as 'slow' here). AC1 is symmetric
 % under time reversal, so trev is included specifically to let SFA pick up a slow
 % drift in the *irreversibility* of the dynamics that none of the other four
-% statistics can see. Validated on Empirical1000 to be essentially uncorrelated
+% statistics can see. On a diverse set of real-world series it is essentially uncorrelated
 % (max |r| ~ 0.14) with all SY_RampingWindows_10 trend fields.
 %
 % A companion comparison with ordinary PCA addresses a different question: PCA
@@ -50,9 +50,9 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 % first). SFA finds the orthogonal directions u_i that minimize var(diff(z*u_i)):
 % the "slowness" eigenvalues eta_i of the covariance of the whitened derivative
 % signal (ascending: eta_1 is the slowest direction). For i.i.d. (white-noise)
-% windows eta is about 2 on average; substantially smaller values indicate
-% genuinely slow (smooth, low-frequency) structure in some combination of the five
-% per-window statistics.
+% windows eta is about 2 on average (eta1 and etaEnd deviate from this by chance);
+% substantially smaller values indicate genuinely slow (smooth, low-frequency)
+% structure in some combination of the five per-window statistics.
 %
 % eta1, the smallest (slowest) SFA eigenvalue
 % etaEnd, the largest (fastest/noisiest) SFA eigenvalue

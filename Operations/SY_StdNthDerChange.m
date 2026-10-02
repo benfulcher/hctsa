@@ -6,10 +6,9 @@ function out = SY_StdNthDerChange(y, maxd)
 % in two ways: by an exponential fit, and directly through the order at which it
 % is smallest.
 %
-% Operation inspired by a comment on the MATLAB Central forum: "You can measure the
-% standard deviation of the n-th derivative, if you like." (Vladimir Vassilevsky,
-% DSP and Mixed Signal Design Consultant), from
-% http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
+% Operation inspired by a comment in a comp.soft-sys.matlab (MATLAB newsgroup)
+% posting: "You can measure the standard deviation of the n-th derivative, if you
+% like." (Vladimir Vassilevsky, DSP and Mixed Signal Design Consultant).
 %
 % An exponential function, f(x) = a*exp(b*x), is fitted to the variation across
 % successive derivatives: regular signals decrease, irregular signals increase.
@@ -18,8 +17,8 @@ function out = SY_StdNthDerChange(y, maxd)
 % successive differencing REDUCE std up to some order (removing trend or
 % nonstationary drift) before over-differencing increases it again: a classic
 % Box-Jenkins ARIMA-order-selection U-shape that a monotonic exponential cannot
-% represent (on a 20-series sample of the Bonn EEG dataset, 20/20 showed this
-% interior minimum, with a median exponential-fit r^2 of only 0.11). The minOrder,
+% represent (in a sample of 20 real EEG series, all 20 showed this interior
+% minimum, with a median exponential-fit r^2 of only 0.11). The minOrder,
 % minOrderInterp, minRatio, overDiffRatio, and isInterior outputs characterize this
 % directly, alongside the exponential fit. Needs the Curve Fitting Toolbox; if the
 % exponential fit fails, the fexp_* outputs are NaN and the others are still returned.

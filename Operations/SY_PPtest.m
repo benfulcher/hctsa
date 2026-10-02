@@ -114,7 +114,7 @@ if nout == 1
 	% Log-likelihood and the information criteria are extensive: they are sums
 	% over observations, so they grow in direct proportion to the time-series
 	% length regardless of how well the model fits (minBIC measured eta^2 = 0.973
-	% against N in the length-dependence audit). Reported per observation, which
+	% against N across series of different lengths). Reported per observation, which
 	% is the standard intensive form and the quantity model comparison actually
 	% depends on.
 	numObs = length(y);
@@ -126,7 +126,7 @@ if nout == 1
 
 else
 	% Return statistics on the set of outputs. maxpValue/stdpValue dropped
-	% (r >= 0.98 with meanpValue on Empirical1000); maxstat/minstat dropped
+	% (r >= 0.98 with meanpValue on real-world series); maxstat/minstat dropped
 	% (r >= 0.97 with meanstat).
 	out.minpValue = min(pValue);
 	out.meanpValue = mean(pValue);
@@ -139,7 +139,7 @@ else
 
 	% Regression statistics: meanloglikelihood/minAIC/minHQC/minrmse/maxrmse
 	% dropped -- confirmed r >= 0.998 with minBIC (and with each other) on
-	% Empirical1000, matching this function's own longstanding comment that
+	% real-world series, matching this function's own longstanding comment that
 	% these are all highly correlated. Per observation -- see the note in
 	% the single-test branch above.
 	numObs = length(y);

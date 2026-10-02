@@ -10,6 +10,8 @@ function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
 %
 % The AMI can be estimated using histograms with extraParam bins (implemented in
 % CO_HistogramAMI) or using the Information Dynamics Toolkit (IN_AutoMutualInfo).
+% The AMI is in nats for all methods (JIDT's Kraskov estimator, like its Gaussian
+% estimator, uses natural logarithms).
 %
 % This algorithm is quite different from, but was based on the idea of, noise
 % titration, presented in Poon and Barahona (2001).

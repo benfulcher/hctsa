@@ -235,10 +235,9 @@ if ismember(psdMeth, {'periodogram', 'welch'})
 	% the whole series (as used below for periodogram, a genuine
 	% single-segment, whole-series estimate) would silently collapse Welch's
 	% method to a single "segment" with no averaging at all, making it
-	% numerically near-indistinguishable from an unwindowed periodogram: an
-	% actual bug found and fixed here (validated on HCTSA_Empirical1000.mat,
-	% where the un-fixed version had r=1.000 with the 'fft' method's output
-	% across 97.6% of fields). noverlap is left at pwelch's own default (50%
+	% numerically near-indistinguishable from an unwindowed periodogram (a bug in earlier
+	% versions: on a diverse set of real-world series the un-fixed version had r=1.000
+	% with the 'fft' method's output across 97.6% of fields). noverlap
 	% of window length) below.
 	if strcmp(psdMeth, 'welch')
 		% winLength used to be Ny/4, which keeps the segment COUNT fixed
@@ -718,9 +717,7 @@ out.statav2_s = std(std(split)) / std(S);
 % this is essentially "which band has the peak" rather than a nuanced
 % measure of stationarity across the spectrum's shape. (The mean-based
 % version, statav2_m, was dropped entirely -- see the note at the top of
-% this file; std(mean(split))/std(S) checked out as the least-redundant-
-% with-anything candidate in the same cross-hctsa audit that flagged
-% ncross, i.e. noise rather than novel structure.)
+% this file.)
 splitLog = buffer(logS, floor(N / 2));
 if size(splitLog, 2) > 2, splitLog = splitLog(:, 1:2); end
 out.logstatav2_m = std(mean(splitLog)) / std(logS);

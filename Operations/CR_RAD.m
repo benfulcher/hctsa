@@ -22,6 +22,11 @@ function f = CR_RAD(x, tau, doAbs)
 %
 % ---OUTPUTS:
 % f, a scalar: the RAD feature value.
+%
+% ---REFERENCES:
+% B. Harris, L. L. Gollo and B. D. Fulcher, "Tracking the distance to criticality in
+% systems with unknown noise", Physical Review X 14(3), 031021 (2024).
+% DOI: 10.1103/PhysRevX.14.031021
 
 % -------------------------------------------------------------------------------
 % Check inputs, set defaults

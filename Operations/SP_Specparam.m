@@ -72,8 +72,10 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 % (maxPeakFreq, maxPeakPower and maxPeakBW are NaN if no peaks are found.)
 %
 % ---REFERENCES:
-% Donoghue et al., "Parameterizing neural power spectra into periodic and
-% aperiodic components", Nature Neuroscience 23: 1655 (2020).
+% T. Donoghue, M. Haller, E. J. Peterson, P. Varma, P. Sebastian, R. Gao, T. Noto,
+% A. H. Lara, J. D. Wallis, R. T. Knight, A. Shestyuk and B. Voytek, "Parameterizing
+% neural power spectra into periodic and aperiodic components", Nature Neuroscience
+% 23, 1655-1665 (2020). DOI: 10.1038/s41593-020-00744-x
 %
 % ---NOTES: Which outputs are registered, and why:
 % Seven of the ten are registered: apExponent, apOffset, numPeaks,
@@ -117,9 +119,8 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 % background* really is different from counting them by absolute
 % prominence, which was the motivating claim for this operation.
 % apExponent is much the most redundant (R^2 = 0.76 against
-% SP_Summaries' linfitloglog_all_a2 and 0.79 against
-% linfitsemilog_all_a2) but is the better-motivated estimator of that same
-% quantity, being both peak-corrected and fitted to a segment-averaged
+% SP_Summaries' linfitloglog_all_a2) but is the better-motivated estimator of that
+% same quantity, being both peak-corrected and fitted to a segment-averaged
 % spectrum.
 
 % ------------------------------------------------------------------------------

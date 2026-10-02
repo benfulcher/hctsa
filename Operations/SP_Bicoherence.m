@@ -47,8 +47,7 @@ function out = SP_Bicoherence(y, segLength, maxN, numSurr)
 %          large-K approximation (K * bic2 ~ Exp(1) under the null of a linear,
 %          ~Gaussian process, giving threshold -log(0.05)/K). A ratio far from 1
 %          flags that the asymptotic approximation is untrustworthy for this
-%          series (e.g., because of non-stationarity), which real data was
-%          empirically found to trigger.
+%          series (e.g., because of non-stationarity).
 %
 % ---NOTES:
 % The surrogates are generated with the random seed reset to its default, so the

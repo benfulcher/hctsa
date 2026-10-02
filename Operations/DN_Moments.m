@@ -18,7 +18,7 @@ function out = DN_Moments(y, theMom, doNormalize)
 % a scalar: the standardized or raw central moment of order theMom.
 %
 % ---NOTES:
-% Prior to 2026-08, this always divided by std(y)^1 regardless of theMom,
+% Earlier versions always divided by std(y)^1 regardless of theMom,
 % which is neither the raw central moment nor a scale-invariant standardized
 % moment: it has no statistical meaning beyond the special case where y is
 % already unit-variance (where it coincides with the standardized moment,

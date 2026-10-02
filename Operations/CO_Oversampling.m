@@ -42,7 +42,7 @@ function out = CO_Oversampling(y)
 % (2020). DOI: 10.1038/s42003-019-0715-9
 %
 % ---NOTES:
-% Redundancy check (Empirical1000): eta correlates r=0.955 with the existing
+% Redundancy check (on real-world series): eta correlates r=0.955 with the existing
 % SY_RangeEvolve.totnuq (both driven by how coarsely a series sets new range
 % records -- exactly what oversampling produces) and etaRobust correlates
 % r=0.972 with plain eta itself (the outlier-robustness case is real but rare in

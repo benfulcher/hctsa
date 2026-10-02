@@ -10,7 +10,7 @@ function out = CO_MatrixProfile(y, m, maxN)
 %
 % Features summarize the distribution of r across windows: high values mean shapes
 % recur ('motifs'); a window with unusually low r is a 'discord' (anomaly). The
-% corrected arc curve (Gharghabi et al., FLUSS) counts how many nearest-neighbour links
+% corrected arc curve (Gharghabi et al., 2017; the FLUSS algorithm) counts how many nearest-neighbour links
 % cross each time point, relative to what a stationary process would give; its minimum
 % is low when the series has a regime change, because windows then match within their
 % own regime.
@@ -42,6 +42,12 @@ function out = CO_MatrixProfile(y, m, maxN)
 %       across stationary series it mostly reflects estimation noise.
 % The output is a single NaN if the series is too short (fewer than 5m windows), no
 % correlation length can be estimated, or most windows are flat.
+%
+% ---REFERENCES:
+% S. Gharghabi, Y. Ding, C.-C. M. Yeh, K. Kamgar, L. Ulanova and E. Keogh, "Matrix
+% Profile VIII: Domain Agnostic Online Semantic Segmentation at Superhuman Performance
+% Levels", 2017 IEEE International Conference on Data Mining (ICDM), pp. 117-126 (2017).
+% DOI: 10.1109/ICDM.2017.21 (the FLUSS corrected arc curve).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

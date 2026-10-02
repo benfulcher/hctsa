@@ -60,10 +60,9 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 %       are near-constant are excluded)
 %
 % ---NOTES:
-% Redundant fields (mabserrs, and the medians of stde and meane) were dropped from
-% this function on 2026-08-11 after a redundancy check on Bonn EEG (500 series) and
-% Empirical1000 (1000 series): each correlated at |r| >= 0.9 with a retained field
-% on both datasets and in all registered operations that use this function.
+% Redundant fields (mabserrs, and the medians of stde and meane) are not returned:
+% each correlated at |r| >= 0.9 with a retained field, on each of two collections of
+% real-world series and in all registered operations that use this function.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -206,8 +205,8 @@ switch subsetHow
 			% driver of this operation's length-dependence (rank eta^2 vs
 			% N on a stationary AR(1) null, N=200..6400, fell from
 			% 0.39-0.94 to 0.01-0.21 across stde/stdrat/ac1/meane
-			% statistics once capped). Capping at 20 leaves N=200 (the
-			% audit's own smallest tested length, where 10% of the series
+			% statistics once capped). Capping at 20 leaves N=200 (the smallest length tested,
+			% where 10% of the series
 			% is already <= 20) completely unchanged and only bites for
 			% longer series, where letting the segment keep growing was
 			% buying no real precision benefit anyway.
@@ -306,9 +305,9 @@ end
 
 % RMS errors, rmserrs
 % (median dropped: r>=0.9 with stde_mean across all 4 registered mops, on
-% both Bonn EEG and Empirical1000; mean absolute error, mabserrs, dropped
+% two collections of real-world series; mean absolute error, mabserrs, dropped
 % entirely: for these residuals r>=0.9 with the matching stde_* moment in
-% every case, so it added no dimension MAE didn't already carry)
+% every case, so it added no dimension the RMS error didn't already carry)
 out.stde_mean = mean(rmserrs);
 out.stde_std = std(rmserrs);
 out.stde_iqr = iqr(rmserrs);
@@ -322,7 +321,7 @@ out.ac1_iqr = iqr(ac1s);
 
 % Differences in mean between two series
 % (median dropped: r>=0.9 with meane_mean across all 4 registered mops, on
-% both Bonn EEG and Empirical1000)
+% two collections of real-world series)
 out.meane_mean = mean(meandiffs);
 out.meane_std = std(meandiffs);
 out.meane_iqr = iqr(meandiffs);

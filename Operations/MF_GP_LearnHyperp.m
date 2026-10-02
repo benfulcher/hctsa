@@ -18,19 +18,15 @@ function hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, nfeva
 % nfevals,       the number of function evaluations
 %
 % ---NOTES:
-% GARCH-suite-style audit, 2026-08-11. The pre-optimization hyperparameter
-% initialization was previously data-informed only for the exact covSum
-% {covSEiso,covNoise} pair; every other covariance combination (including the
-% already-registered covSEiso+covPeriodic+covNoise) fell through to an
-% all-zero start. Verified empirically that this stranded the optimizer at a
-% substantially worse local optimum: on real EEG data, refitting the periodic
-% combination from a data-informed start (vs. the previous all-zero start)
-% changed the negative log marginal likelihood by 100s of units, and flipped
-% the periodic-vs-SE-only "which fits better" comparison from 2.6% of series
-% to ~33% of series (a far more plausible rate). Generalized the
-% data-informed init to work component-by-component for any covSum of
-% covSEiso/covPeriodic/covRQiso/covNoise (the building blocks in play or
-% under consideration); unrecognized components still fall back to zero.
+% The pre-optimization hyperparameter initialization is data-informed,
+% component-by-component, for any covSum of covSEiso/covPeriodic/covRQiso/covNoise;
+% unrecognized components fall back to zero. (Data-informed initialization used to be
+% done only for the exact covSum {covSEiso,covNoise} pair; every other combination,
+% including covSEiso+covPeriodic+covNoise, started from all zeros. This stranded the
+% optimizer at a substantially worse local optimum: on real EEG data, refitting the
+% periodic combination from a data-informed start changed the negative log marginal
+% likelihood by 100s of units, and flipped the periodic-vs-SE-only "which fits better"
+% comparison from 2.6% of series to ~33% of series, a far more plausible rate.)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

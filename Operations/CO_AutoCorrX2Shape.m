@@ -16,7 +16,7 @@ function out = CO_AutoCorrX2Shape(y, maxLag)
 % its size, decay, smoothness, extrema and sign changes, mirroring how
 % CO_AutoCorrShape characterizes the shape of the ordinary ACF. (An earlier version
 % characterized the forward and backward profiles' shapes separately, but on 300
-% real time series from INP_Empirical1000.mat their shape descriptors were
+% real time series their shape descriptors were
 % correlated at r=0.84-0.97 with each other, since both profiles inherit most of
 % their shape from the ordinary linear correlation. The difference profile
 % cancels that shared component.)
@@ -45,8 +45,9 @@ function out = CO_AutoCorrX2Shape(y, maxLag)
 % 5 lags or contains NaN values.
 %
 % ---REFERENCES:
-% Bouchaud, Matacz & Potters, Phys. Rev. Lett. 87, 228701 (2001) (the
-% leverage-effect correlation function).
+% J.-P. Bouchaud, A. Matacz and M. Potters, "Leverage effect in financial markets: the
+% retarded volatility model", Phys. Rev. Lett. 87, 228701 (2001) (the leverage-effect
+% correlation function). DOI: 10.1103/PhysRevLett.87.228701
 %
 % ---NOTES:
 % For N < 40 the 'doubleDrown' bound floor(N/4) is below 10, so maxLag can be

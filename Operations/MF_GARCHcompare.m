@@ -57,10 +57,10 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 %       standard deviation of the constant across one order, averaged over the other
 %
 % ---NOTES:
-% Fixed 2026-08-11: bestpLLF/bestqLLF previously selected the order with the minimum
-% log-likelihood. They now select the maximum, as the best-fitting model has the
-% highest log-likelihood (AIC and BIC are minimized). The old selection almost always
-% returned the lowest-complexity corner of the (pr,qr) grid.
+% bestpLLF/bestqLLF select the order with the maximum log-likelihood, as the
+% best-fitting model has the highest log-likelihood (AIC and BIC are minimized).
+% (Selecting the minimum, as an earlier version did, almost always returned the
+% lowest-complexity corner of the (pr,qr) grid.)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

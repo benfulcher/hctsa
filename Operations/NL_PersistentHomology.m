@@ -97,8 +97,8 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %    timeout outright.
 %
 % An earlier candidate field, a count of "significant" H1 intervals above a fixed
-% normalized-persistence threshold, was dropped after checking against real data (Bonn
-% EEG, Empirical1000): it was 0 for 149/150 Bonn EEG series -- real (noisy, imperfectly
+% normalized-persistence threshold, was dropped after checking against real data: it
+% was 0 for 149/150 real EEG series -- real (noisy, imperfectly
 % periodic) data essentially never clears a fixed significance bar tuned by eye against a
 % clean sine wave, so the field carried almost no information. maxPersistenceH1 captures
 % the same underlying signal as a continuous quantity instead.
@@ -280,7 +280,7 @@ function tau = SUB_periodNormalizedTau(y)
     % Two failure modes ruled out during development, in order:
     % (1) a plain single-FFT argmax period estimate locks onto low-frequency
     %     trend/drift on real (broadband) data -- median "period" of 100+
-    %     samples on Bonn EEG/Empirical1000 test series, with some series
+    %     samples on real test series, with some series
     %     maxing out at half the series length (i.e., just the DC-adjacent
     %     bin). Real time series rarely have one clean dominant sinusoid the
     %     way a synthetic test construction does.
@@ -294,7 +294,7 @@ function tau = SUB_periodNormalizedTau(y)
     % data: at MinPeakProminence=2 (log scale, ~7.4x), 0% false positives on
     % near-unit-root AR(1) (trend, no periodicity), 10% on white noise,
     % 100% true-positive rate with accurate period recovery on a sine wave
-    % even under heavy added noise. On real data (Bonn EEG, Empirical1000),
+    % even under heavy added noise. On real data (EEG and other series),
     % a significant peak was found for ~80% of series, with resulting tau
     % values comparable in scale to 'mi''s own (median ~8-12 vs 'mi''s
     % median ~4-10) -- unlike the two ruled-out methods above, whose

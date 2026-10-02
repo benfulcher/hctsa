@@ -45,7 +45,7 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % Dstd, the standard deviation of D_c across the numC frequencies -- can be heavy-tailed for
 %    complex/near-resonant dynamics (a handful of c values giving an anomalously large slope
 %    estimate), validated as a genuine signal rather than a numerical artifact (e.g. the
-%    synthetic Duffing-van der Pol series in the Empirical1000 validation set, whose own
+%    synthetic Duffing-van der Pol series in a validation set, whose own
 %    Kstd is also elevated)
 % The output is NaN for series shorter than 200 samples.
 %

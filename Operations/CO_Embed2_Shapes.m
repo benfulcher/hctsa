@@ -36,9 +36,9 @@ function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 % median, mean, iqr, hist_ent = 0; mode_val = 1; mode = 0; the rest NaN).
 %
 % ---NOTES:
-% `max` was dropped 2026-08-11: redundancy-checked against `mean`/`std` on
-% Bonn EEG (500 series) and Empirical1000 (1000 series), |r|>=0.9 with both
-% on both datasets, in both registered radii (r=0.1 and r=1).
+% `max` is not computed: it was redundant with `mean` and `std` (|r| >= 0.9 with both,
+% on each of two collections of real-world series), at both registered radii (r = 0.1
+% and r = 1).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

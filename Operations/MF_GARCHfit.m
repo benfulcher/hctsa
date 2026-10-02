@@ -98,23 +98,23 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 %       by the Schwarz Bayesian criterion, and its criterion value
 %
 % ---NOTES:
-% Only the P = 1, Q = 1 registration remains. The P = 1, Q = 2 registration was dropped
-% on 2026-08-11 as almost entirely redundant with it (r = 0.9-1.0 across nearly every
-% output field, on Bonn EEG and Empirical1000). MF_GARCHcompare, which varies P and Q
-% over a grid, is unaffected.
+% Only the P = 1, Q = 1 registration remains. The P = 1, Q = 2 registration was
+% dropped as almost entirely redundant with it (r = 0.9-1.0 across nearly every
+% output field, on two collections of real-world series). MF_GARCHcompare, which
+% varies P and Q over a grid, is unaffected.
 %
-% Added 2026-08-11: persistence and uncondVar, standard GARCH diagnostics (persistence
-% near 1 signals near-integrated, IGARCH-like volatility clustering). uncondVar is set
-% to NaN near the boundary because the model's value is numerically meaningless there.
-% For 'gjr', persistence includes half the leverage coefficient (Glosten, Jagannathan
-% and Runkle's result: the leverage term acts on negative shocks only).
+% persistence and uncondVar are standard GARCH diagnostics (persistence near 1
+% signals near-integrated, IGARCH-like volatility clustering). uncondVar is set to
+% NaN near the boundary because the model's value is numerically meaningless there.
+% For 'gjr', persistence includes half the leverage coefficient (Glosten,
+% Jagannathan and Runkle's result: the leverage term acts on negative shocks only).
 %
-% Added 2026-08-11: the modelType and innovationDist arguments, and the leverage,
-% leverageerr and distDoF outputs, to cover asymmetric volatility response and fat-
-% tailed innovations. Registered variants: MF_GARCHfit_ar_P1_Q1_gjr and
-% MF_GARCHfit_ar_P1_Q1_t each change one thing from the P1_Q1 baseline. 'egarch' is
-% supported but not registered (its ARCH coefficient hit an apparent boundary of 1.0
-% in 2 of 3 real fits, unexplained).
+% The modelType and innovationDist arguments, and the leverage, leverageerr and
+% distDoF outputs, cover asymmetric volatility response and fat-tailed innovations.
+% Registered variants: MF_GARCHfit_ar_P1_Q1_gjr and MF_GARCHfit_ar_P1_Q1_t each
+% change one thing from the P1_Q1 baseline. 'egarch' is supported but not registered
+% (its ARCH coefficient hit an apparent boundary of 1.0 in 2 of 3 real fits,
+% unexplained).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

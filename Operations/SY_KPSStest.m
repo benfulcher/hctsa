@@ -32,7 +32,7 @@ function out = SY_KPSStest(y, lags)
 % Kwiatkowski, Denis and Phillips, Peter C. B. and Schmidt, Peter and Shin,
 % Yongcheol, "Testing the null hypothesis of stationarity against the alternative
 % of a unit root: How sure are we that economic time series have a unit root?",
-% J. Econometrics 54(1-3) 159 (2002).
+% J. Econometrics 54(1-3), 159-178 (1992). DOI: 10.1016/0304-4076(92)90104-Y
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
