@@ -6873,7 +6873,6 @@ WL_cwt_db3_32.pover95	WL_cwt_db3_32_pover95	wavelet,CWT
 WL_cwt_db3_32.pover90	WL_cwt_db3_32_pover90	wavelet,CWT
 WL_cwt_db3_32.pover80	WL_cwt_db3_32_pover80	wavelet,CWT
 WL_cwt_db3_32.gam1	WL_cwt_db3_32_gam1	wavelet,CWT
-WL_cwt_db3_32.gam2	WL_cwt_db3_32_gam2	wavelet,CWT
 WL_cwt_db3_32.SC_h	WL_cwt_db3_32_SC_h	wavelet,CWT
 WL_cwt_db3_32.dd_SC_h	WL_cwt_db3_32_dd_SC_h	wavelet,CWT
 WL_cwt_db3_32.max_ssc	WL_cwt_db3_32_max_ssc	wavelet,CWT
@@ -6896,7 +6895,6 @@ WL_cwt_morl_32.pover95	WL_cwt_morl_32_pover95	wavelet,CWT
 WL_cwt_morl_32.pover90	WL_cwt_morl_32_pover90	wavelet,CWT
 WL_cwt_morl_32.pover80	WL_cwt_morl_32_pover80	wavelet,CWT
 WL_cwt_morl_32.gam1	WL_cwt_morl_32_gam1	wavelet,CWT
-WL_cwt_morl_32.gam2	WL_cwt_morl_32_gam2	wavelet,CWT
 WL_cwt_morl_32.SC_h	WL_cwt_morl_32_SC_h	wavelet,CWT
 WL_cwt_morl_32.dd_SC_h	WL_cwt_morl_32_dd_SC_h	wavelet,CWT
 WL_cwt_morl_32.max_ssc	WL_cwt_morl_32_max_ssc	wavelet,CWT
