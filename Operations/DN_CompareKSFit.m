@@ -94,20 +94,20 @@ switch whatDistn
 	case 'ev'
 		a = evfit(x);
 		peaky = evpdf(a(1), a(1), a(2)); thresh = peaky / 100;
-		xf(1) = 0;
+		xf(1) = a(1);
 		ange = 10;
 		while ange > thresh, xf(1) = xf(1) - xStep; ange = evpdf(xf(1), a(1), a(2)); end
-		xf(2) = 0;
+		xf(2) = a(1);
 		ange = 10;
 		while ange > thresh, xf(2) = xf(2) + xStep; ange = evpdf(xf(2), a(1), a(2)); end
 
 	case 'uni'
 		[a, b] = unifit(x);
 		peaky = unifpdf(mean(x), a, b); thresh = peaky / 100;
-		xf(1) = 0;
+		xf(1) = mean(x);
 		ange = 10;
 		while ange > thresh, xf(1) = xf(1) - xStep; ange = unifpdf(xf(1), a, b); end
-		xf(2) = 0;
+		xf(2) = mean(x);
 		ange = 10;
 		while ange > thresh, xf(2) = xf(2) + xStep; ange = unifpdf(xf(2), a, b); end
 

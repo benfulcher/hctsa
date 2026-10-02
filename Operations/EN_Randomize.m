@@ -46,12 +46,17 @@ function out = EN_Randomize(y, randomizeHow, randomSeed)
 %       statav5fexpc, statav5fexpr2, statav5fexprmse, statav5diff, statav5hp,
 %       swss5_1fexpa, swss5_1fexpb, swss5_1fexpc, swss5_1fexpr2, swss5_1fexprmse,
 %       swss5_1diff, swss5_1hp
-% In all cases diff is the relative change |(s_end - s_start) / s_start| and hp is
-% the number of the first checkpoint at which the statistic passes halfway between
-% its start and end values.
+% In all cases diff is the absolute change |s_end - s_start| of the statistic between
+% the first and last checkpoints and hp is the number of the first checkpoint at which
+% the statistic passes halfway between its start and end values.
 %
 % ---NOTES:
 % Requires the Curve Fitting Toolbox.
+% diff is an absolute change, not a change relative to the starting value, because
+% the starting value (e.g., the autocorrelation of the original series at lag 2) can be
+% near 0, where a relative change is unstable. All the statistics are on a bounded,
+% dimensionless scale (correlations, a normalized entropy, and standard deviations
+% of the z-scored series), so the absolute change is comparable across series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -320,7 +325,7 @@ end
 % -------------------------------------------------------------------------------
 function out = assignExtraStats(out, dataVector, fieldName)
 	% Assigns 2 extra statistics about a data vector:
-	out.([fieldName, 'diff']) = abs((dataVector(end) - dataVector(1)) / dataVector(1));
+	out.([fieldName, 'diff']) = abs(dataVector(end) - dataVector(1));
 	out.([fieldName, 'hp']) = SUB_gethp(dataVector);
 end
 

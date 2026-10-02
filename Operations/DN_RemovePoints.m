@@ -3,8 +3,9 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 %
 % A proportion, p, of the points of the (z-scored) series are removed, or
 % saturated, according to a rule (see BF_RemovePoints), and order-free statistics
-% of the changed series are computed: its mean, median and standard deviation, and
-% the ratios of its skewness and kurtosis to those of the original series. Removing
+% of the changed series are computed: its mean, median and standard deviation, the
+% change in its skewness from that of the original series, and the ratio of its
+% kurtosis to that of the original series. Removing
 % deletes the chosen points and closes up the rest into a shorter series. Saturating
 % keeps them in place but clips their values to the most extreme value among the
 % points kept. The autocorrelation statistics of the same transformation are in
@@ -30,15 +31,18 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % ---OUTPUTS: statistics of the changed series, relative to the original:
 % mean, median, std, the mean, median and standard deviation of the changed
 %       series (not ratios; the z-scored original has mean 0 and std 1)
-% skewnessrat, kurtosisrat, the ratios of the skewness and of the kurtosis
-%       (changed to original)
+% skewnessdiff, the skewness of the changed series minus the skewness of the original
+% kurtosisrat, the ratio of the kurtosis of the changed series to that of the
+%       original
 %
 % ---NOTES:
 % A similar idea is implemented in DN_OutlierInclude.
-% skewnessrat divides by the skewness of the original series, which is near 0 for
-% symmetric distributions, so it is unstable for such series.
-% The autocorrelation outputs of this function (fzcacrat, ac1rat, ac1diff, ac2rat,
-% ac2diff, ac3rat, ac3diff, sumabsacfdiff) moved to CO_RemovePoints.
+% The change in skewness is a difference rather than a ratio because the skewness of
+% the original series can be near 0 (symmetric distributions), where a ratio is
+% unstable (this output was previously the ratio, skewnessrat). The kurtosis
+% is at least 1 for any series, so its ratio is always well defined.
+% The autocorrelation outputs of this function (fzcacrat, ac1diff, ac2diff, ac3diff,
+% sumabsacfdiff) moved to CO_RemovePoints.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -98,7 +102,7 @@ out.median = median(yTransform);
 out.std = std(yTransform);
 
 % Requires Statistics Toolbox:
-out.skewnessrat = skewness(yTransform) / skewness(y);
+out.skewnessdiff = skewness(yTransform) - skewness(y);
 out.kurtosisrat = kurtosis(yTransform) / kurtosis(y);
 
 end

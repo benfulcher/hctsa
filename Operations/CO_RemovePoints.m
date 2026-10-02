@@ -30,16 +30,17 @@ function out = CO_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % ---OUTPUTS: statistics of the changed series, relative to the original:
 % fzcacrat, the ratio of the first zero-crossing of the autocorrelation function
 %       (changed to original)
-% ac1rat, ac2rat, ac3rat, the ratios of the autocorrelation at lags 1, 2 and 3
-%       (changed to original; the sign is kept)
 % ac1diff, ac2diff, ac3diff, the absolute differences in the autocorrelation at
 %       lags 1, 2 and 3
 % sumabsacfdiff, the sum over lags 1 to 8 of the absolute differences in the
 %       autocorrelation
 %
 % ---NOTES:
-% The ratios divide by the original value, which can be near 0 (e.g., a lag-1
-% autocorrelation near 0), so they are unstable for such series.
+% Only the first zero-crossing is a ratio: its original value is an interpolated lag
+% of at least 0.5, so the ratio is always well defined. The autocorrelation outputs
+% are differences, because the original autocorrelation can be near 0, where a ratio
+% is unstable (the ratios ac1rat, ac2rat and ac3rat, redundant with the differences,
+% have been removed).
 % This function and DN_RemovePoints were split from a single function that returned
 % both sets of outputs.
 
@@ -103,18 +104,15 @@ acf_yTransform = SUB_acf(yTransform, 8);
 
 % Two main comparison functions:
 f_absDiff = @(x1, x2) abs(x1 - x2); % ignores the sign
-f_ratio = @(x1, x2) x1 / x2; % includes the sign
+f_ratio = @(x1, x2) x1 / x2;
 
 out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform, 'ac', 0, 'continuous'), ...
 					   CO_FirstCrossing(y, 'ac', 0, 'continuous'));
 
-out.ac1rat = f_ratio(acf_yTransform(1), acf_y(1));
 out.ac1diff = f_absDiff(acf_yTransform(1), acf_y(1));
 
-out.ac2rat = f_ratio(acf_yTransform(2), acf_y(2));
 out.ac2diff = f_absDiff(acf_yTransform(2), acf_y(2));
 
-out.ac3rat = f_ratio(acf_yTransform(3), acf_y(3));
 out.ac3diff = f_absDiff(acf_yTransform(3), acf_y(3));
 
 out.sumabsacfdiff = sum(abs(acf_yTransform - acf_y));

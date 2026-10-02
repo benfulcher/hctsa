@@ -27,8 +27,11 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 % ---OUTPUTS:
 % r2, the R^2 goodness of fit
 % adjr2, R^2 adjusted for the number of fitted parameters
-% rmse, the root-mean-square error of the fit (in counts per bin for a
-%       histogram, or in density units for ksdensity)
+% rmse, the root-mean-square error of the fit, in units of probability density of
+%       the standardized series (the fitted density is the histogram counts divided
+%       by the number of points and the bin width, or the ksdensity estimate,
+%       multiplied by the standard deviation of x), so it does not depend on the
+%       length or the scale of the series
 % resAC1, resAC2, the autocorrelation of the residuals, in order of
 %       increasing value, at lags 1 and 2
 % resruns, the p-value of a runs test on the residuals
@@ -147,7 +150,16 @@ out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
                              % by any mop -- redundant with r2 for these fixed-order fits)
 
-out.rmse = gof.rmse; % root mean square error
+% Root mean square error, in density units of the standardized series, so that it
+% does not grow with the length of the series (histogram counts do) or depend on
+% the scale of x. The fit was done on histogram counts, but rescaling the counts
+% to a density rescales the residuals by the same factor:
+if ischar(numBins) || numBins > 0 % histogram: counts -> density
+	rmseScale = std(x) / (sum(dny) * mean(diff(binEdges)));
+else % ksdensity is already a density
+	rmseScale = std(x);
+end
+out.rmse = gof.rmse * rmseScale;
 out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_AutoCorr(output.residuals, 2, 'Fourier'); % autocorrelation of residuals at lag 2
 out.resruns = HT_IndependenceTests(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value

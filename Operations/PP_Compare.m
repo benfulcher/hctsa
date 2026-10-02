@@ -3,12 +3,19 @@ function out = PP_Compare(y, detrndmeth)
 %
 % Applies a given preprocessing transformation (detrending, differencing,
 % filtering or resampling) to the time series, z-scores the original and the
-% processed series, and returns the ratio of each of a set of statistics for the
-% processed series to its value for the original. The statistics compare
+% processed series, and returns the change in each of a set of statistics from its
+% value for the original to its value for the processed series. The statistics compare
 % stationarity measures (StatAv, and the variation of the local mean and of the
 % local standard deviation across windows), distributional fits (a Gaussian fit
 % to the kernel-smoothed distribution, and the discrepancy from a fitted normal
 % distribution) and the effect of trimming outliers.
+%
+% The change is the difference (processed minus original) for statistics that can be
+% negative or zero, and the normalized difference (processed - original) /
+% (processed + original) for positive statistics. The latter is between -1 and 1, is 0
+% when nothing changes, and equals tanh(log(processed / original) / 2), a bounded
+% version of the log-ratio that stays finite when the original value is near 0, where
+% a plain ratio is unstable.
 %
 % ---INPUTS:
 % y, the input time series
@@ -28,22 +35,28 @@ function out = PP_Compare(y, detrndmeth)
 %       'logr': log returns (positive data only; otherwise NaN)
 %       'boxcox': a Box-Cox transformation (positive data only; otherwise NaN)
 %
-% ---OUTPUTS: the ratio, processed to original, of each of these statistics:
+% ---OUTPUTS: the change, from the original to the processed series, of each of these
+% statistics (all of the series are z-scored first):
+% Normalized differences (positive statistics):
 % statav2, StatAv with 2 segments (SY_StatAv)
 % swms2_2, swms5_1, swms10_1, the standard deviation of the window means across
 %       windows (SY_SlidingWindow 'mean'), with 2 windows overlapping by half, and
 %       5 and 10 non-overlapping windows
 % swss2_1, swss5_1, swss10_1, the same for the window standard deviations
 %       (SY_SlidingWindow 'std')
+% kscn_olapint, the overlap integral of the kernel-smoothed distribution with the
+%       best-fitting normal (DN_CompareKSFit)
+% olbt_s5, the standard deviation after trimming the 5% most extreme values at each
+%       end, relative to that of the full series (DN_OutlierTest)
+% Differences (statistics that can be negative or zero):
 % gauss1_kd_r2, gauss1_kd_resAC1, gauss1_kd_resruns, the R^2, the lag-1
 %       autocorrelation of the residuals, and the runs-test p-value of the residuals
 %       of a Gaussian fit to the kernel-smoothed distribution (DN_SimpleFit)
-% kscn_peaksepy, kscn_peaksepx, kscn_olapint, kscn_relent, the peak separation in
-%       height and in position, the overlap integral and the relative entropy of the
-%       kernel-smoothed distribution against the best-fitting normal
-%       (DN_CompareKSFit)
-% olbt_m2, olbt_m5, olbt_s5, the mean after trimming the 2% and 5% most extreme
-%       values at each end, and the standard deviation after trimming 5% (DN_OutlierTest)
+% kscn_peaksepy, kscn_peaksepx, kscn_relent, the peak separation in height and in
+%       position, and the relative entropy, of the kernel-smoothed distribution
+%       against the best-fitting normal (DN_CompareKSFit)
+% olbt_m2, olbt_m5, the mean after trimming the 2% and 5% most extreme values at
+%       each end (DN_OutlierTest)
 % A scalar NaN is returned if the processed series is identically zero (or, for
 % 'logr' and 'boxcox', if the data are not all positive).
 
@@ -194,20 +207,26 @@ end
 y = zscore(y);
 y_d = zscore(y_d);
 
+% Changes from the original to the processed series: a difference for
+% statistics that can be negative or near 0, and a normalized difference for
+% positive statistics:
+f_diff = @(proc, orig) proc - orig;
+f_normDiff = @(proc, orig) SUB_normDiff(proc, orig);
+
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = SY_StatAv(y_d, 'seg', 2) / SY_StatAv(y, 'seg', 2);
+out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), SY_StatAv(y, 'seg', 2));
 
 % (b) Sliding window mean
-out.swms2_2 = SY_SlidingWindow(y_d, 'mean', 'std', 2, 2) / SY_SlidingWindow(y, 'mean', 'std', 2, 2);
-out.swms5_1 = SY_SlidingWindow(y_d, 'mean', 'std', 5, 1) / SY_SlidingWindow(y, 'mean', 'std', 5, 1);
-out.swms10_1 = SY_SlidingWindow(y_d, 'mean', 'std', 10, 1) / SY_SlidingWindow(y, 'mean', 'std', 10, 1);
+out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), SY_SlidingWindow(y, 'mean', 'std', 2, 2));
+out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), SY_SlidingWindow(y, 'mean', 'std', 5, 1));
+out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), SY_SlidingWindow(y, 'mean', 'std', 10, 1));
 
 % (c) Sliding window std
-out.swss2_1 = SY_SlidingWindow(y_d, 'std', 'std', 2, 1) / SY_SlidingWindow(y, 'std', 'std', 2, 1);
-out.swss5_1 = SY_SlidingWindow(y_d, 'std', 'std', 5, 1) / SY_SlidingWindow(y, 'std', 'std', 5, 1);
-out.swss10_1 = SY_SlidingWindow(y_d, 'std', 'std', 10, 1) / SY_SlidingWindow(y, 'std', 'std', 10, 1);
+out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), SY_SlidingWindow(y, 'std', 'std', 2, 1));
+out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), SY_SlidingWindow(y, 'std', 'std', 5, 1));
+out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), SY_SlidingWindow(y, 'std', 'std', 10, 1));
 
 % 2) Gaussianity
 % (a) kernel density fit
@@ -219,23 +238,34 @@ if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	out.gauss1_kd_resAC1 = NaN;
 	out.gauss1_kd_resruns = NaN;
 else
-	out.gauss1_kd_r2 = me1.r2 / me2.r2;
-	out.gauss1_kd_resAC1 = me1.resAC1 / me2.resAC1;
-	out.gauss1_kd_resruns = me1.resruns / me2.resruns;
+	out.gauss1_kd_r2 = f_diff(me1.r2, me2.r2);
+	out.gauss1_kd_resAC1 = f_diff(me1.resAC1, me2.resAC1);
+	out.gauss1_kd_resruns = f_diff(me1.resruns, me2.resruns);
 end
 
 % (b) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d, 'norm');
 me2 = DN_CompareKSFit(y, 'norm');
 
-out.kscn_peaksepy = me1.peaksepy / me2.peaksepy;
-out.kscn_peaksepx = me1.peaksepx / me2.peaksepx;
-out.kscn_olapint = me1.olapint / me2.olapint;
-out.kscn_relent = me1.relent / me2.relent;
+out.kscn_peaksepy = f_diff(me1.peaksepy, me2.peaksepy);
+out.kscn_peaksepx = f_diff(me1.peaksepx, me2.peaksepx);
+out.kscn_olapint = f_normDiff(me1.olapint, me2.olapint);
+out.kscn_relent = f_diff(me1.relent, me2.relent);
 
 % 3) Outliers
-out.olbt_m2 = DN_OutlierTest(y_d, 2, 'mean') / DN_OutlierTest(y, 2, 'mean');
-out.olbt_m5 = DN_OutlierTest(y_d, 5, 'mean') / DN_OutlierTest(y, 5, 'mean');
-out.olbt_s5 = DN_OutlierTest(y_d, 5, 'std') / DN_OutlierTest(y, 5, 'std');
+out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), DN_OutlierTest(y, 2, 'mean'));
+out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), DN_OutlierTest(y, 5, 'mean'));
+out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), DN_OutlierTest(y, 5, 'std'));
+
+% ------------------------------------------------------------------------------
+function nd = SUB_normDiff(proc, orig)
+	% Normalized difference (proc - orig) / (proc + orig) of two positive numbers,
+	% in [-1, 1]; 0 if both are 0
+	if proc + orig == 0
+		nd = 0;
+	else
+		nd = (proc - orig) / (proc + orig);
+	end
+end
 
 end
