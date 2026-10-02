@@ -34,6 +34,10 @@ function out = EN_BubbleEn(y, m, tau)
 % ---NOTES:
 % A swap is counted only when an earlier value is strictly greater than a later
 % one, so tied values are never swapped (as in a standard bubble sort).
+% The estimate is a small difference between two entropies, so it is noisy when
+% the series is short relative to the number of possible swap counts: for series
+% of about 1000 samples, embedding dimensions much above 10 give poorly
+% reproducible values.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
