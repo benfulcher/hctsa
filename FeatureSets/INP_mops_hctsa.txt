@@ -776,7 +776,6 @@ SC_FluctAnal(x_z,2,'dfa',50,2,[],true)	SC_FluctAnal_2_dfa_50_2_logi
 SC_FluctAnal(x_z,2,'dfa',50,3,[],true)	SC_FluctAnal_2_dfa_50_3_logi
 SC_FluctAnal(x_z,2,'endptdiff',50,[],[],true)	SC_FluctAnal_2_endptdiff_50_logi
 SC_FluctAnal(x_z,2,'iqr',50,[],[],true)	SC_FluctAnal_2_iqr_50_logi
-SC_FluctAnal(x_z,2,'nothing',50,[],[],true)	SC_FluctAnal_2_nothing_50_logi
 SC_FluctAnal(x_z,2,'range',50,[],[],true)	SC_FluctAnal_2_range_50_logi
 SC_FluctAnal(x_z,2,'rsrange',50,[],[],true)	SC_FluctAnal_2_rsrange_50_logi
 SC_FluctAnal(x_z,2,'rsrangefit',50,1,[],true)	SC_FluctAnal_2_rsrangefit_50_1_logi
