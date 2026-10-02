@@ -1,14 +1,14 @@
-function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
-% DN_RemovePoints   How the distribution of a time series changes when a set of points is removed or clipped.
+function out = CO_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
+% CO_RemovePoints   How the autocorrelation of a time series changes when a set of points is removed or clipped.
 %
 % A proportion, p, of the points of the (z-scored) series are removed, or
-% saturated, according to a rule (see BF_RemovePoints), and order-free statistics
-% of the changed series are computed: its mean, median and standard deviation, and
-% the ratios of its skewness and kurtosis to those of the original series. Removing
-% deletes the chosen points and closes up the rest into a shorter series. Saturating
-% keeps them in place but clips their values to the most extreme value among the
-% points kept. The autocorrelation statistics of the same transformation are in
-% CO_RemovePoints.
+% saturated, according to a rule (see BF_RemovePoints), and the autocorrelation
+% structure is compared before and after the change. Removing deletes the chosen
+% points and closes up the rest into a shorter series, which splices together points
+% that were not neighbors. Saturating keeps them in place but clips their values to
+% the most extreme value among the points kept. The order-free statistics of the same
+% transformation (mean, median, standard deviation, skewness and kurtosis) are in
+% DN_RemovePoints.
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored)
@@ -28,17 +28,20 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 %       irreproducible run to run; no registered feature uses it)
 %
 % ---OUTPUTS: statistics of the changed series, relative to the original:
-% mean, median, std, the mean, median and standard deviation of the changed
-%       series (not ratios; the z-scored original has mean 0 and std 1)
-% skewnessrat, kurtosisrat, the ratios of the skewness and of the kurtosis
+% fzcacrat, the ratio of the first zero-crossing of the autocorrelation function
 %       (changed to original)
+% ac1rat, ac2rat, ac3rat, the ratios of the autocorrelation at lags 1, 2 and 3
+%       (changed to original; the sign is kept)
+% ac1diff, ac2diff, ac3diff, the absolute differences in the autocorrelation at
+%       lags 1, 2 and 3
+% sumabsacfdiff, the sum over lags 1 to 8 of the absolute differences in the
+%       autocorrelation
 %
 % ---NOTES:
-% A similar idea is implemented in DN_OutlierInclude.
-% skewnessrat divides by the skewness of the original series, which is near 0 for
-% symmetric distributions, so it is unstable for such series.
-% The autocorrelation outputs of this function (fzcacrat, ac1rat, ac1diff, ac2rat,
-% ac2diff, ac3rat, ac3diff, sumabsacfdiff) moved to CO_RemovePoints.
+% The ratios divide by the original value, which can be near 0 (e.g., a lag-1
+% autocorrelation near 0), so they are unstable for such series.
+% This function and DN_RemovePoints were split from a single function that returned
+% both sets of outputs.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -90,15 +93,37 @@ end
 % ------------------------------------------------------------------------------
 yTransform = BF_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed);
 
+% Compute some autocorrelation properties:
+acf_y = SUB_acf(y, 8);
+acf_yTransform = SUB_acf(yTransform, 8);
+
 % -------------------------------------------------------------------------------
 %% Compute output statistics
 % -------------------------------------------------------------------------------
-out.mean = mean(yTransform);
-out.median = median(yTransform);
-out.std = std(yTransform);
 
-% Requires Statistics Toolbox:
-out.skewnessrat = skewness(yTransform) / skewness(y);
-out.kurtosisrat = kurtosis(yTransform) / kurtosis(y);
+% Two main comparison functions:
+f_absDiff = @(x1, x2) abs(x1 - x2); % ignores the sign
+f_ratio = @(x1, x2) x1 / x2; % includes the sign
+
+out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform, 'ac', 0, 'continuous'), ...
+					   CO_FirstCrossing(y, 'ac', 0, 'continuous'));
+
+out.ac1rat = f_ratio(acf_yTransform(1), acf_y(1));
+out.ac1diff = f_absDiff(acf_yTransform(1), acf_y(1));
+
+out.ac2rat = f_ratio(acf_yTransform(2), acf_y(2));
+out.ac2diff = f_absDiff(acf_yTransform(2), acf_y(2));
+
+out.ac3rat = f_ratio(acf_yTransform(3), acf_y(3));
+out.ac3diff = f_absDiff(acf_yTransform(3), acf_y(3));
+
+out.sumabsacfdiff = sum(abs(acf_yTransform - acf_y));
+
+% -------------------------------------------------------------------------------
+function acf = SUB_acf(x, n)
+	% computes autocorrelation of the input sequence, x, up to a maximum time
+	% lag, n
+	acf = CO_AutoCorr(x, 1:n, 'Fourier');
+end
 
 end
