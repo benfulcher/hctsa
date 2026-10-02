@@ -35,7 +35,7 @@ function out = MD_hrv_classic(y)
 %       deviation of successive differences, divided by sqrt(2), times 1000
 % SD2, the long-term variability from the Poincare plot,
 %       sqrt(2*std(y)^2 - std(diff(y))^2/2), times 1000 (not registered as a
-%       feature: for a z-scored series it equals 1000*sqrt(1 + AC1) exactly, and so
+%       feature: for a z-scored series it is 1000*sqrt(1 + AC1) up to end effects, and so
 %       is redundant with the lag-1 autocorrelation)
 %
 % ---REFERENCES:
