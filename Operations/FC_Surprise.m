@@ -32,8 +32,9 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %
 % numGroups, the number of groups to coarse-grain the time series into (default
 %           3); for 'embed2quadrants' it is instead the time delay of the
-%           embedding (a number of samples, or 'tau' for the first zero-crossing
-%           of the autocorrelation function)
+%           embedding (a number of samples, 'ac1e' for the first 1/e crossing of
+%           the autocorrelation function, or 'tau' for its first zero-crossing,
+%           which is kept for backward compatibility)
 %
 % coarseGrainMethod, the coarse-graining, or symbolization method (SB_CoarseGrain):
 %          (i) 'quantile': an equiprobable alphabet by the value of each
@@ -63,12 +64,14 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %       surprise against 1 nat (NaN if std is 0)
 %
 % ---NOTES:
-% For 'embed2quadrants' with numGroups = 'tau', the delay is the first whole lag at
-% which the autocorrelation function crosses zero (CO_FirstCrossing). If the
-% autocorrelation function is undefined (a constant series), no delay exists and
-% every output is NaN. If the function is defined but never crosses zero,
-% CO_FirstCrossing returns N - 1, which is then capped at floor(N/25), as is any
-% longer delay.
+% For 'embed2quadrants' with numGroups = 'ac1e' (what hctsa registers), the delay is
+% the first whole lag at which the autocorrelation function falls below 1/e
+% (CO_FirstCrossing), capped at floor(N/25) like any delay. If the autocorrelation
+% function is undefined (a constant series) or never crosses 1/e, no delay exists
+% and every output is NaN. The 1/e crossing is a robust measure of the correlation
+% time; the first zero crossing (numGroups = 'tau') can be very long or absent
+% (then silently replaced by the floor(N/25) cap), and is kept only for backward
+% compatibility.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
