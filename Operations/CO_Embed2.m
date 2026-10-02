@@ -10,8 +10,11 @@ function out = CO_Embed2(y, tau)
 %
 % ---INPUTS:
 % y, the input time series (a z-scored column vector)
-% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
-%      function, capped at N/10); or an integer number of samples
+% tau, the time delay: an integer number of samples, or a string that sets it from the
+%      series: 'tau' (default; the first zero-crossing of the autocorrelation
+%      function, capped at N/10), 'ac1e' (the floor of its first 1/e crossing), or
+%      'mi' (the smaller of the first minimum of the Kraskov automutual information
+%      and the 'ac1e' delay); see BF_GetTau
 %
 % ---OUTPUTS:
 % theta_ac1, theta_ac2, theta_ac3, the autocorrelation of the sequence of step angles

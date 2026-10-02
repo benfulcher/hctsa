@@ -12,9 +12,10 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 %
 % ---INPUTS:
 % y, the time series to analyze
-% tau, the time-delay (can be 'ac' or 'mi' for the first zero-crossing of the
-%      autocorrelation function or first minimum of the automutual information function;
-%      default: 1)
+% tau, the time-delay (can be 'ac' for the first zero-crossing of the autocorrelation
+%      function, or 'mi' for the smaller of the first minimum of the Kraskov automutual
+%      information and the floor of the first 1/e crossing of the autocorrelation
+%      function; see BF_GetTau; default: 1)
 % mmm, a two-vector specifying the minimum and maximum embedding dimensions, e.g., [2,10]
 %      for m = 2 up to m = 10 (default: [2,10])
 % tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion

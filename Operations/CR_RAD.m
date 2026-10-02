@@ -13,8 +13,10 @@ function f = CR_RAD(x, tau, doAbs)
 % ---INPUTS:
 % x, the input time series (vector)
 % tau, the embedding and differencing delay in units of the timestep (integer; default
-%      1; 'tau' sets it to the first zero-crossing of the autocorrelation function of
-%      the series after any doAbs transformation)
+%      1). A string sets it from the series (after any doAbs transformation): 'tau'
+%      (the first zero-crossing of the autocorrelation function), 'ac1e' (the floor
+%      of its first 1/e crossing), or 'mi' (the smaller of the first minimum of the
+%      Kraskov automutual information and the 'ac1e' delay); see BF_GetTau
 % doAbs, whether to center the time series at its median and then take absolute values
 %        (logical flag; default true)
 %

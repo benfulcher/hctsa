@@ -15,10 +15,13 @@ function out = EN_ApEn(y, mnom, rth, tau)
 % mnom, the embedding dimension m (default: 1)
 % rth, the similarity threshold as a fraction of the standard deviation of y,
 %      r = rth*std(y) (default: 0.2)
-% tau, the time delay between pattern elements (default: 1), or 'ac1e' or 'mi' for an
-%      adaptive delay (see BF_GetTau). A delay set by the series' own timescale stops ApEn
-%      from mostly measuring smoothness when a process is oversampled, without shortening
-%      the series as decimation would.
+% tau, the time delay between pattern elements (default: 1), or a string for an
+%      adaptive delay: 'ac1e' (the floor of the first 1/e crossing of the
+%      autocorrelation function), 'mi' (the smaller of the first minimum of the
+%      Kraskov automutual information and the 'ac1e' delay), or 'ac' (the first
+%      zero-crossing of the autocorrelation function); see BF_GetTau. A delay set by
+%      the series' own timescale stops ApEn from mostly measuring smoothness when a
+%      process is oversampled, without shortening the series as decimation would.
 %
 % ---OUTPUTS:
 % a scalar: ApEn(m,r) = Phi_m - Phi_{m+1}.

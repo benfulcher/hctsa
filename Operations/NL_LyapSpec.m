@@ -21,10 +21,11 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 % ---INPUTS:
 % y, the input time series
 %
-% tauMethod, the time-delay for the embedding: an integer, or 'ac'/'mi'
-%       for the first zero-crossing of the autocorrelation function or
-%       first minimum of the automutual information (default: 1). Across 134
-%       chaotic flows with known maximal Lyapunov exponents (W. Gilpin's
+% tauMethod, the time-delay for the embedding: an integer, or 'ac'/'ac1e'/'mi'
+%       for the first zero-crossing of the autocorrelation function, the floor of its
+%       first 1/e crossing, or the smaller of the first minimum of the Kraskov
+%       automutual information and the 'ac1e' delay (see BF_GetTau; default: 1).
+%       Across 134 chaotic flows with known maximal Lyapunov exponents (W. Gilpin's
 %       dysts, 30 samples per period), LE1 tracked the true exponent better
 %       with tau = 1 (Spearman 0.47) than with tau = 'ac' (0.37), and the
 %       Kaplan-Yorke dimension far better (0.36 vs 0.08).

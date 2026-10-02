@@ -32,7 +32,8 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 %
 % ---INPUTS:
 % y, scalar time series as a column vector
-% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed; default: 1)
+% tau, time delay for the embedding (can be 'ac', 'ac1e', or 'mi', cf. BF_Embed and
+%    BF_GetTau; default: 1)
 % m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
 %    neighbors (cf. BF_Embed; default: 3)
 % theilerWin, Theiler window excluding temporally-correlated neighbors: {'ac', k} for k

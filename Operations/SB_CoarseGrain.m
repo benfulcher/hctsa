@@ -21,7 +21,10 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 %       'diff' (must be 2 for 'updown'), or sets the time delay for the
 %       embedding subroutines: a number of samples, or a string that sets it
 %       from the series:
-%       'ac1e': the first 1/e crossing of the autocorrelation function,
+%       'ac1e': the floor of the first 1/e crossing of the autocorrelation
+%            function (see BF_GetTau),
+%       'mi': the smaller of the first minimum of the Kraskov automutual
+%            information and the 'ac1e' delay (see BF_GetTau),
 %       'tau': the first zero-crossing of the autocorrelation function (kept for
 %            backward compatibility; the lag can be meaninglessly long, or
 %            absent, for a slowly decorrelating series, and the cap below then

@@ -38,8 +38,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 % ---INPUTS:
 % y, the input time series (assumed z-scored)
 % tau, embedding time delay fed to BF_Embed ('ac': first zero-crossing of the
-%      autocorrelation function, 'mi': first minimum of the automutual
-%      information, or a number of samples; default: 'ac')
+%      autocorrelation function, 'ac1e': the floor of its first 1/e crossing, 'mi':
+%      the smaller of the first minimum of the Kraskov automutual information and
+%      the 'ac1e' delay (see BF_GetTau), or a number of samples; default: 'ac')
 % m, embedding dimension fed to BF_Embed (default: 3)
 % q, the quantile level defining "extreme" close returns: exceedances of
 %    g_i = -log(distance) above its q-quantile are treated as events

@@ -23,8 +23,9 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %
 % ---INPUTS:
 % y, scalar time series as a column vector
-% tau, time delay for the embedding: a positive integer, 'ac' or 'mi' (cf. BF_Embed), or
-%      'periodWelch' (specific to this operation; see ---NOTES). Default: 'mi'
+% tau, time delay for the embedding: a positive integer, 'ac', 'ac1e' or 'mi' (cf.
+%      BF_Embed and BF_GetTau), or 'periodWelch' (specific to this operation; see
+%      ---NOTES). Default: 'mi'
 % m, embedding dimension, a positive integer. Default: 3
 % maxDim, maximum homology dimension to compute (only dimensions 0 and 1 are used by the
 %         outputs below; higher dimensions are far more expensive). Default: 1

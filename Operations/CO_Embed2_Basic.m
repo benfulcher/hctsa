@@ -7,8 +7,11 @@ function out = CO_Embed2_Basic(y, tau)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time lag (default 1; can be set to 'tau' to use the first zero-crossing of
-%      the autocorrelation function, capped at N/10)
+% tau, the time lag (default 1): a number of samples, or a string that sets it from
+%      the series: 'tau' (the first zero-crossing of the autocorrelation function,
+%      capped at N/10), 'ac1e' (the floor of its first 1/e crossing), or 'mi' (the
+%      smaller of the first minimum of the Kraskov automutual information and the
+%      'ac1e' delay); see BF_GetTau
 %
 % ---OUTPUTS:
 % updiag01, updiag05, the fraction of points within 0.1 or 0.5 (vertically) of the

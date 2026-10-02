@@ -27,9 +27,10 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%      zero-crossing of the autocorrelation function or first minimum of the
-%      automutual information, respectively (default: 'ac')
+% tau, the time-delay, can be an integer, 'ac' for the first zero-crossing of the
+%      autocorrelation function, 'ac1e' for the floor of its first 1/e crossing, or
+%      'mi' for the smaller of the first minimum of the Kraskov automutual
+%      information and the 'ac1e' delay (see BF_GetTau; default: 'ac')
 % m, the embedding dimension (default: 3)
 % maxN, the maximum number of embedded points used to form the N x N kernel
 %       matrix, whose eigendecomposition costs O(N^3). Longer embeddings are

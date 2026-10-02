@@ -18,8 +18,10 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %
 % ---INPUTS:
 % y, input time series
-% tau, time-delay (can be 'ac' or 'mi' for first zero-crossing of autocorrelation function,
-%      or first minimum of the automutual information; default: 1)
+% tau, time-delay (can be 'ac' for the first zero-crossing of the autocorrelation
+%      function, 'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller
+%      of the first minimum of the Kraskov automutual information and the 'ac1e' delay;
+%      see BF_GetTau; default: 1)
 % maxm, the maximum embedding dimension (default: 10)
 % theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing of the
 %             autocorrelation function, or a number of samples (see BF_TheilerWindow;

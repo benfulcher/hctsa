@@ -10,9 +10,11 @@ function out = CO_trev(y, tau)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time lag (default 'ac'): an integer number of samples, or 'ac' or 'mi' to
-%      set it as the first zero-crossing of the autocorrelation function, or the first
-%      minimum of the automutual information function, respectively
+% tau, the time lag (default 'ac'): an integer number of samples, or a string that
+%      sets it from the series: 'ac' (the first zero-crossing of the autocorrelation
+%      function), 'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller
+%      of the first minimum of the Kraskov automutual information and the 'ac1e'
+%      delay); see BF_GetTau
 %
 % ---OUTPUTS:
 % raw, the trev expression, mean(d^3) / mean(d^2)^(3/2),
@@ -60,7 +62,7 @@ if nargin < 2 || isempty(tau)
 end
 
 % -------------------------------------------------------------------------------
-% Can set the time lag, tau, to be 'ac' or 'mi':
+% Can set the time lag, tau, to be 'ac', 'ac1e', or 'mi':
 if ischar(tau) && strcmp(tau, 'ac1e')
 	% Adaptive delay: see BF_GetTau
 	tau = BF_GetTau(y, tau);
@@ -73,7 +75,7 @@ if strcmp(tau, 'ac')
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
 	tau = BF_GetTau(y, 'mi');
-	% tau is the first minimum of the automutual information function
+	% tau is the smaller of the first AMI minimum and the 'ac1e' delay
 end
 if isnan(tau)
 	out = NaN; return

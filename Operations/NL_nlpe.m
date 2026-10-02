@@ -12,8 +12,10 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % y, the input time series (should be z-scored)
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the point where the
 %     proportion of false nearest neighbors falls below 5% using NL_FNN; default: 3)
-% tau, the time-delay (can be an integer or 'ac' to be the first zero-crossing of the ACF
-%      or 'mi' to be the first minimum of the automutual information function; default: 1)
+% tau, the time-delay (can be an integer, 'ac' for the first zero-crossing of the ACF,
+%      'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller of the
+%      first minimum of the Kraskov automutual information and the 'ac1e' delay; see
+%      BF_GetTau; default: 1)
 % maxN, the maximum time-series length to analyze; longer series are cropped to their first
 %       maxN points (default: 5000, due to memory constraints with longer time series). Set
 %       to 'full' to disable, with a warning above 20000 points.

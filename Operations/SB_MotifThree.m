@@ -16,10 +16,12 @@ function out = SB_MotifThree(y, cgHow, tau)
 %        most negative third of the increments, c: the most positive third)
 % tau, the time delay at which to symbolize consecutive words (default: 1, i.e.,
 %    consecutive samples). The series is first downsampled by tau (using resample).
-%    Can also be 'ac' to use the first zero-crossing of the autocorrelation
-%    function, matching the lag used by SB_TransitionMatrix; useful since words at
-%    consecutive samples of a smooth, oversampled signal can be dominated by
-%    trivial local structure.
+%    Can also be a string that sets it from the series: 'ac' (the first zero-crossing
+%    of the autocorrelation function, matching the lag used by SB_TransitionMatrix),
+%    'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller of the first
+%    minimum of the Kraskov automutual information and the 'ac1e' delay; see
+%    BF_GetTau). Useful since words at consecutive samples of a smooth, oversampled
+%    signal can be dominated by trivial local structure.
 %
 % ---OUTPUTS:
 % A structure with fields:
