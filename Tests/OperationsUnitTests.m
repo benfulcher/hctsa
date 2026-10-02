@@ -949,8 +949,8 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The Lorenz flow''s divergence curve should take far longer to saturate than noise''s.');
         end
 
-        function test_NL_BoxCorrDim_DiscriminatesStructure(testCase)
-            % NL_BoxCorrDim used to depend on TSTOOL's signal/corrdim;
+        function test_NL_BoxCountEntropyRate_DiscriminatesStructure(testCase)
+            % NL_BoxCountEntropyRate used to depend on TSTOOL's signal/corrdim;
             % it now uses TISEAN's boxcount (Renyi entropy of order Q=2.0
             % via box partitioning), taking its per-embedding-dimension
             % entropy increment as the analogue of corrdim's local-dimension
@@ -970,7 +970,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % during development showed the same qualitative shape.)
             rng(81);
             yNoise = randn(2000,1);
-            outNoise = NL_BoxCorrDim(yNoise,50,{1,5});
+            outNoise = NL_BoxCountEntropyRate(yNoise,50,{1,5});
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -978,7 +978,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_BoxCorrDim(yChaotic,50,{1,5});
+            outChaotic = NL_BoxCountEntropyRate(yChaotic,50,{1,5});
 
             testCase.verifyGreaterThan(outChaotic.mediand5, outNoise.mediand5, ...
                 ['The logistic map''s deterministic, tightly-clustered embedding should keep boxes ' ...
