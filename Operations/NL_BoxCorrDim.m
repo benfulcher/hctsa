@@ -10,9 +10,8 @@ function out = NL_BoxCorrDim(y, numBins, embedParams)
 % (d-1)-dimensional embedding, I(epsilon,d) = H(epsilon,d) - H(epsilon,d-1)
 % (defined for d = 2,...,m; at d = 1, boxcount reports H itself, which is not an
 % increment, so d = 1 is excluded from all summaries). The matrix I (length scales
-% by embedding dimensions 2,...,m) is summarized by its mean, median and minimum
-% across length scales for each dimension, across dimensions for each length
-% scale, and overall.
+% by embedding dimensions 2,...,m) is summarized across length scales for each
+% dimension, across dimensions for each length scale, and overall.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -26,22 +25,30 @@ function out = NL_BoxCorrDim(y, numBins, embedParams)
 % ---OUTPUTS: a structure of summaries of the matrix I(epsilon,d), with d the
 % embedding dimension and r the index of the length scale (r = 1 is the full
 % range of the series, larger r are finer scales):
-% meand<d>, mediand<d>, mind<d>: mean, median and minimum of I over length
-%          scales, at embedding dimension d = 2,...,m
+% meand<d>, mediand<d>: mean and median of I over length scales, at embedding
+%          dimension d = 2,...,m
 % meanr<r>, medianr<r>, minr<r>: mean, median and minimum of I over embedding
 %          dimensions 2,...,m, at length scale r = 2,...,numBins
 % meanchr<r>: mean change of I from one embedding dimension to the next
 %          (d = 2,...,m), at length scale r = 2,...,numBins
 % stdmean, stdmedian: standard deviation, across embedding dimensions 2,...,m, of
 %          the mean (or median) of I over length scales
-% medianstretch, minstretch, iqrstretch: median, minimum and interquartile
-%          range of I over all length scales and embedding dimensions 2,...,m
+% medianstretch, iqrstretch: median and interquartile range of I over all
+%          length scales and embedding dimensions 2,...,m
 %
 % ---NOTES:
 % The increment I approaches the entropy rate of the process (the K2 entropy,
 % per delay step) rather than a slope against log(epsilon), so these features
 % are entropy-rate-like even though the function is named for the correlation
 % dimension.
+% hctsa registers meanr, medianr, minr and meanchr at r = 2, 3, 4, 6, 8, 11, 14,
+% 17, 20, 24, 28, 32, 36 of numBins = 50 (2 to 429 boxes per axis): coarse scales
+% change quickly with r and are sampled densely; neighboring finer scales are
+% nearly redundant; for flows (long delays) the informative scales lie beyond
+% r = 18; and beyond r = 36 the 5-dimensional embedding saturates (I = 0) for
+% series of a few thousand points. Minima over all length scales (formerly
+% mind<d>, minstretch) were removed: the coarsest scale is a single box, where
+% I = 0, so they were always 0.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -176,7 +183,7 @@ end
 for i = 2:m
 	out.(sprintf('meand%u', i)) = mean(rs(:, i));
 	out.(sprintf('mediand%u', i)) = median(rs(:, i));
-	out.(sprintf('mind%u', i)) = min(rs(:, i));
+	% (no minimum over scales: the coarsest scale is a single box, where I = 0, so it would always be 0)
 end
 
 for i = 2:ldr
@@ -192,7 +199,6 @@ out.stdmedian = std(median(rs(:, 2:end)));
 rsstretch = rs(:, 2:end);
 rsstretch = rsstretch(:);
 out.medianstretch = median(rsstretch);
-out.minstretch = min(rsstretch); % same as at maximum embedding dimension, m, or usually at maximum ldr (18)
 out.iqrstretch = iqr(rsstretch);
 
 end
