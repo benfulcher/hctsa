@@ -142,3 +142,4 @@ MF_arfit_1_8_sbc_maxReS,MF_arfit_1_8_sbc_maxReLambda,now from the companion-matr
 MF_arfit_1_8_sbc_maxImS,MF_arfit_1_8_sbc_maxImLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
 MF_arfit_1_8_sbc_maxabsS,MF_arfit_1_8_sbc_maxabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
 MF_arfit_1_8_sbc_stdabsS,MF_arfit_1_8_sbc_stdabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+SP_SpectralTimeFreq_20_sk_meanSpread,SP_SpectralTimeFreq_20_sk_relSpread,spread of power now normalized by the mean power (a coefficient of variation) to remove the 1/N length dependence

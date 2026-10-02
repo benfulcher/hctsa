@@ -32,10 +32,14 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 %         the 95% Gaussian-null threshold (non-Gaussian, bursty behavior)
 % sk_freqAtMax, the angular frequency (2*pi*f, matching SP_Summaries) at which the
 %         spectral kurtosis is largest
-% sk_meanSpread, the mean over frequencies of the standard deviation across windows
-%         of the power in each frequency bin (the spread output of
-%         spectralKurtosis); the power is |FFT|^2/(0.5*sum(window)^2), so it
-%         scales with the variance of the series and as 1/(window length)
+% sk_relSpread, the relative spread of power across windows: the mean over
+%         frequencies of the standard deviation across windows of the power in each
+%         frequency bin (the spread output of spectralKurtosis), divided by the mean
+%         over frequencies of the mean power across windows. A coefficient of
+%         variation of the power: it is dimensionless and independent of the
+%         variance of the series and of the window length (about 1 for white
+%         noise). (Formerly sk_meanSpread, the unnormalized spread, which scaled
+%         with the variance of the series and as 1/(window length).)
 % sk_meanCentroid, 2*pi times the mean over frequencies of the mean across windows
 %         of the same power (the centroid output of spectralKurtosis, which for
 %         unscaled spectral kurtosis is a mean power, not a frequency); not
@@ -46,7 +50,7 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 % ---NOTES:
 % All outputs are computed directly from the spectrogram, so they do not depend on
 % the MATLAB release (on releases without the five-output form of spectralKurtosis,
-% sk_meanSpread and sk_meanCentroid used to be NaN). The values equal those of the
+% sk_relSpread and sk_meanCentroid used to be NaN). The values equal those of the
 % toolbox function's outputs to rounding error.
 
 % ------------------------------------------------------------------------------
@@ -149,7 +153,7 @@ out.sk_range = max(kurt) - min(kurt);
 out.sk_fracAboveThresh = mean(kurt > thresh); % fraction of frequencies with non-Gaussian, bursty behavior
 [~, i_max] = max(kurt);
 out.sk_freqAtMax = 2 * pi * fout(i_max); % angular frequency, matching SP_Summaries convention
-out.sk_meanSpread = mean(spread);
+out.sk_relSpread = mean(spread) / mean(centroid); % coefficient of variation of power across windows
 out.sk_meanCentroid = 2 * pi * mean(centroid);
 
 % ------------------------------------------------------------------------------
