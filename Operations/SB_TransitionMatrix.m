@@ -122,6 +122,13 @@ end
 if nargin < 4 || isempty(tau)
 	tau = 1;
 end
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if tau > length(y) / 50 % for highly-correlated signals (as in SB_TransitionPAlphabet)

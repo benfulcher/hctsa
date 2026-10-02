@@ -99,6 +99,13 @@ if nargin < 2
 	tau = []; % set default in CO_HistogramAMI
 end
 % Set tau to minimum of autocorrelation function
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if ~isempty(tau) && ischar(tau) && ismember(tau, {'ac', 'tau'})
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end

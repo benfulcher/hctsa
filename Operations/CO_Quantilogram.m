@@ -96,8 +96,8 @@ if ischar(lag) || isstring(lag)
     switch lag
     case 'ac'
         lag = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    case 'ac1e'
-        lag = CO_FirstCrossing(y, 'ac', 1/exp(1), 'discrete');
+    case {'ac1e', 'mi'}
+        lag = BF_GetTau(y, lag); % adaptive delay: see BF_GetTau
     otherwise
         error('Unknown lag option ''%s'': use a positive integer, ''ac'', or ''ac1e''', lag)
     end

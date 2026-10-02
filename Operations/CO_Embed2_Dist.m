@@ -64,6 +64,13 @@ N = length(y); % time-series length
 if nargin < 2 || isempty(tau)
 	tau = 'tau'; % set to the first minimum of autocorrelation function
 end
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if strcmp(tau, 'tau'),
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)

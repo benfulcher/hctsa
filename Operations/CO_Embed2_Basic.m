@@ -63,6 +63,13 @@ end
 
 doPlot = false; % plot outputs to a figure
 
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');

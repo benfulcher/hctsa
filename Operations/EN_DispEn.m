@@ -118,8 +118,8 @@ if ischar(tau)
 	switch tau
 		case 'ac'
 			tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-		case 'mi'
-			tau = BF_GetTau(y, 'mi');
+		case {'mi', 'ac1e'}
+			tau = BF_GetTau(y, tau);
 		otherwise
 			error('Unknown time delay ''%s''', tau);
 	end

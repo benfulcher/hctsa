@@ -102,6 +102,13 @@ x_2tau = y_embed(:, 1); % x_{t-2tau}
 x_tau = y_embed(:, 2);  % x_{t-tau}
 x_now = y_embed(:, 3);  % x_t
 
+if ischar(tauMethod) && strcmp(tauMethod, 'ac1e')
+	% Adaptive delay: see BF_GetTau
+	tauMethod = BF_GetTau(y, tauMethod);
+	if isnan(tauMethod)
+		out = NaN; return
+	end
+end
 if strcmp(tauMethod, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tauMethod, 'mi')

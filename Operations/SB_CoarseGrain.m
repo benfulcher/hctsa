@@ -105,10 +105,11 @@ switch howtocg
 	case {'embed2quadrants', 'embed2octants'}
 		% Construct the embedding
 
-		if strcmp(numGroups, 'ac1e')
-			% First 1/e crossing of the autocorrelation function
-			tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
-			if isnan(tau) || tau >= N - 1 % undefined, or never crosses (returns N-1)
+		if ischar(numGroups) && ismember(numGroups, {'ac1e', 'mi'})
+			% Adaptive delay: see BF_GetTau ('ac1e': floor of the first 1/e crossing
+			% of the autocorrelation function)
+			tau = BF_GetTau(y, numGroups);
+			if isnan(tau) % undefined, or never crosses
 				yth = NaN; return
 			end
 		elseif strcmp(numGroups, 'tau')

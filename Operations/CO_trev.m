@@ -61,6 +61,13 @@ end
 
 % -------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac' or 'mi':
+if ischar(tau) && strcmp(tau, 'ac1e')
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function

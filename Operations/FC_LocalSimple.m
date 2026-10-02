@@ -86,6 +86,13 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 % Do the local prediction
 % ------------------------------------------------------------------------------
+if ischar(trainLength) && ismember(trainLength, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	trainLength = BF_GetTau(y, trainLength);
+	if isnan(trainLength)
+		out = NaN; return
+	end
+end
 if strcmp(trainLength, 'ac')
 	% Make it first zero-crossing of ACF:
 	lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');

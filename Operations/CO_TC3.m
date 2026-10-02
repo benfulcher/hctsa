@@ -68,14 +68,14 @@ end
 % ------------------------------------------------------------------------------
 % Can set the time lag, tau, to be 'ac1e', 'ac', or 'mi'
 if strcmp(tau, 'ac1e')
-	tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
-	% tau is the first 1/e crossing of the autocorrelation function
+	tau = BF_GetTau(y, 'ac1e');
+	% tau is the floor of the first 1/e crossing of the autocorrelation function
 elseif strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
 	tau = BF_GetTau(y, 'mi');
-	% tau is the first minimum of the automutual information function
+	% tau is the smaller of the first AMI minimum and the 'ac1e' delay
 end
 if isnan(tau)
 	out = NaN; return

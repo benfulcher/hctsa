@@ -50,6 +50,13 @@ if doAbs
 	x = x - median(x);
 	x = abs(x);
 end
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(x, tau);
+	if isnan(tau)
+		f = NaN; return
+	end
+end
 if ischar(tau) && strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(x, 'ac', 0, 'discrete');
