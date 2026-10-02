@@ -755,7 +755,6 @@ SB_TransitionMatrix(x_z,'quantile',2,'ac')	SB_TransitionMatrix_2ac
 SB_TransitionMatrix(x_z,'quantile',3,'ac')	SB_TransitionMatrix_3ac
 SB_TransitionMatrix(x_z,'quantile',4,'ac')	SB_TransitionMatrix_4ac
 SB_TransitionMatrix(x_z,'quantile',5,'ac')	SB_TransitionMatrix_5ac
-SB_TransitionMatrix(x_z,'quantile',2,1)	SB_TransitionMatrix_21
 SB_TransitionMatrix(x_z,'quantile',3,1)	SB_TransitionMatrix_31
 SB_TransitionMatrix(x_z,'quantile',4,1)	SB_TransitionMatrix_41
 SB_TransitionMatrix(x_z,'quantile',5,1)	SB_TransitionMatrix_51
