@@ -6,7 +6,10 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 % returns to a given neighborhood -- rather than the black line-length statistics NL_RQA
 % computes. For each embedded point j, the sorted recurrence times of its neighbors give a
 % set of recurrence-time samples w (the number of non-recurrent points between successive
-% recurrent points in column j; consecutive recurrent points contribute nothing); pooled
+% recurrent points in column j; consecutive recurrent points contribute nothing). The
+% Theiler window around j is treated as recurrent, so each white line starts at or
+% beyond the edge of the Theiler band and none spans it (the statistics therefore do not
+% depend on the width of the Theiler window); pooled
 % over all j, this yields a mean recurrence time and a mode (the probability mass at the
 % single most common recurrence time), plus their variability when the series is long
 % enough to compute them over several independent segments. This targets a different, and
@@ -215,24 +218,36 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
     % reference point collect the sorted times of its neighbors -- the
     % differences between consecutive recurrence times are the
     % recurrence-time samples w (the length of a "white vertical line").
+    % The Theiler band around the reference point j (|i-j| <= theilerWinAbs) is
+    % treated as recurrent: the band-edge points j-theilerWinAbs and
+    % j+theilerWinAbs (where inside the series) are added to the neighbor list, and
+    % the neighbors on the left and right of j are differenced separately, so that
+    % no white line spans the excluded band (which would make the pooled
+    % recurrence times depend on the Theiler window).
     % Pooled across all reference points: T_MRT is their mean and N_MPRT
-    % is the count of the single most common (modal) integer value of w.
+    % is the fraction of samples at the single most common (modal) integer value of w.
     NsegEmb = size(Yseg, 1);
     idxCell = rangesearch(Yseg, Yseg, radius);
     allW = cell(NsegEmb, 1);
     for j = 1:NsegEmb
-        nbrs = idxCell{j}(:);
+        nbrs = sort(idxCell{j}(:));
         nbrs = nbrs(abs(nbrs - j) > theilerWinAbs); % exclude Theiler window (incl. self)
-        if numel(nbrs) >= 2
-            nbrs = sort(nbrs);
-            % White vertical line lengths: the number of NON-recurrent points
-            % between successive recurrent points in this column of the
-            % recurrence plot (Ngamga et al. 2007, Sec. II: P(w) is the
-            % distribution of white vertical line lengths). Consecutive
-            % recurrent points (a sojourn within one visit) are not
-            % separated by a white line, so contribute nothing:
-            allW{j} = diff(nbrs) - 1;
+        nbrsL = nbrs(nbrs < j); % neighbors before j
+        nbrsR = nbrs(nbrs > j); % neighbors after j
+        % band edges act as recurrent points, so lines start at the edge of the band:
+        if j - theilerWinAbs >= 1
+            nbrsL = [nbrsL; j - theilerWinAbs];
         end
+        if j + theilerWinAbs <= NsegEmb
+            nbrsR = [j + theilerWinAbs; nbrsR];
+        end
+        % White vertical line lengths: the number of NON-recurrent points
+        % between successive recurrent points in this column of the
+        % recurrence plot (Ngamga et al. 2007, Sec. II: P(w) is the
+        % distribution of white vertical line lengths). Consecutive
+        % recurrent points (a sojourn within one visit) are not
+        % separated by a white line, so contribute nothing:
+        allW{j} = [diff(nbrsL) - 1; diff(nbrsR) - 1];
     end
     w = vertcat(allW{:});
     w = w(w >= 1); % (drops the zero-length "lines" between consecutive recurrent points)
