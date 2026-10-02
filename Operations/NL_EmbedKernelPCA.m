@@ -9,17 +9,21 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 %
 % At any finite kernel bandwidth, kernel PCA's spectrum is less compact than
 % linear PCA's in absolute terms (its RBF feature space is far higher-
-% dimensional than the embedding itself), but the *amount* by which it is
-% less compact depends on the geometry of the point cloud: a linear process
-% has an embedding point cloud well described by a low-dimensional
-% ellipsoid, which kernel PCA cannot compress much better than linear PCA
-% does, whereas a nonlinear process (e.g., one confined to a curved manifold
-% in the embedding space) is compressed comparatively well by kernel PCA's
-% nonlinear eigendirections. The *relative discrepancy* between the two
-% spectra (e.g., their top2/nto50/nto80 ratios) is therefore used here as a
-% nonlinearity signal, in a similar spirit to how existing hctsa operations
-% compare a metric's value to its outcome under a linear-appropriate
-% transformation (cf. surrogate-based tests in SD_SurrogateTest).
+% dimensional than the embedding itself), so the kernel-to-linear ratios
+% (top2_ratio, nto80_ratio, nto50_ratio) are below 1 (top2) or at least 1 (nto*)
+% for every series. Tested on simulations (N = 1000, 12 realizations each), the
+% ratios are nearer 1 for series on a curved low-dimensional manifold than for
+% the linear (Gaussian) process with the same power spectrum: for the logistic
+% map and Henon map, top2_ratio is 0.77 and 0.73 against 0.52 and 0.50 for
+% their phase-randomized surrogates (tau = 'ac', m = 3), and nto80_ratio is 1.4
+% and 1.3 against 2.8 and 2.7. The signal is weaker for the Lorenz system and
+% absent for a Roessler oscillator, which is close to linear at this sampling.
+% The ratios are not a stand-alone nonlinearity test, however: they also rise
+% with linear autocorrelation (top2_ratio is about 0.52 for white noise and
+% AR(1) with phi = 0.5, but 0.61-0.71 for AR(1) with phi = 0.99), so a smooth
+% linear process can look more 'nonlinear' than a chaotic map. Compare against
+% surrogates (cf. SD_SurrogateTest) to isolate nonlinearity. std_ratio did not
+% separate nonlinear from linear series consistently.
 %
 % ---INPUTS:
 % y, the input time series

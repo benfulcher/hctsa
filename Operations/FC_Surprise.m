@@ -61,6 +61,14 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %       1 nat; the length-stable form, and the one hctsa registers
 % tstat: effectSize * sqrt(number of test points), the t-statistic of the mean
 %       surprise against 1 nat (NaN if std is 0)
+%
+% ---NOTES:
+% For 'embed2quadrants' with numGroups = 'tau', the delay is the first whole lag at
+% which the autocorrelation function crosses zero (CO_FirstCrossing). If the
+% autocorrelation function is undefined (a constant series), no delay exists and
+% every output is NaN. If the function is defined but never crosses zero,
+% CO_FirstCrossing returns N - 1, which is then capped at floor(N/25), as is any
+% longer delay.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -132,6 +140,15 @@ end
 %% Course Grain
 % ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y, coarseGrainMethod, numGroups); % a coarse-grained time series using the numbers 1:numGroups
+
+if isscalar(yth) && isnan(yth)
+	% No coarse-graining exists (the embedding delay is undefined): every output is NaN
+	outFields = {'min', 'max', 'median', 'mean', 'sum', 'std', 'lq', 'uq', 'propUnseen', 'effectSize', 'tstat'};
+	for i = 1:length(outFields)
+		out.(outFields{i}) = NaN;
+	end
+	return
+end
 
 % The alphabet size for the Krichevsky-Trofimov smoothing below. Usually this
 % is just numGroups, but for 'embed2quadrants'/'embed2octants', numGroups is

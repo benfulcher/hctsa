@@ -12,10 +12,10 @@ function out = WL_cwt(y, wname, maxScale)
 % y, the input time series
 % wname, the wavelet name. For a continuous wavelet transform, a proper continuous
 %        analyzing wavelet like 'morl' (Morlet) is the standard choice; discrete
-%        orthogonal wavelets like 'db3' are also accepted (via their associated
-%        scaling function) and give a genuinely different, complementary
-%        decomposition (see Wavelet Toolbox Documentation for all options;
-%        default: 'db3')
+%        orthogonal wavelets like 'db3' are also accepted (their wavelet function,
+%        evaluated on a fine grid, is used as the analyzing wavelet) and give a
+%        genuinely different, complementary decomposition (see Wavelet Toolbox
+%        Documentation for all options; default: 'db3')
 % maxScale, the maximum scale of wavelet analysis (default: 32)
 %
 % ---OUTPUTS:
@@ -45,6 +45,13 @@ function out = WL_cwt(y, wname, maxScale)
 %        the scaled power
 %
 % ---NOTES:
+% The transform uses the legacy syntax cwt(y, scales, wname), which is the only form of
+% cwt that takes integer scales and a discrete or real wavelet name ('db3', 'morl'): the
+% current syntax is limited to the analytic wavelets 'morse', 'amor' and 'bump' on a
+% frequency grid of its own. In MATLAB R2026a (Wavelet Toolbox 26.1) the legacy syntax
+% is still accepted without a warning, and is equal to the textbook algorithm of
+% convolving y with the integrated, dilated wavelet (to machine precision).
+%
 % The scaled power SC is normalized by the mean power over all coefficients (not by the
 % total energy, as it used to be), so that its distribution, and the statistics that
 % depend on it, do not depend on the number of coefficients (the series length). The
