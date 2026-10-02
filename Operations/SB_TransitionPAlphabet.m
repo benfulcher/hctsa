@@ -203,7 +203,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 
 	% return approximately when starts to rise; where means before and
 	% after a moving dividing point are most different
-	if all(store(:, 4) == store(1, 4)); % all the same
+	if all(store(:, 4) == store(1, 4)) || length(numGroupsRange) < 5 % all the same, or too few sizes to split
 		out.symd_risept = NaN;
 	else
 		mba = zeros(length(numGroupsRange), 2); % means before and after
