@@ -6,7 +6,8 @@ function out = MF_StateSpaceCompOrder(y, maxOrder)
 % within the sample), and returns statistics on how the goodness of fit changes
 % across this range, measured by Akaike's information criterion (AIC) and by the
 % loss function (the estimated variance of the one-step prediction error).
-% The output is NaN if the model cannot be fitted at some order.
+% An order at which the model cannot be fitted is left out of the summaries (its
+% AIC and loss function are NaN), and the output is NaN only if no order can be fitted.
 %
 % c.f., MF_CompareAR -- does a similar thing for AR models
 % Uses the functions iddata, n4sid, and aic from Matlab's System Identification
@@ -26,6 +27,8 @@ function out = MF_StateSpaceCompOrder(y, maxOrder)
 % mindiffaic: the largest decrease (most negative change) in AIC when the order
 %       increases by one
 % ndownaic: the number of order increases at which the AIC decreases
+% (If some orders cannot be fitted, these are taken over the orders that can; the
+% change statistics use only adjacent pairs of orders that both fitted.)
 %
 % ---NOTES:
 % Akaike's final prediction error is also computed at each order but is not output.
@@ -90,9 +93,9 @@ y = iddata(y, [], 1);
 
 % noisevars = zeros(maxOrder,1); % Noise variance -- for us the same as
 % loss fn
-lossfns = zeros(maxOrder, 1); % Loss function
-fpes = zeros(maxOrder, 1); % Akaike's final prediction error
-aics = zeros(maxOrder, 1); % Akaike's information criterion
+lossfns = NaN(maxOrder, 1); % Loss function
+fpes = NaN(maxOrder, 1); % Akaike's final prediction error
+aics = NaN(maxOrder, 1); % Akaike's information criterion
 
 for k = 1:maxOrder
 	% Fit the state space model for this order, k
@@ -100,9 +103,9 @@ for k = 1:maxOrder
 		m = n4sid(y, k);
 	catch
 		% Data-dependent (n4sid could not fit this series at this order), so NaN
-		% rather than error(), per the NaN-vs-error convention:
+		% at this order only, rather than error(), per the NaN-vs-error convention:
 		warning('State-space model fitting failed for k = %u', k);
-		out = NaN; return
+		continue
 	end
 
 	lossfns(k) = m.EstimationInfo.LossFcn;
@@ -110,7 +113,11 @@ for k = 1:maxOrder
 	aics(k) = aic(m);
 end
 
-% Optimum model orders
+if all(isnan(aics))
+	out = NaN; return % no order could be fitted
+end
+
+% Optimum model orders (over the orders that could be fitted)
 out.minaic = min(aics);
 out.aicopt = find(aics == min(aics), 1, 'first');
 % out.minbic = min(bics);
@@ -118,10 +125,18 @@ out.aicopt = find(aics == min(aics), 1, 'first');
 out.minlossfn = min(lossfns);
 out.lossfnopt = find(lossfns == min(lossfns), 1, 'first');
 
-% Curve change summary statistics
-out.meandiffaic = mean(diff(aics));
-out.maxdiffaic = max(diff(aics));
-out.mindiffaic = min(diff(aics));
-out.ndownaic = sum(diff(aics) < 0);
+% Curve change summary statistics (over pairs of adjacent orders that both fitted)
+daics = diff(aics);
+daics = daics(~isnan(daics));
+if isempty(daics)
+	out.meandiffaic = NaN;
+	out.maxdiffaic = NaN;
+	out.mindiffaic = NaN;
+else
+	out.meandiffaic = mean(daics);
+	out.maxdiffaic = max(daics);
+	out.mindiffaic = min(daics);
+end
+out.ndownaic = sum(daics < 0);
 
 end

@@ -86,7 +86,7 @@ static void dfa
    unsigned long  scales
 )
 {
-   unsigned long  idx, i, start, end, iwidth, accum_idx;
+   unsigned long  idx, i, start, end, iwidth, accum_idx, covered;
    long  scale;
 
    REAL  Sy, Sxy;                   /* y and x-y components of normal equations */
@@ -101,6 +101,9 @@ static void dfa
       Since the sample indices are linear, there are simple closed forms for Sxx and Sx. */
    for (scale = scales - 1; scale >= 0; scale --)
    {
+      /* Number of leading samples covered by complete windows at this scale */
+      covered = elements;
+
       /* Sx/Sxy accumulation over each interval */
       for (accum_idx = 0, idx = 0; idx < elements; idx += intervals[scale], accum_idx ++)
       {
@@ -108,14 +111,14 @@ static void dfa
          start  = idx;
          end    = idx + intervals[scale] - 1;
 
-         /* We'll have to miss out an interval smaller than can fit at the end of the sequence */
+         /* A window shorter than the interval, at the end of the sequence, is
+            dropped (as in standard DFA): the fluctuation is measured only over the
+            samples covered by complete windows, and the mean is taken over those
+            samples (counting the dropped samples with zero residual, as this code
+            used to, biased F(s) downwards at scales that do not divide the length). */
          if (end >= elements)
          {
-            /* Any left-over elements not accounted for are treated the same as the input vector */
-            for (i = start; i < elements; i ++)
-            {
-               trend[i] = x[i];
-            }
+            covered = start;
             break;
          }
          iwidth = end - start + 1;
@@ -148,12 +151,12 @@ static void dfa
 
       /* Calculate fluctuation at this scale */
       accum = 0.0f;
-      for (i = 0; i < elements; i ++)
+      for (i = 0; i < covered; i ++)
       {
          diff   = x[i] - trend[i];
          accum += diff * diff;
       }
-      flucts[scale] = sqrt(accum / (REAL)elements);
+      flucts[scale] = sqrt(accum / (REAL)covered);
    }
 
    /* Clean up */

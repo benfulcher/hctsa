@@ -6,7 +6,7 @@ function out = CP_l1pwc_SweepLambda(y, lambdar)
 % step-detection toolkit. At each lambda in lambdar, CP_ML_StepDetect(y, 'l1pwc',
 % lambda) is run, and the number of constant segments per sample (nsegments), the
 % reduction in standard deviation from removing the piecewise-constant fit
-% (rmsoff), and that reduction per segment per sample (rmsoffpstep) are recorded.
+% (rmsoff), and that reduction per constant segment (rmsoffpstep) are recorded.
 % The outputs summarize how these quantities vary with lambda. Note that a
 % lambda below 1 is taken by CP_ML_StepDetect as a proportion of the largest
 % lambda that gives any steps.
@@ -24,8 +24,8 @@ function out = CP_l1pwc_SweepLambda(y, lambdar)
 %       (all five are NaN if the threshold is never crossed)
 % corrsegerr, the correlation across lambdar between the number of segments and
 %       the reduction in standard deviation
-% bestrmserrpseg, the maximum reduction in standard deviation per segment per
-%       sample (rmsoffpstep) over lambdar
+% bestrmserrpseg, the maximum reduction in standard deviation per constant
+%       segment (rmsoffpstep) over lambdar
 % bestlambda, the lambda at which that maximum occurs
 %
 % ---REFERENCES:

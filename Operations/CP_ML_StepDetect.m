@@ -33,7 +33,7 @@ function out = CP_ML_StepDetect(y, method, params)
 % For both methods:
 % nsegments, the number of constant segments per sample (1/N if there are no steps)
 % rmsoff, the reduction in standard deviation: std(y) - std(y - fit)
-% rmsoffpstep, rmsoff divided by nsegments
+% rmsoffpstep, rmsoff divided by the number of constant segments
 % ratn12, ratio of the number of change points in the first half of the series to
 %       the number in the second half (smaller over larger; 0 if either is zero)
 % diffn12, absolute difference between the number of change points in the two
@@ -258,8 +258,9 @@ out.nsegments = numChangePoints / N; % will be 1 if there are no changes
 % How much reduces variance
 out.rmsoff = std(y) - std(y - steppedy);
 
-% Reduces variance per step (per unit step rate, so as not to scale with length)
-out.rmsoffpstep = out.rmsoff / out.nsegments;
+% Reduces variance per segment (numChangePoints counts the segment starting at
+% sample 1, so it is at least 1 and this is defined even when there are no steps)
+out.rmsoffpstep = out.rmsoff / numChangePoints;
 
 % Ratio of number of steps in first half of time series to second half
 sum1 = sum(chpts < N / 2) - 1; % (exclude the chpt that's always sitting at 1)

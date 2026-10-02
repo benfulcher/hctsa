@@ -24,6 +24,12 @@ function out = SC_FastDFA(y)
 % a scalar: the DFA scaling exponent, alpha.
 %
 % ---NOTES:
+% In the C core (ML_fastdfa_core.c), a trailing piece of the series shorter than the
+% window is dropped: F(s) is the root-mean-square residual over the samples covered by
+% complete windows. (It used to be counted with zero residual, which biased F(s)
+% downwards at window sizes that do not divide the series length.) The compiled mex
+% files must be rebuilt after this change (Toolboxes/compile_mex.m).
+%
 % The original fastdfa code is by Max A. Little, publicly available at
 % http://www.maxlittle.net/software/index.php (see the header of ML_fastdfa.m for
 % how to cite it).

@@ -34,7 +34,11 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 %
 % ---OUTPUTS:
 % The spectrum S is a power spectral density in angular frequency w (radians per
-% sample, 0 to pi). Output fields:
+% sample, 0 to pi), for all three estimators normalized so that its area (the sum
+% of S times the bin spacing) equals the variance of the series, i.e. ~1 for a
+% z-scored series. Statistics that accumulate over bins (cumulative-area fits,
+% entropy) are therefore integrals over w, independent of the number of bins and
+% so of the series length. Output fields:
 %
 % Peaks:
 % maxS, maxw: the maximum of S and the angular frequency at which it occurs
@@ -68,14 +72,19 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
 % and kurtosis of frequency weighted by power
 %
-% Fits to the cumulative sum of S:
+% Fits to the cumulative area under S (a running integral of S over w, which rises
+% to ~1 for a z-scored series, independent of the number of bins):
 % fpoly2csS_p1, fpoly2csS_p2, fpoly2csS_p3, fpoly2_sse, fpoly2_r2, fpoly2_rmse:
-%       coefficients and goodness of a quadratic fit
+%       coefficients and goodness of a quadratic fit to the cumulative area under S
+%       as a function of w (fpoly2_sse is the integrated squared error)
 % fpolysat_a, fpolysat_b, fpolysat_r2, fpolysat_rmse: parameters and goodness of
 %       a*w^2/(b+w^2)
 %
 % Entropy, flatness and areas:
-% spect_shann_ent, spect_shann_ent_norm: -sum(S log S), and its mean over bins
+% spect_shann_ent: differential Shannon entropy of the power distribution over
+%       frequency, -integral(Sn log Sn dw), for the unit-area spectrum Sn
+% spect_shann_ent_norm: exp(spect_shann_ent) as a fraction of the frequency range
+%       (1 for a flat spectrum, towards 0 for a narrow-band one)
 % sfm: spectral flatness measure, 10*log10(geometric mean / arithmetic mean)
 % areatopeak, ylogareatopeak: area under S, and under log(S), up to the peak
 %
@@ -517,7 +526,12 @@ out.logtau = CO_FirstCrossing(logS, 'ac', 0, 'continuous') * dw; % see tau's N-i
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
 % ------------------------------------------------------------------------------
-csS = cumsum(S);
+% Cumulative area under the spectrum (a running integral over w, not a bare
+% running sum over bins): for a unit-variance series it rises from 0 to ~1
+% whatever the number of bins, so the fits to it below do not depend on how
+% finely the spectrum happens to be sampled (a bare cumsum(S) ends at ~1/dw,
+% i.e. at a value proportional to the transform length).
+csS = cumsum(S) * dw;
 
 f_frac_w_max = @(f) w(find(csS >= csS(end) * f, 1, 'first'));
 
@@ -605,7 +619,7 @@ end
 out.fpoly2csS_p1 = c.p1;
 out.fpoly2csS_p2 = c.p2;
 out.fpoly2csS_p3 = c.p3;
-out.fpoly2_sse = gof.sse;
+out.fpoly2_sse = gof.sse * dw; % integrated (not summed) squared error
 out.fpoly2_r2 = gof.rsquare;
 out.fpoly2_rmse = gof.rmse;
 
@@ -621,9 +635,20 @@ out.fpolysat_rmse = gof.rmse;
 % ------------------------------------------------------------------------------
 % Shannon spectral entropy
 % ------------------------------------------------------------------------------
-Hshann = -S .* log(S); % Shannon function
-out.spect_shann_ent = sum(Hshann);
-out.spect_shann_ent_norm = mean(Hshann);
+% Both are computed from the spectrum rescaled to exactly unit area, Sn =
+% S/(sum(S)*dw), so they describe the shape of the power distribution over
+% frequency only (not window/leakage effects on the total area, nor the number
+% of bins; a bare sum over bins grows in proportion to the number of bins, i.e. to
+% the series length, and the entropy of S/sum(S) over bins grows as log(bins)).
+% (i) spect_shann_ent: -integral of Sn log(Sn) dw, the differential Shannon entropy
+%     of the power distribution over frequency.
+% (ii) spect_shann_ent_norm: exp(spect_shann_ent) divided by the width of the
+%     frequency axis, N*dw: the fraction of the axis over which a flat spectrum
+%     would have the same entropy. Bounded in (0, 1]: 1 for a flat spectrum,
+%     towards 0 as the power concentrates in a narrow band.
+Sn = S / (sum(S) * dw);
+out.spect_shann_ent = sum(-Sn .* log(Sn)) * dw;
+out.spect_shann_ent_norm = exp(out.spect_shann_ent) / (N * dw);
 
 % ------------------------------------------------------------------------------
 % "Spectral Flatness Measure"

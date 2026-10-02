@@ -38,7 +38,7 @@ function out = PH_KramersMoyal(y, tau, numBins)
 % driftNonlinGain: fraction of the residual variance of a linear drift fit that
 %       is removed by the cubic fit (0 = linear drift)
 % diffSlope, diffCurv: linear and quadratic coefficients of a quadratic fit of
-%       D2(x), each relative to the fitted D2 at x = 0 (0 = additive noise)
+%       D2(x), each relative to the mean of D2 across bins (0 = additive noise)
 % diffTailRatio: mean D2 in the outer bins (the lowest and highest fifth of the
 %       bins) / mean D2 in the central bins
 % pawula: mean over bins of D4/D2^2 (tau/2 for Gaussian increments, i.e., 0.5 for
@@ -139,8 +139,12 @@ out.driftNonlinGain = 1 - res3/res1;
 % ------------------------------------------------------------------------------
 V2 = V3(:, 1:3);
 b = (V2 .* w) \ (D2 .* w);
-out.diffSlope = b(2)/b(1);
-out.diffCurv = b(3)/b(1);
+% Relative to the mean of D2 across bins (always positive), not to the fitted D2 at
+% x = 0, which can be near zero or negative for an unconstrained fit. For z-scored
+% input with D2 = a + c x^2, mean(D2) ~ a + c, so diffCurv ~ the share of the average
+% noise intensity that is state dependent.
+out.diffSlope = b(2)/mean(D2);
+out.diffCurv = b(3)/mean(D2);
 numOuter = max(1, floor(numBins/5));
 isOuter = [true(numOuter,1); false(numBins - 2*numOuter, 1); true(numOuter,1)];
 isCentral = false(numBins,1);

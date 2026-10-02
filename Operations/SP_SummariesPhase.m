@@ -160,8 +160,9 @@ out.phEnt = -sum(pBin_nz .* log(pBin_nz)) / log(nBins);
 % ------------------------------------------------------------------------------
 phUnwrap = unwrap(ph);
 X = [ones(length(ww), 1), ww];
-Wd = diag(wgt);
-beta = (X' * Wd * X) \ (X' * Wd * phUnwrap);
+% (weighting applied elementwise: a diagonal weight matrix would need memory
+% quadratic in the number of bins)
+beta = (X' * (wgt .* X)) \ (X' * (wgt .* phUnwrap));
 out.groupDelay = -beta(2) / Ny; % relative to the series centre, as a fraction of its length
 resid = phUnwrap - X * beta;
 % (normalized by sqrt(#bins): the residual of an unstructured -- random-walk
