@@ -3,14 +3,16 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 %
 % The time series is discretized by quantile separation into numGroups equally
 % populated groups, for each alphabet size in a range (default 2 to 10). At each
-% size, the matrix T of consecutive-pair frequencies is formed (T(i,j) is the
-% number of times group i is followed by group j, divided by N - 1, so it sums to
-% 1) and eight statistics of it are computed: the mean and maximum of its diagonal,
-% its trace, its asymmetry sum(sum(abs(T - T'))), the trace of its covariance
-% matrix, and the standard deviation, maximum and minimum of its eigenvalues.
-% Exponential decays a*exp(b*x) (and some linear fits and change-point statistics)
-% are then fitted to how these change with the alphabet size x. Requires the Curve
-% Fitting Toolbox.
+% size, the matrix T of consecutive-pair frequencies is formed: T(i,j) is the
+% number of times group i is followed by group j, divided by N - 1, so T is a
+% matrix of joint probabilities that sums to 1 (not a row-normalized transition
+% matrix; for equiprobable groups, T(i,j) is about the transition probability
+% P(j|i) divided by the alphabet size, as in SB_TransitionMatrix). Six statistics
+% of T are computed: the mean and maximum of its diagonal, its trace, its
+% asymmetry sum(sum(abs(T - T'))), the trace of its covariance matrix, and the
+% standard deviation of its eigenvalues. Exponential decays a*exp(b*x) (and some
+% linear fits and change-point statistics) are then fitted to how these change
+% with the alphabet size x. Requires the Curve Fitting Toolbox.
 %
 % ---INPUTS:
 % y, the input time series
@@ -25,38 +27,38 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 %    floor(N/50) for a series of length N).
 %
 % ---OUTPUTS:
-% A structure with fields (NaN if tau cannot be determined). The five fit
-% statistics of each exponential fit are the amplitude a, the rate b, R^2, adjusted
-% R^2 and the root-mean-square error:
-% Exponential fit to the mean of the diagonal elements of T:
+% A structure with fields (NaN if tau cannot be determined). In the definitions
+% below, x is the alphabet size (the entries of numGroups) and T = T_x is the
+% joint-probability matrix at that size, so each statistic is a function of x.
+% The five fit statistics of each exponential fit a*exp(b*x) are the amplitude a,
+% the rate b, R^2, adjusted R^2 and the root-mean-square error of the fit:
+% Exponential fit to the mean of the diagonal elements of T, mean_i T(i,i):
 % meandiagfexp_a, meandiagfexp_b, meandiagfexp_r2, meandiagfexp_adjr2,
 %     meandiagfexp_rmse
-% Exponential fit to the maximum of the diagonal elements of T:
+% Exponential fit to the maximum of the diagonal elements of T, max_i T(i,i):
 % maxdiagfexp_a, maxdiagfexp_b, maxdiagfexp_r2, maxdiagfexp_adjr2,
 %     maxdiagfexp_rmse
-% Exponential fit to the trace of T:
+% Exponential fit to the trace of T, sum_i T(i,i):
 % trfexp_a, trfexp_b, trfexp_r2, trfexp_adjr2, trfexp_rmse
-% Adjusted R^2 of a linear fit to the trace of T, over the alphabet sizes at which
-% it is above a fifth, or a tenth, of its value for the smallest alphabet:
+% Adjusted R^2 of a linear fit (a*x + b) to the trace of T, over the alphabet sizes
+% at which it is above a fifth, or a tenth, of its value for the smallest alphabet
+% (NaN if fewer than three sizes qualify):
 % trflin5_adjr2, trflin10adjr2
-% Asymmetry of T, sum(sum(abs(T - T'))): the slope of a linear fit against alphabet
-% size, and the position in the list of alphabet sizes where its mean before and
-% after differs most (a t-statistic criterion):
+% Asymmetry of T, sum_ij |T(i,j) - T(j,i)|: the slope of a linear fit against
+% alphabet size, and the position in the list of alphabet sizes (an index, with 1
+% the smallest alphabet size, not the alphabet size itself) of the dividing point
+% at which the mean before and after differs most (a t-statistic criterion; NaN if
+% the asymmetry is constant or fewer than five sizes are used):
 % symd_a, symd_risept
-% Trace of the covariance matrix of T: the jump from the first to the second
-% alphabet size, and the exponential fit (excluding the first alphabet size if
-% there is a jump up):
+% Trace of the covariance matrix of T, trace(cov(T)): the jump from the first to
+% the second alphabet size (value at the second minus value at the first), and the
+% exponential fit (excluding the first alphabet size if there is a jump up):
 % trcov_jump
 % trcovfexp_a, trcovfexp_b, trcovfexp_r2, trcovfexp_adjr2, trcovfexp_rmse
-% Exponential fit to the standard deviation of the eigenvalues of T:
+% Exponential fit to the standard deviation of the eigenvalues of T, std(eig(T))
+% (the maximum and minimum real eigenvalues of T are no longer fitted):
 % stdeigfexp_a, stdeigfexp_b, stdeigfexp_r2, stdeigfexp_adjr2,
 %     stdeigfexp_rmse
-% Exponential fit to the maximum (real) eigenvalue of T:
-% maxeig_fexpa, maxeig_fexpb, maxeig_fexpr2, maxeig_fexpadjr2,
-%     maxeig_fexprmse
-% Exponential fit to the minimum (real) eigenvalue of T:
-% mineigfexp_a, mineigfexp_b, mineigfexp_r2, mineigfexp_adjr2,
-%     mineigfexp_rmse
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -111,7 +113,7 @@ if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	end
 end
 
-nfeat = 8; % the number of features calculated at each point
+nfeat = 6; % the number of features calculated at each point
 if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
 	if numGroups < 2; return; end % need more than 2 groups
 	taur = tau; % the tau range
@@ -245,28 +247,6 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 	out.stdeigfexp_adjr2 = gof.adjrsquare;
 	out.stdeigfexp_rmse = gof.rmse;
 
-	% 7) maximum (real) eigenvalue of T
-	% Fit an exponential decay
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 7), f);
-	out.maxeig_fexpa = c.a;
-	out.maxeig_fexpb = c.b;
-	out.maxeig_fexpr2 = gof.rsquare;
-	out.maxeig_fexpadjr2 = gof.adjrsquare;
-	out.maxeig_fexprmse = gof.rmse;
-
-	% 8) minimum (real) eigenvalue of T
-	% Fit an exponential decay
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 8), f);
-	out.mineigfexp_a = c.a;
-	out.mineigfexp_b = c.b;
-	out.mineigfexp_r2 = gof.rsquare;
-	out.mineigfexp_adjr2 = gof.adjrsquare;
-	out.mineigfexp_rmse = gof.rmse;
-
 end
 
 % ------------------------------------------------------------------------------
@@ -324,8 +304,6 @@ function out = SUB_getMeasures(yth, numGroups)
 	% (iv) measures from eigenvalues of T
 	eigT = eig(T);
 	out(6) = std(eigT); % std of eigenvalues
-	out(7) = max(real(eigT)); % maximum eigenvalue
-	out(8) = min(real(eigT)); % minimum eigenvalue
 
 end
 
