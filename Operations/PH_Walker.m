@@ -20,10 +20,12 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 %                        w(1) = 0. walkerParams = p;
 %
 %            (ii) 'biasprop': the walker is biased to move more in one
-%                         direction; when the time series is going up (y(i) >
-%                         y(i-1)), it narrows the gap by a proportion p_{up},
-%                         and otherwise by a (potentially different)
-%                         proportion p_{down}. walkerParams = [pup, pdown].
+%                         direction; when the time series has just gone up
+%                         (y(i-1) > y(i-2)), it narrows the gap to y(i-1) by a
+%                         proportion p_{up}, and otherwise (including at the
+%                         first step, when there is no previous change) by a
+%                         (potentially different) proportion p_{down}.
+%                         walkerParams = [pup, pdown].
 %
 %            (iii) 'momentum': the walker moves as if it has mass m and inertia
 %                         from the previous time step: it first extrapolates its
@@ -33,7 +35,11 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 %
 %             (iv) 'runningvar': the walker moves with inertia as above, but
 %                         its values are also adjusted so as to match the local
-%                         variance of time series by a multiplicative factor.
+%                         variance of time series by a multiplicative factor
+%                         (the ratio of the standard deviation of the last wl+1
+%                         values of y, up to y(i-1), to that of the walker over
+%                         the same window, including its provisional new value).
+%                         The walker is not rescaled until i > wl + 1.
 %                         walkerParams = [m, wl], where m is the inertial mass and wl
 %                         is the window length.
 %
@@ -145,7 +151,7 @@ switch walkerRule
 
 		w(1) = 0;
 		for i = 2:N
-			if y(i) > y(i - 1) % time series increases
+			if i > 2 && y(i - 1) > y(i - 2) % time series has just increased
 				w(i) = w(i - 1) + pup * (y(i - 1) - w(i - 1));
 			else
 				w(i) = w(i - 1) + pdown * (y(i - 1) - w(i - 1));
@@ -181,11 +187,11 @@ switch walkerRule
 		for i = 3:N
 			w_inert = w(i - 1) + (w(i - 1) - w(i - 2));
 			w_mom = w_inert + (y(i - 1) - w_inert) / m; % dissipative term from time series
-			if i > wl
+			if i > wl + 1
 				% NB: w(i) is not yet computed at this point, so the local std of the
 				% walker must be built from its provisional value, w_mom, rather than
 				% from w(i) itself (which would still hold its zeros(N,1) initial value)
-				w(i) = w_mom * (std(y(i - wl:i)) / std([w(i - wl:i - 1); w_mom])); % adjust by local standard deviation
+				w(i) = w_mom * (std(y(i - wl - 1:i - 1)) / std([w(i - wl:i - 1); w_mom])); % adjust by local standard deviation
 			else
 				w(i) = w_mom;
 			end

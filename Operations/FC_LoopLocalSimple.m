@@ -24,19 +24,14 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 %        falls at every step, +1 if it rises at every step)
 % sws_stdn, swm_stdn, ac1_stdn, ac2_stdn: standard deviation of the curve divided by
 %        its range
-% stde_peakpos: the training length at which the stde curve has its maximum, if that
-%        maximum is a local one (NaN otherwise)
-% stde_peaksize: the height of that maximum divided by the mean of the stde curve
-%        (NaN if there is no local maximum)
+% stde_peakpos: the position (index in the list of training lengths) of the extreme
+%        value of the stde curve: its maximum if the curve falls on the whole as l
+%        grows (stde_chn < 0), otherwise its minimum
+% stde_peaksize: the stde value at that position divided by the mean of the stde curve
 % sws_fexp_a, sws_fexp_b, sws_fexp_c: the amplitude a, rate b and offset c of an
 %        exponential fit f(l) = a*exp(b*l) + c to the sws curve
 % sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2, adjusted R^2 and root-mean-
 %        square error of that fit
-%
-% ---NOTES:
-% The 'else' branch of the stde peak search, for stde_chn >= 1, can never run
-% (stde_chn is at most 1/(number of lengths - 1) in magnitude), so only maxima
-% are ever searched for.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -123,7 +118,7 @@ out.stde_chn = mean(diff(stats_st(:, 1))) / (range(stats_st(:, 1)));
 out.stde_meansgndiff = mean(sign(diff(stats_st(:, 1))));
 
 % (ii) Is there a peak?
-if out.stde_chn < 1; % on the whole decreasing, as expected
+if out.stde_chn < 0 % on the whole decreasing, as expected: look for a maximum
 	wigv = max(stats_st(:, 1));
 	wig = find(stats_st(:, 1) == wigv, 1, 'first');
 	if wig ~= 1 && stats_st(wig - 1, 1) > wigv
@@ -132,13 +127,13 @@ if out.stde_chn < 1; % on the whole decreasing, as expected
 		wig = NaN; % maximum is not a local maximum; the next value exceeds it
 	end
 else
-	wigv = min(stats_st(:, 1));
+	wigv = min(stats_st(:, 1)); % on the whole increasing: look for a minimum
 	wig = find(stats_st(:, 1) == wigv, 1, 'first');
 
 	if wig ~= 1 && stats_st(wig - 1, 1) < wigv
-		wig = NaN; % maximum is not a local maximum; previous value exceeds it
+		wig = NaN; % minimum is not a local minimum; previous value is below it
 	elseif wig ~= length(trainLengthRange) && stats_st(wig + 1, 1) < wigv
-		wig = NaN; % maximum is not a local maximum; the next value exceeds it
+		wig = NaN; % minimum is not a local minimum; the next value is below it
 	end
 end
 if ~isnan(wig)
