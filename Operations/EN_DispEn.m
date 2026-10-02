@@ -1,66 +1,62 @@
 function out = EN_DispEn(y, m, c, tau, mappingHow)
-% EN_DispEn     Dispersion entropy of a time series.
+% EN_DispEn   Dispersion entropy of a time series.
 %
-% Maps the time series onto c amplitude classes, symbolizes each embedding
-% vector by the sequence of classes it visits (a 'dispersion pattern'), and
-% returns the Shannon entropy of the resulting pattern distribution.
+% Maps the time series onto c amplitude classes, replaces each run of m values
+% (spaced tau samples apart) by the sequence of classes it visits (a
+% 'dispersion pattern'), and returns the Shannon entropy of the resulting
+% pattern distribution.
 %
-% Unlike permutation entropy (EN_PermEn), which records only the rank
-% ordering within each embedding vector and so discards amplitude
-% information entirely ([1,2,3] and [1,2,300] are the same pattern),
-% dispersion entropy assigns each point to an amplitude class first, so the
-% size of an excursion, not just its direction, shapes the symbol sequence.
-% It is also markedly cheaper than sample entropy (EN_SampEn) and degrades
-% more gracefully on short, noisy series.
+% Unlike permutation entropy (EN_PermEn), which records only the rank ordering
+% within each embedding vector and so discards amplitude information entirely
+% ([1,2,3] and [1,2,300] are the same pattern), dispersion entropy assigns each
+% point to an amplitude class first, so the size of an excursion, not just its
+% direction, shapes the symbol sequence. It is also markedly cheaper than sample
+% entropy (EN_SampEn) and degrades more gracefully on short, noisy series.
 %
-% cf. M. Rostaghi and H. Azami, "Dispersion Entropy: A Measure for
-% Time-Series Analysis", IEEE Signal Processing Letters 23(5) 610 (2016).
-% DOI: 10.1109/LSP.2016.2542881
-%
-% Also returns the fluctuation-based variant, which symbolizes the
-% *differences* between successive classes rather than the classes
-% themselves, and so responds to the size of class-to-class changes rather
-% than to absolute amplitude level (i.e., it is blind to a local trend that
-% shifts every point into a higher class together):
-%
-% cf. H. Azami and J. Escudero, "Amplitude- and Fluctuation-Based
-% Dispersion Entropy", Entropy 20(3) 210 (2018). DOI: 10.3390/e20030210
+% The fluctuation-based variant is also returned. It symbolizes the differences
+% between successive classes rather than the classes themselves, and so responds
+% to the size of class-to-class changes rather than to absolute amplitude level
+% (i.e., it is blind to a local trend that shifts every point into a higher
+% class together).
 %
 % ---INPUTS:
 % y, the input time series
-%
-% m, the embedding dimension (default 2, following the source papers; the
+% m, the embedding dimension (default: 2, following the source papers). The
 %    number of possible patterns grows as c^m, so m must stay small for the
-%    pattern frequencies to be estimable -- see the reliability check below)
-%
-% c, the number of amplitude classes (default 6, the value used throughout
-%    the source papers; c > 1 is required, since c = 1 puts every point in
-%    the same class and yields the trivial single-pattern case)
-%
-% tau, the time delay (default 1; can also be 'ac' or 'mi', resolved as in
-%      the rest of the library)
-%
+%    pattern frequencies to be estimable.
+% c, the number of amplitude classes (default: 6, the value used throughout the
+%    source papers; c > 1 is required)
+% tau, the time delay (default: 1); can also be 'ac' (the first zero-crossing of
+%    the autocorrelation function) or 'mi' (the first minimum of the
+%    automutual information)
 % mappingHow, how to map the time series onto (0,1) before classifying:
-%       (i) 'ncdf' (default), the normal cumulative distribution function
-%           with the series' own mean and standard deviation. This is the
-%           mapping the method was introduced with: a linear mapping assigns
-%           the majority of points to only a few classes whenever the
-%           maximum or minimum is far from the median, so a single outlier
-%           can collapse the symbolization.
-%       (ii) 'linear', a min-max rescaling onto [0,1]. Retained mainly
-%            because the worked example in the source papers uses it (and
-%            this operation's unit test reproduces that example), but it is
-%            outlier-sensitive for the reason above.
+%    'ncdf' (default): the normal cumulative distribution function with the
+%        series' own mean and standard deviation. This is the mapping the method
+%        was introduced with: a linear mapping assigns the majority of points to
+%        only a few classes whenever the maximum or minimum is far from the
+%        median, so a single outlier can collapse the symbolization.
+%    'linear': a min-max rescaling onto [0,1]. Retained mainly because the
+%        worked example in the source papers uses it (and this operation's unit
+%        test reproduces that example), but it is outlier-sensitive for the
+%        reason above.
 %
 % ---OUTPUTS:
-% dispEn, normDispEn: the dispersion entropy (in nats) and the same
-%       normalized by its maximum possible value, log(c^m).
-% fDispEn, normFDispEn: the fluctuation-based dispersion entropy and the
-%       same normalized by log((2c-1)^(m-1)).
+% A structure with fields:
+% dispEn, the dispersion entropy (in nats)
+% normDispEn, dispEn normalized by its maximum possible value, log(c^m)
+% fDispEn, the fluctuation-based dispersion entropy (in nats; NaN for m = 1)
+% normFDispEn, fDispEn normalized by log((2c-1)^(m-1)) (NaN for m = 1)
+% If tau cannot be determined, the series is constant, or it is too short for the
+% embedding (fewer than 5 embedding vectors), NaN is returned instead of a
+% structure.
 %
-% Only the normalized outputs are registered as hctsa features: for a fixed
-% (m,c) the raw and normalized versions differ by a constant factor and are
-% therefore the same feature.
+% ---REFERENCES:
+% M. Rostaghi and H. Azami, "Dispersion Entropy: A Measure for Time-Series
+% Analysis", IEEE Signal Processing Letters 23(5) 610 (2016).
+% DOI: 10.1109/LSP.2016.2542881
+%
+% H. Azami and J. Escudero, "Amplitude- and Fluctuation-Based Dispersion
+% Entropy", Entropy 20(3) 210 (2018). DOI: 10.3390/e20030210
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

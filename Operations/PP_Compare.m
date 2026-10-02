@@ -1,67 +1,64 @@
 function out = PP_Compare(y, detrndmeth)
-% PP_Compare    Compare how time-series properties change after pre-processing.
+% PP_Compare   How time-series properties change after a preprocessing step.
 %
-% Applies a given pre-processing transformation to the time series, and returns
-% statistics on how various time-series properties change as a result.
+% Applies a given preprocessing transformation (detrending, differencing,
+% filtering or resampling) to the time series, z-scores the original and the
+% processed series, and returns the change in each of a set of statistics from its
+% value for the original to its value for the processed series. The statistics compare
+% stationarity measures (StatAv, and the variation of the local mean and of the
+% local standard deviation across windows), distributional fits (a Gaussian fit
+% to the kernel-smoothed distribution, and the discrepancy from a fitted normal
+% distribution) and the effect of trimming outliers.
 %
-% Inputs are structured in a clunky way, unfortunately:
+% The change is the difference (processed minus original) for statistics that can be
+% negative or zero, and the normalized difference (processed - original) /
+% (processed + original) for positive statistics. The latter is between -1 and 1, is 0
+% when nothing changes, and equals tanh(log(processed / original) / 2), a bounded
+% version of the log-ratio that stays finite when the original value is near 0, where
+% a plain ratio is unstable.
 %
 % ---INPUTS:
 % y, the input time series
-% detrndmeth, the method to use for detrending:
-%      (i) 'poly': polynomial detrendings, both linear and quadratic. Can
-%                  be of the following forms:
-%            (a) polynomial of given order: 'poly1', 'poly2', 'poly3',
-%                'poly4', 'poly5', 'poly6', 'poly7', 'poly8', 'poly9'
-%            (b) fit best polynomial: 'polybest' determines 'best' by
-%                            various tests (e.g., whiteness of residuals,
-%                            etc.)
-%            (c) 'fitstrong' only fits if a 'strong' trend.
-%      (ii) 'sin': sinusoidal detrending with either one or two frequency
-%                components,
-%            (a) fit a sine series of a given order
-%               Fits a form like: a1*sin(b1*x+c1) + a2*sin(b2*x+c2) + ...
-%               Additional number determines how many terms to include in the
-%               series: 'sin1', 'sin2', 'sin3', 'sin4', 'sin5', 'sin6', 'sin7',
-%               'sin8'
-%            (b) 'sin_st1': fit only if a strong trend (i.e., if the amplitudes
-%                                           are above a given threshold)
-%      (iii) 'spline': removes a least squares spline using Matlab's
-%                      Spline Toolbox function spap2
-%                      Input of the form 'spline<nknots><interpolant_order>'
-%                      e.g., 'spline45' uses four knots and 5th order
-%                      interpolants (Implements a least squares spline via the
-%                      spline toolbox function spap2)
-%      (iv) 'diff': takes incremental differences of the time series. Of form
-%                 'diff<ndiff>' where ndiff is the number of differencings to
-%                 perform. e.g., 'diff3' performs three recursive differences
-%      (v) 'medianf': a running median filter using a given window lengths
-%                   Of form 'medianf<n>' where n is the window length.
-%                   e.g., 'medianf3' takes a running median using the median of
-%                     every 3 consecutive values as a point in the filtered
-%                     time series. Uses the Signal Processing Toolbox
-%                     function medfilt1
-%      (vi) 'rav': running mean filter of a given window length.
-%                  Uses Matlab's filter function to perform a running
-%                  average of order n. Of form 'rav<n>' where n is the order of
-%                  the running average.
-%      (vii) 'resample': resamples the data by a given ratio using the resample
-%                        function in Matlab.
-%                        Of form 'resample_<p>_<q>', where the ratio p/q is the
-%                        new sampling rate e.g., 'resample_1_2' will downsample
-%                        the signal by one half e.g., resample_10_1' will
-%                        resample the signal to 10 times its original length
-%      (viii) 'logr': takes log returns of the data. Only valid for positive
-%                       data, else returns a NaN.
-%      (ix) 'boxcox': makes a Box-Cox transformation of the data. Only valid for
-%                     positive only data; otherwise returns a NaN.
+% detrndmeth, the preprocessing to apply (default: 'medianf3'):
+%       'poly<n>': remove a polynomial of order n = 1-9 (Curve Fitting Toolbox),
+%           e.g., 'poly1', a linear detrending
+%       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(b1*x+c1) + ...
+%           (Curve Fitting Toolbox), e.g., 'sin1'
+%       'spline<npieces><order>': remove a least-squares spline fitted with
+%           spap2 (Spline Toolbox) with the given number of polynomial pieces and
+%           spline order, e.g., 'spline24', a cubic spline with 2 pieces
+%       'diff<n>': take n successive differences, e.g., 'diff3'
+%       'medianf<n>': a running median filter of length n (medfilt1), e.g., 'medianf3'
+%       'rav<n>': a running mean filter of length n (filter), e.g., 'rav5'
+%       'resample_<p>_<q>': resample the series by the ratio p/q (resample); e.g.,
+%           'resample_1_2' halves the length and 'resample_10_1' multiplies it by 10
+%       'logr': log returns (positive data only; otherwise NaN)
+%       'boxcox': a Box-Cox transformation (positive data only; otherwise NaN)
 %
-% If multiple detrending methods are specified, they should be in a cell of
-% strings; the methods will be executed in order, e.g., {'poly1','sin1'} does a
-% linear polynomial then a simple one-frequency seasonal detrend (in that order)
-%
-% ---OUTPUTS: include comparisons of stationarity and distributional measures
-% between the original and transformed time series.
+% ---OUTPUTS: the change, from the original to the processed series, of each of these
+% statistics (all of the series are z-scored first):
+% Normalized differences (positive statistics):
+% statav2, StatAv with 2 segments (SY_StatAv)
+% swms2_2, swms5_1, swms10_1, the standard deviation of the window means across
+%       windows (SY_SlidingWindow 'mean'), with 2 windows overlapping by half, and
+%       5 and 10 non-overlapping windows
+% swss2_1, swss5_1, swss10_1, the same for the window standard deviations
+%       (SY_SlidingWindow 'std')
+% kscn_olapint, the overlap integral of the kernel-smoothed distribution with the
+%       best-fitting normal (DN_CompareKSFit)
+% olbt_s5, the standard deviation after trimming the 5% most extreme values at each
+%       end, relative to that of the full series (DN_OutlierTest)
+% Differences (statistics that can be negative or zero):
+% gauss1_kd_r2, gauss1_kd_resAC1, gauss1_kd_resruns, the R^2, the lag-1
+%       autocorrelation of the residuals, and the runs-test p-value of the residuals
+%       of a Gaussian fit to the kernel-smoothed distribution (DN_SimpleFit)
+% kscn_peaksepy, kscn_peaksepx, kscn_relent, the peak separation in height and in
+%       position, and the relative entropy, of the kernel-smoothed distribution
+%       against the best-fitting normal (DN_CompareKSFit)
+% olbt_m2, olbt_m5, the mean after trimming the 2% and 5% most extreme values at
+%       each end (DN_OutlierTest)
+% A scalar NaN is returned if the processed series is identically zero (or, for
+% 'logr' and 'boxcox', if the data are not all positive).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -95,7 +92,7 @@ function out = PP_Compare(y, detrndmeth)
 % ------------------------------------------------------------------------------
 %% Check inputs, set default:
 if nargin < 2 || isempty(detrndmeth)
-	detrndmeth = 'medianf'; % median filter by default
+	detrndmeth = 'medianf3'; % median filter by default
 end
 
 % -------------------------------------------------------------------------------
@@ -112,7 +109,7 @@ r = (1:N)'; % the time-range over which to fit
 
 % 1) Polynomial detrend
 % starts with 'poly' and ends with integer from 1--9
-if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isempty(str2double(detrndmeth(5)))
+if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isnan(str2double(detrndmeth(5)))
 
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
@@ -122,7 +119,7 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isempty(str2do
 	y_d = y - y_fit;
 
 	% 2) Seasonal detrend
-elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isempty(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
+elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isnan(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
 
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
@@ -132,7 +129,7 @@ elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isempty(str
 	y_d = y - y_fit;
 
 	% 3) Spline detrend
-elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isempty(str2double(detrndmeth(7))) && ~isempty(str2double(detrndmeth(8)))
+elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isnan(str2double(detrndmeth(7))) && ~isnan(str2double(detrndmeth(8)))
 	nknots = str2double(detrndmeth(7));
 	intp = str2double(detrndmeth(8));
 
@@ -144,17 +141,17 @@ elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isempty(
 	y_d = y - y_spl';
 
 	% 4) Differencing
-elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isempty(str2double(detrndmeth(5)))
+elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isnan(str2double(detrndmeth(5)))
 	ndiffs = str2double(detrndmeth(5));
 	y_d = diff(y, ndiffs); % difference the series n times
 
 	% 5) Median Filter
-elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isempty(str2double(detrndmeth(8:end)))
+elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isnan(str2double(detrndmeth(8:end)))
 	n = str2double(detrndmeth(8:end)); % order of filtering
 	y_d = medfilt1(y, n);
 
 	% 6) Running Average
-elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isempty(str2double(detrndmeth(4:end)))
+elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isnan(str2double(detrndmeth(4:end)))
 	n = str2double(detrndmeth(4:end)); % the window size
 	y_d = filter(ones(1, n) / n, 1, y);
 
@@ -210,20 +207,26 @@ end
 y = zscore(y);
 y_d = zscore(y_d);
 
+% Changes from the original to the processed series: a difference for
+% statistics that can be negative or near 0, and a normalized difference for
+% positive statistics:
+f_diff = @(proc, orig) proc - orig;
+f_normDiff = @(proc, orig) SUB_normDiff(proc, orig);
+
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = SY_StatAv(y_d, 'seg', 2) / SY_StatAv(y, 'seg', 2);
+out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), SY_StatAv(y, 'seg', 2));
 
 % (b) Sliding window mean
-out.swms2_2 = SY_SlidingWindow(y_d, 'mean', 'std', 2, 2) / SY_SlidingWindow(y, 'mean', 'std', 2, 2);
-out.swms5_1 = SY_SlidingWindow(y_d, 'mean', 'std', 5, 1) / SY_SlidingWindow(y, 'mean', 'std', 5, 1);
-out.swms10_1 = SY_SlidingWindow(y_d, 'mean', 'std', 10, 1) / SY_SlidingWindow(y, 'mean', 'std', 10, 1);
+out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), SY_SlidingWindow(y, 'mean', 'std', 2, 2));
+out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), SY_SlidingWindow(y, 'mean', 'std', 5, 1));
+out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), SY_SlidingWindow(y, 'mean', 'std', 10, 1));
 
 % (c) Sliding window std
-out.swss2_1 = SY_SlidingWindow(y_d, 'std', 'std', 2, 1) / SY_SlidingWindow(y, 'std', 'std', 2, 1);
-out.swss5_1 = SY_SlidingWindow(y_d, 'std', 'std', 5, 1) / SY_SlidingWindow(y, 'std', 'std', 5, 1);
-out.swss10_1 = SY_SlidingWindow(y_d, 'std', 'std', 10, 1) / SY_SlidingWindow(y, 'std', 'std', 10, 1);
+out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), SY_SlidingWindow(y, 'std', 'std', 2, 1));
+out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), SY_SlidingWindow(y, 'std', 'std', 5, 1));
+out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), SY_SlidingWindow(y, 'std', 'std', 10, 1));
 
 % 2) Gaussianity
 % (a) kernel density fit
@@ -235,23 +238,34 @@ if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	out.gauss1_kd_resAC1 = NaN;
 	out.gauss1_kd_resruns = NaN;
 else
-	out.gauss1_kd_r2 = me1.r2 / me2.r2;
-	out.gauss1_kd_resAC1 = me1.resAC1 / me2.resAC1;
-	out.gauss1_kd_resruns = me1.resruns / me2.resruns;
+	out.gauss1_kd_r2 = f_diff(me1.r2, me2.r2);
+	out.gauss1_kd_resAC1 = f_diff(me1.resAC1, me2.resAC1);
+	out.gauss1_kd_resruns = f_diff(me1.resruns, me2.resruns);
 end
 
 % (b) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d, 'norm');
 me2 = DN_CompareKSFit(y, 'norm');
 
-out.kscn_peaksepy = me1.peaksepy / me2.peaksepy;
-out.kscn_peaksepx = me1.peaksepx / me2.peaksepx;
-out.kscn_olapint = me1.olapint / me2.olapint;
-out.kscn_relent = me1.relent / me2.relent;
+out.kscn_peaksepy = f_diff(me1.peaksepy, me2.peaksepy);
+out.kscn_peaksepx = f_diff(me1.peaksepx, me2.peaksepx);
+out.kscn_olapint = f_normDiff(me1.olapint, me2.olapint);
+out.kscn_relent = f_diff(me1.relent, me2.relent);
 
 % 3) Outliers
-out.olbt_m2 = DN_OutlierTest(y_d, 2, 'mean') / DN_OutlierTest(y, 2, 'mean');
-out.olbt_m5 = DN_OutlierTest(y_d, 5, 'mean') / DN_OutlierTest(y, 5, 'mean');
-out.olbt_s5 = DN_OutlierTest(y_d, 5, 'std') / DN_OutlierTest(y, 5, 'std');
+out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), DN_OutlierTest(y, 2, 'mean'));
+out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), DN_OutlierTest(y, 5, 'mean'));
+out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), DN_OutlierTest(y, 5, 'std'));
+
+% ------------------------------------------------------------------------------
+function nd = SUB_normDiff(proc, orig)
+	% Normalized difference (proc - orig) / (proc + orig) of two positive numbers,
+	% in [-1, 1]; 0 if both are 0
+	if proc + orig == 0
+		nd = 0;
+	else
+		nd = (proc - orig) / (proc + orig);
+	end
+end
 
 end

@@ -1,9 +1,15 @@
 function out = DN_Unique(x)
-% DN_Unique     The proportion of the time series that are unique values
+% DN_Unique   The proportion of the values of a time series that are distinct.
+%
+% The number of different values divided by the length of the series: 1 if
+% no value repeats, and lower when values recur, as in a quantized series.
+% Values are compared exactly.
 %
 % ---INPUTS:
-%
 % x, the input data vector
+%
+% ---OUTPUTS:
+% a scalar: length(unique(x))/length(x).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

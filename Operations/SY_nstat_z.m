@@ -1,40 +1,56 @@
 function out = SY_nstat_z(y, numSeg, embedParams)
-% SY_nstat_z     Cross-forecast errors of zeroth-order time-series models
+% SY_nstat_z   Cross-forecast errors of zeroth-order time-series models.
 %
 % Uses the nstat_z routine from the TISEAN package for nonlinear time-series
 % analysis to calculate cross-forecast errors of zeroth-order models for the
 % time-delay embedded time series.
 %
-% The program looks for nonstationarity in a time series by dividing it
-% into a number of segments and calculating the cross-forecast errors
-% between the different segments. The model used for the forecast is
-% zeroth order model as proposed by Schreiber.
+% The program looks for nonstationarity in a time series by dividing it into a
+% number of segments and calculating the cross-forecast errors between the
+% different segments. The model used for the forecast is the zeroth-order model
+% proposed by Schreiber: each point of the segment being forecast is predicted one
+% step ahead by averaging what followed its nearest neighbors in the embedding of
+% the predicting segment. The error between segment i (predicting) and segment j
+% (forecast) is the root-mean-square forecast error divided by the standard
+% deviation of segment j, collected in a numSeg x numSeg matrix.
 %
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
-%
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-%
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
+% The TISEAN routines are performed in the command line using 'system' commands in
+% MATLAB, and require that TISEAN is installed and compiled, and able to be
 % executed in the command line.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
 % numSeg, the number of equally-spaced segments to divide the time series into,
-%       and used to predict the other time series segments
+%       and used to predict the other time series segments (default: 5)
 %
-% embedParams, in the form {tau,m}, as usual for BF_Embed. That is, for an
-%               embedding dimension, tau, and embedding dimension, m. E.g.,
-%               {1,3} has a time-delay of 1 and embedding dimension of 3.
+% embedParams, in the form {tau,m}, as usual for BF_Embed. That is, a time delay,
+%       tau, and an embedding dimension, m. E.g., {1,3} has a time delay of 1 and
+%       an embedding dimension of 3 (the default).
 %
+% ---OUTPUTS: statistics on the cross-prediction error matrix (below, 'rows' of the
+% matrix are predicting segments, 'columns' are the segments forecast):
+% trace, the trace of the matrix (segments predicting themselves)
+% mean, median, min, max, iqr, std, range: of all entries of the matrix
+% minlower, minupper: the minimum nonzero error below and above the diagonal
+% minoffdiag, iqroffdiag, stdoffdiag, rangeoffdiag: the minimum, interquartile
+%       range, standard deviation, and range of the nonzero off-diagonal entries
+% stdmean, rangemean, stdmedian, rangemedian: the standard deviation and range,
+%       across columns, of the column means and of the column medians
+% rangerange, stdrange: the range and standard deviation, across columns, of the
+%       column ranges
+% rangestd, stdstd: the range and standard deviation, across columns, of the
+%       column standard deviations
+% maximageig, minimageig: the largest and smallest imaginary parts of the
+%       eigenvalues of the matrix
+% rangeeig, stdeig, mineig, maxeig: the range, standard deviation, minimum, and
+%       maximum of the real parts of the eigenvalues
 %
-% ---OUTPUTS: include the trace of the cross-prediction error matrix, the mean,
-% minimum, and maximum cross-prediction error, the minimum off-diagonal
-% cross-prediction error, and eigenvalues of the cross-prediction error matrix.
+% ---REFERENCES:
+% R. Hegger, H. Kantz, and T. Schreiber, "Practical implementation of nonlinear time
+% series methods: The TISEAN package", Chaos 9(2), 413 (1999).
+% TISEAN is available at
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -219,7 +235,7 @@ out.stdstd = std(std(xperr));
 eigs = eig(xperr);
 imagEigs = imag(eigs);
 out.maximageig = max(imagEigs);
-out.minimageig = min(imagEigs); % covaries (negatively) with maximageig
+out.minimageig = min(imagEigs); % for a real matrix, eigenvalues come in conjugate pairs, so maximageig = -minimageig exactly
 
 realEigs = real(eigs);
 out.rangeeig = range(realEigs); % range of real parts of eigenvalues

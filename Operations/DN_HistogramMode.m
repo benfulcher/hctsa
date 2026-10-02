@@ -1,15 +1,21 @@
 function out = DN_HistogramMode(y, numBins, doSimple, doPlot)
-% DN_HistogramMode      Mode of a data vector.
+% DN_HistogramMode   Mode of a data vector, estimated from a histogram.
 %
-% Measures the mode of the data vector using histograms with a given number
-% of bins.
+% Measures the mode of the data vector as the center of the fullest bin of a
+% histogram with a given number of bins (the mean of the centers if several
+% bins tie for the maximum count).
 %
 % ---INPUTS:
+% y, the input data vector
+% numBins, the number of bins to use in the histogram, or the name of a
+%       binning rule for histcounts, e.g., 'auto' (default: 'auto')
+% doSimple, whether to use a simple binning method with linearly spaced bins
+%       between the minimum and maximum (BF_SimpleBinner; true, the default),
+%       or MATLAB's histcounts (false). Ignored if numBins is a text option.
+% doPlot, whether to show a plot of what was computed (default: false)
 %
-% y, the input data vector.
-% numBins, the number of bins to use in the histogram.
-% doSimple, whether to use a simple binning method (linearly spaced bins).
-% doPlot, whether to show a plot of what was computed.
+% ---OUTPUTS:
+% a scalar: the estimated mode.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

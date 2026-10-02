@@ -1,15 +1,21 @@
 function out = CO_PartialAutoCorr(y, maxTau, whatMethod)
-% CO_PartialAutoCorr   Compute the partial autocorrelation of an input time series
+% CO_PartialAutoCorr   The partial autocorrelation of a time series.
+%
+% Computes the partial autocorrelation at lags 1 to maxTau with MATLAB's parcorr:
+% the correlation between y(t) and y(t-k) after removing the linear effect of the
+% intermediate values (the last coefficient of an order-k autoregressive fit).
 %
 % ---INPUTS:
-% y, a scalar time series column vector.
+% y, a scalar time series column vector
+% maxTau, the maximum time delay; returns lags up to this maximum (default 10)
+% whatMethod, the method used to compute it: 'ols' (the default) or 'yule_walker'
 %
-% maxTau, the maximum time-delay. Returns for lags up to this maximum.
+% ---OUTPUTS:
+% pac_1, pac_2, ..., pac_<maxTau>, the partial autocorrelation at lags 1, 2, ...,
+%       maxTau (pac_1 to pac_20 for maxTau = 20).
 %
-% whatMethod, the method used to compute: 'ols' or 'yule_walker'
-%
-% ---OUTPUT: the partial autocorrelations across the set of time lags.
-%
+% ---NOTES:
+% Requires the Econometrics Toolbox (parcorr).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

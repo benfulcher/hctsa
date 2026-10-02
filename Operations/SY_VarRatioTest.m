@@ -1,19 +1,38 @@
 function out = SY_VarRatioTest(y, periods, IIDs)
 % SY_VarRatioTest   Variance ratio test for random walk.
 %
-% Implemented using the vratiotest function from Matlab's Econometrics Toolbox.
+% Implemented using the vratiotest function from MATLAB's Econometrics Toolbox.
 %
-% The test assesses the null hypothesis of a random walk in the time series,
-% which is rejected for some critical p-value.
+% The test assesses the null hypothesis of a random walk in the time series, which
+% is rejected for some critical p-value. The variance ratio compares the variance of
+% changes over a period q with q times the variance of one-step changes; it is 1 for
+% a random walk, above 1 for positively correlated increments, and below 1 for
+% negatively correlated ones.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% periods, a vector (or scalar) of period(s)
+% periods, a vector (or scalar) of period(s) (default: 2)
+%       (e.g., [2,4,6,8,2,4,6,8])
 %
 % IIDs, a vector (or scalar) representing boolean values indicating whether to
-%       assume independent and identically distributed (IID) innovations for
-%       each period.
+%       assume independent and identically distributed (IID) innovations for each
+%       period (default: 0)
+%       (e.g., [1,1,1,1,0,0,0,0])
+%
+% ---OUTPUTS:
+% For a single test:
+% pValue, stat, ratio: the p-value, test statistic, and variance ratio
+% For multiple periods/IIDs:
+% maxpValue, minpValue, meanpValue: the maximum, minimum, and mean p-value
+% periodmaxpValue, periodminpValue: the period of the test with the largest and
+%       smallest p-value
+% IIDperiodmaxpValue, IIDperiodminpValue: the IID setting of the test with the
+%       largest and smallest p-value
+% meanstat, maxstat, minstat: the mean, maximum, and minimum test statistic
+% meanratio, maxratio, minratio: the mean, maximum, and minimum variance ratio
+%       (the p-value and statistic grow with the series length, but the ratio
+%       converges to a fixed population value)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -101,7 +120,7 @@ else
 	% track time-series length rather than the process. Note that swapping stat
 	% for pValue does NOT help -- p = Phi(stat) is a monotone transform, so a
 	% rank-based measure of length dependence is mathematically identical for
-	% the two, and the audit measured exactly that (eta^2 0.970/0.916 for both
+	% the two, and measurement confirms exactly that (eta^2 0.970/0.916 for both
 	% SY_VarRatioTest_2_0_pValue and _stat, to three decimals). The ratio, by
 	% contrast, converges to a fixed population value and measured
 	% eta^2 = 0.147/0.033.

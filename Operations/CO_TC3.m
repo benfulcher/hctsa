@@ -1,23 +1,31 @@
 function out = CO_TC3(y, tau)
-% CO_TC3    Normalized nonlinear autocorrelation function, tc3.
+% CO_TC3   Normalized nonlinear autocorrelation, tc3.
 %
-% Computes the tc3 function, a normalized nonlinear autocorrelation, at a
-% given time-delay, tau.
-% Statistic is for two time-delays, normalized in terms of a single time delay.
-% Used as a test statistic for higher order correlational moments in surrogate
-% data analysis.
+% Computes the tc3 function, a normalized nonlinear autocorrelation, at a given
+% time delay, tau: the mean of y(t)*y(t+tau)*y(t+2*tau) divided by
+% |mean(y(t)*y(t+tau))|^(3/2). The statistic is for two time delays, normalized in
+% terms of a single time delay. It is used as a test statistic for higher-order
+% correlational moments in surrogate data analysis. See the documentation of the
+% TSTOOL package (http://www.physik3.gwdg.de/tstool/) for further details
+% (http://www.physik3.gwdg.de/tstool/manual.pdf).
 %
 % ---INPUTS:
-% y, input time series
-% tau, time lag
+% y, the input time series
+% tau, the time lag, either an integer number of samples or a string that sets it
+%      from the series (default 'ac1e'):
+%      'ac1e': the first 1/e crossing of the autocorrelation function,
+%      'ac': the first zero-crossing of the autocorrelation function (kept for
+%            backward compatibility; for a series whose autocorrelation never
+%            crosses zero, or only at a very long lag, the lag is meaninglessly
+%            long, which is why 'ac1e' is the default),
+%      'mi': the first minimum of the automutual information function.
 %
 % ---OUTPUTS:
-% The raw tc3 expression, its magnitude, the numerator and its magnitude, and
-% the denominator.
-%
-% See documentation of the TSTOOL package (http://www.physik3.gwdg.de/tstool/)
-% for further details about this function
-% (i.e., http://www.physik3.gwdg.de/tstool/manual.pdf)
+% raw, the tc3 expression, mean(y(t)*y(t+tau)*y(t+2*tau)) / |mean(y(t)*y(t+tau))|^(3/2),
+% abs, its magnitude,
+% num, the numerator, mean(y(t)*y(t+tau)*y(t+2*tau)),
+% absnum, the magnitude of the numerator,
+% denom, the denominator, |mean(y(t)*y(t+tau))|^(3/2).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,14 +60,17 @@ function out = CO_TC3(y, tau)
 %% Set defaults:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(tau)
-	tau = 'ac';
+	tau = 'ac1e';
 end
 
 % ------------------------------------------------------------------------------
 % Set the time lag as a measure of the time-series correlation length
 % ------------------------------------------------------------------------------
-% Can set the time lag, tau, to be 'ac' or 'mi'
-if strcmp(tau, 'ac')
+% Can set the time lag, tau, to be 'ac1e', 'ac', or 'mi'
+if strcmp(tau, 'ac1e')
+	tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
+	% tau is the first 1/e crossing of the autocorrelation function
+elseif strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')

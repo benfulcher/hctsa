@@ -147,7 +147,7 @@ end
 %% And time series with constant feature vectors
 % --------------------------------------------------------------------------
 if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
-    bad_op = (nanstd(TS_DataMat) < 10*eps);
+    bad_op = (std(TS_DataMat,0,'omitnan') < 10*eps);
 
     if all(bad_op)
         error('All %u operations produced constant outputs on the %u time series?!',...
@@ -177,7 +177,7 @@ if classVarFilter
     numClasses = length(classNames);
     classVars = zeros(numClasses,size(TS_DataMat,2));
     for i = 1:numClasses
-        classVars(i,:) = nanstd(TS_DataMat(TimeSeries.Group==classNames{i},:));
+        classVars(i,:) = std(TS_DataMat(TimeSeries.Group==classNames{i},:),0,'omitnan');
     end
     zeroClassVar = any(classVars < 10*eps,1);
     if all(zeroClassVar)
@@ -262,7 +262,7 @@ end
 %% Make sure the operations are still good
 % --------------------------------------------------------------------------
 % Check again for ~constant columns after normalization
-kc = (nanstd(TS_DataMat) < 10*eps);
+kc = (std(TS_DataMat,0,'omitnan') < 10*eps);
 if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);

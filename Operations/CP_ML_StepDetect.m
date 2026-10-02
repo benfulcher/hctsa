@@ -1,47 +1,66 @@
 function out = CP_ML_StepDetect(y, method, params)
-% CP_ML_StepDetect      Analysis of discrete steps in a time series.
+% CP_ML_StepDetect   Fit a staircase of constant levels to the series and describe its steps.
 %
-% Gives information about discrete steps in the signal, using the function
-% l1pwc from Max A. Little's step detection toolkit.
-%
-% cf.,
-% "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
-% Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
-%
-% "Steps and bumps: precision extraction of discrete states of molecular machines"
-% M. A. Little, B. C. Steel, F. Bai, Y. Sowa, T. Bilyard, D. M. Mueller,
-% R. M. Berry, N. S. Jones. Biophysical Journal, 101(2):477-485 (2011)
-%
-% Software available at: http://www.maxlittle.net/software/index.php
+% Finds discrete steps in the series using the l1pwc function from Max A.
+% Little's step-detection toolkit. With method 'l1pwc', the series is replaced by
+% the piecewise-constant signal s that minimizes
+%       (1/2) sum_t (y_t - s_t)^2 + lambda * sum_t |s_{t+1} - s_t|
+% (total-variation denoising), where lambda is a penalty on the size of each step:
+% a larger lambda gives fewer, larger steps. The outputs describe the fit (its
+% objective value, the variance it removes) and the constant segments it finds
+% (how many per sample, how long, how variable in length, and how evenly the
+% change points are spread across the first and second halves of the series).
 %
 % ---INPUTS:
 % y, the input time series
 %
 % method, the step-detection method:
-%           (i) 'kv': Kalafut-Visscher
-%                 cf. The algorithm described in:
-%                 Kalafut, Visscher, "An objective, model-independent method for
-%                 detection of non-uniform steps in noisy signals", Comp. Phys.
-%                 Comm., 179(2008), 716-723.
+%       (i) 'kv': Kalafut-Visscher (not used by hctsa),
+%       (ii) 'l1pwc': L1 method (total-variation denoising). Based on code by
+%            Kim et al. for l_1 trend filtering; here as implemented by Max A.
+%            Little. The default if no method is given is 'kv'.
 %
-%           (ii) 'l1pwc': L1 method
-%                 This code is based on code originally written by Kim et al.:
-%                 "l_1 Trend Filtering", S.-J. Kim et al., SIAM Review 51, 339
-%                 (2009).
-%
-% params, the parameters for the given method used:
-%           (i) 'kv': (no parameters required)
-%           (ii) 'l1pwc': params = lambda, the penalty on each step's size.
-%                 For a z-scored series, a fixed lambda gives a segmentation
-%                 that does not depend on the series length (a proportion of
-%                 lambdamax, specified as lambda < 1, does: lambdamax grows
-%                 with the length, as ~sqrt(N) for a short-memory process).
+% params, the parameters for the method:
+%       (i) 'kv': (no parameters required)
+%       (ii) 'l1pwc': params = lambda, the penalty on each step's size
+%            (default 10). For a z-scored series a fixed lambda gives a
+%            segmentation that does not depend on the series length. A value
+%            lambda < 1 is instead taken as a proportion of lambdamax (the
+%            smallest lambda that gives no steps), which grows with the length,
+%            as ~sqrt(N) for a short-memory process.
 %
 % ---OUTPUTS:
-% Statistics on the output of the step-detection method, including the intervals
-% between change points (in samples), the number of constant segments per sample,
-% the reduction in variance from removing the piece-wise constants, and
-% stationarity in the occurrence of change points.
+% For both methods:
+% nsegments, the number of constant segments per sample (1/N if there are no steps)
+% rmsoff, the reduction in standard deviation: std(y) - std(y - fit)
+% rmsoffpstep, rmsoff divided by the number of constant segments
+% ratn12, ratio of the number of change points in the first half of the series to
+%       the number in the second half (smaller over larger; 0 if either is zero)
+% diffn12, absolute difference between the number of change points in the two
+%       halves, as a proportion of the number of segments
+% pshort_3, number of segments of 3 samples or fewer, per sample
+% meanstepintgt3, mean length (in samples) of the segments longer than 3 samples
+% cvstepint, coefficient of variation of the segment lengths
+% medianstepint, median segment length (in samples)
+% For method 'l1pwc' only:
+% E, the value of the objective above at its minimum, per sample (E/N)
+% s, whether the solver converged (1) or hit its maximum iterations (0)
+% lambdamax, the smallest lambda that gives no steps, divided by sqrt(N)
+%
+% ---REFERENCES:
+% Max A. Little and Nick S. Jones, "Sparse Bayesian Step-Filtering for
+% High-Throughput Analysis of Molecular Machine Dynamics", Proc. ICASSP (2010).
+%
+% M. A. Little, B. C. Steel, F. Bai, Y. Sowa, T. Bilyard, D. M. Mueller,
+% R. M. Berry, N. S. Jones, "Steps and bumps: precision extraction of discrete
+% states of molecular machines", Biophysical Journal 101(2): 477-485 (2011).
+%
+% Kalafut and Visscher, "An objective, model-independent method for detection of
+% non-uniform steps in noisy signals", Comp. Phys. Comm. 179, 716-723 (2008).
+%
+% S.-J. Kim et al., "l_1 Trend Filtering", SIAM Review 51, 339 (2009).
+%
+% Software available at: http://www.maxlittle.net/software/index.php
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -239,8 +258,9 @@ out.nsegments = numChangePoints / N; % will be 1 if there are no changes
 % How much reduces variance
 out.rmsoff = std(y) - std(y - steppedy);
 
-% Reduces variance per step (per unit step rate, so as not to scale with length)
-out.rmsoffpstep = out.rmsoff / out.nsegments;
+% Reduces variance per segment (numChangePoints counts the segment starting at
+% sample 1, so it is at least 1 and this is defined even when there are no steps)
+out.rmsoffpstep = out.rmsoff / numChangePoints;
 
 % Ratio of number of steps in first half of time series to second half
 sum1 = sum(chpts < N / 2) - 1; % (exclude the chpt that's always sitting at 1)

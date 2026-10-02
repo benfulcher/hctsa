@@ -1,37 +1,36 @@
 function out = SB_BinaryGapHomogeneity(x, gapWhat)
-% SB_BinaryGapHomogeneity  Homogeneity of the gaps between like symbols in a binarization.
+% SB_BinaryGapHomogeneity   Homogeneity of the gaps between like symbols in a binarization.
 %
-% The time series is symbolized to a binary string by whether it's above (1) or
-% below (0) zero (equivalently its mean, for the z-scored input this is
+% The time series is symbolized to a binary string by whether it is above (1) or at
+% or below (0) zero (equivalently its mean, for the z-scored input this is
 % registered on). Taking the positions of the 1s (or the 0s), the gaps between
 % successive such points are classified as either 'adjacent' (gap of 1, i.e.
 % part of an unbroken run) or 'separated' (gap of 2 or more). This operation
-% returns the length of the longest block over which that classification does
-% not change, as a proportion of the time-series length -- i.e. the longest
-% uninterrupted regime of consistent spacing, whether that regime is a long
-% unbroken run or a long stretch of regularly-isolated points.
+% returns the length of the longest block over which that classification does not
+% change, counted in gaps and as a proportion of the time-series length, i.e.,
+% the longest uninterrupted regime of consistent spacing, whether that regime is
+% a long unbroken run or a long stretch of regularly-isolated points.
 %
 % ---INPUTS:
-%
 % x, the input time series
+% gapWhat, which symbol's gaps to analyze (default: 'gaps1'):
+%    (i) 'gaps1', gap homogeneity between above-zero (1) points
+%    (ii) 'gaps0', gap homogeneity between at-or-below-zero (0) points
 %
-% gapWhat, (i) 'gaps1', gap homogeneity between above-zero (1) points
-%          (ii) 'gaps0', gap homogeneity between below-zero (0) points
+% ---OUTPUTS:
+% a scalar: the length of the longest block of successive gaps of the same type,
+% divided by the length of the time series (0 if there is no block bracketed by a
+% change on both sides).
 %
 % ---NOTES:
 % This is NOT the longest run of consecutive 1s or 0s, despite this operation's
-% former name ('SB_BinaryStretch', with outputs 'lseq1'/'lseq0'), which claimed
-% to measure exactly that and did not: verified against a brute-force longest-run
+% former name ('SB_BinaryStretch', with outputs 'lseq1'/'lseq0'), which claimed to
+% measure exactly that and did not: verified against a brute-force longest-run
 % calculation, the two disagree on 171 of 200 random series, and this quantity is
 % 0 whenever the longest run touches either end of the series (blocks at the
 % boundaries are not counted, since they are not bracketed by a change on both
 % sides). For true run lengths, use SB_BinaryStats, whose longstretch0/longstretch1
 % (and meanstretch/stdstretch) fields were verified exact against brute force.
-%
-% The quantity computed here was nonetheless kept, and renamed rather than fixed,
-% because it is not redundant with those correct measures: on the Empirical1000
-% dataset its rank correlation with SB_BinaryStats_mean_longstretch1 is only 0.47
-% (0.54 for the 0-symbol version), well inside the library's retention bar.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

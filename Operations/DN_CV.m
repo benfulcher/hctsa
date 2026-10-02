@@ -1,13 +1,19 @@
 function out = DN_CV(x, k)
-% DN_CV     Coefficient of variation
+% DN_CV   Coefficient of variation of the values of a data vector.
 %
-% Coefficient of variation of order k is sigma^k / mu^k (for sigma, standard
-% deviation and mu, mean) of a data vector, x
+% The coefficient of variation of order k is (sigma/mu)^k, for sigma the
+% standard deviation and mu the mean of the values: their spread relative to
+% their mean, ignoring their order. k = 1 is the usual coefficient of
+% variation. It is unstable when the mean is close to zero, and negative (for
+% odd k) when the mean is negative.
 %
 % ---INPUTS:
-%
 % x, the input data vector
-% k, the order of coefficient of variation (k = 1 is default)
+% k, the order of the coefficient of variation (default: 1). A warning is
+%       raised if k is not a positive integer, but the calculation continues.
+%
+% ---OUTPUTS:
+% a scalar: (std(x)/mean(x))^k
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

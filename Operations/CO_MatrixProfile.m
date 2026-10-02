@@ -1,45 +1,53 @@
 function out = CO_MatrixProfile(y, m, maxN)
 % CO_MatrixProfile   How well each subsequence shape recurs elsewhere in a time series.
 %
-% Computes the matrix profile: for every length-m window (subsequence) of the
-% time series, the distance to its nearest neighbour among all other windows,
-% after z-normalizing each window (so only its shape matters, not its local
-% level or amplitude). Trivial matches (overlapping windows, |i-j| < m/2) are
-% excluded. Distances are expressed as the equivalent nearest-neighbour Pearson
-% correlation, r = 1 - d^2/(2m), which is bounded and interpretable.
+% Computes the matrix profile: for every length-m window (subsequence) of the time
+% series, the distance to its nearest neighbour among all other windows, after
+% z-normalizing each window (so only its shape matters, not its local level or
+% amplitude). Trivial matches (overlapping windows, |i-j| < m/2) are excluded.
+% Distances are expressed as the equivalent nearest-neighbour Pearson correlation,
+% r = 1 - d^2/(2m), which is bounded and interpretable.
 %
-% Features summarize the distribution of r across windows: high values mean
-% shapes recur ('motifs'); a window with unusually low r is a 'discord'
-% (anomaly). The corrected arc curve (Gharghabi et al., FLUSS) counts how many
-% nearest-neighbour links cross each time point, relative to what a stationary
-% process would give; its minimum is low when the series has a regime change,
-% because windows then match within their own regime.
+% Features summarize the distribution of r across windows: high values mean shapes
+% recur ('motifs'); a window with unusually low r is a 'discord' (anomaly). The
+% corrected arc curve (Gharghabi et al., 2017; the FLUSS algorithm) counts how many nearest-neighbour links
+% cross each time point, relative to what a stationary process would give; its minimum
+% is low when the series has a regime change, because windows then match within their
+% own regime.
 %
-% A one-off anomaly lasting longer than about m/2 is not a discord: its own
-% overlapping windows match each other (the 'twin freak' problem).
+% A one-off anomaly lasting longer than about m/2 is not a discord: its own overlapping
+% windows match each other (the 'twin freak' problem).
 %
 % Uses the STOMP recursion (O(N^2) time, O(N) memory).
 %
 % ---INPUTS:
 % y, the input time series (z-scored in hctsa)
-% m, the window length in samples; or {'ac', k} for k times the first
-%       zero-crossing of the autocorrelation function (at least 10 samples).
-%       Longer windows give more reliable estimates of the nearest-neighbour
-%       statistics (test-retest across processes: 0.93-0.96 at k = 8 vs
-%       0.73-0.84 at k = 4), at the cost of needing longer series.
-% maxN, crops time series longer than this to their first maxN samples (or
-%       'full' to use every sample)
+% m, the window length in samples; or {'ac', k} for k times the first zero-crossing of
+%    the autocorrelation function (at least 10 samples). Default: {'ac', 8}. Longer
+%    windows give more reliable estimates of the nearest-neighbour statistics
+%    (test-retest across processes: 0.93-0.96 at k = 8 vs 0.73-0.84 at k = 4), at the
+%    cost of needing longer series.
+% maxN, crops time series longer than this to their first maxN samples (or 'full' to
+%       use every sample). Default: 5000.
 %
 % ---OUTPUTS:
-% meanR, medianR: mean and median nearest-neighbour correlation ('matchiness')
-% motifR: highest nearest-neighbour correlation (the best-repeated shape)
-% discordR: lowest nearest-neighbour correlation (the most anomalous shape)
-% discordGap: medianR - discordR, how anomalous the discord is relative to a
-%       typical window
-% propMatch90: proportion of windows with a nearest neighbour at r > 0.9
-% minCAC: minimum of the corrected arc curve (low = regime change). A specialist
+% meanR, medianR, the mean and median nearest-neighbour correlation ('matchiness'),
+% motifR, the highest nearest-neighbour correlation (the best-repeated shape),
+% discordR, the lowest nearest-neighbour correlation (the most anomalous shape),
+% discordGap, medianR - discordR, how anomalous the discord is relative to a typical
+%       window,
+% propMatch90, the proportion of windows with a nearest neighbour at r > 0.9,
+% minCAC, the minimum of the corrected arc curve (low = regime change). A specialist
 %       statistic: it separates regime-switching from stationary series well, but
 %       across stationary series it mostly reflects estimation noise.
+% The output is a single NaN if the series is too short (fewer than 5m windows), no
+% correlation length can be estimated, or most windows are flat.
+%
+% ---REFERENCES:
+% S. Gharghabi, Y. Ding, C.-C. M. Yeh, K. Kamgar, L. Ulanova and E. Keogh, "Matrix
+% Profile VIII: Domain Agnostic Online Semantic Segmentation at Superhuman Performance
+% Levels", 2017 IEEE International Conference on Data Mining (ICDM), pp. 117-126 (2017).
+% DOI: 10.1109/ICDM.2017.21 (the FLUSS corrected arc curve).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

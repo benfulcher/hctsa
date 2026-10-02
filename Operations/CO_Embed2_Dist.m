@@ -1,17 +1,30 @@
 function out = CO_Embed2_Dist(y, tau)
-% CO_Embed2_Dist    Analyzes distances in a 2-dim embedding space of a time series.
+% CO_Embed2_Dist   Distances between successive points in a 2-dimensional delay embedding.
 %
-% Returns statistics on the sequence of successive Euclidean distances between
-% points in a two-dimensional time-delay embedding space with a given
-% time-delay, tau.
-%
-% Outputs include the autocorrelation of distances, the mean distance, the
-% spread of distances, and statistics from an exponential fit to the
-% distribution of distances.
+% Returns statistics on the sequence of Euclidean distances between successive
+% points in the two-dimensional delay embedding (y(t), y(t+tau)): their
+% autocorrelation, location and spread, and how well an exponential distribution
+% fits them.
 %
 % ---INPUTS:
-% y, a z-scored column vector representing the input time series.
-% tau, the time delay.
+% y, a z-scored column vector representing the input time series
+% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
+%      function, capped at N/10); or an integer number of samples
+%
+% ---OUTPUTS:
+% d_ac1, d_ac2, d_ac3, the autocorrelation of the sequence of distances at lags 1, 2
+%       and 3,
+% d_mean, d_median, d_std, d_iqr, d_max, d_min, the mean, median, standard
+%       deviation, interquartile range, maximum and minimum of the distances,
+% d_cv, mean(d)/std(d) (the reciprocal of the coefficient of variation),
+% d_expfit_nlogL, the negative log-likelihood per distance of a maximum-likelihood
+%       exponential fit to the distances,
+% d_expfit_meandiff, the mean absolute difference between the histogram of
+%       distances (automatic binning, normalized as a probability density) and the
+%       fitted exponential density at the bin centres.
+%
+% ---NOTES:
+% d_expfit_nlogL equals 1 + log(mean(d)) for a maximum-likelihood exponential fit.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -115,7 +128,7 @@ out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:
 % Use a histogram with automatic binning
-[N, binEdges] = histcounts(d, 'BinMethod', 'auto', 'Normalization', 'probability');
+[N, binEdges] = histcounts(d, 'BinMethod', 'auto', 'Normalization', 'pdf');
 binCentres = mean([binEdges(1:end - 1); binEdges(2:end)]);
 expf = exppdf(binCentres, l); % exponential fit in each bin
 out.d_expfit_meandiff = mean(abs(N - expf)); % mean absolute error of fit

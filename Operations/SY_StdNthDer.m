@@ -1,25 +1,26 @@
 function out = SY_StdNthDer(y, n)
-% SY_StdNthDer  Standard deviation of the nth derivative of the time series.
+% SY_StdNthDer   Standard deviation of the nth derivative of the time series.
 %
 % Based on an idea by Vladimir Vassilevsky, a DSP and Mixed Signal Design
-% Consultant in a Matlab forum, who stated that You can measure the standard
-% deviation of the nth derivative, if you like".
+% Consultant, in a comp.soft-sys.matlab (MATLAB newsgroup) posting, who stated that
+% "You can measure the standard deviation of the nth derivative, if you like".
 %
-% cf. http://www.mathworks.de/matlabcentral/newsreader/view_thread/136539
-%
-% The derivative is estimated very simply by simply taking successive increments
-% of the time series; the process is repeated to obtain higher order
-% derivatives.
+% The derivative is estimated very simply by taking successive increments of the
+% time series (diff(y, n), with a unit time step); the process is repeated to
+% obtain higher order derivatives.
 %
 % Note that this idea is popular in the heart-rate variability literature, cf.
-% cf. "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)
-% (and function MD_hrv_classic)
+% M. Brennan, M. Palaniswami and P. Kamen, "Do existing measures of Poincare plot
+% geometry reflect nonlinear features of heart rate variability?", IEEE Trans. Biomed.
+% Eng. 48(11), 1342-1347 (2001) (and function MD_hrv_classic). DOI: 10.1109/10.959330
 %
 % ---INPUTS:
+% y, the time series to analyze
 %
-% y, time series to analyze
+% n, the order of derivative to analyze (default: 2)
 %
-% n, the order of derivative to analyze
+% ---OUTPUTS:
+% a scalar: the standard deviation of the nth difference of the time series
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

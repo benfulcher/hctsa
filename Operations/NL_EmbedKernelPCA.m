@@ -1,40 +1,36 @@
 function out = NL_EmbedKernelPCA(y, tau, m, maxN)
-% NL_EmbedKernelPCA   Kernel PCA of a time series in an embedding space, vs. linear PCA.
+% NL_EmbedKernelPCA   Kernel PCA of a time-delay embedding of the series, compared with linear PCA.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA)
 % and performs kernel Principal Components Analysis on the result using an
-% RBF kernel, then compares the resulting eigenvalue spectrum to that of
-% ordinary (linear) PCA on the same embedded points.
+% RBF kernel exp(-d^2/median(d^2)), with d the distance between embedded
+% points, then compares the resulting eigenvalue spectrum to that of ordinary
+% (linear) PCA on the same embedded points.
 %
 % At any finite kernel bandwidth, kernel PCA's spectrum is less compact than
 % linear PCA's in absolute terms (its RBF feature space is far higher-
-% dimensional than the embedding itself), but the *amount* by which it is
-% less compact depends on the geometry of the point cloud: a linear process
-% has an embedding point cloud well described by a low-dimensional
-% ellipsoid, which kernel PCA cannot compress much better than linear PCA
-% does, whereas a nonlinear process (e.g., one confined to a curved manifold
-% in the embedding space) is compressed comparatively well by kernel PCA's
-% nonlinear eigendirections. The *relative discrepancy* between the two
-% spectra (e.g., their top2/nto50/nto80 ratios) is therefore used here as a
-% nonlinearity signal, in a similar spirit to how existing hctsa operations
-% compare a metric's value to its outcome under a linear-appropriate
-% transformation (cf. surrogate-based tests in SD_SurrogateTest).
-%
-% "Nonlinear Component Analysis as a Kernel Eigenvalue Problem"
-% B. Scholkopf, A. Smola, K.-R. Muller, Neural Comput. 10(5) 1299 (1998)
-%
-% cf. "Extracting qualitative dynamics from experimental data"
-% D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
+% dimensional than the embedding itself), so the kernel-to-linear ratios
+% (top2_ratio, nto80_ratio, nto50_ratio) are below 1 (top2) or at least 1 (nto*)
+% for every series. Tested on simulations (N = 1000, 12 realizations each), the
+% ratios are nearer 1 for series on a curved low-dimensional manifold than for
+% the linear (Gaussian) process with the same power spectrum: for the logistic
+% map and Henon map, top2_ratio is 0.77 and 0.73 against 0.52 and 0.50 for
+% their phase-randomized surrogates (tau = 'ac', m = 3), and nto80_ratio is 1.4
+% and 1.3 against 2.8 and 2.7. The signal is weaker for the Lorenz system and
+% absent for a Roessler oscillator, which is close to linear at this sampling.
+% The ratios are not a stand-alone nonlinearity test, however: they also rise
+% with linear autocorrelation (top2_ratio is about 0.52 for white noise and
+% AR(1) with phi = 0.5, but 0.61-0.71 for AR(1) with phi = 0.99), so a smooth
+% linear process can look more 'nonlinear' than a chaotic map. Compare against
+% surrogates (cf. SD_SurrogateTest) to isolate nonlinearity. std_ratio did not
+% separate nonlinear from linear series consistently.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%               zero-crossing of the autocorrelation function or first minimum
-%               of the automutual information, respectively
-%
-% m, the embedding dimension
-%
+%      zero-crossing of the autocorrelation function or first minimum of the
+%      automutual information, respectively (default: 'ac')
+% m, the embedding dimension (default: 3)
 % maxN, the maximum number of embedded points used to form the N x N kernel
 %       matrix, whose eigendecomposition costs O(N^3). Longer embeddings are
 %       reduced to their first maxN points (default: 2000, i.e., a ~30MB
@@ -45,14 +41,30 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 %       to 'full' to disable, with a second warning above 5000 points,
 %       where the eigendecomposition starts to take several seconds.
 %
-% ---OUTPUTS:
-% The same battery of eigenvalue-spectrum statistics as NL_EmbedPCA
-% (variance explained by each of the top m components, how many components
-% are needed to explain 50-90% of the variance, etc.), computed on the
-% kernel PCA spectrum instead of the linear PCA spectrum, plus explicit
-% comparison outputs (ratios/differences of matched linear and kernel
-% statistics) that isolate the linear-vs-nonlinear discrepancy itself.
-
+% ---OUTPUTS: statistics of the normalized kernel PCA spectrum (the proportion
+% of variance in feature space explained by each kernel principal component,
+% ordered from largest, one per embedded point), with the linear PCA spectrum
+% of the same points (m entries) for comparison:
+% perc_1, ..., perc_m: the proportion of variance explained by each of the
+%       top m kernel components
+% std, range, min, max: standard deviation, range, minimum and maximum of the
+%       top m proportions only (so they are comparable with linear PCA)
+% top2: the proportion of variance explained by the top two kernel components
+% nto50, nto60, nto70, nto80, nto90: the number of kernel components needed to
+%       explain more than 50%, 60%, 70%, 80% or 90% of the variance
+% fb05, fb02, fb01, fb001: the position of the first kernel component whose
+%       proportion of variance is below 0.5, 0.2, 0.1 or 0.01
+% top2_ratio, top2_diff: top2 of the kernel PCA over (and minus) that of linear PCA
+% nto80_ratio, nto80_diff: nto80 of the kernel PCA over (and minus) that of
+%       linear PCA
+% nto50_ratio: nto50 of the kernel PCA over that of linear PCA
+% std_ratio: std of the kernel PCA over that of linear PCA
+%
+% ---REFERENCES:
+% B. Scholkopf, A. Smola and K.-R. Muller, "Nonlinear Component Analysis as a
+% Kernel Eigenvalue Problem", Neural Comput. 10(5), 1299 (1998).
+% D. S. Broomhead and G. P. King, "Extracting qualitative dynamics from
+% experimental data", Physica D 20(2-3), 217 (1986).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

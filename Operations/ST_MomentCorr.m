@@ -1,30 +1,42 @@
 function out = ST_MomentCorr(x, windowLength, wOverlap, mom1, mom2, whatTransform)
 % ST_MomentCorr   Correlations between simple statistics in local windows of a time series.
 %
-% The idea to implement this was that of Prof. Nick S. Jones (Imperial College London).
+% Slides a window along the series and computes two statistics (mom1 and mom2) in
+% each window, then measures how related they are across windows: their
+% correlation, and the density of windows in the plane of the two statistics. The
+% series can first be transformed (whatTransform).
+%
+% The idea to implement this was that of Prof. Nick S. Jones (Imperial College
+% London).
 %
 % ---INPUTS:
 % x, the input time series
 %
-% windowLength, the sliding window length (can be a fraction to specify a proportion of
-%       the time-series length)
+% windowLength, the sliding window length, in samples (a value below 1 is taken as
+%       a proportion of the time-series length, rounded up; default: 0.02)
 %
-% wOverlap, the overlap between consecutive windows as a fraction of the window
-%       length,
+% wOverlap, the overlap between consecutive windows, in samples (a value below 1
+%       is taken as a fraction of the window length, rounded down; default: 1/5)
 %
 % mom1, mom2: the statistics to investigate correlations between (in each window):
 %               (i) 'iqr': interquartile range
 %               (ii) 'median': median
 %               (iii) 'std': standard deviation (about the local mean)
 %               (iv) 'mean': mean
+%           (defaults: mom1 = 'mean', mom2 = 'std')
 %
-% whatTransform: the pre-processing whatTransformormation to apply to the time series before
-%         analyzing it:
+% whatTransform, the transformation to apply to the time series before analyzing it:
 %               (i) 'abs': takes absolute values of all data points
 %               (ii) 'sqrt': takes the square root of absolute values of all
 %                            data points
 %               (iii) 'sq': takes the square of every data point
-%               (iv) 'none': does no whatTransformormation
+%               (iv) 'none': does no transformation (default)
+%
+% ---OUTPUTS:
+% R, the correlation coefficient between mom1 and mom2 across windows
+% absR, the absolute value of R
+% density, the density of windows in the (mom1, mom2) plane: the number of windows
+%       divided by the area of the box bounding them, range(mom1)*range(mom2)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -108,7 +120,7 @@ end
 % ------------------------------------------------------------------------------
 % Create the windows:
 % ------------------------------------------------------------------------------
-x_buff = buffer(x, windowLength, wOverlap);
+x_buff = buffer(x, windowLength, wOverlap, 'nodelay');
 numWindows = (N / (windowLength - wOverlap)); % number of windows
 
 if size(x_buff, 2) > numWindows
@@ -130,10 +142,6 @@ R = corrcoef(M1, M2);
 out.R = R(2, 1); % correlation coefficient
 out.absR = abs(R(2, 1)); % absolute value of correlation coefficient
 out.density = length(M1) / (range(M1) * range(M2)); % density of points in M1--M2 space: (number of windows) / (bounding-box area)
-out.mi = IN_MutualInfo(M1, M2, 'gaussian');
-% out.mi = BF_MutualInformation(M1,M2,'range','range',floor(sqrt(N)));
-% out.mi = BF_MutualInformation(M1,M2,[0,1],[0,1],floor(sqrt(N)));
-% this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doPlot
 	figure('color', 'w');

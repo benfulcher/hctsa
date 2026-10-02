@@ -1,57 +1,68 @@
 function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, randomSeed)
-% MF_CompareTestSets    Robustness of test-set goodness of fit
+% MF_CompareTestSets   How well a model fitted to the whole series predicts short stretches of it.
 %
-% Robustness is quantified over different samples in the time series from
-% fitting a specified time-series model.
+% Fits a time-series model to the full series, then uses it to predict a set of
+% short test segments of the series (steps samples ahead), and summarizes how the
+% prediction quality varies across the segments. For each segment it records the
+% root-mean-square prediction error, the lag-1 autocorrelation of the errors, the
+% absolute difference between the mean prediction and the mean of the data, and the
+% ratio of the standard deviations of the predictions and the data. It says something
+% about stationarity in the spread of values, and about the suitability of the model
+% in the level of values.
 %
-% Similar to MF_FitSubsegments, except fits the model on the full time
-% series and compares how well it predicts time series in different local
-% time-series segments.
+% Similar to MF_FitSubsegments, except that the model is fitted on the full time
+% series and tested on different local segments.
 %
-% Says something of stationarity in spread of values, and something of the
-% suitability of model in level of values.
-%
-% Uses function iddata and predict from Matlab's System Identification Toolbox,
-% as well as either ar, n4sid, or armax from Matlab's System Identification
-% Toolbox to fit the models, depending on the specified model to fit to the data.
+% Uses iddata and predict from MATLAB's System Identification Toolbox, and ar, n4sid
+% or armax to fit the model.
 %
 % ---INPUTS:
 % y, the input time series
 %
 % theModel, the type of time-series model to fit:
-%           (i) 'ar', fits an AR model
-%           (ii) 'ss', first a state-space model
-%           (iii) 'arma', first an ARMA model
+%           (i) 'ar', an AR model,
+%           (ii) 'ss', a state-space model (default),
+%           (iii) 'arma', an ARMA model.
 %
-% ord, the order of the specified model to fit
+% ord, the order of the model to fit (default 2; a two-element vector for 'arma'),
+%       or 'best' to select it automatically: for 'ar', the order from 1 to 10
+%       minimizing the Schwarz Bayesian criterion (ARFIT_arfit); for 'ss', as chosen
+%       by n4sid.
 %
-% subsetHow, how to select random subsets of the time series to fit:
-%           (i) 'rand', select at random
-%           (ii) 'uniform', uniformly distributed segments throughout the time
-%                   series
+% subsetHow, how to select the test segments:
+%           (i) 'rand', at random (default),
+%           (ii) 'uniform', evenly spaced throughout the time series.
 %
-% samplep, a two-vector specifying the sampling parameters
-%           e.g., [20, 0.1] repeats 20 times for segments 10% the length of the
-%                           time series
+% samplep, a two-vector specifying the sampling parameters, [number of segments,
+%           segment length] (default [20, 0.1]). A segment length below 1 is a
+%           fraction of the series length, capped to between 10 and 20 samples
+%           (so [25, 0.1] takes 25 segments of 10 to 20 samples); otherwise it is a
+%           number of samples.
 %
-% steps, the number of steps ahead to do the predictions.
+% steps, the number of steps ahead to predict in each segment (default 2).
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%               (when 'rand' specified for subsetHow)
+%               (used when subsetHow is 'rand')
+%
+% ---OUTPUTS:
+% stde_mean, stde_std, stde_iqr: the mean, standard deviation and interquartile range
+%       over segments of the root-mean-square prediction error
+% ac1_mean, ac1_median: the absolute value of the mean, and of the median, over
+%       segments of the lag-1 autocorrelation of the prediction errors
+% ac1_std, ac1_iqr: the standard deviation and interquartile range over segments of
+%       that autocorrelation
+% meane_mean, meane_std, meane_iqr: the mean, standard deviation and interquartile
+%       range over segments of the absolute difference between the mean prediction
+%       and the mean of the data
+% stdrat_mean, stdrat_median, stdrat_std, stdrat_iqr: the mean, median, standard
+%       deviation and interquartile range over segments of the ratio of the standard
+%       deviation of the predictions to that of the data (segments in which the data
+%       are near-constant are excluded)
 %
 % ---NOTES:
-% mabserrs (mean absolute residual error) and the *_median statistic of
-% stde/meane were dropped 2026-08-11: redundancy-checked against the
-% retained fields on Bonn EEG (500 series) and Empirical1000 (1000 series),
-% requiring |r|>=0.9 on BOTH datasets AND in all 4 registered mops (this
-% function's output fields are shared code across all mops, so a field is
-% only dropped if it's redundant everywhere it's used). mabserrs correlated
-% |r|>=0.9 with the matching stde_* moment in every case (RMSE and MAE track
-% almost identically for these residuals); stde_median/meane_median
-% correlated |r|>=0.9 with their own _mean. ac1_mean/ac1_median and
-% meane_mean/stde_mean were borderline (|r| up to ~0.98 in some mops) but
-% not consistently >=0.9 across all 4 mops and both datasets, so both were
-% kept.
+% Redundant fields (mabserrs, and the medians of stde and meane) are not returned:
+% each correlated at |r| >= 0.9 with a retained field, on each of two collections of
+% real-world series and in all registered operations that use this function.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -194,8 +205,8 @@ switch subsetHow
 			% driver of this operation's length-dependence (rank eta^2 vs
 			% N on a stationary AR(1) null, N=200..6400, fell from
 			% 0.39-0.94 to 0.01-0.21 across stde/stdrat/ac1/meane
-			% statistics once capped). Capping at 20 leaves N=200 (the
-			% audit's own smallest tested length, where 10% of the series
+			% statistics once capped). Capping at 20 leaves N=200 (the smallest length tested,
+			% where 10% of the series
 			% is already <= 20) completely unchanged and only bites for
 			% longer series, where letting the segment keep growing was
 			% buying no real precision benefit anyway.
@@ -294,9 +305,9 @@ end
 
 % RMS errors, rmserrs
 % (median dropped: r>=0.9 with stde_mean across all 4 registered mops, on
-% both Bonn EEG and Empirical1000; mean absolute error, mabserrs, dropped
+% two collections of real-world series; mean absolute error, mabserrs, dropped
 % entirely: for these residuals r>=0.9 with the matching stde_* moment in
-% every case, so it added no dimension MAE didn't already carry)
+% every case, so it added no dimension the RMS error didn't already carry)
 out.stde_mean = mean(rmserrs);
 out.stde_std = std(rmserrs);
 out.stde_iqr = iqr(rmserrs);
@@ -310,7 +321,7 @@ out.ac1_iqr = iqr(ac1s);
 
 % Differences in mean between two series
 % (median dropped: r>=0.9 with meane_mean across all 4 registered mops, on
-% both Bonn EEG and Empirical1000)
+% two collections of real-world series)
 out.meane_mean = mean(meandiffs);
 out.meane_std = std(meandiffs);
 out.meane_iqr = iqr(meandiffs);

@@ -1,5 +1,5 @@
 function out = MF_steps_ahead(y, model, order, maxSteps)
-% MF_steps_ahead    Goodness of model predictions across prediction lengths.
+% MF_steps_ahead   How the accuracy of multi-step-ahead model predictions compares with trivial predictors and changes with the horizon.
 %
 % Given a model, characterizes the variation in goodness of model predictions
 % across a range of prediction lengths, l, which is made to vary from
@@ -11,20 +11,50 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 %       (iii) state-space models using n4sid code.
 %
 % The model is fitted on the full time series and then used to predict the same
-% data.
+% data (so all predictions are within the sample).
+%
+% At each horizon, the errors of the model are compared with those of three trivial
+% predictors: (i) the value l samples earlier (a sliding mean of length 1),
+% (ii) the average of the last two values, iterated forward l steps (a sliding mean
+% of length 2), and (iii) the mean of the full time series.
 %
 % ---INPUTS:
 % y, the input time series
 % model, the time-series model to fit: 'ar', 'arma', or 'ss'
-% order, the order of the model to fit
-% maxSteps, the maximum number of steps ahead to predict
+% order, the order of the model to fit: an integer for 'ar' and 'ss', a two-vector
+%       [p, q] for 'arma', or the string 'best'. For 'ar', 'best' picks the order
+%       (1 to 10) by Schwarz's Bayesian criterion using ARfit; for 'ss', n4sid
+%       chooses the order from 1 to 10 by a gap rule on its Hankel singular values
+%       (see NOTES). (Default: 2)
+% maxSteps, the maximum number of steps ahead to predict (default: 6)
 %
-% ---OUTPUTS: include the errors, for prediction lengths l = 1, 2, ..., maxSteps,
-% returned for each model relative to the best performance from basic null
-% predictors, including sliding 1- and 2-sample mean predictors and simply
-% predicting each point as the mean of the full time series.
-% Additional outputs quantify how the errors change as the prediction length
-% increases from l = 1, ..., maxSteps (relative to a simple predictor).
+% ---OUTPUTS:
+% stde_h1, stde_h2, stde_h3, stde_h4, stde_h5, stde_h6: the root-mean-square error of
+%       the model at horizon l = 1, ..., maxSteps, divided by the lowest root-mean-square
+%       error of the three trivial predictors at that horizon (stde_h<l>)
+% meanabs_h1, meanabs_h2, meanabs_h3, meanabs_h4, meanabs_h5, meanabs_h6: the same for the
+%       mean absolute error (meanabs_h<l>)
+% ac1_h1, ac1_h2, ac1_h3, ac1_h4, ac1_h5, ac1_h6: the absolute lag-1 autocorrelation of the
+%       model's errors at each horizon (ac1_h<l>; not a ratio)
+% stde_meanabs_diff: the absolute value of the mean difference between the model's
+%       root-mean-square and mean absolute errors across horizons
+% stde_meandiff, stde_maxdiff, stde_stddiff: the mean, maximum, and standard
+%       deviation of the change in the model's root-mean-square error from one horizon
+%       to the next
+% stde_ndown: the number of horizon steps at which the model's root-mean-square error
+%       falls
+% (The last five outputs use the model's raw errors, not the ratios to the trivial
+% predictors.)
+%
+% ---NOTES:
+% With model = 'ss' and order = 'best', n4sid(y, 'best') computes the Hankel singular
+% values of the data (N4Weight 'auto', i.e. CVA, and an N4Horizon chosen
+% automatically) and sets the order to the number of singular values whose logarithm
+% lies above the midpoint between the largest and smallest log singular value,
+% limited to 1 to 10. No information criterion is used. For series with no clear
+% gap in the singular values (white noise, chaotic maps, short noisy AR processes)
+% the chosen order varies widely between realizations (e.g. 4 to 10 for white noise
+% of length 1000), whereas a sine plus noise gives 2 and a random walk 1 almost always.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

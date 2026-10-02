@@ -1,19 +1,33 @@
 function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
-% CO_FirstMin  Time of first minimum in a given self-correlation function
+% CO_FirstMin   Time of the first minimum (or maximum) in a self-correlation function.
+%
+% Searches lags 1, 2, ... for the first local minimum of the autocorrelation function
+% or the automutual information (or, if minNotMax is false, the first local maximum),
+% and returns that lag in samples. Returns the length of the series if the function
+% keeps decreasing, and NaN if it hits a NaN before finding one. The first minimum
+% of the automutual information is a standard choice of embedding delay.
 %
 % ---INPUTS:
 % y, the input time series
 % minWhat, the type of correlation to minimize: either 'ac' for autocorrelation,
-%           or 'mi' for automutual information. By default, 'mi' specifies the
-%           'gaussian' method from the Information Dynamics Toolkit. Other
-%           options can also be implemented as 'mi-kernel', 'mi-kraskov1',
-%           'mi-kraskov2' (all from Information Dynamics Toolkit implementations),
-%           or 'mi-hist' (histogram-based method).
-% extraParam, an additional parameter required from the minWhat (e.g., Kraskov)
-% minNotMax, return the max instead of min.
+%          or 'mi' for automutual information. By default, 'mi' specifies the
+%          'gaussian' method from the Information Dynamics Toolkit. Other
+%          options can also be implemented as 'mi-gaussian', 'mi-kernel',
+%          'mi-kraskov1', 'mi-kraskov2' (all from Information Dynamics Toolkit
+%          implementations), or 'mi-hist' (histogram-based method).
+%          Default: 'mi-gaussian'.
+% extraParam, an additional parameter required by minWhat: the number of bins for
+%             'mi-hist', or the number of nearest neighbors for 'mi-kraskov2'
+%             (as a string, e.g., '4')
+% minNotMax, if false, return the first maximum instead of the first minimum
+%            (default: true)
 %
-% Note that selecting 'ac' is unusual operation: standard operations are the
-% first zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
+% ---OUTPUTS:
+% out, a scalar: the lag of the first local minimum (or maximum), in samples.
+%
+% ---NOTES:
+% Selecting 'ac' is an unusual operation: standard operations are the first
+% zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
 % minimum of the mutual information function ('mi').
 
 % ------------------------------------------------------------------------------

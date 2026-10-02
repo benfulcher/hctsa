@@ -1,30 +1,73 @@
 function out = MF_arfit(y, pmin, pmax, selector)
-% MF_arfit      Statistics of a fitted AR model to a time series.
+% MF_arfit   The coefficients, order, residuals, and oscillation modes of a best-fitting autoregressive model.
 %
-% Uses various functions implemented in the ARfit package, which is
-% freely-available at http://www.gps.caltech.edu/~tapio/arfit/
+% Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax,
+% using the ARfit package, with no intercept (the input should be z-scored).
+% The optimal model order is selected using Schwarz's Bayesian Criterion (SBC) by
+% default; the coefficients, residuals, and modes are those of the model of this
+% order. The outputs also give the SBC and the log final prediction error (FPE) at
+% every order and how sharp their minima are, summaries of the residuals, 95%
+% margins of error on the coefficients, and statistics from an eigendecomposition
+% of the fitted model into modes (oscillation periods, damping times, and
+% excitations, with times in samples).
 %
-% cf. "Estimation of parameters and eigenmodes of multivariate autoregressive
-%       models", A. Neumaier and T. Schneider, ACM Trans. Math. Softw. 27, 27 (2001)
-%
-% cf. "Algorithm 808: ARFIT---a Matlab package for the estimation of parameters
-%      and eigenmodes of multivariate autoregressive models",
-%      T. Schneider and A. Neumaier, ACM Trans. Math. Softw. 27, 58 (2001)
-%
-% Autoregressive (AR) models are fitted with orders p = pmin, pmin + 1, ..., pmax.
-%
-% The optimal model order is selected using Schwartz's Bayesian Criterion (SBC).
+% ARfit is freely available at http://www.gps.caltech.edu/~tapio/arfit/
 %
 % ---INPUTS:
 % y, the input time series
-% pmin, the minimum AR model order to fit
-% pmax, the maximum AR model order to fit
-% selector, crierion to select optimal time-series model order (e.g., 'sbc', cf.
-%           ARFIT package documentation)
+% pmin, the minimum AR model order to fit (default: 1)
+% pmax, the maximum AR model order to fit (default: 10)
+% selector, criterion to select the optimal time-series model order ('sbc',
+%           the default, or 'fpe'; cf. ARFIT package documentation)
 %
-% ---OUTPUTS: include the model coefficients obtained, the SBCs at each model
-% order, various tests on residuals, and statistics from an eigendecomposition
-% of the time series using the estimated AR model.
+% ---OUTPUTS:
+% A1, A2, A3, A4, A5, A6: the first six AR coefficients of the selected model (NaN
+%       if the selected order is lower)
+% maxA, minA, meanA, stdA, sumA: maximum, minimum, mean, standard deviation, and
+%       sum of the AR coefficients
+% rmsA: square root of the sum of squared AR coefficients (their Euclidean norm)
+% C: the estimated noise variance
+% sbc_1, sbc_2, ..., sbc_<pmax>: Schwarz's criterion at each order from pmin to pmax
+% minsbc, popt_sbc: the minimum SBC and its position within pmin:pmax
+% aroundmin_sbc: absolute minimum SBC relative to the mean absolute SBC at the
+%       adjacent orders
+% fpe_1, fpe_2, fpe_3, fpe_4, fpe_5, fpe_6, fpe_7, fpe_8: log final prediction error at each
+%       order (fpe_<k> for order k, k = pmin to pmax)
+% minfpe, popt_fpe, aroundmin_fpe: as for the SBC
+% res_siglev: p-value of the Li-McLeod portmanteau test of residual autocorrelation
+%       (lags up to 20)
+% meane, meanabs, stde, maxonstd, ac1, ac2, ac3, propbth, taurat, sws, swm: summaries
+%       of the residuals (fit minus data), from MF_ResidualAnalysis at the 'core'
+%       level: mean, mean absolute value, standard deviation, largest absolute value
+%       in standard deviations, autocorrelation at lags 1 to 3, proportion of the
+%       first 25 autocorrelations inside the significance band, ratio of residual to
+%       data decorrelation time, and the variability of the residual standard
+%       deviation and mean across 5 windows
+% aerr_min, aerr_max, aerr_mean: minimum, maximum, and mean 95% margin of error
+%       of the AR coefficients
+% maxReLambda, maxImLambda, maxabsLambda, stdabsLambda: maximum real part, maximum
+%       imaginary part, maximum modulus, and standard deviation of the moduli of the
+%       eigenvalues of the companion matrix of the fitted AR model (the roots of its
+%       characteristic polynomial; from ARFIT_armode). The largest modulus is the
+%       spectral radius, near 1 for a nearly non-stationary process.
+% hasInfper: the number of eigenmodes with infinite oscillation period
+% meanper, stdper, maxper, minper, meanpererr: mean, standard deviation, maximum,
+%       minimum, and mean margin of error of the finite oscillation periods
+% meantau, maxtau, mintau, stdtau, meantauerr: mean, maximum, minimum, standard
+%       deviation, and mean margin of error of the damping times
+% maxexctn, minexctn, meanexctn, stdexctn: maximum, minimum, mean, and standard
+%       deviation of the excitations (relative dynamical importance, summing to 1)
+%
+% ---REFERENCES:
+% A. Neumaier and T. Schneider, "Estimation of parameters and eigenmodes of
+% multivariate autoregressive models", ACM Trans. Math. Softw. 27, 27 (2001).
+% T. Schneider and A. Neumaier, "Algorithm 808: ARFIT---a Matlab package for the
+% estimation of parameters and eigenmodes of multivariate autoregressive models",
+% ACM Trans. Math. Softw. 27, 58 (2001).
+%
+% ---NOTES:
+% popt_sbc and popt_fpe are positions within pmin:pmax, so they equal the model
+% order only when pmin = 1.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -200,7 +243,7 @@ out.res_siglev = siglev;
 % ac1 (ac1n was dropped as ~92% recoverable from the rest), and pcorr_res -- the
 % proportion of the first 20 autocorrelations exceeding 1.96/sqrt(N) -- is superseded by
 % propbth, which is the same idea over 25 lags at the 2.6/sqrt(N) threshold.
-residOut = MF_ResidualAnalysis(res, y, 'core');
+residOut = MF_ResidualAnalysis(-res, y, 'core'); % ARFIT_arres returns data minus fit; the contract is prediction minus data
 fields = fieldnames(residOut);
 for k = 1:length(fields)
 	out.(fields{k}) = residOut.(fields{k});
@@ -224,19 +267,23 @@ out.aerr_mean = mean(Aerr);
 % -------------------------------------------------------------------------------
 
 % Run code from the ARfit package
-[S, ~, per, tau, exctn] = ARFIT_armode(Aest, Cest, th);
+[~, ~, per, tau, exctn, lambda] = ARFIT_armode(Aest, Cest, th);
 
-% S: eigenmodes
+% lambda: eigenvalues of the companion matrix of the AR model (complex in conjugate
+%         pairs for oscillatory modes; modulus < 1 for a stable model)
 % Serr: +/- margins of error (95% confidence intervals)
 % per: periods of oscillation (margins of error in second row)
 % tau: damping times (margins of error in second row)
 % exct: measures of relative dynamical importance of eigenmodes
 
 % Since there will be a variable number, best to just use summaries
-out.maxReS = max(real(S));
-out.maxImS = max(imag(S));
-out.maxabsS = max(abs(S));
-out.stdabsS = std(abs(S));
+% (These were previously computed from S, the last component of each unit-length,
+%  phase-adjusted eigenvector, which reflects the eigenvector normalization rather than
+%  the dynamics; they are now computed from the eigenvalues, lambda, themselves.)
+out.maxReLambda = max(real(lambda));
+out.maxImLambda = max(imag(lambda));
+out.maxabsLambda = max(abs(lambda));
+out.stdabsLambda = std(abs(lambda));
 
 % Often you get infinite periods of oscillation -- remove these for the purposes
 % of taking stats:
@@ -245,11 +292,12 @@ perFiltered = per;
 perFiltered(perSpecial) = NaN;
 
 out.hasInfper = sum(perSpecial(1, :));
-out.meanper = nanmean(perFiltered(1, :));
-out.stdper = nanstd(perFiltered(1, :));
-out.maxper = nanmax(perFiltered(1, :));
-out.minper = nanmin(perFiltered(1, :));
-out.meanpererr = nanmean(per(2, :));
+out.meanper = mean(perFiltered(1, :),'omitnan');
+out.stdper = std(perFiltered(1, :),0,'omitnan');
+% (max and min ignore NaNs by default)
+out.maxper = max(perFiltered(1, :));
+out.minper = min(perFiltered(1, :));
+out.meanpererr = mean(per(2, :),'omitnan');
 
 out.meantau = mean(tau(1, :));
 out.maxtau = max(tau(1, :));

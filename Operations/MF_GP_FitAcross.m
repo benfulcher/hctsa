@@ -1,21 +1,48 @@
 function out = MF_GP_FitAcross(y, covFunc, npoints)
-% MF_GP_FitAcross   Gaussian Process time-series modeling for local prediction.
+% MF_GP_FitAcross   How well a Gaussian process through a few evenly spaced points reproduces the series.
 %
-% Trains a Gaussian Process model on equally-spaced points throughout the time
-% series and uses the model to predict its intermediate values.
+% Trains a Gaussian Process (GP) model, with zero mean and a Gaussian likelihood, on
+% points spaced equally throughout the time series, and uses the model to predict all
+% the time series values (the intermediate values, and the training points). Times are
+% the sample indices. The hyperparameters of the covariance function are learned by
+% maximizing the marginal likelihood (MF_GP_LearnHyperp), and the outputs summarize
+% the prediction error, the predictive mean and standard deviation, the per-point
+% negative log marginal likelihood, and the fitted hyperparameters. If the series is longer than 2000
+% samples, predictions are made at 2000 evenly spaced times. A NaN is returned if the
+% fit fails.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
 %
 % ---INPUTS:
 % y, the input time series
-% covFunc, the covariance function (structured in the standard way for the gpml toolbox)
+%
+% covFunc, the covariance function (structured in the standard way for the gpml
+%       toolbox); the default is a sum of a squared-exponential and a noise term,
+%       {'covSum',{'covSEiso','covNoise'}}
+%
 % npoints, the number of points through the time series to fit the GP model to
+%       (default 20)
 %
-% ---OUTPUTS: summarize the error and fitted hyperparameters.
+% ---OUTPUTS:
+% stde, the root-mean-square error of the predictive mean, compared with the series
+% meanabs_std, the mean absolute error of the predictive mean, in units of the
+%       predictive standard deviation at each time
+% stdmu, the standard deviation of the predictive mean over the series
+% meanS, stdS, the mean and standard deviation of the predictive standard deviation
+%       over the series
+% nlml, the negative log marginal likelihood of the whole series (or of the 2000
+%       resampled points) under the fitted GP, divided by the number of points, so
+%       that it does not grow with the length of the series
+% logh1, logh2, logh3, ...: the log hyperparameters of the covariance function, in
+%       gpml's order (for the squared-exponential plus noise covariance, the length
+%       scale, the signal amplitude, and the noise standard deviation)
+% h_lonN, the fitted length scale divided by the series length (only for the
+%       squared-exponential plus noise covariance)
 %
-% In future could do a better job of the sampling of points -- perhaps to take
-% into account the autocorrelation of the time series.
+% ---NOTES:
+% In future, the sampling of points could take into account the autocorrelation of
+% the time series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -45,8 +72,6 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-doplot = 0; % set to 1 to visualize behavior
 
 % ------------------------------------------------------------------------------
 %% Check inputs
@@ -104,7 +129,7 @@ if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data i
 	return
 end
 loghyper = hyp.cov;
-if isnan(loghyper)
+if any(isnan(loghyper))
 	out = NaN;
 	return
 end
@@ -126,21 +151,6 @@ catch emsg
 	error('Error running Gaussian Process regression on time series: %s', emsg.message);
 end
 
-%% For Plotting
-if doplot
-	xstar = linspace(min(t), max(t), 1000)';
-	[mu, S2] = gpr(loghyper, covFunc, t, y, ts);
-	S2p = S2 - exp(2 * loghyper(3)); % remove noise from predictions
-	S2p = S2;
-	figure('color', 'w');
-	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
-	fill([ts; flipdim(ts, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8);
-	% grayscale error bars
-	hold on;
-	plot(ts, mu, 'k-', 'LineWidth', 2); % mean function
-	plot(ts, y(ts), '.-k'); % original data
-end
-
 % ------------------------------------------------------------------------------
 %% Output statistics
 % ------------------------------------------------------------------------------
@@ -154,12 +164,13 @@ out.stdmu = std(mu);
 out.meanS = mean(S);
 out.stdS = std(S);
 
-% Marginal Likelihood
+% Negative log marginal likelihood per point (gpml's nlZ divided by the number of
+% points, so that it does not grow with the number of points, up to 2000)
 try
-	% out.mlikelihood = - gpr(loghyper, covFunc, ts, y(ts));
-	out.mlikelihood = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts));
+	% out.nlml = - gpr(loghyper, covFunc, ts, y(ts));
+	out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, ts, y(ts)) / length(ts);
 catch
-	out.mlikelihood = NaN;
+	out.nlml = NaN;
 end
 
 % Loghyperparameters

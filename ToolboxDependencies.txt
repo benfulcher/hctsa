@@ -113,7 +113,6 @@ DT_IsSeasonal.m
 EN_Randomize.m
 FC_LocalSimple.m
 FC_LoopLocalSimple.m
-NL_FractalDimensions.m
 NL_LargestLyap.m
 NW_VisibilityGraph.m
 PD_PeriodicityWang.m
@@ -174,7 +173,7 @@ Michael Small Package (provided)
 
 NL_MS_LZcomplexity.m
 NL_nlpe.m
-NL_BoxCorrDim.m
+NL_BoxCountEntropyRate.m
 NL_PoincareSection.m
 NL_ReturnTime.m
 NL_TakensEstimator.m
@@ -184,7 +183,7 @@ SY_nstat_z.m
 
 TISEAN Package (GPL; provided)
 
-NL_BoxCorrDim.m
+NL_BoxCountEntropyRate.m
 NL_GPCorrSum.m
 NL_LargestLyap.m
 NL_PoincareSection.m

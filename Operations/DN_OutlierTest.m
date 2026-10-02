@@ -1,17 +1,26 @@
 function out = DN_OutlierTest(y, p, justMe)
-% DN_OutlierTest    How distributional statistics depend on distributional outliers.
+% DN_OutlierTest   How the mean and spread of the values change when the most extreme values are trimmed.
 %
-% Removes the p% of highest and lowest values in the time series (i.e., 2*p%
-% removed from the time series in total) and returns the ratio of either the
-% mean or the standard deviation of the time series, before and after this
-% transformation.
+% Removes the p% highest and p% lowest values of the series (2p% in total; values
+% below the p-th percentile and above the (100-p)-th percentile, strictly) and
+% returns the mean of the remaining values, and their standard deviation divided
+% by the standard deviation of the full series. Time order plays no part. For a
+% z-scored series the full series has mean 0 and standard deviation 1, so these
+% are the changes in the mean and in the spread when the tails are cut.
 %
 % ---INPUTS:
-% y, the input data vector
-% p, the percentage of values to remove beyond upper and lower percentiles
-% justMe [opt], just returns a number:
-%               (i) 'mean' -- returns the mean of the middle portion of the data
-%               (ii) 'std' -- returns the std of the middle portion of the data
+% y, the input data vector (should be z-scored)
+% p, the percentage of values to remove beyond each of the upper and lower
+%       percentiles (default: 2)
+% justMe [opt], return a single number instead of a structure:
+%       'mean': the mean of the middle portion of the data
+%       'std': the std of the middle portion of the data, relative to that of the
+%       full series
+%
+% ---OUTPUTS:
+% mean, the mean of the middle (100 - 2p)% of the data
+% std, the standard deviation of the middle (100 - 2p)% of the data, divided by the
+%       standard deviation of the full series
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

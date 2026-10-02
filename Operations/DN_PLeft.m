@@ -1,17 +1,21 @@
 function out = DN_PLeft(y, th)
-% DN_PLeft  Distance from the mean at which a given proportion of data are
-%                   more distant.
+% DN_PLeft   Distance from the mean beyond which a given proportion of the data lie.
 %
-% Measures the maximum distance from the mean at which a given fixed proportion,
-% p, of the time-series data points are further.
-% Normalizes by the standard deviation of the time series
-% (could generalize to separate positive and negative deviations in future)
-% Uses the quantile function from Matlab's Statistics Toolbox
+% Finds the distance from the mean that is exceeded by a proportion th of the
+% data points, and normalizes it by the standard deviation of the data. That
+% is, quantile(abs(y - mean(y)), 1 - th)/std(y), using the quantile function
+% from MATLAB's Statistics Toolbox. Deviations above and below the mean are
+% pooled (it could be generalized to treat them separately). For a Gaussian
+% distribution and th = 0.05, the output is about 1.96.
 %
 % ---INPUTS:
 % y, the input data vector
-% th, the proportion of data further than p from the mean
-%           (output p, normalized by standard deviation)
+% th, the proportion of data points further from the mean than the output
+%       distance (default: 0.1)
+%
+% ---OUTPUTS:
+% a scalar: the distance from the mean exceeded by a proportion th of the
+% data, in units of the standard deviation.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

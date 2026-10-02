@@ -1,79 +1,72 @@
 function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, randomSeed)
-% NL_RecurrenceTimes    Recurrence-time statistics from a recurrence plot
+% NL_RecurrenceTimes   Recurrence-time statistics from a recurrence plot.
 %
-% Embeds the time series in an m-dimensional delay space and characterizes
-% the *white* vertical structures of the resulting recurrence plot -- the
-% gaps between successive returns to a given neighborhood -- rather than
-% the black line-length statistics NL_RQA computes. For each embedded
-% point j, the sorted recurrence times of its neighbors give a set of
-% recurrence-time samples (successive-return-time differences); pooled
-% over all j, this yields a mean recurrence time and a mode (the
-% probability mass at the single most common recurrence time), plus their
-% variability when the series is long enough to compute them over several
-% independent segments. This targets a different, and more subtle,
-% signature than
-% NL_RQA's determinism/laminarity: a torus-to-strange-nonchaotic-attractor
-% (SNA) transition, which most Lyapunov-exponent-based diagnostics miss,
-% shows up here as an abrupt jump in the segment-to-segment variance of
-% both statistics, even though the point-to-point line-length statistics
-% barely change.
+% Embeds the time series in an m-dimensional delay space and characterizes the *white*
+% vertical structures of the resulting recurrence plot -- the gaps between successive
+% returns to a given neighborhood -- rather than the black line-length statistics NL_RQA
+% computes. For each embedded point j, the sorted recurrence times of its neighbors give a
+% set of recurrence-time samples w (the number of non-recurrent points between successive
+% recurrent points in column j; consecutive recurrent points contribute nothing). The
+% Theiler window around j is treated as recurrent, so each white line starts at or
+% beyond the edge of the Theiler band and none spans it (the statistics therefore do not
+% depend on the width of the Theiler window); pooled
+% over all j, this yields a mean recurrence time and a mode (the probability mass at the
+% single most common recurrence time), plus their variability when the series is long
+% enough to compute them over several independent segments. This targets a different, and
+% more subtle, signature than NL_RQA's determinism/laminarity: a
+% torus-to-strange-nonchaotic-attractor (SNA) transition, which most Lyapunov-exponent-based
+% diagnostics miss, shows up here as an abrupt jump in the segment-to-segment variance of
+% both statistics, even though the point-to-point line-length statistics barely change.
 %
-% cf. E.J. Ngamga, A. Nandi, R. Ramaswamy, M.C. Romano, M. Thiel, J. Kurths,
-% "Recurrence analysis of strange nonchaotic dynamics", Phys. Rev. E 75,
-% 036222 (2007). DOI: 10.1103/PhysRevE.75.036222
+% Of the paper's two measures, only this one -- based on a single observed trajectory --
+% transfers to hctsa's one-series-in setting; their companion SNA-to-chaos diagnostic needs
+% a cross-recurrence plot between two trajectories of the *same* system launched from
+% different initial conditions under identical forcing, which requires access to the
+% generating process itself, not just one observed series.
 %
-% (Of that paper's two measures, only this one -- based on a single
-% observed trajectory -- transfers to hctsa's one-series-in setting; their
-% companion SNA-to-chaos diagnostic needs a cross-recurrence plot between
-% two trajectories of the *same* system launched from different initial
-% conditions under identical forcing, which requires access to the
-% generating process itself, not just one observed series.)
-%
-% NL_ReturnTime.m characterizes a related but distinct quantity: the lags at
-% which each point's nearest neighbors occur (where along the series the
-% trajectory tends to revisit a neighborhood), rather than the distribution of
-% gaps between successive returns computed here. Neither has a counterpart to
-% the segment-to-segment variance computed here (the paper's actual
-% torus-to-SNA diagnostic).
+% NL_ReturnTime.m characterizes a related but distinct quantity: the lags at which each
+% point's nearest neighbors occur (where along the series the trajectory tends to revisit a
+% neighborhood), rather than the distribution of gaps between successive returns computed
+% here. Neither has a counterpart to the segment-to-segment variance computed here (the
+% paper's actual torus-to-SNA diagnostic).
 %
 % ---INPUTS:
-%
 % y, scalar time series as a column vector
+% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed; default: 1)
+% m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
+%    neighbors (cf. BF_Embed; default: 3)
+% theilerWin, Theiler window excluding temporally-correlated neighbors: {'ac', k} for k
+%             times the first zero-crossing of the autocorrelation function, or a number of
+%             samples (see BF_TheilerWindow and NL_RQA; default: {'ac', 1}). Narrowed to
+%             Nemb/5 for short series.
+% rr, target recurrence rate used to set the neighborhood radius (the radius is set once,
+%     from the full embedded series, to the rr-quantile of a subsample of pairwise
+%     distances; the same radius is then reused for every segment below so that
+%     segment-to-segment differences reflect the dynamics rather than a re-calibrated
+%     threshold; default: 0.1)
+% numSegments, the trajectory is divided into this many contiguous, non-overlapping
+%              segments, and the mean recurrence time and modal probability are recomputed
+%              independently within each; their variance across segments is the paper's
+%              diagnostic for the torus-to-SNA transition. Each segment needs at least 50
+%              embedded points for a meaningful recurrence-time distribution -- if it
+%              doesn't, the variance outputs (but not the full-series T_MRT/N_MPRT) are NaN
+%              (default: 4)
+% maxN, the maximum number of samples to consider (cf. NL_RQA; default: 10000); 'full' to
+%       disable cropping
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (cf. NL_RQA;
+%             default: 'default')
 %
-% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed)
+% ---OUTPUTS:
+% T_MRT, the mean recurrence time of the full series (the mean white-line length w)
+% N_MPRT, the modal recurrence-time probability mass of the full series: the fraction of
+%         all recurrence-time samples w taking the single most common value (the paper's
+%         raw count is normalized so that it does not scale with series length)
+% T_MRT_var, the variance of T_MRT across numSegments independent segments
+% N_MPRT_var, the variance of N_MPRT across numSegments independent segments
 %
-% m, embedding dimension (a positive integer)
-%
-% theilerWin, Theiler window excluding temporally-correlated neighbors:
-%             {'ac', k} for k times the first zero-crossing of the
-%             autocorrelation function, or a number of samples (see BF_TheilerWindow) -- see NL_RQA.
-%             Narrowed to Nemb/5 for short series.
-%
-% rr, target recurrence rate used to set the neighborhood radius (the
-%     radius is set once, from the full embedded series, to the
-%     rr-quantile of a subsample of pairwise distances; the same radius
-%     is then reused for every segment below so that segment-to-segment
-%     differences reflect the dynamics rather than a re-calibrated
-%     threshold)
-%
-% numSegments, the trajectory is divided into this many contiguous,
-%              non-overlapping segments, and the mean recurrence time and
-%              modal count are recomputed independently within each; their
-%              variance across segments is the paper's diagnostic for the
-%              torus-to-SNA transition. Each segment needs enough points
-%              for a meaningful recurrence-time distribution -- if it
-%              doesn't, the variance outputs (but not the full-series
-%              T_MRT/N_MPRT) are NaN.
-%
-% maxN, the maximum number of samples to consider (cf. NL_RQA; default:
-%       10000)
-%
-% randomSeed, whether (and how) to reset the random seed, using
-%             BF_ResetSeed (cf. NL_RQA; default: 'default')
-%
-% ---OUTPUTS: the mean recurrence time (T_MRT) and modal recurrence-time
-% probability mass (N_MPRT) of the full series, and their variance across
-% numSegments independent segments (T_MRT_var, N_MPRT_var).
+% ---REFERENCES:
+% Ngamga, Nandi, Ramaswamy, Romano, Thiel, Kurths, "Recurrence analysis of strange
+% nonchaotic dynamics", Phys. Rev. E 75, 036222 (2007). DOI: 10.1103/PhysRevE.75.036222
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -225,24 +218,36 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
     % reference point collect the sorted times of its neighbors -- the
     % differences between consecutive recurrence times are the
     % recurrence-time samples w (the length of a "white vertical line").
+    % The Theiler band around the reference point j (|i-j| <= theilerWinAbs) is
+    % treated as recurrent: the band-edge points j-theilerWinAbs and
+    % j+theilerWinAbs (where inside the series) are added to the neighbor list, and
+    % the neighbors on the left and right of j are differenced separately, so that
+    % no white line spans the excluded band (which would make the pooled
+    % recurrence times depend on the Theiler window).
     % Pooled across all reference points: T_MRT is their mean and N_MPRT
-    % is the count of the single most common (modal) integer value of w.
+    % is the fraction of samples at the single most common (modal) integer value of w.
     NsegEmb = size(Yseg, 1);
     idxCell = rangesearch(Yseg, Yseg, radius);
     allW = cell(NsegEmb, 1);
     for j = 1:NsegEmb
-        nbrs = idxCell{j}(:);
+        nbrs = sort(idxCell{j}(:));
         nbrs = nbrs(abs(nbrs - j) > theilerWinAbs); % exclude Theiler window (incl. self)
-        if numel(nbrs) >= 2
-            nbrs = sort(nbrs);
-            % White vertical line lengths: the number of NON-recurrent points
-            % between successive recurrent points in this column of the
-            % recurrence plot (Ngamga et al. 2007, Sec. II: P(w) is the
-            % distribution of white vertical line lengths). Consecutive
-            % recurrent points (a sojourn within one visit) are not
-            % separated by a white line, so contribute nothing:
-            allW{j} = diff(nbrs) - 1;
+        nbrsL = nbrs(nbrs < j); % neighbors before j
+        nbrsR = nbrs(nbrs > j); % neighbors after j
+        % band edges act as recurrent points, so lines start at the edge of the band:
+        if j - theilerWinAbs >= 1
+            nbrsL = [nbrsL; j - theilerWinAbs];
         end
+        if j + theilerWinAbs <= NsegEmb
+            nbrsR = [j + theilerWinAbs; nbrsR];
+        end
+        % White vertical line lengths: the number of NON-recurrent points
+        % between successive recurrent points in this column of the
+        % recurrence plot (Ngamga et al. 2007, Sec. II: P(w) is the
+        % distribution of white vertical line lengths). Consecutive
+        % recurrent points (a sojourn within one visit) are not
+        % separated by a white line, so contribute nothing:
+        allW{j} = [diff(nbrsL) - 1; diff(nbrsR) - 1];
     end
     w = vertcat(allW{:});
     w = w(w >= 1); % (drops the zero-length "lines" between consecutive recurrent points)
@@ -257,8 +262,8 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
     % Normalized to a probability mass (fraction of all pooled
     % recurrence-time samples falling at the modal value), not the paper's
     % raw count -- the raw count scales directly with how many samples
-    % went in (checked empirically: r=0.84 with plain series length on
-    % the Empirical1000 dataset), which would make it a length artifact
+    % went in (checked empirically on real-world series: r=0.84 with plain series
+    % length), which would make it a length artifact
     % rather than a dynamical one.
     N_MPRT = max(counts) / numel(w);
 end

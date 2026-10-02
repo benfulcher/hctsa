@@ -1,66 +1,77 @@
 function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, numIters, randomSeed)
-% FC_Surprise   How surprised you would be of the next data point given recent memory.
+% FC_Surprise   How surprising each next symbol is, given the recent past.
 %
-% Coarse-grains the time series, turning it into a sequence of symbols of a
-% given alphabet size, numGroups, and quantifies measures of surprise of a
-% process with local memory of the past memory values of the symbolic string.
+% Coarse-grains the time series into a sequence of symbols from a small alphabet,
+% and measures how surprised a forecaster with a local memory of the past memory
+% symbols would be by each new symbol. For a random sample of numIters test points,
+% the forecaster estimates the probability p of the symbol that actually occurred,
+% using only the preceding memory symbols, and the 'information gained' (surprise)
+% is -log(p), in nats.
 %
-% We then consider a memory length, memory, of the time series, and
-% use the data in the proceeding memory samples to inform our expectations of
-% the following sample.
-%
-% The 'information gained', log(1/p), at each sample using expectations
-% calculated from the previous memory samples, is estimated.
+% The estimated p uses Krichevsky-Trofimov-style additive smoothing,
+% (numMatches + 0.5) / (nAntecedent + 0.5*alphabetSize), instead of a raw frequency
+% ratio. The smoothed estimate stays strictly between 0 and 1, so the surprise is
+% always finite and positive, and it falls back to the uniform guess
+% 1/alphabetSize when the antecedent pattern was never observed in memory (a raw
+% ratio would be undefined or 0 there, and treating "no information" as certainty
+% would make a never-seen pattern the least surprising rather than the most).
 %
 % ---INPUTS:
 % y, the input time series
 %
-% whatPrior, the type of information to store in memory:
-%           (i) 'dist': the values of the time series in the previous memory
-%                       samples,
+% whatPrior, the information held in memory to predict the next symbol:
+%           (i) 'dist': the distribution of symbols in the previous memory samples
+%                       (default),
 %           (ii) 'T1': the one-point transition probabilities in the previous
-%                       memory samples, and
+%                       memory samples (what followed the previous symbol), and
 %           (iii) 'T2': the two-point transition probabilities in the previous
-%                       memory samples.
+%                       memory samples (what followed the previous two symbols).
 %
 % memory, the memory length (either number of samples, or a proportion of the
-%           time-series length, if between 0 and 1)
+%           time-series length, if between 0 and 1; default 0.2)
 %
-% numGroups, the number of groups to coarse-grain the time series into
+% numGroups, the number of groups to coarse-grain the time series into (default
+%           3); for 'embed2quadrants' it is instead the time delay of the
+%           embedding (a number of samples, 'ac1e' for the first 1/e crossing of
+%           the autocorrelation function, or 'tau' for its first zero-crossing,
+%           which is kept for backward compatibility)
 %
-% coarseGrainMethod, the coarse-graining, or symbolization method:
+% coarseGrainMethod, the coarse-graining, or symbolization method (SB_CoarseGrain):
 %          (i) 'quantile': an equiprobable alphabet by the value of each
-%                          time-series datapoint,
+%                          time-series datapoint (default),
 %          (ii) 'diff': an equiprobable alphabet by the value of incremental
 %                       changes in the time-series values (previously called
-%                       'updown' -- renamed since it's not a literal
-%                       sign(diff)>0 split; see SB_CoarseGrain.m), and
+%                       'updown'; renamed since it is not a literal sign(diff)>0
+%                       split), and
 %          (iii) 'embed2quadrants': 4-letter alphabet of the quadrant each data
 %                            point resides in a two-dimensional embedding space.
 %
-% numIters, the number of iterations to repeat the procedure for.
+% numIters, the number of test points (a random sample of the points that have a
+%           full memory before them) to repeat the procedure for (default 500).
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
-% ---OUTPUTS: summaries of this series of information gains, including the
-%            minimum, maximum, mean, lower and upper quartiles, standard
-%            deviation, and a t-statistic against an information gain of 1;
-%            plus propUnseen, the proportion of test points whose antecedent
-%            pattern (the current symbol itself for 'dist'; the preceding
-%            1 or 2 symbols for 'T1'/'T2') was never observed anywhere in
-%            the memory window.
+% ---OUTPUTS:
+% min, max, median, mean, sum, std: the minimum (of the nonzero values), maximum,
+%       median, mean, sum and standard deviation of the surprise over the test points
+% lq, uq: the lower and upper quartiles of the surprise
+% propUnseen: the proportion of test points whose antecedent pattern (the current
+%       symbol itself for 'dist'; the preceding 1 or 2 symbols for 'T1'/'T2') was
+%       never observed anywhere in the memory window (always 0 for 'dist')
+% effectSize: |mean - 1| / std, the standardized distance of the mean surprise from
+%       1 nat; the length-stable form, and the one hctsa registers
+% tstat: effectSize * sqrt(number of test points), the t-statistic of the mean
+%       surprise against 1 nat (NaN if std is 0)
 %
-% The estimated probability p at each test point uses Krichevsky-Trofimov-
-% style additive smoothing, (numMatches + 0.5) / (nAntecedent + 0.5*numGroups),
-% rather than a raw frequency ratio. This matters because a raw ratio is
-% either undefined (0/0) or exactly 0 whenever the antecedent pattern was
-% never observed in memory -- and a naive fix of treating "no information"
-% as "certainty" (i.e. artificially setting p=1, so log(1/p)=0 "surprise")
-% is backwards: a never-before-seen antecedent should be *maximally*
-% surprising if it then occurs, not minimally. The smoothed estimate stays
-% strictly in (0,1) (so information gain -log(p) is always finite and
-% positive) and degrades gracefully to the uniform prior 1/numGroups when
-% nAntecedent=0, rather than to a false certainty.
+% ---NOTES:
+% For 'embed2quadrants' with numGroups = 'ac1e' (what hctsa registers), the delay is
+% the first whole lag at which the autocorrelation function falls below 1/e
+% (CO_FirstCrossing), capped at floor(N/25) like any delay. If the autocorrelation
+% function is undefined (a constant series) or never crosses 1/e, no delay exists
+% and every output is NaN. The 1/e crossing is a robust measure of the correlation
+% time; the first zero crossing (numGroups = 'tau') can be very long or absent
+% (then silently replaced by the floor(N/25) cap), and is kept only for backward
+% compatibility.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -132,6 +143,15 @@ end
 %% Course Grain
 % ------------------------------------------------------------------------------
 yth = SB_CoarseGrain(y, coarseGrainMethod, numGroups); % a coarse-grained time series using the numbers 1:numGroups
+
+if isscalar(yth) && isnan(yth)
+	% No coarse-graining exists (the embedding delay is undefined): every output is NaN
+	outFields = {'min', 'max', 'median', 'mean', 'sum', 'std', 'lq', 'uq', 'propUnseen', 'effectSize', 'tstat'};
+	for i = 1:length(outFields)
+		out.(outFields{i}) = NaN;
+	end
+	return
+end
 
 % The alphabet size for the Krichevsky-Trofimov smoothing below. Usually this
 % is just numGroups, but for 'embed2quadrants'/'embed2octants', numGroups is

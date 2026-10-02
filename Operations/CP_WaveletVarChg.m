@@ -1,29 +1,34 @@
 function out = CP_WaveletVarChg(y, wName, level, maxnchpts, minDelay)
-% CP_WaveletVarChg     Variance change points in a time series.
+% CP_WaveletVarChg   Number of variance change points found from a wavelet detail signal.
 %
-% Finds variance change points using functions from Matlab's Wavelet Toolbox,
-% including the primary function wvarchg, which estimates the change points in
-% the time series.
+% Estimates variance change points using functions from MATLAB's Wavelet Toolbox.
+% The series is decomposed with a mother wavelet to a given level, and the detail
+% signal at that level is reconstructed. The 2% of its values with the largest
+% magnitude are replaced by the mean of the detail signal, so that single large
+% events do not dominate. The Wavelet Toolbox function wvarchg then estimates the
+% variance change points of this signal, with up to maxnchpts points at least
+% minDelay samples apart, and chooses how many to keep. The output is that number.
+% Needs the Wavelet Toolbox. Returns NaN if level is too large for the series.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
 % wName, the name of the mother wavelet to analyze the data with: e.g., 'db3',
-%           'sym2', cf. Wavelet Toolbox Documentation for details
+%       'sym2', cf. Wavelet Toolbox Documentation for details (default: 'db3')
 %
-% level, the level of wavelet decomposition
+% level, the level of wavelet decomposition (default: 3); 'max' uses the maximum
+%       level for the series length
 %
-% maxnchpts, the maximum number of change points
+% maxnchpts, the maximum number of change points (default: 5)
 %
-% minDelay, the minimum delay between consecutive change points (can be
-%           specified as a proportion of the time-series length, e.g., 0.02
-%           ensures that change points are separated by at least 2% of the
-%           time-series length)
+% minDelay, the minimum delay between consecutive change points, in samples; a
+%       value between 0 and 1 is taken as a proportion of the time-series
+%       length, e.g., 0.02 ensures that change points are separated by at least
+%       2% of the time-series length (default: 0.01)
 %
-%
-% ---OUTPUT:
-% The optimal number of change points.
+% ---OUTPUTS:
+% a scalar: the optimal number of change points (kopt from wvarchg), from 0 to
+%       maxnchpts, or NaN if level is too large for wavelet wName on this series
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

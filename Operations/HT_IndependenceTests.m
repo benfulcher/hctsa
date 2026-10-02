@@ -21,8 +21,8 @@ function p = HT_IndependenceTests(y, theTest)
 %                       has no autocorrelation (all autocorrelations are zero,
 %                       jointly over the lags considered by Matlab's default)
 %
-% ---OUTPUT:
-% The p-value of the specified test: the probability, under the null hypothesis
+% ---OUTPUTS:
+% p, a scalar: the p-value of the specified test: the probability, under the null hypothesis
 % above, of a test statistic at least as extreme as that observed. Small values
 % are evidence against the null hypothesis (i.e., evidence of serial dependence).
 

@@ -1,33 +1,36 @@
 function out = WL_modwtvar(y, wname, level)
 % WL_modwtvar   Multiscale variance decomposition via the maximal overlap DWT.
 %
-% Decomposes the time series into octave-scale bands using the maximal
-% overlap discrete wavelet transform (MODWT) and computes summary statistics
-% on how variance is distributed across scales. Unlike the standard
-% (decimated) DWT used elsewhere in this codebase, the MODWT is shift-invariant
-% and its associated variance estimator (modwtvar) is unbiased and accounts
-% for boundary-affected coefficients at each level -- the standard approach
-% for a scale-wise variance decomposition (Percival & Walden).
+% Decomposes the time series into octave-scale bands using the maximal overlap
+% discrete wavelet transform (MODWT) and computes summary statistics on how
+% variance is distributed across scales. Unlike the standard (decimated) DWT used
+% elsewhere in this codebase, the MODWT is shift-invariant and its associated
+% variance estimator (modwtvar) is unbiased and accounts for boundary-affected
+% coefficients at each level, which is the standard approach for a scale-wise
+% variance decomposition (Percival and Walden, 2000).
 %
 % ---INPUTS:
 % y, the input time series
-%
 % wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
-%           Documentation)
-%
-% level, the level of wavelet decomposition (can be set to 'max' for the
-%               maximum level supported by the series length,
-%               floor(log2(N)))
+%        Documentation; default: 'db3')
+% level, the level of wavelet decomposition (can be set to 'max' for the maximum
+%        level supported by the series length, floor(log2(N)); default: 5). A
+%        level that is too large is reduced to the maximum.
 %
 % ---OUTPUTS:
 % scalingFrac, the fraction of variance in the lowest-frequency (scaling/trend)
-%               band -- the part of the signal not resolved by any detail level
-% domlevel, the level (1 = highest frequency, ..., level+1 = scaling/trend
-%               band) that carries the most variance
-% decaySlope, the slope of log2(variance) vs. level across the detail bands --
-%               a wavelet-based scaling exponent, analogous to a Hurst
-%               estimate but using the MODWT's unbiased, boundary-corrected
-%               variance rather than an ad hoc regression on raw coefficients
+%        band: the part of the signal not resolved by any detail level
+% domlevel, the level (1 = highest frequency, ..., level+1 = scaling/trend band)
+%        that carries the most variance
+% decaySlope, the slope of log2(variance) against level across the detail bands: a
+%        wavelet-based scaling exponent, analogous to a Hurst estimate but using the
+%        MODWT's unbiased, boundary-corrected variance rather than an ad hoc
+%        regression on raw coefficients
+%
+% ---REFERENCES:
+% D.B. Percival and A.T. Walden, "Wavelet Methods for Time Series Analysis",
+% Cambridge University Press, Cambridge (2000). DOI: 10.1017/CBO9780511841040
+% (the MODWT is treated on pp. 159-205 and the wavelet variance on pp. 295-339).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

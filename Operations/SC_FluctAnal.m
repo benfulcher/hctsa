@@ -1,73 +1,86 @@
 function out = SC_FluctAnal(x, q, wtf, tauStep, k, lag, logInc)
-% SC_FluctAnal   Implements fluctuation analysis by a variety of methods.
+% SC_FluctAnal   Scaling exponents from fluctuation analysis, by a choice of methods.
 %
-% Much of our implementation is based on the well-explained discussion of
-% scaling methods in:
-% "Power spectrum and detrended fluctuation analysis: Application to daily
-% temperatures" P. Talkner and R. O. Weber, Phys. Rev. E 62(1) 150 (2000)
+% The series is integrated (cumulative sum) and cut into windows of tau samples,
+% a measure of the size of the fluctuations is taken in each window, and the
+% fluctuation function F(tau) is the q-th order mean of these (q = 2 is the
+% usual root-mean-square). For a self-similar series F(tau) ~ tau^alpha, so the
+% scaling exponent alpha is the slope of log F(tau) against log tau. The methods
+% differ in how fluctuations are measured in a window (wtf, below). Much of the
+% implementation follows the discussion of scaling methods in Talkner and Weber
+% (2000).
 %
-% The main difference between algorithms for estimating scaling exponents amount
-% to differences in how fluctuations, F, are quantified in time-series segments.
-% Many alternatives are implemented in this function.
+% Timescales tau run from 5 samples to half the series length, in tauStep
+% logarithmically spaced steps (logInc true) or in steps of tauStep samples
+% (logInc false, in which case log F is interpolated by a spline onto 50 evenly
+% spaced values of log tau). Peng et al. (1995) used 5 to a quarter of the series
+% length; Little et al. (2007) used 4 to half. Fewer than 8 timescales give NaN.
 %
 % ---INPUTS:
 % x, the input time series
+% q, the order of the fluctuation function (2, the usual choice, gives
+%       root-mean-square fluctuations); default 2
+% wtf, what to fluctuate (default 'rsrange'):
+%       'dfa': subtract a polynomial trend of order k in each window, then take
+%           the q-th order mean over all points (detrended fluctuation analysis)
+%       'endptdiff': the difference between the end points of each window
+%       'range': the range in each window
+%       'std': the standard deviation in each window (cf. Cannon et al. 1997)
+%       'iqr': the interquartile range in each window
+%       'rsrange': the range after subtracting the straight line joining the end
+%           points of the window (cf. Caccia et al. 1997)
+%       'rsrangefit': the range after subtracting a polynomial trend of order k
+%       'nothing': no windowing statistic; the q-th order mean over all points of
+%           the integrated series that fit in whole windows, with no detrending
+% tauStep, the number of timescales (logInc true) or the step in tau, in samples
+%       (logInc false); default 1
+% k, the polynomial order of the detrending, for 'dfa' and 'rsrangefit'; default 1
+% lag, an optional time lag for the integrated profile (Alvarez-Ramirez et al.
+%       2009): if given, the series is subsampled by taking every lag-th point
+%       before integrating; default none
+% logInc, whether the timescales are logarithmically spaced (true, the
+%       recommended choice) or linearly spaced (false); default true
 %
-% q, the parameter in the fluctuation function q = 2 (usual) gives RMS fluctuations.
+% ---OUTPUTS: statistics of a robust linear fit of log F(tau) against log tau, and
+% of fitting two straight lines to the same data, with the split point chosen to
+% minimize the combined fitting error (each line spans at least a quarter of the
+% timescales, and at least 8):
+% linfitint, alpha, se1, se2, ssr, resac1: the intercept, slope (the scaling
+%       exponent alpha), standard errors of the intercept and the slope, mean
+%       squared residual, and lag-1 autocorrelation of the residuals, of the
+%       single line fitted over all timescales
+% r1_linfitint, r1_alpha, r1_se1, r1_se2, r1_ssr, r1_resac1: the same, for the
+%       first (shorter-timescale) line of the two-line fit
+% r2_linfitint, r2_alpha, r2_se1, r2_se2, r2_ssr, r2_resac1: the same, for the
+%       second (longer-timescale) line
+% logtausplit, the value of log(tau) at the split between the two lines
+% prop_r1, the proportion of the timescales covered by the first line
+% ratsplitminerr, the ratio of the minimum two-line fitting error (mean squared
+%       error pooled over both lines) to ssr
+% meanssr, stdssr, the mean and the standard deviation of the two-line fitting
+%       error across the candidate split points
+% alpharat, the ratio r1_alpha / r2_alpha
+% (All are NaN if there are too few timescales; the two-line fields are NaN if
+% the timescales are too few to support two lines.)
 %
-% wtf, (what to fluctuate)
-%       (i) 'endptdiff', calculates the differences in end points in each segment
-%       (ii) 'range' calculates the range in each segment
-%       (iii) 'std' takes the standard deviation in each segment
-%           cf. "Evaluating scaled windowed variance methods for estimating the
-%               Hurst coefficient of time series", M. J. Cannon et al. Physica A
-%               241(3-4) 606 (1997)
-%       (iv) 'iqr' takes the interquartile range in each segment
-%       (v) 'dfa' removes a polynomial trend of order k in each segment,
-%       (vi) 'rsrange' returns the range after removing a straight line fit
-%           cf. "Analyzing exact fractal time series: evaluating dispersional
-%           analysis and rescaled range methods",  D. C. Caccia et al., Physica
-%           A 246(3-4) 609 (1997)
-%       (vii) 'rsrangefit' fits a polynomial of order k and then returns the
-%           range. The parameter q controls the order of fluctuations, for which
-%           we mostly use the standard choice, q = 2, corresponding to root mean
-%           square fluctuations.
-%           An optional input parameter to this operation is a timelag for
-%           computing the cumulative sum (or integrated profile), as suggested
-%           by: "Using detrended fluctuation analysis for lagged correlation
-%           analysis of nonstationary signals" J. Alvarez-Ramirez et al. Phys.
-%           Rev. E 79(5) 057202 (2009)
+% ---REFERENCES:
+% P. Talkner and R. O. Weber, "Power spectrum and detrended fluctuation analysis:
+% Application to daily temperatures", Phys. Rev. E 62(1), 150 (2000).
+% M. J. Cannon et al., "Evaluating scaled windowed variance methods for estimating
+% the Hurst coefficient of time series", Physica A 241(3-4), 606 (1997).
+% D. C. Caccia et al., "Analyzing exact fractal time series: evaluating
+% dispersional analysis and rescaled range methods", Physica A 246(3-4), 609 (1997).
+% J. Alvarez-Ramirez et al., "Using detrended fluctuation analysis for lagged
+% correlation analysis of nonstationary signals", Phys. Rev. E 79(5), 057202 (2009).
+% C.-K. Peng et al., "Statistical properties of DNA sequences", Physica A
+% 221(1-3), 180 (1995).
+% Little et al., "Exploiting Nonlinear Recurrence and Fractal Scaling Properties
+% for Voice Disorder Detection", Biomed. Eng. Online 6, 23 (2007).
 %
-% tauStep, number of tau (locInc true), or increments in tau for linear range
-%               (if logInc = 0), or
-%
-%           The spacing of timescales, tau, is commonly logarithmic through a range from
-%           5 samples to a quarter of the length of the time series, as suggested in
-%           "Statistical properties of DNA sequences", C.-K. Peng et al. Physica A
-%           221(1-3) 180 (1995)
-%
-%           Max A. Little's fractal paper used L = 4 to L = N/2:
-%           "Exploiting Nonlinear Recurrence and Fractal Scaling Properties for
-%           Voice Disorder Detection", Little et al. Biomed. Eng. Online 6 23 (2007)
-%
-% k, polynomial order of detrending (for 'dfa' & 'rsrangefit')
-%
-% lag, optional time-lag, as in Alvarez-Ramirez (see (vii) above)
-%
-% logInc, whether to use logarithmic increments in tau (it should be logarithmic)
-%
-% ---OUTPUTS: include statistics of fitting a linear function to a plot of log(F) as
-% a function of log(tau), and for fitting two straight lines to the same data,
-% choosing the split point at tau = tau_{split} as that which minimizes the
-% combined fitting errors.
-%
-% This function can also be applied to the absolute deviations of the time
-% series from its mean, and also for just the sign of deviations from the mean
-% (i.e., converting the time series into a series of +1, when the time series is
-% above its mean, and -1 when the time series is below its mean).
-%
-% All results are obtained with both linearly, and logarithmically-spaced time
-% scales tau.
+% ---NOTES:
+% In hctsa the function is also applied to the absolute values of the z-scored
+% series and to its sign (+1 above the mean, -1 below), to look at the scaling of
+% the magnitude and of the sign of the fluctuations separately.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -135,6 +148,7 @@ else
 	% If a lag is specified, do a decimation:
 	y = cumsum(x(1:lag:end));
 end
+N = length(y); % length of the integrated series (shorter than x if a lag is used)
 
 % -------------------------------------------------------------------------------
 % Perform scaling over a range of tau, up to a fifth the time-series length
@@ -319,8 +333,8 @@ else
 
 	out.logtausplit = logtt(breakPt);
 	out.ratsplitminerr = min(sserr) / out.ssr;
-	out.meanssr = nanmean(sserr);
-	out.stdssr = nanstd(sserr);
+	out.meanssr = mean(sserr,'omitnan');
+	out.stdssr = std(sserr,0,'omitnan');
 end
 
 if doPlot

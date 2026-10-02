@@ -1,13 +1,15 @@
 function out = CP_l1pwc_SweepLambda(y, lambdar)
-% CP_l1pwc_SweepLambda     Dependence of step detection on regularization parameter.
+% CP_l1pwc_SweepLambda   How step detection changes as its penalty on step size varies.
 %
 % Gives information about discrete steps in the signal across a range of
-% regularization parameters lambda, using the function l1pwc from Max Little's
-% step detection toolkit.
-%
-% cf.,
-% "Sparse Bayesian Step-Filtering for High-Throughput Analysis of Molecular
-% Machine Dynamics", Max A. Little, and Nick S. Jones, Proc. ICASSP (2010)
+% regularization parameters lambda, using the l1pwc function from Max Little's
+% step-detection toolkit. At each lambda in lambdar, CP_ML_StepDetect(y, 'l1pwc',
+% lambda) is run, and the number of constant segments per sample (nsegments), the
+% reduction in standard deviation from removing the piecewise-constant fit
+% (rmsoff), and that reduction per constant segment (rmsoffpstep) are recorded.
+% The outputs summarize how these quantities vary with lambda. Note that a
+% lambda below 1 is taken by CP_ML_StepDetect as a proportion of the largest
+% lambda that gives any steps.
 %
 % ---INPUTS:
 % y, the input time series
@@ -15,10 +17,20 @@ function out = CP_l1pwc_SweepLambda(y, lambdar)
 % lambdar, a vector specifying the lambda parameters to use
 %
 % ---OUTPUTS:
-% At each iteration, the CP_ML_StepDetect code was run with a given
-% lambda, and the number of segments, and reduction in root mean square error
-% from removing the piecewise constants was recorded. Outputs summarize how the
-% these quantities vary with lambda.
+% rmserrsu05, rmserrsu02, rmserrsu01: the first lambda in lambdar at which the
+%       reduction in standard deviation (rmsoff) falls below 0.5, 0.2, 0.1
+% nsegsu005, nsegsu001: the first lambda in lambdar at which the number of
+%       segments per sample falls below 0.05, 0.01
+%       (all five are NaN if the threshold is never crossed)
+% corrsegerr, the correlation across lambdar between the number of segments and
+%       the reduction in standard deviation
+% bestrmserrpseg, the maximum reduction in standard deviation per constant
+%       segment (rmsoffpstep) over lambdar
+% bestlambda, the lambda at which that maximum occurs
+%
+% ---REFERENCES:
+% Max A. Little and Nick S. Jones, "Sparse Bayesian Step-Filtering for
+% High-Throughput Analysis of Molecular Machine Dynamics", Proc. ICASSP (2010).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

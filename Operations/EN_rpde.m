@@ -2,28 +2,43 @@ function out = EN_rpde(x, m, tau, epsilon, T_max)
 % EN_rpde   Recurrence period density entropy (RPDE).
 %
 % Fast RPDE analysis on an input signal to obtain an estimate of the H_norm value
-% and other related statistics.
+% and other related statistics. The signal is embedded in m dimensions with time
+% delay tau. For each point of the embedded trajectory, the recurrence time is the
+% number of samples until the trajectory first returns to within epsilon (a
+% Euclidean distance) of that point, after having left that neighborhood. The
+% histogram of recurrence times, normalized to sum to 1, is the recurrence period
+% density (rpd), whose Shannon entropy H, divided by log(N) (the entropy of an
+% i.i.d. process; N is the number of bins of the rpd), is H_norm. Periodic signals
+% have H_norm near 0; noise has H_norm near 1.
 %
-% Based on Max Little's code rpde (see below)
-%
-% ---USAGE:
-% [H_norm, rpd] = rpde(x, m, tau)
-% [H_norm, rpd] = rpde(x, m, tau, epsilon)
-% [H_norm, rpd] = rpde(x, m, tau, epsilon, T_max)
+% Based on Max Little's code rpde (see below), with minor tweaks and additional
+% outputs.
 %
 % ---INPUTS:
-%    x       - input signal: must be a row vector
-%    m       - embedding dimension
-%    tau     - embedding time delay
+% x, the input signal (a column vector)
+% m, the embedding dimension (default: 2); can also be a string understood by
+%    BF_Embed
+% tau, the embedding time delay (default: 1); can also be 'ac' (first
+%    zero-crossing of the autocorrelation function) or 'mi' (first minimum of the
+%    automutual information), as in BF_Embed
+% epsilon [optional], the recurrence neighborhood radius (default: 0.12)
+% T_max [optional], the maximum recurrence time (default: no limit, so all
+%    recurrence times are used)
 %
-% ---OPTIONAL INPUTS:
-%    epsilon - recurrence neighbourhood radius
-%              (If not specified, then a suitable value is chosen automatically)
-%    T_max   - maximum recurrence time
-%              (If not specified, then all recurrence times are returned)
 % ---OUTPUTS:
-%    H_norm  - Estimated RPDE value
-%    rpd     - Estimated recurrence period density
+% A structure with fields:
+% H, the entropy of the recurrence period density (in nats)
+% H_norm, H normalized by log(N), the estimated RPDE value
+% propNonZero, the proportion of the recurrence period density that is nonzero
+% meanNonZero, the mean value of the density where it is nonzero, rescaled by N
+% maxRPD, the maximum value of the density, rescaled by N
+% NaN (instead of a structure) is returned if the embedding parameters cannot be
+% determined.
+%
+% ---REFERENCES:
+% M. Little, P. McSharry, S. Roberts, D. Costello and I. Moroz, "Exploiting
+% Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder
+% Detection", BioMedical Engineering OnLine 6:23 (2007).
 
 % ------------------------------------------------------------------------------
 % (c) 2007 Max Little.

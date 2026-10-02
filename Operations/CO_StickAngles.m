@@ -1,21 +1,49 @@
 function out = CO_StickAngles(y)
-% CO_StickAngles    Analysis of line-of-sight angles between time-series data points.
+% CO_StickAngles   Analysis of angles between successive same-sign time-series values.
 %
-% Line-of-sight angles between time-series points treat each time-series value
-% as a stick protruding from an opaque baseline level.
-% Statistics are returned on the raw time series, where sticks protrude
-% from the zero-level, and the z-scored time series, where sticks
-% protrude from the mean level of the time series.
+% Each time-series value is treated as a stick protruding from a baseline at zero
+% (the mean, for a z-scored series). Sticks above the baseline form a positive set
+% and those below it a negative set. Within each set, the angle between successive
+% sticks is atan of the slope from one stick's tip to the next: (y(next) - y(this))
+% divided by the number of samples between them. Statistics are returned on the
+% positive angles (_p), the negative angles (_n), and all of them (_all): location,
+% spread and shape, differences between the positive and negative sets, symmetry,
+% stationarity, autocorrelation, and quantiles. The tau, ac1, quantile and statav
+% outputs use the angle sequences standardized to zero mean and unit variance.
 %
 % ---INPUTS:
-% y, the input time series
+% y, the input time series (assumed z-scored, so that the sign split is about the
+%       mean)
 %
-% ---OUTPUTS: are returned on the obtained sequence of angles, theta, reflecting the
-% maximum deviation a stick can rotate before hitting a stick representing
-% another time point. Statistics include the mean and spread of theta,
-% the different between positive and negative angles, measures of symmetry of
-% the angles, stationarity, autocorrelation, and measures of the distribution of
-% these stick angles.
+% ---OUTPUTS:
+% mean_p, median_p, mean_n, median_n, mean, median, std, the mean, median and
+%       standard deviation of the angles (for the positive set, negative set, or
+%       all angles),
+% pnsumabsdiff, the summed absolute difference between smoothed density estimates
+%       of the positive and negative angles,
+% symks_p, symks_n, the asymmetry about zero of the distribution of the positive or
+%       negative set's angles (summed absolute difference between its smoothed
+%       density and its mirror image),
+% ratmean_p, ratmean_n, the mean of the positive angles divided by the mean of the
+%       negative angles within the positive or negative set,
+% statav2_p_m, statav2_p_s, statav3_p_m, statav3_p_s, statav4_p_m, statav4_p_s,
+%       statav5_p_m, statav5_p_s, statav2_n_m, statav2_n_s, statav3_n_m, statav3_n_s,
+%       statav4_n_m, statav4_n_s, statav5_n_m, statav5_n_s, statav2_all_m,
+%       statav3_all_m, statav4_all_m, statav5_all_m, statav5_all_s, the standard
+%       deviation across 2, 3, 4 or 5 equal parts of the sequence of the mean (_m) or
+%       the standard deviation (_s) of the angles, divided by their overall standard
+%       deviation,
+% tau_p, tau_n, the first zero-crossing of the autocorrelation function of the
+%       positive or negative set's angle sequence (interpolated),
+% ac1_p, ac1_n, the lag-1 autocorrelation of those sequences,
+% q1_p, q10_p, q90_p, q99_p, q1_n, q10_n, q90_n, q99_n, q1_all, q10_all, q90_all,
+%       q99_all, the 1%, 10%, 90% and 99% quantiles of the standardized angles,
+% skewness_p, skewness_n, skewness_all, kurtosis_p, kurtosis_n, kurtosis_all, the
+%       skewness and kurtosis of the angles.
+%
+% ---NOTES:
+% Needs the Signal Processing Toolbox (the buffer function). Heights are in z-scored
+% units and distances in samples, so the angles depend on the sampling rate.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

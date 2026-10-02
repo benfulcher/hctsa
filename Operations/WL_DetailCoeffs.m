@@ -1,22 +1,39 @@
 function out = WL_DetailCoeffs(y, wname, maxlevel)
-% WL_DetailCoeffs   Detail coefficients of a wavelet decomposition.
+% WL_DetailCoeffs   How the size of wavelet detail signals varies across scales.
 %
-% Compares the detail coefficients obtained at each level of the wavelet
-% decomposition from 1 to the maximum possible level for the wavelet given the
-% length of the input time series (computed using wmaxlev from
-% Matlab's Wavelet Toolbox).
+% Compares the detail signals obtained at each level of the wavelet decomposition,
+% from level 1 (the finest scale) to the maximum possible level for the wavelet
+% given the length of the input time series (wmaxlev from Matlab's Wavelet
+% Toolbox). At each level the detail signal is reconstructed (wrcoef, full length)
+% and its mean, median and maximum absolute value are taken, giving three profiles
+% across levels. Each profile is summarized by its largest value, its standard
+% deviation across levels, the level at which it peaks, the ratio of its largest to
+% its second-largest value, and the level that splits it into equal sums at finer
+% and coarser levels. The correlation between the maximum and the median profile is
+% also returned.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % wname, the name of the mother wavelet to analyze the data with: e.g., 'db3',
-%           'sym2', cf. Wavelet Toolbox Documentation for details
-%
-% maxlevel, the maximum wavelet decomposition level (can also set to 'max' to be
-%               that determined by wmaxlev)
+%        'sym2', cf. Wavelet Toolbox Documentation for details (default: 'db3')
+% maxlevel, the maximum wavelet decomposition level (can also be set to 'max' to
+%        be that determined by wmaxlev; default: 20, reduced to the wmaxlev
+%        maximum if larger)
 %
 % ---OUTPUTS:
-% Statistics on the detail coefficients.
+% In the following, 'mean', 'median' and 'max' name the three profiles (the mean,
+% median and maximum absolute detail signal at each level):
+% max_mean, max_median, max_max: the largest value across levels
+% std_mean, std_median, std_max: the standard deviation across levels
+% wheremax_mean, wheremax_median, wheremax_max: the level at which the profile is
+%        largest
+% max1on2_mean, max1on2_median, max1on2_max: the ratio of the largest to the
+%        second-largest value across levels
+% wslesr_mean, wslesr_median, wslesr_max: the level where the sum of values at finer
+%        levels is closest to the sum at coarser levels (a measure of centrality
+%        across scales); NaN with fewer than 3 levels
+% corrcoef_max_medians: the correlation, across levels, between the maximum and the
+%        median profile
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

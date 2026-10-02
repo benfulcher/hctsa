@@ -276,10 +276,10 @@ end
 if ~isnan(chanceLevel)
     fprintf(1,['Mean %s across %u features = %4.2f%s\n' ...
             '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        testStatText,numFeatures,nanmean(testStat),statUnit,numClasses,chanceLevel,statUnit);
+        testStatText,numFeatures,mean(testStat,'omitnan'),statUnit,numClasses,chanceLevel,statUnit);
 else
     fprintf(1,'Mean %s across %u features = %4.2f%s\n',...
-        testStatText,numFeatures,nanmean(testStat),statUnit);
+        testStatText,numFeatures,mean(testStat,'omitnan'),statUnit);
 end
 
 %-------------------------------------------------------------------------------
@@ -393,7 +393,7 @@ if ismember('histogram',whatPlots)
         h_real = histogram(testStat,histEdges,'Normalization','probability',...
                                 'FaceColor',colors{5},'EdgeColor','k');
         maxH = max([max(h_real.Values),max(h_null.Values)]);
-        l_meannull = plot(nanmean(testStat_rand(:))*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
+        l_meannull = plot(mean(testStat_rand(:),'omitnan')*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
     end
 
     % Add chance line:
@@ -402,7 +402,7 @@ if ismember('histogram',whatPlots)
     end
 
     % Add mean of real distribution:
-    l_mean = plot(nanmean(testStat)*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
+    l_mean = plot(mean(testStat,'omitnan')*ones(2,1),[0,maxH],'--','color',colors{5},'LineWidth',2);
 
     % Labels:
     xlabel(sprintf('Individual %s %s across %u features',testStatText,statUnit,numFeatures))

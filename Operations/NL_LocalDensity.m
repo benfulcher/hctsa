@@ -1,37 +1,50 @@
 function out = NL_LocalDensity(y, NNR, past, embedParams)
-% NL_LocalDensity     Local density estimates in the time-delay embedding space
+% NL_LocalDensity   How densely the delay-embedded trajectory is sampled around each of its points, and how that density changes along the orbit.
 %
-% Computes a standard k-nearest-neighbor local density estimate at each
-% point of the time-delay embedding: density(i) is proportional to
-% 1/r_NNR(i)^m, where r_NNR(i) is the distance from point i to its NNR-th
-% nearest neighbor (excluding temporally-close points within a Theiler
-% window of "past" samples) and m is the embedding dimension. This
-% operation previously used TSTOOL's 'localdensity', which the original
+% Computes a k-nearest-neighbor estimate of the local probability density at each
+% point of the time-delay embedding: density(i) = (k/Neff) / (V_m * r_k(i)^m),
+% where r_k(i) is the distance from point i to its k-th (k = NNR) nearest
+% neighbor (excluding temporally-close points within a Theiler window of "past"
+% samples), m is the embedding dimension, V_m = pi^(m/2)/Gamma(m/2+1) is the volume
+% of the unit m-ball, and Neff = N_embed - 2*past - 1 is the number of points that
+% can be neighbors. The estimate is computed in units of the series' standard
+% deviation, and its logarithm is analyzed:
+%   log density(i) = log(k/Neff) - log(V_m) - m*log(r_k(i)/std(y)),
+% which makes the outputs independent of the units of y (rescaling the series only
+% shifts the log density, in a way that is removed by measuring distances in
+% standard deviations), and of the number of points for a stationary process.
+% Working with the log density rather than the density itself keeps the
+% statistics well behaved (the density is heavy-tailed, with a few very dense
+% points dominating its mean and standard deviation). To avoid infinite densities
+% when there are repeated values (zero neighbor distance, as in quantized or
+% held series), distances are smoothed as sqrt(r^2 + (0.01*median(r(r>0)))^2).
+% This operation previously used TSTOOL's 'localdensity', which the original
 % author noted was "very poorly documented in the TSTOOL package" -- its
-% exact algorithm was never confirmed, only assumed to be some form of
-% local density estimate in the embedding space, which is what's computed
-% here natively (no toolbox dependency at all). The missing normalizing
-% constant (relating 1/r^m to a true probability density) is the same for
-% every point in a given call, so it cancels out of all of the relative
-% statistics below (min/max/std/mean/median/autocorrelation).
+% exact algorithm was never confirmed; the estimate is now computed natively
+% (no toolbox dependency at all).
+%
+% The result is a series of log-density values in the time order of the embedded
+% points, of length N - (m-1)*tau. The outputs describe its distribution and its
+% serial dependence.
 %
 % ---INPUTS:
-%
 % y, the time series as a column vector
-%
-% NNR, number of nearest neighbours to compute
-%
-% past, Theiler window of time-correlated points to discard: {'ac', k} for k times the first zero-crossing of the autocorrelation
-%       function, or a number of samples (see BF_TheilerWindow)
-%
+% NNR, number of nearest neighbours to compute (default: 3)
+% past, Theiler window of time-correlated points to discard: {'ac', k} for k times
+%       the first zero-crossing of the autocorrelation function, or a number of
+%       samples (see BF_TheilerWindow; default: {'ac',1})
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
-%               tau and m can be characters specifying a given automatic method
-%               of determining tau and/or m (see BF_Embed).
+%              tau and m can be characters specifying a given automatic method
+%              of determining tau and/or m (see BF_Embed; default: {'ac','fnn'})
 %
-% ---OUTPUTS: various statistics on the local density estimates at each point in
-% the time-delay embedding, including the minimum and maximum values, the range,
-% the standard deviation, mean, median, and autocorrelation.
-
+% ---OUTPUTS: statistics of the log local density series (output names retain 'den'):
+% minden, maxden, iqrden, rangeden, stdden, meanden, medianden: minimum, maximum,
+%       interquartile range, range, standard deviation, mean and median
+% ac1den, ac2den, ac3den, ac4den, ac5den: autocorrelation at lags 1 to 5
+% tauacden: the first zero-crossing of the autocorrelation function (with
+%       interpolation)
+% taumiden: the first minimum of the automutual information
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -107,7 +120,7 @@ end
 kFetch = min(N_embed - 1, NNR + 2 * past + 5);
 [idx, dist] = knnsearch(Y, Y, 'K', kFetch + 1);
 
-locden = zeros(N_embed, 1);
+dk = zeros(N_embed, 1); % distance to the NNR-th neighbor outside the Theiler window
 for i = 1:N_embed
 	validDists = dist(i, abs(idx(i, :) - i) > past);
 	if length(validDists) < NNR
@@ -115,14 +128,21 @@ for i = 1:N_embed
 		allDists(abs((1:N_embed)' - i) <= past) = Inf;
 		validDists = sort(allDists);
 	end
-	locden(i) = 1 / (validDists(NNR)^m);
+	dk(i) = validDists(NNR);
 end
 
-if all(locden == 0) || any(~isfinite(locden))
+if ~any(dk > 0) % all neighbor distances are zero (e.g., a constant series)
 	out = NaN; return
 end
+
+% Smooth the distances so that repeated values (zero distances) give a finite density:
+d = sqrt(dk.^2 + (0.01 * median(dk(dk > 0)))^2);
+
+% Log of the k-NN density estimate, with distances in units of the series' SD:
+Neff = N_embed - 2 * past - 1; % number of points that can be neighbors of a given point
+locden = log(NNR / Neff) - ((m / 2) * log(pi) - gammaln(m / 2 + 1)) - m * log(d / std(y));
 % locden is a vector of length equal to the number of points in the
-% embedding space (length of time series - (m-1)*tau), the local density
+% embedding space (length of time series - (m-1)*tau), the log local density
 % estimate at each point
 
 out.minden = min(locden);

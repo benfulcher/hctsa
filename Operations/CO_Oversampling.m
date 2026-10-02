@@ -3,10 +3,7 @@ function out = CO_Oversampling(y)
 %
 % Implements the oversampling-detection statistic eta (and its downsampling
 % correction) from the 'oversampling' stage of the Chaos Decision Tree
-% Algorithm:
-%
-% Toker, D. et al. "A simple method for detecting chaos in nature",
-% Commun. Biol. 3, 11 (2020). DOI: 10.1038/s42003-019-0715-9
+% Algorithm of Toker et al.:
 %
 %   eta = range(y) / mean(|diff(y)|)
 %
@@ -26,33 +23,35 @@ function out = CO_Oversampling(y)
 % Note eta is scale- and location-invariant (a ratio of two amplitude-unit
 % quantities), so z-scored or raw y give identical results.
 %
-% Beyond eta itself, also reports:
-% - etaRobust, the same ratio with range replaced by a 5th-95th percentile
-%   range, since eta's numerator (a global max-min) is a single-outlier-
-%   sensitive statistic; etaRobust asks the same oversampling question
-%   without letting one extreme point set the scale.
-% - numHalvings, the number of times Toker et al.'s halving procedure would
-%   downsample y before eta <= 10 (or fewer than 100 points would remain)
-%   -- a direct, interpretable severity measure.
-% - etaAfterDownsampling, the value of eta after applying numHalvings
-%   halvings (<=10, unless the series was too short to fully correct).
-%
-% Redundancy check (Empirical1000): eta correlates r=0.955 with the existing
-% SY_RangeEvolve.totnuq (both driven by how coarsely a series sets new range
-% records -- exactly what oversampling produces) and etaRobust correlates
-% r=0.972 with plain eta itself (the outlier-robustness case shown above is
-% real but rare in practice on typical data). Both were kept anyway: eta is
-% the literal statistic from the source paper with a specific methodological
-% role (a validity precondition for NL_ZeroOneTest), and etaRobust guards
-% against the single-outlier failure mode even though it rarely differs from
-% eta in practice. numHalvings and etaAfterDownsampling are not redundant
-% with anything existing (max |r| = 0.82, 0.75 respectively).
-%
 % ---INPUTS:
 % y, the input time series
 %
 % ---OUTPUTS:
-% eta, etaRobust, numHalvings, etaAfterDownsampling (see above)
+% eta, the oversampling statistic range(y)/mean(|diff(y)|),
+% etaRobust, the same ratio with range replaced by a 5th-95th percentile range,
+%       since eta's numerator (a global max-min) is sensitive to a single outlier,
+% numHalvings, the number of times Toker et al.'s halving procedure would
+%       downsample y before eta <= 10 (or before fewer than 100 points would
+%       remain): a direct, interpretable severity measure,
+% etaAfterDownsampling, the value of eta after applying numHalvings halvings (<=10,
+%       unless the series was too short to fully correct).
+% All four are NaN if the series has fewer than 10 points or is constant.
+%
+% ---REFERENCES:
+% Toker et al., "A simple method for detecting chaos in nature", Commun. Biol. 3, 11
+% (2020). DOI: 10.1038/s42003-019-0715-9
+%
+% ---NOTES:
+% Redundancy check (on real-world series): eta correlates r=0.955 with the existing
+% SY_RangeEvolve.totnuq (both driven by how coarsely a series sets new range
+% records -- exactly what oversampling produces) and etaRobust correlates
+% r=0.972 with plain eta itself (the outlier-robustness case is real but rare in
+% practice on typical data). Both were kept anyway: eta is the literal statistic
+% from the source paper with a specific methodological role (a validity
+% precondition for NL_ZeroOneTest), and etaRobust guards against the
+% single-outlier failure mode even though it rarely differs from eta in practice.
+% numHalvings and etaAfterDownsampling are not redundant with anything existing
+% (max |r| = 0.82, 0.75 respectively).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

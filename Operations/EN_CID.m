@@ -1,16 +1,32 @@
 function out = EN_CID(y)
-% EN_CID    Simple complexity measure of a time series.
+% EN_CID   Complexity estimate of a time series from the length of its line graph.
 %
-% Estimates of 'complexity' of a time series as the stretched-out length of the
-% lines resulting from a line-graph of the time series.
-%
-% cf. Batista, G. E. A. P. A., Keogh, E. J., Tataw, O. M. & de Souza, V. M. A.
-% CID: an efficient complexity-invariant distance for time series. Data Min.
-% Knowl. Disc. 28, 634–669 (2014). https://doi.org/10.1007/s10618-013-0312-3
+% Estimates the 'complexity' of a time series as the stretched-out length of the
+% line obtained by plotting the series as a line graph (the complexity estimate
+% used in the complexity-invariant distance, CID). Two versions are computed:
+% CE1, the root-mean-square of the increments, and CE2, the mean length of the
+% line segments between successive points (unit time step, by Pythagoras). Each
+% is also computed on the sorted time series, which gives the minimum value
+% possible for these data, and the series' value is expressed as a ratio to it.
+% Sums in the original definitions are replaced by means so that values scale
+% properly with series length.
 %
 % ---INPUTS:
-%
 % y, the input time series
+%
+% ---OUTPUTS:
+% A structure with fields:
+% CE1, sqrt(mean(diff(y).^2))
+% CE2, mean(sqrt(1 + diff(y).^2))
+% minCE1, CE1 of the sorted time series
+% minCE2, CE2 of the sorted time series
+% CE1_norm, CE1/minCE1
+% CE2_norm, CE2/minCE2
+%
+% ---REFERENCES:
+% G. E. A. P. A. Batista, E. J. Keogh, O. M. Tataw, V. M. A. de Souza,
+% "CID: an efficient complexity-invariant distance for time series",
+% Data Min. Knowl. Disc. 28, 634-669 (2014). https://doi.org/10.1007/s10618-013-0312-3
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

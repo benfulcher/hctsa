@@ -1,21 +1,38 @@
 function out = FC_LoopLocalSimple(y, forecastMeth)
-% FC_LoopLocalSimple    How simple local forecasting depends on window length.
+% FC_LoopLocalSimple   How simple local forecast errors change with the number of past values used.
 %
-% Analyzes the outputs of FC_LocalSimple for a range of local window lengths, l.
-% Loops over the length of the data to use for FC_LocalSimple prediction
+% Runs FC_LocalSimple for a range of training lengths l (the number of past values
+% used to forecast the next value), and summarizes how five statistics of the
+% residuals vary with l: the standard deviation (stde), the stationarity measures
+% sws and swm (variation of the local standard deviation and local mean of the
+% residuals across 5 segments), and the residual autocorrelations at lags 1 and 2
+% (ac1, ac2). Requires the Curve Fitting Toolbox, for the exponential fit.
 %
 % ---INPUTS:
-%
 % y, the input time series
 %
 % forecastMeth, the prediction method:
-%            (i) 'mean', local mean prediction
-%            (ii) 'median', local median prediction
+%            (i) 'mean': local mean prediction, with l = 1, 2, ..., 10 (default),
+%            (ii) 'median': local median prediction, with l = 1, 3, ..., 19.
 %
 % ---OUTPUTS:
-% Statistics including whether the mean square error increases or decreases,
-% testing for peaks, variability, autocorrelation, stationarity, and a fit of
-% exponential decay, f(x) = A*exp(Bx) + C, to the variation.
+% Each of the five statistics (stde, sws, swm, ac1, ac2) is followed across l:
+% stde_chn, sws_chn, swm_chn, ac1_chn, ac2_chn: mean change per step divided by the
+%        range of the curve; negative when the statistic falls on the whole as l grows
+% stde_meansgndiff, sws_meansgndiff, swm_meansgndiff, ac1_meansgndiff,
+%        ac2_meansgndiff: mean sign of the changes between successive l (-1 if it
+%        falls at every step, +1 if it rises at every step)
+% sws_stdn, swm_stdn, ac1_stdn, ac2_stdn: standard deviation of the curve divided by
+%        its range
+% stde_peakpos: the position (index in the list of training lengths) of the extreme
+%        value of the stde curve: its maximum if the curve falls on the whole as l
+%        grows (stde_chn < 0), otherwise its minimum
+% stde_peaksize: the stde value at that position divided by the mean of the stde curve
+% sws_fexp_a, sws_fexp_b, sws_fexp_c: the amplitude a, rate b and offset c of an
+%        exponential fit f(l) = a*exp(b*l) + c to the sws curve
+% sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2, adjusted R^2 and root-mean-
+%        square error of that fit
+%        (all six sws_fexp_* fields are NaN if the fit fails)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -102,7 +119,7 @@ out.stde_chn = mean(diff(stats_st(:, 1))) / (range(stats_st(:, 1)));
 out.stde_meansgndiff = mean(sign(diff(stats_st(:, 1))));
 
 % (ii) Is there a peak?
-if out.stde_chn < 1; % on the whole decreasing, as expected
+if out.stde_chn < 0 % on the whole decreasing, as expected: look for a maximum
 	wigv = max(stats_st(:, 1));
 	wig = find(stats_st(:, 1) == wigv, 1, 'first');
 	if wig ~= 1 && stats_st(wig - 1, 1) > wigv
@@ -111,13 +128,13 @@ if out.stde_chn < 1; % on the whole decreasing, as expected
 		wig = NaN; % maximum is not a local maximum; the next value exceeds it
 	end
 else
-	wigv = min(stats_st(:, 1));
+	wigv = min(stats_st(:, 1)); % on the whole increasing: look for a minimum
 	wig = find(stats_st(:, 1) == wigv, 1, 'first');
 
 	if wig ~= 1 && stats_st(wig - 1, 1) < wigv
-		wig = NaN; % maximum is not a local maximum; previous value exceeds it
+		wig = NaN; % minimum is not a local minimum; previous value is below it
 	elseif wig ~= length(trainLengthRange) && stats_st(wig + 1, 1) < wigv
-		wig = NaN; % maximum is not a local maximum; the next value exceeds it
+		wig = NaN; % minimum is not a local minimum; the next value is below it
 	end
 end
 if ~isnan(wig)
@@ -136,13 +153,23 @@ out.sws_stdn = std(stats_st(:, 2)) / range(stats_st(:, 2));
 % Fit exponential decay:
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [range(stats_st(:, 2)), -0.5 min(stats_st(:, 2))]);
 f = fittype('a*exp(b*x)+c', 'options', s);
-[c, gof] = fit(trainLengthRange, stats_st(:, 2), f);
-out.sws_fexp_a = c.a;
-out.sws_fexp_b = c.b; % this is important
-out.sws_fexp_c = c.c;
-out.sws_fexp_r2 = gof.rsquare; % this is more important!
-out.sws_fexp_adjr2 = gof.adjrsquare;
-out.sws_fexp_rmse = gof.rmse;
+try
+	[c, gof] = fit(trainLengthRange, stats_st(:, 2), f);
+	out.sws_fexp_a = c.a;
+	out.sws_fexp_b = c.b; % this is important
+	out.sws_fexp_c = c.c;
+	out.sws_fexp_r2 = gof.rsquare; % this is more important!
+	out.sws_fexp_adjr2 = gof.adjrsquare;
+	out.sws_fexp_rmse = gof.rmse;
+catch
+	% The fit can fail (10 points, 3 parameters), e.g. for a constant or non-finite curve
+	out.sws_fexp_a = NaN;
+	out.sws_fexp_b = NaN;
+	out.sws_fexp_c = NaN;
+	out.sws_fexp_r2 = NaN;
+	out.sws_fexp_adjr2 = NaN;
+	out.sws_fexp_rmse = NaN;
+end
 
 % (3) sliding window mean
 out.swm_chn = mean(diff(stats_st(:, 3))) / (range(stats_st(:, 3)));

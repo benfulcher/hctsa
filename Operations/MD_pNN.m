@@ -1,22 +1,34 @@
 function out = MD_pNN(x)
-% MD_pNN    pNNx measures of heart rate variability.
+% MD_pNN   pNNx measures of heart rate variability.
 %
-% Applies pNNx measures to time series assumed to represent sequences of
-% consecutive RR intervals measured in milliseconds.
+% Applies pNNx measures to a time series assumed to represent a sequence of
+% consecutive RR intervals: the proportion of successive differences that exceed x
+% milliseconds, for x = 5, 10, 20, 30, ..., 100. The code multiplies the differences
+% by 1000, so the series is taken to be in seconds (see NOTES).
 %
-% cf. "The pNNx files: re-examining a widely used heart rate variability
-%           measure", J.E. Mietus et al., Heart 88(4) 378 (2002)
-%
-% ---INPUTS:
-% x, the input time series
-%
-% This code is derived from MD_hrv_classic.m becuase it doesn't make medical
-% sense to do PNN on a z-scored time series.
-%
-% But now PSD doesn't make too much sense, so we just evaluate the pNN measures.
+% This code is derived from MD_hrv_classic.m because it doesn't make medical sense to do
+% pNN on a z-scored time series. But now PSD doesn't make too much sense, so we just
+% evaluate the pNN measures.
 %
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/
+%
+% ---INPUTS:
+% x, the input time series (the raw series: RR intervals)
+%
+% ---OUTPUTS:
+% pnn5, pnn10, pnn20, pnn30, pnn40, pnn50, pnn60, pnn70, pnn80, pnn90, pnn100, the
+%       proportion of the N - 1 successive absolute differences that exceed 5, 10, ...,
+%       100 ms.
+%
+% ---REFERENCES:
+% Mietus et al., "The pNNx files: re-examining a widely used heart rate variability
+% measure", Heart 88(4), 378 (2002).
+%
+% ---NOTES:
+% The differences are multiplied by 1000 (commented as "assume milliseconds as for RR
+% intervals"), which converts seconds to milliseconds: a series already in
+% milliseconds would have its thresholds scaled by 1000.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2016, Max A. Little, <max.a.little@gmail.com>,

@@ -1,11 +1,12 @@
 function out = DN_MinMax(y, minOrMax)
-% DN_MinMax     The maximum and minimum values of the input data vector
+% DN_MinMax   The maximum or minimum value of a data vector.
 %
 % ---INPUTS:
-%
 % y, the input data vector
+% minOrMax, either 'min' or 'max', to return the minimum or maximum of y
 %
-% minOrMax, either 'min' or 'max' to return either the minimum or maximum of y
+% ---OUTPUTS:
+% a scalar: the minimum or maximum of y.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

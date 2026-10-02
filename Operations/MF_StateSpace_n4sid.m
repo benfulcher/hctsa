@@ -1,5 +1,5 @@
 function out = MF_StateSpace_n4sid(y, ord, ptrain, steps)
-% MF_StateSpace_n4sid   State space time-series model fitting.
+% MF_StateSpace_n4sid   A fitted state-space model of the series, and how well it predicts the later part of the series.
 %
 % First fits the model to the whole time series, then trains it on the first
 % portion and tries to predict the rest.
@@ -9,25 +9,60 @@ function out = MF_StateSpace_n4sid(y, ord, ptrain, steps)
 % the length of the time series.
 %
 % This model is then used to predict the latter portion of the time
-% series (i.e., the subsequent (1-p)*N samples).
+% series (i.e., the subsequent (1-p)*N samples), and the prediction residuals
+% (prediction minus data) are summarized with MF_ResidualAnalysis.
 %
-% Model of the form:
-% dx/dt = A x(t) + B u(t) + K e(t)
-% y(t) = C x(t) + D u(t) + e(t)
-% (for state space matrices A, B, C, D), disturbance matrix K (coefficients of
-% noise input), input u, output y, vector of states x, and disturbance (noise) e.
-%
-% ---INPUTS:
-% y, the input time series
-% ord, the order of state-space model to implement (can also be the string 'best')
-% ptrain, the proportion of the time series to use for training
-% steps, the number of steps ahead to predict
-%
-% ---OUTPUTS: parameters from the model fitted to the entire time series, and
-% goodness of fit and residual analysis from n4sid prediction.
+% Model of the form (discrete time, no input, sampling interval 1):
+% x(t+1) = A x(t) + K e(t)
+% y(t) = C x(t) + e(t)
+% for state space matrices A and C, disturbance matrix K (coefficients of
+% noise input), vector of states x, and disturbance (noise) e.
 %
 % Uses the functions iddata, n4sid, aic, and predict from Matlab's System
 % Identification Toolbox
+%
+% ---INPUTS:
+% y, the input time series
+% ord, the order of state-space model to implement (can also be the string 'best',
+%       to let n4sid choose; default: 2)
+% ptrain, the proportion of the time series to use for training (default: 0.5)
+% steps, the number of steps ahead to predict (default: 1)
+%
+% ---OUTPUTS:
+% From the model fitted to the entire time series:
+% A_1, A_2, A_3, A_4, A_5, A_6, A_7, A_8, A_9: the entries of the state-transition
+%       matrix A, counted down each column in turn (ord^2 of them)
+% k_1, k_2, k_3: the entries of the noise-input vector K (ord of them)
+% c_1, c_2, c_3: the entries of the output vector C (ord of them)
+% x0mod: the length of the initial state vector
+% np: the number of parameters fitted
+% Ts: the sampling interval of the model (always 1)
+% noisevar: the estimated noise variance
+% lossfn: the loss function (estimated prediction-error variance)
+% fpe: Akaike's final prediction error
+% bestorder: the order chosen by n4sid (only when ord = 'best')
+% From the residuals of the predictions of the held-out portion (MF_ResidualAnalysis):
+% meane, meanabs, stde, maxonstd: mean, mean absolute value, standard deviation,
+%       and largest absolute value (in standard deviations) of the residuals
+% ac1, ac2, ac3: residual autocorrelation at lags 1 to 3
+% propbth: proportion of the first 25 residual autocorrelations within the
+%       significance band (|r| < 2.6/sqrt(N))
+% ftbth: the first lag at which the residual autocorrelation is within that band
+% taurat: ratio of the residual decorrelation time to the data decorrelation time
+% sws, swm: variability of the residual standard deviation and mean across 5 windows
+% normksstat: Kolmogorov-Smirnov statistic of the residuals against a Gaussian
+% popt, minsbc: the order of the best AR model fitted to the residuals (chosen by
+%       SBC, from 1 to 10) and its SBC
+% ac1diff: absolute lag-1 autocorrelation of the whole time series minus that of
+%       the prediction residuals
+%
+% ---NOTES:
+% The individual entries of A, K, and C depend on the (arbitrary) coordinates of the
+% hidden state, so they are not directly comparable between time series.
+% The residuals are prediction minus data (yp - ytest). The held-out portion
+% starts at sample floor(ptrain*N), overlapping the training portion by one sample.
+% If n4sid cannot fit the training portion, the function errors rather than
+% returning NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -135,8 +170,8 @@ out.Ts = m.Ts;
 out.noisevar = m.NoiseVariance; % a scalar number, basically the fpe
 out.lossfn = m.EstimationInfo.LossFcn; % basically the fpe
 out.fpe = m.EstimationInfo.FPE;
-% (Dropped: aic(m). Rank-identical to fpe -- Spearman 1.0000 on both the Bonn EEG
-%  and Empirical1000 datasets -- so only fpe is kept. The m_ prefix
+% (Dropped: aic(m). Rank-identical to fpe -- Spearman 1.0000 on two collections of
+%  real-world series -- so only fpe is kept. The m_ prefix
 %  on these fields has also been dropped: MF_armax reports the identical toolbox
 %  quantities under the bare names.)
 
@@ -170,7 +205,7 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 % plot the two:
 % plot(y,yp);
 
-mresiduals = ytest.y - yp.y;
+mresiduals = yp.y - ytest.y; % prediction minus data (the MF_ResidualAnalysis convention)
 
 % -------------------------------------------------------------------------------
 % Statistics on residuals

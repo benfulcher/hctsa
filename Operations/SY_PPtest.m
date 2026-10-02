@@ -1,26 +1,43 @@
 function out = SY_PPtest(y, lags, model, testStatistic)
-% SY_PPtest   Phillips-Peron unit root test.
+% SY_PPtest   Phillips-Perron unit root test.
 %
-% Uses the pptest code from Matlab's Econometrics Toolbox.
+% Uses the pptest function from MATLAB's Econometrics Toolbox. The null hypothesis
+% is that the series is a unit-root process; the alternative is that it is
+% stationary (small p-values reject a unit root). The test is run for each of a
+% set of numbers of autocovariance lags, and the outputs summarize the set of
+% tests. (With a single lag, the results of that one test are returned instead.)
 %
 % ---INPUTS:
 % y, the input time series
 %
-% lags, a vector of lags
+% lags, a vector of lags: the numbers of autocovariance lags included in the
+%       Newey-West estimator of the long-run variance (default: 0:5)
 %
-% model, a specified model:
+% model, a specified model (default: 'ar'):
 %               'ar': autoregressive
 %               'ard': autoregressive with drift, or
 %               'ts': trend stationary,
-%               (see Matlab documentation for information)
+%               (see MATLAB documentation for information)
 %
-% testStatistic, the test statistic:
+% testStatistic, the test statistic (default: 't1'):
 %               't1': the standard t-statistic, or
-%               't2' a lag-adjusted, 'unStudentized' t statistic.
-%               (see Matlab documentation for information)
+%               't2': a lag-adjusted, 'unStudentized' t statistic.
+%               (see MATLAB documentation for information)
 %
-% ---OUTPUTS: statistics on the p-values and lags obtained from the set of tests, as
-% well as measures of the regression statistics.
+% ---OUTPUTS:
+% For a vector of lags:
+% minpValue, meanpValue: the minimum and mean p-value across the tests
+% lagmaxp, lagminp: the lag at which the p-value is largest and smallest (the
+%       first such lag in the case of a tie)
+% meanstat: the mean test statistic across the tests
+% minBIC: the minimum, across the tests, of the Bayesian information criterion of
+%       the test regression, per observation
+% For a single lag:
+% pvalue, stat: the p-value and test statistic
+% coeff1: the first regression coefficient
+% loglikelihood, AIC, BIC, HQC: the log likelihood and information criteria of the
+%       test regression, per observation
+% rmse: the root-mean-square error of the regression
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -97,7 +114,7 @@ if nout == 1
 	% Log-likelihood and the information criteria are extensive: they are sums
 	% over observations, so they grow in direct proportion to the time-series
 	% length regardless of how well the model fits (minBIC measured eta^2 = 0.973
-	% against N in the length-dependence audit). Reported per observation, which
+	% against N across series of different lengths). Reported per observation, which
 	% is the standard intensive form and the quantity model comparison actually
 	% depends on.
 	numObs = length(y);
@@ -109,7 +126,7 @@ if nout == 1
 
 else
 	% Return statistics on the set of outputs. maxpValue/stdpValue dropped
-	% (r >= 0.98 with meanpValue on Empirical1000); maxstat/minstat dropped
+	% (r >= 0.98 with meanpValue on real-world series); maxstat/minstat dropped
 	% (r >= 0.97 with meanstat).
 	out.minpValue = min(pValue);
 	out.meanpValue = mean(pValue);
@@ -122,7 +139,7 @@ else
 
 	% Regression statistics: meanloglikelihood/minAIC/minHQC/minrmse/maxrmse
 	% dropped -- confirmed r >= 0.998 with minBIC (and with each other) on
-	% Empirical1000, matching this function's own longstanding comment that
+	% real-world series, matching this function's own longstanding comment that
 	% these are all highly correlated. Per observation -- see the note in
 	% the single-test branch above.
 	numObs = length(y);

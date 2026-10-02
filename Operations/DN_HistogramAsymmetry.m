@@ -1,13 +1,36 @@
 function out = DN_HistogramAsymmetry(y, numBins, doSimple)
-% DN_HistogramAsymmetry  Measures of distributional asymmetry
+% DN_HistogramAsymmetry   Measures of the asymmetry of the histogram of the data.
 %
-% Measures the asymmetry of the histogram distribution of the input data vector.
+% Compares the histograms of the positive and the negative values of a
+% z-scored series. A histogram of numBins equal-width bins is built separately
+% over the range of the positive values and over the range of the negative
+% values, and expressed as proportions of the number of nonzero values. The
+% outputs compare how many values lie on each side, the proportion in the
+% fullest bin on each side, and the location of that bin. A symmetric
+% distribution gives 0 for all the differences and for modeAsymmetry.
+%
+% The input is assumed to be z-scored (a warning is raised otherwise), so that
+% positive and negative values lie above and below the mean.
 %
 % ---INPUTS:
+% y, the input data vector
+% numBins, the number of bins to use in each histogram (default: 10)
+% doSimple, whether to use a simple binning method with linearly spaced bins
+%       (BF_SimpleBinner; true, the default), or MATLAB's histcounts (false)
 %
-% y, the input data vector.
-% numBins, the number of bins to use in the histogram.
-% doSimple, whether to use a simple binning method (linearly spaced bins).
+% ---OUTPUTS:
+% densityDiff, the proportion of nonzero values that are positive minus the
+%       proportion that are negative
+% modeProbPos, the proportion of nonzero values in the fullest bin of the
+%       positive values
+% modeProbNeg, the proportion of nonzero values in the fullest bin of the
+%       negative values
+% modeDiff, modeProbPos - modeProbNeg
+% posMode, the center of the fullest bin of the positive values (the mean of
+%       the centers if several tie)
+% negMode, the center of the fullest bin of the negative values (the mean of
+%       the centers if several tie)
+% modeAsymmetry, posMode + negMode
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -81,7 +104,7 @@ binCentersNeg = mean([binEdgesNeg(1:end - 1); binEdgesNeg(2:end)]);
 % Asymmetry about the mean, as a PROPORTION of the non-zero values (matching the
 % denominator modeProbPos/modeProbNeg below already use). A raw count difference is
 % extensive -- it grows with the time-series length rather than describing the
-% distribution: measured on Empirical1000, |densityDiff| had Spearman rho = 0.45
+% distribution: measured on real-world series, |densityDiff| had Spearman rho = 0.45
 % with series length (values ranged to +/-9070), which normalizing removes (-0.08).
 out.densityDiff = (sum(y > 0) - sum(y < 0)) / NnonZero;
 out.modeProbPos = max(pPos);

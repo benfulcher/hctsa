@@ -1,11 +1,20 @@
 function out = DN_WithinP(x, p, meanOrMedian)
-% DN_WithinP    Proportion of data points within p standard deviations of the mean.
+% DN_WithinP   Proportion of data points within a distance of the center of the distribution.
+%
+% Returns the proportion of data points that lie within p units of the center
+% of the distribution. With 'mean', the center is the mean and the unit is the
+% standard deviation. With 'median', the center is the median and the unit is
+% 1.35 times the interquartile range.
 %
 % ---INPUTS:
 % x, the input data vector
-% p, the number (proportion) of standard deviations.
-% meanOrMedian, whether to use units of 'mean' and standard deviation, or median
-%               and rescaled interquartile range
+% p, the number of units on each side of the center (default: 1)
+% meanOrMedian, the center and unit to use (default: 'mean'):
+%           'mean': the mean and standard deviation
+%           'median': the median and iqr(x)/1.35
+%
+% ---OUTPUTS:
+% a scalar: the proportion of data points within p units of the center.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -59,7 +68,7 @@ switch meanOrMedian
 
 	case 'median'
 		mu = median(x); % median of the time series
-		sig = 1.35 * iqr(x); % rescaled interquartile range of the time series (equal
+		sig = iqr(x) / 1.35; % rescaled interquartile range of the time series (equal
 		% to standard deviation for Gaussian distribution)
 	otherwise
 		error('Unknown setting: ''%s''', meanOrMedian);

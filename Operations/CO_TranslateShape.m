@@ -1,22 +1,40 @@
 function out = CO_TranslateShape(y, shape, d, howToMove)
-% CO_TranslateShape  Statistics on datapoints inside geometric shapes across
-%                    the time series.
+% CO_TranslateShape   Statistics on datapoints inside geometric shapes across the time series.
 %
-% Inputs specify a shape and its size, and a method for moving this shape
-% through the time domain.
+% Inputs specify a shape and its size, and a method for moving this shape through the
+% time domain. The series is treated as points (t, y(t)) in the plane, with t in
+% samples; the shape is centered on each point in turn (excluding a margin at the start
+% and end), and the number of points of the series inside it (counting the central
+% point) forms a sequence on which statistics are computed.
 %
-% This is usually more informative in an embedding space (CO_Embed2_...), but
-% here we do it just in the temporal domain (_t_).
-%
-% In the future, could perform a similar analysis with a soft boundary, some
-% decaying force function V(r), or perhaps truncated...?
+% This is usually more informative in an embedding space (CO_Embed2_...), but here we
+% do it just in the temporal domain (_t_).
 %
 % ---INPUTS:
 % y, the input time series
-% shape, the shape to move about the time-domain (e.g., 'circle')
-% d, a parameter specifying the size of the shape (e.g., d = 2)
-% howToMove, a method specifying how to move the shape about, e.g., 'pts'
-%               places the shape on each point in the time series.
+% shape, the shape to move about the time domain (default 'circle'):
+%        'circle': a circle of radius d, counting points within distance d of the center
+%                  (only points within floor(d) samples can be inside),
+%        'rectangle': a rectangle of half-width d samples in time, with height |y(t)| on
+%                     either side of zero (counts points within d samples whose magnitude
+%                     is at most that of the central point)
+% d, a parameter specifying the size of the shape (default 2)
+% howToMove, how to move the shape about (default 'pts'): 'pts' places the shape on each
+%            point in the time series.
+%
+% ---OUTPUTS:
+% max, std, mean, the maximum, standard deviation and mean of the number of points inside
+%       the shape,
+% npatmode, the proportion of positions at which the count takes its most common value,
+% mode, that most common count (the smallest, if several counts tie),
+% ones, twos, threes, fours, fives, sixes, sevens, eights, nines, tens, elevens, the
+%       proportion of positions with exactly 1, 2, ..., 11 points inside (output only
+%       while 2w+1 is at least the number, where w = floor(d) for the circle and w = d
+%       for the rectangle),
+% statav2_m, statav2_s, statav3_m, statav3_s, statav4_m, statav4_s, the stationarity of
+%       the counts: the standard deviation across 2, 3 or 4 equal segments of their mean
+%       (_m) or their standard deviation (_s), divided by their overall standard
+%       deviation.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -127,7 +145,9 @@ out.mean = mean(np); % mean number of hits
 histnp = arrayfun(@(x)sum(np == x), unique(np));
 
 % Compute mode of the histogram:
-[out.npatmode, out.mode] = max(histnp);
+distinctCounts = unique(np);
+[out.npatmode, idx] = max(histnp);
+out.mode = distinctCounts(idx);
 out.npatmode = out.npatmode / NN;
 
 % Output all stats:

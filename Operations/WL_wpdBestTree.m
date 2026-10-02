@@ -1,44 +1,39 @@
 function out = WL_wpdBestTree(y, wname, maxlevel)
 % WL_wpdBestTree   Adaptive best-basis wavelet packet decomposition.
 %
-% Decomposes the time series with a full wavelet packet tree and then prunes
-% it to the entropy-optimal ("best basis") subtree using the
-% Coifman-Wickerhauser algorithm. Unlike a standard (or maximal-overlap) DWT,
-% which always splits the frequency axis into the same fixed dyadic/octave
-% bands, a wavelet packet tree also splits the detail branches -- and the
-% best-basis search picks a non-uniform partition tailored to the signal:
-% flat/unstructured regions get merged into coarse nodes, while regions with
-% concentrated structure get split down to fine resolution. The statistics
-% here summarize the *shape* of that adaptively-chosen partition and how
-% energy is spread across it, rather than reporting fixed-band energies
-% (which were checked against this dataset and found largely redundant with
-% existing spectral/wavelet features).
+% Decomposes the time series with a full wavelet packet tree and then prunes it to
+% the entropy-optimal ("best basis") subtree using the Coifman-Wickerhauser
+% algorithm. Unlike a standard (or maximal-overlap) DWT, which always splits the
+% frequency axis into the same fixed dyadic/octave bands, a wavelet packet tree
+% also splits the detail branches, and the best-basis search picks a non-uniform
+% partition tailored to the signal: flat/unstructured regions get merged into
+% coarse nodes, while regions with concentrated structure get split down to fine
+% resolution. The statistics here summarize the shape of that adaptively-chosen
+% partition and how energy is spread across it, rather than reporting fixed-band
+% energies (which were checked against this dataset and found largely redundant
+% with existing spectral/wavelet features).
 %
 % ---INPUTS:
 % y, the input time series
-%
 % wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
-%           Documentation)
-%
-% maxlevel, the maximum depth of the initial (pre-pruning) wavelet packet
-%               tree (can be set to 'max' for the maximum level determined
-%               by wmaxlev)
+%        Documentation; default: 'db3')
+% maxlevel, the maximum depth of the initial (pre-pruning) wavelet packet tree (can
+%        be set to 'max' for the maximum level determined by wmaxlev; default: 5)
 %
 % ---OUTPUTS:
 % numLeaves, the number of terminal nodes in the best-basis tree
-% meanDepth, the mean depth of terminal nodes (shallower on average when the
-%               signal is well described by coarse bands)
-% stdDepth, the spread of terminal-node depths (near zero if the best basis
-%               ends up uniform-depth; large if the partition is very uneven)
-% entropy, the Shannon entropy of the energy distribution across terminal
-%               nodes
+% meanDepth, the mean depth of terminal nodes (shallower on average when the signal
+%        is well described by coarse bands)
+% stdDepth, the spread of terminal-node depths (near zero if the best basis ends up
+%        uniform-depth; large if the partition is very uneven)
+% entropy, the Shannon entropy of the energy distribution across terminal nodes
 %
-% (A sixth candidate statistic, the energy fraction in the single most
-% energetic leaf, was checked and dropped: it correlated r=-0.92 to -0.97
-% with entropy across two independent validation datasets -- essentially
-% the same information restated, unlike numLeaves/meanDepth/stdDepth, whose
-% mutual correlations turned out to be dataset-dependent rather than a
-% fixed mathematical relationship.)
+% ---NOTES:
+% A sixth candidate statistic, the energy fraction in the single most energetic leaf,
+% was checked and dropped: it correlated r = -0.92 to -0.97 with entropy across two
+% independent validation datasets, essentially the same information restated, unlike
+% numLeaves/meanDepth/stdDepth, whose mutual correlations turned out to be
+% dataset-dependent rather than a fixed mathematical relationship.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

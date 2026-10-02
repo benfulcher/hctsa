@@ -1,36 +1,82 @@
 function out = SB_TransitionMatrix(y, howtocg, numGroups, tau)
-% SB_TransitionMatrix  Transition probabilities between time-series states.
+% SB_TransitionMatrix   Transition probabilities between time-series states.
 %
-% The time series is coarse-grained according to a given method.
-%
-% The input time series is transformed into a symbolic string using an
-% equiprobable alphabet of numGroups letters. The transition probabilities are
-% calculated at a lag tau.
+% The input time series is coarse-grained into a symbolic string using the given
+% method (by default, an equiprobable alphabet of numGroups letters), and the
+% matrix T of transition frequencies at a lag tau is computed: T(i,j) is the
+% number of consecutive pairs of symbols (state i then state j) divided by the
+% number of pairs, N - 1, where N is the length of the symbolic string. T is
+% therefore a matrix of JOINT probabilities, P(state i, then state j), that sums to
+% 1; it is not row-normalized. Its row sums are the state occupation
+% probabilities, so for an equiprobable ('quantile') coarse-graining each row sums
+% to about 1/numGroups, and T(i,j) is about the transition probability
+% P(j|i) = T(i,j)/sum_j T(i,j) divided by numGroups. Statistics on T are
+% returned, as well as lam2mod, a statistic of the row-normalized matrix P.
 %
 % Related to the idea of quantile graphs from time series.
-% cf. Andriana et al. (2011). Duality between Time Series and Networks. PLoS ONE.
+% cf. A.S.L.O. Campanharo, M.I. Sirer, R.D. Malmgren, F.M. Ramos and L.A.N. Amaral,
+% "Duality between time series and networks", PLoS ONE 6(8), e23378 (2011).
 % https://doi.org/10.1371/journal.pone.0023378
 %
 % ---INPUTS:
 % y, the input time series
+% howtocg, the method of discretization: 'quantile' (equiprobable, the default) or
+%    'updown' (a true binary up/down split by the sign of each increment: NOT
+%    equiprobable, and requires numGroups = 2; see SB_CoarseGrain.m). Other
+%    SB_CoarseGrain methods could be incorporated in future.
+% numGroups, the number of groups in the coarse-graining (default: 2)
+% tau, analyze transition matrices corresponding to this lag (default: 1). We
+%    could either downsample the time series at this lag and then do the
+%    discretization as normal, or do the discretization and then just look at this
+%    discrete lag. Here we do the former (using resample). Can also set tau to 'ac'
+%    to set tau to the first zero-crossing of the autocorrelation function (capped
+%    at floor(N/50) for a series of length N).
 %
-% howtocg, the method of discretization: 'quantile' (equiprobable, the
-%           default) or 'updown' (a true binary up/down split by the sign of
-%           each increment -- NOT equiprobable, and requires numGroups=2; see
-%           SB_CoarseGrain.m). Other SB_CoarseGrain methods could be
-%           incorporated in future.
+% ---OUTPUTS:
+% A structure with fields, including the entries of the joint-probability matrix T
+% itself, as well as the trace of T, measures of its asymmetry, and its
+% eigenvalues. In the definitions below, T' is the transpose of T, eig(T) are its
+% (possibly complex) eigenvalues, and K = numGroups.
+% T1, T2, ..., T9: the entries of T in column-major order, T1 = T(1,1), T2 = T(2,1),
+%    T3 = T(1,2), T4 = T(2,2), ... (T(i,j) = probability of state i followed by
+%    state j); T1 to T4 if numGroups = 2, T1 to T9 if numGroups = 3
+% TD1, TD2, ..., TDk: the diagonal entries T(i,i), if numGroups > 3
+% ondiag, the trace of T, sum_i T(i,i) (probability of staying in the same state)
+% stddiag, the standard deviation of the diagonal entries of T (normalized by K - 1)
+% symdiff, the sum of absolute differences between T and its transpose,
+%    sum_ij |T(i,j) - T(j,i)|
+% symsumdiff, the sum of the strictly lower triangle of T minus the sum of its
+%    strictly upper triangle (net probability of moving to a lower versus a
+%    higher state, with state 1 the lowest)
+% transKLdiv, the Kullback-Leibler-type divergence sum(T.*log(T./T')) over the
+%    entries (i,j) where both T(i,j) and T(j,i) are positive
+% stdeig, the standard deviation of eig(T) (normalized by K - 1)
+% maxeig, the maximum real part of eig(T) (equal to 1/K up to sampling error for
+%    equiprobable states, so not informative)
+% mineig, the minimum real part of eig(T)
+% maximeig, the maximum imaginary part of eig(T)
+% secondeig, the second largest real part of eig(T)
+% specgap, maxeig - secondeig
+% lam2mod, the modulus of the second-largest-modulus eigenvalue of the
+%    row-normalized transition matrix P(i,j) = T(i,j)/sum_j T(i,j), the
+%    probability of moving to state j given that the series is in state i. The
+%    largest eigenvalue of P is 1, so lam2mod is in [0, 1], and measures the
+%    persistence of the Markov chain (the slowest relaxation of the state
+%    distribution): near 0 for a memoryless chain and near 1 for a very persistent
+%    one. NaN if some state never occurs as the source of a transition (a zero row
+%    of T).
+% transEntropy, the Miller-Madow-corrected entropy of the pair distribution minus
+%    that of its row marginal (the conditional entropy of the next state), in nats
+% sumdiagcov, the trace of the covariance matrix of T, cov(T) (the K-by-K
+%    covariance matrix between the columns of T), i.e., the sum of the variances of
+%    the columns of T (normalized by K - 1)
+% stdeigcov, the standard deviation of the eigenvalues of cov(T)
+% maxeigcov, the maximum eigenvalue of cov(T)
+% mineigcov, the minimum eigenvalue of cov(T)
+% NaN (instead of a structure) is returned if tau cannot be determined.
 %
-% numGroups: number of groups in the course-graining
-%
-% tau: analyze transition matricies corresponding to this lag. We
-%      could either downsample the time series at this lag and then do the
-%      discretization as normal, or do the discretization and then just
-%      look at this dicrete lag. Here we do the former. Can also set tau to 'ac'
-%      to set tau to the first zero-crossing of the autocorrelation function.
-%
-% ---OUTPUTS: include the transition probabilities themselves, as well as the trace
-% of the transition matrix, measures of asymmetry, and eigenvalues of the
-% transition matrix.
+% maxeig and specgap are computed but not used as hctsa features (maxeig is
+% about 1/K for equiprobable states; specgap is then secondeig up to a constant).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -78,6 +124,9 @@ if nargin < 4 || isempty(tau)
 end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if tau > length(y) / 50 % for highly-correlated signals (as in SB_TransitionPAlphabet)
+		tau = floor(length(y) / 50);
+	end
 end
 if isnan(tau)
 	out = NaN; return
@@ -181,20 +230,33 @@ out.mineig = min(real(eigT)); % minimum eigenvalue
 out.maximeig = max(imag(eigT)); % maximum imaginary part of eigenvalues
 
 % Second-largest eigenvalue and spectral gap: for the 'quantile' coarse-
-% graining (equiprobable by construction), the marginal (row/column sums) is
-% close to uniform, which pins the leading eigenvalue near 1/numGroups
-% regardless of temporal structure -- it's the second-largest eigenvalue that
-% reflects the Markov chain's mixing rate (a smaller gap indicates slower
-% relaxation, i.e. longer memory). This doesn't hold for SB_CoarseGrain's
-% non-equiprobable methods ('updown', 'embed2quadrants'/'embed2octants'),
-% where the marginal (and hence the leading eigenvalue) can vary meaningfully
-% with the data -- these fields aren't registered for the numGroups=2 case
-% regardless of coarse-graining method (see the mops file: for 'quantile' it
-% would duplicate SB_MotifTwo_median, for 'updown' SB_MotifTwo_diff).
+% graining (equiprobable by construction), T = diag(occupation probabilities) * P
+% is close to P / numGroups, so its leading eigenvalue is near 1/numGroups
+% regardless of temporal structure (maxeig and specgap are therefore not
+% registered as features), and its other eigenvalues are those of the
+% row-normalized matrix P divided by numGroups. This doesn't hold for
+% SB_CoarseGrain's non-equiprobable methods ('updown',
+% 'embed2quadrants'/'embed2octants'), where the marginal (and hence the leading
+% eigenvalue) can vary meaningfully with the data.
 % numGroups < 2 is already rejected above, so a second eigenvalue always exists:
 realEig = sort(real(eigT), 'descend');
 out.secondeig = realEig(2);
 out.specgap = out.maxeig - out.secondeig;
+
+% Modulus of the second-largest-modulus eigenvalue of the row-normalized
+% transition matrix P(i,j) = T(i,j) / sum_j T(i,j) = P(j|i). P is row-stochastic,
+% so its leading eigenvalue is 1 and lam2mod in [0, 1] measures the persistence of
+% the chain (the decay rate of the slowest mode of the state distribution), without
+% the dependence of eig(T) on the state occupation probabilities. A state that
+% never occurs as a source (zero row of T) has no defined transition
+% probabilities, so lam2mod is NaN.
+srcProb = sum(T, 2); % probability of each state being the source of a transition
+if any(srcProb == 0)
+	out.lam2mod = NaN;
+else
+	absEigP = sort(abs(eig(T ./ srcProb)), 'descend'); % moduli of eigenvalues of P
+	out.lam2mod = absEigP(2);
+end
 
 % (vii) Transition (conditional) entropy rate, H(X_{t+1}|X_t), treating T as a
 % first-order Markov approximation: H(joint) - H(marginal)

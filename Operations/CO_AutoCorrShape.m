@@ -1,12 +1,44 @@
 function out = CO_AutoCorrShape(y, stopWhen)
-% CO_AutoCorrShape   How the autocorrelation function changes with the time lag.
+% CO_AutoCorrShape   The shape of the autocorrelation function (ACF).
 %
-% Outputs include the number of peaks, and autocorrelation in the
-% autocorrelation function (ACF) itself.
+% Computes the ACF at lags 0, 1, 2, ... up to a cutoff set by stopWhen, then
+% summarizes the retained curve: its length, sum and mean, its own
+% autocorrelation (treating the ACF as a series), the number and sharpness of its
+% local minima and maxima, and (for 'posDrown') a fitted exponential decay.
 %
 % ---INPUTS:
 % y, the input time series
-% stopWhen, the criterion for the maximum lag to measure the ACF up to.
+% stopWhen, the criterion for the maximum lag of the ACF:
+%           'posDrown': the initial positive stretch, up to the first value below
+%                       the significance threshold 2/sqrt(N) (or just before it
+%                       turns negative); the default,
+%           'drown': up to the first lag where the ACF is within +/-2/sqrt(N) of
+%                    zero,
+%           'doubleDrown': up to twice that lag,
+%           or a positive integer, the maximum lag.
+%
+% ---OUTPUTS:
+% Nac, the number of lags in the initial positive stretch ('posDrown'), or the
+%       first lag within the threshold band of zero (otherwise),
+% sumacf, meanacf, the sum and mean of the ACF values retained,
+% sumabsacf, meanabsacf, the sum and mean of their absolute values (not output
+%       for 'posDrown', where the ACF is positive),
+% ac1, the lag-1 autocorrelation of the retained ACF (NaN for fewer than 6 values),
+% actau, the autocorrelation of the retained ACF at the lag where its own
+%       autocorrelation first crosses zero (NaN if the ACF is all positive),
+% nminima, nmaxima, nextrema, the number of local minima, maxima and extrema,
+% pextrema, the proportion of retained points that are local extrema,
+% meanminima, meanmaxima, the mean second difference at the local minima, and its
+%       magnitude at the local maxima (NaN if there are none),
+% decayTimescale, the timescale 1/b of an exponential decay exp(-b*k) fitted to the
+%       ACF ('posDrown' only, with at least 4 points; NaN otherwise),
+% fexpacf_r2, the R^2 of that fit,
+% fexpacf_stdres, the standard deviation of the residuals of that fit (the ACF minus
+%       exp(-b*k)).
+%
+% ---NOTES:
+% The exponential fit uses the Curve Fitting Toolbox.
+% Nac counts points for 'posDrown' but is a lag for the other options.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -237,7 +269,7 @@ if fitSuccess % Fit was successful
 	% out.fexpacf_adjr2 = gof.adjrsquare;
 	% out.fexpacf_rmse = gof.rmse;
 
-	expfit = exp(c.b * (0:Nac - 1)');
+	expfit = exp(-c.b * (0:Nac - 1)');
 	residuals = acf - expfit;
 	out.fexpacf_stdres = std(residuals);
 

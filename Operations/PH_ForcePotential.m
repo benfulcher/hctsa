@@ -1,39 +1,50 @@
 function out = PH_ForcePotential(y, whatPotential, params)
-% PH_ForcePotential   Couples the values of the time series to a dynamical system
+% PH_ForcePotential   Statistics of a simulated particle in a potential well, pushed by the time series.
 %
-% The input time series forces a particle in the given potential well.
+% The time series is used as a time-varying force on a simulated particle (with
+% position x and velocity v) that also feels a potential and friction. The
+% particle is simulated for as many time steps as the series has points, with
+% the force from the potential and the next value of the series added at each step:
+%     x(t) = x(t-1) + v(t-1) dt + (F(x(t-1)) + y(t-1) - kappa v(t-1)) dt^2
+%     v(t) = v(t-1) + (F(x(t-1)) + y(t-1) - kappa v(t-1)) dt
+% The outputs are statistics of the trajectory x(t). The potentials are:
 %
-% The time series contributes to a forcing term on a simulated particle in a:
+% (i) A quartic double-well potential with V(x) = x^4/4 - alpha^2 x^2/2, and so
+%     force F(x) = -x^3 + alpha^2 x, with wells at x = +alpha and x = -alpha.
 %
-% (i) Quartic double-well potential with potential energy V(x) = x^4/4 - alpha^2
-%           x^2/2, or a force F(x) = -x^3 + alpha^2 x
-%
-% (ii) Sinusoidal potential with V(x) = -cos(x/alpha), or F(x) = sin(x/alpha)/alpha
+% (ii) A sinusoidal potential with V(x) = -cos(x/alpha), and so force
+%     F(x) = -sin(x/alpha)/alpha.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % whatPotential, the potential function to simulate:
-%               (i) 'dblwell' (a double well potential function)
-%               (ii) 'sine' (a sinusoidal potential function)
+%       'dblwell': a double-well potential
+%       'sine': a sinusoidal potential
+%       Default: 'dblwell'.
+% params, the parameters of the simulation, [alpha, kappa, deltat]:
+%       alpha, for the double well, the position of the wells (+/-alpha); for the
+%           sinusoid, sets the period of the oscillations in the potential
+%       kappa, the coefficient of friction
+%       deltat, the time step of the simulation
+%       Defaults: [2, 0.1, 0.1] for 'dblwell' and [1, 1, 1] for 'sine'.
 %
-% params, the parameters for simulation, should be in the form:
-%                   params = [alpha, kappa, deltat]
+% ---OUTPUTS: statistics of the trajectory of the particle (a scalar NaN if the
+% trajectory blows up, or ends beyond 1e10):
+% mean, median, std, range, the mean, median, standard deviation and range of x
+% proppos, the proportion of time steps at which x is positive
+% pcross, the proportion of time steps at which x crosses zero
+% pcrossup, pcrossdown (double well only), the proportions of time steps at which x
+%       crosses the center of the upper (x = alpha) and lower (x = -alpha) well
+% ac1, ac10, ac50, the magnitude (absolute value) of the autocorrelation of x at
+%       lags 1, 10 and 50
+% tau, the first zero-crossing of the autocorrelation function of x
+% finaldev, the magnitude of the final position, |x(end)|
 %
-%           (i) The double-well potential has three parameters:
-%               - alpha controls the relative positions of the wells,
-%               - kappa is the coefficient of friction,
-%               - deltat sets the time step for the simulation.
-%
-%           (ii) The sinusoidal potential also has three parameters:
-%               - alpha controls the period of oscillations in the potential
-%               - kappa is the coefficient of friction,
-%               - deltat sets the time step for the simulation.
-%
-% ---OUTPUTS:
-% Statistics summarizing the trajectory of the simulated particle,
-% including its mean, the range, proportion positive, proportion of times it
-% crosses zero, its autocorrelation, final position, and standard deviation.
+% ---NOTES:
+% The update is the semi-implicit (symplectic) Euler scheme, x(t) = x(t-1) + v(t) dt
+% with the new velocity v(t), which is the form written above. It is not the
+% constant-acceleration formula (which has dt^2/2 and is not symplectic): that
+% variant makes the double-well simulation blow up for many series and parameter sets.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -96,7 +107,7 @@ deltat = params(3); % time step
 switch whatPotential
 	case 'sine'
 		V = @(x) -cos(x / alpha);
-		F = @(x) sin(x / alpha) / alpha;
+		F = @(x) -sin(x / alpha) / alpha; % F = -dV/dx
 	case 'dblwell'
 		F = @(x) -x.^3 + alpha^2 * x; % the double well function (the force from a double well potential)
 		V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2;

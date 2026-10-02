@@ -1,34 +1,43 @@
 function out = IN_MultivariateAMI(y, tauMethod, estMethod, extraParam)
-% IN_MultivariateAMI   Multivariate automutual information, I(x_t; x_{t-tau}, x_{t-2tau})
+% IN_MultivariateAMI   Multivariate automutual information, I(x_t; x_{t-tau}, x_{t-2tau}).
 %
 % Measures how much information the past two points (spaced tau apart, with tau
 % estimated from the series' own autocorrelation structure) jointly carry about
-% the present -- and, via the synergy field, whether that joint information
-% exceeds or falls short of the sum of the pairwise automutual informations at
-% tau and 2*tau individually. Positive synergy means the two lagged points are
-% jointly more informative than either alone would suggest (interaction
-% structure); negative synergy means x_{t-2tau} is mostly redundant with
-% x_{t-tau} once you already know it.
+% the present, and, via the synergy field, whether that joint information exceeds
+% or falls short of the sum of the pairwise automutual informations at tau and
+% 2*tau individually. Positive synergy means the two lagged points are jointly
+% more informative than either alone would suggest (interaction structure);
+% negative synergy means x_{t-2tau} is mostly redundant with x_{t-tau} once you
+% already know it.
 %
 % ---INPUTS:
+% y, the input time series (column vector, expected z-scored)
+% tauMethod, how to select the time delay, tau (as for BF_Embed):
+%    'ac' (default): the first zero-crossing of the autocorrelation function
+%    'mi': the first minimum of the (Gaussian) automutual information
+%    a fixed positive integer
+% estMethod, the estimation method used to compute the mutual information:
+%    'gaussian' (default): closed-form, via the multiple correlation coefficient,
+%        -0.5*log(1 - R^2); fast, but blind to nonlinear/non-Gaussian structure
+%    'kraskov1', 'kraskov2': nonparametric KSG estimators (Information Dynamics
+%        Toolkit)
+% extraParam, the number of nearest neighbors for the Kraskov estimators, as a
+%    string (default: '4'; cf. IN_Initialize_MI.m)
 %
-% y: input time series (column vector, expected z-scored)
+% ---OUTPUTS:
+% A structure with fields:
+% tau, the time delay used (in samples)
+% multiAMI, the information that x_{t-tau} and x_{t-2tau} jointly carry about x_t
+%    (in nats)
+% ami_2tau, the automutual information between x_{t-2tau} and x_t (in nats)
+% ami_tau, the automutual information between x_{t-tau} and x_t (in nats)
+% synergy, multiAMI - ami_tau - ami_2tau
+% NaN (instead of a structure) is returned if tau cannot be determined or fewer
+% than 20 embedded points remain.
 %
-% tauMethod: how to select the time delay, tau (as for BF_Embed):
-%           (*) 'ac' (default): first zero-crossing of the autocorrelation function
-%           (*) 'mi': first minimum of the (gaussian) automutual information
-%           (*) a fixed positive integer
-%
-% estMethod: the estimation method used to compute the mutual information:
-%           (*) 'gaussian' (default): closed-form, via the multiple correlation
-%               coefficient -- fast, but blind to nonlinear/non-Gaussian structure
-%           (*) 'kraskov2': nonparametric KSG estimator (Information Dynamics Toolkit)
-%
-% extraParam: number of nearest neighbors for the Kraskov estimator (default '4',
-%             cf. IN_Initialize_MI.m)
-%
-% cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
-% information: http://dx.doi.org/10.1103/PhysRevE.69.066138
+% ---REFERENCES:
+% A. Kraskov, H. Stoegbauer, P. Grassberger, "Estimating mutual information",
+% http://dx.doi.org/10.1103/PhysRevE.69.066138
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

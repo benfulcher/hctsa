@@ -1,19 +1,19 @@
 function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
-% NL_EmbedCluster   Gaussian-mixture clustering structure in a time-delay embedding space
+% NL_EmbedCluster   Whether the time-delay embedding of the series forms separate clusters of points.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA,
 % NL_EmbedKernelPCA) and fits Gaussian mixture models with a small grid of
-% component counts to the resulting point cloud. A dynamical process whose
-% trajectory visits distinct regions of phase space (e.g., alternating
-% between two attractor states, or a system with intermittent bursts) leaves
-% a multi-modal point cloud in the embedding; a process with a single smooth
-% (e.g., unimodal-stochastic or single-loop periodic) attractor does not.
-% This is a distinct signal from marginal-distribution multi-modality (e.g.
-% DN_ kurtosis/bimodality stats on the raw values), since two states can
-% overlap entirely in amplitude yet still separate cleanly once lagged
-% coordinates are added, and from regime-switching detected by MF_hmm_Fit /
-% MF_hmm_CompareNStates, which cluster points in raw-amplitude (not
-% lagged/embedded) space.
+% component counts (1,...,kMax) to the resulting point cloud. A dynamical
+% process whose trajectory visits distinct regions of phase space (e.g.,
+% alternating between two attractor states, or a system with intermittent
+% bursts) leaves a multi-modal point cloud in the embedding; a process with a
+% single smooth (e.g., unimodal-stochastic or single-loop periodic) attractor
+% does not. This is a distinct signal from marginal-distribution
+% multi-modality (e.g. DN_ kurtosis/bimodality stats on the raw values), since
+% two states can overlap entirely in amplitude yet still separate cleanly once
+% lagged coordinates are added, and from regime-switching detected by
+% MF_hmm_Fit / MF_hmm_CompareNStates, which cluster points in raw-amplitude
+% (not lagged/embedded) space.
 %
 % Rather than reporting only the BIC-optimal number of components (a
 % discrete, model-selection-driven output that can be noisy/discontinuous
@@ -23,16 +23,12 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 %
 % ---INPUTS:
 % y, the input time series
-%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%               zero-crossing of the autocorrelation function or first minimum
-%               of the automutual information, respectively
-%
+%      zero-crossing of the autocorrelation function or first minimum of the
+%      automutual information, respectively (default: 'ac')
 % m, the embedding dimension (default: 2)
-%
 % kMax, the maximum number of Gaussian mixture components to consider when
 %       searching for the BIC-optimal component count (default: 4)
-%
 % maxN, the maximum number of embedded points used to fit the mixture models.
 %       Defaults to 'full' (no cropping) -- measured cost is cheap and scales
 %       mildly with N, unlike hctsa's O(N^3)-type operations. Set to a number
@@ -44,7 +40,8 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % ---OUTPUTS:
 % bestK, the BIC-optimal number of mixture components over 1:kMax
 % dBIC, the relative BIC improvement of the best fit over a single
-%       (unimodal) Gaussian fit; 0 when bestK == 1 (no clustering evidence)
+%       (unimodal) Gaussian fit, (BIC_1 - BIC_best)/|BIC_1|; 0 when bestK == 1
+%       (no clustering evidence)
 % sep_mahal, log1p-compressed Mahalanobis separation between the two
 %       component means of a fixed 2-component fit, using their pooled
 %       covariance (log-compressed to tame the heavy tail from
@@ -76,14 +73,13 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % clean sine wave (bestK=4, dBIC~0.4, sep_mahal~1.3 -- curvature, not
 % multi-modality).
 %
-% Redundancy-checked (r>=0.9 threshold) against MF_hmm_Fit,
-% MF_hmm_CompareNStates, CO_Embed2_Shapes and NL_EmbedKernelPCA on Bonn EEG
-% (500 series, max|r|=0.79) and Empirical1000 (1000 series). On Empirical1000,
-% the pre-log1p sep_mahal correlated r=0.98 (Pearson) with
-% MF_hmm_CompareNStates.chLLtrain -- but this was entirely driven by two
-% chaotic-map series (logistic, Ricker) whose near-noiseless embeddings
-% collapse onto a thin curve, producing near-singular pooled covariance and
-% raw Mahalanobis separations >2000; Spearman r was only 0.50, and trimming
+% Redundancy-checked (r>=0.9 threshold) against MF_hmm_Fit, MF_hmm_CompareNStates,
+% CO_Embed2_Shapes and NL_EmbedKernelPCA on two collections of real-world series
+% (max|r|=0.79 on the first). On the second, the pre-log1p sep_mahal correlated
+% r=0.98 (Pearson) with MF_hmm_CompareNStates.chLLtrain -- but this was entirely
+% driven by two chaotic-map series (logistic, Ricker) whose near-noiseless
+% embeddings collapse onto a thin curve, producing near-singular pooled covariance
+% and raw Mahalanobis separations >2000; Spearman r was only 0.50, and trimming
 % the top 1% by |chLLtrain| dropped Pearson r to 0.21. The log1p compression
 % above (motivated independently, by the same degenerate cases) resolves this
 % apparent redundancy along with the numerical issue.
@@ -198,7 +194,11 @@ gmModels = cell(kMax, 1);
 % reproducible results independent of what ran before this operation:
 rngState = rng(0, 'twister');
 try
-	gmModels{1} = fitgmdist(y_gmm, 1);
+	% (same covariance regularization and replicates as the k >= 2 fits below, so
+	% that the BIC values are comparable and the fit survives a near-singular cloud)
+	gmModels{1} = fitgmdist(y_gmm, 1, 'CovarianceType', 'full', ...
+							'RegularizationValue', regVal, 'Replicates', 3, ...
+							'Options', gmOptions, 'Start', 'plus');
 	BIC(1) = gmModels{1}.BIC;
 catch
 	% A single-component Gaussian fit failing (degenerate covariance) means
@@ -258,8 +258,8 @@ mahal_raw = sqrt(dMu / pooledCov * dMu');
 % near-deterministic embeddings (e.g. low-noise chaotic maps, whose points
 % collapse onto a thin curve), where pooledCov can be near-singular and
 % mahal_raw explodes to values in the thousands despite no real multi-modal
-% structure (empirically confirmed on the logistic/Ricker map series in the
-% Empirical1000 corpus: mahal_raw > 2000 vs. a typical well-separated
+% structure (empirically confirmed on logistic and Ricker map series:
+% mahal_raw > 2000 vs. a typical well-separated
 % two-regime process giving mahal_raw ~ 10-15). The log keeps sep_mahal
 % monotonic in separation while preventing these degenerate cases from
 % dominating any downstream (e.g. z-scored, correlation-based) analysis:

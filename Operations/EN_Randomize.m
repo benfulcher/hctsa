@@ -1,34 +1,62 @@
 function out = EN_Randomize(y, randomizeHow, randomSeed)
-% EN_Randomize  How time-series properties change with increasing randomization.
+% EN_Randomize   How properties of the series change as it is progressively randomized.
 %
-% Progressively randomizes the input time series according to a specified
-% randomization procedure.
-%
-% The procedure is repeated 2N times, where N is the length of the time series.
+% Randomizes a copy of the input (z-scored) series one point at a time, according
+% to a randomization procedure, repeated 2N times for a series of length N, and
+% compares statistics of the randomized copy with the original at 21 checkpoints:
+% at the start and after every N/10 steps.
 %
 % ---INPUTS:
 % y, the input (z-scored) time series
-%
-% randomizeHow, specifies the randomization scheme for each iteration:
-%      (i) 'statdist' -- substitutes a random element of the time series with
-%                           one from the original time-series distribution
-%      (ii) 'dyndist' -- overwrites a random element of the time
-%                       series with another random element
-%      (iii) 'permute' -- permutes pairs of elements of the time
-%                       series randomly
-%
+% randomizeHow, what one step of randomization does:
+%       'statdist': overwrites a random element of the series with a randomly
+%                   chosen element of the original series
+%       'dyndist': overwrites a random element of the series with another random
+%                  element of the current, partially randomized series
+%       'permute': swaps two randomly chosen elements of the series, so that the
+%                  distribution of values never changes and only the temporal
+%                  properties do
+%       Default: 'statdist'.
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
-% ---OUTPUTS: summarize how the properties change as one of these
-% randomization procedures is iterated, including the cross correlation with the
-% original time series, the autocorrelation of the randomized time series, its
-% entropy, and stationarity.
+% ---OUTPUTS: for each of ten statistics measured at each checkpoint, six or seven
+% fields describing its trajectory over the 21 checkpoints. The statistics are:
+% xcn1, xc1: the cross-correlation of the original and randomized series at lags
+%       -1 and +1
+% d1: the distance between the original and randomized series, norm(y - y_rand) / N
+% ac1, ac2, ac3, ac4: the autocorrelation of the randomized series at lags 1 to 4
+% permen3_1: the normalized permutation entropy PermEn(3,1) of the randomized series
+% statav5: StatAv with 5 segments (the standard deviation of the segment means)
+% swss5_1: the standard deviation across 5 non-overlapping windows of the local
+%       standard deviation, relative to the full-series standard deviation
+% The fields are named by joining a statistic's name to a suffix:
+% xcn1, xc1, ac1, ac2, ac3, ac4 (fits of a * exp(b * k), k the checkpoint number
+% 1..21) have the suffixes fexpa, fexpb (the parameters a and b), fexpr2 (R^2),
+% fexprmse (root-mean-square error), diff and hp:
+%       xcn1fexpa, xcn1fexpb, xcn1fexpr2, xcn1fexprmse, xcn1diff, xcn1hp, xc1fexpa,
+%       xc1fexpb, xc1fexpr2, xc1fexprmse, xc1diff, xc1hp, ac1fexpa, ac1fexpb,
+%       ac1fexpr2, ac1fexprmse, ac1diff, ac1hp, ac2fexpa, ac2fexpb, ac2fexpr2,
+%       ac2fexprmse, ac2diff, ac2hp, ac3fexpa, ac3fexpb, ac3fexpr2, ac3fexprmse,
+%       ac3diff, ac3hp, ac4fexpa, ac4fexpb, ac4fexpr2, ac4fexprmse, ac4diff, ac4hp
+% d1, permen3_1, statav5, swss5_1 (fits of a * exp(b * k) + c) have the same
+% suffixes plus fexpc (the offset c):
+%       d1fexpa, d1fexpb, d1fexpc, d1fexpr2, d1fexprmse, d1diff, d1hp,
+%       permen3_1fexpa, permen3_1fexpb, permen3_1fexpc, permen3_1fexpr2,
+%       permen3_1fexprmse, permen3_1diff, permen3_1hp, statav5fexpa, statav5fexpb,
+%       statav5fexpc, statav5fexpr2, statav5fexprmse, statav5diff, statav5hp,
+%       swss5_1fexpa, swss5_1fexpb, swss5_1fexpc, swss5_1fexpr2, swss5_1fexprmse,
+%       swss5_1diff, swss5_1hp
+% In all cases diff is the absolute change |s_end - s_start| of the statistic between
+% the first and last checkpoints and hp is the number of the first checkpoint at which
+% the statistic passes halfway between its start and end values.
 %
-% These statistics are calculated every N/10 iterations, and thus 20 times
-% throughout the process in total.
-%
-% Most statistics measure how these properties decay with randomization, by
-% fitting a function f(x) = Aexp(Bx).
+% ---NOTES:
+% Requires the Curve Fitting Toolbox.
+% diff is an absolute change, not a change relative to the starting value, because
+% the starting value (e.g., the autocorrelation of the original series at lag 2) can be
+% near 0, where a relative change is unstable. All the statistics are on a bounded,
+% dimensionless scale (correlations, a normalized entropy, and standard deviations
+% of the z-scored series), so the absolute change is comparable across series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -297,7 +325,7 @@ end
 % -------------------------------------------------------------------------------
 function out = assignExtraStats(out, dataVector, fieldName)
 	% Assigns 2 extra statistics about a data vector:
-	out.([fieldName, 'diff']) = abs((dataVector(end) - dataVector(1)) / dataVector(1));
+	out.([fieldName, 'diff']) = abs(dataVector(end) - dataVector(1));
 	out.([fieldName, 'hp']) = SUB_gethp(dataVector);
 end
 

@@ -1,47 +1,60 @@
 function out = NW_OrdinalPartitionNetwork(y, d, tau)
-% NW_OrdinalPartitionNetwork    Ordinal partition transition network measures
+% NW_OrdinalPartitionNetwork   Ordinal partition transition network measures.
 %
-% Symbolizes the time series into ordinal patterns (Bandt-Pompe) and builds
-% a directed transition network in which nodes are the ordinal patterns
-% actually observed and edges connect a pattern to whichever pattern
-% immediately follows it in time. Network-topological measures of this
-% ordinal partition transition network are then computed.
+% Symbolizes the time series into ordinal patterns (Bandt-Pompe) and builds a
+% directed transition network in which nodes are the ordinal patterns actually
+% observed and edges connect a pattern to whichever pattern immediately follows it
+% in time. Network-topological measures of this ordinal partition transition
+% network are then computed. The network is unweighted: an edge exists if the
+% transition occurs at least once (self-transitions included).
 %
-% cf. "Using ordinal partition transition networks to analyze ECG data"
-% C.W. Kulp, J.M. Chobot, H.R. Freitas, G.D. Sprechini, Chaos 26, 073114 (2016)
-%
-% cf. "Streaming feature-based causal graph discovery"... (unrelated); see
-% instead: M. McCullough, M. Small, T. Stemler, H.H.-C. Iu, "Time lagged
-% ordinal partition networks for capturing dynamics of continuous dynamical
-% systems", Chaos 25, 053101 (2015) -- the original (weighted) ordinal
-% partition transition network, of which Kulp et al.'s unweighted version
-% (used here) is a variant.
-%
-% cf. "Permutation Entropy: A Natural Complexity Measure for Time Series"
-% C. Bandt and B. Pompe, Phys. Rev. Lett. 88(17) 174102 (2002)
-% (the underlying ordinal-pattern symbolization; cf. EN_PermEn.m, which
-% computes entropy-based measures on the same symbolization -- entropy is
-% not recomputed here to avoid duplicating that operation, and Kulp et al.
-% found entropy to be a weaker discriminator than the network measures
-% computed below anyway).
+% Entropy is not recomputed here, to avoid duplicating EN_PermEn.m, which computes
+% entropy-based measures on the same symbolization; Kulp et al. found entropy to be
+% a weaker discriminator than the network measures computed below.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % d, the ordinal pattern (embedding) dimension: windows of d consecutive
-%    (delay-tau-spaced) points are each mapped to their rank permutation,
-%    one of d! possible ordinal patterns
+%    (delay-tau-spaced) points are each mapped to their rank permutation, one of
+%    d! possible ordinal patterns (default: 3)
+% tau, the time delay (default: 1, as used throughout Kulp et al. 2016). An integer
+%    number of samples, or 'ac' (the first zero-crossing of the autocorrelation function)
+%    or 'mi' (the first minimum of the automutual information function) to set the delay
+%    from the series, as in the time-lagged networks of McCullough et al. 2015
 %
-% tau, the time delay (default: 1, as used throughout Kulp et al. 2016)
+% ---OUTPUTS:
+% A structure with fields:
+% meanDegree, the mean degree (average number of unique out-edges per visited
+%    node, m/n for m unique edges and n nodes; equal to the mean in-degree): the
+%    paper's central discriminating measure
+% NFP, the number of forbidden (non-occurring) ordinal patterns, d! minus the
+%    number of nodes
+% maxOutDegree, the largest out-degree
+% maxInDegree, the largest in-degree
+% stdOutDegree, the standard deviation of the out-degrees
+% stdInDegree, the standard deviation of the in-degrees
+% reciprocity, the fraction of unique edges whose reverse edge also exists
+% maxEdgeWeight, the proportion of all observed transitions taken up by the most
+%    frequent single transition
+% (The maximum and spread of the degrees, reciprocity and edge-weight measures are
+% not reported in the paper but are cheaply available from the same
+% transition-pair computation.) NaN is returned instead of a structure if the
+% embedding fails or there are fewer than 30 embedded points.
 %
-% ---OUTPUTS: the mean degree (average unique out-edges per visited node --
-% the paper's central discriminating measure) and its d-normalized version
-% (mean degree is bounded above by d, attained for an unconstrained/random
-% process); the number of forbidden (non-occurring) ordinal patterns (NFP)
-% and its normalized version; and complementary graph statistics (max/std
-% in- and out-degree, edge density, reciprocity, and mean/max edge weight,
-% i.e., how often the same transition repeats) not reported in the paper
-% but cheaply available from the same transition-pair computation.
+% ---REFERENCES:
+% C.W. Kulp, J.M. Chobot, H.R. Freitas and G.D. Sprechini, "Using ordinal partition
+% transition networks to analyze ECG data", Chaos 26(7), 073114 (2016).
+% DOI: 10.1063/1.4959537
+%
+% M. McCullough, M. Small, T. Stemler and H.H.-C. Iu, "Time lagged ordinal partition
+% networks for capturing dynamics of continuous dynamical systems", Chaos 25(5),
+% 053101 (2015). DOI: 10.1063/1.4919075
+% The original (weighted) ordinal partition transition network, of which the
+% unweighted version of Kulp et al. (used here) is a variant.
+%
+% C. Bandt and B. Pompe, "Permutation entropy: a natural complexity measure for time
+% series", Phys. Rev. Lett. 88(17), 174102 (2002). DOI: 10.1103/PhysRevLett.88.174102
+% The underlying ordinal-pattern symbolization.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,63 +1,58 @@
 function out = EX_ExtremeEventOrder(y, extremeThresh)
 % EX_ExtremeEventOrder   Temporal patterning of positive vs. negative extreme events.
 %
-% Labels each point in the top/bottom extremeThresh fraction of the
-% distribution as a positive- or negative-direction 'extreme event', then
-% asks not just how often each type occurs (that's DN_OutlierInclude's
-% territory), but how the two types are *ordered* in time relative to each
-% other: does a positive extreme tend to be followed by another positive
-% one (clustering by sign), or does the sequence alternate (P,N,N,P,N,...)?
+% Labels each point in the top/bottom extremeThresh fraction of the distribution
+% as a positive- or negative-direction 'extreme event' (raw threshold
+% exceedances, not declustered peaks), then asks not just how often each type
+% occurs (that is DN_OutlierInclude's territory) but how the two types are
+% *ordered* in time relative to each other: does a positive extreme tend to be
+% followed by another positive one (clustering by sign), or does the sequence
+% alternate (P,N,N,P,N,...)?
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored)
 %
 % extremeThresh, the proportion of points (in each direction) to count as
-%       'extreme' (default: 0.05, i.e., the most extreme 5% each way)
+%       'extreme' (default: 0.05, i.e., the most extreme 5% each way); must be
+%       in (0, 0.5) so the two tails cannot overlap
 %
 % ---OUTPUTS:
-% propPosEvents: what proportion of extreme events are positive-direction.
-%       (the total event count itself is not reported here: with events
-%       defined by a fixed quantile threshold, numEvents is just
-%       extremeThresh*2*N up to tie noise -- a near-exact re-encoding of
-%       series length, not a property of the dynamics.)
-% meanInterval, cvInterval: mean and coefficient of variation of the
-%       inter-event intervals of the combined (both-direction) event
-%       sequence -- how bursty extreme events are overall, irrespective of
-%       direction.
-% meanIntervalPos, cvIntervalPos, meanIntervalNeg, cvIntervalNeg: the same,
-%       but computed separately within each direction's own event
-%       sub-sequence (e.g. meanIntervalPos is the mean gap between
-%       consecutive positive-direction events, ignoring any negative
-%       events that occur in between) -- this is a different question from
-%       the combined interval stats above: a series can have very bursty
-%       positive extremes and very regular negative extremes even while
-%       the combined (direction-blind) event stream looks unremarkable.
-% alternationRate: proportion of consecutive event pairs whose direction
-%       differs -- 1 means the sequence strictly alternates sign, 0 means
+% propPosEvents, the proportion of extreme events that are positive-direction.
+%       (The total event count is not reported: with events defined by a fixed
+%       quantile threshold it is just extremeThresh*2*N up to tie noise, a
+%       near-exact re-encoding of series length.)
+% meanInterval, cvInterval: mean (in samples) and coefficient of variation of the
+%       inter-event intervals of the combined (both-direction) event sequence:
+%       how bursty extreme events are overall, irrespective of direction.
+% meanIntervalPos, cvIntervalPos, meanIntervalNeg, cvIntervalNeg: the same, but
+%       computed separately within each direction's own event sub-sequence (e.g.,
+%       meanIntervalPos is the mean gap between consecutive positive events,
+%       ignoring any negative events in between). A series can have very bursty
+%       positive extremes and very regular negative extremes even while the
+%       combined event stream looks unremarkable.
+% alternationRate, the proportion of consecutive event pairs whose direction
+%       differs: 1 means the sequence strictly alternates sign, 0 means
 %       same-direction events always cluster together.
-% propPN, propNP: alternationRate split by switch direction -- the
-%       proportion of consecutive event pairs that switch positive-to-
-%       negative, and negative-to-positive, respectively (propPN+propNP ==
-%       alternationRate). Mirrors CO_PosNegAsymmetry's propPN/propNP.
+% propPN, propNP, alternationRate split by switch direction: the proportion of
+%       consecutive event pairs that switch positive-to-negative, and
+%       negative-to-positive (propPN + propNP = alternationRate). Mirrors
+%       CO_PosNegAsymmetry's propPN/propNP.
 % meanIntervalPN, cvIntervalPN, meanIntervalNP, cvIntervalNP: mean and
-%       coefficient of variation of the gaps between successive PN
-%       switches (and, separately, successive NP switches), timestamped at
-%       the later (post-switch) event. Different question again from
-%       meanIntervalPos/Neg above: those count every event of a given
-%       direction; these count only the (rarer) moments the direction
-%       actually flips, e.g. a series alternating in bursts P,P,P,N,N,N,...
-%       has short meanIntervalPos/Neg (events of a given type are close
-%       together within a burst) but long meanIntervalPN/NP (switches
-%       between bursts are rare).
-% lzComplexity: normalized Lempel-Ziv complexity (via Michael Small's
-%       MS_complexitybs, called directly on the true 0/1 label sequence --
-%       NOT via MS_complexity/EN_LZComplexity, whose equiprobable
-%       re-binning would relabel points to force equal counts per symbol,
-%       corrupting the true P/N assignment whenever propPosEvents differs
-%       from 0.5) of the event-direction sequence: captures patterning
-%       beyond pairwise alternation alone, e.g. a period-4 repeat
-%       P,P,N,N,P,P,N,N,... has the same alternationRate (~0.5) as i.i.d.
-%       P/N noise, but is far more predictable (much lower lzComplexity).
+%       coefficient of variation of the gaps between successive PN switches (and,
+%       separately, successive NP switches), timestamped at the later
+%       (post-switch) event. These count only the (rarer) moments the direction
+%       flips: a series alternating in bursts P,P,P,N,N,N,... has short
+%       meanIntervalPos/Neg but long meanIntervalPN/NP.
+% lzComplexity, normalized Lempel-Ziv complexity of the event-direction sequence,
+%       via Michael Small's MS_complexitybs called directly on the 0/1 label
+%       sequence (not via MS_complexity/EN_LZComplexity, whose equiprobable
+%       re-binning would relabel points whenever propPosEvents differs from 0.5).
+%       It captures patterning beyond pairwise alternation: a period-4 repeat
+%       P,P,N,N,P,P,N,N,... has the same alternationRate (~0.5) as i.i.d. P/N
+%       noise, but is far more predictable (much lower lzComplexity). NaN with
+%       fewer than 10 events, or if all events have the same direction.
+% Outputs that need at least two events (the intervals and alternation measures)
+% are NaN otherwise.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

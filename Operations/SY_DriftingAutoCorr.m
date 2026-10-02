@@ -1,36 +1,54 @@
 function out = SY_DriftingAutoCorr(y, tau, whatProduct)
-% SY_DriftingAutoCorr  Drift in lag-tau (auto)correlation via a cumulative-sum test.
+% SY_DriftingAutoCorr   Drift in a lag-tau (auto)correlation via a cumulative-sum test.
 %
-% Forms a lag-tau cross-term product series p_t and tests whether its mean --
-% i.e. the corresponding (linear or nonlinear) correlation statistic -- is
-% stationary, via CUSUM/bridge statistics on cumsum(p) (see BF_CumSumBridgeStats).
-% Under stationarity cumsum(p) grows ~linearly; systematic curvature or a
-% localized departure from that line indicates that the correlation structure --
-% not just the mean or variance of y itself -- is drifting over the course of
-% the time series. This is a CUSUM-style stationarity test (cf. Inclan-Tiao's
-% test for a change point in variance) applied to a lag-product series rather
-% than to y itself, mirroring what SY_Trend does for y's own cumsum.
+% Forms a lag-tau cross-term product series p_t and tests whether its mean (i.e.,
+% the corresponding linear or nonlinear correlation statistic) is stationary, via
+% CUSUM/bridge statistics on cumsum(p) (see BF_CumSumBridgeStats). Under
+% stationarity cumsum(p) grows ~linearly; systematic curvature or a localized
+% departure from that line indicates that the correlation structure, not just
+% the mean or variance of y itself, is drifting over the course of the time
+% series. This is a CUSUM-style stationarity test (cf. Inclan-Tiao's test for a
+% change point in variance) applied to a lag-product series rather than to y
+% itself, mirroring what SY_Trend does for y's own cumsum.
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored)
 %
-% tau, the lag defining the cross term [default: 1]
+% tau, the lag defining the cross term (default: 1)
 %
 % whatProduct, which cross term p_t to test for drift:
-%              'ac' (default): p_t = y(t).y(t+tau)          -- linear autocorrelation
-%              'forward':      p_t = y(t).y(t+tau)^2         -- nonlinear/asymmetric
-%                               (does the signed value now predict the squared,
-%                               energy-like value later? cf. CO_AutoCorrX2)
-%              'backward':     p_t = y(t)^2.y(t+tau)         -- the other direction
-%                               (does the squared value now predict the signed
-%                               value later?)
-%              'asymmetry':    p_t = y(t).y(t+tau).(y(t+tau) - y(t))
-%                               = forward - backward, i.e., the leverage/
-%                               time-irreversibility signature itself (vanishes
-%                               in expectation for time-reversible linear
-%                               processes); tests whether *that* asymmetry --
-%                               not just its forward or backward half -- is
-%                               drifting over the course of the time series.
+%       'ac' (default): p_t = y(t).y(t+tau), the linear autocorrelation
+%       'forward': p_t = y(t).y(t+tau)^2, nonlinear/asymmetric (does the signed
+%                   value now predict the squared, energy-like value later? cf.
+%                   CO_AutoCorrX2)
+%       'backward': p_t = y(t)^2.y(t+tau), the other direction (does the squared
+%                   value now predict the signed value later?)
+%       'asymmetry': p_t = y(t).y(t+tau).(y(t+tau) - y(t)) = forward - backward,
+%                   the leverage/time-irreversibility signature itself (it
+%                   vanishes in expectation for time-reversible linear
+%                   processes); tests whether that asymmetry, not just its
+%                   forward or backward half, is drifting over the time series.
+%
+% ---OUTPUTS:
+% Statistics on the cumulative sum yC = cumsum(p) (p has N-tau values), from
+% BF_CumSumBridgeStats; a structure of NaN if there are fewer than 20 products,
+% or NaN if tau >= N-1:
+% meanYC, the mean of yC
+% gradient, intercept: slope and intercept of an ordinary least-squares line fit
+%       to yC against time
+% meanYC12, meanYC22: the mean of yC in the first and second half of the series
+% maxBridge, the largest absolute deviation of yC from the straight line joining
+%       0 to its final value (the 'bridge'), divided by std(p)*sqrt(Np)
+% posMaxBridge, the position (from 0 to 1) of that largest deviation
+% stdBridge, the standard deviation of the bridge
+% gradientDiffSE, the difference between the OLS and a robust (bisquare) slope
+%       fit to yC, in standard errors of the robust slope
+% residStdRatio, the standard deviation of the OLS residuals over that of the
+%       robust-fit residuals
+% varRatioTrend, the Kendall rank correlation between time and the log of the
+%       squared bridge divided by its Brownian-bridge null variance: whether the
+%       bridge wanders more (or less) later in the series than expected under
+%       stationarity
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

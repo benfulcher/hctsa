@@ -1,22 +1,62 @@
 function out = WL_cwt(y, wname, maxScale)
-% WL_cwt    Continuous wavelet transform of a time series
+% WL_cwt   Statistics of the continuous wavelet transform of a time series.
 %
-% Uses the function cwt from Matlab's Wavelet Toolbox.
+% Computes the continuous wavelet transform (cwt from Matlab's Wavelet Toolbox) at
+% scales 1, ..., maxScale, takes the coefficients C and the scaled power SC (the
+% power of each coefficient relative to the mean power over all coefficients), and
+% returns statistics on the coefficients, on the distribution of the scaled power
+% (its gamma fit and entropy), on the power summed across scales as a function of
+% time, and on how the power differs between the two halves of the series.
 %
 % ---INPUTS:
 % y, the input time series
+% wname, the wavelet name. For a continuous wavelet transform, a proper continuous
+%        analyzing wavelet like 'morl' (Morlet) is the standard choice; discrete
+%        orthogonal wavelets like 'db3' are also accepted (their wavelet function,
+%        evaluated on a fine grid, is used as the analyzing wavelet) and give a
+%        genuinely different, complementary decomposition (see Wavelet Toolbox
+%        Documentation for all options; default: 'db3')
+% maxScale, the maximum scale of wavelet analysis (default: 32)
 %
-% wname, the wavelet name. For a continuous wavelet transform, a proper
-%           continuous analyzing wavelet like 'morl' (Morlet) is the
-%           standard choice; discrete orthogonal wavelets like 'db3' are
-%           also accepted (via their associated scaling function) and
-%           give a genuinely different, complementary decomposition (see
-%           Wavelet Toolbox Documentation for all options).
+% ---OUTPUTS:
+% meanC, meanabsC, medianabsC, maxabsC: the mean, mean magnitude, median magnitude
+%        and maximum magnitude of the coefficients
+% maxonmeanC, maxonmeanSC: the maximum relative to the mean, of the coefficient
+%        magnitudes and of the scaled power
+% pover99, pover98, pover95, pover90, pover80: the proportion of the total energy
+%        held by the coefficients whose scaled power exceeds its 99th, 98th, 95th,
+%        90th, 80th percentile (the strongest 1%, 2%, 5%, 10%, 20% of coefficients)
+% gam1, gam2: the shape and scale parameters of a gamma distribution fitted to the
+%        scaled power (gamfit; as the scaled power has mean 1, gam2 = 1/gam1)
+% SC_h: the entropy of the energy distribution over all coefficients (in nats),
+%        relative to its maximum possible value, the log of the number of
+%        coefficients: 0 if the energy is spread evenly, negative when concentrated
+% dd_SC_h: the entropy of the maximum scaled power in each of 10 equal time boxes at
+%        each scale
+% max_ssc, min_ssc, maxonmed_ssc, std_ssc: the maximum, minimum, maximum relative to
+%        the median, and standard deviation over time of the scaled power summed
+%        across scales
+% pcross_maxssc50: the number of crossings of half its maximum by the summed power,
+%        divided by N - 1
+% stat_2_m_s: the mean of the standard deviations of the scaled power in the two
+%        halves of the series, relative to the mean scaled power
+% stat_2_s_m, stat_2_s_s: the standard deviation of the two halves' means (_m) and
+%        of their standard deviations (_s), relative to the standard deviation of
+%        the scaled power
 %
-% maxScale, the maximum scale of wavelet analysis.
+% ---NOTES:
+% The transform uses the legacy syntax cwt(y, scales, wname), which is the only form of
+% cwt that takes integer scales and a discrete or real wavelet name ('db3', 'morl'): the
+% current syntax is limited to the analytic wavelets 'morse', 'amor' and 'bump' on a
+% frequency grid of its own. In MATLAB R2026a (Wavelet Toolbox 26.1) the legacy syntax
+% is still accepted without a warning, and is equal to the textbook algorithm of
+% convolving y with the integrated, dilated wavelet (to machine precision).
 %
-% ---OUTPUTS: statistics on the coefficients, entropy, and results of
-% coefficients summed across scales.
+% The scaled power SC is normalized by the mean power over all coefficients (not by the
+% total energy, as it used to be), so that its distribution, and the statistics that
+% depend on it, do not depend on the number of coefficients (the series length). The
+% maximum-type statistics (maxonmeanSC, max_ssc) still grow slowly with length, as the
+% extreme of more samples does.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -71,10 +111,15 @@ scales = (1:maxScale);
 coeffs = cwt(y, scales, wname);
 
 S = abs(coeffs .* coeffs); % power
-SC = 100 * S ./ sum(S(:)); % scaled power is length-dependent
-
-% These SC values (percentage of energy in each coefficient) are what are
-% displayed in a scalogram (c.f., wscalogram function)
+% Scaled power: each coefficient's power relative to the mean power over all
+% coefficients (so it has mean 1, whatever the length of the series). This used
+% to be the percentage of the total energy in each coefficient, 100*S/sum(S),
+% which has mean 100/numEntries and so shrinks, and whose sums over scales,
+% extremes and fitted parameters all drift, with the number of coefficients (the
+% series length). Dividing by the mean power instead keeps the shape of the
+% power distribution (how concentrated it is, in scales and in time) and
+% removes the dependence on how many coefficients there are.
+SC = S ./ mean(S(:));
 
 if doPlot
 	figure('color', 'w'); box('on');
@@ -103,13 +148,19 @@ out.maxonmeanC = out.maxabsC / out.meanabsC;
 % out.maxSC = max(SC(:));
 out.maxonmeanSC = max(SC(:)) / mean(SC(:));
 
-% Proportion of coeffs matrix over ___ maximum (thresholded)
-poverfn = @(x) sum(SC(SC > x * max(SC(:)))) / numEntries;
-out.pover99 = poverfn(0.99);
-out.pover98 = poverfn(0.98);
-out.pover95 = poverfn(0.95);
-out.pover90 = poverfn(0.90);
-out.pover80 = poverfn(0.80);
+% Proportion of the total energy held by the coefficients whose power exceeds its
+% p-th percentile (i.e., the strongest (100-p)% of the coefficients; the sum of SC is
+% numEntries, so dividing by it gives a proportion of the energy). This replaces the
+% energy held by coefficients exceeding a fraction p of the *maximum*, which depends
+% on the extreme value of the coefficients and so falls steadily as the series (and
+% the number of coefficients) gets longer, even for white noise.
+SCsorted = sort(SC(:), 'descend');
+poverfn = @(p) sum(SCsorted(1:max(1, floor((100 - p) / 100 * numEntries)))) / numEntries;
+out.pover99 = poverfn(99);
+out.pover98 = poverfn(98);
+out.pover95 = poverfn(95);
+out.pover90 = poverfn(90);
+out.pover80 = poverfn(80);
 
 % Distribution of scaled power
 % Fit using Statistics Toolbox
@@ -128,9 +179,11 @@ out.gam2 = gamma_phat(2);
 % ------------------------------------------------------------------------------
 % turn into probabilities
 SC_a = SC ./ sum(SC(:));
-% compute entropy
+% compute entropy, relative to its maximum possible value, log(numEntries): the
+% entropy itself grows as log(numEntries) with the series length, whereas
+% -sum(p*log(p)) - log(numEntries) = -mean(SC*log(SC)) (<= 0) does not
 SC_a = SC_a(:);
-out.SC_h = -sum(SC_a .* log(SC_a));
+out.SC_h = -sum(SC_a .* log(SC_a)) - log(numEntries);
 
 % ------------------------------------------------------------------------------
 %% Weird 2-D entropy idea -- first discretize

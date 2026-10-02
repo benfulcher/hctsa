@@ -19,7 +19,17 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 %
 % numGroups, either specifies the size of the alphabet for 'quantile' and
 %       'diff' (must be 2 for 'updown'), or sets the time delay for the
-%       embedding subroutines
+%       embedding subroutines: a number of samples, or a string that sets it
+%       from the series:
+%       'ac1e': the first 1/e crossing of the autocorrelation function,
+%       'tau': the first zero-crossing of the autocorrelation function (kept for
+%            backward compatibility; the lag can be meaninglessly long, or
+%            absent, for a slowly decorrelating series, and the cap below then
+%            silently sets it).
+%       A numeric or 'tau' delay is capped at floor(N/25). For 'ac1e' the output is
+%       NaN if the autocorrelation function is undefined (a constant series) or
+%       never crosses 1/e (no delay exists); a crossing found at a long lag is
+%       still capped at floor(N/25). For 'tau', an undefined function gives NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -95,7 +105,13 @@ switch howtocg
 	case {'embed2quadrants', 'embed2octants'}
 		% Construct the embedding
 
-		if strcmp(numGroups, 'tau')
+		if strcmp(numGroups, 'ac1e')
+			% First 1/e crossing of the autocorrelation function
+			tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
+			if isnan(tau) || tau >= N - 1 % undefined, or never crosses (returns N-1)
+				yth = NaN; return
+			end
+		elseif strcmp(numGroups, 'tau')
 			% First zero-crossing of the autocorrelation function
 			tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 			if isnan(tau)

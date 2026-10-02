@@ -1,24 +1,40 @@
 function out = SB_BinaryStats(y, binaryMethod)
-% SB_BinaryStats    Statistics on a binary symbolization of the time series
+% SB_BinaryStats   Statistics on a binary symbolization of the time series.
 %
-% Binary symbolization of the time series is a symbolic string of 0s and 1s.
-%
-% Provides information about the coarse-grained behavior of the time series
+% The binary symbolization of the time series is a string of 0s and 1s (see
+% BF_Binarize). The function provides information about the coarse-grained
+% behavior of the time series through statistics on the lengths of the runs
+% (stretches) of consecutive 0s and of consecutive 1s: their number, longest, mean
+% and standard deviation, and how the 1s are distributed between the two halves of
+% the string. N below is the length of the binary string (the length of the time
+% series, minus 1 for 'diff').
 %
 % ---INPUTS:
 % y, the input time series
-%
-% binaryMethod, the symbolization rule:
-%         (i) 'diff': by whether incremental differences of the time series are
-%                      positive (1), or negative (0),
-%         (ii) 'mean': by whether each point is above (1) or below the mean (0)
-%         (iii) 'iqr': by whether the time series is within the interquartile range
-%                      (1), or not (0).
+% binaryMethod, the symbolization rule (default: 'diff'):
+%    (i) 'diff': by whether incremental differences of the time series are
+%        positive (1), or zero or negative (0)
+%    (ii) 'mean': by whether each point is above (1) or at or below the mean (0)
+%    (iii) 'iqr': by whether the time series is within the interquartile range
+%        (1: above the 25th percentile and up to the 75th), or not (0)
+%    (iv) 'median': by whether each point is above (1) or at or below the median (0)
 %
 % ---OUTPUTS:
-% Include the Shannon entropy of the string, the longest stretches of 0s
-% or 1s, the mean length of consecutive 0s or 1s, and the spread of consecutive
-% strings of 0s or 1s.
+% A structure with fields:
+% pupstat2, the number of 1s in the second half of the string divided by the number
+%    of 1s in the first half
+% pstretch1, the number of runs of 1s divided by N
+% longstretch1, longstretch0, the longest run of 1s, and of 0s (0 if there are none)
+% longstretch1norm, longstretch0norm, the same as a proportion of N
+% meanstretch1, meanstretch0, the mean run length of 1s, and of 0s (0 if none)
+% meanstretch1norm, meanstretch0norm, the same as a proportion of N
+% meanstretchdiff, (meanstretch1 - meanstretch0)/N
+% stdstretch1, stdstretch0, the standard deviation of the run lengths of 1s, and
+%    of 0s (NaN if none)
+% stdstretch1norm, stdstretch0norm, the same as a proportion of N
+% stdstretchdiff, (stdstretch1 - stdstretch0)/N
+% diff21stretch1, diff21stretch0, the proportion of runs of 1s (0s) of length 2
+%    minus the proportion of length 1
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

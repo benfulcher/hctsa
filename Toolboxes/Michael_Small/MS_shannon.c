@@ -23,7 +23,8 @@
 int compare(const void *arg1, const void *arg2)
      /* compare two doubles and return arg1-arg2 */
 {
-  return( *(int *)arg1 - *(int *)arg2 );
+  double a = *(const double *)arg1, b = *(const double *)arg2;
+  return (a > b) - (a < b);
 }
 
 void entropy(double	*data,
@@ -35,17 +36,17 @@ void entropy(double	*data,
 {
 	unsigned short *s;
 	double *sorted;
-	float *td;
+	double *td;
         unsigned long int *tally;
 	int i,j,pc=0,nc=0;
-	float total=0,prob=0;
+	double total=0,prob=0;
 	int k;
 	unsigned long int os;
 
 	/*allocate memory for symbol sequence*/
 	s = (unsigned short *) calloc(length,sizeof(unsigned short));
 	sorted = (double *) calloc(length,sizeof(double));
-	td = (float *) calloc(bin-1,sizeof(float));
+	td = (double *) calloc(bin-1,sizeof(double));
 
         /*determine threshold --- for n-bit encoding */
         /* copy the data */

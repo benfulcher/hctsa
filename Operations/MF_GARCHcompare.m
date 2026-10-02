@@ -1,49 +1,66 @@
 function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
-% MF_GARCHcompare   Comparison of GARCH time-series models
+% MF_GARCHcompare   How well GARCH models of different orders describe the changing variance of the series.
 %
-% This code fits a set of GARCH(p,q) models to the time series and
-% returns statistics on the goodness of fits across a range of p and
-% q parameters.
+% Fits a set of GARCH(p,q) models, with zero mean and Gaussian innovations, to the
+% time series, and returns statistics on the goodness of fit across a range of p (the
+% number of lagged variances) and q (the number of lagged squared innovations). All
+% combinations of p and q are compared, and the outputs are summaries across the
+% grid of fitted models, and the orders that fit best.
 %
-% Uses the following functions from Matlab's Econometrics Toolbox: archtest,
-% lbqtest, autocorr, parcorr, garchset, garchfit, garchcount, aicbic
+% Uses the following functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
+% garch, estimate, infer, aicbic.
 %
-% Compares all combinations of p and q and output statistics are on the models
-% with the best fit.
-%
-% This operation focuses on the GARCH/variance component, and therefore
-% attempts to pre-whiten and assumes a constant mean process (applies a linear
-% detrending).
+% This operation focuses on the GARCH/variance component. It therefore detrends the
+% time series, optionally pre-whitens it (BF_Whiten), and z-scores it, so that a
+% constant-mean process is assumed.
 %
 % ---INPUTS:
 % y, the input time series
-% preProc, a preprocessing to apply:
-%           (i) 'none': no preprocessing is performed
-%           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness,
 %
-% pr, a vector of model orders, p, to compare
+% preProc, a preprocessing to apply (after detrending):
+%           (i) 'none': no preprocessing is performed (default),
+%           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness.
 %
-% qr, a vector of model orders, q, to compare
+% pr, a vector of model orders, p, to compare (default 1:3)
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% qr, a vector of model orders, q, to compare (default 1:3)
 %
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (used
+%           in the whitening, BF_Whiten)
 %
-% ---OUTPUTS: include log-likelihoods, Bayesian Information  Criteria (BIC),
-% Akaike's Information Criteria (AIC) (all per observation, i.e., divided by the
-% series length), outputs from Engle's ARCH test and the
-% Ljung-Box Q-test, and estimates of optimal model orders.
+% beVocal, whether to print messages about failed fits to the command line
+%           (default 0)
+%
+% ---OUTPUTS: statistics across the (p,q) models that fitted successfully. The
+% log-likelihood, AIC and BIC are per observation, i.e., divided by the series length.
+% minLLF, maxLLF, meanLLF: the minimum, maximum and mean log-likelihood
+% minBIC, maxBIC, meanBIC: the minimum, maximum and mean Bayesian information
+%       criterion (BIC)
+% minAIC, maxAIC, meanAIC: the minimum, maximum and mean Akaike information
+%       criterion (AIC)
+% minK, maxK, meanK: the minimum, maximum and mean constant term of the variance
+%       equation
+% min_meanarchps, max_meanarchps, mean_meanarchps: the minimum, maximum and mean, across
+%       models, of the mean p-value (over lags 1 to 20) of Engle's ARCH test on the
+%       standardized residuals
+% min_maxarchps, max_maxarchps, mean_maxarchps: the same for the maximum p-value over
+%       the 20 lags
+% min_meanlbqps, max_meanlbqps, mean_meanlbqps: the minimum, maximum and mean, across
+%       models, of the mean p-value (over lags 1 to 20) of the Ljung-Box Q-test on the
+%       squared standardized residuals
+% min_maxlbqps, max_maxlbqps, mean_maxlbqps: the same for the maximum p-value over the
+%       20 lags
+% bestpLLF, bestqLLF: the orders p and q of the model with the maximum log-likelihood
+% bestpAIC, bestqAIC: the orders p and q of the model with the minimum AIC
+% bestpBIC, bestqBIC: the orders p and q of the model with the minimum BIC
+% Ks_vary_p, Ks_vary_q: how much the constant term varies with p, and with q: the
+%       standard deviation of the constant across one order, averaged over the other
 %
 % ---NOTES:
-% Fixed 2026-08-11: bestpLLF/bestqLLF selected the order with the MINIMUM
-% log-likelihood (found via find(LLFs==min(LLFs(:)))), the opposite of what
-% "best" should mean for a log-likelihood -- it should be maximized, unlike
-% AIC/BIC which are correctly minimized elsewhere in this function. In
-% practice this meant bestpLLF/bestqLLF almost always just returned the
-% lowest-complexity corner of the (pr,qr) grid regardless of fit quality,
-% confirmed directly on 5 real series (Bonn EEG): the buggy min-based
-% selection picked p=1,q=1 or q=2 every time, while max-based selection
-% tracked bestpAIC/bestqAIC closely (exact match in 3/5 series), as
-% expected since richer models almost always have higher raw likelihood.
+% bestpLLF/bestqLLF select the order with the maximum log-likelihood, as the
+% best-fitting model has the highest log-likelihood (AIC and BIC are minimized).
+% (Selecting the minimum, as an earlier version did, almost always returned the
+% lowest-complexity corner of the (pr,qr) grid.)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -131,28 +148,29 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % Will use the statistics to compare to features of the residuals after
 % modeling.
 
+% (Commented out as a historical marker: unused by any output; saves wasted compute.)
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
+% [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
 % [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1); % depricated syntax
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
+% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1); % depricated syntax
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]); % depricated syntax
 
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_AutoCorr(y,1:20);
 % autocorrs_var = CO_AutoCorr(y.^2,1:20);
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
+% [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
+% [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
+% [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
@@ -252,28 +270,28 @@ BICs = BICs / N;
 % 'whole things'
 out.minLLF = min(LLFs(:));
 out.maxLLF = max(LLFs(:));
-out.meanLLF = nanmean(LLFs(:));
+out.meanLLF = mean(LLFs(:),'omitnan');
 out.minBIC = min(BICs(:));
 out.maxBIC = max(BICs(:));
-out.meanBIC = nanmean(BICs(:));
+out.meanBIC = mean(BICs(:),'omitnan');
 out.minAIC = min(AICs(:));
 out.maxAIC = max(AICs(:));
-out.meanAIC = nanmean(AICs(:));
+out.meanAIC = mean(AICs(:),'omitnan');
 out.minK = min(Ks(:));
 out.maxK = max(Ks(:));
-out.meanK = nanmean(Ks(:));
+out.meanK = mean(Ks(:),'omitnan');
 out.min_meanarchps = min(meanarchps(:));
 out.max_meanarchps = max(meanarchps(:));
-out.mean_meanarchps = nanmean(meanarchps(:));
+out.mean_meanarchps = mean(meanarchps(:),'omitnan');
 out.min_maxarchps = min(maxarchps(:));
 out.max_maxarchps = max(maxarchps(:));
-out.mean_maxarchps = nanmean(maxarchps(:));
+out.mean_maxarchps = mean(maxarchps(:),'omitnan');
 out.min_meanlbqps = min(meanlbqps(:));
 out.max_meanlbqps = max(meanlbqps(:));
-out.mean_meanlbqps = nanmean(meanlbqps(:));
+out.mean_meanlbqps = mean(meanlbqps(:),'omitnan');
 out.min_maxlbqps = min(maxlbqps(:));
 out.max_maxlbqps = max(maxlbqps(:));
-out.mean_maxlbqps = nanmean(maxlbqps(:));
+out.mean_maxlbqps = mean(maxlbqps(:),'omitnan');
 
 % 'bests' (orders)
 [a, b] = find(LLFs == max(LLFs(:)), 1, 'first');
@@ -292,7 +310,7 @@ out.bestqBIC = qr(b);
 % does changing the order (either p or q) have. Sometimes changing q will
 % have negligible effect -- we want to quantify this.
 
-out.Ks_vary_p = nanmean(nanstd(Ks)); % mean variation along p direction
-out.Ks_vary_q = nanmean(nanstd(Ks')); % mean variation along q direction
+out.Ks_vary_p = mean(std(Ks,0,'omitnan'),'omitnan'); % mean variation along p direction
+out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); % mean variation along q direction
 
 end

@@ -1,72 +1,62 @@
 function out = SP_PhaseAmpCoupling(y, nBands, maxN, nPhaseBins)
-% SP_PhaseAmpCoupling   Cross-frequency phase-amplitude coupling
+% SP_PhaseAmpCoupling   Cross-frequency phase-amplitude coupling between equal-width frequency bands.
 %
 % Splits the (one-sided, DC- and Nyquist-excluded) spectrum into nBands
-% equal-width frequency bands -- the same equal-band convention
-% SP_Summaries uses for its band-power fields -- and, for every pair of
-% bands i < j, asks whether the instantaneous phase of the slower band i
-% modulates the instantaneous amplitude envelope of the faster band j.
-% This is the standard "phase-amplitude coupling" (PAC) measure from the
-% neuroscience literature (e.g. theta phase modulating gamma amplitude in
-% EEG), generalized here to arbitrary equal-width bands rather than
-% fixed, domain-specific ones.
+% equal-width frequency bands (the same equal-band convention SP_Summaries uses
+% for its band-power fields) and, for every pair of bands i < j, asks whether the
+% instantaneous phase of the slower band i modulates the instantaneous amplitude
+% envelope of the faster band j. This is the standard phase-amplitude coupling
+% (PAC) measure from neuroscience (e.g., theta phase modulating gamma amplitude
+% in EEG), generalized to arbitrary equal-width bands.
 %
-% Each band's instantaneous phase/amplitude is obtained directly from an
-% FFT-domain analytic signal: zeroing every bin outside the band and
-% doubling the surviving positive-frequency bins before an inverse FFT
-% gives the band-limited analytic signal in one step (the same
-% zero-negative-frequencies construction behind the textbook FFT-based
-% Hilbert transform), with no Signal Processing Toolbox dependency.
+% Each band's instantaneous phase and amplitude come from an FFT-domain analytic
+% signal: zeroing every bin outside the band and doubling the surviving
+% positive-frequency bins before an inverse FFT gives the band-limited analytic
+% signal in one step, with no Signal Processing Toolbox dependency.
 %
-% Coupling within each band pair is quantified by Tort et al.'s
-% modulation index (MI): the faster band's amplitude envelope is binned
-% by the slower band's instantaneous phase, and MI is the
-% Kullback-Leibler divergence of that phase-binned mean-amplitude
-% distribution from uniform, normalized to [0,1] by its maximum
-% (log(nPhaseBins)) -- 0 for amplitude independent of phase, higher as
+% Coupling within each band pair is quantified by Tort et al.'s (2010) modulation
+% index (MI): the faster band's amplitude envelope is binned by the slower band's
+% instantaneous phase, and MI is the Kullback-Leibler divergence of that
+% phase-binned mean-amplitude distribution from uniform, normalized to [0,1] by
+% its maximum (log(nPhaseBins)): 0 for amplitude independent of phase, higher as
 % amplitude becomes concentrated at a preferred phase.
 %
-% cf. SP_Bicoherence, which detects quadratic *phase* coupling between
-% frequency triplets (f1, f2, f1+f2); this instead detects *amplitude*
-% modulation of one band by the phase of another, a distinct
-% cross-frequency mechanism that a bicoherence/bispectrum analysis does
-% not target.
+% cf. SP_Bicoherence, which detects quadratic phase coupling between frequency
+% triplets (f1, f2, f1+f2); this instead detects amplitude modulation of one band
+% by the phase of another.
 %
 % ---INPUTS:
 % y, the input time series
-%
-% nBands, the number of equal-width frequency bands to split the
-%         spectrum into (default: 5, matching SP_Summaries' 5-band
-%         split). Phase-amplitude pairs are formed from every pair of
-%         bands i < j (phase from the slower band, amplitude from the
-%         faster), giving nchoosek(nBands,2) pairs.
-%
-% maxN, the maximum number of samples to consider (cf. SP_Bicoherence's
-%       maxN); longer series are cropped to their first maxN points.
-%       Can be 'full' to disable cropping (default).
-%
+% nBands, the number of equal-width frequency bands to split the spectrum into
+%         (default: 5, matching SP_Summaries' 5-band split). Pairs are formed
+%         from every pair of bands i < j (phase from the slower, amplitude from
+%         the faster), giving nchoosek(nBands,2) pairs.
+% maxN, the maximum number of samples to consider (cf. SP_Bicoherence); longer
+%       series are cropped to their first maxN points. 'full' disables cropping
+%       (default).
 % nPhaseBins, the number of phase bins used to estimate each band pair's
-%             modulation index (default: 18, i.e. 20-degree bins, the
-%             standard choice from Tort et al. 2010).
+%             modulation index (default: 18, i.e. 20-degree bins).
 %
 % ---OUTPUTS:
-% maxMI, the maximum modulation index across all band pairs -- the
-%       comodulogram peak, i.e. whether *any* band pair shows real
-%       coupling (cf. SP_Bicoherence's maxBic). Chosen over the mean or
-%       standard deviation of MI across pairs after checking all three
-%       on Empirical1000: meanMI and stdMI were both near-duplicates of
-%       maxMI (r=0.96 and r=0.99 respectively) *and* mechanically
-%       diluted by nBands -- doubling nBands from 5 to 10 roughly halved
-%       meanMI (more near-zero pairs enter the average) while maxMI
-%       barely moved (x0.97), making it the only one of the three whose
-%       meaning doesn't depend on this parameter choice.
+% maxMI, the maximum modulation index across all band pairs (the comodulogram
+%        peak): whether any band pair shows real coupling (cf. SP_Bicoherence's
+%        maxBic)
+% entropyMI, the normalized Shannon entropy of the MI values across pairs
+%        (0 = coupling concentrated in a single band pair, 1 = uniformly diffuse)
 %
-% entropyMI, the normalized Shannon entropy of the MI values across
-%       pairs (0 = coupling concentrated in a single band pair, 1 =
-%       uniformly diffuse across all pairs) -- cf. SP_Bicoherence's
-%       analogous entropy field for the bicoherence surface. The one
-%       field found to carry genuinely separate information from maxMI
-%       (r=0.08-0.23 on Empirical1000, vs. r>=0.95 for meanMI/stdMI).
+% ---REFERENCES:
+% A. B. L. Tort, R. Komorowski, H. Eichenbaum and N. Kopell, "Measuring phase-amplitude
+% coupling between neuronal oscillations of different frequencies", J. Neurophysiol.
+% 104(2), 1195-1210 (2010). DOI: 10.1152/jn.00106.2010
+%
+% ---NOTES:
+% maxMI was chosen over the mean or standard deviation of MI across pairs after
+% checking all three on real-world series: meanMI and stdMI were near-duplicates of
+% maxMI (r = 0.96 and r = 0.99) and mechanically diluted by nBands (doubling
+% nBands from 5 to 10 roughly halved meanMI, while maxMI barely moved, x0.97),
+% making maxMI the only one whose meaning does not depend on this parameter.
+% entropyMI carries genuinely separate information from maxMI (r = 0.08-0.23 on
+% real-world series).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

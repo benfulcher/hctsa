@@ -1,49 +1,33 @@
 function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDist)
-% MF_GARCHfit   GARCH time-series modeling.
+% MF_GARCHfit   A GARCH model of the changing variance of the series, and what it leaves in the residuals.
 %
 % Simulates a procedure for fitting Generalized Autoregressive Conditional
 % Heteroskedasticity (GARCH) models to a time series, namely:
 %
-% (1) Preprocessing the data to remove strong trends,
+% (1) Preprocessing the data to remove strong trends (and, optionally, to whiten it),
 % (2) Pre-estimation to calculate initial correlation properties of the time
 %       series and motivate a GARCH model,
-% (3) Fitting a GARCH model, returning goodness of fit statistics and parameters
+% (3) Fitting a GARCH model, returning goodness-of-fit statistics and parameters
 %           of the fitted model, and
-% (4) Post-estimation, involves calculating statistics on residuals and
-%           standardized residuals.
+% (4) Post-estimation, involving statistics on the residuals and the standardized
+%           residuals.
 %
-% The idea is that all of these stages can be pre-specified or skipped using
-% arguments to the function.
+% The preprocessing is BF_Whiten: the series is detrended and, for preproc = 'ar',
+% replaced by the preprocessing (from PP_PreProcess) that maximizes whiteness under an
+% AR(2) model, if one improves on the original series by more than 5%. The result is
+% then z-scored, so the model is of the variance around a zero mean.
 %
-% Uses functions from Matlab's Econometrics Toolbox: archtest, lbqtest,
-% autocorr, parcorr, garchset, garchfit, garchcount, aicbic
-%
-% All methods implemented are from Matlab's Econometrics Toolbox, including
-% Engle's ARCH test (archtest), the Ljung-Box Q-test (lbqtest), estimating the
-% partial autocorrelation function (parcorr), as well as specifying (garchset)
-% and fitting (garchfit) the GARCH model to the time series.
-%
-% As part of this code, a very basic automatic pre-processing routine,
-% PP_ModelFit, is implemented, that applies a range of pre-processings and
-% returns the preprocessing of the time series that shows the worst fit to an
-% AR(2) model.
-%
-% In the case that no simple transformations of the time series are
-% significantly more stationary/less trivially correlated than the original time
-% series (by more than 5%), the original time series is simply used without
-% transformation.
-%
-% Where r and m are the autoregressive and moving average orders of the model,
-% respectively, and p and q control the conditional variance parameters.
+% Uses functions from MATLAB's Econometrics Toolbox: garch, gjr, egarch, estimate,
+% infer, archtest, lbqtest, autocorr, parcorr, aicbic.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% preproc, the preprocessing to apply, can be 'ar' or 'none'
+% preproc, the preprocessing to apply, 'ar' (default) or 'none'
 %
-% P, the GARCH model order
+% P, the GARCH model order (the number of lagged variances; default 1)
 %
-% Q, the ARCH model order
+% Q, the ARCH model order (the number of lagged squared innovations; default 1)
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for pre-processing: PP_PreProcess)
@@ -59,43 +43,78 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 %               parameter to capture fat tails beyond what GARCH-filtering
 %               alone accounts for).
 %
+% ---OUTPUTS:
+% Fitted parameters (standard errors have 'err' in the name):
+% constant, constanterr: the constant term of the variance equation, and its error
+% offset: the mean offset of the model (0 for a z-scored series)
+% GARCH_1, GARCHerr_1, ..., GARCH_P, GARCHerr_P: the coefficients of the P lagged
+%       variances, and their errors (NaN if that lag was dropped from the fit)
+% ARCH_1, ARCHerr_1, ..., ARCH_Q, ARCHerr_Q: the coefficients of the Q lagged squared
+%       innovations, and their errors
+% leverage, leverageerr: the leverage coefficient and its error (gjr/egarch only,
+%       otherwise NaN)
+% distDoF: the degrees of freedom of a Student's t innovation distribution (NaN
+%       otherwise)
+% Goodness of fit:
+% LLF, aic, bic: the log-likelihood, AIC and BIC per observation (divided by the
+%       series length)
+% summaryexitflag: the exit flag of the fitting procedure
+% persistence: the sum of the ARCH and GARCH coefficients (plus half the leverage
+%       coefficient for 'gjr'; NaN for 'egarch'), near 1 for near-integrated volatility
+% uncondVar: the implied long-run (unconditional) variance (NaN if persistence is
+%       0.999 or more, or for 'egarch')
+% The fitted conditional variance (sigmas) through the series:
+% maxsigma, minsigma, rangesigma, stdsigma, meansigma: its maximum, minimum, range,
+%       standard deviation and mean
+% Tests for remaining heteroskedasticity, comparing the (whitened) series and the
+% residuals standardized by the conditional standard deviation, stde:
+% engle_mean_diff_p, engle_max_diff_p: the mean and maximum, over lags 1 to 20, of
+%       the change in p-value of Engle's ARCH test from the series to stde
+% lbq_mean_diff_p, lbq_max_diff_p: the same for the Ljung-Box Q-test of the squared
+%       series
+% engle_pval_stde_1, engle_pval_stde_5, engle_pval_stde_10: the p-values of Engle's
+%       ARCH test on stde at lags 1, 5 and 10
+% minenglepval_stde, maxenglepval_stde: the minimum and maximum of those p-values
+%       over lags 1 to 20
+% lbq_pval_stde_1, lbq_pval_stde_5, lbq_pval_stde_10: the p-values of the Ljung-Box
+%       Q-test on stde^2 at lags 1, 5 and 10
+% minlbqpval_stde2, maxlbqpval_stde2: the minimum and maximum of those p-values over
+%       lags 1 to 20
+% ac1_stde2: the lag-1 autocorrelation of stde^2
+% diff_ac1: the lag-1 autocorrelation of the squared series minus that of stde^2
+% Summary of the standardized residuals, stde, from MF_ResidualAnalysis ('full'),
+% with the prefix zres_:
+% zres_meane, zres_meanabs, zres_stde, zres_maxonstd: mean, mean absolute value,
+%       standard deviation, and largest absolute value (in standard deviations)
+% zres_ac1, zres_ac2, zres_ac3: autocorrelation at lags 1 to 3
+% zres_propbth: proportion of the autocorrelations at lags 1 to 25 within the
+%       significance band +/- 2.6/sqrt(N)
+% zres_ftbth: the first lag at which the autocorrelation is within that band
+% zres_taurat: decorrelation time relative to that of the series
+% zres_normksstat: Kolmogorov-Smirnov statistic against a normal distribution
+% zres_sws, zres_swm: variation across 5 windows of the local standard deviation and
+%       mean, relative to the overall standard deviation
+% zres_popt, zres_minsbc: the order (1 to 10) of the AR model fitted to stde, chosen
+%       by the Schwarz Bayesian criterion, and its criterion value
+%
 % ---NOTES:
-% Only the P=1,Q=1 registration (MF_GARCHfit_ar_P1_Q1) remains; the P=1,Q=2
-% registration was dropped 2026-08-11 after confirming on Bonn EEG and
-% Empirical1000 that it was almost entirely redundant with P=1,Q=1 (r=0.9-1.0
-% across nearly every output field) -- adding a second ARCH lag barely
-% changes the fitted model's character on real data. MF_GARCHcompare, which
-% actually varies P and Q over a grid, is not redundant with either and is
-% unaffected by this.
+% Only the P = 1, Q = 1 registration remains. The P = 1, Q = 2 registration was
+% dropped as almost entirely redundant with it (r = 0.9-1.0 across nearly every
+% output field, on two collections of real-world series). MF_GARCHcompare, which
+% varies P and Q over a grid, is unaffected.
 %
-% Added 2026-08-11: persistence (sum of ARCH+GARCH coefficients) and
-% uncondVar (implied long-run/unconditional variance). These are standard
-% GARCH diagnostics that were previously entirely absent -- persistence
-% close to 1 signals near-integrated (IGARCH-like) volatility clustering
-% that was otherwise invisible in this feature set. See the inline comment
-% at their computation for why uncondVar is NaN'd near the boundary rather
-% than only when persistence >= 1.
+% persistence and uncondVar are standard GARCH diagnostics (persistence near 1
+% signals near-integrated, IGARCH-like volatility clustering). uncondVar is set to
+% NaN near the boundary because the model's value is numerically meaningless there.
+% For 'gjr', persistence includes half the leverage coefficient (Glosten,
+% Jagannathan and Runkle's result: the leverage term acts on negative shocks only).
 %
-% Added 2026-08-11: modelType and innovationDist arguments, plus leverage/
-% leverageerr and distDoF outputs. Motivated by two real gaps: the suite had
-% zero coverage of asymmetric volatility response (the well-known "bad news
-% raises volatility more than good news" leverage effect) and never
-% considered fat-tailed innovations (only ever fit Gaussian). Both were
-% validated on synthetic ground-truth data before adding: fit gjr(1,1) to
-% data simulated with a known leverage of 0.15 vs 0.00 (matched on overall
-% persistence so leverage was the only varying factor) -- recovered
-% 0.161+/-0.022 vs 0.002+/-0.014 (t=23.9, p<1e-6); fit garch(1,1)+t to data
-% simulated with true DoF=4 (heavy tails) vs Gaussian -- recovered
-% 4.14+/-0.24 vs clustering at the optimizer's ~200 ceiling (t=-15.0,
-% p<1e-6), i.e. correctly signaling "no evidence of fat tails" when there
-% genuinely isn't any. Registered variants (MF_GARCHfit_ar_P1_Q1_gjr,
-% MF_GARCHfit_ar_P1_Q1_t) each isolate one new degree of freedom from the
-% P1_Q1 baseline; egarch is supported in the code but not registered
-% (conceptually overlaps with gjr's leverage, and a quick check found its
-% ARCH coefficient hitting an apparent boundary of 1.0 in 2/3 real fits,
-% unexplained -- not investigated further since it's unregistered).
-% leverage/distDoF are NaN when not applicable to the fitted modelType/
-% innovationDist (e.g. leverage is NaN for plain 'garch' fits).
+% The modelType and innovationDist arguments, and the leverage, leverageerr and
+% distDoF outputs, cover asymmetric volatility response and fat-tailed innovations.
+% Registered variants: MF_GARCHfit_ar_P1_Q1_gjr and MF_GARCHfit_ar_P1_Q1_t each
+% change one thing from the P1_Q1 baseline. 'egarch' is supported but not registered
+% (its ARCH coefficient hit an apparent boundary of 1.0 in 2 of 3 real fits,
+% unexplained).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -207,12 +226,14 @@ N = length(y);
 %       departure from randomness hypothesis test
 [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 
+% (Commented out as a historical marker: unused by any output; saves wasted compute,
+%  as in MF_GARCHcompare.)
 % (iii) Correlation in time series: autocorrelation
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
+% [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
+% [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
+% [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model
@@ -403,7 +424,7 @@ out.meansigma = mean(sigmas);
 % ------------------------------------------------------------------------------
 %% Check residuals
 % ------------------------------------------------------------------------------
-res = (y - Gfit.Offset); % residuals (departures from mean process)
+res = (Gfit.Offset - y); % residuals (mean process minus data, the MF_ResidualAnalysis convention)
 stde = res ./ sqrt(sigmas); % standardize residuals by conditional standard deviation
 stde2 = stde.^2;
 

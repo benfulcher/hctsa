@@ -2,95 +2,78 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 % CO_TimeRevKLD   Kullback-Leibler divergence between forward and time-reversed embeddings.
 %
 % Embeds the time series in m dimensions at time delay tau (e.g., the pair
-% (x_t,x_{t+tau}) for m=2, or the triple (x_t,x_{t+tau},x_{t+2tau}) for
-% m=3), and estimates the Kullback-Leibler divergence between the
-% distribution of these embedded points and the distribution of the same
-% points with their coordinate order reversed (equivalent to embedding
-% the time-reversed series). For a (statistically) time-reversible
-% process, these two distributions coincide and the divergence is zero in
-% the population; departures reflect time-irreversibility.
+% (x_t,x_{t+tau}) for m=2, or the triple (x_t,x_{t+tau},x_{t+2tau}) for m=3), and
+% estimates the Kullback-Leibler divergence between the distribution of these
+% embedded points and the distribution of the same points with their coordinate order
+% reversed (equivalent to embedding the time-reversed series). For a (statistically)
+% time-reversible process, these two distributions coincide and the divergence is zero
+% in the population; departures reflect time-irreversibility.
 %
-% cf. CO_trev/CO_TC3, which probe irreversibility via a single third-moment
-% statistic of lagged pairs/triples; this is the natural full-density
-% generalization (in the same sense that CO_JointNonGaussianity generalizes
-% DN_Moments' skewness/kurtosis to the whole joint embedding shape), able to
-% detect any asymmetry between the forward and reversed distributions, not
-% just a third-moment one.
+% cf. CO_trev/CO_TC3, which probe irreversibility via a single third-moment statistic
+% of lagged pairs/triples; this is the natural full-density generalization (in the same
+% sense that CO_JointNonGaussianity generalizes DN_Moments' skewness/kurtosis to the
+% whole joint embedding shape), able to detect any asymmetry between the forward and
+% reversed distributions, not just a third-moment one.
 %
-% cf. also Diks, van Houwelingen, Takens & DeGoede (1995), "Reversibility as
-% a criterion for discriminating time series", Phys. Lett. A 201(4-5) 221,
-% who compare forward and reverse embedding distributions via a different
-% (U-statistic-based) route; the approach here instead estimates the
-% Kullback-Leibler divergence directly using the k-NN estimator of
-% Q. Wang, S.R. Kulkarni & S. Verdu, "Divergence Estimation for
-% Multidimensional Densities via k-Nearest-Neighbor Distances", IEEE Trans.
-% Inf. Theory 55(5) 2392 (2009), which needs no binning or KDE grid and
-% remains usable at hctsa-scale sample sizes in m = 2 or 3 dimensions.
-%
-% The k-NN search follows the same over-fetch-then-Theiler-filter pattern as
-% NL_LocalDensity: candidate neighbors are fetched via a KD-tree and any
-% within a Theiler window of the query point's time index are discarded (a
-% point and its temporal neighbors are strongly autocorrelated, so treating
-% them as informative near-neighbors would understate the local spread);
+% The divergence is estimated directly with the k-nearest-neighbor estimator of
+% Wang, Kulkarni and Verdu, which needs no binning or KDE grid and remains usable at
+% hctsa-scale sample sizes in m = 2 or 3 dimensions. The k-NN search follows the same
+% over-fetch-then-Theiler-filter pattern as NL_LocalDensity: candidate neighbors are
+% fetched via a KD-tree and any within a Theiler window of the query point's time
+% index are discarded (a point and its temporal neighbors are strongly autocorrelated,
+% so treating them as informative near-neighbors would understate the local spread);
 % the rare point left with too few valid candidates falls back to an exact
 % brute-force search.
 %
-% NOTE ON DIRECTIONALITY: KL(P||Q) and KL(Q||P) are generally different
-% quantities, but *not* here: the reversed embedding Q is built by flipping
-% the coordinate order of each row of P, an isometry (it preserves all
-% pairwise distances, including cross-set ones), applied identically at
-% every matching time index. Any purely distance-based two-sample
-% divergence estimator -- like the k-NN one used here -- is therefore
-% forced to return numerically identical values for KL(P||Q) and KL(Q||P)
-% (verified to match to machine precision on synthetic test series); only
-% one direction is computed.
-%
-% NOTE ON SIGNIFICANCE: only a raw divergence estimate is returned, not a
-% p-value -- consecutive embedded points overlap in m-1 coordinates and are
-% not independent, the same reason CO_trev/CO_TC3/CO_JointNonGaussianity
-% report raw statistics only. For significance testing against a null that
-% respects the series' own autocorrelation structure, compare this
-% statistic to its distribution over surrogates (cf. SD_MakeSurrogates,
-% SD_SurrogateTest).
-%
 % ---INPUTS:
 % y, the input time series
-%
-% tau, the time delay for the embedding (can be 'ac' or 'mi', or an
-%      integer, cf. BF_Embed). Default: 'ac'.
-%
-% m, the embedding dimension (an integer; cf. BF_Embed). Default: 2, for
-%    the pairwise joint distribution (x_t,x_{t+tau}); set to 3 for the
-%    triple-wise joint distribution (x_t,x_{t+tau},x_{t+2tau}).
-%
+% tau, the time delay for the embedding (can be 'ac' or 'mi', or an integer, cf.
+%      BF_Embed). Default: 'ac'.
+% m, the embedding dimension (an integer; cf. BF_Embed). Default: 2, for the pairwise
+%    joint distribution (x_t,x_{t+tau}); set to 3 for the triple-wise joint distribution
+%    (x_t,x_{t+tau},x_{t+2tau}).
 % k, the number of nearest neighbors used by the k-NN divergence estimator.
 %    Default: 3 (matches NL_LocalDensity's default).
-%
-% theilerWin, the number of temporally-adjacent points excluded from both
-%             the within-set and cross-set neighbor searches (|i-j| <=
-%             theilerWin), applied at matching time indices in both the
-%             forward and reversed embeddings: {'ac', k} for k times the
-%             first zero-crossing of the autocorrelation function, or a
-%             number of samples (see BF_TheilerWindow). Default: {'ac', 1}.
-%             Narrowed to fit short series (see minN below).
-%
-% maxN, the maximum number of embedded points used. The k-NN searches are
-%       KD-tree-based, not the O(N^2) cost of CO_JointNonGaussianity's
-%       skewness statistic (which needs this kind of cap): empirically,
-%       100000 points takes ~0.3s for smooth data and ~1.6s even for
-%       adversarial duplicate-heavy data that maximally triggers the
-%       brute-force Theiler-window fallback (cf. local_theiler_kth). A
-%       warning is issued whenever cropping actually happens. Default:
-%       'full' (no cropping); set to an integer to cap runtime on
-%       unusually long series.
+% theilerWin, the number of temporally adjacent points excluded from both the
+%             within-set and cross-set neighbor searches (|i-j| <= theilerWin), applied
+%             at matching time indices in both the forward and reversed embeddings:
+%             {'ac', k} for k times the first zero-crossing of the autocorrelation
+%             function, or a number of samples (see BF_TheilerWindow). Default:
+%             {'ac', 1}. Narrowed to fit short series.
+% maxN, the maximum number of embedded points used. The k-NN searches are KD-tree
+%       based, not the O(N^2) cost of CO_JointNonGaussianity's skewness statistic
+%       (which needs this kind of cap): empirically, 100000 points takes ~0.3s for
+%       smooth data and ~1.6s even for adversarial duplicate-heavy data. A warning is
+%       issued whenever cropping actually happens. Default: 'full' (no cropping); set
+%       to an integer to cap runtime on unusually long series.
 %
 % ---OUTPUTS:
-% The raw k-NN estimate of KL(forward || reversed) and its magnitude. A
-% unitless departure-from-reversibility measure, zero up to estimation
-% noise for a reversible process (the k-NN estimator can dip slightly
-% negative near a true value of zero -- expected behavior of this
-% nonparametric estimator, not a bug), with no attached significance level
-% (see note above).
+% raw, the k-NN estimate of KL(forward || reversed): a unitless departure-from-
+%       reversibility measure, zero up to estimation noise for a reversible process
+%       (the k-NN estimator can dip slightly negative near a true value of zero),
+% abs, its magnitude.
+% The output is a single NaN if the embedding fails or has too few points (fewer than
+% max(50, 10k)).
+%
+% ---REFERENCES:
+% Wang, Kulkarni & Verdu, "Divergence Estimation for Multidimensional Densities via
+% k-Nearest-Neighbor Distances", IEEE Trans. Inf. Theory 55(5), 2392 (2009).
+% Diks, van Houwelingen, Takens & DeGoede, "Reversibility as a criterion for
+% discriminating time series", Phys. Lett. A 201(4-5), 221 (1995) (a different,
+% U-statistic-based comparison of forward and reverse embedding distributions).
+%
+% ---NOTES:
+% Directionality: KL(P||Q) and KL(Q||P) are generally different, but not here: the
+% reversed embedding Q is built by flipping the coordinate order of each row of P, an
+% isometry applied identically at every matching time index. Any purely distance-based
+% two-sample divergence estimator, like the k-NN one used here, therefore returns
+% numerically identical values for both directions; only one is computed.
+%
+% Significance: only a raw divergence estimate is returned, not a p-value. Consecutive
+% embedded points overlap in m-1 coordinates and are not independent, the same reason
+% CO_trev/CO_TC3/CO_JointNonGaussianity report raw statistics only. For significance
+% testing, compare to the distribution over surrogates (cf. SD_MakeSurrogates,
+% SD_SurrogateTest).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

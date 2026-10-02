@@ -1,22 +1,47 @@
 function out = DN_CompareKSFit(x, whatDistn)
-% DN_CompareKSFit       Fits a distribution to data.
+% DN_CompareKSFit   Compares a fitted distribution with the smoothed distribution of the data.
 %
-% Returns simple statistics on the discrepancy between the
-% kernel-smoothed distribution of the time-series values, and the distribution
-% fitted to it by some model: Gaussian (using normfifit from Matlab's
-% Statistics Toolbox), Extreme Value (evfifit), Uniform (unififit), Beta
-% (betafifit), Rayleigh (raylfifit), Exponential (expfifit), Gamma (gamfit),
-% LogNormal (lognfifit), and Weibull (wblfifit).
+% Fits a standard distribution to the data (by maximum likelihood, using
+% Statistics Toolbox functions), and compares it with a kernel-smoothed
+% estimate of the distribution of the values (ksdensity; "KS" here means
+% kernel-smoothed, not Kolmogorov-Smirnov). Both curves are evaluated on a
+% common grid of 1000 points that covers the smoothed distribution and the body
+% of the fitted distribution (out to where it falls to 1/100 of its peak).
+% They are then compared by the area between them, the separation of their
+% peaks, their overlap, and the relative entropy.
+%
+% The exponential, Rayleigh and gamma distributions require non-negative
+% values, and the log-normal and Weibull distributions require positive values;
+% NaN is returned if the data do not satisfy this (and for a constant series
+% in the Rayleigh and exponential cases). For the beta distribution, the data
+% are first rescaled to lie inside (0, 1), and all outputs are then in rescaled
+% units.
 %
 % ---INPUTS:
 % x, the input data vector
 % whatDistn, the type of distribution to fit to the data:
-%           'norm' (normal), 'ev' (extreme value), 'uni' (uniform),
-%           'beta' (Beta), 'rayleigh' (Rayleigh), 'exp' (exponential),
-%           'gamma' (Gamma), 'logn' (Log-Normal), 'wbl' (Weibull).
+%           'norm' (Gaussian; normfit), 'ev' (extreme value; evfit),
+%           'uni' (uniform; unifit), 'beta' (beta; betafit),
+%           'rayleigh' (Rayleigh; raylfit), 'exp' (exponential; expfit),
+%           'gamma' (gamma; gamfit), 'logn' (log-normal; lognfit),
+%           'wbl' (Weibull; wblfit).
 %
-% ---OUTPUTS: include the absolute area between the two distributions, the peak
-% separation, overlap integral, and relative entropy.
+% ---OUTPUTS:
+% adiff, the absolute area between the two distributions (0 for a perfect
+%       match, at most 2).
+% peaksepy, the separation in height between the peaks: the maximum of the
+%       fitted distribution minus that of the smoothed distribution.
+% peaksepx, the separation in position between the peaks: the position of the
+%       peak of the fitted distribution minus that of the smoothed distribution.
+% olapint, the overlap integral of the two distributions, multiplied by the
+%       standard deviation of the data so that it does not depend on their
+%       scale.
+% relent, the relative entropy (Kullback-Leibler divergence), in nats, of the
+%       fitted distribution from the smoothed distribution.
+%
+% ---NOTES:
+% adiff, olapint and relent do not depend on the scale of the data, but
+% peaksepy and peaksepx do.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -69,20 +94,20 @@ switch whatDistn
 	case 'ev'
 		a = evfit(x);
 		peaky = evpdf(a(1), a(1), a(2)); thresh = peaky / 100;
-		xf(1) = 0;
+		xf(1) = a(1);
 		ange = 10;
 		while ange > thresh, xf(1) = xf(1) - xStep; ange = evpdf(xf(1), a(1), a(2)); end
-		xf(2) = 0;
+		xf(2) = a(1);
 		ange = 10;
 		while ange > thresh, xf(2) = xf(2) + xStep; ange = evpdf(xf(2), a(1), a(2)); end
 
 	case 'uni'
 		[a, b] = unifit(x);
 		peaky = unifpdf(mean(x), a, b); thresh = peaky / 100;
-		xf(1) = 0;
+		xf(1) = mean(x);
 		ange = 10;
 		while ange > thresh, xf(1) = xf(1) - xStep; ange = unifpdf(xf(1), a, b); end
-		xf(2) = 0;
+		xf(2) = mean(x);
 		ange = 10;
 		while ange > thresh, xf(2) = xf(2) + xStep; ange = unifpdf(xf(2), a, b); end
 

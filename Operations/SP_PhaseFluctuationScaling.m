@@ -1,77 +1,68 @@
 function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
-% SP_PhaseFluctuationScaling    Multi-scale fluctuation analysis of instantaneous phase
+% SP_PhaseFluctuationScaling   Multi-scale fluctuation analysis of the instantaneous phase of the dominant oscillation.
 %
-% Isolates the dominant oscillatory component of y (the frequency band
-% carrying the most spectral power, excluding DC and Nyquist), takes its
-% instantaneous phase via the analytic signal, and asks how the
-% fluctuation of that phase about its mean rotation rate grows with
-% window size N: mean(|dphi(t+N) - dphi(t)|) vs. N, in log-log space (the
-% same detrended-fluctuation-analysis logic SC_FluctAnal/SY_ apply to raw
-% values, applied here to instantaneous phase instead).
+% Isolates the dominant oscillatory component of y (the frequency band carrying
+% the most spectral power, excluding DC and Nyquist), takes its instantaneous
+% phase via the analytic signal, and asks how the fluctuation of that phase about
+% its mean rotation rate grows with window size w: mean(|dphi(t+w) - dphi(t)|)
+% against w, in log-log space (the same logic as detrended fluctuation analysis,
+% as in SC_FluctAnal, applied to instantaneous phase instead of raw values).
 %
-% This targets a specific finding of Gupta, Prasad, Singh & Ramaswamy
-% (below): for strange nonchaotic dynamics, this curve rises at short
-% windows (reflecting local instability -- SNAs and chaotic dynamics look
-% identical over short windows) but *flattens* at longer windows, because
-% an SNA's largest Lyapunov exponent is negative and its phase dynamics
-% are, over long timescales, globally stable. For chaotic dynamics, the
-% curve keeps rising at long windows too, because nearby trajectories
-% (and hence the phase) never stop diverging. This is a real signature to
-% distinguish from a similar-looking but different thing: an ordinary,
-% cleanly periodic oscillation also flattens quickly, but its short-window
-% slope is close to zero as well (there's no local instability to begin
-% with) -- it's the combination of an appreciable short-window rise *and*
-% a later flattening that is closer to the paper's SNA signature, not
-% flattening alone.
+% This targets a finding of Gupta, Prasad, Singh and Ramaswamy for strange
+% nonchaotic dynamics: the curve rises at short windows (local instability) but
+% flattens at longer windows, because an SNA's largest Lyapunov exponent is
+% negative and its phase dynamics are globally stable. For chaotic dynamics the
+% curve keeps rising at long windows, because nearby trajectories (and so the
+% phase) never stop diverging. An ordinary, cleanly periodic oscillation also
+% flattens quickly, but its short-window slope is close to zero as well; the
+% combination of an appreciable short-window rise and a later flattening is
+% closer to the paper's SNA signature (but see the note below).
 %
-% The original method uses empirical mode decomposition (EMD) to isolate
-% the dominant intrinsic mode. This implementation instead bandpasses
-% around the single dominant non-edge FFT peak (the same band-limited
-% analytic-signal trick SP_PhaseAmpCoupling uses), which is simpler,
-% parameter-transparent, and avoids EMD's known mode-mixing/boundary
-% sensitivities -- at the cost of not being a literal reimplementation.
+% The original method uses empirical mode decomposition (EMD) to isolate the
+% dominant intrinsic mode. This implementation instead bandpasses around the
+% single dominant non-edge FFT peak (the band-limited analytic-signal trick of
+% SP_PhaseAmpCoupling), which is simpler, parameter-transparent, and avoids EMD's
+% mode-mixing and boundary sensitivities, at the cost of not being a literal
+% reimplementation.
 %
-% NOTE (audit, 2026-09): the short-window slope does NOT behave as the
+% ---INPUTS:
+% y, the input time series
+% halfWidthFrac, half-width of the frequency band around the dominant peak, as a
+%                fraction of the usable (DC- and Nyquist-excluded) one-sided
+%                spectrum, and at least 2 bins (default: 0.01)
+% numWindows, the number of log-spaced window sizes (from 2 samples to N/4) to
+%             evaluate, split into a short-window half and a long-window half for
+%             two separate linear fits in log-log space (default: 16)
+% maxN, the maximum number of samples to consider (cf. NL_RQA); longer series are
+%       cropped to their first maxN points (default: 10000)
+%
+% ---OUTPUTS:
+% slope_short, slope_long: log-log slopes of the phase fluctuation against window
+%              size, over the shorter and the longer half of the window sizes
+%              (the two fits share one point)
+% slope_diff, slope_short - slope_long
+% meanFreq, the mean rotation frequency of the isolated dominant component, in
+%              cycles per sample (correlates r = 0.90 with the SP_Summaries_*_maxw
+%              fields on real EEG data; kept as a free byproduct)
+%
+% ---REFERENCES:
+% K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal analysis of
+% strange nonchaotic dynamics", Phys. Rev. E 77, 046220 (2008).
+% DOI: 10.1103/PhysRevE.77.046220
+%
+% ---NOTES:
+% NOTE: the short-window slope does NOT behave as the
 % reasoning above would suggest. Because the phase comes from a narrow
 % band (a coherence length of ~N/(2*halfWidthBins) samples), it is smooth
 % at short lags for ANY input, so mean(|dphi(t+w) - dphi(t)|) grows
 % linearly with w there -- the trivial derivative regime -- and
 % slope_short is ~1 regardless of dynamics: 0.93-1.00 for 90% of the
-% Empirical1000 series (and 0.92 for a clean periodic signal, not ~0).
+% real-world series (and 0.92 for a clean periodic signal, not ~0).
 % slope_diff is consequently just 1 - slope_long (r = -0.98). The
 % informative quantity is slope_long alone: near 0 where the phase
 % fluctuation saturates (periodic, SNA-like), and positive where it keeps
 % growing (chaotic, noisy). slope_short and slope_diff are still computed
 % but should not be read as a short-window instability measure.
-%
-% cf. K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal
-% analysis of strange nonchaotic dynamics", Phys. Rev. E 77, 046220 (2008).
-% DOI: 10.1103/PhysRevE.77.046220
-%
-% ---INPUTS:
-%
-% y, the input time series
-%
-% halfWidthFrac, half-width of the frequency band around the dominant
-%                peak, as a fraction of the usable (DC- and
-%                Nyquist-excluded) one-sided spectrum (default: 0.01)
-%
-% numWindows, the number of log-spaced window sizes N to evaluate, split
-%             evenly into a short-window half and a long-window half for
-%             two separate linear fits in log-log space (default: 16)
-%
-% maxN, the maximum number of samples to consider (cf. NL_RQA; default:
-%       10000)
-%
-% ---OUTPUTS: the short-window and long-window log-log slopes
-% (slope_short, slope_long), their difference (slope_diff = slope_short -
-% slope_long), and the mean rotation frequency of the isolated dominant
-% component (meanFreq, in cycles per sample -- correlates r=0.90
-% with the existing SP_Summaries_*_maxw fields on the Bonn EEG dataset,
-% which capture a related "location of the dominant spectral peak"
-% concept via a plain periodogram rather than this operation's isolated
-% band; kept anyway since it's a free byproduct of the computation above
-% and the two aren't identical).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

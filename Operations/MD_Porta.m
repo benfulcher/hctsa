@@ -1,8 +1,9 @@
 function out = MD_Porta(x,numLevels)
-% MD_Porta      Porta's symbolic-dynamics word-type indices.
+% MD_Porta   Porta's symbolic-dynamics word-type indices.
 %
-% Quantizes the time series into a small number of levels and classifies
-% consecutive length-3 "words" of symbols by their pattern of variation:
+% Quantizes the time series into a small number of levels (numLevels equal-width
+% bins spanning its range, by discretize) and classifies consecutive length-3
+% "words" of symbols by their pattern of variation:
 %   0V   -- no variation (all three symbols equal)
 %   1V   -- one variation (exactly one of the two transitions is flat)
 %   2LV  -- two like variations (both transitions move the same direction)
@@ -11,18 +12,40 @@ function out = MD_Porta(x,numLevels)
 % Originally developed for heart-rate-variability analysis, quantifying the
 % complexity/regularity of the symbolic dynamics of RR interval sequences.
 %
-% cf. A. Porta et al., "Quantifying the strength of the linear and
-% nonlinear relationships between heart period and arterial pressure",
-% IEEE Trans. Biomed. Eng. 45(8) 1017 (1998)
-%
 % ---INPUTS:
 % x, the input time series
-% numLevels, the number of quantization levels (default: 6, as in the
-%            original papers)
+% numLevels, the number of quantization levels (default: 6, as in the original
+%    papers)
 %
 % ---OUTPUTS:
-% out.pV0, out.pV1, out.pV2LV, out.pV2UV: percentage of length-3 words of
-% each type
+% A structure with fields:
+% pV0, the percentage of length-3 words with no variation
+% pV1, the percentage of length-3 words with one variation
+% pV2LV, the percentage of length-3 words with two like variations
+% pV2UV, the percentage of length-3 words with two unlike variations
+% All four are NaN for a constant series.
+%
+% ---REFERENCES:
+% A. Porta, S. Guzzetti, N. Montano, R. Furlan, M. Pagani, A. Malliani and S. Cerutti,
+% "Entropy, entropy rate, and pattern classification as tools to typify complexity
+% in short heart period variability series", IEEE Trans. Biomed. Eng. 48(11),
+% 1282-1291 (2001). DOI: 10.1109/10.959324
+% (defines the 0V, 1V, 2LV and 2UV classes of three-beat patterns.)
+%
+% A. Porta, E. Tobaldini, S. Guzzetti, R. Furlan, N. Montano and T. Gnecchi-Ruscone,
+% "Assessment of cardiac autonomic modulation during graded head-up tilt by
+% symbolic analysis of heart rate variability", Am. J. Physiol. Heart Circ.
+% Physiol. 293(1), H702-H708 (2007). DOI: 10.1152/ajpheart.00006.2007
+%
+% ---NOTES:
+% Earlier versions of this docstring cited "A. Porta et al., Quantifying the
+% strength of the linear and nonlinear relationships between heart period and
+% arterial pressure, IEEE Trans. Biomed. Eng. 45(8) 1017 (1998)". No paper with
+% that title was found; IEEE Trans. Biomed. Eng. 45(8), 1017-1023 (1998) is a
+% different paper (Cammarota and Onaral, DOI: 10.1109/10.704870). The references
+% above are the papers that define and use the word classes implemented here. The
+% default of six quantization levels is the value reported for this method in
+% secondary sources; it was not checked in the two papers above.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

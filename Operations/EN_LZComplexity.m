@@ -1,27 +1,37 @@
 function out = EN_LZComplexity(y, n, preProc)
-% EN_LZComplexity Lempel-Ziv complexity of a n-bit encoding of a time series
+% EN_LZComplexity   Lempel-Ziv complexity of an n-symbol encoding of a time series.
+%
+% The time series is coarse-grained into n symbols using equiprobable bins (each
+% symbol is used equally often), and the normalized Lempel-Ziv complexity of the
+% resulting symbol string is computed: the number c of distinct symbol sequences
+% found when reading the string, divided by the number expected for a random
+% (noise) string, c*log(L)/(L*log(n)) for a string of length L. A value near 1
+% indicates a random sequence; lower values indicate structure that can be
+% compressed.
 %
 % ---INPUTS:
 % y, the input time series
-% n, the (integer) number of bits to encode the data into
-% preProc [opt], first apply a given preProcessing to the time series. For now,
-%               just 'diff' is implemented, which zscores incremental
-%               differences and then applies the complexity method.
+% n, the (integer) number of symbols to encode the data into (default: 2, a
+%    binary encoding)
+% preProc [optional], first apply a given preprocessing to the time series. For
+%    now, just 'diff' is implemented, which z-scores the incremental differences
+%    and then applies the complexity method. An empty input applies no
+%    preprocessing (default).
 %
-% ---OUTPUT: the normalized Lempel-Ziv complexity: i.e., the number of distinct
-%           symbol sequences in the time series divided by the expected number
-%           of distinct symbols for a noise sequence.
+% ---OUTPUTS:
+% a scalar: the normalized Lempel-Ziv complexity.
+%
+% ---REFERENCES:
+% M. Small, "Applied Nonlinear Time Series Analysis: Applications in Physics,
+% Physiology, and Finance", World Scientific, Nonlinear Science Series A, Vol. 52
+% (2005).
+%
+% ---NOTES:
+% Uses Michael Small's code 'complexity' (renamed MS_complexity here), available
+% at http://small.eie.polyu.edu.hk/matlab/. The code is a wrapper for Michael
+% Small's original code and uses the associated mex file compiled from
+% complexitybs.c (renamed MS_complexitybs.c here).
 
-% Uses Michael Small's code: 'complexity' (renamed MS_complexity here).
-%
-% cf. M. Small, Applied Nonlinear Time Series Analysis: Applications in Physics,
-% Physiology, and Finance (book) World Scientific, Nonlinear Science Series A,
-% Vol. 52 (2005)
-% Code is available at http://small.eie.polyu.edu.hk/matlab/
-%
-% The code is a wrapper for Michael Small's original code and uses the
-% associated mex file compiled from complexitybs.c (renamed MS_complexitybs.c
-% here).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

@@ -1,17 +1,22 @@
 function out = DN_Mean(y, meanType)
-% DN_Mean   A given measure of location of a data vector.
+% DN_Mean   A given measure of the location of a data vector.
+%
+% Returns the mean, median or another measure of the typical value of the data,
+% ignoring the order of the values.
 %
 % ---INPUTS:
-%
 % y, the input data vector
-%
-% meanType, (i) 'norm' or 'arithmetic', arithmetic mean
+% meanType, the measure of location (default: 'arithmetic'):
+%           (i) 'norm' or 'arithmetic', arithmetic mean
 %           (ii) 'median', median
 %           (iii) 'geom', geometric mean
 %           (iv) 'harm', harmonic mean
 %           (v) 'rms', root-mean-square
-%           (vi) 'iqm', interquartile mean
-%           (vii) 'midhinge', midhinge
+%           (vi) 'iqm', interquartile mean (cf. DN_TrimmedMean)
+%           (vii) 'midhinge', average of the first and third quartiles
+%
+% ---OUTPUTS:
+% a scalar: the chosen measure of location.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

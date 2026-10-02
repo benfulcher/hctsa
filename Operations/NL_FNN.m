@@ -1,16 +1,34 @@
 function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
-% NL_FNN     False nearest neighbors of a time series.
+% NL_FNN   How the fraction of false nearest neighbors falls as the embedding dimension of the series increases.
+%
+% Uses the false_nearest routine from the TISEAN package for nonlinear
+% time-series analysis. For each embedding dimension m = 1,...,maxm (delay tau),
+% every point's nearest neighbor (in the maximum norm) is found, excluding points
+% within the Theiler window in time. The neighbor is false if, when one more
+% coordinate is added, the two points move apart by more than escapeFactor times
+% their original distance. For a deterministic system the fraction of false
+% neighbors falls toward 0 once the embedding dimension is large enough; for
+% noise it stays high. Neighbors farther apart than the standard deviation of
+% the data divided by the escape factor are skipped.
+%
+% The TISEAN routines are run in the command line using 'system' commands in
+% MATLAB, and require that TISEAN is installed and compiled, and able to be
+% executed in the command line.
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time delay
+% tau, the time delay (a number of samples, or 'ac' for the first zero-crossing
+%      of the autocorrelation function, or 'mi' for the first minimum of the
+%      automutual information; default: 1)
 % maxm, the maximum embedding dimension
 % theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing
 %             of the autocorrelation function, or a number of samples (see
-%             BF_TheilerWindow)
-% justBest, if 1 just outputs a scalar estimate of embedding dimension
+%             BF_TheilerWindow; default: {'ac',1})
+% justBest, if 1 just outputs a scalar estimate of embedding dimension: the first
+%           dimension at which the fraction of false nearest neighbors is below
+%           bestp (default: 1)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
-%                dimension
+%        dimension (default: 0.4)
 % escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
 %                its R_tol-like false-neighbor threshold: a candidate neighbor
 %                is "false" if its distance grows by more than this factor
@@ -21,25 +39,37 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 %                is 5 -- at matched escapeFactor values the two methods give
 %                closely comparable per-dimension false-neighbor profiles.
 %
-% ---OUTPUTS: individual false nearest neighbors proportions, as well as
-% summaries of neighborhood size, and embedding dimensions at which the
-% proportion of nearest neighbours falls below a range of thresholds
-
-% Uses the false_nearest routine from the TISEAN package for nonlinear time-series
-% analysis.
+% ---OUTPUTS: (if justBest is 1, a scalar embedding dimension; otherwise a
+% structure with the fields below, where i = 1,...,maxm is the embedding dimension)
+% pfnn_<i>: the fraction of false nearest neighbors in an i-dimensional embedding
+% nHood2_<i>: the typical (root-mean-square) distance from a point to its nearest
+%             neighbor in an i-dimensional embedding
+% minpfnn, meanpfnn, stdpfnn: minimum, mean and standard deviation of the
+%             fraction of false nearest neighbors across dimensions
+% maxnHood2, meannHood2: maximum and mean of nHood2 across dimensions
+% firstunder09, firstunder08, firstunder07, firstunder06, firstunder05,
+%             firstunder04, firstunder03, firstunder02, firstunder01,
+%             firstunder005: the first embedding dimension at which the fraction
+%             of false nearest neighbors is below 90%, 80%, ..., 10%, 5% (maxm + 1
+%             if it never is)
+% max1stepchange: the largest absolute change in the fraction between
+%             consecutive embedding dimensions
+% mdrop: the mean change in the fraction per added dimension
+% pdrop: minus the mean sign of the change, i.e. the fraction of decreasing steps
+%        minus the fraction of increasing steps
 %
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
+% ---REFERENCES:
+% R. Hegger, H. Kantz and T. Schreiber, "Practical implementation of nonlinear
+% time series methods: The TISEAN package", Chaos 9(2), 413 (1999).
 %
-% Available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-%
-% Documentation here:
+% ---NOTES:
+% TISEAN is available at
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html and the
+% false_nearest documentation at
 % http://www.mpipks-dresden.mpg.de/~tisean/TISEAN_2.1/docs/docs_c/false_nearest.html
 %
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
+% The fourth column of TISEAN's output (nHood2) is the square root of the mean
+% squared nearest-neighbor distance.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>

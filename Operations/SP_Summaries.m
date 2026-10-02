@@ -1,42 +1,123 @@
 function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
-% SP_Summaries  Statistics of the power spectrum of a time series
+% SP_Summaries   Statistics of the power spectrum of a time series.
 %
-% The estimation can be done using a periodogram, using the periodogram code in
-% Matlab's Signal Processing Toolbox, or a fast fourier transform, implemented
-% using Matlab's fft code.
+% Estimates the power spectrum (as a periodogram, using Matlab's periodogram, as
+% a plain fast Fourier transform, or by Welch's method) and returns many summary
+% statistics: the location and width of its main peak, the number and prominence
+% of peaks, the distribution of power values, the autocorrelation of power across
+% frequency, the frequencies below which given fractions of the power lie,
+% power-weighted moments of frequency, fits to the cumulative power, a spectral
+% entropy and flatness, robust power-law fits to the log-log spectrum, the power in
+% 2 and 5 equal frequency bands, and the number of crossings of the log spectrum at
+% various levels. Many statistics have a log-domain version computed on log(S).
 %
 % ---INPUTS:
 % y, the input time series
-%
 % psdMeth, the method of obtaining the spectrum from the signal:
-%               (i) 'periodogram': periodogram
-%               (ii) 'fft': fast fourier transform
-%               (iii) 'welch': Welch's method
-%
-% windowType, the window to use:
+%               (i) 'periodogram': periodogram (window across the whole series)
+%               (ii) 'fft': fast fourier transform, single-sided power spectral
+%                    density; no window is applied and the DC bin is dropped
+%               (iii) 'welch': Welch's method, with windows of
+%                    max(min(256, round(N/4)), 16) samples and 50% overlap
+%               (default: 'fft')
+% windowType, the window to use (for 'periodogram' and 'welch'; ignored by 'fft'):
 %               (i) 'boxcar'
 %               (ii) 'rect'
 %               (iii) 'bartlett'
 %               (iv) 'hann'
-%               (v) 'hamming'
+%               (v) 'hamming' (default)
 %               (vi) 'none'
-%
-% nf, the number of frequency components to include. If
-%           empty (default), it's approximately length(y).
-%
-% doLogAbs, if 1, takes log amplitude of the signal before
-%           transforming to the frequency domain.
-%
-% doPower, analyzes the power spectrum rather than amplitudes of a Fourier
-%          transform
+% nf, the number of frequency components to include; used only by 'periodogram'.
+%           If empty (default), the periodogram's own frequency grid is used.
+% doLogAbs, if true, analyzes the spectrum of the log of the absolute values,
+%           log(abs(y)), in place of y (default: false)
 %
 % ---OUTPUTS:
-% Statistics summarizing various properties of the spectrum,
-% including its maximum, minimum, spread, correlation, centroid, area in certain
-% (normalized) frequency bands, moments of the spectrum, power-weighted
-% moments of the frequency distribution, Shannon spectral
-% entropy, a spectral flatness measure, power-law fits, and the number of
-% crossings of the spectrum at various amplitude thresholds.
+% The spectrum S is a power spectral density in angular frequency w (radians per
+% sample, 0 to pi), for all three estimators normalized so that its area (the sum
+% of S times the bin spacing) equals the variance of the series, i.e. ~1 for a
+% z-scored series. Statistics that accumulate over bins (cumulative-area fits,
+% entropy) are therefore integrals over w, independent of the number of bins and
+% so of the series length. Output fields:
+%
+% Peaks:
+% maxS, maxw: the maximum of S and the angular frequency at which it occurs
+% maxWidth: half-power bandwidth of the dominant peak
+% numPromPeaks_3, numPromPeaks_5, numPromPeaks_8: number of peaks of log(S) with
+%       prominence above 3, 5, 8 (natural-log units)
+% meanProm_5, meanPeakWidth_prom5: mean prominence and mean width of the peaks with
+%       prominence above 5
+% width_weighted_prom, w_weighted_peak_prom: mean peak width and mean peak location,
+%       weighted by prominence
+% peakPower_2, peakPower_5, peakPower_prom5: power (height x width) in the 2 and 5
+%       tallest peaks and in the peaks with prominence above 5
+% numPeaks_50power, peakpower_1: number of tallest peaks needed to hold half the
+%       peak power, and the fraction of peak power in the tallest peak
+% (These are calibrated for, and registered only with, psdMeth = 'welch'.)
+%
+% Distribution of power values (and of log power values, with prefix log):
+% iqr, logiqr, q25, median, q75, logq25, logmedian, logq75, std, stdlog (= log of
+% std), logstd (= std of log(S)), mom3 and logmom3 (skewness)
+%
+% Autocorrelation of the spectrum across frequency:
+% ac1, ac2, tau (first zero-crossing of the autocorrelation, in units of w), and
+% logac1, logac2, logtau for log(S)
+%
+% Cumulative power:
+% wmax_5, wmax_10, wmax_25, centroid, wmax_75, wmax_90, wmax_95, wmax_99: the
+% frequency below which 5%, 10%, ..., 99% of the power lies (centroid is the
+% median frequency, 50%)
+%
+% Power-weighted moments of frequency:
+% specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
+% and kurtosis of frequency weighted by power
+%
+% Fits to the cumulative area under S (a running integral of S over w, which rises
+% to ~1 for a z-scored series, independent of the number of bins):
+% fpoly2csS_p1, fpoly2csS_p2, fpoly2csS_p3, fpoly2_sse, fpoly2_r2, fpoly2_rmse:
+%       coefficients and goodness of a quadratic fit to the cumulative area under S
+%       as a function of w (fpoly2_sse is the integrated squared error)
+% fpolysat_a, fpolysat_b, fpolysat_r2, fpolysat_rmse: parameters and goodness of
+%       a*w^2/(b+w^2)
+%
+% Entropy, flatness and areas:
+% spect_shann_ent: differential Shannon entropy of the power distribution over
+%       frequency, -integral(Sn log Sn dw), for the unit-area spectrum Sn
+% spect_shann_ent_norm: exp(spect_shann_ent) as a fraction of the frequency range
+%       (1 for a flat spectrum, towards 0 for a narrow-band one)
+% sfm: spectral flatness measure, 10*log10(geometric mean / arithmetic mean)
+% areatopeak, ylogareatopeak: area under S, and under log(S), up to the peak
+%
+% Robust linear fits (a1 = intercept, a2 = gradient; sigrat = OLS/robust sigma ratio;
+% sigma = residual sigma estimate; sea1 = standard error of the intercept):
+% linfitloglog_all_a1, linfitloglog_all_a2, linfitloglog_all_sigrat,
+% linfitloglog_all_sigma, linfitloglog_all_sea1: log(S) against log(w), all
+%       frequencies
+% linfitloglog_lf_a2, linfitloglog_mf_a2: gradient over the lower half and the
+%       middle half of the frequencies
+% linfitloglog_hf_a1, linfitloglog_hf_a2, linfitloglog_hf_sigrat,
+% linfitloglog_hf_sigma, linfitloglog_hf_sea1: upper half of the frequencies
+% linfitsemilog_all_a1, linfitsemilog_all_sigrat, linfitsemilog_all_sigma,
+% linfitsemilog_all_sea1: log(S) against w, all frequencies
+%
+% Power in frequency bands (2 and 5 equal bands, from the lowest frequencies):
+% area_2_1, area_2_2, logarea_2_1, logarea_2_2: area under S and log(S) in each of
+%       2 bands
+% area_5_1, area_5_2, area_5_3, area_5_4, area_5_5, logarea_5_1, logarea_5_2,
+% logarea_5_3, logarea_5_4, logarea_5_5: the same for 5 bands
+% statav2_s, statav5_s: std across bands of the within-band std of S, relative to
+%       std(S), for 2 and 5 bands
+% logstatav2_m, logstatav2_s, logstatav5_m, logstatav5_s: std across bands of the
+%       band means (_m) and of the within-band stds (_s) of log(S), relative to
+%       std(log(S)), for 2 and 5 bands
+%
+% Crossings of the log spectrum:
+% ncross_log_f05, ncross_log_f10, ncross_log_f20, ncross_log_f50: crossings of a
+%       level 5%, 10%, 20%, 50% of the way from min(log S) to max(log S)
+%
+% ---NOTES:
+% The 2- and 5-band areas use buffer on the bins, so when the number of bins is not
+% divisible by the number of bands the last few bins are dropped.
 %
 % Note there are two distinct senses of 'moment' here, which the field
 % names can obscure: mom3 etc. are moments of the distribution of power
@@ -154,10 +235,9 @@ if ismember(psdMeth, {'periodogram', 'welch'})
 	% the whole series (as used below for periodogram, a genuine
 	% single-segment, whole-series estimate) would silently collapse Welch's
 	% method to a single "segment" with no averaging at all, making it
-	% numerically near-indistinguishable from an unwindowed periodogram: an
-	% actual bug found and fixed here (validated on HCTSA_Empirical1000.mat,
-	% where the un-fixed version had r=1.000 with the 'fft' method's output
-	% across 97.6% of fields). noverlap is left at pwelch's own default (50%
+	% numerically near-indistinguishable from an unwindowed periodogram (a bug in earlier
+	% versions: on a diverse set of real-world series the un-fixed version had r=1.000
+	% with the 'fft' method's output across 97.6% of fields). noverlap
 	% of window length) below.
 	if strcmp(psdMeth, 'welch')
 		% winLength used to be Ny/4, which keeps the segment COUNT fixed
@@ -445,7 +525,12 @@ out.logtau = CO_FirstCrossing(logS, 'ac', 0, 'continuous') * dw; % see tau's N-i
 % ------------------------------------------------------------------------------
 % Shape of cumulative sum curve
 % ------------------------------------------------------------------------------
-csS = cumsum(S);
+% Cumulative area under the spectrum (a running integral over w, not a bare
+% running sum over bins): for a unit-variance series it rises from 0 to ~1
+% whatever the number of bins, so the fits to it below do not depend on how
+% finely the spectrum happens to be sampled (a bare cumsum(S) ends at ~1/dw,
+% i.e. at a value proportional to the transform length).
+csS = cumsum(S) * dw;
 
 f_frac_w_max = @(f) w(find(csS >= csS(end) * f, 1, 'first'));
 
@@ -533,7 +618,7 @@ end
 out.fpoly2csS_p1 = c.p1;
 out.fpoly2csS_p2 = c.p2;
 out.fpoly2csS_p3 = c.p3;
-out.fpoly2_sse = gof.sse;
+out.fpoly2_sse = gof.sse * dw; % integrated (not summed) squared error
 out.fpoly2_r2 = gof.rsquare;
 out.fpoly2_rmse = gof.rmse;
 
@@ -549,9 +634,20 @@ out.fpolysat_rmse = gof.rmse;
 % ------------------------------------------------------------------------------
 % Shannon spectral entropy
 % ------------------------------------------------------------------------------
-Hshann = -S .* log(S); % Shannon function
-out.spect_shann_ent = sum(Hshann);
-out.spect_shann_ent_norm = mean(Hshann);
+% Both are computed from the spectrum rescaled to exactly unit area, Sn =
+% S/(sum(S)*dw), so they describe the shape of the power distribution over
+% frequency only (not window/leakage effects on the total area, nor the number
+% of bins; a bare sum over bins grows in proportion to the number of bins, i.e. to
+% the series length, and the entropy of S/sum(S) over bins grows as log(bins)).
+% (i) spect_shann_ent: -integral of Sn log(Sn) dw, the differential Shannon entropy
+%     of the power distribution over frequency.
+% (ii) spect_shann_ent_norm: exp(spect_shann_ent) divided by the width of the
+%     frequency axis, N*dw: the fraction of the axis over which a flat spectrum
+%     would have the same entropy. Bounded in (0, 1]: 1 for a flat spectrum,
+%     towards 0 as the power concentrates in a narrow band.
+Sn = S / (sum(S) * dw);
+out.spect_shann_ent = sum(-Sn .* log(Sn)) * dw;
+out.spect_shann_ent_norm = exp(out.spect_shann_ent) / (N * dw);
 
 % ------------------------------------------------------------------------------
 % "Spectral Flatness Measure"
@@ -621,9 +717,7 @@ out.statav2_s = std(std(split)) / std(S);
 % this is essentially "which band has the peak" rather than a nuanced
 % measure of stationarity across the spectrum's shape. (The mean-based
 % version, statav2_m, was dropped entirely -- see the note at the top of
-% this file; std(mean(split))/std(S) checked out as the least-redundant-
-% with-anything candidate in the same cross-hctsa audit that flagged
-% ncross, i.e. noise rather than novel structure.)
+% this file.)
 splitLog = buffer(logS, floor(N / 2));
 if size(splitLog, 2) > 2, splitLog = splitLog(:, 1:2); end
 out.logstatav2_m = std(mean(splitLog)) / std(logS);

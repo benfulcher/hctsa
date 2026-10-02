@@ -1,17 +1,32 @@
 function out = CO_Embed2_Basic(y, tau)
-% CO_Embed2_Basic Point density statistics in a 2-d embedding space.
+% CO_Embed2_Basic   Point-density statistics in a 2-d embedding space.
 %
-% Computes a set of point-density statistics in a plot of y_i against y_{i-tau}.
+% Plots y(t+tau) against y(t) and computes the fraction of points that fall inside
+% simple geometric shapes: thick diagonals, thick parabolas, rings and circles. The
+% input is assumed to be z-scored.
 %
-% INPUTS:
-% y, the input time series.
+% ---INPUTS:
+% y, the input time series
+% tau, the time lag (default 1; can be set to 'tau' to use the first zero-crossing of
+%      the autocorrelation function, capped at N/10)
 %
-% tau, the time lag (can be set to 'tau' to set the time lag the first zero
-%                       crossing of the autocorrelation function).
-%
-% Outputs include the number of points near the diagonal, and similarly, the
-% number of points that are close to certain geometric shapes in the y_{i-tau},
-% y_{tau} plot, including parabolas, rings, and circles.
+% ---OUTPUTS:
+% updiag01, updiag05, the fraction of points within 0.1 or 0.5 (vertically) of the
+%       diagonal y(t+tau) = y(t),
+% downdiag01, downdiag05, the same for the anti-diagonal y(t+tau) = -y(t),
+% ratdiag01, ratdiag05, the ratios updiag/downdiag,
+% parabup01, parabup05, parabdown01, parabdown05, the fraction within 0.1 or 0.5 of
+%       the parabolas y(t+tau) = y(t)^2 and y(t+tau) = -y(t)^2,
+% parabup01_1, parabup05_1, parabdown01_1, parabdown05_1, the same for the
+%       parabolas shifted up by 1 (y(t)^2 + 1 and -(y(t)^2 - 1)),
+% parabup01_n1, parabup05_n1, parabdown01_n1, parabdown05_n1, the same for the
+%       parabolas shifted down by 1 (y(t)^2 - 1 and -(y(t)^2 + 1)),
+% ring1_01, ring1_02, ring1_05, the fraction with |y(t)^2 + y(t+tau)^2 - 1| below
+%       0.1, 0.2 or 0.5,
+% incircle_01, incircle_02, incircle_05, incircle_1, incircle_2, incircle_3, the
+%       fraction with y(t)^2 + y(t+tau)^2 below 0.1, 0.2, 0.5, 1, 2 or 3,
+% medianincircle, stdincircle, the median and standard deviation of the six incircle
+%       fractions.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -51,6 +66,13 @@ doPlot = false; % plot outputs to a figure
 if strcmp(tau, 'tau')
 	% Make tau the first zero crossing of the autocorrelation function
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	if isnan(tau)
+		out = NaN; return
+	end
+	% Cannot set the time delay greater than 10% the length of the time series
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
+	end
 end
 if isnan(tau)
 	out = NaN; return

@@ -1,102 +1,127 @@
 function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasses)
-% EN_MSE  Multiscale entropy of a time series
+% EN_MSE   Multiscale entropy of a time series.
 %
-% As per "Multiscale entropy analysis of biological signals",
-% Costa, Goldberger and Peng, PRE, 71, 021906 (2005)
-% http://physionet.comp.nus.edu.sg/physiotools/mse/papers/pre-2005.pdf
+% At each scale s the time series is coarse-grained by averaging over
+% non-overlapping windows of s samples (scale 1 is the original series), and the
+% entropy of the coarse-grained series is computed: by default the sample entropy,
+% SampEn(m,r) (EN_SampEn), as in the multiscale entropy of Costa et al. Scales are
+% handled as Composite Multiscale Entropy: the value at scale s is the mean over
+% all s possible starting offsets of the windows, instead of just offset 0 (see
+% NOTES). Scales for which the coarse-grained series has fewer than 20 samples are
+% skipped. The entropy is also summarized across scales (extremes and where they
+% occur, mean, spread, trend).
 %
 % ---INPUTS:
-% scaleRange: a vector of scales (default: 1:10)
-% m: embedding dimension/length of sequence to match (default: 2)
-% r: similarity threshold for matching (default: 0.15)
-% preProcessHow: how to preprocess the data (default: do not)
+% y, the input time series
+% scaleRange, a vector of scales (default: 1:10)
+% m, the embedding dimension (length of sequence to match) (default: 2)
+% r, the similarity threshold for matching, passed to EN_SampEn as an absolute
+%    value, so it is not rescaled with the scale (default: 0.15). It is a fraction
+%    of the standard deviation of the input if y is z-scored (as in hctsa).
+% preProcessHow, how to preprocess the data before coarse-graining (default: do
+%    not). The preprocessed series (BF_PreProcess) is z-scored. Options include
+%    'diff1' (incremental differences) and 'rescale_tau' (first coarse-grain at
+%    the first zero-crossing of the autocorrelation function).
+% whatEntropy, which entropy to evaluate at each scale:
+%    'sampen' (default): sample entropy, the classical multiscale entropy of Costa
+%        et al.
+%    'dispen': normalized dispersion entropy (EN_DispEn, with tau = 1), i.e.,
+%        multiscale dispersion entropy (MDE); cf. H. Azami, M. Rostaghi,
+%        D. Abasolo, J. Escudero, "Refined Composite Multiscale Dispersion
+%        Entropy and its Application to Biomedical Signals", IEEE Trans.
+%        Biomed. Eng. 64(12) 2872 (2017).
+%    'fdispen': the fluctuation-based variant of the same.
+%    r is unused for the dispersion-based settings (they partition amplitude into
+%    classes rather than applying a distance tolerance), and output field names
+%    carry the corresponding suffix (dispen_s1, meanDispEn, ...) so that the
+%    'sampen' outputs are unchanged.
+% numClasses, the number of amplitude classes for the dispersion-based settings
+%    (default: 6, EN_DispEn's own default); unused for 'sampen'.
 %
-% whatEntropy: which entropy to evaluate at each scale:
-%       (i) 'sampen' (default), Sample Entropy -- the classical Multiscale
-%           Entropy of Costa et al.
-%       (ii) 'dispen', normalized Dispersion Entropy (EN_DispEn), i.e.
-%            Multiscale Dispersion Entropy (MDE); cf. H. Azami, M. Rostaghi,
-%            D. Abasolo, J. Escudero, "Refined Composite Multiscale Dispersion
-%            Entropy and its Application to Biomedical Signals", IEEE Trans.
-%            Biomed. Eng. 64(12) 2872 (2017).
-%       (iii) 'fdispen', the fluctuation-based variant of the same.
-%       Note r is unused for the dispersion-based settings (they partition
-%       amplitude into classes rather than applying a distance tolerance), and
-%       output field names carry the corresponding suffix (dispen_s1,
-%       meanDispEn, ...) so that the 'sampen' outputs are unchanged.
+% ---OUTPUTS:
+% A structure with fields (for the sample entropy setting; for 'dispen' and
+% 'fdispen' the entropy-specific names change as given in brackets):
+% sampen_s1, sampen_s2, sampen_s3, sampen_s4, sampen_s5, sampen_s6, sampen_s7,
+%     sampen_s8, sampen_s9, sampen_s10 [dispen_s1, ... or fdispen_s1, ...], the
+%     entropy at each scale in scaleRange (named by the scale; these names are for
+%     the default scaleRange)
+% maxSampEn [maxDispEn, maxFDispEn], the maximum entropy across scales
+% maxScale, the scale at which the maximum occurs
+% minSampEn [minDispEn, minFDispEn], the minimum entropy across scales
+% minScale, the scale at which the minimum occurs
+% meanSampEn [meanDispEn, meanFDispEn], the mean entropy across scales
+% stdSampEn [stdDispEn, stdFDispEn], the standard deviation of the entropy across
+%     scales
+% cvSampEn [cvDispEn, cvFDispEn], the coefficient of variation of the entropy
+%     across scales (stdSampEn/meanSampEn)
+% meanch, the mean change in entropy from one scale to the next
+% slope, the slope of a robust linear fit (robustfit) of entropy against scale
+%     (NaN unless at least 4 scales have valid values)
+% slopeSE, the standard error of that slope
+% A scalar NaN is returned instead if no scale has enough samples.
 %
-% numClasses: the number of amplitude classes for the dispersion-based
-%       settings (default 6, EN_DispEn's own default); unused for 'sampen'.
-%
-% ---WHY THE DISPERSION SETTING EXISTS:
-% Validated before registering, against the SampEn default on matched data
-% (2026-09-23). The dispersion variant is not measuring something unrelated --
-% meanDispEn correlates 0.88 with the SampEn family -- it estimates a similar
-% quantity far more precisely: ~2x the effect size when discriminating AR
-% persistence (Cohen's |d| 6.10 vs 2.98 on continuous data, 4.5-5.4 vs 3.1-3.7
-% when quantized), with a 5-8x smaller coefficient of variation, clean
-% behaviour on a null (AUC 0.504 where the classes are identical), and ~30x
-% faster. The advantage reverses only under extreme quantization (<= ~9
-% distinct values), where six amplitude classes become degenerate and SampEn
-% is better.
-% Only meanDispEn/minDispEn/stdDispEn are registered as features: a
-% test-retest reliability screen over 40 processes (two independent
-% realizations each) put the remaining summaries well below the SampEn
-% incumbents' 0.953-0.994 band -- notably slope (0.851), dispen_s10 (0.679)
-% and maxScale (0.669) -- so the fields with the *lowest* redundancy against
-% the library were, in this case, the least trustworthy ones.
-%
+% ---REFERENCES:
+% Costa, Goldberger and Peng, "Multiscale entropy analysis of biological
+% signals", Phys. Rev. E 71, 021906 (2005).
+% http://physionet.comp.nus.edu.sg/physiotools/mse/papers/pre-2005.pdf
 %
 % Original C implementation and docs here:
 % http://physionet.org/physiotools/mse/tutorial/node3.html
 %
 % ---NOTES:
-% Audit, 2026-08-11. The classic Costa coarse-graining at scale s uses a
-% single, arbitrary non-overlapping partition of the series starting at the
-% first sample -- but s-1 other equally-valid partitions exist (starting at
-% offsets 1,...,s-1), and which one you happen to use has no scientific
-% meaning. Verified this is a real problem in practice, not just a
-% theoretical nitpick: on real Bonn EEG data truncated to N=300 (not
-% unusually short), the single-offset SampEn at scale=10 swung by up to 4x
-% depending purely on the arbitrary starting offset (e.g. one series: 2.08
-% at offset 0 vs. a mean of 0.64 across all 10 offsets; another: 1.39 vs.
-% 0.35) -- noise from an implementation detail, not signal, and it
-% contaminated every derived summary field (maxSampEn/maxScale/meanSampEn/
-% cvSampEn). Fixed by implementing Composite Multiscale Entropy (CMSE): "A
-% Study of Multiscale Entropy on Sample Entropy...", or more directly, "The
-% direction of the study on complexity", Wu, Wu, Chen, Liu, Sun, Yang, Peng,
-% Entropy 15(3):1069-1084 (2013) -- average SampEn across all s possible
-% coarse-graining offsets at each scale, rather than using only offset 0.
-% Cost impact measured directly: negligible (~1.0x wall time on a real
-% N=4097 series -- EN_SampEn's compiled mex is fast enough that 55 calls
-% vs. 10 doesn't register). Considered Refined Composite MSE (pooling raw
-% match counts across offsets before the log, per Wu et al. 2014) as a
-% theoretically marginally better alternative, but it needs the raw A/B
-% match counts that the fast compiled sampen_mex path doesn't expose;
-% skipped as unnecessary complexity given plain averaging (using nanmean,
-% matching this file's existing NaN-handling convention) already resolves
-% the demonstrated instability -- across 2200 offset x scale combinations
-% on real data, 0% Inf and only 2% NaN (from too-short coarse-grained
-% segments), both already handled safely.
+% Why the dispersion setting exists:
+% The dispersion variant is not measuring something unrelated -- meanDispEn
+% correlates 0.88 with the SampEn family -- but it estimates a similar quantity far
+% more precisely. Compared with SampEn on matched data: ~2x the effect size when
+% discriminating AR persistence (Cohen's |d| 6.10 vs 2.98 on continuous data, 4.5-5.4
+% vs 3.1-3.7 when quantized), a 5-8x smaller coefficient of variation, clean
+% behavior on a null (AUC 0.504 where the classes are identical), and ~30x faster.
+% The advantage reverses only under extreme quantization (<= ~9 distinct values),
+% where six amplitude classes become degenerate and SampEn is better.
+% Only meanDispEn/minDispEn/stdDispEn are registered as features: a test-retest
+% reliability screen over 40 processes (two independent realizations each) put the
+% remaining summaries well below the SampEn incumbents' 0.953-0.994 band -- notably
+% slope (0.851), dispen_s10 (0.679) and maxScale (0.669) -- so the fields with the
+% *lowest* redundancy against the library were, in this case, the least trustworthy
+% ones.
 %
-% Also audited the summary-statistic set (maxSampEn/maxScale/minSampEn/
-% minScale/meanSampEn/stdSampEn/cvSampEn/meanch), checking on two
-% independent datasets (Bonn EEG, Empirical1000) rather than one -- the
-% first (EEG-only) pass looked alarming (several field pairs r>0.9) but most
-% of that turned out to be an artifact of EEG's narrow domain, not general
-% redundancy (e.g. stdSampEn~meanch dropped from r=0.93 on EEG to r=-0.35 on
-% Empirical1000; minScale looked degenerate -- constant at 1 across all 500
-% EEG series -- but is well-distributed on Empirical1000, so it was kept).
-% One redundancy held up on both datasets: maxSampEn~meanSampEn (r=0.94 EEG,
-% r=0.95 Empirical1000) -- dropped maxSampEn, kept meanSampEn (Costa's own
-% "Complexity Index" is essentially this field) and maxScale (peak
-% location, distinct from peak height). Also considered replacing meanch
-% with a more principled robust-linear-fit slope of SampEn vs. scale: it
-% correlates with meanch at r=0.83-0.93 on BOTH datasets (not an EEG
-% artifact) -- essentially the same trend signal via a fancier estimator --
-% so meanch was dropped from registration in favour of slope/slopeSE (uses
-% all valid scales at once, and comes with its own standard error), rather
-% than the reverse.
+% Composite coarse-graining: the classic Costa coarse-graining at scale s uses a
+% single, arbitrary non-overlapping partition of the series starting at the first
+% sample, but s-1 other equally valid partitions exist (starting at offsets 1,...,s-1),
+% and which one is used has no scientific meaning. This matters in practice: on real
+% EEG data truncated to N=300, the single-offset SampEn at scale=10 swung by up to 4x
+% depending purely on the arbitrary starting offset (e.g. one series: 2.08 at offset
+% 0 vs. a mean of 0.64 across all 10 offsets; another: 1.39 vs. 0.35), which
+% contaminated every derived summary field (maxSampEn/maxScale/meanSampEn/cvSampEn).
+% This function therefore implements Composite Multiscale Entropy (CMSE): "A Study of
+% Multiscale Entropy on Sample Entropy...", or more directly, "The direction of the
+% study on complexity", Wu, Wu, Chen, Liu, Sun, Yang, Peng, Entropy 15(3):1069-1084
+% (2013) -- averaging SampEn across all s possible coarse-graining offsets at each
+% scale, rather than using only offset 0. The cost is negligible (~1.0x wall time on a
+% real N=4097 series; EN_SampEn's compiled mex is fast enough that 55 calls vs. 10
+% does not register). Refined Composite MSE (pooling raw match counts across offsets
+% before the log, per Wu et al. 2014) is theoretically marginally better, but needs
+% the raw A/B match counts that the fast compiled sampen_mex path does not expose;
+% plain averaging (using mean(...,'omitnan'), matching this file's NaN-handling convention)
+% already resolves the instability -- across 2200 offset x scale combinations on real
+% data, 0% Inf and only 2% NaN (from too-short coarse-grained segments), both handled
+% safely.
+%
+% Summary statistics: the summary-statistic set (maxSampEn/maxScale/minSampEn/
+% minScale/meanSampEn/stdSampEn/cvSampEn/meanch) was checked on two independent
+% collections of real series rather than one. Several field pairs looked redundant
+% (r>0.9) on EEG alone, but most of that was an artifact of EEG's narrow domain, not
+% general redundancy (e.g. stdSampEn~meanch dropped from r=0.93 on EEG to r=-0.35 on a
+% more diverse collection; minScale was constant at 1 across all 500 EEG series but is
+% well-distributed on the diverse collection, so it was kept). One redundancy held up
+% on both: maxSampEn~meanSampEn (r=0.94 and r=0.95), so maxSampEn was dropped and
+% meanSampEn kept (Costa's own "Complexity Index" is essentially this field), along
+% with maxScale (peak location, distinct from peak height). A more principled
+% robust-linear-fit slope of SampEn vs. scale correlates with meanch at r=0.83-0.93
+% on both collections (not an EEG artifact) -- essentially the same trend signal via a
+% fancier estimator -- so meanch was dropped from registration in favor of
+% slope/slopeSE (which uses all valid scales at once, and comes with its own standard
+% error), rather than the reverse.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -209,7 +234,7 @@ for si = 1:numScales
 			end
 		end
 	end
-	sampEns(si) = nanmean(offsetSampEns);
+	sampEns(si) = mean(offsetSampEns,'omitnan');
 end
 
 % -------------------------------------------------------------------------------
@@ -244,17 +269,18 @@ end
 % Summary statistics of the variation:
 % -------------------------------------------------------------------------------
 % Maximum, and where it occurred
-[out.(['max' enName]), maxInd] = nanmax(sampEns);
+% (max and min ignore NaNs by default)
+[out.(['max' enName]), maxInd] = max(sampEns);
 out.maxScale = scaleRange(maxInd);
 % Minimum, and where it occurred
-[out.(['min' enName]), minInd] = nanmin(sampEns);
+[out.(['min' enName]), minInd] = min(sampEns);
 out.minScale = scaleRange(minInd);
 % Mean, std, coefficient of variation:
-out.(['mean' enName]) = nanmean(sampEns);
-out.(['std' enName]) = nanstd(sampEns);
+out.(['mean' enName]) = mean(sampEns,'omitnan');
+out.(['std' enName]) = std(sampEns,0,'omitnan');
 out.(['cv' enName]) = out.(['std' enName]) / out.(['mean' enName]);
 % Mean change across the range of scales:
-out.meanch = nanmean(diff(sampEns));
+out.meanch = mean(diff(sampEns),'omitnan');
 
 % Trend across scales: robust linear fit of SampEn vs. scale (a more
 % principled alternative to meanch's raw adjacent-scale averaging -- uses

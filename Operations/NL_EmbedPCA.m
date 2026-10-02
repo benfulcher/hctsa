@@ -1,28 +1,40 @@
 function out = NL_EmbedPCA(y, tau, m)
-% NL_EmbedPCA  Principal Components analysis of a time series in an embedding space.
+% NL_EmbedPCA   How the variance of a time-delay embedding of the series is spread across its principal components.
 %
-% Reconstructs the time series as a time-delay embedding, and performs Principal
-% Components Analysis on the result using Matlab's Statistics and Machine
-% Learning Toolbox pca() function.
-%
-% This technique is known as singular spectrum analysis.
-%
-% "Extracting qualitative dynamics from experimental data"
-% D. S. Broomhead and G. P. King, Physica D 20(2-3) 217 (1986)
+% Reconstructs the time series as a time-delay embedding in m dimensions and
+% performs Principal Components Analysis on the embedded points, using MATLAB's
+% Statistics and Machine Learning Toolbox pca() function. This technique is
+% known as singular spectrum analysis. The outputs summarize the distribution
+% of the proportion of variance carried by each of the m principal components.
+% A smooth or periodic series packs its variance into a few components; white
+% noise spreads it evenly, each component taking about 1/m.
 %
 % ---INPUTS:
 % y, the input time series
-%
 % tau, the time-delay, can be an integer or 'ac', or 'mi' for first
-%               zero-crossing of the autocorrelation function or first minimum
-%               of the automutual information, respectively
-%
+%      zero-crossing of the autocorrelation function or first minimum of the
+%      automutual information, respectively
 % m, the embedding dimension
 %
-% OUTPUTS: Various statistics summarizing the obtained eigenvalue distribution.
+% ---OUTPUTS: statistics of the proportion of variance explained by each
+% principal component, perc (ordered from largest to smallest, m entries):
+% perc_1, ..., perc_m: the proportion of variance explained by each component
+% std, range, min, max: standard deviation, range, minimum (= perc_m) and
+%      maximum (= perc_1) of perc
+% top2: the proportion of variance explained by the top two components
+% nto50, nto60, nto70, nto80, nto90: the number of components needed to
+%      explain more than 50%, 60%, 70%, 80% or 90% of the variance (m + 1 if
+%      never reached)
+% fb05, fb02, fb01, fb001: the position of the first component whose
+%      proportion of variance is below 0.5, 0.2, 0.1 or 0.01 (m + 1 if none is)
 %
-% The suggestion to implement this idea was provided by Siddarth Arora.
-% (Siddharth Arora, <arora@maths.ox.ac.uk>)
+% ---REFERENCES:
+% D. S. Broomhead and G. P. King, "Extracting qualitative dynamics from
+% experimental data", Physica D 20(2-3), 217 (1986).
+%
+% ---NOTES:
+% The suggestion to implement this idea was provided by Siddarth Arora
+% (Siddharth Arora, <arora@maths.ox.ac.uk>).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,30 +1,48 @@
 function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
-% DN_RemovePoints   How time-series properties change as points are removed.
+% DN_RemovePoints   How the distribution of a time series changes when a set of points is removed or clipped.
 %
-% A proportion, p, of points are removed from the time series according to some
-% rule, and a set of statistics are computed before and after the change.
+% A proportion, p, of the points of the (z-scored) series are removed, or
+% saturated, according to a rule (see BF_RemovePoints), and order-free statistics
+% of the changed series are computed: its mean, median and standard deviation, the
+% change in its skewness from that of the original series, and the ratio of its
+% kurtosis to that of the original series. Removing
+% deletes the chosen points and closes up the rest into a shorter series. Saturating
+% keeps them in place but clips their values to the most extreme value among the
+% points kept. The autocorrelation statistics of the same transformation are in
+% CO_RemovePoints.
 %
 % ---INPUTS:
-% y, the input time series
-% removeHow, how to remove points from the time series:
-%               (i) 'absclose': those that are the closest to the mean,
-%               (ii) 'absfar': those that are the furthest from the mean,
-%               (iii) 'min': the lowest values,
-%               (iv) 'max': the highest values,
-%               (v) 'random': at random.
-%
-% p, the proportion of points to remove
-%
-% removeOrSaturate, to remove points ('remove') or saturate their values ('saturate')
-%
+% y, the input time series (should be z-scored)
+% removeHow, how to choose the points to remove:
+%       'absclose': those closest to the mean
+%       'absfar': those furthest from the mean
+%       'min': the lowest values
+%       'max': the highest values
+%       'random': at random
+%       Default: 'absfar'.
+% p, the proportion of points to remove (default: 0.1)
+% removeOrSaturate, whether to remove the points ('remove', the default) or to
+%       saturate their values ('saturate'; not possible with 'absclose' or
+%       'random')
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%             (only relevant for removeHow = 'random', which is otherwise
-%             irreproducible run to run; no registered feature uses it)
+%       (only relevant for removeHow = 'random', which is otherwise
+%       irreproducible run to run; no registered feature uses it)
 %
-% ---OUTPUTS: Statistics include the change in autocorrelation, time scales, mean,
-% spread, and skewness.
+% ---OUTPUTS: statistics of the changed series, relative to the original:
+% mean, median, std, the mean, median and standard deviation of the changed
+%       series (not ratios; the z-scored original has mean 0 and std 1)
+% skewnessdiff, the skewness of the changed series minus the skewness of the original
+% kurtosisrat, the ratio of the kurtosis of the changed series to that of the
+%       original
 %
-% NOTE: This is a similar idea to that implemented in DN_OutlierInclude.
+% ---NOTES:
+% A similar idea is implemented in DN_OutlierInclude.
+% The change in skewness is a difference rather than a ratio because the skewness of
+% the original series can be near 0 (symmetric distributions), where a ratio is
+% unstable (this output was previously the ratio, skewnessrat). The kurtosis
+% is at least 1 for any series, so its ratio is always well defined.
+% The autocorrelation outputs of this function (fzcacrat, ac1diff, ac2diff, ac3diff,
+% sumabsacfdiff) moved to CO_RemovePoints.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -56,149 +74,35 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Preliminaries
-% ------------------------------------------------------------------------------
-N = length(y); % time-series length
-doPlot = false; % plot output
-
-% ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
-if nargin < 2 || isempty(removeHow)
-	removeHow = 'absfar'; % default
+if nargin < 2
+	removeHow = []; % defaults set in BF_RemovePoints
 end
-if nargin < 3 || isempty(p)
-	p = 0.1; % 10%
+if nargin < 3
+	p = [];
 end
-if nargin < 4 || isempty(removeOrSaturate)
-	removeOrSaturate = 'remove';
+if nargin < 4
+	removeOrSaturate = [];
 end
-
 if nargin < 5
-	randomSeed = []; % default for BF_ResetSeed
-end
-
-if ~BF_iszscored(y)
-	warning('The input time series should be z-scored')
+	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------
-% Sort time-series values on different criteria, ordered by those to be *kept*
-switch removeHow
-	case 'absclose'
-		% Remove a proportion p of points closest to the mean
-		[~, is] = sort(abs(y), 'descend');
-	case 'absfar'
-		% Remove/saturate a proportion p of points furthest from the mean
-		[~, is] = sort(abs(y), 'ascend');
-	case 'min'
-		% Remove/saturate a proportion p of points with the lowest values
-		[~, is] = sort(y, 'descend');
-	case 'max'
-		% Remove/saturate a proportion p of points with the highest values
-		[~, is] = sort(y, 'ascend');
-	case 'random'
-		BF_ResetSeed(randomSeed); % (for reproducibility of the random ordering)
-		is = randperm(N);
-	otherwise
-		error('Unknown method ''%s''', removeHow);
-end
-
-% Indices of points to *keep*:
-rKeep = sort(is(1:round(N * (1 - p))), 'ascend');
-
-% Indices of points to *transform*:
-rTransform = setxor(1:N, rKeep);
-
-% -------------------------------------------------------------------------------
-% Do the removing/saturating to convert y -> yTransform
-switch removeOrSaturate
-	case 'remove'
-		% Remove the targeted points:
-		yTransform = y(rKeep);
-
-	case 'saturate'
-		% Saturate out the targeted points:
-		switch removeHow
-			case 'max'
-				yTransform = y;
-				yTransform(rTransform) = max(y(rKeep));
-			case 'min'
-				yTransform = y;
-				yTransform(rTransform) = min(y(rKeep));
-			case 'absfar'
-				yTransform = y;
-				yTransform(yTransform > max(y(rKeep))) = max(y(rKeep));
-				yTransform(yTransform < min(y(rKeep))) = min(y(rKeep));
-			otherwise
-				error('Cannot ''saturate'' when using ''%s'' method', removeHow)
-		end
-	otherwise
-		error('Unknown removeOrSaturate option: ''%s''', removeOrSaturate);
-end
-
-% -------------------------------------------------------------------------------
-% SIMPLE PLOT:
-if doPlot
-	figure('color', 'w')
-	hold('off')
-	plot(y, 'ok');
-	hold('on');
-	plot(rKeep, yTransform, '.r')
-	hold('off');
-	histogram(yTransform, 50)
-end
-
-% Compute some autocorrelation properties:
-acf_y = SUB_acf(y, 8);
-acf_yTransform = SUB_acf(yTransform, 8);
-
-if doPlot
-	figure('color', 'w')
-	hold('off');
-	plot(acf_y, ':b');
-	hold('on');
-	plot(acf_yTransform, ':r');
-end
+%% Remove or saturate the chosen points
+% ------------------------------------------------------------------------------
+yTransform = BF_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed);
 
 % -------------------------------------------------------------------------------
 %% Compute output statistics
 % -------------------------------------------------------------------------------
-
-% Two main comparison functions:
-f_absDiff = @(x1, x2) abs(x1 - x2); % ignores the sign
-f_ratio = @(x1, x2) x1 / x2; % includes the sign
-
-out.fzcacrat = f_ratio(CO_FirstCrossing(yTransform, 'ac', 0, 'continuous'), ...
-					   CO_FirstCrossing(y, 'ac', 0, 'continuous'));
-
-out.ac1rat = f_ratio(acf_yTransform(1), acf_y(1));
-out.ac1diff = f_absDiff(acf_yTransform(1), acf_y(1));
-
-out.ac2rat = f_ratio(acf_yTransform(2), acf_y(2));
-out.ac2diff = f_absDiff(acf_yTransform(2), acf_y(2));
-
-out.ac3rat = f_ratio(acf_yTransform(3), acf_y(3));
-out.ac3diff = f_absDiff(acf_yTransform(3), acf_y(3));
-
-out.sumabsacfdiff = sum(abs(acf_yTransform - acf_y));
 out.mean = mean(yTransform);
 out.median = median(yTransform);
 out.std = std(yTransform);
 
 % Requires Statistics Toolbox:
-out.skewnessrat = skewness(yTransform) / skewness(y);
+out.skewnessdiff = skewness(yTransform) - skewness(y);
 out.kurtosisrat = kurtosis(yTransform) / kurtosis(y);
-
-% -------------------------------------------------------------------------------
-function acf = SUB_acf(x, n)
-	% computes autocorrelation of the input sequence, x, up to a maximum time
-	% lag, n
-	acf = CO_AutoCorr(x, 1:n, 'Fourier');
-	% acf = zeros(n,1);
-	% for i = 1:n
-	%     acf(i) = CO_AutoCorr(x,i,'Fourier');
-	% end
-end
 
 end

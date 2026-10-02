@@ -1,36 +1,65 @@
 function out = NL_Dimensions(y, numBins, embedParams)
-% NL_Dimensions Box counting, information, and correlation dimension of a time series.
+% NL_Dimensions   Box-counting and correlation dimension of the delay embedding, from straight-line fits to log-log curves.
 %
-% Computes the box counting (D0) and correlation (D2) dimension of a
-% time-delay embedded time series across a range of embedding dimensions,
-% using TISEAN's 'boxcount' (Renyi entropy of order Q=0.0, giving raw
-% ln(N(epsilon)), the log box-count -- the direct analogue of D0) and
-% 'd2' (the classic Grassberger-Procaccia pair-counting correlation sum,
-% giving ln(C(epsilon)) -- the direct analogue of D2 and, unlike
-% 'boxcount' at Q=2.0, the same pair-counting construction TSTOOL's own
-% correlation-dimension estimate used). This operation previously used
-% TSTOOL's 'dimensions'. This function contains extensive code for
-% estimating the best scaling range to estimate the dimension using a
-% penalized regression procedure -- all of that downstream analysis code
-% is embedding-agnostic (it only consumes (logr, logN) / (logr, logC)
-% matrices) and is unchanged here.
-%
-% The information dimension (D1, Q=1) was already disabled in the
-% previous TSTOOL-based version of this operation ("there's not extra
-% information in it by these estimates") and, since that dead code
-% depended entirely on TSTOOL's now-removed 'dimensions' output, has been
-% removed rather than carried forward as an unreachable branch.
+% Estimates the box-counting (D0) and correlation (D2) dimension of a
+% time-delay embedded time series across embedding dimensions m = 1,...,M,
+% where M is the larger of 3 and the embedding dimension resolved from
+% embedParams. For D0, TISEAN's 'boxcount' (Renyi entropy of order Q = 0)
+% gives ln N(epsilon), the log of the number of boxes of side epsilon that
+% contain points. For D2, TISEAN's 'd2' (the Grassberger-Procaccia pair-counting
+% correlation sum) gives ln C(r), the log of the fraction of pairs of embedded
+% points closer than r. Each is computed at numBins scales. The slope of
+% ln N against ln(epsilon) estimates -D0 and the slope of ln C against ln(r)
+% estimates D2. Straight lines are fitted over all scales and over a scaling
+% range chosen by a penalized regression: its start is in the first half of
+% the scales and its end in the second half, chosen to minimize the mean
+% absolute residual minus 0.02 times the number of scales kept. This operation
+% previously used TSTOOL's 'dimensions'. The information dimension (D1) was
+% disabled in that version and has been removed.
 %
 % ---INPUTS:
 % y, column vector of time series data
-% numBins, maximum number of partitions per axis
+% numBins, the number of length scales (epsilon values for boxcount, r values
+%          for d2) in each sweep (default: 50)
 % embedParams, embedding parameters to feed BF_Embed() for embedding the
-%              signal in the form {tau,m}
+%          signal, in the form {tau,m} (default: {'ac','fnn'})
 %
-% ---OUTPUTS:
-% A range of statistics are returned about how each dimension estimate changes
-% with m, the scaling range in r, and the embedding dimension at which the best
-% fit is obtained.
+% ---OUTPUTS: statistics of the curves, in two families with prefix bc_ (box
+% counting, ln N(epsilon)) or co_ (correlation sum, ln C(r)). In the names, k is
+% an embedding dimension 1, 2 or 3 or "max" (the highest, m = M), and mopt is
+% the embedding dimension resolved from embedParams:
+% bc_meanm<k>, co_meanm<k>: mean of the curve over scales
+% bc_minm<k>, co_minm<k>: minimum of the curve over scales
+% bc_range<k>, co_range<k>: range of the curve over scales (computed but not
+%          registered as features; named range1, range2, range3, rangemmax)
+% bc_mindiff, co_mindiff, bc_meandiff, co_meandiff: mean of the increases in the
+%          minimum (or mean) of the curve from m = 1 to 2 and from 2 to 3
+% bc_lfitm<k>, co_lfitm<k>: slope of a straight-line fit over all scales
+% bc_lfitb<k>, co_lfitb<k>: intercept of that fit
+% bc_lfitmeansqdev<k>, co_lfitmeansqdev<k>: mean squared deviation from that fit
+% scr_bc_m<k>_*, scr_co_m<k>_* (k = 1, 2, 3, or mopt): the best scaling range
+%          of the curve in that embedding dimension, with the fields
+%          minbad (the penalized fit error at the optimum), logrmin and logrmax
+%          (the ends of the range in ln(epsilon) or ln(r)), logrrange (their
+%          difference), pgone (fraction of scales dropped), meanabsres and
+%          meansqres (mean absolute and squared residual of the fit over the
+%          range), scaling_exp (its slope, the dimension estimate) and
+%          scaling_int (its intercept)
+% bc_minscalingexp, bc_maxscalingexp, bc_meanscalingexp, co_minscalingexp,
+%          co_maxscalingexp, co_meanscalingexp: minimum, maximum and mean over
+%          m = 1,...,M of the scaling-range slope
+% bc_mbestfit, co_mbestfit: the embedding dimension m at which the
+%          scaling-range fit has the smallest mean squared residual
+%
+% ---NOTES:
+% The bc_ slopes estimate minus the box-counting dimension (they are
+% negative); the co_ slopes estimate the correlation dimension. The
+% correlation-sum distances run from maxEps/10 to maxEps, with
+% maxEps = std(y)*sqrt(M).
+%
+% Code for estimating the best scaling range is embedding-agnostic (it only
+% consumes (logr, logN) / (logr, logC) matrices) and is unchanged from the
+% TSTOOL-based version.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -1,42 +1,54 @@
 function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
-% NL_TakensEstimator   Taken's estimator for correlation dimension.
+% NL_TakensEstimator   Takens' estimator for the correlation dimension.
 %
-% cf. "Detecting strange attractors in turbulence", F. Takens.
-% Lect. Notes Math. 898 p366 (1981)
-%
-% Takens' maximum-likelihood estimator of the correlation dimension at an
-% upper length scale eup = rad standard deviations of y:
+% Takens' maximum-likelihood estimator of the correlation dimension at an upper length
+% scale eup = rad standard deviations of y:
 %   D_T = 1 / mean( ln(eup / r_ij) ),
-% the mean taken over all pairs (i,j) of delay vectors with max-norm distance
-% r_ij < eup, excluding pairs closer in time than the Theiler window, past.
-% Computed natively (KD-tree range search at the one radius needed). This
-% replaced running TISEAN's d2 (correlation sums over every dimension 1:m
-% and every radius, all reference points) followed by c2t, and reading one
-% number off the result -- the same estimator, since c2t's
-% D_T(r) = C(r) / int_0^r C(r')/r' dr' reduces to the expression above, but
-% c2t evaluates it from d2's logarithmically-binned correlation sum at the
-% first bin above eup, whereas here it is evaluated exactly at eup from the
-% pair distances themselves; values therefore differ slightly from the
-% TISEAN-based implementation (which itself was not numerically identical to
-% the TSTOOL takens_estimator used before that). Kantz & Schreiber's
-% recommendation of half a standard deviation for the length scale is used
-% the same way in NL_d2.m's takens05.
+% the mean taken over all pairs (i,j) of delay vectors with max-norm distance r_ij < eup,
+% excluding pairs closer in time than the Theiler window, past, and exact duplicate
+% vectors. Computed natively (KD-tree range search at the one radius needed). This
+% replaced running TISEAN's d2 (correlation sums over every dimension 1:m and every
+% radius, all reference points) followed by c2t, and reading one number off the result --
+% the same estimator, since c2t's D_T(r) = C(r) / int_0^r C(r')/r' dr' reduces to the
+% expression above, but c2t evaluates it from d2's logarithmically-binned correlation sum
+% at the first bin above eup, whereas here it is evaluated exactly at eup from the pair
+% distances themselves; values therefore differ slightly from the TISEAN-based
+% implementation (which itself was not numerically identical to the TSTOOL
+% takens_estimator used before that). Kantz & Schreiber's recommendation of half a
+% standard deviation for the length scale is used the same way in NL_d2.m's takens05.
 %
 % ---INPUTS:
 % y, the input time series
-% Nref, the number of reference points (can be -1 to use all points)
-% rad, the upper length scale to read off the dimension estimate, in standard
-%       deviations of y (cf. TSTOOL's rad, a proportion of attractor size)
-% past, the Theiler window: {'ac', k} for k times the first zero-crossing of the autocorrelation
-%       function, or a number of samples (see BF_TheilerWindow)
-% embedParams, the embedding parameters for BF_Embed, in the form {tau,m}
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%               (relevant if an embedding-dimension method requiring
-%               randomization is used)
+% Nref, the number of reference points (the first Nref delay vectors; -1 uses all points;
+%       default: -1)
+% rad, the upper length scale to read off the dimension estimate, in standard deviations of
+%      y (cf. TSTOOL's rad, a proportion of attractor size; default: 0.05)
+% past, the Theiler window: {'ac', k} for k times the first zero-crossing of the
+%       autocorrelation function, or a number of samples (see BF_TheilerWindow; default:
+%       {'ac', 1})
+% embedParams, the embedding parameters for BF_Embed, in the form {tau,m} (default:
+%              {'ac','fnn'})
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (relevant if
+%             an embedding-dimension method requiring randomization is used)
 %
-% ---OUTPUT: the Taken's estimator of the correlation dimension, d2 (NaN if
-%           no pair of delay vectors lies within the length scale, or all such
-%           pairs are exact duplicates, e.g., heavily quantized data).
+% ---OUTPUTS:
+% A scalar: Takens' estimator of the correlation dimension, d2 (NaN if no pair of delay
+% vectors lies within the length scale, or all such pairs are exact duplicates, e.g.,
+% heavily quantized data).
+%
+% ---REFERENCES:
+% F. Takens, "On the numerical determination of the dimension of an attractor", in
+% B.L.J. Braaksma, H.W. Broer and F. Takens (eds.), Dynamical Systems and
+% Bifurcations (Groningen, 1984), Lecture Notes in Mathematics 1125, 99-106,
+% Springer, Berlin (1985). DOI: 10.1007/BFb0075637
+%
+% ---NOTES:
+% For high embedding dimensions of noise-like series no pair may fall within eup at all,
+% giving NaN (~1/3 of real-world series for the m = 8 and m = 10 variants); the
+% TISEAN-based implementation returned a constant 14.3 in that situation -- 1/ln of d2's
+% radius-bin ratio, i.e. every pair in a single bin -- which was an artifact, not an
+% estimate. Where both are defined they agree to ~2% (median), Spearman 0.95-0.99 across
+% real-world series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -158,11 +170,11 @@ if numPairs == 0
 end
 % (No minimum pair count beyond that. Note that for high embedding
 % dimensions of noise-like series no pair may fall within eup at all, giving
-% NaN here (~1/3 of Empirical1000 series for the m = 8 and m = 10 variants);
+% NaN here (~1/3 of real-world series for the m = 8 and m = 10 variants);
 % the TISEAN-based implementation returned a constant 14.3 in that situation
 % -- 1/ln of d2's radius-bin ratio, i.e. every pair in a single bin -- which
 % was an artifact, not an estimate. Where both are defined they agree to
-% ~2% (median), Spearman 0.95-0.99 across Empirical1000.)
+% ~2% (median), Spearman 0.95-0.99 across real-world series.)
 
 out = numPairs / sumLog; % Takens' estimator: 1 / mean(ln(eup/r))
 

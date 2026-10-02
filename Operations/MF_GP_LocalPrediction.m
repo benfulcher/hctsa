@@ -1,38 +1,69 @@
 function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pmode, randomSeed)
-% MF_GP_LocalPrediction     Gaussian Process time-series model for local prediction.
+% MF_GP_LocalPrediction   How well a Gaussian process fitted to short windows of the series predicts nearby held-out values.
 %
-% Fits a given Gaussian Process model to a section of the time series and uses
-% it to predict to the subsequent datapoint.
+% Takes numPreds windows spread evenly along the time series. In each window, a
+% Gaussian process (GP) with the covariance function covFunc is fitted to a
+% training segment and used to predict numTest held-out values, which are compared
+% with the true values. Each window is first standardized using the mean and
+% standard deviation of its training data. The outputs summarize the prediction
+% errors (absolute, and relative to the GP's own 95% error bar), the size of the
+% error bars, the fitted hyperparameters across windows, and the per-point
+% negative log marginal likelihoods.
+%
+% Uses GP fitting code from the gpml toolbox, which is available here:
+% http://gaussianprocess.org/gpml/code.
 %
 % ---INPUTS:
 % y, the input time series
 %
 % covFunc, covariance function in the standard form for the gpml package.
 %           E.g., covFunc = {'covSum', {'covSEiso','covNoise'}} combines squared
-%           exponential and noise terms
+%           exponential and noise terms (the default)
 %
-% numTrain, the number of training samples (for each iteration)
+% numTrain, the number of training samples (for each window; default: 20)
 %
-% numTest, the number of testing samples (for each interation)
+% numTest, the number of test samples (for each window; default: 5)
 %
-% numPreds, the number of predictions to make
+% numPreds, the number of windows, and so of predictions made (default: 10)
 %
-% pmode, the prediction mode:
-%       (i) 'beforeafter': predicts the preceding time series values by training
-%                           on the following values,
-%       (ii) 'frombefore': predicts the following values of the time series by
-%                    training on preceding values, and
-%       (iii) 'randomgap': predicts random values within a segment of time
-%                    series by training on the other values in that segment.
+% pmode, the prediction mode (default: 'frombefore'):
+%       (i) 'beforeafter': trains on numTrain samples on each side of a gap of
+%                           numTest samples, and predicts the samples in the gap,
+%       (ii) 'frombefore': trains on numTrain samples and predicts the numTest
+%                    samples that follow, and
+%       (iii) 'randomgap': trains on a random numTrain of the numTrain + numTest
+%                    samples in the window and predicts the other numTest samples.
 %
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %               (for 'randomgap' prediction)
 %
-% ---OUTPUTS: summaries of the quality of predictions made, the mean and
-% spread of obtained hyperparameter values, and marginal likelihoods.
-
-% Uses GP fitting code from the gpml toolbox, which is available here:
-% http://gaussianprocess.org/gpml/code.
+% ---OUTPUTS:
+% meanabs_run, maxabs_run, minabs_run: mean, maximum, and minimum over windows of
+%       the mean absolute prediction error in a window (in units of the training
+%       data's standard deviation)
+% meanabs_std_run, maxabs_std_run, minabs_std_run: the same, with each error in
+%       units of the GP's 95% error bar (twice its predictive standard deviation)
+% meanabs, maxabs, minabs: mean, maximum, and minimum over all predicted points of
+%       the absolute prediction error
+% meanabs_std, maxabs_std, minabs_std: the same, in units of the 95% error bar
+% maxerrbar, meanerrbar, minerrbar: maximum, mean, and minimum over all predicted
+%       points of the 95% error bar half-width (twice the predictive standard
+%       deviation)
+% meanlogh1, meanlogh2, meanlogh3, stdlogh1, stdlogh2, stdlogh3: mean and standard
+%       deviation across windows of each log hyperparameter of the fitted
+%       covariance function (for squared exponential plus noise: log length scale,
+%       log amplitude, log noise standard deviation)
+% maxnlml, minnlml, stdnlml: maximum, minimum, and standard deviation across
+%       windows of the negative log marginal likelihood of the fitted model on the
+%       training data of the window, divided by the number of training points
+%
+% ---NOTES:
+% The 'standard errors' in the code (stderrs) are 2*sqrt(S2), i.e., 95% error
+% bars, so the outputs ending in _std are in units of these, not of one standard
+% deviation. The predictive variance S2 includes the likelihood noise.
+% For 'randomgap', the random seed is reset once, before the loop over windows, so
+% each window gets a different random split, but the sequence of splits is the
+% same on every run (with a fixed seed).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -128,10 +159,16 @@ hyp = struct; % structure for storing hyperparameter information in latest versi
 mus = zeros(numTest, numPreds); % predicted values
 stderrs = zeros(numTest, numPreds); % standard errors on predictions
 yss = zeros(numTest, numPreds); % test values
-mlikelihoods = zeros(numPreds, 1); % marginal likelihoods of model
+nlmls = zeros(numPreds, 1); % negative log marginal likelihoods of model, per training point
 
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
+
+% Control the random seed (for reproducibility), once, before the loop over windows
+% (so that the windows get different random splits):
+if strcmp(pmode, 'randomgap')
+	BF_ResetSeed(randomSeed);
+end
 
 for i = 1:numPreds
 	%% (0) Set up test and training sets
@@ -146,9 +183,6 @@ for i = 1:numPreds
 			ys = y(rs); % test data
 
 		case 'randomgap'
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-
 			t = (1:numTrain + numTest)';
 			r = randperm(numTrain + numTest);
 			yy = y(spns(i):spns(i) + numTrain + numTest - 1);
@@ -202,7 +236,7 @@ for i = 1:numPreds
 	end
 	loghyper = hyp.cov;
 
-	if isnan(loghyper)
+	if any(isnan(loghyper))
 		fprintf(1, 'Unable to learn hyperparameters for this time series\n');
 		out = NaN; return
 	end
@@ -211,8 +245,9 @@ for i = 1:numPreds
 
 	% Get marginal likelihood for this model with hyperparameters optimized
 	% over training data
-	% mlikelihoods(i) = - gpr(loghyper, covFunc, tt, yt);
-	mlikelihoods(i) = -gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt);
+	% nlmls(i) = gpr(loghyper, covFunc, tt, yt);
+	% (negative log marginal likelihood, gpml's nlZ, divided by the number of training points)
+	nlmls(i) = gp(hyp, infAlg, meanFunc, covFunc, likFunc, tt, yt) / length(tt);
 
 	% ------------------------------------------------------------------------------
 	%% (2) Evaluate at test set (s)
@@ -321,12 +356,14 @@ end
 % ------------------------------------------------------------------------------
 %% (3) Marginal likelihood measures
 % ------------------------------------------------------------------------------
-% Best marginal neg-log-likelihood attained
-% Worst marginal neg-log-likelihood attained
-% spread in marginal neg-log-likelihoods
+% Worst (maximum) per-point marginal neg-log-likelihood attained
+% Best (minimum) per-point marginal neg-log-likelihood attained
+% spread in per-point marginal neg-log-likelihoods
+% (Previously maxmlik, minmlik and stdmlik: the log marginal likelihood, i.e., the
+%  negative of nlZ, summed over the training points rather than per point.)
 
-out.maxmlik = max(mlikelihoods);
-out.minmlik = min(mlikelihoods);
-out.stdmlik = std(mlikelihoods);
+out.maxnlml = max(nlmls);
+out.minnlml = min(nlmls);
+out.stdnlml = std(nlmls);
 
 end

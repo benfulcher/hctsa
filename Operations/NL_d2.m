@@ -1,49 +1,86 @@
 function out = NL_d2(y, tau, maxm, theilerWin)
-% NL_d2  d2 routine from the TISEAN package.
+% NL_d2   Correlation dimension, correlation entropy and related scaling statistics (TISEAN d2).
 %
-% The function estimates the correlation sum, the correlation dimension and
-% the correlation entropy of a given time series, y. Our code uses the outputs
-% from this algorithm to return a set of informative features about the results.
+% The function estimates the correlation sum, the correlation dimension and the correlation
+% entropy of a given time series, y, using the d2 routine from the TISEAN package, for
+% embedding dimensions m = 1, ..., maxm. Our code uses the outputs from this algorithm to
+% return a set of informative features about the results.
+%
+% Takens' estimator is computed for the correlation dimension, as well as related statistics,
+% including other dimension estimates by finding appropriate scaling ranges, and searching
+% for a flat region in the output of TISEAN's h2 algorithm, which indicates
+% determinism/deterministic chaos.
+%
+% To find a suitable scaling range, a penalized regression procedure is used to determine an
+% optimal scaling range that simultaneously spans the greatest range of scales and shows the
+% best fit to the data, and return the range, a goodness of fit statistic, and a dimension
+% estimate.
 %
 % ---INPUTS:
-%
 % y, input time series
+% tau, time-delay (can be 'ac' or 'mi' for first zero-crossing of autocorrelation function,
+%      or first minimum of the automutual information; default: 1)
+% maxm, the maximum embedding dimension (default: 10)
+% theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing of the
+%             autocorrelation function, or a number of samples (see BF_TheilerWindow;
+%             default: {'ac', 1})
 %
-% tau, time-delay (can be 'ac' or 'mi' for first zero-crossing of
-%       autocorrelation function, or first minimum of the automutual
-%       information)
+% ---OUTPUTS:
+% (Notation: m_min is the smallest embedding dimension from which a quantity computed for
+% each embedding dimension is roughly constant, found by a penalized search; "goodness" is
+% a standard deviation of rescaled values minus a penalty times the length of the stretch,
+% so lower is better; "stabled" is the mean of the quantity from m_min upward; "linrmserr"
+% is the RMS error of a straight-line fit of the rescaled quantity against m.)
+% takens05_mean, takens05_median, takens05_max, takens05_min, takens05_std, takens05_iqr:
+%       statistics, across embedding dimensions, of Takens' estimator of the correlation
+%       dimension at the first length scale above 0.5 (standard deviations of a z-scored
+%       series)
+% takens05mmin_ri, takens05mmin_goodness, takens05mmin_stabled, takens05mmin_linrmserr:
+%       m_min, goodness, stabled and linrmserr of Takens' estimates over m
+% bend2_mindim, bend2_maxdim, bend2_meandim: the minimum, maximum and mean, across
+%       embedding dimensions, of the correlation dimension estimate (mean local slope of
+%       the correlation sum, over the best scaling range for each embedding dimension)
+% bend2_meangoodness, the mean goodness of those per-dimension scaling ranges
+% benmmind2_logminl, benmmind2_goodness, benmmind2_stabledim, benmmind2_linrmserr:
+%       logminl (the log of the smallest length scale of the scaling range found at
+%       embedding dimension m_min), goodness, stabled and linrmserr of the
+%       per-dimension estimates over m
+% d2_logminscr, d2_logmaxscr, d2_logscr, d2_goodness, d2_dimest, d2_dimstd: the joint
+%       scaling range (across embedding dimensions m_min and above) of the local slopes:
+%       the logs of its smallest and largest length scales, their difference, the goodness,
+%       the dimension estimate (mean slope in the range) and its standard deviation
+% bend2g_mindim, bend2g_maxdim, bend2g_meandim, bend2g_meangoodness, benmmind2g_logminl,
+% benmmind2g_goodness, benmmind2g_stabledim, benmmind2g_linrmserr, d2g_logminscr,
+% d2g_logmaxscr, d2g_logscr, d2g_goodness, d2g_dimest, d2g_dimstd: the same as the bend2_,
+%       benmmind2_ and d2_ fields, but using the local slopes of the Gaussian-kernel
+%       correlation integral (TISEAN's c2g) in place of those of the correlation sum
+% slopesh2_ri1, slopesh2_goodness, slopesh2_stabled, slopesh2_linrmserr: m_min, goodness,
+%       stabled and linrmserr of the slope of the correlation entropy H2 against log length
+%       scale (over its best range of scales), across m
+% h2meangoodness, h2bestgoodness: the mean and the best (minimum) across embedding
+%       dimensions of the goodness of a flat stretch of H2 at intermediate length scales
+%       (a plateau signals determinism); lower means a clearer plateau
+% h2besth2, the mean H2 over the flat stretch at the embedding dimension with the best
+%       goodness
+% meanh2, medianh2, the mean and median across embedding dimensions of the mean H2 over
+%       the flat stretch
+% flatsh2min_ri1, flatsh2min_goodness, flatsh2min_stabled, flatsh2min_linrmserr: m_min,
+%       goodness, stabled and linrmserr of the plateau value of H2 across m
+% The output is NaN if the series has fewer than 50 samples, TISEAN fails to produce usable
+% output, or no scaling range can be found.
 %
-% maxm, the maximum embedding dimension
+% ---REFERENCES:
+% Hegger, Kantz, Schreiber, "Practical implementation of nonlinear time series methods: The
+% TISEAN package", Chaos 9(2) 413 (1999).
+% Theiler, "Spurious dimension from correlation algorithms applied to limited time-series
+% data", Phys. Rev. A, 34(3) 2427 (1986).
+% Kantz and Schreiber, "Nonlinear Time Series Analysis", Cambridge University Press (2004).
 %
-% theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing
-%             of the autocorrelation function, or a number of samples (see
-%             BF_TheilerWindow)
-
-% cf. "Practical implementation of nonlinear time series methods: The TISEAN
-% package", R. Hegger, H. Kantz, and T. Schreiber, Chaos 9(2) 413 (1999)
-%
-% The TISEAN package is available here:
-% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
-%
-% The TISEAN routines are performed in the command line using 'system' commands
-% in Matlab, and require that TISEAN is installed and compiled, and able to be
-% executed in the command line.
-%
-% cf. "Spurious dimension from correlation algorithms applied to limited
-% time-series data", J. Theiler, Phys. Rev. A, 34(3) 2427 (1986)
-%
-% cf. "Nonlinear Time Series Analysis", Cambridge University Press, H. Kantz
-% and T. Schreiber (2004)
-%
-% Taken's estimator is computed for the correlation dimension, as well as related
-% statistics, including other dimension estimates by finding appropriate scaling
-% ranges, and searching for a flat region in the output of TISEAN's h2
-% algorithm, which indicates determinism/deterministic chaos.
-%
-% To find a suitable scaling range, a penalized regression procedure is used to
-% determine an optimal scaling range that simultaneously spans the greatest
-% range of scales and shows the best fit to the data, and return the range, a
-% goodness of fit statistic, and a dimension estimate.
+% ---NOTES:
+% The TISEAN package is available at
+% http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html. The TISEAN routines
+% are performed in the command line using 'system' commands in Matlab, and require that
+% TISEAN is installed and compiled, and able to be executed in the command line.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -300,7 +337,9 @@ mminfulcherd2 = SUB_findmmin(benfindd2(:, 4));
 if isempty(mminfulcherd2.ri1)
 	out.benmmind2_logminl = NaN;
 else
-	out.benmmind2_logminl = log(d2dat_v(mminfulcherd2.ri1)); % minimum scale to observe a scaling range
+	% minimum scale to observe a scaling range: the start of the scaling range
+	% found for embedding dimension m_min (column 1 of benfindd2 indexes d2dat_v)
+	out.benmmind2_logminl = log(d2dat_v(benfindd2(mminfulcherd2.ri1, 1)));
 end
 out.benmmind2_goodness = mminfulcherd2.goodness;
 out.benmmind2_stabledim = mminfulcherd2.stabled;
@@ -371,7 +410,9 @@ mminfulcherd2g = SUB_findmmin(benfindd2g(:, 4));
 if isempty(mminfulcherd2g.ri1)
 	out.benmmind2g_logminl = NaN;
 else
-	out.benmmind2g_logminl = log(d2gdat_v(mminfulcherd2g.ri1)); % minimum scale to observe a scaling range
+	% minimum scale to observe a scaling range: the start of the scaling range
+	% found for embedding dimension m_min (column 1 of benfindd2g indexes d2gdat_v)
+	out.benmmind2g_logminl = log(d2gdat_v(benfindd2g(mminfulcherd2g.ri1, 1)));
 end
 out.benmmind2g_goodness = mminfulcherd2g.goodness;
 out.benmmind2g_stabledim = mminfulcherd2g.stabled;
@@ -701,7 +742,7 @@ function results = SUB_getslopes(x, Y)
 		% () find best scaling region in which to estimate gradient
 
 		mybad = zeros(length(stptr), length(endptr));
-		v = diff(Y(c, :)) .* dx; % make transformation to vector of local gradients
+		v = diff(Y(c, :)) ./ dx; % make transformation to vector of local gradients
 		vnorm = (v - min(v)) ./ (max(v) - min(v)); % normalize regardless of range
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)
@@ -743,7 +784,7 @@ function results = SUB_doesflatten(x, Y)
 	for c = 1:ndim
 		% regions that deviate least from zero
 		mybad = zeros(length(stptr), length(endptr));
-		v = diff(Y(c, :)) .* dx; % make transformation to vector of local gradients
+		v = diff(Y(c, :)) ./ dx; % make transformation to vector of local gradients
 		vnorm = abs(v) ./ max(abs(v));
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)

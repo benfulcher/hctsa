@@ -1,17 +1,51 @@
 function out = NL_DelayTime(y, maxDelay, past, randomSeed)
-% NL_DelayTime    Optimal delay time using the method of Parlitz and Wichard.
+% NL_DelayTime   How quickly points that start with nearly equal values drift apart, over a range of delays.
 %
+% Optimal delay time using the method of Parlitz and Wichard, as in TSTOOL's
+% 'delaytime'. For each of 64 random reference times t, finds the two times
+% whose values are nearest to y(t) from below and from above, excluding times
+% within a Theiler window of t (past), and accumulates |y(s+l) - y(t+l)|
+% for both neighbors s, for delays l = 0,...,maxDelay. Averaged over the 64
+% references, this gives a curve tau(l+1) that starts low (the neighbors begin
+% with nearly equal values) and tends to rise to a noisy level as they
+% separate. The outputs summarize this curve.
+%
+% ---INPUTS:
+% y, column vector of time series data
+% maxDelay, maximum value of the delay to consider: {'ac', k} for k times the
+%           first zero-crossing of the autocorrelation function, or a number
+%           of samples (or, legacy, a proportion of the time-series length);
+%           at least 10, and shortened to fit series shorter than 2*maxDelay
+%           (default: {'ac',10})
+% past, Theiler window: value-neighbors closer in time than this are not used
+%       ({'ac', k}, or a number of samples; see BF_TheilerWindow)
+%       (default: {'ac',1})
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+%
+% ---OUTPUTS: statistics of the curve tau(l+1), the summed distance of the two
+% value-neighbors at delay l:
+% tau1, tau2, tau3: the curve at delays 0, 1 and 2 (note tau1 is delay 0)
+% difftau12, difftau13: tau2 - tau1 and tau3 - tau1
+% meantau, stdtau, mintau, maxtau: mean, standard deviation, minimum and
+%           maximum of the curve over delays 0,...,maxDelay
+%
+% ---REFERENCES:
+% C. Merkwirth, U. Parlitz, I. Wedekind, D. Engster and W. Lauterborn, "OpenTSTOOL
+% User Manual", Version 1.2 (February 2009), Drittes Physikalisches Institut,
+% Universitaet Goettingen (section 6.20.3.17, 'delaytime', p. 53: "Compute optimal
+% delaytime for a scalar timeseries with method of Parlitz and Wichard").
+% The method is attributed to Parlitz and Wichard only in TSTOOL's documentation
+% and source (tstoolbox/@signal/delaytime.m); no journal paper describing it was
+% found in Crossref, arXiv or a web search.
+%
+% ---NOTES:
 % Computed natively in MATLAB. TSTOOL's own 'delaytime' code
 % (tstoolbox/@signal/delaytime.m, vendored in this repo under
 % Toolboxes/OpenTSTOOL) turned out to be pure MATLAB itself -- no compiled
 % TSTOOL binary/mex involved at all -- so its exact algorithm (still
 % undocumented/uncredited beyond "method of Parlitz and Wichard", per
 % TSTOOL's own comments) is reproduced here directly, rather than
-% approximated: sort the (truncated) series by value; repeatedly (64
-% iterations) pick a random reference point by value-rank, then find its
-% nearest value-neighbors on either side (excluding a Theiler window of
-% "past" samples in time) and accumulate |x(neighbor+lag) - x(ref+lag)|
-% for lag = 0:maxDelay; the average over iterations is tau(lag+1).
+% approximated.
 %
 % Two bugs fixed relative to TSTOOL's own source's search for the
 % nearest-by-value neighbor *above* the reference rank
@@ -29,19 +63,6 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 %     ref. "post" here takes the first element after offsetting, so both
 %     directions consistently return the nearest value-neighbor passing
 %     the Theiler-window exclusion.
-%
-% ---INPUTS:
-% y, column vector of time series data
-%
-% maxDelay, maximum value of the delay to consider: {'ac', k} for k times the
-%           first zero-crossing of the autocorrelation function, or a number
-%           of samples (or, legacy, a proportion of the time-series length);
-%           shortened to fit series shorter than 2*maxDelay
-%
-% past, Theiler window: value-neighbors closer in time than this are not used
-%       ({'ac', k}, or a number of samples; see BF_TheilerWindow)
-%
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

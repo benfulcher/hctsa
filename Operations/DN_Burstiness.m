@@ -1,16 +1,31 @@
 function out = DN_Burstiness(y)
-% DN_Burstiness     Burstiness statistic of a time series
+% DN_Burstiness   Burstiness statistic of the values of a time series.
 %
-% Returns the 'burstiness' statistic from
+% Returns the burstiness of the values, B = (r - 1)/(r + 1), where
+% r = std(y)/mean(y) is their coefficient of variation. B = -1 for perfectly
+% regular values, B = 0 when the standard deviation equals the mean (as for the
+% intervals of a Poisson process), and B approaches 1 for highly bursty values.
+% A second output corrects B for the finite number of values, N.
 %
-% Goh and Barabasi, 'Burstiness and memory in complex systems' Europhys. Lett.
-% 81, 48002 (2008).
+% The statistic was defined for the gaps between events in a bursty process.
+% Here it is applied to the values of the series directly, ignoring their
+% order. It is undefined for a mean of zero, and not confined to [-1, 1] for a
+% negative mean.
 %
-% ---INPUT:
+% ---INPUTS:
 % y, the input time series
 %
-% ---OUTPUT:
-% The burstiness statistic, B.
+% ---OUTPUTS:
+% B, the burstiness statistic of Goh and Barabasi.
+% B_Kim, the burstiness statistic corrected for the finite series length, N.
+%
+% ---REFERENCES:
+% Goh and Barabasi, "Burstiness and memory in complex systems", Europhys.
+% Lett. 81, 48002 (2008).
+%
+% Kim and Jo, "Measuring burstiness for finite event sequences", Phys. Rev. E 94,
+% 032311 (2016). DOI: 10.1103/PhysRevE.94.032311 (the finite-size correction used
+% for B_Kim).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -50,7 +65,7 @@ out.B = (r - 1) / (r + 1);
 
 % -------------------------------------------------------------------------------
 % Improved burstiness statistic, accounting for scaling for finite time series
-% Kim and Jo, 2016, http://arxiv.org/pdf/1604.01125v1.pdf
+% Kim and Jo (2016), Phys. Rev. E 94, 032311
 N = length(y);
 out.B_Kim = (sqrt(N + 1) * r - sqrt(N - 1)) / ((sqrt(N + 1) - 2) * r + sqrt(N - 1));
 

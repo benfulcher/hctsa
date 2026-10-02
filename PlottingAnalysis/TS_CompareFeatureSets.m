@@ -75,6 +75,12 @@ dataStruct = makeDataStruct();
 %-------------------------------------------------------------------------------
 % Define the feature sets as sets of IDs
 %-------------------------------------------------------------------------------
+% The 'catch22' set uses catch22's own implementation (operations 'catch22_*', from
+% TS_Init(...,'catch22')); skip it when this dataset does not contain them:
+if ismember('catch22',whatFeatureSets) && ~any(strncmp(Operations.CodeString,'catch22_',8))
+    warning('No catch22 operations in this dataset (compute them with TS_Init(...,''catch22'')); skipping the catch22 feature set.');
+    whatFeatureSets = setdiff(whatFeatureSets,{'catch22'},'stable');
+end
 numFeatureSets = length(whatFeatureSets);
 featureIDs = cell(numFeatureSets,1);
 theColors = cell(numFeatureSets,1);

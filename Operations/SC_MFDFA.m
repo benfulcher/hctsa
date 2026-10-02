@@ -1,60 +1,59 @@
 function out = SC_MFDFA(y, scaleRange, qRange, order)
-% SC_MFDFA   Multifractal detrended fluctuation analysis (MFDFA).
+% SC_MFDFA   Multifractal detrended fluctuation analysis (MFDFA): the multifractal spectrum of a time series.
 %
-% Estimates the multifractal singularity spectrum f(alpha) of a time series
-% via the classical MFDFA algorithm:
-% Kantelhardt, J.W. et al., "Multifractal detrended fluctuation analysis of
-% nonstationary time series", Physica A 316(1-4) 87-114 (2002).
+% Estimates the multifractal singularity spectrum f(alpha) of a time series by
+% the classical MFDFA algorithm of Kantelhardt et al. (2002). The mean-subtracted
+% series is integrated (cumulative sum) to a profile, which is divided into
+% non-overlapping segments of length s (taken from both the start and the end of
+% the series, to use the whole series when N is not a multiple of s). Each segment
+% is detrended by a polynomial of a given order, and the q-th order fluctuation
+% function F_q(s) is formed by averaging the segment variances raised to the power
+% q/2 (with a log-averaging limit at q = 0). For a monofractal series, F_q(s)
+% scales as s^h(q) with a single exponent h independent of q. For a multifractal
+% series, h(q) varies with q: small or negative q weight small-fluctuation
+% segments, large positive q weight large-fluctuation segments, so a q-dependence
+% of h(q) reveals that different amplitudes obey different local scaling laws.
+% h(q) is Legendre-transformed via the mass exponent tau(q) = q*h(q) - 1 into the
+% singularity spectrum f(alpha), where alpha = d tau / dq and f = q*alpha - tau,
+% the standard multifractal fingerprint. Its width, Delta-alpha, is the usual
+% "degree of multifractality".
 %
-% The (integrated) profile is divided into non-overlapping segments of
-% length s (from both the start and end of the series, to use the whole
-% series when N is not a multiple of s), each segment is locally detrended
-% by a polynomial of a given order, and the q-th order fluctuation function
-% F_q(s) is formed by averaging the segment variances raised to the power
-% q/2 (with a log-averaging limit at q=0). For a monofractal series, F_q(s)
-% scales as s^h(q) with a SINGLE exponent h independent of q. For a
-% multifractal series, h(q) genuinely varies with q -- small/negative q
-% weight small-fluctuation segments, large/positive q weight large-fluctuation
-% segments, so a q-dependence in h(q) reveals that different amplitude
-% scales in the series obey different local scaling laws. h(q) is
-% Legendre-transformed (via the mass exponent tau(q) = q*h(q) - 1) into the
-% singularity spectrum f(alpha), the standard multifractal fingerprint
-% reported across the literature (its width, Delta-alpha, is the usual
-% "degree of multifractality").
-%
-% This is a genuinely distinct method from hctsa's existing scaling-exponent
-% estimators. SC_FluctAnal/SC_FastDFA are monofractal (single q=2 exponent,
-% no Legendre transform). SC_MMA also generalizes DFA across q, but reports
-% how the RAW h(q) surface itself varies with SCALE (its "multiscale" axis)
-% -- it never performs the Legendre transform, so it has no alpha/f(alpha)
-% singularity-spectrum output at all. SC_MFDFA instead fixes the scaling
-% range and focuses entirely on the q-axis, producing the textbook
-% alpha/f(alpha) multifractal spectrum and its standard summary statistics
-% (spectrum width, asymmetry, degree of multifractality) that SC_MMA does
-% not compute.
+% It differs from hctsa's other scaling-exponent estimators: SC_FastDFA and
+% SC_FluctAnal are monofractal (a single q = 2 exponent, no Legendre transform);
+% SC_MMA also generalizes DFA across q but reports how the raw h(q) surface varies
+% with scale, and has no f(alpha) spectrum. SC_MFDFA fixes the scaling range and
+% focuses on the q axis.
 %
 % ---INPUTS:
 % y, the input time series
+% scaleRange, [minScale, maxScale], the range of segment lengths s used for the
+%       fluctuation-function fit, as 20 log-spaced values (default:
+%       [16, floor(N/4)], following common DFA practice, cf. Peng et al. 1995)
+% qRange, [qMin, qMax], the range of the multifractal order q (default: [-5, 5];
+%       q is sampled in steps of 0.5, with q = 0 handled by its log-averaging
+%       limit)
+% order, the order of the polynomial used to detrend each segment (default: 1,
+%       linear detrending, as in the original MFDFA1 of Kantelhardt et al.)
 %
-% scaleRange, [minScale, maxScale], the range of segment lengths s to use
-%           for the fluctuation function fit (default: [16, floor(N/4)],
-%           following common DFA practice, cf. Peng et al. 1995)
+% ---OUTPUTS: statistics of the Legendre-transformed singularity spectrum
+% alpha / f(alpha), and quality diagnostics of the h(q) fits:
+% meanR2, the mean (across q) of the R^2 of the log-log fits of F_q(s) against s
+% h2, the generalized Hurst exponent h(q) at q = 2 (NaN if q = 2 is not in qRange)
+% alphaMin, alphaMax, the smallest and largest singularity exponents alpha
+% alphaWidth, alphaMax - alphaMin, the width of the spectrum (Delta-alpha, the
+%       degree of multifractality)
+% fAlphaMax, the maximum of f(alpha), the height of the spectrum's peak
+% alpha0, the alpha at the peak of the spectrum (the dominant exponent)
+% spectrumAsymmetry, the width to the left of the peak divided by the width to the
+%       right, (alpha0 - alphaMin) / (alphaMax - alpha0)
+% (The raw generalized Hurst exponent h(q) is not otherwise reported: it is
+% redundant, r >= 0.9, with these spectrum quantities.)
+% A scalar NaN is returned if the series or scale range cannot support the
+% analysis.
 %
-% qRange, [qMin, qMax], the range of the multifractal order q (default:
-%           [-5, 5]; q is sampled in steps of 0.5, with q = 0 handled by its
-%           log-averaging limit)
-%
-% order, the order of the polynomial used to locally detrend each segment
-%           (default: 1, i.e., linear detrending, as in the original
-%           Kantelhardt et al. MFDFA1 formulation)
-%
-% ---OUTPUTS: statistics of the Legendre-transformed multifractal singularity
-% spectrum alpha/f(alpha) -- its extent (alphaMin, alphaMax), width (the
-% standard degree-of-multifractality diagnostic, Delta-alpha), dominant
-% exponent (alpha0), and asymmetry -- plus quality diagnostics of the
-% underlying h(q) log-log fits and Legendre transform. (The raw generalized
-% Hurst exponent h(q) itself is not separately reported: verified redundant,
-% r>=0.9, with these singularity-spectrum quantities -- see NOTE in-code.)
+% ---REFERENCES:
+% J. W. Kantelhardt et al., "Multifractal detrended fluctuation analysis of
+% nonstationary time series", Physica A 316(1-4), 87-114 (2002).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -223,7 +222,7 @@ end
 
 % NOTE: the rest of the raw generalized Hurst exponent h(q) -- its
 % q=qMin/qMax endpoints and its range/trend/std across q -- is NOT reported
-% here. Verified on both the Bonn EEG and Empirical1000 datasets (r>=0.95 on
+% here. Verified on two independent collections of real-world series (r>=0.95 on
 % BOTH, the bar for confirmed redundancy) that h(qMin) duplicates alphaMax,
 % h(qMax) duplicates alphaMin, and h(q)'s range/trend/std across q all
 % mutually duplicate alphaWidth (hqTrend is in fact a deterministic

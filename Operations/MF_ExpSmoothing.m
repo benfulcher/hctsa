@@ -1,29 +1,66 @@
 function out = MF_ExpSmoothing(x, ntrain, alpha)
-% MF_ExpSmoothing   Exponential smoothing time-series prediction model.
+% MF_ExpSmoothing   Exponential smoothing as a one-step forecaster: the best smoothing parameter and its residuals.
 %
-% Fits an exponential smoothing model to the time series using a training set to
-% fit the optimal smoothing parameter, alpha, and then applies the result to the
-% try to predict the rest of the time series.
-%
-% cf. "The Analysis of Time Series", C. Chatfield, CRC Press LLC (2004)
-%
-% Code is adapted from that provided by Siddharth Arora:
-% Siddharth.Arora@sbs.ox.ac.uk
+% Fits an exponential smoothing model to the time series, in which the forecast is an
+% exponentially weighted average of past values, S(t) = alpha*X(t) + (1-alpha)*S(t-1),
+% and alpha is the smoothing parameter. The best alpha is found by minimizing the
+% root-mean-square one-step prediction error over a training set (the first ntrain
+% samples): a coarse search over five values from 0.1 to 0.9, with a parabola fitted
+% to the three lowest errors, and then a finer search around its minimum. The chosen
+% alpha is then used to forecast each sample after the training set from the samples
+% before it, and the outputs report alpha and statistics of the residuals of these
+% held-out forecasts, from the shared residual summary MF_ResidualAnalysis (at its
+% 'full' level).
 %
 % ---INPUTS:
 % x, the input time series
 %
 % ntrain, the number of samples to use for training (can be a proportion of the
-%           time-series length)
+%           time-series length, if between 0 and 1). It is kept between 100 and 1000
+%           samples. Default is min(100, N). If the series is shorter than ntrain, or
+%           fewer than 50 samples remain after the training set, a NaN is returned.
 %
-% alpha, the exponential smoothing parameter
+% alpha, the exponential smoothing parameter, or 'best' (default) to fit it on the
+%           training set.
 %
-% ---OUTPUTS: include the fitted alpha, and statistics on the residuals from the
-% prediction phase.
+% ---OUTPUTS (when alpha is 'best'; the residual statistics are those of the
+% held-out samples, after the first ntrain):
+% alphamin, the fitted smoothing parameter (between 0.01 and 1)
+% alphamin_1, the first estimate of it: the minimum of the parabola fitted in the
+%           coarse search (not bounded to the interval 0 to 1)
+% p1_1, the size of the quadratic coefficient of that parabola
+% cup_1, the sign of that coefficient (+1 if the parabola opens upward)
+% meane, mean of the residuals (prediction minus data)
+% meanabs, mean absolute residual
+% stde, standard deviation of the residuals
+% maxonstd, largest absolute residual, in units of the residual standard deviation
+% ac1, ac2, ac3: autocorrelation of the (z-scored) residuals at lags 1, 2 and 3
+% propbth, proportion of the residual autocorrelations at lags 1 to 25 within the
+%           significance band +/- 2.6/sqrt(N)
+% taurat, decorrelation time of the residuals (first zero-crossing of their
+%           autocorrelation function) divided by that of the time series
+% ftbth, first lag at which the residual autocorrelation falls inside the
+%           significance band (26 if it never does)
+% normksstat, Kolmogorov-Smirnov statistic of the residuals against a Gaussian
+% sws, standard deviation across 5 windows of the local standard deviation of the
+%           residuals, relative to their overall standard deviation
+% swm, standard deviation across 5 windows of the local mean of the residuals,
+%           relative to their overall standard deviation
+% popt, the order (1 to 10) of the AR model fitted to the residuals, selected by the
+%           Schwarz Bayesian criterion
+% minsbc, the corresponding Schwarz Bayesian criterion
 %
-% Future alteration could take a number of training sets and average to some
-% optimal alpha, for example, rather than just fitting it in an initial portion
-% of the time series.
+% ---REFERENCES:
+% C. Chatfield, "The Analysis of Time Series", CRC Press LLC (2004).
+%
+% ---NOTES:
+% The residuals are those of the one-step forecasts of the held-out samples only
+% (samples ntrain+1 to N), so they are not biased by the fit of alpha to the
+% training set. Each forecast uses the samples before it, including earlier
+% held-out ones. For the registered call (ntrain = 0.5) at N = 1000, 500 samples
+% are held out.
+%
+% Code is adapted from that provided by Siddharth Arora (Siddharth.Arora@sbs.ox.ac.uk).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -83,7 +120,7 @@ if ntrain < minTrain; % smaller than minimum training set size
 	ntrain = 100;
 end
 
-if N < ntrain % time series shorter than the size of the training set
+if N < ntrain + 50 % too few samples held out after the training set
 	fprintf(1, 'Time Series too short for exponential smoothing\n')
 	out = NaN; return
 end
@@ -211,8 +248,9 @@ end
 % Plot original time series and smoothed data using optimum values
 y = SUB_fit_exp_smooth(x, alpha);
 
-yp = y(3:N); % predicted
-xp = x(3:N); % original
+% Residuals only on the held-out part (after the ntrain samples used to fit alpha):
+yp = y(ntrain+1:N); % predicted
+xp = x(ntrain+1:N); % original
 e = yp - xp; % residuals
 % in_sample_error = sqrt(mean((yp-xp).^2));
 % out.insamplermse = in_sample_error;
@@ -230,7 +268,7 @@ end
 if doPlot
 	figure('color', 'w'); box('on')
 	t = 1:length(yp);
-	plot(t, x(3:N), 'b', t, y(3:N), 'k');
+	plot(t, xp, 'b', t, yp, 'k');
 	legend('Obs', 'Fit');
 	xlabel('Time');
 	ylabel('Amplitude');
@@ -238,22 +276,25 @@ end
 
 % ------------------------------------------------------------------------------
 function xf = SUB_fit_exp_smooth(x, a)
-	% Iterate over rolling window:
-	ntrain = length(x);
-	xf = zeros(ntrain, 1);
-
-	for ii = 2:ntrain - 1
-		s = zeros(ntrain, 1);
-		s(1) = mean(x(1:ii - 1));
-
-		% Loop to smooth data within the window size
-		for jj = 2:ii
-			s(jj) = a * x(jj) + (1 - a) * s(jj - 1);
-		end
-
-		% S(t) = Xf(t) is forecasted value for X(t+1)
-		xf(ii + 1, 1) = s(ii);
+	% The forecast of x(ii+1) restarts the smoother at the start of the series, with
+	% initial value s(1) = mean(x(1:ii-1)), and runs s(jj) = a*x(jj) + (1-a)*s(jj-1)
+	% for jj = 2:ii. Unrolling the recursion, the forecast is
+	%   s(ii) = (1-a)^(ii-1)*mean(x(1:ii-1)) + sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj),
+	% where the sum is itself a one-pole filter of x(2:end), so all forecasts are
+	% found in O(N) rather than by restarting the loop at every ii.
+	x = x(:);
+	nx = length(x);
+	xf = zeros(nx, 1);
+	if nx < 3
+		return
 	end
+
+	ii = (2:nx - 1)';
+	runMean = cumsum(x(1:nx - 2)) ./ (1:nx - 2)'; % mean(x(1:ii-1))
+	ewma = filter(a, [1, -(1 - a)], [0; x(2:end)]); % sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj)
+
+	% S(t) = Xf(t) is forecasted value for X(t+1)
+	xf(ii + 1) = (1 - a).^(ii - 1) .* runMean + ewma(ii);
 end
 
 end

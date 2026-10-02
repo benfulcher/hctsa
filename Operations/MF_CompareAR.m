@@ -1,17 +1,53 @@
 function out = MF_CompareAR(y, orders, testHow)
-% MF_CompareAR  Compares model fits of various orders to a time series.
+% MF_CompareAR   How the out-of-sample error of an AR model changes with its order.
 %
-% Uses functions from Matlab's System Identification Toolbox: iddata, arxstruc,
-% and selstruc
+% Fits autoregressive (AR) models of a range of orders, and compares the loss of each
+% (the mean squared one-step prediction error, see NOTES) when the model fitted to
+% a training segment is applied to a test segment. Uses functions from MATLAB's System
+% Identification Toolbox: iddata, arxstruc and selstruc. Statistics are taken over the
+% loss as a function of model order, v.
 %
 % ---INPUTS:
 % y, vector of time-series data
-% orders, a vector of possible model orders
-% testHow, specify a fraction, or provide a string 'all' to train and test on
-%            all the data
 %
-% ---OUTPUTS: statistics on the loss at each model order, which are obtained by
-% applying the model trained on the training data to the testing data.
+% orders, a vector of model orders to compare (default 1:10)
+%
+% testHow, a fraction of the time series to train on (the model is tested on the
+%          remaining portion), or the string 'all' to train and test on all the
+%          data (default). With 'all' the loss measures in-sample fit, not
+%          out-of-sample prediction.
+%
+% ---OUTPUTS:
+% maxv, minv, meanv, medianv: the maximum, minimum, mean and median of the loss over
+%       orders
+% firstonmin, the loss of the first order divided by the minimum loss
+% maxonmed, the maximum loss divided by the median loss
+% meandiff, stddiff, maxdiff, meddiff: the mean, standard deviation, maximum absolute
+%       value and median of the change in loss from one order to the next
+% minstdfromi, the minimum (over starting orders i) of the standard error of the loss
+%       over orders i onward, std(v(i:end))/sqrt(length(v)-i+1), ignoring zeros
+% where01max, the first position in the list of orders from which that standard error
+%       is below 10% of its maximum (NaN if none)
+% whereen4, the first position in the list of orders from which it is below 1e-4
+%       (NaN if none)
+% best_n, the order with the smallest loss (selstruc with criterion 0)
+% aic_n, the order that minimizes Akaike's Information Criterion
+% bestaic, the minimum value of Akaike's Information Criterion over orders
+%
+% ---NOTES:
+% The loss is the first row of arxstruc's output: the sum of squared one-step
+% prediction errors on the test segment, divided by the length of the test segment
+% (checked against a least-squares fit by hand, to machine precision). The first
+% max(orders) + 1 points of the training and test segments are excluded from the fit
+% and from the sum, so that every order is scored on the same points, but the sum is
+% still divided by the full test length. The loss is therefore the mean squared
+% error scaled by about 1 - (max(orders) + 1)/(test length) (e.g. 0.99 for orders
+% 1:10 and 1000 test points), the same for every order.
+%
+% With testHow = 'all' the models are tested on the data they were trained on, so the
+% loss measures in-sample fit: it cannot rise with the model order, and features such
+% as minv, firstonmin and where01max mostly describe how fast the fit improves with
+% order. Use a training fraction (e.g. 0.5) for a genuine out-of-sample comparison.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

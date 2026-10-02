@@ -1,65 +1,67 @@
 function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
-% NL_RQA    Recurrence quantification analysis (RQA).
+% NL_RQA   Recurrence quantification analysis (RQA) of the delay-embedded series.
 %
-% Embeds the time series in an m-dimensional delay space and computes
-% standard recurrence quantification measures (Marwan et al., Phys. Rep.
-% 438, 237 (2007)) from the resulting recurrence plot: recurrence rate,
-% determinism, laminarity, trapping time, and related diagonal/vertical
-% line-length statistics.
+% Embeds the time series in an m-dimensional delay space and computes standard recurrence
+% quantification measures from the resulting recurrence plot: recurrence rate,
+% determinism, laminarity, trapping time, and related diagonal/vertical line-length
+% statistics. Two embedded states are recurrent if they lie within a radius of each other;
+% the radius is set to give a target recurrence rate rr. Pairs closer in time than the
+% Theiler window are excluded.
 %
 % ---INPUTS:
-%
 % y, scalar time series as a column vector
+% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed; default: 1)
+% m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
+%    neighbors (cf. BF_Embed; default: 3)
+% theilerWin, Theiler window excluding temporally-correlated neighbors from the main
+%             diagonal: {'ac', k} for k times the first zero-crossing of the
+%             autocorrelation function, or a number of samples (see BF_TheilerWindow;
+%             default: {'ac', 1})
+% rr, target recurrence rate used to set the neighborhood radius (the radius is set to the
+%     rr-quantile of a subsample of pairwise distances in the embedded space, following
+%     standard RQA practice of fixing RR for comparability across time series; default: 0.1)
+% lmin, minimum diagonal line length to count towards determinism/entropy measures
+%       (default: 2)
+% vmin, minimum vertical line length to count towards laminarity/trapping time (default: 2)
+% maxN, the maximum number of samples to consider. Because the number of recurrent pairs at
+%       a fixed target recurrence rate rr grows as rr*N^2 (this holds regardless of how
+%       neighbors are found), longer time series are reduced to their first maxN points
+%       (default: 10000). Set to 'full' to disable cropping (a warning is given above
+%       N = 20000, where run time starts to become substantial).
+% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (the
+%             neighborhood radius is set from a random subsample of pairwise distances when
+%             Nemb exceeds 500; default: 'default')
 %
-% tau, time delay for the embedding (can be 'ac' or 'mi', cf. BF_Embed)
+% ---OUTPUTS:
+% RR, recurrence rate: the proportion of pairs outside the Theiler window that are recurrent
+% DET, determinism: the proportion of recurrent points on diagonal lines of length >= lmin
+% L_mean, mean diagonal line length (lines of length >= lmin)
+% L_max, maximum diagonal line length
+% L_entr, Shannon entropy (nats) of the distribution of diagonal line lengths
+% DIV, divergence, 1/L_max
+% LAM, laminarity: the proportion of recurrent points on vertical lines of length >= vmin
+% TT, trapping time: mean vertical line length (lines of length >= vmin)
+% V_max, maximum vertical line length
+% If there are no diagonal lines: DET = 0, L_mean = NaN, L_max = 0, L_entr = 0, DIV = Inf;
+% if there are no vertical lines: LAM = 0, TT = NaN, V_max = 0. The output is NaN if the
+% embedding fails, the series is too short, or the radius is degenerate.
 %
-% m, embedding dimension (a positive integer)
+% ---REFERENCES:
+% Marwan et al., Phys. Rep. 438, 237 (2007).
 %
-% theilerWin, Theiler window excluding temporally-correlated neighbors
-%             from the main diagonal: {'ac', k} for k times the first zero-crossing of the
-%             autocorrelation function, or a number of samples (see BF_TheilerWindow)
-%
-% rr, target recurrence rate used to set the neighborhood radius (the
-%     radius is set to the rr-quantile of a subsample of pairwise
-%     distances in the embedded space, following standard RQA practice
-%     of fixing RR for comparability across time series)
-%
-% lmin, minimum diagonal line length to count towards determinism/entropy
-%       measures (default: 2)
-%
-% vmin, minimum vertical line length to count towards laminarity/trapping
-%       time (default: 2)
-%
-% maxN, the maximum number of samples to consider. Because the number of
-%       recurrent pairs at a fixed target recurrence rate rr grows as
-%       rr*N^2 (this holds regardless of how neighbors are found), longer
-%       time series are reduced to their first maxN points (default:
-%       10000). Set to 'full' to disable cropping (a warning is given
-%       above N = 20000, where run time starts to become substantial).
-%
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%             (the neighborhood radius is set from a random subsample of
-%             pairwise distances when Nemb exceeds 500; default: 'default')
-%
-% ---OUTPUTS: recurrence rate, determinism, average/maximum diagonal line
-% length, diagonal line-length entropy, laminarity, trapping time, and
-% maximum vertical line length.
-%
-% Neighbors are found with a KD-tree (rangesearch) rather than by forming
-% the full N x N distance matrix, and line-length statistics are computed
-% directly from the resulting (sparse) list of recurrent pairs, grouping
-% by diagonal/column and looking for runs of consecutive indices. This
-% makes the neighbor search itself roughly linear in N, and comfortably
-% outperforms round-tripping through TISEAN's 'recurr' (which requires
-% forming a text file of every recurrent pair and re-parsing it back into
-% MATLAB -- a benchmark on a logistic-map series found the native
-% approach 8-25x faster end-to-end, with the gap widening at longer N,
-% since TISEAN's ASCII pair-list I/O dominates over its C search core).
-% However, the number of recurrent pairs itself is intrinsically ~rr*N^2
-% (a property of the definition of RQA at fixed recurrence rate, not of
-% the search algorithm), so run time still grows roughly quadratically
-% with N at fixed rr -- hence the maxN cap above, in the same spirit as
-% the maxL cap in NW_VisibilityGraph.m.
+% ---NOTES:
+% Neighbors are found with a KD-tree (rangesearch) rather than by forming the full N x N
+% distance matrix, and line-length statistics are computed directly from the resulting
+% (sparse) list of recurrent pairs, grouping by diagonal/column and looking for runs of
+% consecutive indices. This makes the neighbor search itself roughly linear in N, and
+% comfortably outperforms round-tripping through TISEAN's 'recurr' (which requires forming
+% a text file of every recurrent pair and re-parsing it back into MATLAB -- a benchmark on a
+% logistic-map series found the native approach 8-25x faster end-to-end, with the gap
+% widening at longer N, since TISEAN's ASCII pair-list I/O dominates over its C search
+% core). However, the number of recurrent pairs itself is intrinsically ~rr*N^2 (a property
+% of the definition of RQA at fixed recurrence rate, not of the search algorithm), so run
+% time still grows roughly quadratically with N at fixed rr -- hence the maxN cap above, in
+% the same spirit as the maxL cap in NW_VisibilityGraph.m.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
