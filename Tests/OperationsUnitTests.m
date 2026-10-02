@@ -989,10 +989,10 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % NL_LocalDensity used to depend on TSTOOL's 'localdensity',
             % which the original author noted was "very poorly documented"
             % -- its exact algorithm was never confirmed. It's now a native
-            % k-nearest-neighbor local density estimate (density(i) ~
-            % 1/r_NNR(i)^m, r_NNR(i) = distance to the NNR-th nearest
-            % neighbor outside a Theiler window of "past" samples), using a
-            % KD-tree for speed. Since there's no original TSTOOL ground
+            % k-nearest-neighbor local density estimate (log density from
+            % r_NNR(i) = distance to the NNR-th nearest neighbor outside a
+            % Theiler window of "past" samples, in units of the series SD
+            % with zero distances smoothed), using a KD-tree for speed. Since there's no original TSTOOL ground
             % truth to validate against here (unlike the other TSTOOL-
             % derived operations in this file), the right check is that the
             % new native implementation is itself correct: confirm its
@@ -1007,13 +1007,17 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             Y = BF_Embed(y, 1, 3, false);
             N_embed = size(Y,1);
             m = size(Y,2);
-            locdenBrute = zeros(N_embed,1);
+            dk = zeros(N_embed,1);
             for i = 1:N_embed
                 d = sqrt(sum((Y - Y(i,:)).^2, 2));
                 d(abs((1:N_embed)' - i) <= past) = Inf;
                 sd = sort(d);
-                locdenBrute(i) = 1 / (sd(NNR)^m);
+                dk(i) = sd(NNR);
             end
+            % Same log k-NN density transform as NL_LocalDensity
+            d = sqrt(dk.^2 + (0.01 * median(dk(dk > 0)))^2);
+            Neff = N_embed - 2 * past - 1;
+            locdenBrute = log(NNR / Neff) - ((m / 2) * log(pi) - gammaln(m / 2 + 1)) - m * log(d / std(y));
 
             testCase.verifyEqual(out.meanden, mean(locdenBrute), 'RelTol', 1e-9);
             testCase.verifyEqual(out.stdden, std(locdenBrute), 'RelTol', 1e-9);
