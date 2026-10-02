@@ -24,7 +24,8 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % order, the order of the model to fit: an integer for 'ar' and 'ss', a two-vector
 %       [p, q] for 'arma', or the string 'best'. For 'ar', 'best' picks the order
 %       (1 to 10) by Schwarz's Bayesian criterion using ARfit; for 'ss', n4sid
-%       chooses the order. (Default: 2)
+%       chooses the order from 1 to 10 by a gap rule on its Hankel singular values
+%       (see NOTES). (Default: 2)
 % maxSteps, the maximum number of steps ahead to predict (default: 6)
 %
 % ---OUTPUTS:
@@ -44,6 +45,16 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 %       falls
 % (The last five outputs use the model's raw errors, not the ratios to the trivial
 % predictors.)
+%
+% ---NOTES:
+% With model = 'ss' and order = 'best', n4sid(y, 'best') computes the Hankel singular
+% values of the data (N4Weight 'auto', i.e. CVA, and an N4Horizon chosen
+% automatically) and sets the order to the number of singular values whose logarithm
+% lies above the midpoint between the largest and smallest log singular value,
+% limited to 1 to 10. No information criterion is used. For series with no clear
+% gap in the singular values (white noise, chaotic maps, short noisy AR processes)
+% the chosen order varies widely between realizations (e.g. 4 to 10 for white noise
+% of length 1000), whereas a sine plus noise gives 2 and a random walk 1 almost always.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
