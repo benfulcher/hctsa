@@ -10,9 +10,9 @@ function out = CO_trev(y, tau)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time lag (default 'ac'; can be 'ac' or 'mi' to set it as the first
-%      zero-crossing of the autocorrelation function, or the first minimum of the
-%      automutual information function, respectively)
+% tau, the time lag (default 'ac'): an integer number of samples, or 'ac' or 'mi' to
+%      set it as the first zero-crossing of the autocorrelation function, or the first
+%      minimum of the automutual information function, respectively
 %
 % ---OUTPUTS:
 % raw, the trev expression, mean(d^3) / mean(d^2)^(3/2),

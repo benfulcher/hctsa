@@ -9,7 +9,7 @@ function out = CO_Embed2_Dist(y, tau)
 % ---INPUTS:
 % y, a z-scored column vector representing the input time series
 % tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
-%      function, capped at N/10)
+%      function, capped at N/10); or an integer number of samples
 %
 % ---OUTPUTS:
 % d_ac1, d_ac2, d_ac3, the autocorrelation of the sequence of distances at lags 1, 2

@@ -11,7 +11,7 @@ function out = CO_Embed2(y, tau)
 % ---INPUTS:
 % y, the input time series (a z-scored column vector)
 % tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
-%      function, capped at N/10)
+%      function, capped at N/10); or an integer number of samples
 %
 % ---OUTPUTS:
 % theta_ac1, theta_ac2, theta_ac3, the autocorrelation of the sequence of step angles
