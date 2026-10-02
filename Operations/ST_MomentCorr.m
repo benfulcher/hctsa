@@ -37,8 +37,6 @@ function out = ST_MomentCorr(x, windowLength, wOverlap, mom1, mom2, whatTransfor
 % absR, the absolute value of R
 % density, the density of windows in the (mom1, mom2) plane: the number of windows
 %       divided by the area of the box bounding them, range(mom1)*range(mom2)
-% mi, the mutual information between mom1 and mom2 across windows, from a
-%       Gaussian estimator (IN_MutualInfo)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -122,7 +120,7 @@ end
 % ------------------------------------------------------------------------------
 % Create the windows:
 % ------------------------------------------------------------------------------
-x_buff = buffer(x, windowLength, wOverlap);
+x_buff = buffer(x, windowLength, wOverlap, 'nodelay');
 numWindows = (N / (windowLength - wOverlap)); % number of windows
 
 if size(x_buff, 2) > numWindows
@@ -144,10 +142,6 @@ R = corrcoef(M1, M2);
 out.R = R(2, 1); % correlation coefficient
 out.absR = abs(R(2, 1)); % absolute value of correlation coefficient
 out.density = length(M1) / (range(M1) * range(M2)); % density of points in M1--M2 space: (number of windows) / (bounding-box area)
-out.mi = IN_MutualInfo(M1, M2, 'gaussian');
-% out.mi = BF_MutualInformation(M1,M2,'range','range',floor(sqrt(N)));
-% out.mi = BF_MutualInformation(M1,M2,[0,1],[0,1],floor(sqrt(N)));
-% this is a poor choice of bin number -- M1 and M2 are not length N
 
 if doPlot
 	figure('color', 'w');

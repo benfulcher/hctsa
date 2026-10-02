@@ -33,13 +33,11 @@ function out = CO_AutoCorrShape(y, stopWhen)
 % decayTimescale, the timescale 1/b of an exponential decay exp(-b*k) fitted to the
 %       ACF ('posDrown' only, with at least 4 points; NaN otherwise),
 % fexpacf_r2, the R^2 of that fit,
-% fexpacf_stdres, the standard deviation of the ACF minus exp(+b*k) (see NOTES).
+% fexpacf_stdres, the standard deviation of the residuals of that fit (the ACF minus
+%       exp(-b*k)).
 %
 % ---NOTES:
 % The exponential fit uses the Curve Fitting Toolbox.
-% fexpacf_stdres is computed with the opposite sign of the exponent to the fit
-% (exp(+b*k) rather than exp(-b*k)), so it is not the standard deviation of the
-% fit residuals.
 % Nac counts points for 'posDrown' but is a lag for the other options.
 
 % ------------------------------------------------------------------------------
@@ -271,7 +269,7 @@ if fitSuccess % Fit was successful
 	% out.fexpacf_adjr2 = gof.adjrsquare;
 	% out.fexpacf_rmse = gof.rmse;
 
-	expfit = exp(c.b * (0:Nac - 1)');
+	expfit = exp(-c.b * (0:Nac - 1)');
 	residuals = acf - expfit;
 	out.fexpacf_stdres = std(residuals);
 

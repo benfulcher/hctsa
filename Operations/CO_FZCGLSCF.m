@@ -4,7 +4,7 @@ function out = CO_FZCGLSCF(y, alpha, beta, maxtau)
 % Returns the lag at which the generalized self-correlation function of Queiros and
 % Moyano (see CO_GLSCF), the correlation between |y(t)|^alpha and |y(t+tau)|^beta,
 % first changes sign as tau = 1, 2, ... increases. The crossing is placed by linear
-% interpolation between the two lags either side (see NOTES). If the function never
+% interpolation between the two lags either side. If the function never
 % changes sign, the output is maxtau.
 %
 % ---INPUTS:
@@ -20,11 +20,6 @@ function out = CO_FZCGLSCF(y, alpha, beta, maxtau)
 % ---REFERENCES:
 % Queiros and Moyano, "Yet on statistical properties of traded volume: Correlation and
 % mutual information at different value magnitudes", Physica A 383, 10--15 (2007).
-%
-% ---NOTES:
-% The interpolation is i - 1 + g(i)/(g(i) - g(i-1)) for the self-correlation g
-% between lags i-1 and i, which places the crossing at the mirror image of the
-% linearly interpolated position (it should be i - 1 + g(i-1)/(g(i-1) - g(i))).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -74,7 +69,7 @@ for i = 1:maxtau
 
 	if (i > 1) && (glscfs(i) * glscfs(i - 1) < 0)
 		% Draw a straight line between these two and look at where hits zero
-		out = i - 1 + glscfs(i) / (glscfs(i) - glscfs(i - 1));
+		out = i - 1 + glscfs(i - 1) / (glscfs(i - 1) - glscfs(i));
 		return
 	end
 end

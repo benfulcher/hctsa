@@ -20,8 +20,8 @@ function out = CO_Embed2(y, tau)
 % hist10std, the standard deviation of the proportions in a 10-bin histogram of
 %       the angles,
 % histent, the entropy of that angle distribution (nats; at most log(pi)),
-% stdb1, stdb2, stdb3, stdb4, the standard deviation over four angle bins of the
-%       proportions of angles in the first four fifths of the series (see NOTES),
+% stdb1, stdb2, stdb3, stdb4, the standard deviation across the five fifths of the
+%       series of the proportion of angles falling in each of four angle bins,
 % eucdm1, eucdm2, eucdm3, eucdm4, eucdm5, the mean distance of the points from the origin in each fifth
 %       of the series,
 % std_eucdm, mean_eucdm, the standard deviation and mean of those five means,
@@ -33,11 +33,6 @@ function out = CO_Embed2(y, tau)
 % areas_all, the area of the bounding rectangle of all points,
 % areas_50, the same for the half of the points nearest the origin,
 % arearat, the ratio areas_50/areas_all.
-%
-% ---NOTES:
-% stdb1, ..., stdb4 are the spread across the four angle bins within each of the
-% first four fifths, not (as the code comment suggests) the variation across fifths
-% of the proportion in each bin.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -136,9 +131,9 @@ n = n / afifth;
 n(4, :) = n(4, :) + n(5, :);
 n(5, :) = [];
 
-% Output the standard deviation in each bin:
+% Output the standard deviation across fifths of the proportion in each bin:
 for i = 1:4
-	out.(sprintf('stdb%u', i)) = std(n(:, i));
+	out.(sprintf('stdb%u', i)) = std(n(i, :));
 end
 
 % -------------------------------------------------------------------------------

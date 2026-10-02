@@ -99,7 +99,7 @@ i  = 1;
 pc = 0;
 
 % seqcnt = 0;
-while (i <= (N - D))
+while (i <= (N - D + 1))
 	xseq = xsym(i:(i + D - 1));
 	%    seqcnt = seqcnt + 1;
 	if (sum(xseq == zseq) == D) || (sum(xseq == oseq) == D)

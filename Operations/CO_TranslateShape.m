@@ -26,8 +26,7 @@ function out = CO_TranslateShape(y, shape, d, howToMove)
 % max, std, mean, the maximum, standard deviation and mean of the number of points inside
 %       the shape,
 % npatmode, the proportion of positions at which the count takes its most common value,
-% mode, the index of that most common count among the distinct counts that occur (see
-%       NOTES),
+% mode, that most common count (the smallest, if several counts tie),
 % ones, twos, threes, fours, fives, sixes, sevens, eights, nines, tens, elevens, the
 %       proportion of positions with exactly 1, 2, ..., 11 points inside (output only
 %       while 2w+1 is at least the number, where w = floor(d) for the circle and w = d
@@ -36,10 +35,6 @@ function out = CO_TranslateShape(y, shape, d, howToMove)
 %       the counts: the standard deviation across 2, 3 or 4 equal segments of their mean
 %       (_m) or their standard deviation (_s), divided by their overall standard
 %       deviation.
-%
-% ---NOTES:
-% mode is the index into the sorted distinct counts, not the count itself; they agree
-% only if every count from 1 up to the mode occurs.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -150,7 +145,9 @@ out.mean = mean(np); % mean number of hits
 histnp = arrayfun(@(x)sum(np == x), unique(np));
 
 % Compute mode of the histogram:
-[out.npatmode, out.mode] = max(histnp);
+distinctCounts = unique(np);
+[out.npatmode, idx] = max(histnp);
+out.mode = distinctCounts(idx);
 out.npatmode = out.npatmode / NN;
 
 % Output all stats:

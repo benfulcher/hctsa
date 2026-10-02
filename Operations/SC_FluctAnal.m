@@ -148,6 +148,7 @@ else
 	% If a lag is specified, do a decimation:
 	y = cumsum(x(1:lag:end));
 end
+N = length(y); % length of the integrated series (shorter than x if a lag is used)
 
 % -------------------------------------------------------------------------------
 % Perform scaling over a range of tau, up to a fifth the time-series length

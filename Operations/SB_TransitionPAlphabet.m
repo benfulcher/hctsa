@@ -208,7 +208,7 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 	else
 		mba = zeros(length(numGroupsRange), 2); % means before and after
 		sba = zeros(length(numGroupsRange), 2); % standard deviation before and after
-		for i = 3:length(numGroupsRange - 2)
+		for i = 3:length(numGroupsRange) - 2
 			mba(i, 1) = mean(store(1:i - 1, 4));
 			sba(i, 1) = std(store(1:i - 1, 4)) / sqrt(i - 1);
 			mba(i, 2) = mean(store(i + 1:end, 4));

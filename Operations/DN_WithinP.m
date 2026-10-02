@@ -11,15 +11,10 @@ function out = DN_WithinP(x, p, meanOrMedian)
 % p, the number of units on each side of the center (default: 1)
 % meanOrMedian, the center and unit to use (default: 'mean'):
 %           'mean': the mean and standard deviation
-%           'median': the median and 1.35*iqr(x)
+%           'median': the median and iqr(x)/1.35
 %
 % ---OUTPUTS:
 % a scalar: the proportion of data points within p units of the center.
-%
-% ---NOTES:
-% For 'median', the unit is 1.35*iqr(x). The interquartile range of a Gaussian
-% distribution is about 1.35 standard deviations, so a robust estimate of the
-% standard deviation would instead be iqr(x)/1.35.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -73,7 +68,7 @@ switch meanOrMedian
 
 	case 'median'
 		mu = median(x); % median of the time series
-		sig = 1.35 * iqr(x); % rescaled interquartile range of the time series (equal
+		sig = iqr(x) / 1.35; % rescaled interquartile range of the time series (equal
 		% to standard deviation for Gaussian distribution)
 	otherwise
 		error('Unknown setting: ''%s''', meanOrMedian);

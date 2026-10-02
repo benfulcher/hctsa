@@ -118,7 +118,7 @@ for j = 1:numSegs
 	% pick a range
 	% in this implementation, ranges CAN overlap
 
-	ist = randi(N - 1 - l, 1); % random start point (not exceeding the endpoint)
+	ist = randi(N - l + 1, 1); % random start point (not exceeding the endpoint)
 	ifh = ist + l - 1; % finish index
 	rs = ist:ifh; % sample range (from starting to finishing index)
 	ySub = y(rs); % contiguous subsegment of the time series
