@@ -10,8 +10,6 @@ function f = CR_RAD(x, tau, doAbs)
 % x(t). The output is the standard deviation of the increments x(t+tau) - x(t), times
 % (1/std of the upper half of x(t) - 1/std of the lower half of x(t)).
 %
-% Devised and implemented by Brendan Harris, @brendanjohnharris (GitHub), 2023.
-%
 % ---INPUTS:
 % x, the input time series (vector)
 % tau, the embedding and differencing delay in units of the timestep (integer; default
@@ -27,6 +25,11 @@ function f = CR_RAD(x, tau, doAbs)
 % B. Harris, L. L. Gollo and B. D. Fulcher, "Tracking the distance to criticality in
 % systems with unknown noise", Physical Review X 14(3), 031021 (2024).
 % DOI: 10.1103/PhysRevX.14.031021
+% Please cite this paper if you use this function in your work.
+%
+% ---NOTES:
+% Devised and authored by Brendan Harris, 2023 (@brendanjohnharris on GitHub).
+% Edits by Ben Fulcher for incorporating into hctsa.
 
 % -------------------------------------------------------------------------------
 % Check inputs, set defaults
