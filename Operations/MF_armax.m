@@ -30,8 +30,8 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % AR_1, AR_2, AR_3: the AR coefficients a1, ..., ap (the negatives of the usual AR
 %       coefficients)
 % MA_1, MA_2: the MA coefficients c1, ..., cq
-% maxda, maxdc: the largest uncertainty (standard deviation) of the AR and MA
-%       coefficients
+% maxda, maxdc: the largest estimated standard deviation of the AR and MA
+%       coefficients (from the covariance of the parameter estimates)
 % noisevar, lossfn, fpe: the noise variance, loss function, and Akaike's final
 %       prediction error of the fit
 % From the residuals of the predictions of the held-out portion (MF_ResidualAnalysis):
@@ -123,8 +123,11 @@ m = armax(y, orders);
 
 c_ar = m.a; % AR coefficients
 c_ma = m.c; % MA coefficients
-da = m.da; % must be uncertainties in AR coeffs
-dc = m.dc; % must uncertainties in MA coeffs
+% Standard deviations of the AR and MA coefficients (the leading, fixed 1 has
+% standard deviation 0). These are identical to the dA, dC outputs of
+% [A,B,C,D,F,dA,dB,dC] = polydata(m).
+da = m.da;
+dc = m.dc;
 
 % Make these outputs
 if length(c_ar) > 1
