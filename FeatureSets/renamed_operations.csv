@@ -143,3 +143,8 @@ MF_arfit_1_8_sbc_maxImS,MF_arfit_1_8_sbc_maxImLambda,now from the companion-matr
 MF_arfit_1_8_sbc_maxabsS,MF_arfit_1_8_sbc_maxabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
 MF_arfit_1_8_sbc_stdabsS,MF_arfit_1_8_sbc_stdabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
 SP_SpectralTimeFreq_20_sk_meanSpread,SP_SpectralTimeFreq_20_sk_relSpread,spread of power now normalized by the mean power (a coefficient of variation) to remove the 1/N length dependence
+MD_hrv_classic_pnn5,MD_hrv_classic_pnnrel025,fixed x/1000 threshold replaced by a multiple of the robust SD of the increments
+MD_hrv_classic_pnn10,MD_hrv_classic_pnnrel05,fixed x/1000 threshold replaced by a multiple of the robust SD of the increments
+MD_hrv_classic_pnn20,MD_hrv_classic_pnnrel1,fixed x/1000 threshold replaced by a multiple of the robust SD of the increments
+MD_hrv_classic_pnn30,MD_hrv_classic_pnnrel2,fixed x/1000 threshold replaced by a multiple of the robust SD of the increments
+MD_hrv_classic_pnn40,MD_hrv_classic_pnnrel3,fixed x/1000 threshold replaced by a multiple of the robust SD of the increments
