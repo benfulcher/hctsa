@@ -79,12 +79,17 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %    heuristic. A harmonic-ratio variant of the same construction (1:3 instead of 1:2)
 %    additionally showed the *sign* of the effect isn't stable across related constructions
 %    either. 'periodWelch' doesn't fix the sign-instability (nothing about tau selection
-%    can), but it does fix the sampling-rate sensitivity: it targets a fixed *physical*
-%    delay (not an absolute index count) by normalizing against the series' own estimated
-%    dominant period, so the same relative embedding delay is used regardless of how
-%    finely the series happens to be sampled. (In the code the delay is
-%    round(period*5/(2*pi)) samples, falling back to 'mi' if no prominent spectral peak is
-%    found.)
+%    can), but it does fix the sampling-rate sensitivity: it targets a fixed *fraction of
+%    the dominant period* (not an absolute index count) by normalizing against the series'
+%    own estimated dominant period, so the same relative embedding delay is used
+%    regardless of how finely the series happens to be sampled. (In the code the delay is
+%    max(1, round(period/5)) samples, one fifth of the period, falling back to 'mi' if no
+%    prominent spectral peak is found.) A fifth of a period is chosen because, for a
+%    sinusoid in a two-dimensional delay embedding, the loop is roundest near a quarter
+%    period and collapses onto a line at half a period; a fifth keeps a round loop, is
+%    robust to errors in the Welch period estimate, matches the delay 'mi' picks for
+%    periodic signals (about 0.2 period), and keeps the phase sensitivity this mop is
+%    meant to have.
 %
 % tau: a fixed tau performs much worse here than for most other embedding-based
 %    operations (see the comment in the code on the default).
@@ -275,11 +280,11 @@ out.totalPersistenceH0 = sum(pers0); % 0 if empty
 
 % ------------------------------------------------------------------------------
 function tau = SUB_periodNormalizedTau(y)
-    % Targets a fixed *physical* embedding delay (5, in units of the
-    % series' own estimated dominant period / 2*pi -- see the m-parameter
-    % docstring note for why this specific value) rather than an absolute
-    % index count, so the resulting index-tau automatically scales with
-    % however finely the series happens to be sampled.
+    % Targets an embedding delay of one fifth of the series' own estimated
+    % dominant period (see the m-parameter docstring note for why this
+    % specific fraction) rather than an absolute index count, so the
+    % resulting index-tau automatically scales with however finely the
+    % series happens to be sampled.
     %
     % Two failure modes ruled out during development, in order:
     % (1) a plain single-FFT argmax period estimate locks onto low-frequency
@@ -304,7 +309,6 @@ function tau = SUB_periodNormalizedTau(y)
     % median ~4-10) -- unlike the two ruled-out methods above, whose
     % resulting tau values were wildly unstable (medians 20-90+, maxima in
     % the hundreds to thousands).
-    targetPhysDelay = 5;
     minProm = 2.0;
 
     if numel(y) < 16
@@ -329,7 +333,7 @@ function tau = SUB_periodNormalizedTau(y)
     end
     [~, best] = max(proms); % most prominent peak, not necessarily tallest
     period = 1 / F(locs(best));
-    tau = max(1, round(period * targetPhysDelay / (2*pi)));
+    tau = max(1, round(period / 5)); % one fifth of the dominant period
 end
 % ------------------------------------------------------------------------------
 
