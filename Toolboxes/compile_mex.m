@@ -182,17 +182,25 @@ results(end+1) = struct('name','ripser','ok',ok);
 %-------------------------------------------------------------------------------
 % CATCH22
 %-------------------------------------------------------------------------------
+% (optional git submodule: skipped, not counted as a failure, if it hasn't been
+% fetched -- e.g. a ZIP download, or a clone without --recursive)
 fprintf(1,'catch22...');
-cd(fullfile(toolDir,'catch22','wrap_Matlab'))
-ok = true;
-try
-    mexAll
-    fprintf(1,' done.\n');
-catch emsg
-    ok = false;
-    fprintf(1,'ERROR: catch22 failed to compile correctly.\n%s\n',emsg.message);
+catch22Dir = fullfile(toolDir,'catch22','wrap_Matlab');
+if isfolder(catch22Dir)
+    cd(catch22Dir)
+    ok = true;
+    try
+        mexAll
+        fprintf(1,' done.\n');
+    catch emsg
+        ok = false;
+        fprintf(1,'ERROR: catch22 failed to compile correctly.\n%s\n',emsg.message);
+    end
+    results(end+1) = struct('name','catch22','ok',ok);
+else
+    fprintf(1,[' skipped (optional submodule not fetched; to add it, run from the hctsa root: ' ...
+        'git submodule update --init --recursive).\n']);
 end
-results(end+1) = struct('name','catch22','ok',ok);
 
 % Return to base directory
 cd(toolDir);
