@@ -6,5 +6,8 @@ function AddJavaClassPathInfoDynamics()
     computeDir = which('TS_Compute');
     splits = regexp(computeDir,filesep);
     hctsaDir = computeDir(1:splits(end-1));
-    javaaddpath(fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar'));
+    jarPath = fullfile(hctsaDir,'Toolboxes','infodynamics-dist','infodynamics.jar');
+    if ~ismember(jarPath,javaclasspath('-all'))
+        javaaddpath(jarPath);
+    end
 end
