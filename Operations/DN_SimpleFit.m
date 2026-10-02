@@ -28,10 +28,10 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 % r2, the R^2 goodness of fit
 % adjr2, R^2 adjusted for the number of fitted parameters
 % rmse, the root-mean-square error of the fit, in units of probability density of
-%       the standardized series (the fitted density is the histogram counts divided
-%       by the number of points and the bin width, or the ksdensity estimate,
-%       multiplied by the standard deviation of x), so it does not depend on the
-%       length or the scale of the series
+%       the standardized series (the fit is to the density: the histogram counts
+%       divided by the number of points and the bin width, or the ksdensity
+%       estimate; the error is multiplied by the standard deviation of x), so it
+%       does not depend on the length or the scale of the series
 % resAC1, resAC2, the autocorrelation of the residuals, in order of
 %       increasing value, at lags 1 and 2
 % resruns, the p-value of a runs test on the residuals
@@ -105,15 +105,17 @@ if any(strcmp(distModels, dmodel)) % valid DISTRIBUTION model name
 		numBins = 'sqrt'; % use sqrt of number of data points
 	end
 
-	% Compute the histogram counts:
+	% Compute the distribution (histogram, normalized to a probability density):
 	if ischar(numBins) % specify a binning method
 		[dny, binEdges] = histcounts(x, 'BinMethod', numBins);
 		dnx = mean([binEdges(1:end - 1); binEdges(2:end)]);
+		dny = dny / (sum(dny) * mean(diff(binEdges))); % counts -> probability density
 	elseif numBins == 0 % use ksdensity instead of a histogram
 		[dny, dnx] = ksdensity(x);
 	else
 		[dny, binEdges] = histcounts(x, numBins);
 		dnx = mean([binEdges(1:end - 1); binEdges(2:end)]);
+		dny = dny / (sum(dny) * mean(diff(binEdges))); % counts -> probability density
 	end
 
 	% Both must be column vectors:
@@ -150,16 +152,11 @@ out.r2 = gof.rsquare; % rsquared
 out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
                              % by any mop -- redundant with r2 for these fixed-order fits)
 
-% Root mean square error, in density units of the standardized series, so that it
-% does not grow with the length of the series (histogram counts do) or depend on
-% the scale of x. The fit was done on histogram counts, but rescaling the counts
-% to a density rescales the residuals by the same factor:
-if ischar(numBins) || numBins > 0 % histogram: counts -> density
-	rmseScale = std(x) / (sum(dny) * mean(diff(binEdges)));
-else % ksdensity is already a density
-	rmseScale = std(x);
-end
-out.rmse = gof.rmse * rmseScale;
+% Root mean square error. The fit was done directly to the probability density, so
+% multiplying by std(x) expresses it in density units of the standardized series,
+% which does not grow with the length of the series (histogram counts do) or
+% depend on the scale of x:
+out.rmse = gof.rmse * std(x);
 out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
 out.resAC2 = CO_AutoCorr(output.residuals, 2, 'Fourier'); % autocorrelation of residuals at lag 2
 out.resruns = HT_IndependenceTests(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value
