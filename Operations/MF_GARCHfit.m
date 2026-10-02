@@ -422,7 +422,7 @@ out.meansigma = mean(sigmas);
 % ------------------------------------------------------------------------------
 %% Check residuals
 % ------------------------------------------------------------------------------
-res = (y - Gfit.Offset); % residuals (departures from mean process)
+res = (Gfit.Offset - y); % residuals (mean process minus data, the MF_ResidualAnalysis convention)
 stde = res ./ sqrt(sigmas); % standardize residuals by conditional standard deviation
 stde2 = stde.^2;
 

@@ -6,7 +6,7 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % coefficients, their uncertainties, and the goodness of fit are from this fit.
 % The model is then fitted again to the first pTrain proportion of the time series
 % and used to predict the remainder numSteps samples ahead; the prediction
-% residuals (data minus prediction) are summarized with MF_ResidualAnalysis.
+% residuals (prediction minus data) are summarized with MF_ResidualAnalysis.
 %
 % Uses the functions iddata, armax, aic, and predict from Matlab's System
 % Identification Toolbox
@@ -184,7 +184,7 @@ mp = armax(ytrain, orders);
 % Maybe look at trends across different prediction horizons...
 yp = predict(mp, ytest, numSteps, 'init', 'e'); % across whole dataset
 
-mresiduals = ytest.y - yp.y;
+mresiduals = yp.y - ytest.y; % prediction minus data (the MF_ResidualAnalysis convention)
 
 % ------------------------------------------------------------------------------
 % Get statistics on residuals

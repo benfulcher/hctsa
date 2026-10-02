@@ -10,7 +10,7 @@ function out = MF_StateSpace_n4sid(y, ord, ptrain, steps)
 %
 % This model is then used to predict the latter portion of the time
 % series (i.e., the subsequent (1-p)*N samples), and the prediction residuals
-% (data minus prediction) are summarized with MF_ResidualAnalysis.
+% (prediction minus data) are summarized with MF_ResidualAnalysis.
 %
 % Model of the form (discrete time, no input, sampling interval 1):
 % x(t+1) = A x(t) + K e(t)
@@ -59,7 +59,7 @@ function out = MF_StateSpace_n4sid(y, ord, ptrain, steps)
 % ---NOTES:
 % The individual entries of A, K, and C depend on the (arbitrary) coordinates of the
 % hidden state, so they are not directly comparable between time series.
-% The residuals are data minus prediction (ytest - yp). The held-out portion
+% The residuals are prediction minus data (yp - ytest). The held-out portion
 % starts at sample floor(ptrain*N), overlapping the training portion by one sample.
 % If n4sid cannot fit the training portion, the function errors rather than
 % returning NaN.
@@ -205,7 +205,7 @@ yp = predict(mp, ytest, steps, 'init', 'e'); % across whole ytest dataset
 % plot the two:
 % plot(y,yp);
 
-mresiduals = ytest.y - yp.y;
+mresiduals = yp.y - ytest.y; % prediction minus data (the MF_ResidualAnalysis convention)
 
 % -------------------------------------------------------------------------------
 % Statistics on residuals

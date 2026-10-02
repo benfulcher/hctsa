@@ -5,8 +5,8 @@ function out = MF_AR_arcov(y, p)
 % a(p+1)*x(t-p) = e(t), by least-squares fitting of the one-step prediction (the
 % covariance method, arcov from MATLAB's Signal Processing Toolbox). The outputs are
 % the fitted polynomial coefficients, the variance of the white noise that drives
-% the model, and statistics of the residuals (the data minus the one-step
-% prediction), from the shared residual summary MF_ResidualAnalysis ('core' level).
+% the model, and statistics of the residuals (the one-step prediction minus
+% the data), from the shared residual summary MF_ResidualAnalysis ('core' level).
 %
 % ---INPUTS:
 % y, the input time series
@@ -17,7 +17,7 @@ function out = MF_AR_arcov(y, p)
 % a2, a3, a4, a5, a6 (up to a(p+1)): the fitted AR polynomial coefficients; a(k+1)
 %       is the negative of the usual AR coefficient on the lag-k value. (a1 is
 %       always 1 and is also returned.)
-% meane, mean of the residuals (note the sign: data minus prediction)
+% meane, mean of the residuals (prediction minus data)
 % meanabs, mean absolute residual
 % stde, standard deviation of the residuals
 % maxonstd, largest absolute residual, in units of the residual standard deviation
@@ -90,7 +90,7 @@ end
 %% Residual analysis
 % ------------------------------------------------------------------------------
 y_est = filter([0, -a(2:end)], 1, y);
-err = y - y_est; % residuals
+err = y_est - y; % residuals (prediction minus data, the MF_ResidualAnalysis convention)
 
 % Report the residuals through the shared contract, at the cheap 'core' level (this
 % operation is meant to stay cheap). Replaces the four hand-rolled statistics res_mu,

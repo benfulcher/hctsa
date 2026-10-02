@@ -8,7 +8,7 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % grid of fitted models, and the orders that fit best.
 %
 % Uses the following functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
-% autocorr, parcorr, garch, estimate, infer, aicbic.
+% garch, estimate, infer, aicbic.
 %
 % This operation focuses on the GARCH/variance component. It therefore detrends the
 % time series, optionally pre-whitens it (BF_Whiten), and z-scores it, so that a
@@ -148,28 +148,29 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % Will use the statistics to compare to features of the residuals after
 % modeling.
 
+% (Commented out as a historical marker: unused by any output; saves wasted compute.)
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
+% [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
 % [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1); % depricated syntax
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
+% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1); % depricated syntax
 % [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]); % depricated syntax
 
 % (iii) Correlation in time series: autocorrelation
 % autocorrs_y = CO_AutoCorr(y,1:20);
 % autocorrs_var = CO_AutoCorr(y.^2,1:20);
-[ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
-[ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
+% [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
+% [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
 
 % (iv) Partial autocorrelation function: PACF
-[PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
+% [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
 
 % ------------------------------------------------------------------------------
 %% (3) Create an appropriate GARCH model

@@ -128,7 +128,7 @@ if ~isstruct(hyp) % MF_GP_LearnHyperp returns NaN (not a struct) when the data i
 	return
 end
 loghyper = hyp.cov;
-if isnan(loghyper)
+if any(isnan(loghyper))
 	out = NaN;
 	return
 end

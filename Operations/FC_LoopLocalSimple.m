@@ -32,6 +32,7 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 %        exponential fit f(l) = a*exp(b*l) + c to the sws curve
 % sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2, adjusted R^2 and root-mean-
 %        square error of that fit
+%        (all six sws_fexp_* fields are NaN if the fit fails)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -152,13 +153,23 @@ out.sws_stdn = std(stats_st(:, 2)) / range(stats_st(:, 2));
 % Fit exponential decay:
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [range(stats_st(:, 2)), -0.5 min(stats_st(:, 2))]);
 f = fittype('a*exp(b*x)+c', 'options', s);
-[c, gof] = fit(trainLengthRange, stats_st(:, 2), f);
-out.sws_fexp_a = c.a;
-out.sws_fexp_b = c.b; % this is important
-out.sws_fexp_c = c.c;
-out.sws_fexp_r2 = gof.rsquare; % this is more important!
-out.sws_fexp_adjr2 = gof.adjrsquare;
-out.sws_fexp_rmse = gof.rmse;
+try
+	[c, gof] = fit(trainLengthRange, stats_st(:, 2), f);
+	out.sws_fexp_a = c.a;
+	out.sws_fexp_b = c.b; % this is important
+	out.sws_fexp_c = c.c;
+	out.sws_fexp_r2 = gof.rsquare; % this is more important!
+	out.sws_fexp_adjr2 = gof.adjrsquare;
+	out.sws_fexp_rmse = gof.rmse;
+catch
+	% The fit can fail (10 points, 3 parameters), e.g. for a constant or non-finite curve
+	out.sws_fexp_a = NaN;
+	out.sws_fexp_b = NaN;
+	out.sws_fexp_c = NaN;
+	out.sws_fexp_r2 = NaN;
+	out.sws_fexp_adjr2 = NaN;
+	out.sws_fexp_rmse = NaN;
+end
 
 % (3) sliding window mean
 out.swm_chn = mean(diff(stats_st(:, 3))) / (range(stats_st(:, 3)));

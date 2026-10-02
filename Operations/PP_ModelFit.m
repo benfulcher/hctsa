@@ -20,7 +20,7 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 %            detrending)
 %     rmgd: the values replaced by Gaussian values of the same rank (rank mapping
 %            to a Gaussian distribution)
-% (The spectral-filtering versions that PP_PreProcess can also return are not used.)
+% (The spectral-filtering versions that PP_PreProcess can also return are not computed.)
 %
 % ---INPUTS:
 % y, the input time series
@@ -94,7 +94,7 @@ end
 % ------------------------------------------------------------------------------
 %% Apply a range of preprocessings
 % ------------------------------------------------------------------------------
-yp = PP_PreProcess(y, '', [], [], [], randomSeed);
+yp = PP_PreProcess(y, '', [], [], false, randomSeed); % doSpectral = false: spectral versions are never used here
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
 %% ____________________FIT MODEL TO A CURATED SUBSET:_______________________ %%

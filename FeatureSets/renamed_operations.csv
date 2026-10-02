@@ -130,3 +130,7 @@ CO_TC3_ac_abs,CO_TC3_ac1e_abs,tau now the first 1/e crossing of the ACF (first z
 CO_TC3_ac_num,CO_TC3_ac1e_num,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
 CO_TC3_ac_absnum,CO_TC3_ac1e_absnum,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
 CO_TC3_ac_denom,CO_TC3_ac1e_denom,tau now the first 1/e crossing of the ACF (first zero crossing can be very long or absent)
+MF_arfit_1_8_sbc_maxReS,MF_arfit_1_8_sbc_maxReLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_maxImS,MF_arfit_1_8_sbc_maxImLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_maxabsS,MF_arfit_1_8_sbc_maxabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_stdabsS,MF_arfit_1_8_sbc_stdabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
