@@ -138,3 +138,7 @@ PH_Walker_prop_01_sw_ac1rat,PH_Walker_prop_01_sw_ac1diff,lag-1 autocorrelation r
 PH_Walker_prop_05_sw_ac1rat,PH_Walker_prop_05_sw_ac1diff,lag-1 autocorrelation ratio replaced by a difference (original ac1 can be near 0)
 PH_Walker_prop_11_sw_ac1rat,PH_Walker_prop_11_sw_ac1diff,lag-1 autocorrelation ratio replaced by a difference (original ac1 can be near 0)
 PH_Walker_runningvar_15_50_sw_ac1rat,PH_Walker_runningvar_15_50_sw_ac1diff,lag-1 autocorrelation ratio replaced by a difference (original ac1 can be near 0)
+MF_arfit_1_8_sbc_maxReS,MF_arfit_1_8_sbc_maxReLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_maxImS,MF_arfit_1_8_sbc_maxImLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_maxabsS,MF_arfit_1_8_sbc_maxabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components
+MF_arfit_1_8_sbc_stdabsS,MF_arfit_1_8_sbc_stdabsLambda,now from the companion-matrix eigenvalues instead of the eigenvector components

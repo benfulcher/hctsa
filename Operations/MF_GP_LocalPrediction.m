@@ -231,7 +231,7 @@ for i = 1:numPreds
 	end
 	loghyper = hyp.cov;
 
-	if isnan(loghyper)
+	if any(isnan(loghyper))
 		fprintf(1, 'Unable to learn hyperparameters for this time series\n');
 		out = NaN; return
 	end

@@ -14,7 +14,8 @@ function out = MF_CompareAR(y, orders, testHow)
 %
 % testHow, a fraction of the time series to train on (the model is tested on the
 %          remaining portion), or the string 'all' to train and test on all the
-%          data (default)
+%          data (default). With 'all' the loss measures in-sample fit, not
+%          out-of-sample prediction.
 %
 % ---OUTPUTS:
 % maxv, minv, meanv, medianv: the maximum, minimum, mean and median of the loss over
@@ -34,7 +35,10 @@ function out = MF_CompareAR(y, orders, testHow)
 % bestaic, the minimum value of Akaike's Information Criterion over orders
 %
 % ---NOTES:
-% With testHow = 'all' the models are tested on the data they were trained on.
+% With testHow = 'all' the models are tested on the data they were trained on, so the
+% loss measures in-sample fit: it cannot rise with the model order, and features such
+% as minv, firstonmin and where01max mostly describe how fast the fit improves with
+% order. Use a training fraction (e.g. 0.5) for a genuine out-of-sample comparison.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

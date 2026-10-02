@@ -32,6 +32,9 @@ function out = MF_StateSpaceCompOrder(y, maxOrder)
 %
 % ---NOTES:
 % Akaike's final prediction error is also computed at each order but is not output.
+% meandiffaic is not registered in hctsa's feature set: the mean of the changes in AIC
+% telescopes to (AIC(maxOrder) - AIC(1))/(maxOrder - 1) when all orders are fitted, so
+% it carries no information beyond the first and last AIC values.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
