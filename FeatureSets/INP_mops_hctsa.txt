@@ -38,6 +38,14 @@ CO_AutoCorr(x_z,37,'Fourier')	AC_37
 CO_AutoCorr(x_z,38,'Fourier')	AC_38
 CO_AutoCorr(x_z,39,'Fourier')	AC_39
 CO_AutoCorr(x_z,40,'Fourier')	AC_40
+CO_AutoCorr(x_z,50,'Fourier')	AC_50
+CO_AutoCorr(x_z,60,'Fourier')	AC_60
+CO_AutoCorr(x_z,80,'Fourier')	AC_80
+CO_AutoCorr(x_z,100,'Fourier')	AC_100
+CO_AutoCorr(abs(x_z),10,'Fourier')	AC_abs_10
+CO_AutoCorr(abs(x_z),20,'Fourier')	AC_abs_20
+CO_AutoCorr(abs(x_z),40,'Fourier')	AC_abs_40
+CO_AutoCorr(abs(x_z),80,'Fourier')	AC_abs_80
 CO_NonlinearAutocorr(x_z,[0,1],false)	        AC_nl_01
 CO_NonlinearAutocorr(x_z,[0,0,1],false)	        AC_nl_001
 CO_NonlinearAutocorr(x_z,[0,1],true)	        AC_nl_01_abs
@@ -147,6 +155,8 @@ CO_Embed2_Dist(x_z,'tau')	CO_Embed2_Dist_tau
 CO_Embed2_Shapes(x_z,'tau','circle',0.1,{'ac',1})	CO_Embed2_Shapes_tau_circle_01_ac1
 CO_Embed2_Shapes(x_z,'tau','circle',1,{'ac',1})	CO_Embed2_Shapes_tau_circle_1_ac1
 CO_Embed2(x_z,'tau')	CO_Embed2_tau
+CO_Embed2(x_z,1)	CO_Embed2_1
+CO_Embed2_Dist(x_z,1)	CO_Embed2_Dist_1
 CO_FallingSticks(x_z)	CO_FallingSticks_y
 CO_FirstCrossing(x_z,'ac',0,'both')	CO_FirstCrossing_acf_0
 CO_FirstCrossing(x_z,'ac',1/exp(1),'both')	CO_FirstCrossing_acf_1e
@@ -238,6 +248,7 @@ CO_StickAngles(x_z)	CO_StickAngles_y
 CO_TC3(x_z,1)	CO_TC3_1
 CO_TC3(x_z,2)	CO_TC3_2
 CO_TC3(x_z,3)	CO_TC3_3
+CO_TC3(x_z,5)	CO_TC3_5
 CO_TC3(x_z,'ac1e')	CO_TC3_ac1e
 CO_TimeRevKLD(x_z,'ac',2,3,{'ac',1},'full')	CO_TimeRevKLD_ac_2_3_ac1_full
 CO_TimeRevKLD(x_z,'ac',3,3,{'ac',1},'full')	CO_TimeRevKLD_ac_3_3_ac1_full
@@ -248,6 +259,8 @@ CO_TranslateShape(x_z,'rectangle',2,'pts')	CO_TranslateShape_rectangle_2_pts
 CO_trev(x_z,1)	CO_trev_1
 CO_trev(x_z,2)	CO_trev_2
 CO_trev(x_z,3)	CO_trev_3
+CO_trev(x_z,5)	CO_trev_5
+CO_trev(x_z,10)	CO_trev_10
 CO_trev(x_z,'ac')	CO_trev_ac
 CO_trev(x_z,'mi')	CO_trev_mi
 CO_Oversampling(x_z)	CO_Oversampling
@@ -454,6 +467,8 @@ EN_PermEn(x_z,2,'ac')        EN_PermEn_2_ac
 EN_PermEn(x_z,3,1)        EN_PermEn_3_1
 EN_PermEn(x_z,3,2)        EN_PermEn_3_2
 EN_PermEn(x_z,3,'ac')        EN_PermEn_3_ac
+EN_PermEn(x_z,3,10)	EN_PermEn_3_10
+EN_PermEn(x_z,3,'mi')	EN_PermEn_3_mi
 EN_PermEn(x_z,4,1)        EN_PermEn_4_1
 EN_PermEn(x_z,4,2)        EN_PermEn_4_2
 EN_PermEn(x_z,4,'ac')        EN_PermEn_4_ac
@@ -704,6 +719,7 @@ NL_FNN(x_z,'ac',10,{'ac',1},0,[],5)	NL_FNN_ac_10_ac1_f5
 NL_FNN(x_z,'mi',10,{'ac',1},0,[],5)	NL_FNN_mi_10_ac1_f5
 NL_ZeroOneTest(x_z,20,'full')	NL_ZeroOneTest_20_full
 NW_OrdinalPartitionNetwork(x_z,4,1)	NW_OrdinalPartitionNetwork_4_1
+NW_OrdinalPartitionNetwork(x_z,4,'ac')	NW_OrdinalPartitionNetwork_4_ac
 NW_VisibilityGraph(x_z,'horiz','full')	NW_VisibilityGraph_horiz_full
 NW_VisibilityGraph(x_z,'norm',20000)	    NW_VisibilityGraph_norm_20000
 PD_PeriodicityWang(x_z)	PD_PeriodicityWang
