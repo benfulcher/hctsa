@@ -21,7 +21,8 @@ function out = SB_MotifTwo(y, binarizeHow, tau)
 %    zero-crossing of the autocorrelation function, matching the lag used by
 %    SB_TransitionMatrix), 'ac1e' (the floor of its first 1/e crossing), or 'mi' (the
 %    smaller of the first minimum of the Kraskov automutual information and the
-%    'ac1e' delay; see BF_GetTau). Useful since 'diff'/'mean'/'median' words at
+%    'ac1e' delay; see BF_GetTau). All three are capped at floor(N/50) for a series
+%    of length N. Useful since 'diff'/'mean'/'median' words at
 %    consecutive samples of a smooth, oversampled signal can be dominated by trivial
 %    local structure.
 %
@@ -95,9 +96,19 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	if isnan(tau)
 		out = NaN; return
 	end
+	% Cap the data-driven delay at 2% of the series length (as for 'ac'), so that the
+	% downsampled series stays long enough to count words/transitions
+	if tau > length(y) / 50
+		tau = floor(length(y) / 50);
+	end
 end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	% Cap the data-driven delay at 2% of the series length so that the
+	% downsampled series stays long enough to count words/transitions
+	if tau > length(y) / 50
+		tau = floor(length(y) / 50);
+	end
 end
 if isnan(tau)
 	out = NaN; return

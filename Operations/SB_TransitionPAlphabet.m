@@ -24,9 +24,10 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 %    discretization as normal, or do the discretization and then just look at this
 %    discrete lag. Here we do the former (using resample). Can also be a string that
 %    sets it from the series: 'ac' (the first zero-crossing of the autocorrelation
-%    function, capped at floor(N/50) for a series of length N), 'ac1e' (the floor of
-%    its first 1/e crossing), or 'mi' (the smaller of the first minimum of the
-%    Kraskov automutual information and the 'ac1e' delay; see BF_GetTau).
+%    function), 'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller
+%    of the first minimum of the Kraskov automutual information and the 'ac1e'
+%    delay; see BF_GetTau). All three are capped at floor(N/50) for a series of
+%    length N.
 %
 % ---OUTPUTS:
 % A structure with fields (NaN if tau cannot be determined). In the definitions
@@ -110,6 +111,11 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	tau = BF_GetTau(y, tau);
 	if isnan(tau)
 		out = NaN; return
+	end
+	% Cap the data-driven delay at 2% of the series length (as for 'ac'), so that the
+	% downsampled series stays long enough to count words/transitions
+	if tau > N / 50
+		tau = floor(N / 50);
 	end
 end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
