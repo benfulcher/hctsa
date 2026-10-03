@@ -1,14 +1,16 @@
-function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
+function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 % SP_EnvelopeStats   Statistics of the amplitude envelope of the full series and of its dominant oscillation.
 %
 % Computes the instantaneous amplitude envelope |z(t)| of the analytic signal
 % z(t) = y(t) + i H[y](t), where H is the Hilbert transform, for (a) the full
-% series and (b) the dominant band: the frequency band of half-width
-% halfWidthFrac (as a fraction of the usable spectrum, at least 2 bins) around the
-% largest periodogram peak (the band convention of SP_PhaseFluctuationScaling and
-% SP_PhaseAmpCoupling, DC and Nyquist bins excluded). Each analytic signal comes
-% from the FFT: zeroing the bins outside the band (negative frequencies included)
-% and doubling the rest before an inverse FFT, with no toolbox needed.
+% series and (b) the dominant band: the narrowest frequency band centered on the
+% largest periodogram peak (DC and Nyquist bins excluded) that holds a fraction
+% powerFrac of the total power, and at least 2 bins either side of the peak. Its
+% width therefore adapts to the series: it is the width of the dominant peak
+% for a narrowband oscillation, and a large part of the spectrum for broadband noise.
+% Each analytic signal comes from the FFT: zeroing the bins outside the band
+% (negative frequencies included) and doubling the rest before an inverse FFT,
+% with no toolbox needed.
 %
 % The envelope summaries describe amplitude modulation: how variable the
 % envelope is (coefficient of variation), how asymmetric and heavy-tailed its
@@ -27,15 +29,17 @@ function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
 % To limit edge effects (the FFT filter is circular, so the series ends wrap
 % around), trimFrac of the samples are dropped from each end of the envelope and
 % phase before any summary is computed. Timescales are in samples (as elsewhere in
-% hctsa), so they scale with the sampling rate. The dominant-band fields of a
-% narrow band are based on few effectively independent envelope values (about
-% N times the band width), so they are biased toward lower CV for short series.
+% hctsa), so they scale with the sampling rate (for a narrowband oscillation, the
+% dominant-band timescale and frequency spread do too, because the band is set by
+% the width of the spectral peak). The dominant-band fields of a narrow band are
+% based on few effectively independent envelope values (about N times the band
+% width), so they are biased toward lower CV for short series.
 %
 % ---INPUTS:
 % y, the input time series
-% halfWidthFrac, half-width of the dominant band around the largest spectral peak, as a
-%                fraction of the usable one-sided spectrum, and at least 2 bins
-%                (default: 0.01)
+% powerFrac, the fraction of the total (one-sided, DC and Nyquist excluded) spectral power
+%            that the dominant band, centered on the largest periodogram peak, must
+%            contain (default: 0.5)
 % trimFrac, the fraction of samples dropped from each end of the analytic signal
 %           before computing summaries (default: 0.05)
 %
@@ -56,11 +60,15 @@ function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
 % signal. I. Fundamentals", Proc. IEEE 80(4), 520-538 (1992).
 %
 % ---NOTES:
-% The dominant band is a fixed fraction of the spectrum (up to the Nyquist
-% frequency), not a fixed width in Hz, so dom_tau and dom_ifspread are set partly
-% by halfWidthFrac and do not scale with the sampling rate as full_tau does: for a
-% broadband series, dom_tau is about 1/(bandwidth), i.e., roughly 40 to 80 samples
-% at the default settings, whatever the series.
+% The dominant band is the narrowest window around the largest periodogram peak
+% holding half the power (by default), so for a narrowband oscillation it follows the
+% width of the spectral peak and dom_tau and dom_ifspread scale with the
+% sampling rate like full_tau (decimating by 2 and 4 gave dom_tau ratios of
+% about 1/2 and 1/4 and dom_ifspread ratios of 2 and 4, in simulation). A peak
+% narrower than the frequency resolution (a sinusoid in noise, a random walk)
+% gives a band of the 2-bin minimum, so dom_tau then grows in proportion to N. For
+% broadband noise the band is a large part of the spectrum, so dom_tau is only a few
+% samples.
 %
 % Also computed during development but not kept, as redundant: the lag-1
 % envelope autocorrelation (r = 0.95 with the 1/e timescale for the full band;
@@ -100,8 +108,8 @@ function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
 %% Check inputs, set defaults
 % ------------------------------------------------------------------------------
 y = y(:);
-if nargin < 2 || isempty(halfWidthFrac)
-    halfWidthFrac = 0.01;
+if nargin < 2 || isempty(powerFrac)
+    powerFrac = 0.5;
 end
 if nargin < 3 || isempty(trimFrac)
     trimFrac = 0.05;
@@ -145,13 +153,19 @@ envFull = abs(zFull(keep));
 [out.full_cv, out.full_skew, out.full_kurt, out.full_tau] = envelopeSummary(envFull);
 
 % ------------------------------------------------------------------------------
-%% (b) Dominant band: the largest periodogram peak +/- halfWidthBins
+%% (b) Dominant band: the largest periodogram peak +/- the smallest half-width
+% (at least 2 bins) for which the band holds a fraction powerFrac of the total power
 % ------------------------------------------------------------------------------
-halfWidthBins = max(2, round(halfWidthFrac * length(usableBins)));
-if length(usableBins) < 4 * halfWidthBins
-    return
+pow = abs(Y(usableBins)).^2;
+nBins = length(usableBins);
+[~, iPeak] = max(pow);
+cumPow = [0; cumsum(pow)];
+hws = (2:nBins)';
+bandPow = cumPow(min(nBins, iPeak + hws) + 1) - cumPow(max(1, iPeak - hws));
+halfWidthBins = hws(find(bandPow >= powerFrac * cumPow(end), 1));
+if isempty(halfWidthBins)
+    halfWidthBins = nBins;
 end
-[~, iPeak] = max(abs(Y(usableBins)).^2);
 peakBin = usableBins(iPeak);
 bandBins = max(usableBins(1), peakBin - halfWidthBins):min(usableBins(end), peakBin + halfWidthBins);
 
