@@ -10,8 +10,10 @@ function out = EN_BubbleEn(y, m, tau)
 % for runs of m and of m+1 values. The bubble entropy is the increase in entropy
 % on going from m to m+1 values, H_(m+1) - H_m, divided by ln((m+1)/(m-1)) to
 % normalize for the dimension. Low values indicate series whose runs have
-% predictable orderings; for white noise the value is about 0.5 in the long-
-% series limit and higher for short series.
+% predictable orderings. For white noise, every ordering of a run is equally
+% likely, and the long-series value follows from the distribution of the number
+% of pairs in the wrong order: about 0.64 for m = 5 and 0.69 for m = 10 (rising
+% slowly toward 0.75 as m grows).
 %
 % ---INPUTS:
 % y, the input time series
@@ -39,6 +41,11 @@ function out = EN_BubbleEn(y, m, tau)
 % the series is short relative to the number of possible swap counts: for series
 % of about 1000 samples, embedding dimensions much above 10 give poorly
 % reproducible values.
+%
+% With a delay set by the autocorrelation function ('ac'), the runs of m values
+% span (m-1)*tau samples, so for a slowly decorrelating series (a large delay)
+% there are few runs and the value is unreliable; it is NaN when the
+% autocorrelation function has no zero crossing (as for many random walks).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

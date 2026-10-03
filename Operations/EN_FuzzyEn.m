@@ -47,6 +47,12 @@ function out = EN_FuzzyEn(y, M, r, n)
 % ---NOTES:
 % To get the fuzzy entropy of the increments of a series, give diff(y) as the
 % input; r is relative to the standard deviation of whatever series is given.
+%
+% The similarity is written here as exp(-(d/r)^n), so that r is a distance (in
+% units of std(y)). Chen et al. (2007) write it as exp(-d^n/r), in which r is not
+% a distance: for n = 2, their r = 0.2 on standardized data is a Gaussian width of
+% sqrt(0.2) = 0.45 standard deviations, against 0.2 here. Values of r are
+% therefore not directly comparable with those quoted in that paper.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

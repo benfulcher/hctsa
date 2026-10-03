@@ -56,6 +56,12 @@ function out = SP_EnvelopeStats(y, halfWidthFrac, trimFrac)
 % signal. I. Fundamentals", Proc. IEEE 80(4), 520-538 (1992).
 %
 % ---NOTES:
+% The dominant band is a fixed fraction of the spectrum (up to the Nyquist
+% frequency), not a fixed width in Hz, so dom_tau and dom_ifspread are set partly
+% by halfWidthFrac and do not scale with the sampling rate as full_tau does: for a
+% broadband series, dom_tau is about 1/(bandwidth), i.e., roughly 40 to 80 samples
+% at the default settings, whatever the series.
+%
 % Also computed during development but not kept, as redundant: the lag-1
 % envelope autocorrelation (r = 0.95 with the 1/e timescale for the full band;
 % near 1 for every series for a narrow band), and the instantaneous-frequency

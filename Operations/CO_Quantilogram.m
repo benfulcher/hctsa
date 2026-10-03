@@ -15,8 +15,10 @@ function out = CO_Quantilogram(y, lag)
 % in the tails (volatility clustering, or bursts of extreme values that follow
 % one another), at the center (directional persistence), and any asymmetry
 % between them. Because the series enters only through whether each value lies
-% below a quantile, the result is unchanged by any monotonic rescaling of the
-% series, and is not affected by outliers.
+% below a quantile, the result at a fixed lag is unchanged by any increasing
+% monotonic rescaling of the series, and is not affected by outliers (a lag set
+% by the timescale of the series is found from the series itself, so it can
+% change with the rescaling).
 %
 % ---INPUTS:
 % y, the input time series
@@ -45,9 +47,10 @@ function out = CO_Quantilogram(y, lag)
 % At lag 1 the central quantile levels measure the same persistence as the
 % quantile-state transition probabilities and the up-down motif frequencies
 % (SB_TransitionMatrix, SB_MotifTwo), so hctsa registers only the lower and upper
-% tail levels (q05 and q95) there, and all seven levels at the lag set by 'ac',
-% where the linear autocorrelation has gone and what remains is nonlinear or
-% tail dependence.
+% tail levels (q05 and q95) there, and all seven levels at the adaptive lag set
+% by 'mi', which grows with the series' own timescale and so is less dependent
+% on the sampling rate (a series that decorrelates within a step, such as a
+% chaotic map, keeps a lag of 1).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
