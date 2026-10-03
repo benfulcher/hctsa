@@ -28,8 +28,11 @@ function out = PH_KramersMoyal(y, tau, numBins)
 %
 % ---INPUTS:
 % y, the input time series (z-scored in hctsa)
-% tau, the increment lag, in samples; or 'ac' for the first zero-crossing of the
-%       autocorrelation function (default: 1)
+% tau, the increment lag, in samples (default: 1); or a string that sets it from the
+%       series: 'ac' for the first zero-crossing of the autocorrelation function,
+%       'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller of the
+%       first minimum of the Kraskov automutual information and the 'ac1e' delay (see
+%       BF_GetTau)
 % numBins, the number of equiprobable bins used to condition on x (default: 15)
 %
 % ---OUTPUTS:
@@ -90,6 +93,8 @@ if ischar(tau)
     switch tau
     case 'ac'
         tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+    case {'ac1e', 'mi'}
+        tau = BF_GetTau(y, tau); % adaptive delay
     otherwise
         error('Unknown time delay ''%s''', tau);
     end
