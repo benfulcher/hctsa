@@ -12,9 +12,10 @@ function out = CO_Embed2(y, tau)
 % y, the input time series (a z-scored column vector)
 % tau, the time delay: an integer number of samples, or a string that sets it from the
 %      series: 'tau' (default; the first zero-crossing of the autocorrelation
-%      function, capped at N/10), 'ac1e' (the floor of its first 1/e crossing), or
+%      function), 'ac1e' (the floor of its first 1/e crossing), or
 %      'mi' (the smaller of the first minimum of the Kraskov automutual information
-%      and the 'ac1e' delay); see BF_GetTau
+%      and the 'ac1e' delay); see BF_GetTau. All three are capped
+%      at N/10
 %
 % ---OUTPUTS:
 % theta_ac1, theta_ac2, theta_ac3, the autocorrelation of the sequence of step angles
@@ -81,6 +82,10 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	tau = BF_GetTau(y, tau);
 	if isnan(tau)
 		out = NaN; return
+	end
+	% Cannot set the time delay greater than 10% the length of the time series
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
 	end
 end
 if strcmp(tau, 'tau'),

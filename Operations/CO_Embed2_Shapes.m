@@ -11,9 +11,10 @@ function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 % y, the input time series as a (z-scored) column vector
 % tau, the time delay: an integer number of samples, or a string that sets it from the
 %      series: 'tau' (default; the first zero-crossing of the autocorrelation
-%      function, capped at N/10), 'ac1e' (the floor of its first 1/e crossing), or
+%      function), 'ac1e' (the floor of its first 1/e crossing), or
 %      'mi' (the smaller of the first minimum of the Kraskov automutual information
-%      and the 'ac1e' delay); see BF_GetTau
+%      and the 'ac1e' delay); see BF_GetTau. All three are capped
+%      at N/10
 % shape, the shape (only 'circle' for now; default)
 % r, the radius of the circle (default 1)
 % theilerWin, the Theiler window: points closer in time than this are not counted
@@ -103,6 +104,10 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	tau = BF_GetTau(y, tau);
 	if isnan(tau)
 		out = NaN; return
+	end
+	% Cannot set the time delay greater than 10% the length of the time series
+	if tau > length(y) / 10
+		tau = floor(length(y) / 10);
 	end
 end
 if strcmp(tau, 'tau'),
