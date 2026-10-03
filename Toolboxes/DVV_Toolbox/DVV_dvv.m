@@ -1,13 +1,15 @@
-function data = DVV_dvv(x, m, Nsub, nd, Ntv)
+function data = DVV_dvv(x, m, Nsub, nd, Ntv, tau)
 % Delay Vector Variance method for real and complex signals
 %
 %
-% USAGE: C = dvv (X, m, Nsub, nd, Ntv)
+% USAGE: C = dvv (X, m, Nsub, nd, Ntv, tau)
 %	X       original real-valued or complex time series
 %	m       delay embedding dimension
 %	Ntv     number of points on horizontal axes
 %	Nsub	number of reference DVs to consider
 %	nd      Span over which to perform DVV
+%	tau     time delay between delay-vector elements, in samples (default 1).
+%	        hctsa modification: the original fixed tau = 1.
 %
 %
 %   A Delay Vector Variance (DVV) toolbox for MATLAB
@@ -49,15 +51,14 @@ end
 if nargin < 5 || isempty(Ntv)
 	Ntv = 25*nd;
 end
-if nargin < 6 || isempty(numSurr)
-    numSurr = 10;
+if nargin < 6 || isempty(tau)
+    tau = 1; % time delay (samples) between the elements of each delay vector
 end
 
 % ------------------------------------------------------------------------------
 % Initial Conditions
 % ------------------------------------------------------------------------------
 N = length(x);              % Length of input vector
-tau = 1;                    % Time delay parameter
 d = zeros(N-m*tau, Nsub);
 y = zeros(Ntv,1);
 

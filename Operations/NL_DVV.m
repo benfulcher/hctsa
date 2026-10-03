@@ -1,4 +1,4 @@
-function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
+function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
 % NL_DVV   How well nearby delay vectors predict the next value, compared with surrogates.
 %
 % Delay vector variance (DVV) method for real and complex signals, using the
@@ -15,7 +15,7 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
 % surrogate curve.
 %
 % ---USAGE:
-% outputStats = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
+% outputStats = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
 %
 % ---INPUTS:
 % x, original real-valued or complex time series
@@ -26,6 +26,12 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed)
 % Ntv, number of points on the horizontal (distance) axis (default: 25*nd)
 % numSurr, number of surrogates to compare to (default: 10)
 % randomSeed, how to control the random seed for reproducibility
+% tau, the time delay between delay-vector elements: an integer number of samples
+%      (default: 1), or 'ac1e' or 'mi' to set it from the series (see BF_GetTau).
+%      The same delay is used for the data and the surrogates. With tau = 1 an
+%      oversampled series' delay vectors span only a small part of a correlation
+%      time, so the statistics mostly measure smoothness; an adaptive delay makes
+%      them much less dependent on the sampling rate.
 %
 % ---OUTPUTS: statistics of the curve of target variance against standardized
 % distance (the "data curve", using only distances at which it is defined):
@@ -149,16 +155,27 @@ end
 if nargin < 7
 	randomSeed = [];
 end
+if nargin < 8 || isempty(tau)
+	tau = 1;
+end
 
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
 BF_ResetSeed(randomSeed); % Reset the random seed if specified
 
+% Time delay: an integer, or 'ac1e'/'mi' resolved from the series by BF_GetTau
+if ischar(tau) || isstring(tau)
+	tau = BF_GetTau(x, char(tau));
+end
+if isnan(tau)
+	out = NaN; return % no delay can be set (e.g. a constant series)
+end
+
 % DVV_dvv draws numDVs reference delay vectors without replacement from the
-% N - m available, so a short series cannot supply them (data-dependent):
-if length(x) - m < numDVs
-	warning('Time series (N = %u) too short to draw %u reference delay vectors at m = %u', length(x), numDVs, m);
+% N - m*tau available, so a short series cannot supply them (data-dependent):
+if length(x) - m*tau < numDVs
+	warning('Time series (N = %u) too short to draw %u reference delay vectors at m = %u, tau = %u', length(x), numDVs, m, tau);
 	out = NaN; return
 end
 
@@ -166,7 +183,7 @@ end
 % Run DVV on input data:
 % ------------------------------------------------------------------------------
 if beVocal, fprintf(1, 'dvv on data...'); end
-dvv_data = DVV_dvv(x, m, numDVs, nd, Ntv);
+dvv_data = DVV_dvv(x, m, numDVs, nd, Ntv, tau);
 if beVocal, fprintf(1, ' Done.\n'); end
 
 % ------------------------------------------------------------------------------
@@ -179,7 +196,7 @@ if beVocal, fprintf(1, ' Done.\n'); end
 if beVocal, fprintf(1, 'Computing dvv for surrogates...'); end
 dvv_surr = zeros(Ntv, 2, numSurr);
 for i = 1:numSurr
-	dvv_surr(:, :, i) = DVV_dvv(x_surr(:, i), m, numDVs, nd, Ntv);
+	dvv_surr(:, :, i) = DVV_dvv(x_surr(:, i), m, numDVs, nd, Ntv, tau);
 end
 mean_dvv_surr = mean(dvv_surr, 3);
 if beVocal, fprintf(1, ' Done.\n'); end
