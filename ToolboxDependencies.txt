@@ -32,6 +32,7 @@ DN_Quantile.m
 DN_RemovePoints.m
 DN_SimpleFit.m
 DN_Spread.m
+DN_TailIndex.m
 DN_TrimmedMean.m
 DN_PLeft.m
 EN_DistributionEntropy.m
@@ -102,6 +103,7 @@ SP_Summaries.m
 SP_SpectralTimeFreq.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
+ST_PeakIntervals.m
 
 Curve Fitting Toolbox (Matlab Toolbox)
 

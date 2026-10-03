@@ -65,6 +65,9 @@ function out = ST_PeakIntervals(y, minProm)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+% findpeaks is in the Signal Processing Toolbox
+BF_CheckToolbox('signal_toolbox');
+
 y = y(:);
 if nargin < 2 || isempty(minProm)
     minProm = 1;

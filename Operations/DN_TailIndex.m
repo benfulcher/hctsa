@@ -107,6 +107,10 @@ function out = DN_TailIndex(y, tailFrac)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
+% (gpfit, used for the generalized Pareto fits, is in the Statistics and Machine
+% Learning Toolbox)
+BF_CheckToolbox('statistics_toolbox');
+
 if nargin < 2 || isempty(tailFrac)
     tailFrac = 0.05;
 end
