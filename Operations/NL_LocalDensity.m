@@ -35,7 +35,8 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 %       samples (see BF_TheilerWindow; default: {'ac',1})
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
 %              tau and m can be characters specifying a given automatic method
-%              of determining tau and/or m (see BF_Embed; default: {'ac','fnn'})
+%              of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) and/or m
+%              ('fnn') (see BF_Embed; default: {'ac','fnn'})
 %
 % ---OUTPUTS: statistics of the log local density series (output names retain 'den'):
 % minden, maxden, iqrden, rangeden, stdden, meanden, medianden: minimum, maximum,
@@ -43,7 +44,8 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % ac1den, ac2den, ac3den, ac4den, ac5den: autocorrelation at lags 1 to 5
 % tauacden: the first zero-crossing of the autocorrelation function (with
 %       interpolation)
-% taumiden: the first minimum of the automutual information
+% taumiden: the first minimum of the automutual information (the Gaussian
+%       estimate, as CO_FirstMin(y,'mi'))
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

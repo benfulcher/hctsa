@@ -43,7 +43,12 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %             BF_TheilerWindow; default: {'ac', 1})
 % steps [opt], number of moments to calculate (default=32);
 % embedParams, how to embed the time series using a time-delay reconstruction,
-%              as {tau,m} (inputs to BF_Embed; default: {'ac','fnn'})
+%              as {tau,m} (inputs to BF_Embed): tau is a number of samples, 'ac'
+%              (first zero-crossing of the autocorrelation function), 'ac1e' (floor
+%              of its first 1/e crossing) or 'mi' (the smaller of the first minimum
+%              of the Kraskov automutual information and the 'ac1e' delay; see
+%              BF_GetTau); m is a number of dimensions or 'fnn' (chosen by false
+%              nearest neighbors). Default: {'ac','fnn'}
 % randomSeed [opt], whether (and how) to reset the random seed, using
 %             BF_ResetSeed, before choosing reference points (relevant
 %             whenever Nref ~= -1, since that involves a random subsample of
