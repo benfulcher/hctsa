@@ -1531,7 +1531,7 @@ EN_PermEnComplexity_5_2.jsComplexity            EN_PermEnComplexity_5_2_jsComple
 EN_PermEnComplexity_5_ac1e.jsComplexity            EN_PermEnComplexity_5_ac1e_jsComplexity            entropy
 EN_BubbleEn_5_1.bubbleEn	EN_BubbleEn_5_1_bubbleEn	entropy,symbolic
 EN_BubbleEn_10_1.bubbleEn	EN_BubbleEn_10_1_bubbleEn	entropy,symbolic
-EN_BubbleEn_10_ac1e.bubbleEn	EN_BubbleEn_10_ac1e_bubbleEn	entropy,symbolic
+EN_BubbleEn_10_mi.bubbleEn	EN_BubbleEn_10_mi_bubbleEn	entropy,symbolic
 EN_BubbleEn_10_1_diff1.bubbleEn	EN_BubbleEn_10_1_diff1_bubbleEn	entropy,symbolic
 EN_Randomize_dyndist.xcn1fexpa	EN_Randomize_dyndist_xcn1fexpa	entropy
 EN_Randomize_dyndist.xcn1fexpb	EN_Randomize_dyndist_xcn1fexpb	entropy
