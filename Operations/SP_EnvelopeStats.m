@@ -14,15 +14,17 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 %
 % The envelope summaries describe amplitude modulation: how variable the
 % envelope is (coefficient of variation), how asymmetric and heavy-tailed its
-% distribution is (skewness, kurtosis), and how long it takes to decorrelate
-% (the 1/e timescale of its autocorrelation function). An unmodulated sinusoid
-% has a constant envelope (CV near 0); bursting or amplitude-modulated signals
-% have a large CV, and a high kurtosis for intermittent bursts.
+% distribution is (kurtosis for the full series; skewness and kurtosis for the
+% dominant band), and how long it takes to decorrelate (the 1/e timescale of its
+% autocorrelation function). An unmodulated sinusoid has a constant envelope (CV
+% near 0); bursting or amplitude-modulated signals have a large CV, and a high
+% kurtosis for intermittent bursts.
 %
 % Baseline for Gaussian noise: the analytic signal of a stationary Gaussian
 % process is complex Gaussian, so its envelope is Rayleigh distributed:
 % CV = sqrt(4/pi - 1) = 0.5227, skewness 0.6311, kurtosis 3.2451 (checked
-% numerically on white noise for the full-band fields). Values of the CV below
+% numerically on white noise for the full-band fields; the full-band skewness is
+% not returned, as it is redundant with the kurtosis). Values of the CV below
 % this indicate an envelope steadier than noise (e.g., a sinusoid in noise follows
 % a Rice distribution), and above it an envelope more modulated than noise.
 %
@@ -45,15 +47,30 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 %
 % ---OUTPUTS:
 % full_cv, the envelope's coefficient of variation (standard deviation over mean), full series
-% full_skew, the envelope's skewness, full series
 % full_kurt, the envelope's kurtosis, full series
 % full_tau, the 1/e decay time (in samples) of the envelope's autocorrelation function, full series
-% dom_cv, dom_skew, dom_kurt, dom_tau, as above for the dominant band
+% dom_cv, dom_skew (the envelope's skewness), dom_kurt, dom_tau, as above for
+%         the dominant band
 % dom_ifspread, a robust spread of the dominant band's instantaneous frequency
 %               (1.4826 times the median absolute deviation of the phase
 %               increments, in cycles per sample)
 % All fields are NaN for constant, non-finite, or very short (N < 50) series.
 % A 1/e timescale is NaN when the autocorrelation never falls below 1/e within N/2 lags.
+% For an envelope that is essentially constant (as for a sinusoid without noise)
+% the skewness, kurtosis and timescale are an undefined 0/0 (they divide by the
+% variance), and they are extended continuously to the limit of a steady
+% oscillation in vanishing Gaussian noise: skewness 0 and kurtosis 3 (the
+% envelope's fluctuations become Gaussian, as the Rice distribution tends to a
+% Gaussian), and a 1/e timescale equal to the largest lag searched, floor(n/2)
+% for the n samples left after trimming (the envelope never decorrelates). This is
+% done by shrinking each measured value toward its limit with the weight
+% w = c^2/(c^2 + 1e-20), where c is the envelope's CV (computed as usual, and
+% reported unchanged): reported = limit + w*(measured - limit), so that the
+% reported values vary smoothly with c and are unchanged (to a relative 1e-12 or
+% better) when c exceeds 1e-4. The scale 1e-10 is four to five orders above the
+% round-off of a noiseless sinusoid (c of order 1e-15 to 1e-14) and far below any
+% real variability. The weights are applied to the full and dominant-band
+% envelopes separately.
 %
 % ---REFERENCES:
 % B. Boashash, "Estimating and interpreting the instantaneous frequency of a
@@ -116,7 +133,7 @@ if nargin < 3 || isempty(trimFrac)
 end
 
 % Fixed set of output fields (NaN whenever a value is undefined):
-fldFull = {'full_cv', 'full_skew', 'full_kurt', 'full_tau'};
+fldFull = {'full_cv', 'full_kurt', 'full_tau'};
 fldDom = {'dom_cv', 'dom_skew', 'dom_kurt', 'dom_tau', 'dom_ifspread'};
 for f = [fldFull, fldDom]
     out.(f{1}) = NaN;
@@ -150,7 +167,7 @@ Yfull = zeros(N, 1);
 Yfull(usableBins) = 2 * Y(usableBins);
 zFull = ifft(Yfull);
 envFull = abs(zFull(keep));
-[out.full_cv, out.full_skew, out.full_kurt, out.full_tau] = envelopeSummary(envFull);
+[out.full_cv, ~, out.full_kurt, out.full_tau] = envelopeSummary(envFull);
 
 % ------------------------------------------------------------------------------
 %% (b) Dominant band: the largest periodogram peak +/- the smallest half-width
@@ -190,25 +207,55 @@ function [cv, sk, ku, tau] = envelopeSummary(env)
 cv = NaN; sk = NaN; ku = NaN; tau = NaN;
 n = length(env);
 m = mean(env);
-if ~(m > 0) || std(env) == 0
+if ~(m > 0)
     return
 end
 e = env - m;
 s2 = mean(e.^2);
 cv = sqrt(s2) / m; % population standard deviation over the mean
-sk = mean(e.^3) / s2^1.5;
-ku = mean(e.^4) / s2^2;
 
-% Autocorrelation of the envelope via the FFT (zero-padded, biased estimator)
-nfft = 2^nextpow2(2 * n);
-F = fft(e, nfft);
-acf = real(ifft(abs(F).^2));
-acf = acf(1:floor(n / 2) + 1) / acf(1); % lags 0..N/2
-iCross = find(acf < exp(-1), 1);
-if ~isempty(iCross) && iCross > 1
-    % linear interpolation between lags (iCross-2) and (iCross-1)
-    a0 = acf(iCross - 1);
-    a1 = acf(iCross);
-    tau = (iCross - 2) + (a0 - exp(-1)) / (a0 - a1);
+% Weight of the measured skewness, kurtosis and timescale: these are a 0/0 for a
+% constant envelope, extended continuously to the limit for a steady oscillation in
+% vanishing Gaussian noise (see the function help); w -> 1 for any envelope that varies
+cvScale = 1e-10; % well above the round-off CV of a noiseless sinusoid (~1e-15)
+w = cv^2 / (cv^2 + cvScale^2);
+tauMax = floor(n / 2); % the largest lag searched below (the envelope never decorrelates)
+
+skMeas = NaN; kuMeas = NaN; tauMeas = NaN;
+if s2 > 0
+    skMeas = mean(e.^3) / s2^1.5;
+    kuMeas = mean(e.^4) / s2^2;
+
+    % Autocorrelation of the envelope via the FFT (zero-padded, biased estimator)
+    nfft = 2^nextpow2(2 * n);
+    F = fft(e, nfft);
+    acf = real(ifft(abs(F).^2));
+    acf = acf(1:floor(n / 2) + 1) / acf(1); % lags 0..N/2
+    iCross = find(acf < exp(-1), 1);
+    if ~isempty(iCross) && iCross > 1
+        % linear interpolation between lags (iCross-2) and (iCross-1)
+        a0 = acf(iCross - 1);
+        a1 = acf(iCross);
+        tauMeas = (iCross - 2) + (a0 - exp(-1)) / (a0 - a1);
+    end
+end
+
+sk = shrinkToLimit(skMeas, 0, w);
+ku = shrinkToLimit(kuMeas, 3, w);
+tau = shrinkToLimit(tauMeas, tauMax, w);
+end
+
+% ------------------------------------------------------------------------------
+function v = shrinkToLimit(measured, limit, w)
+% limit + w*(measured - limit); an undefined measured value takes the limit only
+% when the weight w is negligible (an essentially constant envelope)
+if isnan(measured)
+    if w < 1e-6
+        v = limit;
+    else
+        v = NaN;
+    end
+else
+    v = limit + w * (measured - limit);
 end
 end
