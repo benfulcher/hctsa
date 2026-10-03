@@ -23,11 +23,8 @@ function out = FC_LocalSimple(y, forecastMeth, trainLength)
 %          zero-crossing of the autocorrelation function of y; discrete, from
 %          CO_FirstCrossing), 'ac1e' (the floor of its first 1/e crossing), or 'mi'
 %          (the smaller of the first minimum of the Kraskov automutual information
-%          and the 'ac1e' delay); see BF_GetTau. For 'lfit' with 'ac', this is at
-%          least 2 (a line cannot be fitted to a single point). The 'ac1e' and 'mi'
-%          lengths are not floored, so for 'lfit' a length of 1 (which they give for
-%          white noise or an iterated map) fits a line to a single point, and the
-%          forecast is then twice the previous value.
+%          and the 'ac1e' delay); see BF_GetTau. For 'lfit' with 'ac', 'ac1e' or
+%          'mi', this is at least 2 (a line cannot be fitted to a single point).
 %
 % ---OUTPUTS:
 % meane, mean of the residuals (the bias of the forecast)
@@ -97,6 +94,9 @@ if ischar(trainLength) && ismember(trainLength, {'ac1e', 'mi'})
 	trainLength = BF_GetTau(y, trainLength);
 	if isnan(trainLength)
 		out = NaN; return
+	end
+	if strcmp(forecastMeth, 'lfit')
+		trainLength = max(trainLength, 2); % a straight line needs at least two points
 	end
 end
 if strcmp(trainLength, 'ac')
