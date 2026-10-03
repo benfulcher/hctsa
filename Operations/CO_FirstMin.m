@@ -15,10 +15,13 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 %          Toolkit, a monotonic function of |autocorrelation|), 'mi-kernel',
 %          'mi-kraskov1', 'mi-kraskov2' (all from Information Dynamics Toolkit
 %          implementations), or 'mi-hist' (histogram-based method).
-%          Default: 'mi-gaussian'. A naked 'mi' is not an estimator here: it is
-%          a deprecated alias for 'mi-gaussian' (with a one-time warning); use the
-%          explicit name. (In the adaptive delay rules of BF_GetTau, 'mi' means the
-%          Kraskov-based delay, which is not computed by this function.)
+%          'mi' is the Kraskov automutual information, the same as 'mi-kraskov1'
+%          (with the estimator's default of 4 nearest neighbors). The Gaussian
+%          estimate must be requested explicitly as 'mi-gaussian' (earlier versions
+%          of hctsa used the name 'mi' for it). Default: 'mi-gaussian'.
+%          (In the adaptive delay rules of BF_GetTau, 'mi' is the smaller of the
+%          first minimum of the Kraskov automutual information and the 1/e decay
+%          time of the autocorrelation function, which is not computed here.)
 % extraParam, an additional parameter required by minWhat: the number of bins for
 %             'mi-hist', or the number of nearest neighbors for 'mi-kraskov2'
 %             (as a string, e.g., '4')
@@ -35,8 +38,8 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 % The Gaussian estimate ('mi-gaussian') is a monotonic function of
 % |autocorrelation|, so it is not a nonlinear timescale; the adaptive delays that
 % use the Kraskov automutual information are in BF_GetTau.
-% For 'mi-kraskov1' extraParam is not passed on: the estimator's default of 4
-% nearest neighbors is used.
+% For 'mi' and 'mi-kraskov1' extraParam is not passed on: the estimator's default
+% of 4 nearest neighbors is used.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -74,15 +77,9 @@ if nargin < 2 || isempty(minWhat)
 	% Mutual information using gaussian method from Information Dynamics Toolkit:
 	minWhat = 'mi-gaussian';
 end
-persistent hasWarnedMI
 if strcmp(minWhat, 'mi')
-	% Naked 'mi' used to mean the Gaussian estimator: keep accepting it, but say so
-	if isempty(hasWarnedMI)
-		warning('hctsa:deprecated', ['CO_FirstMin(y,''mi'') is deprecated: ''mi'' meant the Gaussian ' ...
-					'estimator, which is now named explicitly; use ''mi-gaussian'' (or another method, e.g., ''mi-kraskov1'', ''mi-hist'').']);
-		hasWarnedMI = true;
-	end
-	minWhat = 'mi-gaussian';
+	% Naked 'mi' is the Kraskov automutual information (as for BF_GetTau's 'mi')
+	minWhat = 'mi-kraskov1';
 end
 if nargin < 3
 	extraParam = [];

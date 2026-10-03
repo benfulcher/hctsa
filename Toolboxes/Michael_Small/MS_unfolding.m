@@ -40,8 +40,8 @@ if strcmp(tau,'ac')
     % First zero-crossing of autocorrelation function
     tau = CO_FirstCrossing(y,'ac',0,'discrete');
 elseif strcmp(tau,'mi')
-    % First minimum of automutual information function
-    tau = CO_FirstMin(y,'mi');
+    % First minimum of automutual information function (Gaussian estimate, as before)
+    tau = CO_FirstMin(y,'mi-gaussian');
 end
 if isnan(tau)
     error('Time series cannot be embedded (too short?)');
