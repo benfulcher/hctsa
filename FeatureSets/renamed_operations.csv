@@ -1219,3 +1219,4 @@ SB_TransitionPAlphabet_20_ac_stdeigfexp_a,SB_TransitionPAlphabet_20_ac1e_stdeigf
 SB_TransitionPAlphabet_20_ac_stdeigfexp_b,SB_TransitionPAlphabet_20_ac1e_stdeigfexp_b,"adaptive delay changed to 'ac1e' (see BF_GetTau): more sampling-rate invariant and stable"
 SB_TransitionPAlphabet_20_ac_stdeigfexp_r2,SB_TransitionPAlphabet_20_ac1e_stdeigfexp_r2,"adaptive delay changed to 'ac1e' (see BF_GetTau): more sampling-rate invariant and stable"
 SB_TransitionPAlphabet_20_ac_stdeigfexp_rmse,SB_TransitionPAlphabet_20_ac1e_stdeigfexp_rmse,"adaptive delay changed to 'ac1e' (see BF_GetTau): more sampling-rate invariant and stable"
+EN_BubbleEn_10_ac_bubbleEn,EN_BubbleEn_10_ac1e_bubbleEn,"tau now the 1/e crossing of the ACF (first zero crossing is absent for many slow series and unstable)"
