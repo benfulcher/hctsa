@@ -27,8 +27,9 @@ function out = EN_DispEn(y, m, c, tau, mappingHow)
 % c, the number of amplitude classes (default: 6, the value used throughout the
 %    source papers; c > 1 is required)
 % tau, the time delay (default: 1); can also be 'ac' (the first zero-crossing of
-%    the autocorrelation function) or 'mi' (the first minimum of the
-%    automutual information)
+%    the autocorrelation function), 'ac1e' (the floor of its first 1/e crossing), or
+%    'mi' (the smaller of the first minimum of the Kraskov automutual information
+%    and the 'ac1e' delay); see BF_GetTau
 % mappingHow, how to map the time series onto (0,1) before classifying:
 %    'ncdf' (default): the normal cumulative distribution function with the
 %        series' own mean and standard deviation. This is the mapping the method
@@ -118,8 +119,8 @@ if ischar(tau)
 	switch tau
 		case 'ac'
 			tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-		case 'mi'
-			tau = CO_FirstMin(y, 'mi');
+		case {'mi', 'ac1e'}
+			tau = BF_GetTau(y, tau);
 		otherwise
 			error('Unknown time delay ''%s''', tau);
 	end

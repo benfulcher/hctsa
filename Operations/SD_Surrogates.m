@@ -13,9 +13,10 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ---INPUTS:
 % y, the input time series
 % tau, the time lag used in the test statistic (an integer, or 'ac' or 'mi' for the first
-%      zero-crossing of the autocorrelation function or the first minimum of the automutual
-%      information; default: 1). For 'tc3' the statistic is
-%      <x_n x_{n-tau} x_{n-2tau}> / |<x_n x_{n-tau}>|^(3/2); for 'trev' it is
+%      zero-crossing of the autocorrelation function or the smaller of the first minimum
+%      of the Kraskov automutual information and the floor of the first 1/e crossing of
+%      the autocorrelation function, see BF_GetTau; default: 1). For 'tc3' the
+%      statistic is <x_n x_{n-tau} x_{n-2tau}> / |<x_n x_{n-tau}>|^(3/2); for 'trev' it is
 %      <d^3> / <d^2>^(3/2) for the increments d = x_{n+tau} - x_n.
 % nsurr, the number of surrogates to generate (default: 50)
 % surrMethod, the method of generating surrogates (default: 1):
@@ -82,7 +83,7 @@ end
 if strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tau, 'mi')
-	tau = CO_FirstMin(y, 'mi');
+	tau = BF_GetTau(y, 'mi');
 end
 if isnan(tau)
 	out = NaN; return

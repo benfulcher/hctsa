@@ -7,7 +7,10 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,randomSeed,beVocal)
 %---INPUTS:
 % y, univariate scalar time series
 %
-% tau, time-delay. Can be a string, 'ac', 'mi', ...
+% tau, time-delay. Can be a string: 'ac' (first zero crossing of the ACF),
+%       'ac1e' (floor of the first 1/e crossing of the ACF), or 'mi' (the
+%       smaller of the first minimum of the Kraskov automutual information and
+%       'ac1e'); see BF_GetTau.
 %
 % m, the embedding dimension. Must be a cell specifying method and parameters,
 %    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
@@ -72,13 +75,19 @@ if nargin < 2 || isempty(tau)
 else
     if ischar(tau) % use a routine to inform tau
         switch tau
-            case 'mi' % first minimum of mutual information function
-                tau = CO_FirstMin(y,'mi');
+            case 'mi' % min(first minimum of Kraskov AMI, floor of ACF 1/e crossing)
+                tau = BF_GetTau(y,'mi');
                 if isnan(tau)
                     % Could not get time delay by mutual information (time series too short?)
                     y_embed = NaN; return
                 end
-                sstau = sprintf('by first minimum of mutual information to tau = ');
+                sstau = sprintf('by the smaller of the first automutual information minimum and the 1/e ACF time to tau = ');
+            case 'ac1e' % floor of the first 1/e crossing of the ACF
+                tau = BF_GetTau(y,'ac1e');
+                if isnan(tau)
+                    y_embed = NaN; return
+                end
+                sstau = sprintf('by the (floored) first 1/e crossing of the autocorrelation function to tau = ');
             case 'ac' % first zero-crossing of ACF
                 tau = CO_FirstCrossing(y,'ac',0,'discrete');
                 sstau = sprintf('by first zero crossing of autocorrelation function to tau = ');

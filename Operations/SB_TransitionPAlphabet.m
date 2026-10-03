@@ -22,9 +22,11 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 % tau, the time delay at which to analyze the transition matrices (default: 1). We
 %    can either downsample the time series at this lag and then do the
 %    discretization as normal, or do the discretization and then just look at this
-%    discrete lag. Here we do the former (using resample). Can also be 'ac' to use
-%    the first zero-crossing of the autocorrelation function (capped at
-%    floor(N/50) for a series of length N).
+%    discrete lag. Here we do the former (using resample). Can also be a string that
+%    sets it from the series: 'ac' (the first zero-crossing of the autocorrelation
+%    function, capped at floor(N/50) for a series of length N), 'ac1e' (the floor of
+%    its first 1/e crossing), or 'mi' (the smaller of the first minimum of the
+%    Kraskov automutual information and the 'ac1e' delay; see BF_GetTau).
 %
 % ---OUTPUTS:
 % A structure with fields (NaN if tau cannot be determined). In the definitions
@@ -103,6 +105,13 @@ end
 
 N = length(y); % time-series length
 
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)

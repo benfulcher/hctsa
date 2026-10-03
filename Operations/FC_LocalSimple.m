@@ -19,9 +19,12 @@ function out = FC_LocalSimple(y, forecastMeth, trainLength)
 %                         trainLength values.
 %
 % trainLength, the number of past values used to forecast the next value (default
-%          3), or 'ac' to use the first zero-crossing of the autocorrelation
-%          function of y (discrete, from CO_FirstCrossing); for 'lfit' this is
-%          at least 2, since a line cannot be fitted to a single point.
+%          3), or a string that sets it from the series: 'ac' (the first
+%          zero-crossing of the autocorrelation function of y; discrete, from
+%          CO_FirstCrossing), 'ac1e' (the floor of its first 1/e crossing), or 'mi'
+%          (the smaller of the first minimum of the Kraskov automutual information
+%          and the 'ac1e' delay); see BF_GetTau. For 'lfit' with 'ac', this is at
+%          least 2 (a line cannot be fitted to a single point).
 %
 % ---OUTPUTS:
 % meane, mean of the residuals (the bias of the forecast)
@@ -86,6 +89,13 @@ N = length(y); % Time-series length
 % ------------------------------------------------------------------------------
 % Do the local prediction
 % ------------------------------------------------------------------------------
+if ischar(trainLength) && ismember(trainLength, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	trainLength = BF_GetTau(y, trainLength);
+	if isnan(trainLength)
+		out = NaN; return
+	end
+end
 if strcmp(trainLength, 'ac')
 	% Make it first zero-crossing of ACF:
 	lp = CO_FirstCrossing(y, 'ac', 0, 'discrete');

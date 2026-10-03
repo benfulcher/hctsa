@@ -1,4 +1,4 @@
-function out = EN_ApEn(y, mnom, rth)
+function out = EN_ApEn(y, mnom, rth, tau)
 % EN_ApEn   Approximate entropy of a time series.
 %
 % Pincus's approximate entropy, ApEn(m,r). Every run of m consecutive values is
@@ -15,6 +15,13 @@ function out = EN_ApEn(y, mnom, rth)
 % mnom, the embedding dimension m (default: 1)
 % rth, the similarity threshold as a fraction of the standard deviation of y,
 %      r = rth*std(y) (default: 0.2)
+% tau, the time delay between pattern elements (default: 1), or a string for an
+%      adaptive delay: 'ac1e' (the floor of the first 1/e crossing of the
+%      autocorrelation function), 'mi' (the smaller of the first minimum of the
+%      Kraskov automutual information and the 'ac1e' delay), or 'ac' (the first
+%      zero-crossing of the autocorrelation function); see BF_GetTau. A delay set by
+%      the series' own timescale stops ApEn from mostly measuring smoothness when a
+%      process is oversampled, without shortening the series as decimation would.
 %
 % ---OUTPUTS:
 % a scalar: ApEn(m,r) = Phi_m - Phi_{m+1}.
@@ -65,6 +72,15 @@ if nargin < 3 || isempty(rth)
 	rth = 0.2; % r = 0.2 (default)
 end
 
+if nargin < 4 || isempty(tau)
+	tau = 1; % consecutive samples (default)
+elseif ischar(tau)
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
+
 % -------------------------------------------------------------------------------
 
 r = rth * std(y); % threshold of similarity
@@ -73,15 +89,19 @@ phi = zeros(2, 1); % phi(1)=phi_m, phi(2)=phi_{m+1}
 
 for k = 1:2
 	m = mnom + k - 1; % pattern length
-	C = zeros(N - m + 1, 1);
+	numVectors = N - (m - 1)*tau; % number of delay vectors of length m
+	if numVectors < 2
+		out = NaN; return % time series too short for this pattern length and delay
+	end
+	C = zeros(numVectors, 1);
 
-	% Form vector sequences x from the time series y: x(i,:) = y(i:i+m-1).
-	% Built via one vectorized indexing operation instead of an N-m+1
+	% Form delay vectors x from the time series y: x(i,:) = y(i:tau:i+(m-1)*tau).
+	% Built via one vectorized indexing operation instead of a numVectors
 	% iteration loop:
-	idx = (1:N - m + 1)' + (0:m - 1);
+	idx = (1:numVectors)' + (0:m - 1)*tau;
 	x = y(idx);
 
-	for i = 1:N - m + 1
+	for i = 1:numVectors
 		% m - m(i,:)-style implicit broadcasting subtracts the row x(i,:)
 		% from every row of x, giving the same result as explicitly building
 		% ax (formerly done via an inner for-loop over j=1:m per i -- an
@@ -94,7 +114,7 @@ for k = 1:2
 			d = max(d, [], 2)';
 		end
 		dr = (d <= r);
-		C(i) = sum(dr) / (N - m + 1); % Number of x(j) within r of x(i)
+		C(i) = sum(dr) / numVectors; % Number of x(j) within r of x(i)
 	end
 	phi(k) = mean(log(C));
 end

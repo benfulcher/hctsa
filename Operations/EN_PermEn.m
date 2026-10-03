@@ -17,8 +17,9 @@ function out = EN_PermEn(y, m, tau)
 % y, the input time series
 % m, the embedding dimension (the order of the permutation entropy; default: 2)
 % tau, the time delay for the embedding (default: 1); can also be 'ac' (first
-%    zero-crossing of the autocorrelation function) or 'mi' (first minimum of
-%    the automutual information), as in BF_Embed
+%    zero-crossing of the autocorrelation function), 'ac1e' (the floor of its first
+%    1/e crossing), or 'mi' (the smaller of the first minimum of the Kraskov
+%    automutual information and the 'ac1e' delay), as in BF_Embed (see BF_GetTau)
 %
 % ---OUTPUTS:
 % A structure with fields:

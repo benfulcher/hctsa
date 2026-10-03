@@ -18,8 +18,11 @@ function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored)
-% tau, the time delay for computing the AMI (a number of samples, or 'ac' for the
-%       first zero-crossing of the autocorrelation function of y)
+% tau, the time delay for computing the AMI: a number of samples, or a string that
+%       sets it from the series: 'ac' or 'tau' (the first zero-crossing of the
+%       autocorrelation function of y), 'ac1e' (the floor of its first 1/e crossing),
+%       or 'mi' (the smaller of the first minimum of the Kraskov automutual
+%       information and the 'ac1e' delay); see BF_GetTau
 % amiMethod, the method for computing the AMI:
 %       * 'std1', 'std2', 'quantiles', 'even': histogram-based estimation
 %         (see CO_HistogramAMI)
@@ -99,6 +102,13 @@ if nargin < 2
 	tau = []; % set default in CO_HistogramAMI
 end
 % Set tau to minimum of autocorrelation function
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
 if ~isempty(tau) && ischar(tau) && ismember(tau, {'ac', 'tau'})
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 end

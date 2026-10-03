@@ -21,9 +21,10 @@ function out = CO_Quantilogram(y, lag)
 % ---INPUTS:
 % y, the input time series
 % lag, the time lag (default: 1). Can be a positive integer, 'ac' (the first
-%       zero-crossing of the autocorrelation function of the series), or 'ac1e'
-%       (the first time the autocorrelation function falls below 1/e): lags set
-%       by the timescale of the series.
+%       zero-crossing of the autocorrelation function of the series), 'ac1e'
+%       (the floor of its first 1/e crossing), or 'mi' (the smaller of the first
+%       minimum of the Kraskov automutual information and the 'ac1e' delay): lags
+%       set by the timescale of the series (see BF_GetTau).
 %
 % ---OUTPUTS:
 % A structure with the quantilogram at the lag for each quantile level, in
@@ -96,10 +97,10 @@ if ischar(lag) || isstring(lag)
     switch lag
     case 'ac'
         lag = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-    case 'ac1e'
-        lag = CO_FirstCrossing(y, 'ac', 1/exp(1), 'discrete');
+    case {'ac1e', 'mi'}
+        lag = BF_GetTau(y, lag); % adaptive delay: see BF_GetTau
     otherwise
-        error('Unknown lag option ''%s'': use a positive integer, ''ac'', or ''ac1e''', lag)
+        error('Unknown lag option ''%s'': use a positive integer, ''ac'', ''ac1e'', or ''mi''', lag)
     end
 end
 if isnan(lag) || lag < 1 || lag >= N/2

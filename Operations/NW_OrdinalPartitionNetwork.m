@@ -18,9 +18,11 @@ function out = NW_OrdinalPartitionNetwork(y, d, tau)
 %    (delay-tau-spaced) points are each mapped to their rank permutation, one of
 %    d! possible ordinal patterns (default: 3)
 % tau, the time delay (default: 1, as used throughout Kulp et al. 2016). An integer
-%    number of samples, or 'ac' (the first zero-crossing of the autocorrelation function)
-%    or 'mi' (the first minimum of the automutual information function) to set the delay
-%    from the series, as in the time-lagged networks of McCullough et al. 2015
+%    number of samples, or 'ac' (the first zero-crossing of the autocorrelation function),
+%    'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller of the first
+%    minimum of the Kraskov automutual information and the 'ac1e' delay) to set the
+%    delay from the series (see BF_GetTau), as in the time-lagged networks of
+%    McCullough et al. 2015
 %
 % ---OUTPUTS:
 % A structure with fields:

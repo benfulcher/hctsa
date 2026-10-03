@@ -158,6 +158,12 @@ if doParallelSeries
                  'serially instead of in parallel.']);
         doParallelSeries = false;
     end
+elseif doParallelOps
+    % Set up the workers once here (including the Java class path for the
+    % information dynamics toolkit), even if a pool was already open: the
+    % per-series call in TS_CalculateFeatureVector only does so when it opens
+    % the pool itself. TS_CalculateFeatureVector falls back to serial if needed.
+    TS_InitiateParallel(true);
 end
 
 %-------------------------------------------------------------------------------

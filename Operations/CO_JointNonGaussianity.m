@@ -41,8 +41,8 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time delay for the embedding (can be 'ac' or 'mi', or an integer, cf.
-%      BF_Embed). Default: 'ac'.
+% tau, the time delay for the embedding (can be 'ac', 'ac1e', or 'mi', or an integer,
+%      cf. BF_Embed and BF_GetTau). Default: 'ac'.
 % m, the embedding dimension (an integer, or {'fnn',th}, cf. BF_Embed). Default: 2, for
 %    the pairwise joint distribution (x_t,x_{t+tau}); set to 3 for the triple-wise joint
 %    distribution (x_t,x_{t+tau},x_{t+2tau}).

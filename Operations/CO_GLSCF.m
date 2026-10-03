@@ -11,8 +11,11 @@ function glscf = CO_GLSCF(y, alpha, beta, tau)
 % y, the input time series
 % alpha, the power applied to the magnitude at time t (real and nonzero)
 % beta, the power applied to the magnitude at time t+tau (real and nonzero)
-% tau, the time delay (default 'tau': the first zero-crossing of the autocorrelation
-%      function)
+% tau, the time delay: an integer number of samples, or a string that sets it from the
+%      series: 'tau' (default; the first zero-crossing of the autocorrelation
+%      function), 'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller
+%      of the first minimum of the Kraskov automutual information and the 'ac1e'
+%      delay); see BF_GetTau
 %
 % ---OUTPUTS:
 % glscf, a scalar: the generalized self-correlation at that delay.
@@ -58,6 +61,13 @@ if nargin < 4 || isempty(tau)
 end
 
 % Set tau to first zero-crossing of the autocorrelation function with the input 'tau'
+if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		glscf = NaN; return
+	end
+end
 if strcmp(tau, 'tau')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)

@@ -14,7 +14,9 @@ function out = IN_MultivariateAMI(y, tauMethod, estMethod, extraParam)
 % y, the input time series (column vector, expected z-scored)
 % tauMethod, how to select the time delay, tau (as for BF_Embed):
 %    'ac' (default): the first zero-crossing of the autocorrelation function
-%    'mi': the first minimum of the (Gaussian) automutual information
+%    'ac1e': the floor of the first 1/e crossing of the autocorrelation function
+%    'mi': the smaller of the first minimum of the Kraskov automutual information
+%        and the 'ac1e' delay (see BF_GetTau)
 %    a fixed positive integer
 % estMethod, the estimation method used to compute the mutual information:
 %    'gaussian' (default): closed-form, via the multiple correlation coefficient,
@@ -102,10 +104,17 @@ x_2tau = y_embed(:, 1); % x_{t-2tau}
 x_tau = y_embed(:, 2);  % x_{t-tau}
 x_now = y_embed(:, 3);  % x_t
 
+if ischar(tauMethod) && strcmp(tauMethod, 'ac1e')
+	% Adaptive delay: see BF_GetTau
+	tauMethod = BF_GetTau(y, tauMethod);
+	if isnan(tauMethod)
+		out = NaN; return
+	end
+end
 if strcmp(tauMethod, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 elseif strcmp(tauMethod, 'mi')
-	tau = CO_FirstMin(y, 'mi');
+	tau = BF_GetTau(y, 'mi');
 else
 	tau = tauMethod;
 end

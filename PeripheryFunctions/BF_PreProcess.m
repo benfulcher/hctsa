@@ -46,6 +46,15 @@ if ~isempty(preProcessHow)
         y_buffer = BF_MakeBuffer(y,tau);
         % Mean each window to get a coarse-grained time series
         y = mean(y_buffer,2);
+    case 'decimate_ac1e'
+        % Keep one sample per (floored) 1/e autocorrelation time (cf. BF_GetTau),
+        % so that features computed on the result do not change trivially with
+        % the sampling rate. Iterated maps (ACF below 1/e at lag 1) are unchanged.
+        tau = BF_GetTau(y,'ac1e');
+        if isnan(tau)
+            y = NaN; return
+        end
+        y = y(1:tau:end);
     otherwise
         error('Unknown preprocessing setting: ''%s''',preProcessHow);
     end

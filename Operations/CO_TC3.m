@@ -13,12 +13,14 @@ function out = CO_TC3(y, tau)
 % y, the input time series
 % tau, the time lag, either an integer number of samples or a string that sets it
 %      from the series (default 'ac1e'):
-%      'ac1e': the first 1/e crossing of the autocorrelation function,
+%      'ac1e': the floor of the first 1/e crossing of the autocorrelation function
+%            (the largest lag at which it is still at least 1/e; see BF_GetTau),
 %      'ac': the first zero-crossing of the autocorrelation function (kept for
 %            backward compatibility; for a series whose autocorrelation never
 %            crosses zero, or only at a very long lag, the lag is meaninglessly
 %            long, which is why 'ac1e' is the default),
-%      'mi': the first minimum of the automutual information function.
+%      'mi': the smaller of the first minimum of the (Kraskov) automutual
+%            information and the 'ac1e' delay (see BF_GetTau).
 %
 % ---OUTPUTS:
 % raw, the tc3 expression, mean(y(t)*y(t+tau)*y(t+2*tau)) / |mean(y(t)*y(t+tau))|^(3/2),
@@ -66,16 +68,16 @@ end
 % ------------------------------------------------------------------------------
 % Set the time lag as a measure of the time-series correlation length
 % ------------------------------------------------------------------------------
-% Can set the time lag, tau, to be 'ac1e', 'ac', or 'mi'
+% Can set the time lag, tau, to be 'ac1e', 'ac', or 'mi' (see BF_GetTau)
 if strcmp(tau, 'ac1e')
-	tau = CO_FirstCrossing(y, 'ac', 1 / exp(1), 'discrete');
-	% tau is the first 1/e crossing of the autocorrelation function
+	tau = BF_GetTau(y, 'ac1e');
+	% tau is the floor of the first 1/e crossing of the autocorrelation function
 elseif strcmp(tau, 'ac')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	% tau is first zero crossing of the autocorrelation function
 elseif strcmp(tau, 'mi')
-	tau = CO_FirstMin(y, 'mi');
-	% tau is the first minimum of the automutual information function
+	tau = BF_GetTau(y, 'mi');
+	% tau is the smaller of the first AMI minimum and the 'ac1e' delay
 end
 if isnan(tau)
 	out = NaN; return

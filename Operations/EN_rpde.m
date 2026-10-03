@@ -19,8 +19,9 @@ function out = EN_rpde(x, m, tau, epsilon, T_max)
 % m, the embedding dimension (default: 2); can also be a string understood by
 %    BF_Embed
 % tau, the embedding time delay (default: 1); can also be 'ac' (first
-%    zero-crossing of the autocorrelation function) or 'mi' (first minimum of the
-%    automutual information), as in BF_Embed
+%    zero-crossing of the autocorrelation function), 'ac1e' (the floor of its first
+%    1/e crossing), or 'mi' (the smaller of the first minimum of the Kraskov
+%    automutual information and the 'ac1e' delay), as in BF_Embed (see BF_GetTau)
 % epsilon [optional], the recurrence neighborhood radius (default: 0.12)
 % T_max [optional], the maximum recurrence time (default: no limit, so all
 %    recurrence times are used)
