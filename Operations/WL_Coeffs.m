@@ -87,8 +87,8 @@ if wmaxlev(N, wname) < level
 end
 
 % ------------------------------------------------------------------------------
-%% Perform a single-level wavelet decomposition
-% (Recover a noisy signal by suppressing an approximation)
+%% Perform a wavelet decomposition (wavedec) down to the given level
+% (the statistics below are of the detail signal reconstructed at that level)
 [c, l] = wavedec(y, level, wname);
 
 % Reconstruct detail

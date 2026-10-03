@@ -24,9 +24,10 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % theTestStat, the test statistic to evaluate on all surrogates and the original time
 %           series. Can specify multiple options in a cell and will return output for each
 %           specified test statistic:
-%           (i) 'ami1': the automutual information at lag 1 (Gaussian approximation, via
+%           (i) 'amigaussian1': the automutual information at lag 1 (Gaussian approximation, via
 %                 IN_AutoMutualInfo); tested one-sided (surrogates should have lower values)
-%           (ii) 'fmmi': the first minimum of the automutual information function; tested
+%           (ii) 'fmmigaussian': the first minimum of the automutual information function
+%                 (Gaussian approximation, as CO_FirstMin(y,'mi-gaussian')); tested
 %                 one-sided
 %           (iii) 'o3': a third-order statistic, the mean cubed increment at lag 1; tested
 %                 two-sided
@@ -34,12 +35,16 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %           (v) 'nlpe': the mean squared nonlinear prediction error (slow; one-sided)
 %           (vi) 'fnn': the proportion of false nearest neighbors in 2 dimensions (very
 %                 slow; one-sided)
-%           (default: 'ami1')
+%           (default: 'amigaussian1')
+%           The earlier names 'ami1' and 'fmmi' (which both meant the Gaussian estimate)
+%           are still accepted, with a one-time warning.
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
-% ---OUTPUTS: for each requested test statistic s (ami for 'ami1', fmmi, o3, tc3, nlpe, fnn),
-% five fields named with the prefix s_ (e.g., ami_p, ami_zscore, ami_f, ami_mediqr,
-% ami_prank, and likewise fmmi_p, fmmi_zscore, fmmi_f, fmmi_mediqr, fmmi_prank, o3_p,
+% ---OUTPUTS: for each requested test statistic s (amigaussian for 'amigaussian1',
+% fmmigaussian for 'fmmigaussian', o3, tc3, nlpe, fnn),
+% five fields named with the prefix s_ (e.g., amigaussian_p, amigaussian_zscore,
+% amigaussian_f, amigaussian_mediqr, amigaussian_prank, and likewise fmmigaussian_p,
+% fmmigaussian_zscore, fmmigaussian_f, fmmigaussian_mediqr, fmmigaussian_prank, o3_p,
 % o3_zscore, o3_f, o3_mediqr, o3_prank, tc3_p, tc3_zscore, tc3_f, tc3_mediqr, tc3_prank,
 % and the same for nlpe_ and fnn_):
 % s_p, the p-value of a one- or two-sided z-test of the series' value against the Gaussian
@@ -64,7 +69,9 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % Schreiber and Schmitz, "Surrogate time series", Physica D 142(3-4) 346 (2000).
 %
 % ---NOTES:
-% The test statistic is named 'ami1' (its outputs are prefixed 'ami_').
+% The lag-1 automutual information statistic is named 'amigaussian1' (its outputs are
+% prefixed 'amigaussian_'); the Gaussian estimate is a function of the autocorrelation
+% only, which random-phase surrogates preserve.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -113,11 +120,26 @@ if nargin < 4
 end
 
 if nargin < 5 || isempty(theTestStat)
-	theTestStat = 'ami1'; % automutual information at lag 1
+	theTestStat = 'amigaussian1'; % Gaussian automutual information at lag 1
 end
 
 if ischar(theTestStat)
 	theTestStat = {theTestStat};
+end
+
+% Earlier names for the (Gaussian-estimate) statistics, which did not say so:
+persistent hasWarnedOldNames
+oldNames = {'ami1', 'fmmi'};
+newNames = {'amigaussian1', 'fmmigaussian'};
+for k = 1:2
+	if ismember(oldNames{k}, theTestStat)
+		if isempty(hasWarnedOldNames)
+			warning('hctsa:deprecated', ['SD_SurrogateTest statistics ''ami1'' and ''fmmi'' are deprecated: use ' ...
+						'''amigaussian1'' and ''fmmigaussian'' (they are Gaussian-estimate automutual information).']);
+			hasWarnedOldNames = true;
+		end
+		theTestStat = strrep(theTestStat, oldNames{k}, newNames{k});
+	end
 end
 
 % randomSeed: how to treat the randomization
@@ -137,7 +159,7 @@ z = SD_MakeSurrogates(x, surrMeth, numSurrs, extrap, randomSeed);
 % ------------------------------------------------------------------------------
 % Evaluate test statistic on each surrogate
 % ------------------------------------------------------------------------------
-if ismember('ami1', theTestStat)
+if ismember('amigaussian1', theTestStat)
 	% Investigate AMI(1) of surrogates compared to that of signal itself
 	% This statistic is used by Nakamura et al. (2006), PRE
 	% Could use CO_HistogramAMI or TSTL, but I'll use IN_AutoMutualInfo with
@@ -160,31 +182,31 @@ if ismember('ami1', theTestStat)
 	someStats = SDgivemestats(AMIx, AMIsurr, 'right');
 	fnames = fieldnames(someStats);
 	for i = 1:length(fnames)
-		out.(sprintf('ami_%s', fnames{i})) = someStats.(fnames{i});
+		out.(sprintf('amigaussian_%s', fnames{i})) = someStats.(fnames{i});
 	end
 end
 
-if ismember('fmmi', theTestStat)
+if ismember('fmmigaussian', theTestStat)
 	% Investigate the first minimum of mutual information of surrogates compared to
 	% that of signal itself
-	fmmix = CO_FirstMin(x, 'mi');
+	fmmix = CO_FirstMin(x, 'mi-gaussian');
 	fmmiSurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
 		try
-			fmmiSurr(i) = CO_FirstMin(z(:, i), 'mi');
+			fmmiSurr(i) = CO_FirstMin(z(:, i), 'mi-gaussian');
 		catch
 			fmmiSurr(i) = NaN;
 		end
 	end
 	if any(isnan(fmmiSurr))
-		error('fmmi failed');
+		error('fmmigaussian failed');
 	end
 
 	% FMMI should be higher for signal than surrogates
 	someStats = SDgivemestats(fmmix, fmmiSurr, 'right');
 	fnames = fieldnames(someStats);
 	for i = 1:length(fnames)
-		out.(sprintf('fmmi_%s', fnames{i})) = someStats.(fnames{i});
+		out.(sprintf('fmmigaussian_%s', fnames{i})) = someStats.(fnames{i});
 	end
 end
 

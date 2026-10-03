@@ -10,12 +10,15 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 % ---INPUTS:
 % y, the input time series
 % minWhat, the type of correlation to minimize: either 'ac' for autocorrelation,
-%          or 'mi' for automutual information. By default, 'mi' specifies the
-%          'gaussian' method from the Information Dynamics Toolkit. Other
-%          options can also be implemented as 'mi-gaussian', 'mi-kernel',
+%          or an automutual information (AMI) estimator, named by its method:
+%          'mi-gaussian' (the Gaussian estimator from the Information Dynamics
+%          Toolkit, a monotonic function of |autocorrelation|), 'mi-kernel',
 %          'mi-kraskov1', 'mi-kraskov2' (all from Information Dynamics Toolkit
 %          implementations), or 'mi-hist' (histogram-based method).
-%          Default: 'mi-gaussian'.
+%          Default: 'mi-gaussian'. A naked 'mi' is not an estimator here: it is
+%          a deprecated alias for 'mi-gaussian' (with a one-time warning); use the
+%          explicit name. (In the adaptive delay rules of BF_GetTau, 'mi' means the
+%          Kraskov-based delay, which is not computed by this function.)
 % extraParam, an additional parameter required by minWhat: the number of bins for
 %             'mi-hist', or the number of nearest neighbors for 'mi-kraskov2'
 %             (as a string, e.g., '4')
@@ -28,9 +31,10 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 % ---NOTES:
 % Selecting 'ac' is an unusual operation: standard operations are the first
 % zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
-% minimum of the mutual information function ('mi'). Here 'mi' is the Gaussian
-% estimate ('mi-gaussian', a monotonic function of |autocorrelation|); the
-% adaptive delays that use the Kraskov automutual information are in BF_GetTau.
+% minimum of the mutual information function (e.g., 'mi-hist' or 'mi-kraskov1').
+% The Gaussian estimate ('mi-gaussian') is a monotonic function of
+% |autocorrelation|, so it is not a nonlinear timescale; the adaptive delays that
+% use the Kraskov automutual information are in BF_GetTau.
 % For 'mi-kraskov1' extraParam is not passed on: the estimator's default of 4
 % nearest neighbors is used.
 
@@ -70,6 +74,16 @@ if nargin < 2 || isempty(minWhat)
 	% Mutual information using gaussian method from Information Dynamics Toolkit:
 	minWhat = 'mi-gaussian';
 end
+persistent hasWarnedMI
+if strcmp(minWhat, 'mi')
+	% Naked 'mi' used to mean the Gaussian estimator: keep accepting it, but say so
+	if isempty(hasWarnedMI)
+		warning('hctsa:deprecated', ['CO_FirstMin(y,''mi'') is deprecated: ''mi'' meant the Gaussian ' ...
+					'estimator, which is now named explicitly; use ''mi-gaussian'' (or another method, e.g., ''mi-kraskov1'', ''mi-hist'').']);
+		hasWarnedMI = true;
+	end
+	minWhat = 'mi-gaussian';
+end
 if nargin < 3
 	extraParam = [];
 end
@@ -80,9 +94,8 @@ end
 % ------------------------------------------------------------------------------
 % Cache the resolved output (keyed on an exact, NaN-safe match of all inputs
 % that affect the result), since many different operations call this function
-% to resolve a time delay for the same series and method (e.g., BF_Embed
-% defaults tau via CO_FirstMin(y,'mi') internally, and is itself called from
-% ~38 other operations). A miss falls through to exactly the same computation
+% to resolve a time delay for the same series and method (e.g., BF_GetTau's
+% 'mi-gaussian' rule, which is itself called from many other operations). A miss falls through to exactly the same computation
 % as before, so this cannot change behavior -- only whether the result was
 % already sitting in the cache (see CO_AutoCorr.m for the same pattern and
 % rationale, including why this is safe under parfor).
@@ -135,7 +148,7 @@ N = length(y); % Time-series length
 % Define the autocorrelation function
 % ------------------------------------------------------------------------------
 switch minWhat
-	case {'mi', 'mi-gaussian'} % default method (using Information Dynamics Toolkit)
+	case 'mi-gaussian' % default method (using Information Dynamics Toolkit)
 		corrfn = @(x) IN_AutoMutualInfo(y, x, 'gaussian');
 	case 'mi-kernel' % (using Information Dynamics Toolkit)
 		corrfn = @(x) IN_AutoMutualInfo(y, x, 'kernel');

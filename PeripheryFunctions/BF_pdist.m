@@ -61,15 +61,17 @@ end
 % Compute pairwise distances
 % ------------------------------------------------------------------------------
 switch distMetric
-case 'mi'
-    % Mutual information distances: can't make use of the inbuilt pdist function
+case {'mi-gaussian','mi'}
+    % Gaussian mutual information (a function of the correlation only): can't make
+    % use of the inbuilt pdist function. ('mi' is the deprecated name for this metric.)
+    if strcmp(distMetric,'mi')
+        warning('hctsa:deprecated',['BF_pdist metric ''mi'' is deprecated: it is the Gaussian ' ...
+                    'mutual information, now named ''mi-gaussian''.']);
+    end
     if ~isempty(opts)
-        numBins = opts; % for MI, extra argument specifies numBins
+        numBins = opts; % (only used by the commented-out histogram estimator below)
     else
         numBins = 10;
-    end
-    if ~beSilent,
-        fprintf(1,'Using a histogram with %u bins\n',numBins);
     end
 
     goodies = ~isnan(dataMatrix); % now we can deal with NaNs into design matrix

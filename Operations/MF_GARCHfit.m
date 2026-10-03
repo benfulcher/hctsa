@@ -240,7 +240,7 @@ N = length(y);
 % ------------------------------------------------------------------------------
 switch modelType
 case 'garch'
-	GModel = garch(P, Q); % ARCH order P, GARCH order Q
+	GModel = garch(P, Q); % GARCH degree P, ARCH degree Q
 case 'gjr'
 	GModel = gjr(P, Q); % adds a leverage/asymmetry term
 case 'egarch'

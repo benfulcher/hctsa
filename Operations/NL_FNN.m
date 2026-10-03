@@ -254,12 +254,12 @@ out.maxnHood2 = max(nHoodSize2); % maximum
 out.meannHood2 = mean(nHoodSize2); % mean
 
 % Find embedding dimension for the first time p goes under x%
-out.firstunder09 = firstunderf(0.9, mDim, pNN);   % 80%
+out.firstunder09 = firstunderf(0.9, mDim, pNN);   % 90%
 out.firstunder08 = firstunderf(0.8, mDim, pNN);   % 80%
 out.firstunder07 = firstunderf(0.7, mDim, pNN);   % 70%
 out.firstunder06 = firstunderf(0.6, mDim, pNN);   % 60%
 out.firstunder05 = firstunderf(0.5, mDim, pNN);   % 50%
-out.firstunder04 = firstunderf(0.4, mDim, pNN);   % 50%
+out.firstunder04 = firstunderf(0.4, mDim, pNN);   % 40%
 out.firstunder03 = firstunderf(0.3, mDim, pNN);   % 30%
 out.firstunder02 = firstunderf(0.2, mDim, pNN);   % 20%
 out.firstunder01 = firstunderf(0.1, mDim, pNN);   % 10%

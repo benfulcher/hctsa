@@ -115,7 +115,7 @@ end
 
 % maxSteps, maximum number of steps ahead for prediction
 if nargin < 4 || isempty(maxSteps)
-	maxSteps = 6; % compare up to 5 steps ahead by default
+	maxSteps = 6; % compare up to 6 steps ahead by default
 end
 
 % ------------------------------------------------------------------------------

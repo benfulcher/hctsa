@@ -106,7 +106,7 @@ end
 % (2) Set embedding parameters to defaults
 if nargin < 3 || isempty(embedParams)
 	embedParams = {'ac', 'fnn'};
-	fprintf(1, 'Using default time-delay embedding parameters: autocorrelation and cao');
+	fprintf(1, 'Using default time-delay embedding parameters: autocorrelation and false nearest neighbors');
 else
 	if length(embedParams) ~= 2
 		error('Embedding parameters are incorrectly formatted -- need {tau,m}')
@@ -175,7 +175,7 @@ for d = 1:M
 		error('TISEAN function ''boxcount'' returned an unexpected number of length scales.');
 	end
 	if d == 1
-		bc_logr = log(r); % raw (linearly-spaced-ish) epsilon -> ln(epsilon)
+		bc_logr = log(r); % raw epsilon -> ln(epsilon) (boxcount spaces epsilon geometrically, so ln(epsilon) is evenly spaced)
 	end
 	bc_logN(:, d) = logN;
 end

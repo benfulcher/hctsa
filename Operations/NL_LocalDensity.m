@@ -44,8 +44,9 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % ac1den, ac2den, ac3den, ac4den, ac5den: autocorrelation at lags 1 to 5
 % tauacden: the first zero-crossing of the autocorrelation function (with
 %       interpolation)
-% taumiden: the first minimum of the automutual information (the Gaussian
-%       estimate, as CO_FirstMin(y,'mi'))
+% taumigaussden: the first minimum of the automutual information (the Gaussian
+%       estimate, as CO_FirstMin(y,'mi-gaussian'), a monotonic function of the
+%       autocorrelation)
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -162,6 +163,6 @@ end
 
 % Estimates of correlation length:
 out.tauacden = CO_FirstCrossing(locden, 'ac', 0, 'continuous'); % first zero-crossing of autocorrelation function
-out.taumiden = CO_FirstMin(locden, 'mi'); % first minimum of automutual information function
+out.taumigaussden = CO_FirstMin(locden, 'mi-gaussian'); % first minimum of the Gaussian automutual information function
 
 end
