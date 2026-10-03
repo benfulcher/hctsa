@@ -13,9 +13,9 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % ---INPUTS:
 % y, the time series to analyze
 % tau, the time-delay (can be 'ac' for the first zero-crossing of the autocorrelation
-%      function, or 'mi' for the smaller of the first minimum of the Kraskov automutual
-%      information and the floor of the first 1/e crossing of the autocorrelation
-%      function; see BF_GetTau; default: 1)
+%      function, 'ac1e' for the floor of its first 1/e crossing, or 'mi' for the
+%      smaller of the first minimum of the Kraskov automutual information and the
+%      'ac1e' delay; see BF_GetTau; default: 1). Other strings are an error.
 % mmm, a two-vector specifying the minimum and maximum embedding dimensions, e.g., [2,10]
 %      for m = 2 up to m = 10 (default: [2,10])
 % tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion
@@ -115,10 +115,14 @@ end
 if nargin < 2 || isempty(tau)
 	tau = 1;
 end
-if strcmp(tau, 'ac')
-	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-elseif strcmp(tau, 'mi')
-	tau = BF_GetTau(y, 'mi');
+if ischar(tau)
+	if strcmp(tau, 'ac')
+		tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+	elseif ismember(tau, {'ac1e', 'mi'})
+		tau = BF_GetTau(y, tau); % adaptive delay
+	else
+		error('Unknown time delay ''%s''', tau);
+	end
 end
 if isnan(tau)
 	out = NaN; return
