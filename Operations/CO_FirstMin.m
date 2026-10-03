@@ -28,7 +28,11 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 % ---NOTES:
 % Selecting 'ac' is an unusual operation: standard operations are the first
 % zero-crossing of the autocorrelation (as in CO_FirstCrossing), or the first
-% minimum of the mutual information function ('mi').
+% minimum of the mutual information function ('mi'). Here 'mi' is the Gaussian
+% estimate ('mi-gaussian', a monotonic function of |autocorrelation|); the
+% adaptive delays that use the Kraskov automutual information are in BF_GetTau.
+% For 'mi-kraskov1' extraParam is not passed on: the estimator's default of 4
+% nearest neighbors is used.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

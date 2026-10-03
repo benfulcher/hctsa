@@ -22,7 +22,9 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % numBins, the number of length scales (epsilon values for boxcount, r values
 %          for d2) in each sweep (default: 50)
 % embedParams, embedding parameters to feed BF_Embed() for embedding the
-%          signal, in the form {tau,m} (default: {'ac','fnn'})
+%          signal, in the form {tau,m} (tau can be a number of samples, 'ac',
+%          'ac1e' or 'mi'; see BF_GetTau; default: {'ac','fnn'}; hctsa uses
+%          {'ac1e','fnn'})
 %
 % ---OUTPUTS: statistics of the curves, in two families with prefix bc_ (box
 % counting, ln N(epsilon)) or co_ (correlation sum, ln C(r)). In the names, k is

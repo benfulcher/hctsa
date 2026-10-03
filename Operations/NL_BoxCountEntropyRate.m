@@ -20,7 +20,8 @@ function out = NL_BoxCountEntropyRate(y, numBins, embedParams)
 %          exact TISEAN equivalent; this is the closest analogue.
 % embedParams [opt], embedding parameters as {tau,m} in a 2-entry cell, a
 %          time delay, tau, and embedding dimension, m, as inputs to BF_Embed
-%          (default: {'ac','fnn'})
+%          (tau can be a number of samples, 'ac', 'ac1e' or 'mi'; see BF_GetTau;
+%          default: {'ac','fnn'}; hctsa uses {'ac1e',5})
 %
 % ---OUTPUTS: a structure of summaries of the matrix I(epsilon,d), with d the
 % embedding dimension and r the index of the length scale (r = 1 is the full

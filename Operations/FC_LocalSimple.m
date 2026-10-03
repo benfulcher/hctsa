@@ -24,7 +24,10 @@ function out = FC_LocalSimple(y, forecastMeth, trainLength)
 %          CO_FirstCrossing), 'ac1e' (the floor of its first 1/e crossing), or 'mi'
 %          (the smaller of the first minimum of the Kraskov automutual information
 %          and the 'ac1e' delay); see BF_GetTau. For 'lfit' with 'ac', this is at
-%          least 2 (a line cannot be fitted to a single point).
+%          least 2 (a line cannot be fitted to a single point). The 'ac1e' and 'mi'
+%          lengths are not floored, so for 'lfit' a length of 1 (which they give for
+%          white noise or an iterated map) fits a line to a single point, and the
+%          forecast is then twice the previous value.
 %
 % ---OUTPUTS:
 % meane, mean of the residuals (the bias of the forecast)

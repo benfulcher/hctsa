@@ -55,7 +55,8 @@ function out = EN_PermEn(y, m, tau)
 % The time-reversed series has the same runs as the original read backward, so
 % its pattern distribution is computed from the same runs without re-embedding.
 % ordAsym is a distance between two empirical distributions and so is above zero
-% even for a time-reversible series; the amount is about sqrt(m!/Nx) for Nx runs.
+% even for a time-reversible series; for white noise the amount is about
+% 0.55*sqrt(m!/Nx) for Nx runs (checked for m = 3, 4 and 5 and 500 to 2000 samples).
 % The Land-Elias version is adapted from
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/ (logisticPE.m).
 
