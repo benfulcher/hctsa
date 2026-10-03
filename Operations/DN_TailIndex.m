@@ -74,6 +74,10 @@ function out = DN_TailIndex(y, tailFrac)
 % with 3 to 10 degrees of freedom (xi = 1/nu), the Hill estimate reads high by
 % 0.05 to 0.15, and the moment and generalized Pareto estimates read low by about
 % 0.1; for nu <= 2 the three agree to within about 0.1.
+%
+% hctsa registers hillUpper for tailFrac = 0.05 but not for 0.10: that field is nearly
+% redundant with an outlier statistic (Spearman correlation 0.96 across series with
+% DN_RemovePoints_max_01_saturate_mean).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
