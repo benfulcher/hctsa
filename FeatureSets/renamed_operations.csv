@@ -1241,3 +1241,4 @@ SP_EnvelopeStats_001_005_dom_skew,SP_EnvelopeStats_05_005_dom_skew,"dominant ban
 SP_EnvelopeStats_001_005_dom_kurt,SP_EnvelopeStats_05_005_dom_kurt,"dominant band redefined as the narrowest band holding half the spectral power (argument is now a power fraction)"
 SP_EnvelopeStats_001_005_dom_tau,SP_EnvelopeStats_05_005_dom_tau,"dominant band redefined as the narrowest band holding half the spectral power (argument is now a power fraction)"
 SP_EnvelopeStats_001_005_dom_ifspread,SP_EnvelopeStats_05_005_dom_ifspread,"dominant band redefined as the narrowest band holding half the spectral power (argument is now a power fraction)"
+EN_BubbleEn_10_ac_bubbleEn,EN_BubbleEn_10_ac1e_bubbleEn,"tau now the 1/e crossing of the ACF (first zero crossing is absent for many slow series and unstable)"

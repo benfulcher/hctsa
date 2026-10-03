@@ -42,10 +42,15 @@ function out = EN_BubbleEn(y, m, tau)
 % of about 1000 samples, embedding dimensions much above 10 give poorly
 % reproducible values.
 %
-% With a delay set by the autocorrelation function ('ac'), the runs of m values
-% span (m-1)*tau samples, so for a slowly decorrelating series (a large delay)
-% there are few runs and the value is unreliable; it is NaN when the
-% autocorrelation function has no zero crossing (as for many random walks).
+% With a delay set by the timescale of the series ('ac1e', as in the hctsa
+% calls), the runs of m values span (m-1)*tau samples, so for a slowly
+% decorrelating series (a large delay) there are few runs and the value is
+% unreliable; it is NaN when the autocorrelation function never decays to 1/e
+% (as for many random walks) or the runs are too few. The first zero crossing
+% ('ac') is less stable still: it is absent for many slow series, and for
+% periodic series the runs then sample only a few periods, so values leave the
+% usual range. 'mi' falls back on the first automutual-information minimum
+% when the autocorrelation function never decays to 1/e, so it is rarely NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

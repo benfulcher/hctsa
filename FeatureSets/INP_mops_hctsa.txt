@@ -494,7 +494,7 @@ EN_PermEnComplexity(x_z,5,2)        EN_PermEnComplexity_5_2
 EN_PermEnComplexity(x_z,5,'ac1e')	EN_PermEnComplexity_5_ac1e
 EN_BubbleEn(x_z,5,1)	EN_BubbleEn_5_1
 EN_BubbleEn(x_z,10,1)	EN_BubbleEn_10_1
-EN_BubbleEn(x_z,10,'ac')	EN_BubbleEn_10_ac
+EN_BubbleEn(x_z,10,'ac1e')	EN_BubbleEn_10_ac1e
 EN_BubbleEn(diff(x_z),10,1)	EN_BubbleEn_10_1_diff1
 EN_Randomize(x_z,'dyndist','default')	EN_Randomize_dyndist
 EN_Randomize(x_z,'permute','default')	EN_Randomize_permute
