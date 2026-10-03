@@ -27,7 +27,7 @@ function out = ST_PeakIntervals(y, minProm)
 % meanProm, the mean prominence of the detected peaks (NaN if there are none)
 % cvInt, the coefficient of variation of the inter-peak intervals, std/mean (NaN with fewer than 3 intervals)
 % acInt1, the lag-1 correlation between successive inter-peak intervals (NaN with fewer than 5
-%         intervals, or if the intervals are all equal)
+%         intervals; 0 if the intervals are all equal, as for a perfectly periodic series)
 % All fields are NaN for constant, non-finite, or very short (N < 20) series.
 %
 % ---NOTES:
@@ -95,8 +95,12 @@ if length(ipi) >= 3
     out.cvInt = std(ipi) / mean(ipi);
 end
 if length(ipi) >= 5
-    r = corrcoef(ipi(1:end-1), ipi(2:end));
-    out.acInt1 = r(1, 2); % NaN if all intervals are equal
+    if all(ipi == ipi(1))
+        out.acInt1 = 0; % equal intervals (e.g., a periodic series): no serial correlation
+    else
+        r = corrcoef(ipi(1:end-1), ipi(2:end));
+        out.acInt1 = r(1, 2);
+    end
 end
 
 end
