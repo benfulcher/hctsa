@@ -16,7 +16,8 @@ function out = NL_PoincareSection(y, ref, embedParams)
 %      'max' selects crossings heading toward a local maximum (ascending through the mean,
 %      TISEAN's "from below", -C0); 'min' selects crossings heading toward a local minimum
 %      (descending through the mean, "from above", -C1).
-% embedParams, the usual thing to give BF_Embed for the time-delay embedding, as {tau,m}
+% embedParams, the usual thing to give BF_Embed for the time-delay embedding, as {tau,m},
+%      where tau is a number of samples or 'ac', 'ac1e' or 'mi' (see BF_GetTau)
 %      (default: {'mi',3}). m is forced to 3, so that the Poincare section is
 %      2-dimensional.
 %

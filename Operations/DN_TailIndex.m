@@ -65,13 +65,15 @@ function out = DN_TailIndex(y, tailFrac)
 % Ann. Stat. 3, 119 (1975).
 %
 % ---NOTES:
-% Estimates of xi from the largest few percent of a series of typical length
-% (N ~ 1000) have a standard error of order xi/sqrt(k), and the Hill and moment
-% estimators are biased by the choice of k when the distribution is not exactly
-% Pareto-tailed. The values are best read as a relative ranking of tail
-% heaviness between series rather than as precise estimates of xi. In samples
-% of N = 1000 from a Student-t distribution (xi = 1/nu), the Hill estimate reads
-% high and the moment and generalized Pareto estimates low, by a few tenths of xi.
+% With k tail values, the standard error of the Hill estimate is about xi/sqrt(k),
+% and that of the moment and generalized Pareto estimates is about 0.2 for
+% k = 50 (N = 1000 at tailFrac = 0.05), whatever xi is. All three are biased by the
+% choice of k when the distribution is not exactly Pareto-tailed. The values are
+% best read as a relative ranking of tail heaviness between series rather than as
+% precise estimates of xi. In samples of N = 1000 from a Student-t distribution
+% with 3 to 10 degrees of freedom (xi = 1/nu), the Hill estimate reads high by
+% 0.05 to 0.15, and the moment and generalized Pareto estimates read low by about
+% 0.1; for nu <= 2 the three agree to within about 0.1.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -26,8 +26,9 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % past, the Theiler window: {'ac', k} for k times the first zero-crossing of the
 %       autocorrelation function, or a number of samples (see BF_TheilerWindow; default:
 %       {'ac', 1})
-% embedParams, the embedding parameters for BF_Embed, in the form {tau,m} (default:
-%              {'ac','fnn'})
+% embedParams, the embedding parameters for BF_Embed, in the form {tau,m}, where tau
+%              is a number of samples or 'ac', 'ac1e' or 'mi' (see BF_GetTau) and m
+%              is a number of dimensions or 'fnn' (default: {'ac','fnn'})
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (relevant if
 %             an embedding-dimension method requiring randomization is used)
 %

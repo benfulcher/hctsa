@@ -35,9 +35,10 @@ if nargin < 1
     doInitiate = false;
 end
 
-% Check a license is available:
+% Check a license is available (not info mode, which only warns: errors are
+% caught here so we fall back to serial with a single message)
 try
-    BF_CheckToolbox('distrib_computing_toolbox',true);
+    BF_CheckToolbox('distrib_computing_toolbox',false);
 catch
     fprintf(1,['License for Parallel/Distributed Computing Toolbox could not be initiated' ...
                 ' -- cannot perform computations across multiple cores.\n']);
@@ -68,8 +69,8 @@ try
                                     '%u workers.\n'],numWorkers);
     end
 catch emsg
-    warning(['\nError starting parallel processing pool -- running serially instead:\n%s',...
-                    emsg.message])
+    warning('Error starting parallel processing pool -- running serially instead:\n%s',...
+                    emsg.message)
     success = false;
 end
 

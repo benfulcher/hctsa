@@ -128,13 +128,13 @@ if infoMode
 else
     % Want to use (and checkout) a license
     if ~haveToolbox
-        error('This function requires %s but you don''t have it installed'.',theName);
+        error('This function requires %s but you don''t have it installed.',theName);
     end
 
     % 2. Check to see if there's an available license for this toolbox:
     [licenseFree,~] = license('checkout',theToolbox); % Attempt to check out a license
     if ~licenseFree
-        error('This function requires %s but I could not obtain a license for it).',theName);
+        error('This function requires %s but I could not obtain a license for it.',theName);
     end
 end
 
