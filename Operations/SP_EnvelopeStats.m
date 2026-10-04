@@ -58,19 +58,20 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 % A 1/e timescale is NaN when the autocorrelation never falls below 1/e within N/2 lags.
 % For an envelope that is essentially constant (as for a sinusoid without noise)
 % the skewness, kurtosis and timescale are an undefined 0/0 (they divide by the
-% variance), and they are extended continuously to the limit of a steady
-% oscillation in vanishing Gaussian noise: skewness 0 and kurtosis 3 (the
-% envelope's fluctuations become Gaussian, as the Rice distribution tends to a
-% Gaussian), and a 1/e timescale equal to the largest lag searched, floor(n/2)
-% for the n samples left after trimming (the envelope never decorrelates). This is
-% done by shrinking each measured value toward its limit with the weight
-% w = c^2/(c^2 + 1e-20), where c is the envelope's CV (computed as usual, and
-% reported unchanged): reported = limit + w*(measured - limit), so that the
-% reported values vary smoothly with c and are unchanged (to a relative 1e-12 or
-% better) when c exceeds 1e-4. The scale 1e-10 is four to five orders above the
-% round-off of a noiseless sinusoid (c of order 1e-15 to 1e-14) and far below any
-% real variability. The weights are applied to the full and dominant-band
-% envelopes separately.
+% variance), and their limit depends on how the envelope becomes constant (a
+% sinusoid with vanishing added noise and one with vanishing amplitude modulation
+% tend to different values). They are set by convention to skewness 0 and
+% kurtosis 3 (the Gaussian values) and a 1/e timescale equal to the largest lag
+% searched, floor(n/2) for the n samples left after trimming (a constant envelope
+% never decorrelates). So that no threshold is needed, each measured value is
+% shrunk toward its conventional value with the weight w = c^2/(c^2 + 1e-20),
+% where c is the envelope's CV (computed as usual, and reported unchanged):
+% reported = convention + w*(measured - convention). The reported values vary
+% continuously with c; the change happens over c of about 1e-11 to 1e-9, and they
+% are unchanged (to a relative 1e-12 or better) when c exceeds 1e-4. The scale
+% 1e-10 is four to five orders above the round-off of a noiseless sinusoid (c of
+% order 1e-15 to 1e-14) and far below any real variability. The weights are
+% applied to the full and dominant-band envelopes separately.
 %
 % ---REFERENCES:
 % B. Boashash, "Estimating and interpreting the instantaneous frequency of a
@@ -215,8 +216,8 @@ s2 = mean(e.^2);
 cv = sqrt(s2) / m; % population standard deviation over the mean
 
 % Weight of the measured skewness, kurtosis and timescale: these are a 0/0 for a
-% constant envelope, extended continuously to the limit for a steady oscillation in
-% vanishing Gaussian noise (see the function help); w -> 1 for any envelope that varies
+% constant envelope, shrunk continuously toward conventional values (see the
+% function help); w -> 1 for any envelope that varies
 cvScale = 1e-10; % well above the round-off CV of a noiseless sinusoid (~1e-15)
 w = cv^2 / (cv^2 + cvScale^2);
 tauMax = floor(n / 2); % the largest lag searched below (the envelope never decorrelates)
@@ -247,8 +248,9 @@ end
 
 % ------------------------------------------------------------------------------
 function v = shrinkToLimit(measured, limit, w)
-% limit + w*(measured - limit); an undefined measured value takes the limit only
-% when the weight w is negligible (an essentially constant envelope)
+% limit + w*(measured - limit), where limit is the conventional value; an
+% undefined measured value takes it only when the weight w is negligible (an
+% essentially constant envelope)
 if isnan(measured)
     if w < 1e-6
         v = limit;
