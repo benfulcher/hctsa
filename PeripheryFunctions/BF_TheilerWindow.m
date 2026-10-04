@@ -16,6 +16,9 @@ function W = BF_TheilerWindow(y, spec, Nfrac)
 % spec, the Theiler window:
 %       {'ac', k}: k times the first zero-crossing of the autocorrelation
 %                  function (recommended);
+%       {'ac1e', k}: k times the floor of the first 1/e crossing of the
+%                  autocorrelation function (see BF_GetTau); shorter and more
+%                  stable than the zero crossing, NaN if the ACF never falls to 1/e;
 %       an integer >= 0: a fixed number of samples;
 %       a number in (0,1): a proportion of Nfrac (legacy; this scales with the
 %                  length of the series).
@@ -60,10 +63,14 @@ if nargin < 3 || isempty(Nfrac)
 end
 
 if iscell(spec)
-	if numel(spec) ~= 2 || ~strcmp(spec{1}, 'ac') || ~isnumeric(spec{2}) || spec{2} < 0
-		error('Theiler window must be specified as {''ac'', k}, with k >= 0');
+	if numel(spec) ~= 2 || ~ismember(spec{1}, {'ac', 'ac1e'}) || ~isnumeric(spec{2}) || spec{2} < 0
+		error('Theiler window must be specified as {''ac'', k} or {''ac1e'', k}, with k >= 0');
 	end
-	W = ceil(spec{2} * CO_FirstCrossing(y, 'ac', 0, 'discrete'));
+	if strcmp(spec{1}, 'ac')
+		W = ceil(spec{2} * CO_FirstCrossing(y, 'ac', 0, 'discrete'));
+	else
+		W = ceil(spec{2} * BF_GetTau(y, 'ac1e'));
+	end
 elseif isnumeric(spec) && isscalar(spec) && spec >= 0
 	if spec > 0 && spec < 1 % a proportion of the series length
 		W = round(spec * Nfrac);

@@ -684,6 +684,7 @@ NL_BoxCountEntropyRate(x_z,50,{'ac1e',5})	NL_BoxCountEntropyRate_50_ac1e_5
 NL_DelayTime(x_z,{'ac',10},{'ac',1},'default')	NL_DelayTime_ac10_ac1
 NL_Dimensions(x_z,50,{'ac1e','fnn'})	NL_Dimensions_50_ac1e_fnn
 NL_DVV(x_z,3,100,2,50,10,'default')       NL_DVV_3_100_2_50_10_default
+NL_DVV(x_z,3,100,2,50,10,'default','ac1e')	NL_DVV_3_100_2_50_10_default_ac1e
 NL_EmbedCluster(x_z,1,2,4,'full')	NL_EmbedCluster_1_2_4_full
 NL_EmbedCluster(x_z,'ac1e',2,4,'full')	NL_EmbedCluster_ac1e_2_4_full
 NL_EmbedCluster(x_z,'mi',3,4,'full')	NL_EmbedCluster_mi_3_4_full
@@ -703,8 +704,8 @@ NL_FractalDimensions(x_z,5,100,0.2,1,10,{'ac',1},32,{'ac1e',3},'default')	NL_Fra
 NL_GPCorrSum(x_z,-1,0.1,{'ac',1},20,{'ac','fnn'},1)	NL_GPCorrSum2_n1_01_ac1_20_ac_fnn
 NL_GPCorrSum(x_z,-1,0.1,{'ac',1},40,{'ac','fnn'},1)	NL_GPCorrSum2_n1_01_ac1_40_ac_fnn
 NL_GPCorrSum(x_z,-1,0.5,{'ac',1},20,{'ac','fnn'},1)	NL_GPCorrSum2_n1_05_ac1_20_ac_fnn
-NL_LargestLyap(x_z,-1,{'ac',20},{'ac',1},3,{1,4})	NL_LargestLyap_n1_ac20_ac1_3_1_4
-NL_LargestLyap(x_z,-1,{'ac',20},{'ac',1},3,{'mi','fnn'})	NL_LargestLyap_n1_ac20_ac1_3_mi_fnn
+NL_LargestLyap(x_z,-1,{'ac1e',30},{'ac1e',1},3,{1,4})	NL_LargestLyap_n1_ac1e30_ac1e1_3_1_4
+NL_LargestLyap(x_z,-1,{'ac1e',30},{'ac1e',1},3,{'mi','fnn'})	NL_LargestLyap_n1_ac1e30_ac1e1_3_mi_fnn
 NL_LocalDensity(x_z,5,{'ac',1},{1,3})	NL_LocalDensity_5_ac1_1_3
 NL_LocalDensity(x_z,5,{'ac',1},{'ac1e',2})	NL_LocalDensity_5_ac1_ac1e_2
 NL_LocalDensity(x_z,5,{'ac',1},{'ac1e','fnn'})	NL_LocalDensity_5_ac1_ac1e_fnn

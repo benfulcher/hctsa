@@ -30,16 +30,20 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       backwards compatibility but no longer affects the computation:
 %       'lyap_r' has no equivalent and always uses every valid point as a
 %       reference.
-% maxtstep, maximum prediction length: {'ac', k} for k times the first
-%       zero-crossing of the autocorrelation function, or a number of samples
-%       (default: {'ac',20}). {'ac', 20} tracked known maximal Lyapunov exponents
-%       across 134 chaotic flows (W. Gilpin's dysts) as well as or better than the
-%       former 10% of the series length, without scaling with the length. The
-%       series must span maxtstep + 2*past <= N/2 samples, else NaN (a shortened
-%       horizon carries no information about the exponent).
-% past, the Theiler window: {'ac', k} for k times the first zero-crossing of the
-%       autocorrelation function, or a number of samples (see BF_TheilerWindow;
-%       default: {'ac',1})
+% maxtstep, maximum prediction length: {'ac1e', k} for k times the floor of the
+%       first 1/e crossing of the autocorrelation function (see BF_GetTau),
+%       {'ac', k} for k times its first zero-crossing, or a number of samples
+%       (default: {'ac1e',30}). The series must span maxtstep + 2*past <= N/2
+%       samples. With {'ac1e', k}, a longer horizon is capped to fit, and the
+%       output is NaN only if fewer than max(10, 3 'ac1e' times) remain; with
+%       {'ac', k} or a number of samples, the output is NaN instead (capping a
+%       zero-crossing horizon lost the correlation of the slopes with known
+%       exponents on chaotic flows). {'ac1e', 30} tracked the known exponents of 58
+%       dysts flows as well as {'ac', 20} did (Spearman 0.79 vs 0.80 for
+%       ve_gradient at N = 1000), and stays defined for finely sampled series,
+%       where the zero crossing is long and {'ac', 20} gave NaN for most.
+% past, the Theiler window: {'ac1e', k} or {'ac', k} as for maxtstep, or a number
+%       of samples (see BF_TheilerWindow; default: {'ac1e',1})
 % NNR, number of nearest neighbours. Accepted for backwards compatibility but no
 %      longer affects the computation: 'lyap_r' always uses exactly one nearest
 %      neighbor per reference point.
@@ -64,6 +68,12 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       points)
 % ve_meanabsres, ve_rmsres, ve_gradient, ve_intercept, ve_minbad: the same, with
 %       only the end of the fit varied (the fit starts at the beginning of p)
+% vse_gradient_pertau, ve_gradient_pertau: the two slopes (exponents per sample)
+%       multiplied by the (continuous) first 1/e crossing time of the
+%       autocorrelation function, i.e. exponents per correlation time. The
+%       per-sample slopes scale with the sampling rate; these much less (Lorenz
+%       and Rossler flows sampled at 1x to 8x: spread 1.1-2x at N = 5000 and
+%       1.2-3.7x at N = 1000, against 4-16x for the per-sample slopes).
 % expfit_a, expfit_b, expfit_r2, expfit_adjr2, expfit_rmse: the parameters a and
 %       b of a fit p(t) = a*(1 - exp(b*t)) to the whole curve, with its R^2,
 %       adjusted R^2 and root-mean-square error
@@ -127,12 +137,13 @@ end
 
 % (2) maxtstep: maximum prediction length
 if nargin < 3 || isempty(maxtstep)
-	maxtstep = {'ac', 20}; % (neighbor divergence typically saturates within ~15-30 autocorrelation times)
+	maxtstep = {'ac1e', 30}; % (neighbor divergence typically saturates within tens of correlation times)
 end
+capHorizon = iscell(maxtstep) && strcmp(maxtstep{1}, 'ac1e'); % cap (rather than NaN) a horizon too long for the series
 if iscell(maxtstep) % a multiple of the autocorrelation time (as for a Theiler window)
 	maxtstep = BF_TheilerWindow(y, maxtstep);
 	if isnan(maxtstep)
-		warning('No autocorrelation zero-crossing to set the prediction length')
+		warning('No autocorrelation time to set the prediction length')
 		out = NaN; return
 	end
 end
@@ -142,18 +153,26 @@ end
 if maxtstep < 10;
 	maxtstep = 10; % minimum prediction length; for output stats purposes...
 end
-if maxtstep > 0.5 * N;
-	maxtstep = 0.5 * N; % can't look further than half the time series length, methinks
+if maxtstep > floor(0.5 * N)
+	maxtstep = floor(0.5 * N); % can't look further than half the time series length
 end
 
 % (3) past/theiler window
 if nargin < 4 || isempty(past)
-	past = {'ac', 1};
+	past = {'ac1e', 1};
 end
 past = BF_TheilerWindow(y, past, N);
-if isnan(past) % the autocorrelation function never crosses zero
-	warning('No autocorrelation zero-crossing to set the Theiler window')
+if isnan(past) % no autocorrelation time (e.g. the ACF never decays to 1/e)
+	warning('No autocorrelation time to set the Theiler window')
 	out = NaN; return
+end
+if capHorizon && maxtstep + 2 * past > floor(N / 2)
+	% Cap an 'ac1e' horizon to fit, keeping at least a few correlation times
+	maxtstep = floor(N / 2) - 2 * past;
+	if maxtstep < max(10, 3 * BF_GetTau(y, 'ac1e'))
+		warning('Time series too short (N = %u) for a prediction horizon with Theiler window %u', N, past);
+		out = NaN; return
+	end
 end
 if maxtstep + 2 * past > N / 2
 	% Too few correlation times in the series to follow neighbor divergence
@@ -388,6 +407,12 @@ else
 	if isempty(out.ve_minbad), out.ve_minbad = NaN; end
 
 end
+
+% Exponents per correlation time (the continuous first 1/e crossing of the ACF)
+tau1e = CO_FirstCrossing(y, 'ac', 1/exp(1), 'continuous');
+if isnan(BF_GetTau(y, 'ac1e')), tau1e = NaN; end % the ACF never falls to 1/e
+out.vse_gradient_pertau = out.vse_gradient * tau1e;
+out.ve_gradient_pertau = out.ve_gradient * tau1e;
 
 % Fit exponential
 s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [max(p) -0.5]);

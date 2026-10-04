@@ -1044,6 +1044,55 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'The Lorenz flow''s divergence curve should take far longer to saturate than noise''s.');
         end
 
+        function test_NL_LargestLyap_FinelySampledFlowIsDefined(testCase)
+            % A finely sampled flow has a long ACF zero crossing, so a horizon
+            % of 20 zero-crossing times does not fit in N/2 samples and the
+            % {'ac',20} setting gives NaN. The default horizon (30 'ac1e'
+            % times, capped to fit) stays defined, with a positive exponent.
+            sigma = 10; rho = 28; beta = 8/3;
+            lorenzODE = @(t,v) [sigma*(v(2)-v(1)); v(1)*(rho-v(3))-v(2); v(1)*v(2)-beta*v(3)];
+            [~, sol] = ode45(lorenzODE, 0:0.005:60, [1,1,1]);
+            y = zscore(sol(end-999:end, 1)); % N = 1000 at ~150 samples per period
+            outZC = NL_LargestLyap(y, -1, {'ac',20}, {'ac',1}, 3, {1,4});
+            out = NL_LargestLyap(y, -1, [], [], 3, {1,4});
+            testCase.verifyTrue(~isstruct(outZC) && isnan(outZC), ...
+                'A 20 zero-crossing horizon cannot fit in this series, so NaN.');
+            testCase.verifyTrue(isstruct(out), 'The default ''ac1e'' horizon should be capped to fit.');
+            testCase.verifyGreaterThan(out.vse_gradient, 0);
+            testCase.verifyEqual(out.vse_gradient_pertau, ...
+                out.vse_gradient * CO_FirstCrossing(y, 'ac', 1/exp(1), 'continuous'), 'RelTol', 1e-12);
+        end
+
+        function test_NL_LargestLyap_LogisticMapExponent(testCase)
+            % For a chaotic map the ACF decays within a step ('ac1e' = 1), and
+            % the slope should be near the known exponent, ln 2 for r = 4.
+            N = 2000; x = zeros(N,1); x(1) = 0.3;
+            for t = 2:N, x(t) = 4*x(t-1)*(1 - x(t-1)); end
+            out = NL_LargestLyap(zscore(x), -1, [], [], 3, {1,2});
+            testCase.verifyGreaterThan(out.vse_gradient, 0.5);
+            testCase.verifyLessThan(out.vse_gradient, 0.9);
+        end
+
+        function test_NL_DVV_DelayDefaultUnchanged(testCase)
+            % tau = 1 (default or explicit) must reproduce the original
+            % consecutive-sample DVV exactly; an adaptive delay gives finite
+            % output for a smooth series.
+            rng(72);
+            y = zscore(filter(1, [1, -0.95], randn(1000,1)));
+            out0 = NL_DVV(y, 3, 100, 2, 50, 10, 'default');
+            out1 = NL_DVV(y, 3, 100, 2, 50, 10, 'default', 1);
+            testCase.verifyTrue(isequaln(out0, out1), 'An explicit tau = 1 must match the default.');
+            outA = NL_DVV(y, 3, 100, 2, 50, 10, 'default', 'ac1e');
+            testCase.verifyTrue(isstruct(outA) && all(isfinite(struct2array(outA))));
+        end
+
+        function test_BF_TheilerWindow_ac1eUnits(testCase)
+            rng(73);
+            y = filter(1, [1, -0.9], randn(1000,1));
+            testCase.verifyEqual(BF_TheilerWindow(y, {'ac1e', 2}), ceil(2 * BF_GetTau(y, 'ac1e')));
+            testCase.verifyEqual(BF_TheilerWindow(y, {'ac', 1}), CO_FirstCrossing(y, 'ac', 0, 'discrete'));
+        end
+
         function test_NL_BoxCountEntropyRate_DiscriminatesStructure(testCase)
             % NL_BoxCountEntropyRate used to depend on TSTOOL's signal/corrdim;
             % it now uses TISEAN's boxcount (Renyi entropy of order Q=2.0
