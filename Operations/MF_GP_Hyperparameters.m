@@ -1,4 +1,4 @@
-function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed)
+function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed, numDraws)
 % MF_GP_Hyperparameters   Fits a Gaussian process to the series and reports its fitted kernel parameters and goodness of fit.
 %
 % Models the series as a smooth function of time using a Gaussian process (GP).
@@ -13,7 +13,9 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %
 % Fitting is O(N^3), so the model is fitted to at most maxN samples from the time
 % series, chosen by (i) resampling the time series down to this many points,
-% (ii) taking the first maxN samples, or (iii) taking random samples.
+% (ii) taking the first maxN samples, or (iii) taking random samples (in which case
+% the fit is repeated for numDraws different random samples and the outputs are
+% averaged over them).
 % Times are the sample indices (squishorsquash = 1), so length scales and periods
 % are in samples of the cut series. The output is NaN if the fit fails or if the
 % fitted mean is nearly constant (standard deviation below 0.01).
@@ -48,6 +50,12 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % randomSeed, the seed of the random numbers (see BF_RandomSeed; they come from the
 %             portable generator BF_Random), for settings of resampleHow that involve
 %             random number generation
+%
+% numDraws, the number of independent random samples to fit, for the settings of
+%             resampleHow that involve random number generation (default: 20). The
+%             outputs are the means over the draws that gave a valid fit: a single
+%             random sample of a few tens of points is dominated by which points
+%             happened to be drawn, but the average over draws is not.
 %
 % ---OUTPUTS:
 % logh1, logh2, logh3, logh4, logh5, logh6: the log hyperparameters of the fitted covariance function, in
@@ -179,6 +187,34 @@ end
 
 if nargin < 6
 	randomSeed = [];
+end
+
+if nargin < 7 || isempty(numDraws)
+	numDraws = 20;
+end
+
+% ------------------------------------------------------------------------------
+%% Random samples: average the fit over several independent draws
+% ------------------------------------------------------------------------------
+if numDraws > 1 && maxN > 0 && N > maxN && ismember(resampleHow, {'random_i', 'random_consec', 'random_both'})
+	seed0 = BF_RandomSeed(randomSeed);
+	outDraws = cell(numDraws, 1);
+	for d = 1:numDraws
+		% (draw d uses the seeds seed0 + 2*(d-1), and one more for 'random_both')
+		outDraws{d} = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, seed0 + 2 * (d - 1), 1);
+	end
+	isValid = cellfun(@isstruct, outDraws);
+	if sum(isValid) < numDraws / 2
+		out = NaN; return % too few draws gave a usable fit
+	end
+	outDraws = outDraws(isValid);
+	fieldNames = fieldnames(outDraws{1});
+	out = struct();
+	for f = 1:length(fieldNames)
+		vals = cellfun(@(o) o.(fieldNames{f}), outDraws);
+		out.(fieldNames{f}) = mean(vals, 'omitnan');
+	end
+	return
 end
 
 % Inference algorithm -- use the Laplace approximation:
