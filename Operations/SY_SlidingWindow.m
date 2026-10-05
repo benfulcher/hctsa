@@ -31,9 +31,10 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 %           spectrum (window mean removed before the FFT); captures whether the
 %           *frequency content* drifts across the record, distinct from all the
 %           above time-domain measures
-%       (xi) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within the window: a
-%           nonlinear, time-asymmetric variant of AC1 (cf. SY_RampingWindows, which
-%           trends a related statistic, mean(x_t*x_{t+1}*(x_{t+1} - x_t)), across
+%       (xi) 'asymAC1', mean(x_t*x_{t+1}*(x_{t+1} - x_t)) with x z-scored within the
+%           window: a nonlinear, time-asymmetric variant of AC1, antisymmetric under
+%           time reversal and so zero in expectation for any time-reversible process
+%           (the same statistic as SY_RampingWindows' asymAC1, which trends it across
 %           segments rather than summarizing its spread across windows as done here)
 %
 % acrossWinStat, how the obtained sequence of local estimates is summarized
@@ -194,10 +195,10 @@ switch windowStat
 		for i = 1:numSteps
 			qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
 		end
-	case 'asymAC1' % Asymmetric, nonlinear AC1 variant: mean(x_t*x_{t+1}^2), z-scored per window
+	case 'asymAC1' % Asymmetric, nonlinear AC1 variant: mean(x_t*x_{t+1}*(x_{t+1} - x_t)), z-scored per window
 		for i = 1:numSteps
 			zw = zscore(y(getWindow(i)));
-			qs(i) = mean(zw(1:end - 1) .* zw(2:end).^2);
+			qs(i) = mean(zw(1:end - 1) .* zw(2:end) .* (zw(2:end) - zw(1:end - 1)));
 		end
 	otherwise
 		error('Unknown statistic ''%s''', windowStat)
