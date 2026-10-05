@@ -9,7 +9,8 @@ function [f, xi, h] = BF_KSDensity(y, xi, h)
 % where s estimates the standard deviation from the median absolute deviation (this
 % is also the default of ksdensity). If the median absolute deviation is zero (more
 % than half the values are equal), s is the standard deviation of y instead; if that
-% too is zero (a constant series), h = 1.
+% too is zero (a constant series), there is no scale to smooth over and h, xi and f
+% are NaN.
 %
 % ---INPUTS:
 % y, the data vector (NaNs are ignored)
@@ -66,7 +67,7 @@ if nargin < 3 || isempty(h)
 		s = std(y);
 	end
 	if s <= 0
-		h = 1; % constant data: arbitrary scale
+		h = NaN; % constant data: no scale
 	else
 		h = s * (4 / (3 * n))^(1/5);
 	end
