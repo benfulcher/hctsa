@@ -20,8 +20,10 @@ function out = CO_CompareMinAMI(y, binMethod, numBins)
 % mode, the most common first-minimum lag,
 % modef, the proportion of the bin numbers that give that most common lag,
 % conv4, the mean first-minimum lag for the last five bin numbers,
-% nlocmax, the number of local maxima of the first-minimum lag, as a function of
-%       the number of bins, that lie more than one standard deviation above the mean.
+% nprompeaks, the number of prominent peaks (local maxima) of the first-minimum lag as
+%       a function of the number of bins: peaks that rise at least 5% of the range of
+%       the lags above the higher of the valleys on either side of them, so a small
+%       fluctuation does not add a peak.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -115,11 +117,34 @@ out.conv4 = mean(amiMins(max(1, end - 4):end));
 % -------------------------------------------------------------------------------
 % Look for peaks (local maxima)
 % -------------------------------------------------------------------------------
-% local maxima above 1*std from mean
 % inspired by curious result of periodic maxima for periodic signal with
 % bin size... ('quantiles', [2:80])
-loc_extr = intersect(find(diff(amiMins(1:end - 1)) > 0), BF_SignChange(diff(amiMins(1:end - 1)), 1)) + 1;
-big_loc_extr = intersect(find(amiMins > out.mean + out.std), loc_extr);
-out.nlocmax = length(big_loc_extr);
+% Only prominent peaks are counted: a count of every local maximum, or of those
+% above a fixed height such as the mean plus one standard deviation, changes with
+% each small fluctuation of the curve
+out.nprompeaks = SUB_NumProminentPeaks(amiMins, 0.05 * out.range);
 
+end
+
+% -------------------------------------------------------------------------------
+function numPeaks = SUB_NumProminentPeaks(x, minProminence)
+	% The number of local maxima of x (interior points higher than both neighbors,
+	% a flat top counting once) whose prominence is at least minProminence: how far
+	% the peak rises above the higher of the lowest values reached on each side
+	% before meeting a higher value (or the end of the series).
+	x = x(:);
+	x = x([true; diff(x) ~= 0]); % merge runs of equal values
+	numPeaks = 0;
+	for i = 2:length(x) - 1
+		if x(i) > x(i - 1) && x(i) > x(i + 1)
+			iHigherLeft = find(x(1:i - 1) > x(i), 1, 'last');
+			iHigherRight = i + find(x(i + 1:end) > x(i), 1, 'first');
+			if isempty(iHigherLeft), iHigherLeft = 1; end
+			if isempty(iHigherRight), iHigherRight = length(x); end
+			valley = max(min(x(iHigherLeft:i)), min(x(i:iHigherRight)));
+			if x(i) - valley >= minProminence
+				numPeaks = numPeaks + 1;
+			end
+		end
+	end
 end
