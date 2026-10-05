@@ -4,9 +4,8 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % Generates surrogate time series (using the periphery function, SD_MakeSurrogates) and
 % evaluates one or more test statistics on both the original series and each surrogate. For
 % each statistic, the outputs measure how consistent the series' value is with the
-% distribution of the surrogates' values: a z-test (assuming a Gaussian distribution), a
-% kernel-smoothed density, a distance from the median in interquartile ranges, and a
-% rank-based p-value.
+% distribution of the surrogates' values: a z-score (assuming a Gaussian distribution), a
+% distance from the median in interquartile ranges, and a rank-based p-value.
 %
 % ---INPUTS:
 % x, the input time series
@@ -47,16 +46,11 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % ---OUTPUTS: for each requested test statistic s (amikraskov for 'amikraskov1',
 % fmmikraskov for 'fmmikraskov', amigaussian for 'amigaussian1', fmmigaussian for
 % 'fmmigaussian', o3, tc3, nlpe, fnn),
-% five fields named with the prefix s_ (e.g., amikraskov_p, amikraskov_zscore,
-% amikraskov_f, amikraskov_mediqr, amikraskov_prank, and likewise fmmikraskov_p,
-% fmmikraskov_zscore, fmmikraskov_f, fmmikraskov_mediqr, fmmikraskov_prank, o3_p,
-% o3_zscore, o3_f, o3_mediqr, o3_prank, tc3_p, tc3_zscore, tc3_f, tc3_mediqr, tc3_prank,
-% and the same for amigaussian_, fmmigaussian_, nlpe_ and fnn_):
-% s_p, the p-value of a one- or two-sided z-test of the series' value against the Gaussian
-%      distribution fitted to the surrogates' values
-% s_zscore, the corresponding z-statistic
-% s_f, the kernel-smoothed density of the (z-scored) surrogates' values at the (z-scored)
-%      value for the series (0 if outside the range of the density estimate)
+% three fields named with the prefix s_ (e.g., amikraskov_zscore, amikraskov_mediqr,
+% amikraskov_prank, and likewise fmmikraskov_, o3_, tc3_, amigaussian_, fmmigaussian_,
+% nlpe_ and fnn_):
+% s_zscore, the z-statistic of the series' value against the Gaussian distribution fitted
+%      to the surrogates' values (NaN if all surrogates have the same value)
 % s_mediqr, the distance of the series' value from the surrogates' median, in interquartile
 %      ranges (NaN if the interquartile range is 0)
 % s_prank, a rank-based p-value of the series' value among the surrogates' values:
@@ -347,36 +341,12 @@ function someStats = SDgivemestats(statx, statsurr, leftrightboth)
 	% statx. Want to return measures of how consistant the measured
 	% statistic is with the sample statsurr.
 
-	% ASSUME GAUSSIAN DISTRIBUTION:
-	% so can use 1/2-sided z-statistic
-	[~, p, ~, zStat] = ztest(statx, mean(statsurr), std(statsurr), 0.05, leftrightboth);
-	someStats.p = p; % pvalue
-	someStats.zscore = zStat; % z-statistic
-
-	% fit a kernel distribution to zscored distribution:
+	% ASSUME GAUSSIAN DISTRIBUTION: z-statistic of the series' value
 	if std(statsurr) == 0
-		% all surrogates have same value of this statistic
-		% cannot do a meaningful zscore -- do it raw
-		[f, xi] = ksdensity(statsurr);
-		% find where the statx value would be:
-		if statx < min(xi) || statx > max(xi)
-			someStats.f = 0; % out of range -- assume p=0 here
-		else
-			[~, minhere] = min(abs(statx - xi));
-			someStats.f = f(minhere); % return probability density where the point is
-		end
+		% all surrogates have the same value of this statistic: no meaningful z-score
+		someStats.zscore = NaN;
 	else
-		zscstatsurr = (statsurr - mean(statsurr)) / std(statsurr);
-		zscstatx = (statx - mean(statsurr)) / std(statsurr);
-		[f, xi] = ksdensity(zscstatsurr);
-
-		% find where the statx value would be:
-		if (zscstatx < min(xi)) || (zscstatx > max(xi))
-			someStats.f = 0; % out of range -- assume p=0 here
-		else
-			[~, minhere] = min(abs(zscstatx - xi));
-			someStats.f = f(minhere); % return probability density where the point is
-		end
+		someStats.zscore = (statx - mean(statsurr)) / std(statsurr);
 	end
 
 	% What fraction of the range is the sample in?
