@@ -28,6 +28,9 @@ function out = SY_DriftingMean(y, segmentHow, l)
 % max, the maximum segment mean divided by the mean of the segment variances
 % min, the minimum segment mean divided by the mean of the segment variances
 % mean, the mean of the segment means divided by the mean of the segment variances
+%       (when the segments tile the series exactly this is the mean of the series
+%       divided by the mean segment variance, so it is zero up to rounding for a
+%       z-scored series, and carries no information there)
 % meanmaxmin, the average of max and min
 % meanabsmaxmin, the average of the absolute values of max and min
 
