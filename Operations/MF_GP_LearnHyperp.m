@@ -113,7 +113,18 @@ if strcmp(covFunc1, 'covSum')
 	pos = 1;
 	for ci = 1:numel(covFunc2)
 		if ~ischar(covFunc2{ci})
-			pos = pos + 1; % non-string (e.g., degree-parameterized) component: leave at zero
+			% a parameterized component, e.g., {'covMaterniso',3}: gpml reports its number of hyperparameters
+			comp = covFunc2{ci};
+			numHyp = eval(feval(comp{:}));
+			compName = comp{1};
+			if isa(compName, 'function_handle')
+				compName = func2str(compName);
+			end
+			if strcmp(compName, 'covMaterniso')
+				hyp.cov(pos) = log(typicalDT);   % length-scale
+				hyp.cov(pos + 1) = 0;            % log-magnitude
+			end
+			pos = pos + numHyp;
 			continue
 		end
 		switch covFunc2{ci}
