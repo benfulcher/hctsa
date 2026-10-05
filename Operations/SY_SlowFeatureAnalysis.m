@@ -75,6 +75,12 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 % ---REFERENCES:
 % L. Wiskott and T. J. Sejnowski, "Slow feature analysis: unsupervised learning of
 % invariances", Neural Computation 14(4), 715-770 (2002).
+% K. S. Owens, M. Tamaki and B. D. Fulcher, "Parameter inference from a non-stationary
+% unknown process using statistical feature-based slow feature analysis",
+% arXiv:2609.01651 (2026). This operation is a compact, single-feature variant of their
+% feature-based SFA (f-SFA), which applies SFA to sliding-window catch22/catch24
+% features; f-SFA is implemented in the Python package fsfa:
+% https://github.com/KieranOwens/fsfa
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -161,8 +167,9 @@ Cx = cov(Xc); % 5 x 5
 Vp = Vp(:, ord);
 pcScores = Xc * Vp; % numWindows x 5, PC1 = pcScores(:,1)
 
-% Whitening (symmetric/ZCA, avoids an arbitrary rotation among near-degenerate
-% directions). Directions with near-zero variance relative to the leading one
+% Whitening (PCA whitening: the scores on the retained principal axes, each scaled
+% to unit variance; any rotation of the whitened space gives the same slowness
+% eigenvalues and slow components below). Directions with near-zero variance relative to the leading one
 % (e.g. a per-window statistic that barely varies across windows) are dropped
 % rather than whitened: full whitening would divide by their near-zero std and
 % amplify what is essentially estimation noise into a spuriously enormous
