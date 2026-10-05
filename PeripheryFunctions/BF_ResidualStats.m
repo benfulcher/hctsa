@@ -1,21 +1,24 @@
-function p = HT_HypothesisTest(x, theTest)
-% HT_HypothesisTest     [DEPRECATED] Statistical hypothesis test applied to a time series.
+function [ac1, ac2, runsz] = BF_ResidualStats(res, sstot)
+% BF_ResidualStats   Statistics of the residuals of a fit, for remaining structure.
 %
-% DEPRECATED: use HT_MarginalTests (tests about the distribution of values)
-% or HT_IndependenceTests (tests of serial independence) instead; this thin
-% wrapper is kept only so that custom input files keep working, and is no longer
-% part of the default feature library.
+% Summarizes what a fitted model leaves unexplained, from the autocorrelation of the
+% residuals at lags 1 and 2 (the 'Fourier' method of CO_AutoCorr) and a runs test on
+% them (BF_RunsZ). The residuals are taken in the order given (time order, or order
+% of increasing value of the fitted variable).
+%
+% A fit that is exact (the residual sum of squares is below 1e-12 of the total sum
+% of squares) leaves only numerical error in the residuals, whose autocorrelation and
+% runs are arbitrary and differ between implementations: all three outputs are then
+% NaN instead of being computed from that noise.
 %
 % ---INPUTS:
-% x, the input time series
+% res, the residuals (column vector)
+% sstot, the total sum of squares of the fitted data about its mean, which sets the
+%       scale against which the residuals are judged to be negligible
 %
-% theTest, the hypothesis test to perform, dispatched as:
-%           HT_MarginalTests: 'signtest', 'vartest', 'ztest', 'signrank', 'jbtest'
-%           HT_IndependenceTests: 'runsz', 'runstest', 'lbq'
-%
-% ---OUTPUT:
-% p-value from the specified statistical test (identical to that of the function
-% it dispatches to; the z-statistic of the runs test for 'runsz')
+% ---OUTPUTS:
+% ac1, ac2, the autocorrelation of the residuals at lags 1 and 2
+% runsz, the signed z-statistic of a runs test on the residuals (BF_RunsZ)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,23 +49,14 @@ function p = HT_HypothesisTest(x, theTest)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% Warn once per session:
-persistent hasWarned
-if isempty(hasWarned)
-	warning('hctsa:deprecated', ['HT_HypothesisTest is deprecated: use HT_MarginalTests ' ...
-				'(distribution tests) or HT_IndependenceTests (serial independence tests) instead.']);
-	hasWarned = true;
+if sum(res.^2) <= 1e-12 * sstot
+	% exact fit: nothing but numerical error is left
+	ac1 = NaN; ac2 = NaN; runsz = NaN;
+	return
 end
 
-switch theTest
-	case {'signtest','vartest','ztest','signrank','jbtest'}
-		p = HT_MarginalTests(x, theTest);
-
-	case {'runsz','runstest','lbq'}
-		p = HT_IndependenceTests(x, theTest);
-
-	otherwise
-		error('Unknown hypothesis test ''%s''', theTest);
-end
+ac1 = CO_AutoCorr(res, 1, 'Fourier'); % autocorrelation of residuals at lag 1
+ac2 = CO_AutoCorr(res, 2, 'Fourier'); % autocorrelation of residuals at lag 2
+runsz = BF_RunsZ(res); % runs test on residuals
 
 end

@@ -589,7 +589,7 @@ HT_DistributionTest(x,'ks','uni')				HT_DistributionTest_ks_uni
 HT_DistributionTest(x,'ks','wbl')				HT_DistributionTest_ks_wbl
 HT_MarginalTests(x,'jbtest')		HT_MarginalTests_jbtest
 HT_IndependenceTests(x_z,'lbq')			HT_IndependenceTests_lbq
-HT_IndependenceTests(x,'runstest')	HT_IndependenceTests_runstest
+HT_IndependenceTests(x,'runsz')	HT_IndependenceTests_runsz
 HT_MarginalTests(x_z,'signrank')	HT_MarginalTests_signrank
 HT_MarginalTests(x_z,'signtest')	HT_MarginalTests_signtest
 IN_AutoMutualInfoStats(x_z,40,'gaussian') IN_AutoMutualInfoStats_40_gaussian

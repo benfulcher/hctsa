@@ -42,17 +42,21 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 % olu90: how far the mean of the top 5% of degrees lies above the overall
 %       mean, in standard deviations of the degrees
 % dgaussk_r2, dgaussk_adjr2, dgaussk_rmse, dgaussk_resAC1, dgaussk_resAC2,
-% dgaussk_resruns: goodness of fit (R^2, adjusted R^2, root-mean-square error),
-%       autocorrelation of the residuals at lags 1 and 2, and a runs test
-%       p-value, for a single Gaussian fitted to the histogram of degrees
-%       (DN_SimpleFit, with as many bins as the range of the degrees); the
-%       root-mean-square error is in units of probability density of the degrees
-%       divided by their standard deviation, so it does not depend on the number
-%       of nodes
+% dgaussk_resrunsz: goodness of fit (R^2, adjusted R^2, root-mean-square error),
+%       autocorrelation of the residuals at lags 1 and 2, and the signed z-statistic
+%       of a runs test (BF_RunsZ) on the residuals, for a single Gaussian fitted to
+%       the distribution of degrees (the proportion of nodes at each integer degree,
+%       from the minimum to the maximum degree), by deterministic least squares
+%       (BF_FitDensityCurve); the root-mean-square error is in units of probability
+%       density of the degrees divided by their standard deviation, so it does not
+%       depend on the number of nodes
 % dexpk_r2, dexpk_adjr2, dexpk_rmse, dexpk_resAC1, dexpk_resAC2,
-% dexpk_resruns: the same, for a single exponential fitted to the histogram
+% dexpk_resrunsz: the same, for an exponential fitted to the distribution of degrees
 % dpowerk_r2, dpowerk_adjr2, dpowerk_rmse, dpowerk_resAC1, dpowerk_resAC2,
-% dpowerk_resruns: the same, for a power law fitted to the histogram
+% dpowerk_resrunsz: the same, for a power law fitted to the distribution of degrees
+%       (for each of the three fits, NaN if the degrees take no more distinct values
+%       than the fit has parameters: 3 for the Gaussian, 2 for the others; also NaN
+%       if the fit is exact, which leaves no meaningful residuals)
 % gaussnlogL, expnlogL: the mean negative log-likelihood per node of a Gaussian
 %       and of an exponential distribution fitted to the degrees
 % evparam1, evparam2, evnlogL: the location and scale parameters of an
@@ -142,19 +146,28 @@ switch meth
 	case 'norm'
 		% Natural visibility graph degrees by a forward sweep from each node i that keeps the
 		% largest slope seen so far: node j is visible from i iff its slope (y(j)-y(i))/(j-i)
-		% strictly exceeds that of every node in between. No adjacency matrix is stored.
+		% exceeds that of every node in between. Slopes that agree to within rounding error
+		% (collinear nodes, as for tied or quantized values) are treated as equal, which
+		% blocks the view, so the graph does not depend on how a slope was rounded: a slope
+		% must exceed the running maximum by a relative 1e-12. No adjacency matrix is stored.
 		% Once the running maximum slope m is positive, nodes beyond distance (max(y)-y(i))/m
 		% would have to lie above max(y), so the scan stops early.
 		k = zeros(1, N);
 		ymax = max(y);
+		visTol = 1e-12; % relative tolerance of the visibility test
 		for i = 1:(N - 1)
 			yi = y(i);
-			m = -Inf; % largest slope from i seen so far
+			m = y(i + 1) - yi; % largest slope from i seen so far: the neighbor is always visible
+			k(i + 1) = k(i + 1) + 1;
+			k(i) = k(i) + 1;
 			jlim = N; % last node that can still be visible
-			j = i + 1;
+			if m > 0
+				jlim = min(N, i + floor((ymax - yi) / m) + 1);
+			end
+			j = i + 2;
 			while j <= jlim
 				sj = (y(j) - yi) / (j - i);
-				if sj > m
+				if sj > m + visTol*abs(m)
 					m = sj;
 					k(j) = k(j) + 1;
 					k(i) = k(i) + 1;
@@ -224,83 +237,37 @@ out.olu90 = (mean(k(k >= quantile(k, 0.95))) - mean(k)) / std(k); % top 5% of po
 %% Fit distributions to degree distribution
 % ------------------------------------------------------------------------------
 % (1) Gauss1: Gaussian fit to degree distribution
-try
-	dgaussout = DN_SimpleFit(k, 'gauss1', range(k)); % range(k)-bin single gaussian fit
-catch emsg
-	warning(sprintf('Error fitting gaussian distribution to data:\n%s', emsg.message))
-	dgaussout = NaN;
+% Distribution of the degrees: the proportion of nodes at each integer degree from the
+% minimum to the maximum (bins of width 1, so proportions are probability densities)
+kVals = (min(k):max(k))';
+kProb = accumarray(k(:) - min(k) + 1, 1, [length(kVals), 1]) / length(k);
+
+% Least-squares fits of a Gaussian, an exponential and a power law to the distribution
+fitModels = {'gauss', 'exp', 'power'};
+numParams = [3, 2, 2]; % parameters of each model (for the degrees of freedom)
+for i = 1:length(fitModels)
+	fitName = ['d' fitModels{i} 'k'];
+	if sum(kProb > 0) <= numParams(i) % too few distinct degrees to fit this model meaningfully
+		[r2, adjr2, rmse, resAC1, resAC2, resrunsz] = deal(NaN);
+	else
+		kFit = BF_FitDensityCurve(kVals, kProb, fitModels{i});
+		res = kProb - kFit; % residuals, in order of increasing degree
+		sse = sum(res.^2);
+		sstot = sum((kProb - mean(kProb)).^2);
+		dfe = length(kVals) - numParams(i); % degrees of freedom of the error
+		r2 = 1 - sse/sstot;
+		adjr2 = 1 - (1 - r2)*(length(kVals) - 1)/dfe;
+		rmse = sqrt(sse/dfe) * std(k); % in density units of the standardized degrees
+		[resAC1, resAC2, resrunsz] = BF_ResidualStats(res, sstot);
+	end
+	out.([fitName '_r2']) = r2; % rsquared
+	out.([fitName '_adjr2']) = adjr2; % degrees of freedom-adjusted rsquared
+	out.([fitName '_rmse']) = rmse; % root mean square error
+	out.([fitName '_resAC1']) = resAC1; % autocorrelation of residuals at lag 1
+	out.([fitName '_resAC2']) = resAC2; % autocorrelation of residuals at lag 2
+	out.([fitName '_resrunsz']) = resrunsz; % runs test z-statistic of the residuals
 end
 
-if ~isstruct(dgaussout) && isnan(dgaussout)
-	out.dgaussk_r2 = NaN;
-	out.dgaussk_adjr2 = NaN;
-	out.dgaussk_rmse = NaN;
-	out.dgaussk_resAC1 = NaN;
-	out.dgaussk_resAC2 = NaN;
-	out.dgaussk_resruns = NaN;
-else
-	out.dgaussk_r2 = dgaussout.r2; % rsquared
-	out.dgaussk_adjr2 = dgaussout.adjr2; % degrees of freedom-adjusted rsqured
-	out.dgaussk_rmse = dgaussout.rmse;  % root mean square error
-	out.dgaussk_resAC1 = dgaussout.resAC1; % autocorrelation of residuals at lag 1
-	out.dgaussk_resAC2 = dgaussout.resAC2; % autocorrelation of residuals at lag 2
-	out.dgaussk_resruns = dgaussout.resruns; % runs test on residuals -- outputs p-value
-end
-
-% (2) Exponential1: Exponential fit to degree distribution
-try
-	dexpout = DN_SimpleFit(k, 'exp1', range(k)); % range(k)-bin single exponential fit
-catch emsg
-	warning(sprintf('Error fitting exponential distribution to data:\n%s', emsg.message))
-	dexpout = NaN;
-end
-if ~isstruct(dexpout) && isnan(dexpout)
-	out.dexpk_r2 = NaN;
-	out.dexpk_adjr2 = NaN;
-	out.dexpk_rmse = NaN;
-	out.dexpk_resAC1 = NaN;
-	out.dexpk_resAC2 = NaN;
-	out.dexpk_resruns = NaN;
-else
-	out.dexpk_r2 = dexpout.r2; % rsquared
-	out.dexpk_adjr2 = dexpout.adjr2; % degrees of freedom-adjusted rsqured
-	out.dexpk_rmse = dexpout.rmse;  % root mean square error
-	out.dexpk_resAC1 = dexpout.resAC1; % autocorrelation of residuals at lag 1
-	out.dexpk_resAC2 = dexpout.resAC2; % autocorrelation of residuals at lag 2
-	out.dexpk_resruns = dexpout.resruns; % runs test on residuals -- outputs p-value
-end
-
-% (3) Power1: Power-law fit to degree distribution
-try
-	dpowerout = DN_SimpleFit(k, 'power1', range(k)); % range(k)-bin single power law fit
-catch emsg
-	warning(sprintf('Error fitting power-law distribution to data:\n%s', emsg.message))
-	dpowerout = NaN;
-end
-if ~isstruct(dpowerout) && isnan(dpowerout)
-	out.dpowerk_r2 = NaN;
-	out.dpowerk_adjr2 = NaN;
-	out.dpowerk_rmse = NaN;
-	out.dpowerk_resAC1 = NaN;
-	out.dpowerk_resAC2 = NaN;
-	out.dpowerk_resruns = NaN;
-else
-	out.dpowerk_r2 = dpowerout.r2; % rsquared
-	out.dpowerk_adjr2 = dpowerout.adjr2; % degrees of freedom-adjusted rsqured
-	out.dpowerk_rmse = dpowerout.rmse;  % root mean square error
-	out.dpowerk_resAC1 = dpowerout.resAC1; % autocorrelation of residuals at lag 1
-	out.dpowerk_resAC2 = dpowerout.resAC2; % autocorrelation of residuals at lag 2
-	out.dpowerk_resruns = dpowerout.resruns; % runs test on residuals -- outputs p-value
-end
-
-% ------------------------------------------------------------------------------
-%% Using likelihood now:
-% ------------------------------------------------------------------------------
-% normlike/explike/evlike return the negative log-likelihood *summed* over the
-% degree sequence, which is extensive: it grows in direct proportion to the
-% number of nodes (and hence to the time-series length), swamping any
-% distributional information. Report the mean NLL per node instead, which is
-% the intensive quantity these fields were always meant to capture.
 numNodes = length(k);
 
 % Gaussian
