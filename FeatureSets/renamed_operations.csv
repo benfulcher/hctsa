@@ -1411,3 +1411,62 @@ SD_SurrogateTest_RP_99_o3_p,,"deregistered: z-test p-value, a monotone function 
 SD_SurrogateTest_RP_99_o3_f,,"deregistered: kernel density at the series value: 15-45% of series exactly 0 (outside the density estimate), bandwidth-dependent, Spearman 0.86-0.96 with registered mediqr, less seed-stable than the z-score"
 SD_SurrogateTest_RP_99_tc3_p,,"deregistered: z-test p-value, a monotone function of the registered z-score (Spearman -1.00 one-sided; -0.99 with mediqr for two-sided) that saturates at 0"
 SD_SurrogateTest_RP_99_tc3_f,,"deregistered: kernel density at the series value: 15-45% of series exactly 0 (outside the density estimate), bandwidth-dependent, Spearman 0.86-0.96 with registered mediqr, less seed-stable than the z-score"
+DN_OutlierInclude_abs_001_mfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_abs_001_mfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_abs_001_nfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_abs_001_nfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_abs_001_stdrfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_abs_001_stdrfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_mfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_mfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_nfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_nfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_stdrfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_n_001_stdrfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_mfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_mfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_nfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_nfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_stdrfexpa,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+DN_OutlierInclude_p_001_stdrfexpc,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+FC_LoopLocalSimple_mean_sws_fexp_a,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+FC_LoopLocalSimple_mean_sws_fexp_c,,"deregistered: amplitude/offset of the exponential fit are collinear and ill-determined (the rate b, r2 and rmse stay)"
+MF_hmm_Fit_07_3_nit,,deregistered: the number of EM iterations is a stopping-rule artefact
+MF_hmm_Fit_08_2_nit,,deregistered: the number of EM iterations is a stopping-rule artefact
+PH_ForcePotential_sine_05_5_01_finaldev,,deregistered: a single final sample of the trajectory; its stable replacement (mean |x|) is redundant with the registered std for the sine force
+PH_ForcePotential_sine_1_2_01_finaldev,,deregistered: a single final sample of the trajectory; its stable replacement (mean |x|) is redundant with the registered std for the sine force
+PH_ForcePotential_sine_1_5_01_finaldev,,deregistered: a single final sample of the trajectory; its stable replacement (mean |x|) is redundant with the registered std for the sine force
+SC_FluctAnal_2_dfa_50_0_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_0_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_2_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_2_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_3_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_3_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_1_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_2_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_2_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_3_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_dfa_50_3_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_endptdiff_50_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_endptdiff_50_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_iqr_50_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_iqr_50_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_range_50_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_range_50_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_rsrange_50_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_rsrange_50_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_rsrangefit_50_1_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_rsrangefit_50_1_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_std_50_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_2_std_50_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_mag_2_dfa_50_2_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_mag_2_dfa_50_2_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_sign_2_dfa_50_2_logi_se1,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SC_FluctAnal_sign_2_dfa_50_2_logi_se2,,deregistered: full-range fit standard error is a function of ssr (Spearman 1.000)
+SY_SlidingWindow_ac1_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_asymac1_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_m_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_mom3_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_s_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_specen_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
