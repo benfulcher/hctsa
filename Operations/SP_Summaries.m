@@ -10,6 +10,9 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % entropy and flatness, robust power-law fits to the log-log spectrum, the power in
 % 2 and 5 equal frequency bands, and the number of crossings of the log spectrum at
 % various levels. Many statistics have a log-domain version computed on log(S).
+% The spectrum is floored at 1e-12 of its maximum before any statistic is computed,
+% so that bins at the rounding level of the estimator do not determine the
+% log-domain statistics.
 %
 % ---INPUTS:
 % y, the input time series
@@ -363,6 +366,13 @@ if doPlot
 	% Area under S should sum to 1 if a power spectral density estimate:
 	title(sprintf('Area under psd curve = %.1f (= %.1f)', sum(S * (w(2) - w(1))), var(y)));
 end
+
+% Floor the spectrum at 1e-12 of its maximum (120 dB below the peak) before taking
+% logs: bins at the rounding level of the estimator (e.g., for a periodic signal that
+% fits the transform length, or a ramp) are otherwise arbitrary values of order
+% 1e-30 or exactly zero, and then set every log-domain statistic. The spectral
+% dynamic range of real-world series is well above this floor.
+S = max(S, 1e-12 * max(S));
 
 N = length(S); % = length(w)
 logS = log(S);
