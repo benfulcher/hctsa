@@ -31,7 +31,7 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %           (iii) 'o3': a third-order statistic, the mean cubed increment at lag 1; tested
 %                 two-sided
 %           (iv) 'tc3': a time-reversal asymmetry measure, CO_TC3 at lag 1; tested two-sided
-%           (v) 'nlpe': the mean squared nonlinear prediction error (slow; one-sided)
+%           (v) 'nlpe': the mean squared nonlinear prediction error (slow; one-sided, the series should have the lower error)
 %           (vi) 'fnn': the proportion of false nearest neighbors in 2 dimensions (very
 %                 slow; one-sided)
 %           (vii) 'amigaussian1' and (viii) 'fmmigaussian': as (i) and (ii) but with the
@@ -298,11 +298,10 @@ if ismember('nlpe', theTestStat)
 	nlpesurr = zeros(numSurrs, 1);
 	for i = 1:numSurrs
 		res = MS_nlpe(z(:, i), de, tau, BF_TheilerWindow(z(:, i), {'ac', 1}));
-		msqerr = sum(res.^2);
-		nlpesurr(i) = msqerr;
+		nlpesurr(i) = mean(res.^2); % the mean squared error, as for the series (NL_nlpe msqerr)
 	end
 
-	someStats = SDgivemestats(nlpex, nlpesurr, 'right'); % NLPE should be higher than surrogates
+	someStats = SDgivemestats(nlpex, nlpesurr, 'left'); % nonlinear structure makes the series more predictable: lower error than the surrogates
 	fnames = fieldnames(someStats);
 	for i = 1:length(fnames)
 		out.(sprintf('nlpe_%s', fnames{i})) = someStats.(fnames{i});
