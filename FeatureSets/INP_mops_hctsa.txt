@@ -894,11 +894,9 @@ SY_PPtest(x_z,0:5,'ar','t1')	SY_PPtest_0_5_ar_t1
 SY_RampingWindows(x_z,10)	SY_RampingWindows_10
 SY_RampingWindows(x_z,10,'ac1e')	SY_RampingWindows_10_ac1e
 SY_RangeEvolve(x_z)	SY_RangeEvolve
-SY_SlidingWindow(x_z,'AC1','ent',10,1)		SY_SlidingWindow_ac1_ent10_1
 SY_SlidingWindow(x_z,'AC1','std',2,1)			SY_SlidingWindow_ac1_s2_1
 SY_SlidingWindow(x_z,'AC1','std',10,1)		SY_SlidingWindow_ac1_s10_1
 SY_SlidingWindow(x_z,'AC1','permen',10,2)		SY_SlidingWindow_ac1_permen10_2
-SY_SlidingWindow(x_z,'asymAC1','ent',10,1)	SY_SlidingWindow_asymac1_ent10_1
 SY_SlidingWindow(x_z,'asymAC1','std',2,1)		SY_SlidingWindow_asymac1_s2_1
 SY_SlidingWindow(x_z,'asymAC1','std',10,1)	SY_SlidingWindow_asymac1_s10_1
 SY_SlidingWindow(x_z,'asymAC1','permen',10,2)	SY_SlidingWindow_asymac1_permen10_2
@@ -906,15 +904,12 @@ SY_SlidingWindow(x_z,'ent','std',2,1)			SY_SlidingWindow_ent_s2_1
 SY_SlidingWindow(x_z,'ent','std',10,1)		SY_SlidingWindow_ent_s10_1
 SY_SlidingWindow(x_z,'lillie','std',2,1)		SY_SlidingWindow_lil_s2_1
 SY_SlidingWindow(x_z,'lillie','std',10,1)		SY_SlidingWindow_lil_s10_1
-SY_SlidingWindow(x_z,'mean','ent',10,1)		SY_SlidingWindow_m_ent10_1
 SY_SlidingWindow(x_z,'mean','std',2,1)		SY_SlidingWindow_m_s_2_1
 SY_SlidingWindow(x_z,'mean','std',10,1)		SY_SlidingWindow_m_s_10_1
 SY_SlidingWindow(x_z,'mean','permen',10,2)	SY_SlidingWindow_m_permen10_2
-SY_SlidingWindow(x_z,'mom3','ent',10,1)		SY_SlidingWindow_mom3_ent10_1
 SY_SlidingWindow(x_z,'mom3','std',2,1)		SY_SlidingWindow_mom3_s2_1
 SY_SlidingWindow(x_z,'mom3','std',10,1)		SY_SlidingWindow_mom3_s10_1
 SY_SlidingWindow(x_z,'mom3','permen',10,2)	SY_SlidingWindow_mom3_permen10_2
-SY_SlidingWindow(x_z,'std','ent',10,1)		SY_SlidingWindow_s_ent10_1
 SY_SlidingWindow(x_z,'std','std',2,1)			SY_SlidingWindow_s_s2_1
 SY_SlidingWindow(x_z,'std','std',10,1)		SY_SlidingWindow_s_s10_1
 SY_SlidingWindow(x_z,'std','permen',10,2)		SY_SlidingWindow_s_permen10_2

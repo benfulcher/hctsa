@@ -1470,3 +1470,8 @@ SY_SlidingWindow_m_ent2_1,,deregistered: with 2 segments the entropy of the wind
 SY_SlidingWindow_mom3_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
 SY_SlidingWindow_s_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
 SY_SlidingWindow_specen_ent2_1,,deregistered: with 2 segments the entropy of the window statistics is a monotone function of the 'std' variant (Spearman 1.000)
+SY_SlidingWindow_ac1_ent10_1,,deregistered: redundant with SY_SlidingWindow_ac1_s10_1 (Spearman 0.956); the 'std' summary of the window statistic stays
+SY_SlidingWindow_asymac1_ent10_1,,deregistered: redundant with SY_SlidingWindow_asymac1_s10_1 (Spearman 0.969); the 'std' summary of the window statistic stays
+SY_SlidingWindow_m_ent10_1,,deregistered: redundant with SY_SlidingWindow_m_s_10_1 (StatAv10) (Spearman 0.982); the 'std' summary of the window statistic stays
+SY_SlidingWindow_mom3_ent10_1,,deregistered: redundant with SY_SlidingWindow_mom3_s10_1 (Spearman 0.968); the 'std' summary of the window statistic stays
+SY_SlidingWindow_s_ent10_1,,deregistered: redundant with SY_SlidingWindow_s_s10_1 (Spearman 0.960); the 'std' summary of the window statistic stays
