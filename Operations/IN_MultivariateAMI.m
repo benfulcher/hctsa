@@ -132,12 +132,17 @@ switch estMethod
 		R = corr([x_now, x_2tau, x_tau]);
 		corrVecXY = R(1, 2:3)';
 		CorrXX = R(2:3, 2:3);
-		Rsq = corrVecXY' * (CorrXX \ corrVecXY);
-		Rsq = min(max(Rsq, 0), 1 - eps); % guard numerical over/undershoot
-		out.multiAMI = -0.5 * log(1 - Rsq);
+		if any(isnan(R(:))) || rcond(CorrXX) < 1e-12
+			% the two lagged copies are (numerically) collinear: the joint estimate is undefined
+			out.multiAMI = NaN;
+		else
+			Rsq = corrVecXY' * (CorrXX \ corrVecXY);
+			Rsq = min(max(Rsq, 0), 1); % guard numerical over/undershoot
+			out.multiAMI = -0.5 * log(max(1 - Rsq, 1e-12)); % floored as in IN_AutoMutualInfo (at most 13.8 nats)
+		end
 
-		out.ami_2tau = -0.5 * log(1 - R(1, 2)^2);
-		out.ami_tau = -0.5 * log(1 - R(1, 3)^2);
+		out.ami_2tau = -0.5 * log(max(1 - R(1, 2)^2, 1e-12));
+		out.ami_tau = -0.5 * log(max(1 - R(1, 3)^2, 1e-12));
 
 	case {'kraskov1', 'kraskov2'}
 		miCalc = IN_Initialize_MI(estMethod, extraParam, false, y); % no added noise
