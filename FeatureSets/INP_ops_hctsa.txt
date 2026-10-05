@@ -1395,16 +1395,8 @@ EN_DistributionEntropy_hist_10_03	    EN_DistributionEntropy_hist_10_03	     ent
 EN_DistributionEntropy_hist_10_005	    EN_DistributionEntropy_hist_10_005	     entropy
 EN_DistributionEntropy_hist_20_0		EN_DistributionEntropy_hist_20_0	entropy
 EN_DistributionEntropy_hist_50_0		EN_DistributionEntropy_hist_50_0	entropy
-EN_DistributionEntropy_hist_auto_0      EN_DistributionEntropy_hist_auto_0       entropy
 EN_DistributionEntropy_hist_auto_001    EN_DistributionEntropy_hist_auto_001    entropy
-EN_DistributionEntropy_hist_auto_01     EN_DistributionEntropy_hist_auto_01      entropy
 EN_DistributionEntropy_hist_auto_002    EN_DistributionEntropy_hist_auto_002    entropy
-EN_DistributionEntropy_hist_auto_02     EN_DistributionEntropy_hist_auto_02      entropy
-EN_DistributionEntropy_hist_auto_03     EN_DistributionEntropy_hist_auto_03      entropy
-EN_DistributionEntropy_hist_auto_005    EN_DistributionEntropy_hist_auto_005    entropy
-EN_DistributionEntropy_hist_fd_0        EN_DistributionEntropy_hist_fd_0         entropy
-EN_DistributionEntropy_hist_sqrt_0      EN_DistributionEntropy_hist_sqrt_0       entropy
-EN_DistributionEntropy_hist_sturges_0   EN_DistributionEntropy_hist_sturges_0    entropy
 EN_DistributionEntropy_ks__001	        EN_DistributionEntropy_ks__001	    entropy
 EN_DistributionEntropy_ks__01	        EN_DistributionEntropy_ks__01	    entropy
 EN_DistributionEntropy_ks__002	        EN_DistributionEntropy_ks__002	    entropy

@@ -433,16 +433,8 @@ EN_DistributionEntropy(x_z,'hist',10,0.3)	        EN_DistributionEntropy_hist_10
 EN_DistributionEntropy(x_z,'hist',10,0.05)	    EN_DistributionEntropy_hist_10_005
 EN_DistributionEntropy(x_z,'hist',20,0)	EN_DistributionEntropy_hist_20_0
 EN_DistributionEntropy(x_z,'hist',50,0)	EN_DistributionEntropy_hist_50_0
-EN_DistributionEntropy(x_z,'hist','auto',0)	    EN_DistributionEntropy_hist_auto_0
 EN_DistributionEntropy(x_z,'hist','auto',0.01)	EN_DistributionEntropy_hist_auto_001
-EN_DistributionEntropy(x_z,'hist','auto',0.1)	    EN_DistributionEntropy_hist_auto_01
 EN_DistributionEntropy(x_z,'hist','auto',0.02)	EN_DistributionEntropy_hist_auto_002
-EN_DistributionEntropy(x_z,'hist','auto',0.2)	    EN_DistributionEntropy_hist_auto_02
-EN_DistributionEntropy(x_z,'hist','auto',0.3)	    EN_DistributionEntropy_hist_auto_03
-EN_DistributionEntropy(x_z,'hist','auto',0.05)	EN_DistributionEntropy_hist_auto_005
-EN_DistributionEntropy(x_z,'hist','fd',0)	        EN_DistributionEntropy_hist_fd_0
-EN_DistributionEntropy(x_z,'hist','sqrt',0)	    EN_DistributionEntropy_hist_sqrt_0
-EN_DistributionEntropy(x_z,'hist','sturges',0)	EN_DistributionEntropy_hist_sturges_0
 EN_DistributionEntropy(x_z,'ks',[],0.01)	EN_DistributionEntropy_ks__001
 EN_DistributionEntropy(x_z,'ks',[],0.1)	EN_DistributionEntropy_ks__01
 EN_DistributionEntropy(x_z,'ks',[],0.02)	EN_DistributionEntropy_ks__002
