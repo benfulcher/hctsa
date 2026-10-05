@@ -32,6 +32,11 @@ function out = MF_AR_arcov(y, p)
 %       relative to their overall standard deviation
 %
 % ---NOTES:
+% NaN is returned for a (nearly) exactly predictable series: when the fitted noise
+% variance is below 1e-12 of the variance of the series, the design is singular and
+% the fitted coefficients and residuals are not meaningful (e.g., an exact sinusoid
+% with p > 2).
+%
 % The first p residuals are computed with the unseen values before the start of the
 % series set to zero, and are not excluded from the residual statistics.
 
@@ -76,6 +81,13 @@ end
 % Fit an AR model using Matlab's Signal Processing Toolbox:
 % -------------------------------------------------------------------------------
 [a, e] = arcov(y, p);
+
+% An exactly predictable series (e.g., a sinusoid fitted with p > 2) has a singular
+% design and a noise variance at the level of rounding error: the coefficients are
+% not determined and the residuals are rounding noise, so there is nothing to report
+if e < 1e-12 * var(y) || ~(var(y) > 0)
+	out = NaN; return
+end
 
 % Variance of the white noise driving the fitted AR process. Named noisevar to match
 % MF_armax and MF_StateSpace_n4sid, which report the same quantity:
