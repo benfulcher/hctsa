@@ -27,8 +27,8 @@ function out = SY_LocalGlobal(y, subsetHow, n, randomSeed)
 % n, the parameter for the method specified above (default: 100 for 'l',
 %       'unicg', and 'randcg'; 0.1 for 'p')
 %
-% randomSeed, an option for whether (and how) to reset the random seed, for the
-%       'randcg' input
+% randomSeed, the seed of the random points for the 'randcg' input (see BF_RandomSeed;
+%       the numbers come from the portable generator BF_Random)
 %
 % ---OUTPUTS:
 % absmean, the absolute value of the mean of the subset
@@ -113,11 +113,9 @@ switch subsetHow
 			randomSeed = [];
 		end
 
-		% Reset the random seed if specified (for reproducibility):
-		BF_ResetSeed(randomSeed);
-
-		% Take n random points in time series; there could be repeats:
-		r = randi(N, n, 1);
+		% Take n random points in time series (uniform on 1..N; there could be
+		% repeats), reproducible from the seed:
+		r = 1 + floor(N * BF_Random(n, BF_RandomSeed(randomSeed)));
 
 		% This is not very statistically robust: just a single stochastic
 		% sample with a (possibly) large variance
