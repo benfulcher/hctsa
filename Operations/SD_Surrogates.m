@@ -8,7 +8,7 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % operation no longer depends on TSTOOL). The statistic is computed on the series and on
 % each surrogate, and the outputs describe where the series' value lies in the distribution
 % of the surrogates' values (a Gaussian fit to them, their median and interquartile range,
-% and a kernel-smoothed density).
+% and a kernel-smoothed density, see BF_KSDensity).
 %
 % ---INPUTS:
 % y, the input time series
@@ -42,7 +42,8 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ksphereonmax, the kernel density at s relative to the peak of N(muhat, sigmahat) (0 if s
 %         lies above the density grid)
 % ksiqrsfrommode, |s - (mode of the kernel density)|/iqrsurr (NaN if iqrsurr = 0)
-% normpatponmax, stdfrommean and ztestp are NaN if the surrogates all have the same value.
+% normpatponmax, stdfrommean, ztestp, kspminfromext and ksphereonmax are NaN if the
+% surrogates all have the same value.
 % The output is NaN if tau cannot be determined; an error is raised if the statistic fails
 % for all surrogates.
 
@@ -201,21 +202,26 @@ out.stdsurr = sigmahat;
 out.meansurr = muhat;
 
 % 4) kernel density test
-[ksf, ksx] = ksdensity(tc3_surr, 'function', 'pdf');
+[ksf, ksx] = BF_KSDensity(tc3_surr);
 % hold on;plot(ksx,ksf,'r')
-ksdx = ksx(2) - ksx(1);
-ihit = find(ksx > tc3_y, 1, 'first');
+if any(isnan(ksf)) % all surrogates have the same value: no scale to smooth over
+	out.kspminfromext = NaN;
+	out.ksphereonmax = NaN;
+else
+	ksdx = ksx(2) - ksx(1);
+	ihit = find(ksx > tc3_y, 1, 'first');
 
-if isempty(ihit) %% off the scale!
-	out.kspminfromext = 0;
-	out.ksphereonmax = 0;
-else % on the scale!
-	pfromleft = ksdx * sum(ksf(1:ihit));
-	% pfromright = ksdx*sum(ksf(ihit+1:end))
-	out.kspminfromext = min([pfromleft 1 - pfromleft]);
-	% out.phereonstd = ksf(ihit)/sigmahat;
-	out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
-	%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+	if isempty(ihit) %% off the scale!
+		out.kspminfromext = 0;
+		out.ksphereonmax = 0;
+	else % on the scale!
+		pfromleft = ksdx * sum(ksf(1:ihit));
+		% pfromright = ksdx*sum(ksf(ihit+1:end))
+		out.kspminfromext = min([pfromleft 1 - pfromleft]);
+		% out.phereonstd = ksf(ihit)/sigmahat;
+		out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
+		%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+	end
 end
 
 % iqrs from mode
