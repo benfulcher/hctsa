@@ -1,13 +1,14 @@
 function out = DN_SimpleFit(x, dmodel, numBins)
 % DN_SimpleFit   Fits a simple curve to the distribution of the values.
 %
-% Uses the fit function from MATLAB's Curve Fitting Toolbox to fit a simple
-% parametric curve to an estimate of the distribution of values in the time
-% series, ignoring their temporal ordering. The distribution is estimated
+% Fits a simple parametric curve to an estimate of the distribution of values in
+% the time series, ignoring their temporal ordering. The distribution is estimated
 % either as a histogram, with a specified number of bins, or as a
 % kernel-smoothed density (ksdensity, with its default width). The outputs
 % measure the goodness of fit, and test the residuals (in order of increasing
-% value) for remaining structure.
+% value) for remaining structure. The curve is fitted by least squares to the
+% density, in a deterministic way that does not depend on random starts or on an
+% optimizer's default settings (BF_FitDensityCurve).
 %
 % ---INPUTS:
 % x, the input time series
@@ -17,6 +18,7 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 %           (iii) 'exp1': an exponential, a*exp(b*x)
 %           (iv) 'power1': a power law, a*x^b (cannot be fit if any bin center
 %                   is not positive; NaN is returned)
+% NaN is also returned if there are no more bins than parameters of the model.
 % numBins, how to estimate the distribution (default: 'sqrt'):
 %           a text option: the name of a binning rule for histcounts,
 %                   e.g., 'sqrt' uses the square root of the number of data
@@ -34,7 +36,9 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 %       does not depend on the length or the scale of the series
 % resAC1, resAC2, the autocorrelation of the residuals, in order of
 %       increasing value, at lags 1 and 2
-% resruns, the p-value of a runs test on the residuals
+% resrunsz, the signed z-statistic of a runs test on the residuals, in order of
+%       increasing value (BF_RunsZ): negative when the residuals have fewer runs
+%       about their median than expected for a random order
 %
 % ---NOTES:
 % Fits of time-series models (sinusoids or Fourier series) against time have
@@ -76,9 +80,6 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 % ------------------------------------------------------------------------------
 % Preliminaries
 % ------------------------------------------------------------------------------
-
-% Check a curve-fitting toolbox license is available:
-BF_CheckToolbox('curve_fitting_toolbox');
 
 % ------------------------------------------------------------------------------
 %% Deprecated: time-series models now live in SP_SinusoidFit
@@ -124,22 +125,28 @@ if any(strcmp(distModels, dmodel)) % valid DISTRIBUTION model name
 		dny = dny';
 	end
 
-	% Fit the distribution model:
-	try
-		[cfun, gof, output] = fit(dnx, dny, dmodel);
-	catch emsg % this model can't even be fitted OR license problem...
-		if strcmp(emsg.identifier, 'curvefit:fit:nanComputed') ...
-				|| strcmp(emsg.identifier, 'curvefit:fit:infComputed')
-			fprintf(1, 'Error fitting the model ''%s'' to this data:\n%s', dmodel, emsg.message);
-			out = NaN; return
-		elseif strcmp(emsg.message, 'Power functions cannot be fit to non-positive xdata.') ...
-				|| strcmp(emsg.identifier, 'curvefit:fit:powerFcnsRequirePositiveData')
-			fprintf(1, 'The model ''%s'' can not be applied to non-positive data\n', dmodel);
-			out = NaN; return
-		else
-			error('Error fitting %s to the data distribution\n%s', dmodel, emsg.message);
-		end
+	% Fit the distribution model, by least squares for the density (BF_FitDensityCurve):
+	if strcmp(dmodel, 'power1') && any(dnx <= 0)
+		fprintf(1, 'The model ''%s'' can not be applied to non-positive data\n', dmodel);
+		out = NaN; return
 	end
+	fitModels = {'gauss1', 'gauss', 3; 'gauss2', 'gauss2', 6; 'exp1', 'exp', 2; 'power1', 'power', 2}; % model, curve, number of parameters
+	iModel = find(strcmp(fitModels(:, 1), dmodel));
+	dnyFit = BF_FitDensityCurve(dnx, dny, fitModels{iModel, 2});
+
+	% Residuals (in order of increasing value) and goodness of fit as in the Curve Fitting
+	% Toolbox: R^2, R^2 adjusted for the number of fitted parameters, and the root-mean-square
+	% error from the residual sum of squares divided by the degrees of freedom of the error
+	res = dny - dnyFit;
+	sse = sum(res.^2);
+	sstot = sum((dny - mean(dny)).^2);
+	dfe = length(dny) - fitModels{iModel, 3}; % degrees of freedom of the error
+	if dfe < 1 % no more bins than parameters: the fit is not meaningful
+		out = NaN; return
+	end
+	r2 = 1 - sse/sstot;
+	adjr2 = 1 - (1 - r2)*(length(dny) - 1)/dfe;
+	rmse = sqrt(sse/dfe);
 
 else
 	error('Invalid distribution model ''%s'' specified', dmodel);
@@ -148,17 +155,17 @@ end
 % ------------------------------------------------------------------------------
 %% Compute the outputs into a structure
 % ------------------------------------------------------------------------------
-out.r2 = gof.rsquare; % rsquared
-out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
-                             % by any mop -- redundant with r2 for these fixed-order fits)
+out.r2 = r2; % rsquared
+out.adjr2 = adjr2; % degrees of freedom-adjusted rsquared (not currently registered
+                   % by any mop -- redundant with r2 for these fixed-order fits)
 
 % Root mean square error. The fit was done directly to the probability density, so
 % multiplying by std(x) expresses it in density units of the standardized series,
 % which does not grow with the length of the series (histogram counts do) or
 % depend on the scale of x:
-out.rmse = gof.rmse * std(x);
-out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
-out.resAC2 = CO_AutoCorr(output.residuals, 2, 'Fourier'); % autocorrelation of residuals at lag 2
-out.resruns = HT_IndependenceTests(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value
+out.rmse = rmse * std(x);
+
+% Remaining structure in the residuals, in order of increasing value:
+[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, sstot);
 
 end
