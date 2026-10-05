@@ -20,7 +20,8 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % past, Theiler window: value-neighbors closer in time than this are not used
 %       ({'ac', k}, or a number of samples; see BF_TheilerWindow)
 %       (default: {'ac',1})
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, the seed of the random reference points (see BF_RandomSeed; they come from
+%       the portable generator BF_Random, so results are reproducible across languages)
 %
 % ---OUTPUTS: statistics of the curve tau(l+1), the summed distance of the two
 % value-neighbors at delay l:
@@ -149,8 +150,11 @@ end
 %% Run
 % ------------------------------------------------------------------------------
 
-% Control the random seed (for reproducibility):
-BF_ResetSeed(randomSeed);
+% Random numbers for the reference points: the next unused number of one reproducible
+% stream (more of the same stream is generated if the numbers run out)
+seed = BF_RandomSeed(randomSeed);
+randStream = BF_Random(512, seed);
+numUsed = 0;
 
 % Reproduces TSTOOL's tstoolbox/@signal/delaytime.m directly (see header comment):
 ITERATIONS = 64;
@@ -170,7 +174,11 @@ for i = 1:ITERATIONS
 			warning('Could not find reference points with neighbors on both sides after %u attempts', maxAttempts);
 			out = NaN; return
 		end
-		ref = ceil(rand(1, 1) * len);
+		numUsed = numUsed + 1;
+		if numUsed > length(randStream)
+			randStream = BF_Random(4 * length(randStream), seed); % same stream, longer
+		end
+		ref = ceil(randStream(numUsed) * len);
 		actual = index(ref);
 		preCandidates = index(abs(index(1:ref - 1) - actual) > past);
 		postCandidates = index(ref + find(abs(index(ref + 1:end) - actual) > past));
