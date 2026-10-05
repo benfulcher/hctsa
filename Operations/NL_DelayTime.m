@@ -2,10 +2,13 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % NL_DelayTime   How quickly points that start with nearly equal values drift apart, over a range of delays.
 %
 % Optimal delay time using the method of Parlitz and Wichard, as in TSTOOL's
-% 'delaytime'. For each of 64 random reference times t, finds the two times
+% 'delaytime'. For each of 256 reference times t (spread evenly over the values of
+% the series by a low-discrepancy sequence, rather than chosen at random, and more
+% of them than TSTOOL's 64 so that the curve does not depend on the few references
+% used), finds the two times
 % whose values are nearest to y(t) from below and from above, excluding times
 % within a Theiler window of t (past), and accumulates |y(s+l) - y(t+l)|
-% for both neighbors s, for delays l = 0,...,maxDelay. Averaged over the 64
+% for both neighbors s, for delays l = 0,...,maxDelay. Averaged over the 256
 % references, this gives a curve tau(l+1) that starts low (the neighbors begin
 % with nearly equal values) and tends to rise to a noisy level as they
 % separate. The outputs summarize this curve.
@@ -20,8 +23,8 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % past, Theiler window: value-neighbors closer in time than this are not used
 %       ({'ac', k}, or a number of samples; see BF_TheilerWindow)
 %       (default: {'ac',1})
-% randomSeed, the seed of the random reference points (see BF_RandomSeed; they come from
-%       the portable generator BF_Random, so results are reproducible across languages)
+% randomSeed, ignored: the reference points are deterministic. Kept so that existing
+%       calls still work.
 %
 % ---OUTPUTS: statistics of the curve tau(l+1), the summed distance of the two
 % value-neighbors at delay l:
@@ -150,14 +153,13 @@ end
 %% Run
 % ------------------------------------------------------------------------------
 
-% Random numbers for the reference points: the next unused number of one reproducible
-% stream (more of the same stream is generated if the numbers run out)
-seed = BF_RandomSeed(randomSeed);
-randStream = BF_Random(512, seed);
+% The reference points are the ranks (in the sorted values of the series) given by the
+% golden-ratio (Weyl) sequence frac(j*phi): evenly spread, deterministic, and the
+% next one is used whenever a reference has no valid neighbors on both sides.
 numUsed = 0;
 
 % Reproduces TSTOOL's tstoolbox/@signal/delaytime.m directly (see header comment):
-ITERATIONS = 64;
+ITERATIONS = 256;
 len = N - maxDelay;
 [~, index] = sort(y(1:len));
 
@@ -175,10 +177,7 @@ for i = 1:ITERATIONS
 			out = NaN; return
 		end
 		numUsed = numUsed + 1;
-		if numUsed > length(randStream)
-			randStream = BF_Random(4 * length(randStream), seed); % same stream, longer
-		end
-		ref = ceil(randStream(numUsed) * len);
+		ref = max(1, ceil(mod(numUsed * 0.6180339887498949, 1) * len));
 		actual = index(ref);
 		preCandidates = index(abs(index(1:ref - 1) - actual) > past);
 		postCandidates = index(ref + find(abs(index(ref + 1:end) - actual) > past));
