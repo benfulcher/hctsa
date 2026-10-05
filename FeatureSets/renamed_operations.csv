@@ -1479,3 +1479,4 @@ MF_CompareAR_1_10_05_firstonmin,MF_CompareAR_1_10_05_propgain1min,"1 - min(v)/v(
 MF_CompareAR_1_10_05_maxonmed,MF_CompareAR_1_10_05_medonmax,"median(v)/max(v) (bounded in (0,1]) replaces the unbounded ratio max(v)/median(v)"
 MF_CompareAR_1_10_all_firstonmin,MF_CompareAR_1_10_all_propgain1min,"1 - min(v)/v(1), the proportion of the first order loss removed by the best order (bounded in [0,1]), replaces the unbounded ratio v(1)/min(v)"
 MF_CompareAR_1_10_all_maxonmed,MF_CompareAR_1_10_all_medonmax,"median(v)/max(v) (bounded in (0,1]) replaces the unbounded ratio max(v)/median(v)"
+SY_SlidingWindow_asymac1_permen10_2,,deregistered: permutation entropy of ~19 window values is sampling noise (split-half reliability 0.02 on the 1000x1000 series)
