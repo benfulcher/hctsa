@@ -32,5 +32,27 @@ classdef Robust_smallTests < matlab.unittest.TestCase
             tc.verifyLessThan(o.propgain1min, 0.1);
             tc.verifyGreaterThan(o.medonmax, 0.9);
         end
+
+        function fallingSticksFlatBranchPersistenceIsNaN(tc)
+            % all negative sticks are shorter than their spacing and fall flat (pi/2): the angles are
+            % constant, but their mean rounds, so std(angles) is not exactly zero
+            rng(3);
+            y = [0.3*rand(300, 1); -0.3*rand(700, 1)];
+            y = y(randperm(1000));
+            o = CO_FallingSticks(y);
+            tc.verifyEqual(o.propFlat_n, 1);
+            tc.verifyTrue(isnan(o.tau_n) && isnan(o.ac1_n));
+            tc.verifyTrue(isnan(o.tau_p) && isnan(o.ac1_p)); % so is the positive branch
+            tc.verifyEqual(o.std_all, 0);
+            tc.verifyTrue(isnan(o.skewness_all) && isnan(o.kurtosis_all));
+            tc.verifyEqual(o.q10_all, pi/2);
+        end
+
+        function fallingSticksOrdinarySeriesUnaffected(tc)
+            rng(4);
+            o = CO_FallingSticks(zscore(randn(1000, 1)));
+            tc.verifyFalse(any(isnan([o.tau_p o.tau_n o.ac1_p o.ac1_n o.skewness_all o.kurtosis_all])));
+            tc.verifyGreaterThan(o.std_all, 0.05);
+        end
     end
 end
