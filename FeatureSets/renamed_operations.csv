@@ -1304,3 +1304,7 @@ NL_LargestLyap_n1_ac20_ac1_3_mi_fnn_expfit_a,NL_LargestLyap_n1_ac1e30_ac1e1_3_mi
 NL_LargestLyap_n1_ac20_ac1_3_mi_fnn_expfit_b,NL_LargestLyap_n1_ac1e30_ac1e1_3_mi_fnn_expfit_b,"prediction horizon and Theiler window now in 'ac1e' units (30 and 1), horizon capped rather than NaN (see NL_LargestLyap)"
 NL_LargestLyap_n1_ac20_ac1_3_mi_fnn_expfit_r2,NL_LargestLyap_n1_ac1e30_ac1e1_3_mi_fnn_expfit_r2,"prediction horizon and Theiler window now in 'ac1e' units (30 and 1), horizon capped rather than NaN (see NL_LargestLyap)"
 NL_LargestLyap_n1_ac20_ac1_3_mi_fnn_expfit_rmse,NL_LargestLyap_n1_ac1e30_ac1e1_3_mi_fnn_expfit_rmse,"prediction horizon and Theiler window now in 'ac1e' units (30 and 1), horizon capped rather than NaN (see NL_LargestLyap)"
+PH_ForcePotential_dblwell_1_02_01_finaldev,PH_ForcePotential_dblwell_1_02_01_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_1_05_02_finaldev,PH_ForcePotential_dblwell_1_05_02_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_2_005_02_finaldev,PH_ForcePotential_dblwell_2_005_02_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_3_001_01_finaldev,PH_ForcePotential_dblwell_3_001_01_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
