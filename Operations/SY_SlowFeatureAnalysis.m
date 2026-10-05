@@ -167,8 +167,9 @@ Cx = cov(Xc); % 5 x 5
 Vp = Vp(:, ord);
 pcScores = Xc * Vp; % numWindows x 5, PC1 = pcScores(:,1)
 
-% Whitening (symmetric/ZCA, avoids an arbitrary rotation among near-degenerate
-% directions). Directions with near-zero variance relative to the leading one
+% Whitening (PCA whitening: the scores on the retained principal axes, each scaled
+% to unit variance; any rotation of the whitened space gives the same slowness
+% eigenvalues and slow components below). Directions with near-zero variance relative to the leading one
 % (e.g. a per-window statistic that barely varies across windows) are dropped
 % rather than whitened: full whitening would divide by their near-zero std and
 % amplify what is essentially estimation noise into a spuriously enormous

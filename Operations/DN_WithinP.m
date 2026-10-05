@@ -4,7 +4,8 @@ function out = DN_WithinP(x, p, meanOrMedian)
 % Returns the proportion of data points that lie within p units of the center
 % of the distribution. With 'mean', the center is the mean and the unit is the
 % standard deviation. With 'median', the center is the median and the unit is
-% 1.35 times the interquartile range.
+% the interquartile range divided by 1.35 (equal to the standard deviation for
+% Gaussian data).
 %
 % ---INPUTS:
 % x, the input data vector
