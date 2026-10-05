@@ -214,7 +214,14 @@ Y = zeros(Nemb, m);
 for j = 1:m
     Y(:, j) = y((1:Nemb) + (j - 1) * tau);
 end
-filePath = [tempname '.dat'];
+% Write to /tmp on unix (as BF_WriteTempFile does), not to TMPDIR: a scheduler's
+% per-job TMPDIR can contain characters that the shell running the TISEAN command
+% would expand (e.g., PBS array jobs' /var/tmp/pbs.<id>[<k>].<host> under csh)
+if isunix
+    filePath = [tempname('/tmp') '.dat'];
+else
+    filePath = [tempname '.dat'];
+end
 fid = fopen(filePath, 'w');
 fprintf(fid, [repmat('%.7g ', 1, m - 1) '%.7g\n'], Y');
 fclose(fid);
