@@ -179,7 +179,9 @@ for i = 1:nhps
 	% eval(sprintf('out.logh%u = loghyper(%u);',i,i));
 end
 
-if strcmp(covFunc{1}, 'covSum') && strcmp(covFunc{2}{1}, 'covSEiso') && strcmp(covFunc{2}{2}, 'covNoise')
+if strcmp(covFunc{1}, 'covSum') && numel(covFunc{2}) == 2 && ischar(covFunc{2}{1}) && ischar(covFunc{2}{2}) ...
+		&& strcmp(covFunc{2}{1}, 'covSEiso') && strcmp(covFunc{2}{2}, 'covNoise')
+	% (components with parameters, like {'covMaterniso',3}, are cells, not strings)
 	% Give extra output based on length parameter on length of time series
 	out.h_lonN = exp(loghyper(1)) / N;
 end
