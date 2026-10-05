@@ -234,7 +234,7 @@ CO_HistogramAMI(x_z,1:5,'std2',2)	CO_HistogramAMI_std2_2bin
 CO_JointNonGaussianity(x_z,'ac1e',2,{'ac',1},10000)	CO_JointNonGaussianity_ac1e_2_ac1_10000
 CO_JointNonGaussianity(x_z,'ac1e',3,{'ac',1},10000)	CO_JointNonGaussianity_ac1e_3_ac1_10000
 CO_MatrixProfile(x_z,{'ac',8},5000)	CO_MatrixProfile_ac_8_5000
-CO_PartialAutoCorr(x_z,20,'ols')  CO_PartialAutoCorr_20_ols
+CO_PartialAutoCorr(x_z,20,'burg')  CO_PartialAutoCorr_20_burg
 CO_PosNegAsymmetry(x_z)	CO_PosNegAsymmetry_y
 CO_Quantilogram(x_z,1)	CO_Quantilogram_1
 CO_Quantilogram(x_z,'mi')	CO_Quantilogram_mi
