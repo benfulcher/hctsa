@@ -66,6 +66,10 @@ c        read int(rand*nmax-(mt-1)*id)+1, which can fall below 1)
  20      ju(iperm)=ih
 c     there are only nvalid embedded points to use as centers
       iu=min(ncmin,nvalid)
+c     number of centers: each contributes exactly one log distance below
+c     (this used to divide by ncmin-(mt-1)*id, inflating the mean log
+c     radius by ncmin/(ncmin-(mt-1)*id) and biasing every dimension low)
+      nused=iu
       eln=0
       nsweep=0
  1    call mbase(ncomp+(mt-1)*id,mmax,nxx,y,id,m,jh,jpntr,eps)
@@ -107,7 +111,7 @@ c     no further neighbors can turn up; give up on this mass
          return
       endif
       if(iunp.ne.0) goto 1
-      eln=eln/(ncmin-(mt-1)*id)
+      eln=eln/nused
       end
 
 c digamma function
