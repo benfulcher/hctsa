@@ -118,7 +118,7 @@ end
 theta = diff(m(:, 2)) ./ diff(m(:, 1));
 theta = atan(theta); % measured as deviation from the horizontal
 
-if doPlot, ksdensity(theta); end % can plot distribution of angles
+if doPlot, [f, xi] = BF_KSDensity(theta); plot(xi, f); end % can plot distribution of angles
 out.theta_ac1 = CO_AutoCorr(theta, 1, 'Fourier');
 out.theta_ac2 = CO_AutoCorr(theta, 2, 'Fourier');
 out.theta_ac3 = CO_AutoCorr(theta, 3, 'Fourier');
@@ -126,8 +126,11 @@ out.theta_ac3 = CO_AutoCorr(theta, 3, 'Fourier');
 out.theta_mean = mean(theta);
 out.theta_std = std(theta);
 
-binEdges = linspace(-pi / 2, pi / 2, 11); % 10 bins in the histogram
-[px, binEdges] = histcounts(theta, binEdges, 'Normalization', 'probability');
+% 10 equal bins on the support of the angles (-pi/2, pi/2) (explicit edges, so that
+% angles of exactly zero from tied values or of exactly +/-pi/2 from a vertical
+% step fall in the same bin whatever the rounding):
+binEdges = BF_HistEdges(theta, 10, [-pi / 2, pi / 2]);
+px = histcounts(theta, binEdges, 'Normalization', 'probability');
 binWidths = diff(binEdges);
 out.hist10std = std(px);
 out.histent = -sum(px(px > 0) .* log(px(px > 0) ./ binWidths(px > 0)));
@@ -136,15 +139,13 @@ out.histent = -sum(px(px > 0) .* log(px(px > 0) ./ binWidths(px > 0)));
 % Stationarity in fifths of the time series
 % -------------------------------------------------------------------------------
 % Use histograms with 4 bins
-x = linspace(-pi / 2, pi / 2, 5); % 4 bins
+binEdges4 = BF_HistEdges(theta, 4, [-pi / 2, pi / 2]);
 afifth = floor((N - 1) / 5); % -1 because angles are correlations *between* points
-n = zeros(length(x), 5);
+n = zeros(4, 5);
 for i = 1:5
-	n(:, i) = histc(theta(afifth * (i - 1) + 1:afifth * i), x);
+	n(:, i) = histcounts(theta(afifth * (i - 1) + 1:afifth * i), binEdges4);
 end
 n = n / afifth;
-n(4, :) = n(4, :) + n(5, :);
-n(5, :) = [];
 
 % Output the standard deviation across fifths of the proportion in each bin:
 for i = 1:4
