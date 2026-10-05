@@ -26,9 +26,9 @@ function x = BF_Random(n, seed, kind)
 %                 uniforms (u1, u2) = (2k-1, 2k) give the normal numbers
 %                 sqrt(-2*log(u1))*cos(2*pi*u2) and sqrt(-2*log(u1))*sin(2*pi*u2)
 %                 as values 2k-1 and 2k
-%       'perm': a random permutation of 1..n by a Fisher-Yates shuffle: for
-%               i = n down to 2, element i is swapped with element floor(u*i)+1,
-%               where u is the next uniform
+%       'perm': a random permutation of 1..n: the ranks of n uniform numbers, i.e.
+%               the indices that sort them ([~, x] = sort(u); ties, which have a
+%               probability of about n^2/2^33, go to the lower index)
 %
 % ---OUTPUTS:
 % x, a column vector (n-by-1)
@@ -40,6 +40,12 @@ function x = BF_Random(n, seed, kind)
 % and returns (p1 - p2 [+ 4294967087 if p1 <= p2]) * 2.328306549295727688e-10.
 % Uniform draws agree exactly between languages; normal draws agree to the
 % rounding of the platform's log, cos and sin (about 1e-16).
+%
+% Speed: the recurrence is linear, so a long stream is cut into blocks of 2^6 draws
+% whose starting states are obtained by jump-ahead (powers of the 3-by-3 transition
+% matrices modulo m1 and m2, in exact uint64 arithmetic) and the blocks are then
+% advanced together as columns. This returns exactly the same numbers as the plain
+% one-draw-at-a-time loop (used for short streams), only faster for long ones.
 %
 % ---REFERENCES:
 % P. L'Ecuyer, "Good parameters and implementations for combined multiple recursive
@@ -85,52 +91,125 @@ if nargin < 3 || isempty(kind)
 	kind = 'uniform';
 end
 
-m1 = 4294967087;
-m2 = 4294944443;
 if isscalar(seed)
-	s = (12345 + seed) * ones(1, 6); % the six state words
+	s0 = (12345 + seed) * ones(1, 6); % the six state words
 	numSkip = 8; % decorrelate neighboring seeds
 else
-	s = seed(:)'; % raw state
+	s0 = seed(:)'; % raw state
 	numSkip = 0;
 end
 
 switch kind
 	case 'uniform'
-		x = nextUniforms(n);
+		x = nextUniforms(s0, numSkip, n);
 	case 'normal'
 		m = ceil(n / 2);
-		u = nextUniforms(2 * m);
+		u = nextUniforms(s0, numSkip, 2 * m);
 		r = sqrt(-2 * log(u(1:2:end)));
 		theta = 2 * pi * u(2:2:end);
 		x = reshape([r .* cos(theta), r .* sin(theta)]', [], 1);
 		x = x(1:n);
 	case 'perm'
-		x = (1:n)';
-		u = nextUniforms(max(n - 1, 0));
-		for i = n:-1:2
-			j = floor(u(n - i + 1) * i) + 1; % uniform on 1..i
-			t = x(i); x(i) = x(j); x(j) = t;
-		end
+		[~, x] = sort(nextUniforms(s0, numSkip, n));
 	otherwise
 		error('Unknown kind ''%s''', kind);
 end
 
-	function u = nextUniforms(k)
-		u = zeros(k, 1);
-		for ii = 1:(k + numSkip)
-			p1 = mod(1403580 * s(2) - 810728 * s(1), m1);
-			s(1:3) = [s(2), s(3), p1];
-			p2 = mod(527612 * s(6) - 1370589 * s(4), m2);
-			s(4:6) = [s(5), s(6), p2];
-			if ii > numSkip
-				if p1 > p2
-					u(ii - numSkip) = (p1 - p2) * 2.328306549295727688e-10;
-				else
-					u(ii - numSkip) = (p1 - p2 + m1) * 2.328306549295727688e-10;
-				end
-			end
-		end
-	end
-
 end
+
+% ------------------------------------------------------------------------------
+function u = nextUniforms(s0, numSkip, k)
+% k uniforms after discarding numSkip draws, starting from the state s0 (six words)
+m1 = 4294967087;
+m2 = 4294944443;
+total = k + numSkip;
+if total <= 3000
+	p1 = zeros(total, 1);
+	p2 = zeros(total, 1);
+	a1 = s0(1); b1 = s0(2); c1 = s0(3);
+	a2 = s0(4); b2 = s0(5); c2 = s0(6);
+	for ii = 1:total
+		d1 = mod(1403580 * b1 - 810728 * a1, m1);
+		a1 = b1; b1 = c1; c1 = d1;
+		d2 = mod(527612 * c2 - 1370589 * a2, m2);
+		a2 = b2; b2 = c2; c2 = d2;
+		p1(ii) = d1;
+		p2(ii) = d2;
+	end
+else
+	% blocks of L = 2^p draws, B of them side by side
+	p = 6;
+	L = 2^p;
+	B = ceil(total / L);
+	J1 = jumpMatrices(1);
+	J2 = jumpMatrices(2);
+	X1 = uint64(s0(1:3)');
+	X2 = uint64(s0(4:6)');
+	q = 0;
+	while size(X1, 2) < B % block j starts at A^(jL) * s0, built up by doubling
+		X1 = [X1, applyMod(J1{p + q + 1}, X1, uint64(m1))]; %#ok<AGROW>
+		X2 = [X2, applyMod(J2{p + q + 1}, X2, uint64(m2))]; %#ok<AGROW>
+		q = q + 1;
+	end
+	a1 = double(X1(1, 1:B))'; b1 = double(X1(2, 1:B))'; c1 = double(X1(3, 1:B))';
+	a2 = double(X2(1, 1:B))'; b2 = double(X2(2, 1:B))'; c2 = double(X2(3, 1:B))';
+	P1 = zeros(B, L);
+	P2 = zeros(B, L);
+	for ii = 1:L
+		% (x - m*floor(x/m), corrected by one m, is exact here and much faster than mod)
+		d1 = 1403580 * b1 - 810728 * a1;
+		d1 = d1 - m1 * floor(d1 / m1);
+		d1 = d1 + m1 * (d1 < 0) - m1 * (d1 >= m1);
+		a1 = b1; b1 = c1; c1 = d1;
+		d2 = 527612 * c2 - 1370589 * a2;
+		d2 = d2 - m2 * floor(d2 / m2);
+		d2 = d2 + m2 * (d2 < 0) - m2 * (d2 >= m2);
+		a2 = b2; b2 = c2; c2 = d2;
+		P1(:, ii) = d1;
+		P2(:, ii) = d2;
+	end
+	p1 = P1.'; % column j holds draws (j-1)*L+1 ... j*L
+	p2 = P2.';
+	p1 = p1(1:total)';
+	p2 = p2(1:total)';
+end
+p1 = p1(numSkip + 1:end);
+p2 = p2(numSkip + 1:end);
+u = (p1 - p2 + m1 * (p1 <= p2)) * 2.328306549295727688e-10;
+u = reshape(u, [], 1);
+end
+
+% ------------------------------------------------------------------------------
+function J = jumpMatrices(comp)
+% J{q+1} = (transition matrix of component comp)^(2^q) modulo its modulus, exact
+persistent cache
+if isempty(cache)
+	cache = cell(2, 1);
+end
+if isempty(cache{comp})
+	if comp == 1
+		m = uint64(4294967087);
+		A = uint64([0 1 0; 0 0 1; 4294967087 - 810728, 1403580, 0]);
+	else
+		m = uint64(4294944443);
+		A = uint64([0 1 0; 0 0 1; 4294944443 - 1370589, 0, 527612]);
+	end
+	J = cell(1, 40);
+	J{1} = A;
+	for q = 2:40
+		J{q} = applyMod(J{q - 1}, J{q - 1}, m);
+	end
+	cache{comp} = J;
+end
+J = cache{comp};
+end
+
+function Y = applyMod(M, X, m)
+% M*X modulo m for uint64 M (3-by-3) and X (3-by-k), entries below m (< 2^32), so every
+% product is exact in uint64
+Y = zeros(3, size(X, 2), 'uint64');
+for r = 1:3
+	Y(r, :) = rem(rem(M(r, 1) * X(1, :), m) + rem(M(r, 2) * X(2, :), m) + rem(M(r, 3) * X(3, :), m), m);
+end
+end
+
