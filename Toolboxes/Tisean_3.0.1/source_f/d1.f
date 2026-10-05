@@ -44,14 +44,18 @@ c===========================================================================
       write(istderr(),*) 'Mass ', exp(pln),': k=', k, ', N=', ncomp 
       call rms(nmax,y,sc,sd)
       eps=exp(pln/m)*sd
-      do 10 i=1,nmax-(mt-1)*id
+      nvalid=nmax-(mt-1)*id
+      do 10 i=1,nvalid
  10      ju(i)=i+(mt-1)*id
-      do 20 i=1,nmax-(mt-1)*id
-         iperm=min(int(rand(0.0)*nmax-(mt-1)*id)+1,nmax-(mt-1)*id)
+      do 20 i=1,nvalid
+c        random partner among the nvalid embedded points (this used to
+c        read int(rand*nmax-(mt-1)*id)+1, which can fall below 1)
+         iperm=min(int(rand(0.0)*nvalid)+1,nvalid)
          ih=ju(i)
          ju(i)=ju(iperm)
  20      ju(iperm)=ih
-      iu=ncmin
+c     there are only nvalid embedded points to use as centers
+      iu=min(ncmin,nvalid)
       eln=0
  1    call mbase(ncomp+(mt-1)*id,mmax,nxx,y,id,m,jh,jpntr,eps)
       iunp=0
