@@ -1359,3 +1359,7 @@ SC_FluctAnal_mag_2_dfa_50_2_logi_ratsplitminerr,SC_FluctAnal_mag_2_dfa_50_2_logi
 SC_FluctAnal_mag_2_dfa_50_2_logi_alpharat,SC_FluctAnal_mag_2_dfa_50_2_logi_alphadiff,"ratio of the two regimes' slopes (one near 0) replaced by their difference r1_alpha - r2_alpha"
 SC_FluctAnal_sign_2_dfa_50_2_logi_ratsplitminerr,SC_FluctAnal_sign_2_dfa_50_2_logi_splitgain,"ratio of the two-line error to the single-line error replaced by one minus that ratio (between 0 and 1)"
 SC_FluctAnal_sign_2_dfa_50_2_logi_alpharat,SC_FluctAnal_sign_2_dfa_50_2_logi_alphadiff,"ratio of the two regimes' slopes (one near 0) replaced by their difference r1_alpha - r2_alpha"
+PH_ForcePotential_dblwell_1_02_01_finaldev,PH_ForcePotential_dblwell_1_02_01_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_1_05_02_finaldev,PH_ForcePotential_dblwell_1_05_02_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_2_005_02_finaldev,PH_ForcePotential_dblwell_2_005_02_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
+PH_ForcePotential_dblwell_3_001_01_finaldev,PH_ForcePotential_dblwell_3_001_01_meanabs,"the final position |x(end)| (one sample of a chaotic trajectory) replaced by the mean of |x| over the whole trajectory"
