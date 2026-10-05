@@ -1504,3 +1504,4 @@ MF_FitSubsegments_arsbc_rand_25_01_sbcs_std,MF_FitSubsegments_arsbc_spread_25_01
 MF_FitSubsegments_arsbc_rand_25_01_sbcs_range,MF_FitSubsegments_arsbc_spread_25_01_sbcs_range,"start points of the segments from the golden-ratio sequence (deterministic, evenly spread) instead of random draws"
 MF_FitSubsegments_arsbc_rand_25_01_sbcs_min,MF_FitSubsegments_arsbc_spread_25_01_sbcs_min,"start points of the segments from the golden-ratio sequence (deterministic, evenly spread) instead of random draws"
 MF_FitSubsegments_arsbc_rand_25_01_sbcs_max,MF_FitSubsegments_arsbc_spread_25_01_sbcs_max,"start points of the segments from the golden-ratio sequence (deterministic, evenly spread) instead of random draws"
+SY_SlidingWindow_asymac1_permen10_2,,deregistered: permutation entropy of ~19 window values is sampling noise (split-half reliability 0.02 on the 1000x1000 series)
