@@ -622,14 +622,14 @@ MF_armax(x_z,[3,1],0.5,1)	MF_armax_3_1_05_1
 MF_GARCHcompare(x_z,'ar',1:3,1:3)	MF_compare_GARCH_ar_1_3_1_3
 MF_CompareAR(x_z,1:10,0.5)	MF_CompareAR_1_10_05
 MF_CompareAR(x_z,1:10,'all')	MF_CompareAR_1_10_all
-MF_CompareTestSets(x_z,'ar',4,'rand',[25,0.1],1,'default')	MF_CompareTestSets_y_ar_4_rand_25_01_1
+MF_CompareTestSets(x_z,'ar',4,'spread',[25,0.1],1)	MF_CompareTestSets_y_ar_4_spread_25_01_1
 MF_CompareTestSets(x_z,'ar','best','uniform',[25,0.1],1)	MF_CompareTestSets_y_ar_best_uniform_25_01_1
 MF_CompareTestSets(x_z,'ss',2,'uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_2_uniform_25_01_1
 MF_CompareTestSets(x_z,'ss','best','uniform',[25,0.1],1)	MF_CompareTestSets_y_ss_best_uniform_25_01_1
 MF_ExpSmoothing(x_z,0.5,'best')	MF_ExpSmoothing_05_best
 MF_FitSubsegments(x_z,'ar',2,'uniform',[25,0.1])	MF_FitSubsegments_ar_2_uniform_25_01
 MF_FitSubsegments(x_z,'arcrosspred',2,'uniform',5)	MF_FitSubsegments_arcrosspred_2_uniform_5
-MF_FitSubsegments(x_z,'arsbc',[],'rand',[25,0.1],'default')	MF_FitSubsegments_arsbc_rand_25_01
+MF_FitSubsegments(x_z,'arsbc',[],'spread',[25,0.1])	MF_FitSubsegments_arsbc_spread_25_01
 MF_FitSubsegments(x_z,'arsbc',[],'uniform',[25,0.1])	MF_FitSubsegments_arsbc_uniform_25_01
 MF_FitSubsegments(x_z,'ss',2,'uniform',[25,0.1])	MF_FitSubsegments_ss_2_uniform_25_01
 MF_GARCHfit(x_z,'ar',1,1)    MF_GARCHfit_ar_P1_Q1
