@@ -121,5 +121,66 @@ classdef Robust_finishTests < matlab.unittest.TestCase
             tc.verifyEqual(a.rmgd, b.rmgd);
             tc.verifyEqual(sort(a.rmgd), sort(BF_Random(800, 0, 'normal')), 'AbsTol', 0);
         end
+
+        % ---------------------------------------------------------------------
+        % explicit bin edges and bandwidths (no MATLAB defaults)
+        % ---------------------------------------------------------------------
+        function mutualInformationExplicitBins(tc)
+            y = Robust_finishTests.series(2000, 11);
+            a = BF_MutualInformation(y(1:end - 1), y(2:end), 'range', 'range', 10);
+            tc.verifyTrue(isfinite(a) && a > 0);
+            % lattice-valued data: a value exactly on an edge always goes to the same bin,
+            % whatever the last bit of a rescaling does
+            yl = mod(0:1999, 11)' + 0; % values 0..10, with edges of 11 bins on the lattice
+            m1 = BF_MutualInformation(yl(1:end - 1), yl(2:end), 'range', 'range', 11);
+            m2 = BF_MutualInformation(yl(1:end - 1) * 0.1, yl(2:end) * 0.1, 'range', 'range', 11);
+            m3 = BF_MutualInformation(yl(1:end - 1) * 3, yl(2:end) * 3, 'range', 'range', 11);
+            tc.verifyEqual(m1, m2, 'AbsTol', 1e-12);
+            tc.verifyEqual(m1, m3, 'AbsTol', 1e-12);
+            % a tiny-scale series is binned like any other (no absolute offsets)
+            tc.verifyEqual(BF_MutualInformation(y(1:end - 1) * 1e-9, y(2:end) * 1e-9, 'range', 'range', 10), a, 'AbsTol', 1e-12);
+            tc.verifyTrue(isnan(BF_MutualInformation(ones(100, 1), (1:100)', 'range', 'range', 10))); % constant: undefined
+        end
+
+        function distributionFitsUseExplicitDensity(tc)
+            y = Robust_finishTests.series(1500, 12);
+            for nb = {'sqrt', 0, 15}
+                o = DN_SimpleFit(y, 'gauss1', nb{1});
+                tc.verifyTrue(isfinite(o.r2) && o.r2 > 0.5, sprintf('%s', num2str(nb{1})));
+                tc.verifyEqual(o, DN_SimpleFit(y, 'gauss1', nb{1}));
+            end
+            tc.verifyTrue(isnan(DN_SimpleFit(ones(200, 1), 'gauss1', 0))); % constant: no density
+        end
+
+        function triangularIndexAndAsymmetryUseExplicitBins(tc)
+            y = Robust_finishTests.series(1000, 13);
+            o = MD_RawHRVMeas(y);
+            e = BF_HistEdges(y, 10);
+            tc.verifyEqual(o.tri10, 1000 / max(histcounts(y, e)));
+            tc.verifyEqual(MD_hrv_classic(y).tri, o.tri10);
+            h = DN_HistogramAsymmetry(y, 11, false);
+            tc.verifyTrue(h.modeProbPos > 0 && h.modeProbNeg > 0);
+            % all values on one side of the mean: no histogram on the other side
+            yo = [ones(50, 1); 2 * ones(50, 1)]; yo = (yo - mean(yo)) / std(yo);
+            ho = DN_HistogramAsymmetry(yo, 11, false);
+            tc.verifyEqual(ho.modeProbPos, 0.5);
+        end
+
+        function portaLevelsOnLatticeAreScaleInvariant(tc)
+            [~, shuffle] = sort(BF_Random(1000, 1));
+            yl = repmat((0:9)', 100, 1); yl = yl(shuffle);
+            a = MD_Porta(yl, 6);
+            b = MD_Porta(yl * 0.1, 6);
+            tc.verifyEqual(a, b);
+        end
+
+        function walkerAndReturnTimeRun(tc)
+            y = Robust_finishTests.series(1500, 14);
+            w = PH_Walker(y, 'biasprop', [0.1, 0.5]);
+            tc.verifyTrue(isfinite(w.sw_distdiff) && w.sw_distdiff >= 0 && w.sw_distdiff <= 2);
+            r = NL_ReturnTime(y, 0.05, 100, {'ac', 1}, 500, {1, 3});
+            tc.verifyTrue(isfinite(r.hhisthist) && r.maxhisthist > 0 && r.maxhisthist <= 1);
+            tc.verifyEqual(r, NL_ReturnTime(y, 0.05, 100, {'ac', 1}, 500, {1, 3}));
+        end
     end
 end
