@@ -900,6 +900,7 @@ SY_LocalGlobal(x_z,'unicg',100)     SY_LocalGlobal_unicg100
 SY_LocalGlobal(x_z,'unicg',500)     SY_LocalGlobal_unicg500
 SY_PPtest(x_z,0:5,'ar','t1')	SY_PPtest_0_5_ar_t1
 SY_RampingWindows(x_z,10)	SY_RampingWindows_10
+SY_RampingWindows(x_z,10,'ac1e')	SY_RampingWindows_10_ac1e
 SY_RangeEvolve(x_z)	SY_RangeEvolve
 SY_SlidingWindow(x_z,'AC1','ent',2,1)			SY_SlidingWindow_ac1_ent2_1
 SY_SlidingWindow(x_z,'AC1','ent',10,1)		SY_SlidingWindow_ac1_ent10_1
