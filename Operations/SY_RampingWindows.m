@@ -1,4 +1,4 @@
-function out = SY_RampingWindows(y, numSeg)
+function out = SY_RampingWindows(y, numSeg, asymTau)
 % SY_RampingWindows   Monotonic trend ('ramping') in windowed statistics.
 %
 % Splits the time series into numSeg non-overlapping segments (discarding any
@@ -25,14 +25,17 @@ function out = SY_RampingWindows(y, numSeg)
 % shape trend isn't conflated with the (separately tracked) scale trend in the
 % variance.
 %
-% asymAC1 is a nonlinear, asymmetric variant of the lag-1 autocorrelation:
-% mean(x_t * x_{t+1} * (x_{t+1} - x_t)), with x z-scored *within* each segment.
-% It is the difference between the statistic computed forwards (mean(x_t *
-% x_{t+1}^2)) and on the time-reversed segment (mean(x_{t+1} * x_t^2)): swapping
-% x_t and x_{t+1} negates the expression, so it is antisymmetric under time
-% reversal and zero in expectation for any time-reversible process (in the same
-% spirit as CO_trev). A ramp in asymAC1 therefore flags a trend specifically in
-% the series' local time-asymmetry/nonlinearity.
+% asymAC1 is a nonlinear, asymmetric variant of the autocorrelation at lag tau
+% (default tau = 1): mean(x_t * x_{t+tau} * (x_{t+tau} - x_t)), with x z-scored
+% *within* each segment. It is the difference between the statistic computed
+% forwards (mean(x_t * x_{t+tau}^2)) and on the time-reversed segment
+% (mean(x_{t+tau} * x_t^2)): swapping x_t and x_{t+tau} negates the expression,
+% so it is antisymmetric under time reversal and zero in expectation for any
+% time-reversible process (in the same spirit as CO_trev). A ramp in asymAC1
+% therefore flags a trend specifically in the series' local time-asymmetry/
+% nonlinearity. The lag can be set from the series' own correlation time
+% (asymTau = 'ac1e'), so that the statistic is not dominated by smoothness when
+% the series is oversampled.
 %
 % ---INPUTS:
 % y, the input time series
@@ -44,6 +47,12 @@ function out = SY_RampingWindows(y, numSeg)
 %         between adjacent window statistics, which would inflate the apparent
 %         monotonic trend independent of any real ramping in the data.
 %         Returns NaN if segments would be shorter than 20 samples.
+%
+% asymTau, the lag, tau, of asymAC1 (default: 1): an integer number of samples,
+%         or 'ac1e' to use the floor of the first 1/e crossing of the
+%         autocorrelation function of the whole series (at least 1; see
+%         BF_GetTau). The asymac1_* outputs are NaN if tau cannot be set from
+%         the series, or if tau >= segment length - 1 (too few pairs).
 %
 % ---OUTPUTS:
 % For each of the statistics mean, var, skew, kurt, ac1, asymac1 (X below):
@@ -93,6 +102,9 @@ N = length(y);
 if nargin < 2 || isempty(numSeg)
     numSeg = 10;
 end
+if nargin < 3 || isempty(asymTau)
+    asymTau = 1; % lag of asymAC1
+end
 
 minNumSeg = 5; % need enough segments for a meaningful trend statistic
 minSegLength = 20; % heuristic minimum for meaningful skewness/kurtosis/AC1 estimates
@@ -105,6 +117,14 @@ segLength = floor(N / numSeg);
 if segLength < minSegLength
     warning('Time series (N = %u) too short for %u segments of a meaningful length', N, numSeg);
     out = NaN; return
+end
+
+% Lag of asymAC1 (an adaptive lag is set from the whole series, not per segment):
+if ischar(asymTau)
+    asymTau = BF_GetTau(y(:), asymTau); % NaN if it cannot be set
+end
+if ~isscalar(asymTau) || ~isnumeric(asymTau) || (~isnan(asymTau) && (asymTau < 1 || asymTau ~= round(asymTau)))
+    error('asymTau must be a positive integer or a BF_GetTau rule (e.g., ''ac1e'')');
 end
 
 % ------------------------------------------------------------------------------
@@ -124,11 +144,13 @@ segVar = var(z);
 segSkew = skewness(z);
 segKurt = kurtosis(z);
 segAC1 = zeros(1, numSeg);
-segAsymAC1 = zeros(1, numSeg);
+segAsymAC1 = NaN(1, numSeg);
 for i = 1:numSeg
     segAC1(i) = CO_AutoCorr(z(:, i), 1, 'Fourier');
-    zseg = zscore(z(:, i)); % z-scored *within* this segment
-    segAsymAC1(i) = mean(zseg(1:end - 1) .* zseg(2:end) .* (zseg(2:end) - zseg(1:end - 1)));
+    if ~isnan(asymTau) && asymTau < segLength - 1 % need pairs to average over
+        zseg = zscore(z(:, i)); % z-scored *within* this segment
+        segAsymAC1(i) = mean(zseg(1:end - asymTau) .* zseg(1 + asymTau:end) .* (zseg(1 + asymTau:end) - zseg(1:end - asymTau)));
+    end
 end
 
 % ------------------------------------------------------------------------------
