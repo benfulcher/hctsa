@@ -3,7 +3,8 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %
 % Coarse-grains the time series into a sequence of symbols from a small alphabet,
 % and measures how surprised a forecaster with a local memory of the past memory
-% symbols would be by each new symbol. For a random sample of numIters test points,
+% symbols would be by each new symbol. At each test point (every point with a full
+% memory before it, or a fixed subsample of numIters of them for long series),
 % the forecaster estimates the probability p of the symbol that actually occurred,
 % using only the preceding memory symbols, and the 'information gained' (surprise)
 % is -log(p), in nats.
@@ -48,10 +49,13 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %          (iii) 'embed2quadrants': 4-letter alphabet of the quadrant each data
 %                            point resides in a two-dimensional embedding space.
 %
-% numIters, the number of test points (a random sample of the points that have a
-%           full memory before them) to repeat the procedure for (default 500).
+% numIters, the number of test points to use (default 500). If there are at most
+%           2*numIters points with a full memory before them, all of them are used;
+%           otherwise numIters of them, spread evenly by a golden-ratio sequence
+%           (deterministic, and free of aliasing with periodic series).
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, ignored: the test points are deterministic. Kept so that existing
+%           calls still run.
 %
 % ---OUTPUTS:
 % min, max, median, mean, sum, std: the minimum (of the nonzero values), maximum,
@@ -61,9 +65,10 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %       symbol itself for 'dist'; the preceding 1 or 2 symbols for 'T1'/'T2') was
 %       never observed anywhere in the memory window (always 0 for 'dist')
 % effectSize: |mean - 1| / std, the standardized distance of the mean surprise from
-%       1 nat; the length-stable form, and the one hctsa registers
+%       1 nat; the length-stable form, and the one hctsa registers (NaN if the
+%       surprise does not vary, std at rounding level relative to the mean)
 % tstat: effectSize * sqrt(number of test points), the t-statistic of the mean
-%       surprise against 1 nat (NaN if std is 0)
+%       surprise against 1 nat (NaN under the same condition)
 %
 % ---NOTES:
 % For 'embed2quadrants' with numGroups = 'ac1e' (what hctsa registers), the delay is
@@ -129,16 +134,9 @@ if nargin < 5 || isempty(coarseGrainMethod)
 	coarseGrainMethod = 'quantile'; % symbolize time series by their values (quantile)
 end
 
-% numIters: number of iterations
+% numIters: number of test points (all of them, unless there are more than 2*numIters)
 if nargin < 6 || isempty(numIters)
 	numIters = 500;
-	% number of iterations of the procedure to perform (does it with random samples)
-	% could also imagine doing it exhaustively...?!
-end
-
-% randomSeed: how to treat the randomization
-if nargin < 7
-	randomSeed = []; % default for BF_ResetSeed
 end
 
 % ------------------------------------------------------------------------------
@@ -171,21 +169,18 @@ end
 
 N = length(yth); % will be the same as y, for 'quantile', and 'diff'
 
-% Select random samples to test:
-BF_ResetSeed(randomSeed); % control random seed (for reproducibility)
-rs = randperm(N - memory) + memory; % Can't do beginning of time series, up to memory
-rs = sort(rs(1:min(numIters, end))); % Just use a random sample of numIters points to test
+% Select the test points (can't test the beginning of the time series, up to memory):
+numAvailable = N - memory;
+if numAvailable <= 2 * numIters
+	rs = (memory + 1:N)'; % every point with a full memory before it
+else
+	% numIters points spread over the available range by a golden-ratio sequence
+	rs = unique(memory + 1 + floor(numAvailable * mod((1:numIters)' * 0.6180339887498949, 1)));
+end
 
 % -------------------------------------------------------------------------------
 % Compute empirical probabilities from time series
 % -------------------------------------------------------------------------------
-% Preallocate to the number of test points actually available, numTest, which is
-% min(numIters, N-memory) -- NOT numIters. Sizing these to numIters left the
-% trailing entries at zero whenever N-memory < numIters (i.e. short time series),
-% and those spurious zeros then contaminated every output: nAntecedent==0 counted
-% them as unseen antecedents (inflating propUnseen by exactly the padding
-% fraction), and -log(0) turned them into +Inf in store (making mean/median/
-% quantiles/max/sum Inf and std/tstat NaN for any N < memory+numIters).
 numTest = length(rs);
 store = zeros(numTest, 1); % store probabilities
 nAntecedent = zeros(numTest, 1); % how many times the antecedent pattern was seen in memory
@@ -259,23 +254,16 @@ out.lq = quantile(store, 0.25); % lower quartile
 out.uq = quantile(store, 0.75); % upper quartile
 out.std = std(store); % standard deviation
 
-% Standardized distance of the mean information gain from 1.
-%
-% effectSize is the length-stable form and is what the hctsa library registers;
-% tstat is effectSize * sqrt(numTest) and is retained for callers who want the
-% significance rather than the size of the departure.
-%
-% numTest saturates at numIters once the series is long enough, but below that
-% it equals N-memory, so tstat grows with time-series length by construction for
-% short series -- measured eta^2 against N of 0.75-0.82 across the registered
-% variants, against 0.55-0.69 when a preallocation bug was (wrongly) holding the
-% denominator fixed at numIters. Dividing the length back out leaves a quantity
-% that describes the process rather than the sample size.
-if out.std == 0
-	out.tstat = NaN; % can't compute this if there is no variation
+% Standardized distance of the mean information gain from 1 nat. effectSize is the
+% length-stable form and is what the hctsa library registers; tstat is
+% effectSize * sqrt(numTest). When the surprise does not vary (std at rounding
+% level relative to the mean, e.g. for a perfectly periodic series) the ratio is
+% rounding noise, so both are NaN.
+if out.std < 1e-8 * out.mean
 	out.effectSize = NaN;
+	out.tstat = NaN;
 else
-	out.effectSize = abs((out.mean - 1) / out.std);
+	out.effectSize = abs(out.mean - 1) / out.std;
 	out.tstat = out.effectSize * sqrt(numTest);
 end
 
