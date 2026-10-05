@@ -55,15 +55,30 @@ c     Ask for no more than exist, and for nothing at all if there are none.
       call rms(nmax,y,sc,sd)
       eps=exp(pln/m)*sd
       nvalid=nmax-(mt-1)*id
+c     The centers are the embedded points in a fixed order whose first
+c     iu entries are spread evenly over the series (a lattice rule with the
+c     golden-ratio stride, a permutation of the nvalid points since the
+c     stride is made coprime to nvalid), instead of the first iu entries
+c     of a random permutation: the estimate then does not depend on which
+c     centers a random generator happened to pick.
+      istr=int(real(nvalid)*0.6180339887)
+      if(istr.lt.1) istr=1
+ 12   ia=istr
+      ib=nvalid
+ 13   if(ib.ne.0) then
+         ic=mod(ia,ib)
+         ia=ib
+         ib=ic
+         goto 13
+      endif
+      if(ia.ne.1.and.nvalid.gt.1) then
+         istr=istr+1
+         goto 12
+      endif
+      iacc=0
       do 10 i=1,nvalid
- 10      ju(i)=i+(mt-1)*id
-      do 20 i=1,nvalid
-c        random partner among the nvalid embedded points (this used to
-c        read int(rand*nmax-(mt-1)*id)+1, which can fall below 1)
-         iperm=min(int(rand(0.0)*nvalid)+1,nvalid)
-         ih=ju(i)
-         ju(i)=ju(iperm)
- 20      ju(iperm)=ih
+         ju(i)=iacc+1+(mt-1)*id
+ 10      iacc=mod(iacc+istr,nvalid)
 c     there are only nvalid embedded points to use as centers
       iu=min(ncmin,nvalid)
       eln=0
