@@ -36,8 +36,8 @@ function out = EN_DistributionEntropy(y, histOrKS, numBins, olremp)
 % ---OUTPUTS:
 % a scalar: the entropy estimate (in nats), or, if olremp is nonzero, the
 % entropy of the full time series minus that of the trimmed time series.
-% NaN if everything is removed by the trimming, or if the 'ks' grid range is
-% degenerate (near-constant series).
+% NaN if everything is removed by the trimming, or if the data (after trimming) are
+% constant, for which the differential entropy is not defined.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -106,6 +106,9 @@ end
 % ------------------------------------------------------------------------------
 switch histOrKS
 	case 'hist' % Use histogram to calculate pdf
+		if range(y) == 0 % constant: the differential entropy is not defined
+			out = NaN; return
+		end
 		binEdges = BF_HistEdges(y, numBins); % explicit edges, whether a number of bins or a rule
 		px = histcounts(y, binEdges, 'Normalization', 'probability');
 		% Compute bin centers:
