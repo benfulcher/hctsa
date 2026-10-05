@@ -17,7 +17,8 @@ function out = CO_HistogramAMI(y, tau, meth, numBins)
 %       'std1', 'std2': numBins bins across -1 to 1 or -2 to 2 (the series is
 %                       assumed to be z-scored), plus an extra bin beyond each
 %                       edge that the series exceeds, to include outliers,
-%       'quantiles': equiprobable bins chosen using quantiles.
+%       'quantiles': equiprobable bins chosen using quantiles (fewer bins if
+%                    values are tied at a quantile).
 % numBins, the number of bins (default 10)
 %
 % ---OUTPUTS:
@@ -85,36 +86,32 @@ end
 
 % same for both -- assume same distribution (true for stationary processes,
 % or small lags)
+% (the edges are explicit; see BF_HistEdges and BF_QuantileEdges, which place
+% edges so that a value exactly on one always falls in the same bin)
 switch meth
 	case 'even'
-		b = linspace(min(y), max(y), numBins + 1);
-		% Add increment buffer to ensure all points are included:
-		inc = 0.1;
-		b(1) = b(1) - inc;
-		b(end) = b(end) + inc;
+		b = BF_HistEdges(y, numBins); % through the range of the time series
 
 	case 'std1' % bins out to +/- 1 std
-		b = linspace(-1, 1, numBins + 1);
-		if min(y) < -1
+		b = BF_HistEdges(y, numBins, [-1, 1]);
+		if min(y) < b(1)
 			b = [min(y) - 0.1, b];
 		end
-		if max(y) > 1
+		if max(y) > b(end)
 			b = [b, max(y) + 0.1];
 		end
 
-	case 'std2' % bins out to +/- 1 std
-		b = linspace(-2, 2, numBins + 1);
-		if min(y) < -2
+	case 'std2' % bins out to +/- 2 std
+		b = BF_HistEdges(y, numBins, [-2, 2]);
+		if min(y) < b(1)
 			b = [min(y) - 0.1, b];
 		end
-		if max(y) > 2
+		if max(y) > b(end)
 			b = [b, max(y) + 0.1];
 		end
 
 	case 'quantiles' % use quantiles with ~equal number in each bin
-		b = quantile(y, linspace(0, 1, numBins + 1));
-		b(1) = b(1) - 0.1;
-		b(end) = b(end) + 0.1;
+		b = BF_QuantileEdges(y, numBins);
 
 	otherwise
 		error('Unknown method ''%s''', meth)

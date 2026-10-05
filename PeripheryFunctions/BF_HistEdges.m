@@ -1,4 +1,4 @@
-function edges = BF_HistEdges(y, binRule)
+function edges = BF_HistEdges(y, binRule, limits)
 % BF_HistEdges   Equal-width histogram bin edges from an explicit bin-count rule.
 %
 % Returns the bin edges, to pass to histcounts, for a histogram of equal-width
@@ -6,7 +6,7 @@ function edges = BF_HistEdges(y, binRule)
 % written out as a formula (histcounts' own BinMethod rules round the bin width to
 % 'nice' values, so the bins depend on the implementation).
 %
-% The bins span [min(y), max(y)] with width (max - min)/numBins. The interior edges
+% The bins span [min(y), max(y)] (or limits) with width (max - min)/numBins. The interior edges
 % are lowered, and the end edges widened, by a tiny fraction (1e-6) of a bin width,
 % so that values lying exactly on an edge of the ideal grid (e.g., lattice-valued
 % data or counts), which a rounding error in the last bit could otherwise move
@@ -20,6 +20,8 @@ function edges = BF_HistEdges(y, binRule)
 %       'fd': Freedman-Diaconis, ceil(range/(2*IQR*n^(-1/3))) (Sturges if IQR = 0),
 %       'auto': the larger of the Sturges and Freedman-Diaconis numbers of bins.
 %       (default: 'auto'). A rule's number of bins is at most n, and at least 1.
+% limits, [lower, upper], the interval to span, instead of the range of the data
+%       (optional; the number of bins from a rule still depends on the data)
 %
 % ---OUTPUTS:
 % edges, a row vector of numBins + 1 increasing bin edges.
@@ -59,9 +61,14 @@ if nargin < 2 || isempty(binRule)
 end
 y = y(~isnan(y));
 n = length(y);
-lo = min(y);
-hi = max(y);
-dataRange = hi - lo;
+dataRange = max(y) - min(y); % (for the rules)
+if nargin >= 3 && ~isempty(limits)
+	lo = limits(1);
+	hi = limits(2);
+else
+	lo = min(y);
+	hi = max(y);
+end
 
 % ------------------------------------------------------------------------------
 % Number of bins
@@ -98,11 +105,11 @@ end
 % ------------------------------------------------------------------------------
 % Bin edges
 % ------------------------------------------------------------------------------
-if dataRange == 0 % constant data: one bin of unit width
+if hi == lo % constant data: one bin of unit width
 	edges = lo + [-0.5, 0.5];
 	return
 end
-binWidth = dataRange / numBins;
+binWidth = (hi - lo) / numBins;
 tol = 1e-6 * binWidth;
 edges = lo + (0:numBins) * binWidth - tol; % interior edges, lowered by tol
 edges(1) = lo - tol;
