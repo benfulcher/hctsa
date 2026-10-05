@@ -3056,7 +3056,6 @@ MF_hmm_Fit_07_3.stdmeanP	MF_hmm_Fit_07_3_stdmeanP	HMM,model
 MF_hmm_Fit_07_3.maxP	MF_hmm_Fit_07_3_maxP	HMM,model
 MF_hmm_Fit_07_3.stdP	MF_hmm_Fit_07_3_stdP	HMM,model
 MF_hmm_Fit_07_3.LLtrainpersample	MF_hmm_Fit_07_3_LLtrainpersample	HMM,model
-MF_hmm_Fit_07_3.nit	MF_hmm_Fit_07_3_nit	HMM,model
 MF_hmm_Fit_07_3.LLtestpersample	MF_hmm_Fit_07_3_LLtestpersample	HMM,model
 MF_hmm_Fit_07_3.LLdifference	MF_hmm_Fit_07_3_LLdifference	HMM,model
 MF_hmm_Fit_08_2.Mu_1	MF_hmm_Fit_08_2_Mu_1	HMM,model
@@ -3069,7 +3068,6 @@ MF_hmm_Fit_08_2.stdmeanP	MF_hmm_Fit_08_2_stdmeanP	HMM,model
 MF_hmm_Fit_08_2.maxP	MF_hmm_Fit_08_2_maxP	HMM,model
 MF_hmm_Fit_08_2.stdP	MF_hmm_Fit_08_2_stdP	HMM,model
 MF_hmm_Fit_08_2.LLtrainpersample	MF_hmm_Fit_08_2_LLtrainpersample	HMM,model
-MF_hmm_Fit_08_2.nit	MF_hmm_Fit_08_2_nit	HMM,model
 MF_hmm_Fit_08_2.LLtestpersample	MF_hmm_Fit_08_2_LLtestpersample	HMM,model
 MF_hmm_Fit_08_2.LLdifference	MF_hmm_Fit_08_2_LLdifference	HMM,model
 MF_hmm_CompareNStates_06_24.meanLLtrain	MF_hmm_CompareNStates_06_24_meanLLtrain	HMM,model
