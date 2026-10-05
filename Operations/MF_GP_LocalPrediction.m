@@ -1,4 +1,4 @@
-function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pmode, randomSeed)
+function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pmode, randomSeed, numSplits)
 % MF_GP_LocalPrediction   How well a Gaussian process fitted to short windows of the series predicts nearby held-out values.
 %
 % Takes numPreds windows spread evenly along the time series. In each window, a
@@ -38,6 +38,11 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % randomSeed, the seed of the random splits (see BF_RandomSeed; they come from the
 %               portable generator BF_Random; for 'randomgap' prediction)
 %
+% numSplits, the number of different random splits made of each window, for 'randomgap'
+%               prediction (default: 8). Each split is fitted and predicted as a window
+%               of its own, so the outputs summarize numPreds * numSplits fits: a few
+%               random splits of ten windows are dominated by which splits were drawn.
+%
 % ---OUTPUTS:
 % meanabs_run, maxabs_run, minabs_run: mean, maximum, and minimum over windows of
 %       the mean absolute prediction error in a window (in units of the training
@@ -65,9 +70,8 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % The 'standard errors' in the code (stderrs) are 2*sqrt(S2), i.e., 95% error
 % bars, so the outputs ending in _std are in units of these, not of one standard
 % deviation. The predictive variance S2 includes the likelihood noise.
-% For 'randomgap', the random seed is reset once, before the loop over windows, so
-% each window gets a different random split, but the sequence of splits is the
-% same on every run (with a fixed seed).
+% For 'randomgap', all the random splits are drawn once, from one seed, before the
+% loop over windows: the sequence of splits is the same on every run (with a fixed seed).
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -137,6 +141,14 @@ if nargin < 7
 	randomSeed = [];
 end
 
+% numSplits: random splits of each window ('randomgap' only)
+if nargin < 8 || isempty(numSplits)
+	numSplits = 8;
+end
+if ~strcmp(pmode, 'randomgap')
+	numSplits = 1;
+end
+
 % ------------------------------------------------------------------------------
 %% Set up loop
 % ------------------------------------------------------------------------------
@@ -145,6 +157,9 @@ if ismember(pmode, {'frombefore', 'randomgap'})
 elseif strcmp(pmode, 'beforeafter')
 	spns = floor(linspace(1, N - (numTest + numTrain * 2), numPreds)); % starting positions
 end
+% Each window is used numSplits times (with a different random split each time):
+spns = repelem(spns, numSplits);
+numPreds = numPreds * numSplits;
 
 % Details of GP:
 meanFunc = {'meanZero'}; % zero-mean process
