@@ -1,8 +1,8 @@
 function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
-% SY_SpreadRandomLocal   Bootstrap-based stationarity measure.
+% SY_SpreadRandomLocal   How local statistics vary across many overlapping segments of the series.
 %
-% numSegs time-series segments of length l are selected at random from the time
-% series (at random start points; segments can overlap) and in each segment some
+% numSegs time-series segments of length l are selected from the time series (with
+% start points spread evenly over it; segments can overlap) and in each segment some
 % statistic is calculated: mean, standard deviation, skewness, kurtosis,
 % PermEn(3,1), AC(1), AC(2), and the first zero-crossing of the autocorrelation
 % function. Outputs summarize how these quantities vary in different local
@@ -19,11 +19,10 @@ function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
 %       (i) 'ac2': twice the first zero-crossing of the autocorrelation function
 %       (ii) 'ac5': five times the first zero-crossing of the autocorrelation function
 %
-% numSegs, the number of randomly-selected local segments to analyze (default: 100)
+% numSegs, the number of local segments to analyze (default: 100)
 %
-% randomSeed, the seed of the random start points (see BF_RandomSeed; the numbers come
-%       from the portable generator BF_Random, so results are reproducible across
-%       languages)
+% randomSeed, ignored: the segment start points are deterministic. Kept so that
+%       existing calls still work.
 %
 % ---OUTPUTS:
 % stdmean, stdstd, stdskew, stdkurt: the standard deviation, across segments, of
@@ -104,7 +103,7 @@ if isnan(l) || l > 0.9 * N % operation is not suitable -- time series is too sho
 end
 
 if nargin < 4
-	randomSeed = []; % use default random seed
+	randomSeed = []; % (not used)
 end
 
 % ------------------------------------------------------------------------------
@@ -113,8 +112,10 @@ end
 numFeat = 8; % number of features
 qs = zeros(numSegs, numFeat);
 
-% Random start points of the segments (uniform on 1..N-l+1), reproducible from the seed:
-istarts = 1 + floor((N - l + 1) * BF_Random(numSegs, BF_RandomSeed(randomSeed)));
+% Start points of the segments, spread over 1..N-l+1 by the golden-ratio (Weyl)
+% sequence frac(j*phi): deterministic and evenly spread (unlike random start points,
+% which clump and leave gaps), and with no aliasing with periodicities of the series:
+istarts = 1 + floor((N - l + 1) * mod((1:numSegs)' * 0.6180339887498949, 1));
 
 for j = 1:numSegs
 	% pick a range
