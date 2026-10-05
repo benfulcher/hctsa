@@ -1,4 +1,4 @@
-function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
+function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove, asymTau)
 % SY_SlidingWindow   How a local statistic changes across windows sliding along the series.
 %
 % Slides a window along the time series, measures a statistic (windowStat) in each
@@ -31,9 +31,11 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 %           spectrum (window mean removed before the FFT); captures whether the
 %           *frequency content* drifts across the record, distinct from all the
 %           above time-domain measures
-%       (xi) 'asymAC1', mean(x_t*x_{t+1}^2) with x z-scored within the window: a
-%           nonlinear, time-asymmetric variant of AC1 (cf. SY_RampingWindows, which
-%           trends a related statistic, mean(x_t*x_{t+1}*(x_{t+1} - x_t)), across
+%       (xi) 'asymAC1', mean(x_t*x_{t+tau}*(x_{t+tau} - x_t)) with x z-scored within the
+%           window (tau = asymTau, 1 by default): a nonlinear, time-asymmetric variant
+%           of the autocorrelation at lag tau, antisymmetric under time reversal and
+%           so zero in expectation for any time-reversible process
+%           (the same statistic as SY_RampingWindows' asymAC1, which trends it across
 %           segments rather than summarizing its spread across windows as done here)
 %
 % acrossWinStat, how the obtained sequence of local estimates is summarized
@@ -49,6 +51,13 @@ function out = SY_SlidingWindow(y, windowStat, acrossWinStat, numSeg, incMove)
 % incMove, the increment to move the window at each iteration, as 1/fraction of
 %       the window length (e.g., incMove = 2 means the window moves half the length
 %       of the window at each increment; default: 2)
+%
+% asymTau, the lag, tau, of the 'asymAC1' window statistic (default: 1; ignored for
+%       other windowStat): an integer number of samples, or 'ac1e' to use the floor
+%       of the first 1/e crossing of the autocorrelation function of the whole
+%       series (at least 1; see BF_GetTau), so that the lag reflects the series'
+%       own correlation time. A window that is not longer than tau + 1 samples
+%       gives NaN.
 %
 % ---OUTPUTS:
 % a scalar: the summary, acrossWinStat, of the local estimates of windowStat. NaN
@@ -109,6 +118,9 @@ if nargin < 4 || isempty(numSeg)
 end
 if nargin < 5 || isempty(incMove)
 	incMove = 2;
+end
+if nargin < 6 || isempty(asymTau)
+	asymTau = 1; % lag of 'asymAC1'
 end
 
 % ------------------------------------------------------------------------------
@@ -194,10 +206,20 @@ switch windowStat
 		for i = 1:numSteps
 			qs(i) = CO_AutoCorr(y(getWindow(i)), 1, 'Fourier');
 		end
-	case 'asymAC1' % Asymmetric, nonlinear AC1 variant: mean(x_t*x_{t+1}^2), z-scored per window
-		for i = 1:numSteps
-			zw = zscore(y(getWindow(i)));
-			qs(i) = mean(zw(1:end - 1) .* zw(2:end).^2);
+	case 'asymAC1' % Asymmetric, nonlinear AC variant: mean(x_t*x_{t+tau}*(x_{t+tau} - x_t)), z-scored per window
+		% (an adaptive lag is set from the whole series, not per window)
+		if ischar(asymTau)
+			asymTau = BF_GetTau(y(:), asymTau); % NaN if it cannot be set
+		end
+		if ~isscalar(asymTau) || ~isnumeric(asymTau) || (~isnan(asymTau) && (asymTau < 1 || asymTau ~= round(asymTau)))
+			error('asymTau must be a positive integer or a BF_GetTau rule (e.g., ''ac1e'')');
+		end
+		qs(:) = NaN;
+		if ~isnan(asymTau) && asymTau < winLength - 1 % need pairs to average over
+			for i = 1:numSteps
+				zw = zscore(y(getWindow(i)));
+				qs(i) = mean(zw(1:end - asymTau) .* zw(1 + asymTau:end) .* (zw(1 + asymTau:end) - zw(1:end - asymTau)));
+			end
 		end
 	otherwise
 		error('Unknown statistic ''%s''', windowStat)
