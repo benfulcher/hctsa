@@ -4,7 +4,7 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 % Fits a simple parametric curve to an estimate of the distribution of values in
 % the time series, ignoring their temporal ordering. The distribution is estimated
 % either as a histogram, with a specified number of bins, or as a
-% kernel-smoothed density (ksdensity, with its default width). The outputs
+% kernel-smoothed density (a Gaussian kernel with an explicit bandwidth, BF_KSDensity). The outputs
 % measure the goodness of fit, and test the residuals (in order of increasing
 % value) for remaining structure. The curve is fitted by least squares to the
 % density, in a deterministic way that does not depend on random starts or on an
@@ -20,19 +20,22 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 %                   is not positive; NaN is returned)
 % NaN is also returned if there are no more bins than parameters of the model.
 % numBins, how to estimate the distribution (default: 'sqrt'):
-%           a text option: the name of a binning rule for histcounts,
-%                   e.g., 'sqrt' uses the square root of the number of data
-%                   points as the number of bins
-%           a positive integer: the number of bins in the histogram
-%           0: use ksdensity instead of a histogram
+%           a text option: the name of a binning rule (BF_HistEdges: 'sqrt', 'sturges',
+%                   'fd' or 'auto'), e.g., 'sqrt' uses the square root of the
+%                   number of data points as the number of equal-width bins
+%           a positive integer: the number of equal-width bins in the histogram
+%           0: use a kernel-smoothed density (BF_KSDensity: Gaussian kernel,
+%                   bandwidth s*(4/(3n))^(1/5) with s the median absolute
+%                   deviation divided by 0.6745) instead of a histogram,
+%                   evaluated at 100 points
 %
 % ---OUTPUTS:
 % r2, the R^2 goodness of fit
 % adjr2, R^2 adjusted for the number of fitted parameters
 % rmse, the root-mean-square error of the fit, in units of probability density of
 %       the standardized series (the fit is to the density: the histogram counts
-%       divided by the number of points and the bin width, or the ksdensity
-%       estimate; the error is multiplied by the standard deviation of x), so it
+%       divided by the number of points and the bin width, or the kernel-smoothed
+%       density estimate; the error is multiplied by the standard deviation of x), so it
 %       does not depend on the length or the scale of the series
 % resAC1, resAC2, the autocorrelation of the residuals, in order of
 %       increasing value, at lags 1 and 2
@@ -107,14 +110,14 @@ if any(strcmp(distModels, dmodel)) % valid DISTRIBUTION model name
 	end
 
 	% Compute the distribution (histogram, normalized to a probability density):
-	if ischar(numBins) % specify a binning method
-		[dny, binEdges] = histcounts(x, 'BinMethod', numBins);
-		dnx = mean([binEdges(1:end - 1); binEdges(2:end)]);
-		dny = dny / (sum(dny) * mean(diff(binEdges))); % counts -> probability density
-	elseif numBins == 0 % use ksdensity instead of a histogram
-		[dny, dnx] = ksdensity(x);
-	else
-		[dny, binEdges] = histcounts(x, numBins);
+	if ~ischar(numBins) && numBins == 0 % use a kernel-smoothed density instead of a histogram
+		[dny, dnx] = BF_KSDensity(x);
+		if any(isnan(dny)) % constant series: no distribution to fit
+			out = NaN; return
+		end
+	else % histogram with an explicit number of equal-width bins (a number, or a rule)
+		binEdges = BF_HistEdges(x, numBins);
+		dny = histcounts(x, binEdges);
 		dnx = mean([binEdges(1:end - 1); binEdges(2:end)]);
 		dny = dny / (sum(dny) * mean(diff(binEdges))); % counts -> probability density
 	end
