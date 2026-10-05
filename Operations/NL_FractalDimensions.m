@@ -49,12 +49,12 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %              of the Kraskov automutual information and the 'ac1e' delay; see
 %              BF_GetTau); m is a number of dimensions or 'fnn' (chosen by false
 %              nearest neighbors). Default: {'ac','fnn'}
-% randomSeed [opt], whether (and how) to reset the random seed, using
-%             BF_ResetSeed, before choosing reference points (relevant
-%             whenever Nref ~= -1, since that involves a random subsample of
-%             points). Defaults to 'default' (a fixed seed) so this operation
-%             is reproducible by default rather than genuinely stochastic
-%             run-to-run.
+% randomSeed [opt], the seed for choosing the reference points (see BF_RandomSeed;
+%             relevant whenever Nref ~= -1, since that involves a random subsample
+%             of points). The random numbers come from the portable generator
+%             BF_Random, so the subsample is the same in every language. Defaults
+%             to 'default' (a fixed seed), so this operation is reproducible by
+%             default rather than genuinely stochastic run-to-run.
 %
 % ---OUTPUTS:
 % rangeDq, maxDq, meanDq: range, maximum and mean of D across the moments
@@ -188,8 +188,8 @@ end
 if Nref == -1 || Nref >= N_embed
 	refIdx = 1:N_embed;
 else
-	BF_ResetSeed(randomSeed); % for reproducibility of this random subsample
-	refIdx = randperm(N_embed, Nref);
+	refIdx = BF_Random(N_embed, BF_RandomSeed(randomSeed), 'perm'); % random subsample, reproducible
+	refIdx = refIdx(1:Nref)';
 end
 R = length(refIdx);
 

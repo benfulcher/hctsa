@@ -29,9 +29,10 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 %       neighbors are found), longer time series are reduced to their first maxN points
 %       (default: 10000). Set to 'full' to disable cropping (a warning is given above
 %       N = 20000, where run time starts to become substantial).
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (the
-%             neighborhood radius is set from a random subsample of pairwise distances when
-%             Nemb exceeds 500; default: 'default')
+% randomSeed, the seed of the random subsample (see BF_RandomSeed; the random numbers come
+%             from the portable generator BF_Random, so results are reproducible across
+%             languages). The neighborhood radius is set from a random subsample of
+%             pairwise distances when Nemb exceeds 500; default: 'default'
 %
 % ---OUTPUTS:
 % RR, recurrence rate: the proportion of pairs outside the Theiler window that are recurrent
@@ -164,8 +165,8 @@ end
 %% distance matrix just to pick a threshold)
 % ------------------------------------------------------------------------------
 nSub = min(500, Nemb);
-BF_ResetSeed(randomSeed); % for reproducibility of this random subsample
-subIdx = randperm(Nemb, nSub);
+subIdx = BF_Random(Nemb, BF_RandomSeed(randomSeed), 'perm'); % random subsample, reproducible
+subIdx = subIdx(1:nSub);
 Dsub = pdist(Y(subIdx, :));
 radius = quantile(Dsub, rr);
 if radius <= 0
