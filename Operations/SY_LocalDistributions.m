@@ -1,12 +1,13 @@
-function out = SY_LocalDistributions(y, numSegs, eachOrPar, numPoints)
+function out = SY_LocalDistributions(y, numSegs, eachOrPar, numBins)
 % SY_LocalDistributions   Compares the distribution in consecutive time-series segments.
 %
-% Breaks the time series into numSegs consecutive segments of equal length,
-% estimates the distribution of values in each by kernel smoothing (on a common
-% grid of numPoints points spanning the range of the whole series), and measures
-% the difference between two distributions as the integral of the absolute difference
-% between their density estimates (the L1 distance: 0 for identical distributions and
-% at most 2), approximated by a sum over the grid multiplied by the grid spacing.
+% Breaks the time series into numSegs consecutive segments of equal length and
+% measures how different the distributions of values in two segments are as the
+% total variation distance between their histograms: half the sum of the absolute
+% differences between the proportions of values in each bin (0 for identical
+% distributions, 1 for distributions with no bin in common). The bins are common to
+% all segments and equiprobable for the full series (edges at its quantiles), so the
+% measure has no smoothing parameter and does not depend on the scale of the data.
 % The operation behaves in one of two modes: 'each' compares the distribution in
 % each segment to that in every other segment, and 'par' compares each
 % distribution to the so-called 'parent' distribution, that of the full signal.
@@ -21,12 +22,12 @@ function out = SY_LocalDistributions(y, numSegs, eachOrPar, numPoints)
 %            (ii) 'each': compares each local distribution to all other local
 %                         distributions
 %
-% numPoints, the number of points to compute the distribution across (in each
-%          local segment) (default: 200)
+% numBins, the number of equiprobable bins (default: 10; fewer if values are tied
+%          at a quantile)
 %
 % ---OUTPUTS:
-% meandiv, stddiv: the mean and standard deviation of the L1 distance between
-%       distributions, across the different comparisons
+% meandiv, stddiv: the mean and standard deviation of the total variation distance
+%       between distributions, across the different comparisons
 %       (segments vs. the parent, or all pairs of segments). With 'each' and
 %       numSegs = 2, a single number (the one comparison) is returned instead.
 
@@ -71,9 +72,8 @@ end
 if nargin < 3 || isempty(eachOrPar)
 	eachOrPar = 'par'; % compare each subsection to full (parent) distribution
 end
-if nargin < 4 || isempty(numPoints)
-	% number of points to compute the distribution across
-	numPoints = 200; % 200 by default
+if nargin < 4 || isempty(numBins)
+	numBins = 10; % number of equiprobable bins
 end
 
 % ------------------------------------------------------------------------------
@@ -81,15 +81,14 @@ end
 % ------------------------------------------------------------------------------
 N = length(y); % Length of the time series (number of samples)
 lseg = floor(N / numSegs);
-dns = zeros(numPoints, numSegs);
-r = linspace(min(y), max(y), numPoints); % Make range of ksdensity uniform across all subsegments
-dr = r(2) - r(1); % grid spacing, to turn sums over the grid into integrals
+binEdges = BF_QuantileEdges(y, numBins); % bins common to all segments, equiprobable for the full series
+dns = zeros(length(binEdges) - 1, numSegs);
 
 % ------------------------------------------------------------------------------
-% Compute the kernel-smoothed distribution in all numSegs segments of the time series
+% Compute the distribution (proportion in each bin) in all numSegs segments of the time series
 % ------------------------------------------------------------------------------
 for i = 1:numSegs
-	dns(:, i) = ksdensity(y((i - 1) * lseg + 1:i * lseg), r, 'function', 'pdf');
+	dns(:, i) = histcounts(y((i - 1) * lseg + 1:i * lseg), binEdges, 'Normalization', 'probability');
 end
 
 if doPlot
@@ -103,10 +102,10 @@ end
 switch eachOrPar
 	case {'par', 'parent'}
 		% Compares each subdistribtuion to the parent (full signal) distribution
-		pardn = ksdensity(y, r, 'function', 'pdf');
+		pardn = histcounts(y, binEdges, 'Normalization', 'probability');
 		divs = zeros(numSegs, 1);
 		for i = 1:numSegs
-			divs(i) = sum(abs(dns(:, i) - pardn')) * dr; % each is just divergence to parent
+			divs(i) = 0.5 * sum(abs(dns(:, i) - pardn')); % each is just divergence to parent
 		end
 		if doPlot
 			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off
@@ -114,7 +113,7 @@ switch eachOrPar
 	case 'each'
 		% Compares each subdistribtuion to the parent (full signal) distribution
 		if numSegs == 2 % output is just an integer: only two distributions to compare
-			out = sum(abs(dns(:, 1) - dns(:, 2))) * dr;
+			out = 0.5 * sum(abs(dns(:, 1) - dns(:, 2)));
 			return
 		end
 
@@ -124,7 +123,7 @@ switch eachOrPar
 		for i = 1:numSegs
 			for j = 1:numSegs
 				if j > i
-					diffmat(i, j) = sum(abs(dns(:, i) - dns(:, j))) * dr; % store L1 distance
+					diffmat(i, j) = 0.5 * sum(abs(dns(:, i) - dns(:, j))); % store total variation distance
 				end
 			end
 		end
