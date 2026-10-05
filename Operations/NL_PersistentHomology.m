@@ -343,7 +343,9 @@ function ivals = SUB_parseDim(res, d)
     % Extracts [birth, death] pairs for dimension d from ripser's stdout;
     % an unbounded ("essential") interval, printed with a blank death field
     % (' [b, )'), is returned with death = Inf.
-    pat = sprintf('persistence intervals in dim %d:\\n((?:.*\\n)*?)(?=persistence intervals in dim|$)', d);
+    % ([^\n]* rather than .*, since '.' matches a newline in MATLAB regexp and a lazy .*\n can
+    % then run on through the following dimension's block)
+    pat = sprintf('persistence intervals in dim %d:\\n((?:[^\\n]*\\n)*?)(?=persistence intervals in dim|$)', d);
     tok = regexp(res, pat, 'tokens', 'once');
     if isempty(tok)
         ivals = zeros(0, 2); return

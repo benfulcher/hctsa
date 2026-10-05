@@ -48,6 +48,11 @@ function out = MF_CompareAR(y, orders, testHow)
 % loss measures in-sample fit: it cannot rise with the model order, and features such
 % as minv, firstonmin and where01max mostly describe how fast the fit improves with
 % order. Use a training fraction (e.g. 0.5) for a genuine out-of-sample comparison.
+%
+% If the series is too short for the highest order (the training segment must have more
+% than 2*max(orders) + 1 points, and the test segment more than max(orders) + 1), the
+% highest-order models interpolate the training data and the loss is at machine precision;
+% NaN is returned for every output.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -127,6 +132,18 @@ else
 	co = floor(N * testHow); % cutoff
 	yTrain = y(1:co);
 	yTest = y(co + 1:end);
+end
+
+% The loss is only meaningful if the highest-order model is identifiable from the training
+% segment (more points fitted than parameters) and the test segment has points to score.
+% Otherwise arxstruc returns a perfect fit (loss at machine precision, eps) for the high
+% orders, or for all of them, and the statistics are an artifact: the output is then NaN.
+maxOrder = max(orders(:));
+nScoredTrain = size(yTrain, 1) - maxOrder - 1; % points fitted (the first maxOrder + 1 are excluded)
+nScoredTest = size(yTest, 1) - maxOrder - 1;
+if nScoredTrain <= maxOrder || nScoredTest < 1
+	out = NaN; % series too short for this range of orders
+	return
 end
 
 V = arxstruc(yTrain, yTest, orders);
