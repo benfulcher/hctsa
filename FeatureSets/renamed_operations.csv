@@ -1475,3 +1475,7 @@ SY_SlidingWindow_asymac1_ent10_1,,deregistered: redundant with SY_SlidingWindow_
 SY_SlidingWindow_m_ent10_1,,deregistered: redundant with SY_SlidingWindow_m_s_10_1 (StatAv10) (Spearman 0.982); the 'std' summary of the window statistic stays
 SY_SlidingWindow_mom3_ent10_1,,deregistered: redundant with SY_SlidingWindow_mom3_s10_1 (Spearman 0.968); the 'std' summary of the window statistic stays
 SY_SlidingWindow_s_ent10_1,,deregistered: redundant with SY_SlidingWindow_s_s10_1 (Spearman 0.960); the 'std' summary of the window statistic stays
+MF_CompareAR_1_10_05_firstonmin,MF_CompareAR_1_10_05_propgain1min,"1 - min(v)/v(1), the proportion of the first order loss removed by the best order (bounded in [0,1]), replaces the unbounded ratio v(1)/min(v)"
+MF_CompareAR_1_10_05_maxonmed,MF_CompareAR_1_10_05_medonmax,"median(v)/max(v) (bounded in (0,1]) replaces the unbounded ratio max(v)/median(v)"
+MF_CompareAR_1_10_all_firstonmin,MF_CompareAR_1_10_all_propgain1min,"1 - min(v)/v(1), the proportion of the first order loss removed by the best order (bounded in [0,1]), replaces the unbounded ratio v(1)/min(v)"
+MF_CompareAR_1_10_all_maxonmed,MF_CompareAR_1_10_all_medonmax,"median(v)/max(v) (bounded in (0,1]) replaces the unbounded ratio max(v)/median(v)"
