@@ -31,7 +31,10 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 %
 % subsetHow, how to select the test segments:
 %           (i) 'rand', at random (default),
-%           (ii) 'uniform', evenly spaced throughout the time series.
+%           (ii) 'uniform', evenly spaced throughout the time series,
+%           (iii) 'spread', start points spread over the series by the golden-ratio
+%                 (Weyl) sequence: deterministic, evenly spread, and without the
+%                 aliasing a regular spacing has with periodic series.
 %
 % samplep, a two-vector specifying the sampling parameters, [number of segments,
 %           segment length] (default [20, 0.1]). A segment length below 1 is a
@@ -42,7 +45,9 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % steps, the number of steps ahead to predict in each segment (default 2).
 %
 % randomSeed, the seed of the random start points (see BF_RandomSeed; the numbers come
-%               from the portable generator BF_Random; used when subsetHow is 'rand')
+%               from the portable generator BF_Random; used when subsetHow is 'rand'). The
+%               segments of a random draw are what the outputs depend on most, so
+%               prefer 'spread' or 'uniform'.
 %
 % ---OUTPUTS:
 % stde_mean, stde_std, stde_iqr: the mean, standard deviation and interquartile range
@@ -217,6 +222,17 @@ switch subsetHow
 
 		% numPred random starting points (uniform on 1..N-l+1), reproducible from the seed:
 		spts = 1 + floor((N - l + 1) * BF_Random(numPred, BF_RandomSeed(randomSeed)));
+		r(:, 1) = spts;
+		r(:, 2) = spts + l - 1;
+
+	case 'spread'
+		if samplep(2) < 1 % specified a fraction of time series
+			l = max(min(20, floor(N * samplep(2))), 10); % (capped, as for 'rand')
+		else % specified an absolute interval
+			l = samplep(2);
+		end
+		% start points on 1..N-l+1 from the golden-ratio (Weyl) sequence frac(j*phi):
+		spts = 1 + floor((N - l + 1) * mod((1:numPred)' * 0.6180339887498949, 1));
 		r(:, 1) = spts;
 		r(:, 2) = spts + l - 1;
 
