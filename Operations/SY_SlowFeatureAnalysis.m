@@ -75,6 +75,12 @@ function out = SY_SlowFeatureAnalysis(y, numWindows)
 % ---REFERENCES:
 % L. Wiskott and T. J. Sejnowski, "Slow feature analysis: unsupervised learning of
 % invariances", Neural Computation 14(4), 715-770 (2002).
+% K. S. Owens, M. Tamaki and B. D. Fulcher, "Parameter inference from a non-stationary
+% unknown process using statistical feature-based slow feature analysis",
+% arXiv:2609.01651 (2026). This operation is a compact, single-feature variant of their
+% feature-based SFA (f-SFA), which applies SFA to sliding-window catch22/catch24
+% features; f-SFA is implemented in the Python package fsfa:
+% https://github.com/KieranOwens/fsfa
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
