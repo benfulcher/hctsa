@@ -29,10 +29,9 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 %       neighbors are found), longer time series are reduced to their first maxN points
 %       (default: 10000). Set to 'full' to disable cropping (a warning is given above
 %       N = 20000, where run time starts to become substantial).
-% randomSeed, the seed of the random subsample (see BF_RandomSeed; the random numbers come
-%             from the portable generator BF_Random, so results are reproducible across
-%             languages). The neighborhood radius is set from a random subsample of
-%             pairwise distances when Nemb exceeds 500; default: 'default'
+% randomSeed, ignored: the neighborhood radius is set from the distances among all the
+%             embedded points (or, above 2000 of them, among 2000 points spread evenly
+%             over the series), so nothing is random. Kept so that existing calls still work.
 %
 % ---OUTPUTS:
 % RR, recurrence rate: the proportion of pairs outside the Theiler window that are recurrent
@@ -121,7 +120,7 @@ if nargin < 8 || isempty(maxN)
     maxN = 10000; % crops time series longer than this maximum length
 end
 if nargin < 9 || isempty(randomSeed)
-    randomSeed = 'default'; % for reproducibility of the random subsample below
+    randomSeed = 'default'; % (not used)
 end
 
 if ischar(maxN) && strcmp(maxN, 'full')
@@ -164,8 +163,8 @@ end
 %% from a subsample of pairwise distances (avoids forming the full N^2
 %% distance matrix just to pick a threshold)
 % ------------------------------------------------------------------------------
-nSub = min(500, Nemb);
-subIdx = BF_Random(Nemb, BF_RandomSeed(randomSeed), 'perm'); % random subsample, reproducible
+nSub = min(2000, Nemb);
+subIdx = BF_SpreadPerm(Nemb); % (deterministic; the first nSub points are spread evenly over the series)
 subIdx = subIdx(1:nSub);
 Dsub = pdist(Y(subIdx, :));
 radius = quantile(Dsub, rr);
