@@ -5,7 +5,8 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % points spaced equally throughout the time series, and uses the model to predict all
 % the time series values (the intermediate values, and the training points). Times are
 % the sample indices. The hyperparameters of the covariance function are learned by
-% maximizing the marginal likelihood (MF_GP_LearnHyperp), and the outputs summarize
+% maximizing the marginal likelihood (MF_GP_LearnHyperp; the noise standard deviation is
+% bounded below by 1% of that of the data), and the outputs summarize
 % the prediction error, the predictive mean and standard deviation, the per-point
 % negative log marginal likelihood, and the fitted hyperparameters. If the series is longer than 2000
 % samples, predictions are made at 2000 evenly spaced times. A NaN is returned if the

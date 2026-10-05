@@ -6,7 +6,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % function covFunc, e.g., (i) a sum of squared exponential and noise terms, or
 % (ii) a sum of squared exponential, periodic, and noise terms. The log
 % hyperparameters are found by maximizing the marginal likelihood (at most 50
-% function evaluations), starting from a data-informed initial guess. Goodness of
+% function evaluations, with the noise standard deviation bounded below by 1% of
+% that of the data), starting from a data-informed initial guess. Goodness of
 % fit is summarized by the per-point negative log marginal likelihood, the error of the fitted mean, and
 % the GP's predictive standard deviation.
 %

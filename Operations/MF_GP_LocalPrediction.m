@@ -3,7 +3,8 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %
 % Takes numPreds windows spread evenly along the time series. In each window, a
 % Gaussian process (GP) with the covariance function covFunc is fitted to a
-% training segment and used to predict numTest held-out values, which are compared
+% training segment (with the noise standard deviation bounded below by 1% of that of
+% the training data) and used to predict numTest held-out values, which are compared
 % with the true values. Each window is first standardized using the mean and
 % standard deviation of its training data. The outputs summarize the prediction
 % errors (absolute, and relative to the GP's own 95% error bar), the size of the
@@ -58,6 +59,9 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %       training data of the window, divided by the number of training points
 %
 % ---NOTES:
+% Windows whose training data are constant (standard deviation below 1e-8 of that of
+% the series) cannot be standardized, and are left out of every statistic; the output
+% is NaN if every window is left out.
 % The 'standard errors' in the code (stderrs) are 2*sqrt(S2), i.e., 95% error
 % bars, so the outputs ending in _std are in units of these, not of one standard
 % deviation. The predictive variance S2 includes the likelihood noise.
@@ -159,7 +163,7 @@ hyp = struct; % structure for storing hyperparameter information in latest versi
 mus = zeros(numTest, numPreds); % predicted values
 stderrs = zeros(numTest, numPreds); % standard errors on predictions
 yss = zeros(numTest, numPreds); % test values
-nlmls = zeros(numPreds, 1); % negative log marginal likelihoods of model, per training point
+nlmls = NaN(numPreds, 1); % negative log marginal likelihoods of model, per training point
 
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
@@ -209,6 +213,12 @@ for i = 1:numPreds
 
 		otherwise
 			error('Unknown prediction mode ''%s''', pmode);
+	end
+
+	% A window whose training data are constant (to rounding error, relative to the
+	% series) cannot be standardized and carries no information about a GP: skip it
+	if ~(std(yt) > 1e-8 * std(y))
+		continue
 	end
 
 	% Process to normalize scales
@@ -289,6 +299,14 @@ for i = 1:numPreds
 end
 
 % Ok, we're done.
+
+% Drop the skipped windows (those with constant training data)
+keep = ~isnan(nlmls);
+if ~any(keep)
+	out = NaN; return
+end
+mus = mus(:, keep); stderrs = stderrs(:, keep); yss = yss(:, keep);
+loghypers = loghypers(:, keep); nlmls = nlmls(keep);
 
 % ------------------------------------------------------------------------------
 %% Return statistics on how well it did
