@@ -20,8 +20,11 @@ function out = MF_CompareAR(y, orders, testHow)
 % ---OUTPUTS:
 % maxv, minv, meanv, medianv: the maximum, minimum, mean and median of the loss over
 %       orders
-% firstonmin, the loss of the first order divided by the minimum loss
-% maxonmed, the maximum loss divided by the median loss
+% propgain1min, the proportion of the first order's loss removed by the best order,
+%       1 - min(v)/v(1) (between 0 and 1; 1 for a perfectly predictable series; NaN if
+%       the first loss is zero or not finite)
+% medonmax, the median loss divided by the maximum loss (in (0, 1], approaching 1 when
+%       the loss is insensitive to the order; NaN if the maximum is zero or not finite)
 % meandiff, stddiff, maxdiff, meddiff: the mean, standard deviation, maximum absolute
 %       value and median of the change in loss from one order to the next
 % minstdfromi, the minimum (over starting orders i) of the standard error of the loss
@@ -46,7 +49,7 @@ function out = MF_CompareAR(y, orders, testHow)
 %
 % With testHow = 'all' the models are tested on the data they were trained on, so the
 % loss measures in-sample fit: it cannot rise with the model order, and features such
-% as minv, firstonmin and where01max mostly describe how fast the fit improves with
+% as minv, propgain1min and where01max mostly describe how fast the fit improves with
 % order. Use a training fraction (e.g. 0.5) for a genuine out-of-sample comparison.
 %
 % If the series is too short for the highest order (the training segment must have more
@@ -159,8 +162,18 @@ out.maxv = max(v);
 out.minv = min(v);
 out.meanv = mean(v);
 out.medianv = median(v);
-out.firstonmin = v(1) / min(v);
-out.maxonmed = max(v) / median(v);
+% Bounded forms of the two loss ratios: the proportional improvement from the first to the
+% best order, and the median over the maximum (a zero or non-finite denominator is NaN)
+if v(1) > 0 && isfinite(v(1))
+	out.propgain1min = 1 - min(v) / v(1);
+else
+	out.propgain1min = NaN;
+end
+if max(v) > 0 && isfinite(max(v))
+	out.medonmax = median(v) / max(v);
+else
+	out.medonmax = NaN;
+end
 out.meandiff = mean(diff(v));
 out.stddiff = std(diff(v));
 out.maxdiff = max(abs(diff(v)));

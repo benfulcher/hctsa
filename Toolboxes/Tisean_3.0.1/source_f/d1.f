@@ -35,6 +35,16 @@ c===========================================================================
       ncomp=nmax-(mt-1)*id
       kpr=int(exp(pr)*(ncomp-2*nmin-1))+1
       k=int(exp(pln)*(ncomp-2*nmin-1))+1
+c     A point has at most ncomp-2*nmin-1 neighbors outside the temporal
+c     exclusion. The mass in the loop of c1 can reach 1 up to rounding
+c     (when nmax-(m-1)*id is a power of 2, for instance), which asked for
+c     one neighbor more than exists, so the search below never ended.
+c     Ask for no more than exist, and for nothing at all if there are none.
+      if(ncomp-2*nmin-1.lt.1) then
+         pln=pr
+         return
+      endif
+      k=min(k,ncomp-2*nmin-1)
       if(k.gt.kmax) then
          ncomp=real(ncomp-2*nmin-1)*real(kmax)/k+2*nmin+1
          k=kmax
@@ -44,15 +54,20 @@ c===========================================================================
       write(istderr(),*) 'Mass ', exp(pln),': k=', k, ', N=', ncomp 
       call rms(nmax,y,sc,sd)
       eps=exp(pln/m)*sd
-      do 10 i=1,nmax-(mt-1)*id
+      nvalid=nmax-(mt-1)*id
+      do 10 i=1,nvalid
  10      ju(i)=i+(mt-1)*id
-      do 20 i=1,nmax-(mt-1)*id
-         iperm=min(int(rand(0.0)*nmax-(mt-1)*id)+1,nmax-(mt-1)*id)
+      do 20 i=1,nvalid
+c        random partner among the nvalid embedded points (this used to
+c        read int(rand*nmax-(mt-1)*id)+1, which can fall below 1)
+         iperm=min(int(rand(0.0)*nvalid)+1,nvalid)
          ih=ju(i)
          ju(i)=ju(iperm)
  20      ju(iperm)=ih
-      iu=ncmin
+c     there are only nvalid embedded points to use as centers
+      iu=min(ncmin,nvalid)
       eln=0
+      nsweep=0
  1    call mbase(ncomp+(mt-1)*id,mmax,nxx,y,id,m,jh,jpntr,eps)
       iunp=0
       do 30 nn=1,iu                                           ! find neighbours
@@ -84,6 +99,13 @@ c===========================================================================
  30      continue
       iu=iunp
       eps=eps*sqrt(2.)
+      nsweep=nsweep+1
+c     safety net: the box size has long exceeded the data range, so
+c     no further neighbors can turn up; give up on this mass
+      if(iunp.ne.0.and.nsweep.gt.200) then
+         pln=pr
+         return
+      endif
       if(iunp.ne.0) goto 1
       eln=eln/(ncmin-(mt-1)*id)
       end
