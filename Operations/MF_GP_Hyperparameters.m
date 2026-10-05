@@ -45,8 +45,9 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %           'random_both': take maxN consecutive samples from a random position,
 %                          then a random fifth of them
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
-%             for settings of resampleHow that involve random number generation
+% randomSeed, the seed of the random numbers (see BF_RandomSeed; they come from the
+%             portable generator BF_Random), for settings of resampleHow that involve
+%             random number generation
 %
 % ---OUTPUTS:
 % logh1, logh2, logh3, logh4, logh5, logh6: the log hyperparameters of the fitted covariance function, in
@@ -219,19 +220,16 @@ elseif (maxN > 0) && (N > maxN)
 		case 'random_i' % takes maxN random indicies in the time series
 			% Set time index
 			t = SUB_settimeindex(N, squishorsquash);
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-			% Now take samples (unevenly spaced!!)
-			ii = randsample(N, maxN);
-			ii = sort(ii, 'ascend');
+			% Now take samples (unevenly spaced!!): maxN distinct indices, chosen
+			% reproducibly from the seed
+			ii = BF_Random(N, BF_RandomSeed(randomSeed), 'perm');
+			ii = sort(ii(1:maxN), 'ascend');
 			t = t(ii);
 			t = (t - min(t)) / range(t) * (maxN - 1) + 1; % respace from 1:maxN
 			y = y(ii);
 
 		case 'random_consec' % takes maxN consecutive indicies from a random position in the time series
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-			sind = randi(N - maxN + 1); % start index
+			sind = 1 + floor((N - maxN + 1) * BF_Random(1, BF_RandomSeed(randomSeed))); % start index (uniform on 1..N-maxN+1)
 			y = y(sind:sind + maxN - 1); % take this bit
 			t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
@@ -240,16 +238,15 @@ elseif (maxN > 0) && (N > maxN)
 			t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
 		case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
 			% Take sample from random position in time series
-			sind = randi(N - maxN + 1); % start index
+			seed = BF_RandomSeed(randomSeed);
+			sind = 1 + floor((N - maxN + 1) * BF_Random(1, seed)); % start index (uniform on 1..N-maxN+1)
 			y = y(sind:sind + maxN - 1); % take this bit
 			N = length(y); % update time series length (should be maxN)
 			t = SUB_settimeindex(N, squishorsquash); % set time index
 			% Now take samples (unevenly spaced!!)
-			ii = randsample(N, ceil(maxN / 5)); % This 5 is really a parameter...
-			ii = sort(ii, 'ascend');
+			ii = BF_Random(N, seed + 1, 'perm'); % (a second stream, independent of the start index)
+			ii = sort(ii(1:ceil(maxN / 5)), 'ascend'); % This 5 is really a parameter...
 			t = t(ii);
 			y = y(ii);
 

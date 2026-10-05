@@ -35,8 +35,8 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %       (iii) 'randomgap': trains on a random numTrain of the numTrain + numTest
 %                    samples in the window and predicts the other numTest samples.
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%               (for 'randomgap' prediction)
+% randomSeed, the seed of the random splits (see BF_RandomSeed; they come from the
+%               portable generator BF_Random; for 'randomgap' prediction)
 %
 % ---OUTPUTS:
 % meanabs_run, maxabs_run, minabs_run: mean, maximum, and minimum over windows of
@@ -168,10 +168,11 @@ nlmls = NaN(numPreds, 1); % negative log marginal likelihoods of model, per trai
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
 
-% Control the random seed (for reproducibility), once, before the loop over windows
-% (so that the windows get different random splits):
+% The random train/test splits, one column per window (so that the windows get different
+% random splits), reproducible from the seed:
 if strcmp(pmode, 'randomgap')
-	BF_ResetSeed(randomSeed);
+	[~, randomSplits] = sort(reshape(BF_Random((numTrain + numTest) * numPreds, BF_RandomSeed(randomSeed)), ...
+										numTrain + numTest, numPreds));
 end
 
 for i = 1:numPreds
@@ -188,7 +189,7 @@ for i = 1:numPreds
 
 		case 'randomgap'
 			t = (1:numTrain + numTest)';
-			r = randperm(numTrain + numTest);
+			r = randomSplits(:, i)';
 			yy = y(spns(i):spns(i) + numTrain + numTest - 1);
 
 			rt = sort(r(1:numTrain), 'ascend');

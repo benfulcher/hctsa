@@ -54,8 +54,8 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 %              (default: 4)
 % maxN, the maximum number of samples to consider (cf. NL_RQA; default: 10000); 'full' to
 %       disable cropping
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (cf. NL_RQA;
-%             default: 'default')
+% randomSeed, the seed of the random subsample (see BF_RandomSeed and NL_RQA; default:
+%             'default')
 %
 % ---OUTPUTS:
 % T_MRT, the mean recurrence time of the full series (the mean white-line length w)
@@ -162,8 +162,8 @@ end
 %% achieve the target recurrence rate rr (same logic as NL_RQA)
 % ------------------------------------------------------------------------------
 nSub = min(500, Nemb);
-BF_ResetSeed(randomSeed);
-subIdx = randperm(Nemb, nSub);
+subIdx = BF_Random(Nemb, BF_RandomSeed(randomSeed), 'perm');
+subIdx = subIdx(1:nSub);
 Dsub = pdist(Y(subIdx, :));
 radius = quantile(Dsub, rr);
 if radius <= 0

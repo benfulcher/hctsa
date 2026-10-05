@@ -21,7 +21,9 @@ function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
 %
 % numSegs, the number of randomly-selected local segments to analyze (default: 100)
 %
-% randomSeed, the input to BF_ResetSeed to control reproducibility
+% randomSeed, the seed of the random start points (see BF_RandomSeed; the numbers come
+%       from the portable generator BF_Random, so results are reproducible across
+%       languages)
 %
 % ---OUTPUTS:
 % stdmean, stdstd, stdskew, stdkurt: the standard deviation, across segments, of
@@ -111,14 +113,14 @@ end
 numFeat = 8; % number of features
 qs = zeros(numSegs, numFeat);
 
-% Reset random seed, for reproducibility:
-BF_ResetSeed(randomSeed);
+% Random start points of the segments (uniform on 1..N-l+1), reproducible from the seed:
+istarts = 1 + floor((N - l + 1) * BF_Random(numSegs, BF_RandomSeed(randomSeed)));
 
 for j = 1:numSegs
 	% pick a range
 	% in this implementation, ranges CAN overlap
 
-	ist = randi(N - l + 1, 1); % random start point (not exceeding the endpoint)
+	ist = istarts(j); % random start point (not exceeding the endpoint)
 	ifh = ist + l - 1; % finish index
 	rs = ist:ifh; % sample range (from starting to finishing index)
 	ySub = y(rs); % contiguous subsegment of the time series

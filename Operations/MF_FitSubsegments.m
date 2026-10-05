@@ -48,8 +48,8 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %           time-series length). For model = 'arcrosspred', a scalar giving the
 %           number of non-overlapping segments to partition the whole series into.
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%           (for when subsetHow is 'rand')
+% randomSeed, the seed of the random start points (see BF_RandomSeed; the numbers come
+%           from the portable generator BF_Random; for when subsetHow is 'rand')
 %
 % ---OUTPUTS: depend on the model.
 % For 'arsbc', statistics across segments of the best AR order and its SBC:
@@ -185,11 +185,8 @@ switch subsetHow
 			l = samplep(2);
 		end
 
-		% Control the random seed (for reproducibility):
-		BF_ResetSeed(randomSeed);
-
-		% numPred random starting points:
-		spts = randi(N - l + 1, numPred, 1);
+		% numPred random starting points (uniform on 1..N-l+1), reproducible from the seed:
+		spts = 1 + floor((N - l + 1) * BF_Random(numPred, BF_RandomSeed(randomSeed)));
 		r(:, 1) = spts;
 		r(:, 2) = spts + l - 1;
 

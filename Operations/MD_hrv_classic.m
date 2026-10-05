@@ -154,7 +154,7 @@ out.hf    = hfp / total * 100;
 % Triangular histogram index
 % ------------------------------------------------------------------------------
 numBins = 10;
-out.tri = length(y) / max(histcounts(y, numBins));
+out.tri = length(y) / max(histcounts(y, BF_HistEdges(y, numBins))); % equal-width bins spanning the data (BF_HistEdges)
 
 % ------------------------------------------------------------------------------
 % Poincare plot measures:

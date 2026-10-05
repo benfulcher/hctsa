@@ -25,7 +25,13 @@ function out = SD_MakeSurrogates(x, surrMethod, numSurrs, extraParams, randomSee
 %
 % extraParams, extra parameters required by the selected surrogate generation method
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, the seed of the random numbers (see BF_RandomSeed: 'default' or empty, a
+%             number, or 'none'). The numbers come from the portable generator BF_Random,
+%             so the surrogates are the same in every language and MATLAB release, and
+%             MATLAB's own random stream is neither used nor changed. All the surrogates
+%             are drawn in one go: column k of the random numbers (a block of consecutive
+%             draws) makes surrogate k. (AAFT draws its Gaussian noise from seed and its
+%             phases from seed + 1.)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -89,8 +95,11 @@ N = length(x); % length of the time series
 out = zeros(N, numSurrs); % each column is a new surrogate
 tic % time it
 
-% Control the random seed (for reproducibility):
-BF_ResetSeed(randomSeed);
+% Seed of the portable random-number generator (for reproducibility):
+seed = BF_RandomSeed(randomSeed);
+
+% Number of random phases per surrogate (see SUB_RandomPhase)
+nFree = floor((N - 1) / 2);
 
 switch surrMethod
 	case 'RP'
@@ -103,8 +112,9 @@ switch surrMethod
 						'destroyed by the phase randomization\n'])
 		end
 
+		phases = reshape(BF_Random(nFree * numSurrs, seed), nFree, numSurrs);
 		for surri = 1:numSurrs
-			out(:, surri) = SUB_RandomPhase(x);
+			out(:, surri) = SUB_RandomPhase(x, 0, phases(:, surri));
 		end
 
 	case 'AAFT'
@@ -119,14 +129,16 @@ switch surrMethod
 		[xSorted, ix] = sort(x);
 		[~, xRO] = sort(ix); % rank ordered permutation
 
+		noise = reshape(BF_Random(N * numSurrs, seed, 'normal'), N, numSurrs);
+		phases = reshape(BF_Random(nFree * numSurrs, seed + 1), nFree, numSurrs);
 		for surri = 1:numSurrs
 			% Rand order white Gaussian-distributed noise
-			nSort = sort(randn(N, 1));
+			nSort = sort(noise(:, surri));
 			y = nSort(xRO); % sorted Guassian white noise reordered as x
 
 			% Random-phase surrogate of y (phase-randomized version of
 			% random noise rank-ordered as x):
-			yRP = SUB_RandomPhase(y);
+			yRP = SUB_RandomPhase(y, 0, phases(:, surri));
 
 			% Rank order x with respect to yRP:
 			[~, ixyRP] = sort(yRP);
@@ -151,8 +163,9 @@ switch surrMethod
 			end
 		end
 
+		phases = reshape(BF_Random(nFree * numSurrs, seed), nFree, numSurrs);
 		for surri = 1:numSurrs
-			out(:, surri) = SUB_RandomPhase(x, fc);
+			out(:, surri) = SUB_RandomPhase(x, fc, phases(:, surri));
 		end
 
 	case 'RandPerm'
@@ -163,8 +176,9 @@ switch surrMethod
 			fprintf(1, 'Constructing %u surrogates using random permutation\n', numSurrs)
 		end
 
+		[~, perms] = sort(reshape(BF_Random(N * numSurrs, seed), N, numSurrs));
 		for surri = 1:numSurrs
-			out(:, surri) = x(randperm(N));
+			out(:, surri) = x(perms(:, surri));
 		end
 
 	otherwise
@@ -179,8 +193,9 @@ end
 end
 
 % ------------------------------------------------------------------------------
-function xNew = SUB_RandomPhase(x, fc)
-	% Random-phase-Fourier-transform surrogate of column vector x.
+function xNew = SUB_RandomPhase(x, fc, u)
+	% Random-phase-Fourier-transform surrogate of column vector x, with the
+	% uniform random numbers u (one per free bin, in (0,1)) setting the phases.
 	%
 	% Preserves the magnitude spectrum exactly (reusing abs(fft(x)) as-is,
 	% rather than manually re-assembling it from a half-spectrum slice --
@@ -202,10 +217,6 @@ function xNew = SUB_RandomPhase(x, fc)
 	% also preserved rather than randomized -- a truncated Fourier
 	% transform (TFT) surrogate, for dealing with non-stationarity by
 	% only randomizing high-frequency phases.
-	if nargin < 2 || isempty(fc)
-		fc = 0;
-	end
-
 	N = length(x);
 	z = fft(x);
 	zMag = abs(z);
@@ -218,7 +229,7 @@ function xNew = SUB_RandomPhase(x, fc)
 	end
 	freeBins = (2:nFree + 1)';
 
-	randPhase = 2 * pi * rand(nFree, 1);
+	randPhase = 2 * pi * u;
 	nKeep = min(fc, nFree);
 	randPhase(1:nKeep) = zPhase(freeBins(1:nKeep)); % preserve low-frequency phases (TFT)
 

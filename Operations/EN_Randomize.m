@@ -17,7 +17,8 @@ function out = EN_Randomize(y, randomizeHow, randomSeed)
 %                  distribution of values never changes and only the temporal
 %                  properties do
 %       Default: 'statdist'.
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, the seed of the random choices (see BF_RandomSeed; they come from the
+%       portable generator BF_Random, so results are reproducible across languages)
 %
 % ---OUTPUTS: for each of ten statistics measured at each checkpoint, six or seven
 % fields describing its trajectory over the 21 checkpoints. The statistics are:
@@ -141,8 +142,9 @@ y_rand = y; % this vector will be randomized
 
 stats(1, :) = CalculateStats(y, y_rand); % initial condition: apply on itself
 
-% Control the random seed (for reproducibility):
-BF_ResetSeed(randomSeed);
+% The random choices for every step, reproducible from the seed (portable generator
+% BF_Random): two uniform draws per step, as indices uniform on 1..N
+randIdx = 1 + floor(N * reshape(BF_Random(2 * randp_max * N, BF_RandomSeed(randomSeed)), 2, []));
 
 % -------------------------------------------------------------------------------
 % Do the randomization
@@ -154,18 +156,18 @@ for i = 1:N * randp_max
 		case 'statdist'
 			% randomize by substituting a random element of the time series by
 			% a random element from the static original time series distribution
-			y_rand(randi(N)) = y(randi(N));
+			y_rand(randIdx(1, i)) = y(randIdx(2, i));
 
 		case 'dyndist'
 			% randomize by substituting a random element of the time series
 			% by a random element of the current, already partially randomized,
 			% time series
-			y_rand(randi(N)) = y_rand(randi(N));
+			y_rand(randIdx(1, i)) = y_rand(randIdx(2, i));
 
 		case 'permute'
 			% randomize by swapping elements of the time series so that
 			% the distribution remains static; only temporal properties will change
-			randis = randi(N, [2, 1]);
+			randis = randIdx(:, i);
 			tmp = y_rand(randis(1));
 			y_rand(randis(1)) = y_rand(randis(2));
 			y_rand(randis(2)) = tmp;

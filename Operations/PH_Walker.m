@@ -269,8 +269,8 @@ out.sw_ansarib_pval = pval; % p-value from the test
 % out.sw_ansarib_Wstar = stats.Wstar; % Approximate normal statistic
 % test statistics are length dependent. Remove.
 
-r = linspace(min(min(y), min(w)), max(max(y), max(w)), 200); % make range of ksdensity uniform across all subsegments
-dy = ksdensity(y, r); dw = ksdensity(w, r); % the kernel-smoothed distributions
+r = linspace(min(min(y), min(w)), max(max(y), max(w)), 200); % common grid for both densities
+dy = BF_KSDensity(y, r); dw = BF_KSDensity(w, r); % the kernel-smoothed distributions (Gaussian kernel, explicit bandwidth)
 out.sw_distdiff = sum(abs(dy - dw)) * (r(2) - r(1)); % integral of |density difference| (grid spacing x sum)
 
 % (iii) Looking at residuals between time series and walker
