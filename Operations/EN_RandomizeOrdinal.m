@@ -32,7 +32,8 @@ function out = EN_RandomizeOrdinal(y, tau)
 %
 % ---INPUTS:
 % y, the input time series
-% tau, the time delay between the three samples of each window (default: 1)
+% tau, the time delay between the three samples of each window (default: 1); can
+%    also be a rule understood by BF_GetTau ('ac', 'ac1e', 'mi'), evaluated on y
 %
 % ---OUTPUTS:
 % A structure with fields:
@@ -97,8 +98,13 @@ end
 
 y = y(:);
 N = length(y);
-x = BF_Embed(y, tau, 3, false); % windows [y(i), y(i+tau), y(i+2*tau)]
-if size(x, 1) < 5
+if ischar(tau)
+	tau = BF_GetTau(y, tau); % the delay is set by the series (not by its ranks)
+	if isnan(tau)
+		out = NaN; return
+	end
+end
+if N - 2 * tau < 5 % need at least 5 windows [y(i), y(i+tau), y(i+2*tau)]
 	warning('Time series too short to embed');
 	out = NaN; return
 end
