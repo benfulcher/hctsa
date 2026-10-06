@@ -28,7 +28,8 @@ function out = SP_Bicoherence(y, segLength, maxN, numSurr)
 % numSurr, the number of random-phase surrogates (SD_MakeSurrogates 'RP', which
 %          preserve the power spectrum but destroy phase coupling) used to
 %          calibrate the significance threshold empirically, in place of its
-%          asymptotic approximation (default: 25). The threshold is the 95%
+%          asymptotic approximation (default: 100; the threshold of a few tens of
+%          surrogates depends on which ones were drawn). The threshold is the 95%
 %          quantile of squared bicoherence values pooled across all frequency
 %          pairs and all surrogates.
 %
@@ -96,7 +97,7 @@ if nargin < 3 || isempty(maxN)
     maxN = 'full';
 end
 if nargin < 4 || isempty(numSurr)
-    numSurr = 25;
+    numSurr = 100;
 end
 
 minSegLength = 16;

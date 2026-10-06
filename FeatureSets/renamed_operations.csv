@@ -1505,3 +1505,11 @@ MF_FitSubsegments_arsbc_rand_25_01_sbcs_range,MF_FitSubsegments_arsbc_spread_25_
 MF_FitSubsegments_arsbc_rand_25_01_sbcs_min,MF_FitSubsegments_arsbc_spread_25_01_sbcs_min,"start points of the segments from the golden-ratio sequence (deterministic, evenly spread) instead of random draws"
 MF_FitSubsegments_arsbc_rand_25_01_sbcs_max,MF_FitSubsegments_arsbc_spread_25_01_sbcs_max,"start points of the segments from the golden-ratio sequence (deterministic, evenly spread) instead of random draws"
 SY_SlidingWindow_asymac1_permen10_2,,deregistered: permutation entropy of ~19 window values is sampling noise (split-half reliability 0.02 on the 1000x1000 series)
+SP_Bicoherence_64_full_25_meanBic,SP_Bicoherence_64_full_100_meanBic,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_maxBic,SP_Bicoherence_64_full_100_maxBic,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_stdBic,SP_Bicoherence_64_full_100_stdBic,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_skewBic,SP_Bicoherence_64_full_100_skewBic,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_entropy,SP_Bicoherence_64_full_100_entropy,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_meanBicDiag,SP_Bicoherence_64_full_100_meanBicDiag,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_propSig,SP_Bicoherence_64_full_100_propSig,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
+SP_Bicoherence_64_full_25_threshRatio,SP_Bicoherence_64_full_100_threshRatio,"threshold calibrated from 100 random-phase surrogates instead of 25 (the threshold ratio depended on which surrogates were drawn)"
