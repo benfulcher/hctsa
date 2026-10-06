@@ -1,18 +1,18 @@
 function out = EN_RandomizeOrdinal(y, tau)
 % EN_RandomizeOrdinal   How quickly ordinal-pattern structure is lost as a series is randomized.
 %
-% Consider progressively randomizing the series: at each step, one randomly chosen
-% sample is overwritten by a value drawn at random from the original series (the
-% 'statdist' scheme of EN_Randomize). This function computes, exactly and without
-% any random draws, the expected distribution of the ordinal patterns of order 3
-% (the patterns of permutation entropy, PermEn(3,tau)) of the randomized series
-% after t such steps, and reports how fast the ordinal structure decays.
+% The series is randomized progressively: at each step, one randomly chosen
+% sample is overwritten by a value copied from a randomly chosen sample of the
+% original series (the 'statdist' scheme of EN_Randomize). Rather than simulating
+% this, the function computes exactly (with no random draws) the expected
+% distribution of the ordinal patterns of order 3 (the patterns of Bandt and
+% Pompe's permutation entropy, PermEn(3,tau)) after t steps, and reports how
+% quickly the ordinal structure of the series is lost.
 %
-% The calculation is exact because, after t steps, each sample of the series has
-% either never been overwritten, or it holds a value drawn independently and
-% uniformly from the original series. For a window of three samples, the
-% probability that exactly a given subset of them has never been overwritten
-% depends only on the size of the subset, k, through
+% The calculation is exact because, after t steps, each sample has either never
+% been overwritten, or it holds a value drawn independently and uniformly from the
+% original series. For a window of three samples, the probability that exactly a
+% given subset of k of them has never been overwritten is
 %       w_k(t) = sum_{j=0}^{3-k} nchoosek(3-k, j) (-1)^j (1 - (k+j)/N)^t.
 % Given the subset, the pattern probabilities follow from the kept values and the
 % empirical distribution function of the series (ties are treated as in
@@ -26,30 +26,41 @@ function out = EN_RandomizeOrdinal(y, tau)
 % pattern distribution is halfway between its value for the original series
 % (t = 0) and its value for the fully randomized series (t -> infinity). A long
 % halftime means that much of the ordinal structure survives the replacement of
-% single samples (i.e., it is carried by the ordering of pairs of samples); a
-% short halftime means that the structure depends on the joint configuration of
-% all three samples of a window.
+% single samples (it is carried by the order of pairs of samples); a short
+% halftime means that the structure depends on the joint configuration of all
+% three samples of a window.
 %
-%---INPUTS:
+% ---INPUTS:
 % y, the input time series
 % tau, the time delay between the three samples of each window (default: 1)
 %
-%---OUTPUTS:
+% ---OUTPUTS:
+% A structure with fields:
 % halftime, the randomization time t/N at which the permutation entropy of the
-%       expected pattern distribution is halfway to its fully randomized value
-%       (NaN if the original series has the same pattern entropy as its fully
-%       randomized version, so that nothing decays)
+%    expected pattern distribution is halfway to its fully randomized value (NaN
+%    if the original series has the same pattern entropy as its fully randomized
+%    version, so that nothing decays)
 % normPermEn0, the normalized PermEn(3,tau) of the original series
 % normPermEnRep1, the normalized permutation entropy of the expected pattern
-%       distribution when one sample of each window (chosen at random) is replaced
-%       by an independent draw from the series
+%    distribution when one sample of each window (chosen at random) is replaced by
+%    an independent draw from the series
 % normPermEnInf, the normalized permutation entropy of the fully randomized series
-%       (close to 1 for a series without repeated values)
+%    (close to 1 for a series without repeated values)
+% NaN (instead of a structure) is returned if the series is too short to embed
+% (fewer than 5 windows).
 %
-%---NOTES:
-% The entropy is of the expected pattern distribution (not the expected entropy of
-% a single randomized series, which is lower by a small finite-sample bias), so the
-% result is deterministic and needs no random seed.
+% ---NOTES:
+% The entropy is that of the expected pattern distribution (not the expected
+% entropy of a single randomized series, which is lower by a small finite-sample
+% bias), so the result is deterministic and needs no random seed. The 'dyndist'
+% and 'permute' schemes of EN_Randomize give the same expected pattern
+% distribution to leading order in 1/N ('permute' at twice the rate), so they
+% are not offered separately.
+%
+% ---REFERENCES:
+% C. Bandt and B. Pompe, "Permutation Entropy: A Natural Complexity Measure for
+% Time Series", Phys. Rev. Lett. 88(17) 174102 (2002).
+% DOI: 10.1103/PhysRevLett.88.174102
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
