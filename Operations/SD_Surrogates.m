@@ -32,6 +32,18 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ---OUTPUTS: (s is the value of the statistic on the series; the surrogates' values have
 % mean muhat, standard deviation sigmahat, median and interquartile range iqrsurr)
 % meansurr, the mean of the statistic over the surrogates
+% meannumsurr, the mean over the surrogates of the statistic's numerator: for 'tc3',
+%         <x_n x_{n-tau} x_{n-2tau}>; for 'trev', <d^3>. Unlike meansurr it has no
+%         denominator, so it is not dominated by the few surrogates whose denominator is
+%         near zero (for 'tc3', |<x_n x_{n-tau}>| is small whenever the surrogate's
+%         lag-tau autocorrelation is). It is the mean third-order moment of the null
+%         ensemble: for AAFT surrogates (surrMethod = 2) it measures how much
+%         <x_n x_{n-tau} x_{n-2tau}> a static monotone transform of a linear Gaussian
+%         process with this series' distribution and autocorrelation produces. For 'trev'
+%         and for random-phase surrogates (surrMethod = 1) its expectation is near zero for
+%         every series (the null processes are time-reversible, and random phases cancel
+%         third-order moments of a zero-mean series); for permuted surrogates
+%         (surrMethod = 3) it depends only on the series' distribution.
 % stdsurr, the standard deviation of the statistic over the surrogates
 % normpatponmax, the Gaussian density N(muhat, sigmahat) at s relative to its peak value
 % stdfrommean, |s - muhat|/sigmahat
@@ -125,14 +137,15 @@ end
 % own tc3/trev functions used):
 switch surrfn
 	case 'tc3'
-		statFn = @(yy) CO_TC3(yy, tau).raw;
+		statFn = @(yy) CO_TC3(yy, tau);
 	case 'trev'
-		statFn = @(yy) CO_trev(yy, tau).raw;
+		statFn = @(yy) CO_trev(yy, tau);
 	otherwise
 		error('Unknown surrogate function ''%s''', surrfn)
 end
 
-tc3_y = statFn(y);
+statY = statFn(y);
+tc3_y = statY.raw;
 
 % Map TSTOOL's numeric surrogate-method convention onto SD_MakeSurrogates:
 switch surrMethod
@@ -150,8 +163,11 @@ end
 % evaluate the same statistic on each:
 surrogates = SD_MakeSurrogates(y, nativeSurrMethod, nsurr, [], randomSeed);
 tc3_surr = zeros(nsurr, 1);
+num_surr = zeros(nsurr, 1); % the statistic's numerator on each surrogate
 for i = 1:nsurr
-	tc3_surr(i) = statFn(surrogates(:, i));
+	statSurr = statFn(surrogates(:, i));
+	tc3_surr(i) = statSurr.raw;
+	num_surr(i) = statSurr.num;
 end
 
 if all(isnan(tc3_surr))
@@ -200,6 +216,7 @@ end
 % 3) basic info on surrogates
 out.stdsurr = sigmahat;
 out.meansurr = muhat;
+out.meannumsurr = mean(num_surr);
 
 % 4) kernel density test
 [ksf, ksx] = BF_KSDensity(tc3_surr);
