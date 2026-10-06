@@ -47,6 +47,11 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % stdsurr, the standard deviation of the statistic over the surrogates
 % normpatponmax, the Gaussian density N(muhat, sigmahat) at s relative to its peak value
 % stdfrommean, |s - muhat|/sigmahat
+% zsigned, (s - muhat)/sigmahat: the z-score of the series' statistic against the
+%         surrogates, keeping its sign (whether the series has more or less of the
+%         statistic than the null ensemble); NaN if sigmahat is at the rounding level of
+%         the surrogates' values (sigmahat <= 1e-10*max|value|), where no meaningful
+%         z-score exists
 % ztestp, the p-value of a z-test of s against N(muhat, sigmahat)
 % iqrsfrommedian, |s - median|/iqrsurr (NaN if iqrsurr = 0)
 % kspminfromext, the smaller of the kernel-density probabilities of a value below and above
@@ -203,6 +208,13 @@ else
 	% (~equivalent to a z-test:)
 	[~, out.ztestp] = ztest(tc3_y, muhat, sigmahat);
 	% (both of these stats are a monotonic function of normpatponmax)
+end
+
+% signed z-score (NaN if the surrogates' spread is at rounding level)
+if sigmahat <= 1e-10 * max(abs(tc3_surr))
+	out.zsigned = NaN;
+else
+	out.zsigned = (tc3_y - muhat) / sigmahat;
 end
 
 % iqrs from median

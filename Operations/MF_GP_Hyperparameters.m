@@ -76,6 +76,13 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       sampled times
 % maxS, minS, meanS: maximum, minimum, and mean of the GP's predictive standard
 %       deviation over 1000 equally spaced times spanning the sampled series
+% oosmedabserr: out-of-sample error, for the random-subsample settings of resampleHow
+%       ('random_i', 'random_both'): the median absolute difference between the series
+%       and the GP mean at the times between the first and last sampled time that were
+%       not sampled (so are not seen by the fit), in units of the series' standard
+%       deviation. How well a GP fitted to a sparse, irregular subsample interpolates
+%       the rest of the series. NaN when every point in that span was sampled (e.g.,
+%       'first', 'resample', or a series no longer than maxN).
 %
 % ---NOTES:
 % For the covSEiso+covPeriodic+covNoise variants: the installed gpml (v4.2)'s
@@ -230,6 +237,7 @@ infAlg = @infGaussLik;
 % ------------------------------------------------------------------------------
 %% Downsample long time series
 % ------------------------------------------------------------------------------
+tOut = []; yOut = []; % times and values of unsampled points within the sampled span
 if maxN == 0
 	slowThreshold = 2000;
 	if N > slowThreshold
@@ -261,6 +269,10 @@ elseif (maxN > 0) && (N > maxN)
 			% reproducibly from the seed
 			ii = BF_Random(N, BF_RandomSeed(randomSeed), 'perm');
 			ii = sort(ii(1:maxN), 'ascend');
+			% the unsampled points between the first and last sampled ones (for oosmedabserr):
+			iOut = setdiff((ii(1):ii(end))', ii(:));
+			tOut = (t(iOut) - t(ii(1))) / (t(ii(end)) - t(ii(1))) * (maxN - 1) + 1; % same respacing
+			yOut = y(iOut);
 			t = t(ii);
 			t = (t - min(t)) / range(t) * (maxN - 1) + 1; % respace from 1:maxN
 			y = y(ii);
@@ -284,6 +296,8 @@ elseif (maxN > 0) && (N > maxN)
 			% Now take samples (unevenly spaced!!)
 			ii = BF_Random(N, seed + 1, 'perm'); % (a second stream, independent of the start index)
 			ii = sort(ii(1:ceil(maxN / 5)), 'ascend'); % This 5 is really a parameter...
+			iOut = setdiff((ii(1):ii(end))', ii(:)); % unsampled points within the sampled span
+			tOut = t(iOut); yOut = y(iOut);
 			t = t(ii);
 			y = y(ii);
 
@@ -394,6 +408,14 @@ S = sqrt(S2); % standard deviation function (S2 is the variance)
 out.maxS = max(S); % maximum predictive standard deviation
 out.minS = min(S); % minimum predictive standard deviation
 out.meanS = mean(S); % mean predictive standard deviation
+
+% Out-of-sample error: the GP mean at the unsampled times within the sampled span
+if ~isempty(tOut)
+	muOut = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, tOut);
+	out.oosmedabserr = median(abs(yOut - muOut));
+else
+	out.oosmedabserr = NaN;
+end
 
 % ------------------------------------------------------------------------------
 function t = SUB_settimeindex(N, squishorsquash)

@@ -1,6 +1,6 @@
 classdef Robust_gpSplitTests < matlab.unittest.TestCase
     % Tests for MF_GP_LocalPrediction's deterministic 'spreadgap' splits and its robust
-    % tail summaries over the fits.
+    % tail summaries over the fits, and MF_GP_Hyperparameters' out-of-sample error.
 
     methods (Static)
         function y = series(n, seed)
@@ -36,6 +36,8 @@ classdef Robust_gpSplitTests < matlab.unittest.TestCase
             o = MF_GP_LocalPrediction(y, cf, 10, 3, 6, 'spreadgap', [], 4);
             tc.verifyLessThanOrEqual(o.meanabs_run, o.q90abs_run + 10 * eps);
             tc.verifyLessThanOrEqual(o.q90abs_run, o.maxabs_run);
+            tc.verifyLessThanOrEqual(o.minabs_run, o.q10abs_run);
+            tc.verifyLessThanOrEqual(o.q10abs_run, o.meanabs_run + 10 * eps);
             tc.verifyLessThanOrEqual(o.q90abs_std_run, o.maxabs_std_run);
             tc.verifyLessThanOrEqual(o.minabs_std_run, o.low25abs_std_run);
             tc.verifyLessThanOrEqual(o.low25abs_std_run, o.meanabs_std_run);
@@ -52,6 +54,26 @@ classdef Robust_gpSplitTests < matlab.unittest.TestCase
             cf = {'covSum', {'covSEiso', 'covNoise'}};
             o = MF_GP_LocalPrediction(y, cf, 10, 3, 4, 'frombefore');
             tc.verifyEqual(o.low25abs_std_run, o.minabs_std_run);
+        end
+
+        function gpHyperparametersOutOfSampleError(tc)
+            % defined for random subsamples (averaged over the draws like the other outputs),
+            % NaN when the fit sees every point of its span
+            y = Robust_gpSplitTests.series(400, 7);
+            cf = {'covSum', {'covSEiso', 'covNoise'}};
+            one = MF_GP_Hyperparameters(y, cf, 1, 50, 'random_i', 0, 1);
+            two = MF_GP_Hyperparameters(y, cf, 1, 50, 'random_i', 2, 1);
+            avg = MF_GP_Hyperparameters(y, cf, 1, 50, 'random_i', 0, 2);
+            tc.verifyTrue(isfinite(one.oosmedabserr) && one.oosmedabserr > 0);
+            tc.verifyEqual(avg.oosmedabserr, (one.oosmedabserr + two.oosmedabserr) / 2, 'AbsTol', 1e-12);
+            first = MF_GP_Hyperparameters(y, cf, 1, 200, 'first');
+            tc.verifyTrue(isnan(first.oosmedabserr));
+            % a smooth series is interpolated better than white noise
+            w = BF_Random(400, 8, 'normal'); w = zscore(w(:));
+            s = zscore(sin((1:400)' / 15));
+            ow = MF_GP_Hyperparameters(w, cf, 1, 50, 'random_i', 0);
+            os = MF_GP_Hyperparameters(s, cf, 1, 50, 'random_i', 0);
+            tc.verifyLessThan(os.oosmedabserr, ow.oosmedabserr);
         end
     end
 end
