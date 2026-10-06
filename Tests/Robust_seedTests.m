@@ -82,5 +82,12 @@ classdef Robust_seedTests < matlab.unittest.TestCase
             % other modes are unaffected by numSplits
             tc.verifyEqual(MF_GP_LocalPrediction(y, cf, 10, 3, 6, 'frombefore', 1, 4), MF_GP_LocalPrediction(y, cf, 10, 3, 6, 'frombefore', 1, 1));
         end
+
+        function c1UsesAtLeast500Centers(tc)
+            y = Robust_seedTests.series(1000, 9);
+            a = NL_c1(y, 1, [2, 4], 25, 0.1); % 100 requested: raised to 500
+            b = NL_c1(y, 1, [2, 4], 25, 500);
+            tc.verifyEqual(a, b);
+        end
     end
 end
