@@ -82,13 +82,11 @@ classdef Robust_finishTests < matlab.unittest.TestCase
                 rng(2); b = calls{i}();
                 tc.verifyEqual(a, b, sprintf('call %d', i));
             end
-            % the seed does matter
-            a = SY_SpreadRandomLocal(y, 100, 20, 'default');
-            b = SY_SpreadRandomLocal(y, 100, 20, 9);
-            tc.verifyNotEqual(a.stdmean, b.stdmean);
-            a = NL_RQA(y, 2, 3, 10, 0.1, 2, 2, 'full', 'default');
-            b = NL_RQA(y, 2, 3, 10, 0.1, 2, 2, 'full', 4);
-            tc.verifyNotEqual(a.RR, b.RR); % radius from a different subsample
+            % the seed does matter for the random draws that remain (SY_SpreadRandomLocal and
+            % NL_RQA no longer draw any: see Robust_seedTests)
+            a = MF_FitSubsegments(y, 'ar', 2, 'rand', [10, 0.1], 'default');
+            b = MF_FitSubsegments(y, 'ar', 2, 'rand', [10, 0.1], 9);
+            tc.verifyNotEqual(a, b);
         end
 
         function fractalDimensionsReproducible(tc)
