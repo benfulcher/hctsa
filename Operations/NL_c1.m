@@ -57,7 +57,11 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % number of embedded points is a power of two (for some embedding dimension in mmm), when the
 % time separation leaves no neighbors, or when more reference points are requested than
 % exist, and it picks the partners in its shuffle of the reference points from outside the
-% valid range. Recompile TISEAN (compile_tisean) after updating.
+% valid range. Stock TISEAN also divides the summed log radii by Nref - (m-1)*tau rather than
+% by the number of reference points used, which inflates the mean log radius and biases the
+% dimension estimates low (more so with fewer reference points, higher m and longer delays);
+% the patched c1 divides by the number of reference points used. Recompile TISEAN
+% (compile_tisean) after updating.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
