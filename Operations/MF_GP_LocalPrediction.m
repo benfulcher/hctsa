@@ -59,10 +59,12 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % q90abs_run, q90abs_std_run: the 90th percentile (MATLAB's quantile) over windows of
 %       the mean absolute prediction error in a window, without and with each error
 %       in units of the 95% error bar
+% q10abs_run: the 10th percentile over windows of the mean absolute prediction error
+%       in a window
 % low25abs_std_run: the mean over the lowest quarter of the windows (the ceil(n/4)
 %       smallest of the n values) of the mean absolute prediction error in a window,
 %       in units of the 95% error bar
-%       (These three summarize the upper and lower tails robustly: the maximum and
+%       (These four summarize the upper and lower tails robustly: the maximum and
 %       minimum over windows are each set by a single fit, often a badly conditioned
 %       one, and so mostly reflect which splits were made.)
 % meanabs, maxabs, minabs: mean, maximum, and minimum over all predicted points of
@@ -415,6 +417,7 @@ out.minabs_run = min(abserr_run);
 % made; a high (low) quantile, or the mean of the highest (lowest) quarter, keeps the
 % meaning ('how large/small does it get') and is reproducible
 out.q90abs_run = quantile(abserr_run, 0.9);
+out.q10abs_run = quantile(abserr_run, 0.1);
 out.q90abs_std_run = quantile(stderr_run, 0.9);
 out.low25abs_std_run = SUB_tailMean(stderr_run, 'low');
 
