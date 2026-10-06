@@ -818,13 +818,11 @@ SD_Surrogates(x_z,1,100,1,'tc3','default')	SD_Surrogates_1_100_1_tc3
 SD_Surrogates(x_z,1,100,1,'trev','default')	SD_Surrogates_1_100_1_trev
 SD_Surrogates(x_z,1,100,2,'tc3','default')	SD_Surrogates_1_100_2_tc3
 SD_Surrogates(x_z,1,100,2,'trev','default')	SD_Surrogates_1_100_2_trev
-SD_Surrogates(x_z,1,100,3,'tc3','default')	SD_Surrogates_1_100_3_tc3
 SD_Surrogates(x_z,1,100,3,'trev','default')	SD_Surrogates_1_100_3_trev
 SD_Surrogates(x_z,'mi',100,1,'tc3','default')	SD_Surrogates_mi_100_1_tc3
 SD_Surrogates(x_z,'mi',100,1,'trev','default')	SD_Surrogates_mi_100_1_trev
 SD_Surrogates(x_z,'mi',100,2,'tc3','default')	SD_Surrogates_mi_100_2_tc3
 SD_Surrogates(x_z,'mi',100,2,'trev','default')	SD_Surrogates_mi_100_2_trev
-SD_Surrogates(x_z,'mi',100,3,'tc3','default')	SD_Surrogates_mi_100_3_tc3
 SD_Surrogates(x_z,'mi',100,3,'trev','default')	SD_Surrogates_mi_100_3_trev
 SD_SurrogateTest(x_z,'RP',99,[],{'amikraskov1','fmmikraskov','o3','tc3'},'default')	SD_SurrogateTest_RP_99
 SP_Bicoherence(x_z,64,'full',100)	SP_Bicoherence_64_full_100
