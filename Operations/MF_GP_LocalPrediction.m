@@ -31,17 +31,24 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %       (i) 'beforeafter': trains on numTrain samples on each side of a gap of
 %                           numTest samples, and predicts the samples in the gap,
 %       (ii) 'frombefore': trains on numTrain samples and predicts the numTest
-%                    samples that follow, and
+%                    samples that follow,
 %       (iii) 'randomgap': trains on a random numTrain of the numTrain + numTest
-%                    samples in the window and predicts the other numTest samples.
+%                    samples in the window and predicts the other numTest samples, and
+%       (iv) 'spreadgap': as 'randomgap', but with deterministic splits: the test
+%                    sets are taken, in the evenly spread order of BF_SpreadPerm, from
+%                    the list of all nchoosek(numTrain + numTest, numTest) possible test
+%                    sets (in lexicographic order), a different one for each fit (cycling
+%                    through the list when there are more fits than test sets). The
+%                    fits cover the possible splits evenly, as random splits do on
+%                    average, and the outputs do not depend on a seed.
 %
 % randomSeed, the seed of the random splits (see BF_RandomSeed; they come from the
 %               portable generator BF_Random; for 'randomgap' prediction)
 %
-% numSplits, the number of different random splits made of each window, for 'randomgap'
-%               prediction (default: 8). Each split is fitted and predicted as a window
-%               of its own, so the outputs summarize numPreds * numSplits fits: a few
-%               random splits of ten windows are dominated by which splits were drawn.
+% numSplits, the number of different splits made of each window, for 'randomgap' and
+%               'spreadgap' prediction (default: 8). Each split is fitted and predicted as
+%               a window of its own, so the outputs summarize numPreds * numSplits fits: a
+%               few splits of ten windows are dominated by which splits were made.
 %
 % ---OUTPUTS:
 % meanabs_run, maxabs_run, minabs_run: mean, maximum, and minimum over windows of
@@ -49,12 +56,23 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 %       data's standard deviation)
 % meanabs_std_run, maxabs_std_run, minabs_std_run: the same, with each error in
 %       units of the GP's 95% error bar (twice its predictive standard deviation)
+% q90abs_run, q90abs_std_run: the 90th percentile (MATLAB's quantile) over windows of
+%       the mean absolute prediction error in a window, without and with each error
+%       in units of the 95% error bar
+% low25abs_std_run: the mean over the lowest quarter of the windows (the ceil(n/4)
+%       smallest of the n values) of the mean absolute prediction error in a window,
+%       in units of the 95% error bar
+%       (These three summarize the upper and lower tails robustly: the maximum and
+%       minimum over windows are each set by a single fit, often a badly conditioned
+%       one, and so mostly reflect which splits were made.)
 % meanabs, maxabs, minabs: mean, maximum, and minimum over all predicted points of
 %       the absolute prediction error
 % meanabs_std, maxabs_std, minabs_std: the same, in units of the 95% error bar
 % maxerrbar, meanerrbar, minerrbar: maximum, mean, and minimum over all predicted
 %       points of the 95% error bar half-width (twice the predictive standard
 %       deviation)
+% high25errbar: the mean of the largest quarter of these error bars (over all
+%       predicted points)
 % meanlogh1, meanlogh2, meanlogh3, stdlogh1, stdlogh2, stdlogh3: mean and standard
 %       deviation across windows of each log hyperparameter of the fitted
 %       covariance function (for squared exponential plus noise: log length scale,
@@ -62,6 +80,9 @@ function out = MF_GP_LocalPrediction(y, covFunc, numTrain, numTest, numPreds, pm
 % maxnlml, minnlml, stdnlml: maximum, minimum, and standard deviation across
 %       windows of the negative log marginal likelihood of the fitted model on the
 %       training data of the window, divided by the number of training points
+% q90nlml: the 90th percentile of the same across windows
+%
+% For 'randomgap' and 'spreadgap', each split counts as a window in these summaries.
 %
 % ---NOTES:
 % Windows whose training data are constant (standard deviation below 1e-8 of that of
@@ -141,23 +162,23 @@ if nargin < 7
 	randomSeed = [];
 end
 
-% numSplits: random splits of each window ('randomgap' only)
+% numSplits: splits of each window ('randomgap' and 'spreadgap' only)
 if nargin < 8 || isempty(numSplits)
 	numSplits = 8;
 end
-if ~strcmp(pmode, 'randomgap')
+if ~ismember(pmode, {'randomgap', 'spreadgap'})
 	numSplits = 1;
 end
 
 % ------------------------------------------------------------------------------
 %% Set up loop
 % ------------------------------------------------------------------------------
-if ismember(pmode, {'frombefore', 'randomgap'})
+if ismember(pmode, {'frombefore', 'randomgap', 'spreadgap'})
 	spns = floor(linspace(1, N - (numTest + numTrain), numPreds)); % starting positions
 elseif strcmp(pmode, 'beforeafter')
 	spns = floor(linspace(1, N - (numTest + numTrain * 2), numPreds)); % starting positions
 end
-% Each window is used numSplits times (with a different random split each time):
+% Each window is used numSplits times (with a different split each time):
 spns = repelem(spns, numSplits);
 numPreds = numPreds * numSplits;
 
@@ -183,10 +204,26 @@ nlmls = NaN(numPreds, 1); % negative log marginal likelihoods of model, per trai
 nhps = eval(feval(covFunc{:})); % number of hyperparameters
 loghypers = zeros(nhps, numPreds); % loghyperparameters
 
-% The random train/test splits, one column per window (so that the windows get different
-% random splits), reproducible from the seed:
-if strcmp(pmode, 'randomgap')
-	[~, randomSplits] = sort(reshape(BF_Random((numTrain + numTest) * numPreds, BF_RandomSeed(randomSeed)), ...
+% The train/test splits, one column per fit (so that the windows get different splits):
+if strcmp(pmode, 'spreadgap')
+	% Deterministic splits: the test sets are taken from the list of all
+	% nchoosek(numTrain + numTest, numTest) possible ones (in lexicographic order) in the
+	% evenly spread order of BF_SpreadPerm, a different test set for each of the
+	% numPreds (windows x splits) fits (cycling through the list if it is shorter):
+	numSplitsAll = nchoosek(numTrain + numTest, numTest);
+	if numSplitsAll > 1e6
+		error('Too many possible splits (%g) for ''spreadgap''', numSplitsAll);
+	end
+	testSets = nchoosek(1:numTrain + numTest, numTest);
+	spreadOrder = BF_SpreadPerm(numSplitsAll);
+	splits = zeros(numTrain + numTest, numPreds);
+	for i = 1:numPreds
+		testSet = testSets(spreadOrder(mod(i - 1, numSplitsAll) + 1), :);
+		splits(:, i) = [setdiff(1:numTrain + numTest, testSet), testSet]';
+	end
+elseif strcmp(pmode, 'randomgap')
+	% Random splits, reproducible from the seed:
+	[~, splits] = sort(reshape(BF_Random((numTrain + numTest) * numPreds, BF_RandomSeed(randomSeed)), ...
 										numTrain + numTest, numPreds));
 end
 
@@ -202,9 +239,9 @@ for i = 1:numPreds
 			rs = spns(i) + numTrain:spns(i) + numTrain + numTest - 1; % test range
 			ys = y(rs); % test data
 
-		case 'randomgap'
+		case {'randomgap', 'spreadgap'}
 			t = (1:numTrain + numTest)';
-			r = randomSplits(:, i)';
+			r = splits(:, i)';
 			yy = y(spns(i):spns(i) + numTrain + numTest - 1);
 
 			rt = sort(r(1:numTrain), 'ascend');
@@ -373,8 +410,17 @@ out.maxabs_run = max(abserr_run);
 out.minabs_std_run = min(stderr_run);
 out.minabs_run = min(abserr_run);
 
+% Upper (and lower) tails over the fits: the maximum (minimum) over the fits is set by
+% one fit (often a single badly conditioned one), and so depends on which splits were
+% made; a high (low) quantile, or the mean of the highest (lowest) quarter, keeps the
+% meaning ('how large/small does it get') and is reproducible
+out.q90abs_run = quantile(abserr_run, 0.9);
+out.q90abs_std_run = quantile(stderr_run, 0.9);
+out.low25abs_std_run = SUB_tailMean(stderr_run, 'low');
+
 % Error bar stats:
 out.maxerrbar = max(stderrs(:)); % largest error bar
+out.high25errbar = SUB_tailMean(stderrs(:), 'high'); % mean of the largest quarter of the error bars
 out.meanerrbar = mean(stderrs(:)); % mean error bar length
 out.minerrbar = min(stderrs(:)); % minimum error bar length
 
@@ -397,7 +443,22 @@ end
 %  negative of nlZ, summed over the training points rather than per point.)
 
 out.maxnlml = max(nlmls);
+out.q90nlml = quantile(nlmls, 0.9);
 out.minnlml = min(nlmls);
 out.stdnlml = std(nlmls);
+
+% ------------------------------------------------------------------------------
+function m = SUB_tailMean(x, whichTail)
+	% Mean of the highest ('high') or lowest ('low') quarter of the values in x
+	% (the ceil(n/4) largest or smallest of the n values)
+	x = sort(x(:), 'ascend');
+	k = ceil(length(x) / 4);
+	if strcmp(whichTail, 'high')
+		m = mean(x(end - k + 1:end));
+	else
+		m = mean(x(1:k));
+	end
+end
+% ------------------------------------------------------------------------------
 
 end
