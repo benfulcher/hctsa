@@ -3,6 +3,20 @@ classdef Robust_salv_surrTests < matlab.unittest.TestCase
     % surrogates).
 
     methods (Test)
+        function zsignedIsSignedStdFromMean(testCase)
+            % zsigned = (s - meansurr)/stdsurr; its magnitude is stdfrommean
+            e = BF_Random(1500, 13, 'normal');
+            g = filter(1, [1, -0.6], e);
+            y = zscore(exp(g / std(g)));
+            for tau = {1, 'mi'}
+                o = SD_Surrogates(y, tau{1}, 50, 2, 'tc3', 0);
+                if ischar(tau{1}), t = BF_GetTau(y, tau{1}); else, t = tau{1}; end
+                s = CO_TC3(y, t).raw;
+                testCase.verifyEqual(o.zsigned, (s - o.meansurr) / o.stdsurr, 'RelTol', 1e-12);
+                testCase.verifyEqual(abs(o.zsigned), o.stdfrommean, 'RelTol', 1e-12);
+            end
+        end
+
         function meannumsurrIsMeanOfNumerator(testCase)
             % meannumsurr is the mean of CO_TC3/CO_trev's numerator over the same surrogates
             y = zscore(BF_Random(300, 7, 'normal'));
