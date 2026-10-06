@@ -200,8 +200,9 @@ if numDraws > 1 && maxN > 0 && N > maxN && ismember(resampleHow, {'random_i', 'r
 	seed0 = BF_RandomSeed(randomSeed);
 	outDraws = cell(numDraws, 1);
 	for d = 1:numDraws
-		% (draw d uses the seeds seed0 + 2*(d-1), and one more for 'random_both')
-		outDraws{d} = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, seed0 + 2 * (d - 1), 1);
+		% (draw d uses the seed 2*numDraws*seed0 + 2*(d-1), and the next one as well for
+		% 'random_both', so that different seeds share no draws)
+		outDraws{d} = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, 2 * numDraws * seed0 + 2 * (d - 1), 1);
 	end
 	isValid = cellfun(@isstruct, outDraws);
 	if sum(isValid) < numDraws / 2
