@@ -57,6 +57,9 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 %       comes to dominate (degenerating towards a unimodal fit)
 %
 % ---NOTES:
+% Each mixture is fitted from 10 k-means++ starts (the best likelihood is kept; the generator is
+% seeded inside the function): a few starts leave the sep_* outputs dependent on which starts
+% were drawn.
 % The sep_* outputs are always computed from a fixed 2-component fit, so they
 % are not gated by whether that fit is actually favoured by BIC over a single
 % Gaussian: even a genuinely unimodal-but-elongated point cloud (e.g. AR(1)
@@ -198,7 +201,7 @@ try
 	% (same covariance regularization and replicates as the k >= 2 fits below, so
 	% that the BIC values are comparable and the fit survives a near-singular cloud)
 	gmModels{1} = fitgmdist(y_gmm, 1, 'CovarianceType', 'full', ...
-							'RegularizationValue', regVal, 'Replicates', 3, ...
+							'RegularizationValue', regVal, 'Replicates', 10, ...
 							'Options', gmOptions, 'Start', 'plus');
 	BIC(1) = gmModels{1}.BIC;
 catch
@@ -215,7 +218,7 @@ warningState = warning('off', 'stats:gmdistribution:FailedToConvergeReps');
 for k = 2:kMax
 	try
 		gmModels{k} = fitgmdist(y_gmm, k, 'CovarianceType', 'full', ...
-								'RegularizationValue', regVal, 'Replicates', 3, ...
+								'RegularizationValue', regVal, 'Replicates', 10, ...
 								'Options', gmOptions, 'Start', 'plus');
 		BIC(k) = gmModels{k}.BIC;
 	catch

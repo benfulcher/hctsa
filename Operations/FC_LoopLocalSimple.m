@@ -6,7 +6,7 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 % residuals vary with l: the standard deviation (stde), the stationarity measures
 % sws and swm (variation of the local standard deviation and local mean of the
 % residuals across 5 segments), and the residual autocorrelations at lags 1 and 2
-% (ac1, ac2). Requires the Curve Fitting Toolbox, for the exponential fit.
+% (ac1, ac2).
 %
 % ---INPUTS:
 % y, the input time series
@@ -28,11 +28,14 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 %        value of the stde curve: its maximum if the curve falls on the whole as l
 %        grows (stde_chn < 0), otherwise its minimum
 % stde_peaksize: the stde value at that position divided by the mean of the stde curve
-% sws_fexp_a, sws_fexp_b, sws_fexp_c: the amplitude a, rate b and offset c of an
-%        exponential fit f(l) = a*exp(b*l) + c to the sws curve
-% sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2, adjusted R^2 and root-mean-
-%        square error of that fit
-%        (all six sws_fexp_* fields are NaN if the fit fails)
+% sws_fexp_b: the rate b of an exponential fit f(l) = a*exp(b*l) + c to the sws
+%        curve (negative for a decay with training length). The fit is the global
+%        least-squares optimum over b, with a and c found by linear least squares
+%        (see BF_ExpFit); a and c are not output because they are poorly determined
+%        when the curve is close to a straight line.
+% sws_fexp_r2, sws_fexp_adjr2, sws_fexp_rmse: the R^2 (between 0 and 1), adjusted R^2
+%        and root-mean-square error of that fit
+%        (all four sws_fexp_* fields are NaN if the sws curve is constant)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -62,15 +65,6 @@ function out = FC_LoopLocalSimple(y, forecastMeth)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-% ------------------------------------------------------------------------------
-% Check a curve-fitting toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox');
-
-% (A Signal Processing Toolbox check was declared here for xcorr, but neither this function
-%  nor anything it calls -- FC_LocalSimple, CO_AutoCorr, CO_FirstCrossing -- uses xcorr or any
-%  other Signal Processing function, so the requirement was spurious.)
 
 doPlot = false; % plot outputs to a figure
 
@@ -150,26 +144,12 @@ out.sws_chn = mean(diff(stats_st(:, 2))) / (range(stats_st(:, 2)));
 out.sws_meansgndiff = mean(sign(diff(stats_st(:, 2))));
 out.sws_stdn = std(stats_st(:, 2)) / range(stats_st(:, 2));
 
-% Fit exponential decay:
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [range(stats_st(:, 2)), -0.5 min(stats_st(:, 2))]);
-f = fittype('a*exp(b*x)+c', 'options', s);
-try
-	[c, gof] = fit(trainLengthRange, stats_st(:, 2), f);
-	out.sws_fexp_a = c.a;
-	out.sws_fexp_b = c.b; % this is important
-	out.sws_fexp_c = c.c;
-	out.sws_fexp_r2 = gof.rsquare; % this is more important!
-	out.sws_fexp_adjr2 = gof.adjrsquare;
-	out.sws_fexp_rmse = gof.rmse;
-catch
-	% The fit can fail (10 points, 3 parameters), e.g. for a constant or non-finite curve
-	out.sws_fexp_a = NaN;
-	out.sws_fexp_b = NaN;
-	out.sws_fexp_c = NaN;
-	out.sws_fexp_r2 = NaN;
-	out.sws_fexp_adjr2 = NaN;
-	out.sws_fexp_rmse = NaN;
-end
+% Fit exponential decay (global least squares over the rate, see BF_ExpFit):
+fExp = BF_ExpFit(trainLengthRange, stats_st(:, 2), true);
+out.sws_fexp_b = fExp.b; % this is important
+out.sws_fexp_r2 = fExp.r2; % this is more important!
+out.sws_fexp_adjr2 = fExp.adjr2;
+out.sws_fexp_rmse = fExp.rmse;
 
 % (3) sliding window mean
 out.swm_chn = mean(diff(stats_st(:, 3))) / (range(stats_st(:, 3)));

@@ -3,8 +3,10 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 %
 % Searches lags 1, 2, ... for the first local minimum of the autocorrelation function
 % or the automutual information (or, if minNotMax is false, the first local maximum),
-% and returns that lag in samples. Returns the length of the series if the function
-% keeps decreasing, and NaN if it hits a NaN before finding one. The first minimum
+% and returns that lag in samples. Returns NaN if the function becomes undefined
+% (NaN) before a minimum is found (e.g., an automutual information that keeps
+% decreasing on a monotone trend until too few pairs remain), and the length of the
+% series if it keeps decreasing up to the longest lag. The first minimum
 % of the automutual information is a standard choice of embedding delay.
 %
 % ---INPUTS:

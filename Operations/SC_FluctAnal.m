@@ -10,6 +10,10 @@ function out = SC_FluctAnal(x, q, wtf, tauStep, k, lag, logInc)
 % implementation follows the discussion of scaling methods in Talkner and Weber
 % (2000).
 %
+% Straight lines are fitted by the Theil-Sen method (the median of the slopes
+% between all pairs of points), a robust estimator with a closed form (see
+% BF_TheilSen).
+%
 % Timescales tau run from 5 samples to half the series length, in tauStep
 % logarithmically spaced steps (logInc true) or in steps of tauStep samples
 % (logInc false, in which case log F is interpolated by a spline onto 50 evenly
@@ -48,18 +52,22 @@ function out = SC_FluctAnal(x, q, wtf, tauStep, k, lag, logInc)
 % linfitint, alpha, se1, se2, ssr, resac1: the intercept, slope (the scaling
 %       exponent alpha), standard errors of the intercept and the slope, mean
 %       squared residual, and lag-1 autocorrelation of the residuals, of the
-%       single line fitted over all timescales
+%       single line fitted over all timescales (the standard errors are the usual
+%       least-squares formulas applied to the residuals of the robust fit)
 % r1_linfitint, r1_alpha, r1_se1, r1_se2, r1_ssr, r1_resac1: the same, for the
 %       first (shorter-timescale) line of the two-line fit
 % r2_linfitint, r2_alpha, r2_se1, r2_se2, r2_ssr, r2_resac1: the same, for the
 %       second (longer-timescale) line
 % logtausplit, the value of log(tau) at the split between the two lines
 % prop_r1, the proportion of the timescales covered by the first line
-% ratsplitminerr, the ratio of the minimum two-line fitting error (mean squared
-%       error pooled over both lines) to ssr
+% splitgain, the proportional reduction in mean squared error from fitting two
+%       least-squares lines rather than one over the whole range: one minus the
+%       ratio of the minimum two-line error to the one-line error (between 0 and 1;
+%       NaN if the one-line fit is exact)
 % meanssr, stdssr, the mean and the standard deviation of the two-line fitting
 %       error across the candidate split points
-% alpharat, the ratio r1_alpha / r2_alpha
+% alphadiff, the difference r1_alpha - r2_alpha between the scaling exponents of
+%       the two lines
 % (All are NaN if there are too few timescales; the two-line fields are NaN if
 % the timescales are too few to support two lines.)
 %
@@ -295,19 +303,21 @@ end
 sserr = nan(numTimeScales, 1); % don't choose the end points
 minPoints = max(8, round(0.25 * numTimeScales));
 if numTimeScales >= 2 * minPoints
+	% Single straight line over the whole range (least squares), for comparison
+	p0 = polyfit(logtt, logFF, 1);
+	ssr1 = sum((polyval(p0, logtt) - logFF).^2) / numTimeScales;
 	for i = minPoints:numTimeScales - minPoints
 		r1 = 1:i;
 		p1 = polyfit(logtt(r1), logFF(r1), 1);
 		r2 = i:numTimeScales;
 		p2 = polyfit(logtt(r2), logFF(r2), 1);
 		% Mean squared error, pooled across both segments and normalized by
-		% the total number of points sampled (numTimeScales), so that
-		% ratsplitminerr below (which divides by out.ssr, a mean squared
-		% error) is a genuinely comparable, tauStep-invariant ratio. This was
+		% the total number of points sampled (numTimeScales), so that it is
+		% comparable to ssr1 and independent of tauStep. (This was
 		% previously a straight sum of L2 norms (unnormalized), which scales
-		% with sqrt(#points) and made ratsplitminerr roughly triple just from
+		% with sqrt(#points) and made the error roughly triple just from
 		% varying tauStep 20->200 on an identical series -- not a real effect,
-		% purely a units mismatch.
+		% purely a units mismatch.)
 		e1 = polyval(p1, logtt(r1)) - logFF(r1);
 		e2 = polyval(p2, logtt(r2)) - logFF(r2);
 		sserr(i) = (sum(e1.^2) + sum(e2.^2)) / numTimeScales;
@@ -319,12 +329,16 @@ if all(isnan(sserr))
 	r1 = []; r2 = [];
 	out.prop_r1 = NaN;
 	out.logtausplit = NaN;
-	out.ratsplitminerr = NaN;
+	out.splitgain = NaN;
 	out.meanssr = NaN;
 	out.stdssr = NaN;
 else
-	% breakPt is the point where it's best to fit a line before and another line after
-	breakPt = find(sserr == min(sserr), 1, 'first');
+	% breakPt is the point where it's best to fit a line before and another line after.
+	% The error curve can be flat, so take the first split whose error is within a
+	% tiny relative tolerance of the minimum, rather than testing for exact equality
+	% (which rounding errors can decide)
+	minErr = min(sserr);
+	breakPt = find(sserr <= minErr * (1 + 1e-9), 1, 'first');
 	r1 = 1:breakPt;
 	r2 = breakPt:numTimeScales;
 
@@ -332,7 +346,13 @@ else
 	out.prop_r1 = length(r1) / numTimeScales;
 
 	out.logtausplit = logtt(breakPt);
-	out.ratsplitminerr = min(sserr) / out.ssr;
+	% The proportional reduction in squared error from using two lines rather than one
+	% (NaN if the single line is exact to rounding error, when the ratio is meaningless)
+	if ssr1 > 1e-24
+		out.splitgain = max(0, 1 - minErr / ssr1);
+	else
+		out.splitgain = NaN;
+	end
 	out.meanssr = mean(sserr,'omitnan');
 	out.stdssr = std(sserr,0,'omitnan');
 end
@@ -359,15 +379,12 @@ out = DoRobustLinearFit(out, logtt, logFF, r1, 'r1_');
 % R2:
 out = DoRobustLinearFit(out, logtt, logFF, r2, 'r2_');
 
-if isnan(out.r1_alpha) || isnan(out.r2_alpha)
-	out.alpharat = NaN;
-else
-	out.alpharat = out.r1_alpha / out.r2_alpha;
-end
+% Change in scaling exponent between the two regimes:
+out.alphadiff = out.r1_alpha - out.r2_alpha;
 
 % -------------------------------------------------------------------------------
 function out = DoRobustLinearFit(out, logtt, logFF, theRange, fieldName)
-	% Get robust linear fit statistics on scaling range
+	% Robust (Theil-Sen) linear fit statistics on scaling range
 	% Adds fields to the output structure
 
 	if length(theRange) < 8 || all(isnan(logFF(theRange)))
@@ -378,14 +395,19 @@ function out = DoRobustLinearFit(out, logtt, logFF, theRange, fieldName)
 		out.([fieldName, 'ssr']) = NaN;
 		out.([fieldName, 'resac1']) = NaN;
 	else
-		[linfit, stats] = robustfit(logtt(theRange), logFF(theRange));
+		xx = logtt(theRange);
+		p = BF_TheilSen(xx, logFF(theRange));
+		resid = logFF(theRange) - polyval(p, xx);
+		n = length(xx);
+		Sxx = sum((xx - mean(xx)).^2);
+		s2 = sum(resid.^2) / (n - 2);
 
-		out.([fieldName, 'linfitint']) = linfit(1); % linear fit intercept
-		out.([fieldName, 'alpha']) = linfit(2); % linear fit gradient
-		out.([fieldName, 'se1']) = stats.se(1); % standard error in intercept
-		out.([fieldName, 'se2']) = stats.se(2); % standard error in mean
-		out.([fieldName, 'ssr']) = mean(stats.resid.^2); % mean squares residual
-		out.([fieldName, 'resac1']) = CO_AutoCorr(stats.resid, 1, 'Fourier');
+		out.([fieldName, 'linfitint']) = p(2); % linear fit intercept
+		out.([fieldName, 'alpha']) = p(1); % linear fit gradient
+		out.([fieldName, 'se1']) = sqrt(s2*(1/n + mean(xx)^2/Sxx)); % standard error in intercept
+		out.([fieldName, 'se2']) = sqrt(s2/Sxx); % standard error in gradient
+		out.([fieldName, 'ssr']) = mean(resid.^2); % mean squares residual
+		out.([fieldName, 'resac1']) = CO_AutoCorr(resid, 1, 'Fourier');
 	end
 end
 
