@@ -2,8 +2,9 @@ function out = EN_DistributionEntropy(y, histOrKS, numBins, olremp)
 % EN_DistributionEntropy   Entropy of the distribution of values in a time series.
 %
 % Estimates the entropy of the distribution of a data vector, ignoring the order
-% of values in time. The distribution is estimated either with a histogram or as
-% a kernel-smoothed density (using ksdensity from Matlab's Statistics Toolbox,
+% of values in time. The distribution is estimated either with a histogram
+% (equal-width bins spanning the data, see BF_HistEdges) or as a kernel-smoothed
+% density (Gaussian kernel with a normal-reference bandwidth, see BF_KSDensity,
 % evaluated on a grid of 200 points spanning the 0.1%-99.9% quantile range plus a
 % 10% margin). The entropy is -sum(p.*log(p./w)), where p is the probability in
 % each cell and w the cell width, so it estimates a differential entropy (in
@@ -19,11 +20,11 @@ function out = EN_DistributionEntropy(y, histOrKS, numBins, olremp)
 % histOrKS, 'hist' for a histogram, or 'ks' for a kernel-smoothed density
 %    (default: 'hist')
 % numBins, for 'hist': either a positive integer, giving the number of
-%        equal-width bins, or the name of a rule for choosing the bin width
-%        passed to histcounts ('auto', 'fd', 'sqrt', 'sturges', ...);
-%        for 'ks': a positive real number, the width parameter for ksdensity, or
-%        empty for the default (automatically chosen) width, which is optimal for
-%        a Gaussian distribution
+%        equal-width bins, or the name of a rule for the number of bins
+%        ('auto', 'fd', 'sqrt', 'sturges'; see BF_HistEdges);
+%        for 'ks': a positive real number, the bandwidth of the Gaussian kernel, or
+%        empty for the default bandwidth, which is optimal for a Gaussian
+%        distribution (see BF_KSDensity)
 %        (default: 10)
 % olremp [optional], the proportion of values to remove at both extremes (by
 %        quantile; e.g., olremp = 0.01 keeps only the middle 98% of the data; 0
@@ -35,8 +36,8 @@ function out = EN_DistributionEntropy(y, histOrKS, numBins, olremp)
 % ---OUTPUTS:
 % a scalar: the entropy estimate (in nats), or, if olremp is nonzero, the
 % entropy of the full time series minus that of the trimmed time series.
-% NaN if everything is removed by the trimming, or if the 'ks' grid range is
-% degenerate (near-constant series).
+% NaN if everything is removed by the trimming, or if the data (after trimming) are
+% constant, for which the differential entropy is not defined.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -105,11 +106,11 @@ end
 % ------------------------------------------------------------------------------
 switch histOrKS
 	case 'hist' % Use histogram to calculate pdf
-		if isnumeric(numBins)
-			[px, binEdges] = histcounts(y, numBins, 'Normalization', 'probability');
-		else
-			[px, binEdges] = histcounts(y, 'BinMethod', numBins, 'Normalization', 'probability');
+		if range(y) == 0 % constant: the differential entropy is not defined
+			out = NaN; return
 		end
+		binEdges = BF_HistEdges(y, numBins); % explicit edges, whether a number of bins or a rule
+		px = histcounts(y, binEdges, 'Normalization', 'probability');
 		% Compute bin centers:
 		xr = mean([binEdges(1:end - 1); binEdges(2:end)]);
 		% Compute bin widths:
@@ -134,7 +135,7 @@ switch histOrKS
 		pad = 0.1 * (hi - lo); % a little headroom beyond the quantile range
 		xGrid = linspace(lo - pad, hi + pad, numGridPts);
 		if isempty(numBins)
-			[px, xr] = ksdensity(y, xGrid, 'function', 'pdf'); % selects optimal width
+			[px, xr] = BF_KSDensity(y, xGrid); % normal-reference bandwidth
 		else
 			% NB: a *fixed* absolute bandwidth makes the density estimate
 			% inconsistent -- for consistency the bandwidth must shrink with
@@ -145,7 +146,7 @@ switch histOrKS
 			% selection, so the fixed-bandwidth variants are no longer
 			% registered as hctsa features. The option is kept for callers who
 			% want a specific smoothing scale.
-			[px, xr] = ksdensity(y, xGrid, 'width', numBins, 'function', 'pdf'); % uses specified width
+			[px, xr] = BF_KSDensity(y, xGrid, numBins); % uses specified bandwidth
 		end
 		binWidths = ones(1, length(px)) * (xr(2) - xr(1));
 		% ksdensity returns a *density* evaluated on a grid, whereas the entropy

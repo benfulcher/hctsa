@@ -21,7 +21,9 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion
 %       of the time-series length (default: 0.02)
 % Nref, the number of reference points; between 0 and 1 for a proportion of the time-series
-%       length (default: 0.5). It is limited to between 100 (if N > 100) and 2500.
+%       length (default: 0.5). It is limited to between 500 (if N > 500) and 2500: fewer
+%       centers make the best-scaling-range outputs depend on which points are the centers.
+%       The centers are spread evenly over the series (a fixed, deterministic choice).
 %
 % ---OUTPUTS: scaling ranges and dimension estimates over the embedding dimensions, m,
 % from mmm(1) to mmm(2):
@@ -51,8 +53,15 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % and require that TISEAN is installed and compiled, and able to be executed in the command
 % line. TISEAN is available at http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html
 %
-% TISEAN's c1 freezes for series whose length is within 6 of a multiple of 128, so the last
-% mod(N,128)+1 points are dropped in that case.
+% The compiled c1 in this package is patched: stock TISEAN 3.0.1 searches for ever when the
+% number of embedded points is a power of two (for some embedding dimension in mmm), when the
+% time separation leaves no neighbors, or when more reference points are requested than
+% exist, and it picks the partners in its shuffle of the reference points from outside the
+% valid range. Stock TISEAN also divides the summed log radii by Nref - (m-1)*tau rather than
+% by the number of reference points used, which inflates the mean log radius and biases the
+% dimension estimates low (more so with fewer reference points, higher m and longer delays);
+% the patched c1 divides by the number of reference points used. Recompile TISEAN
+% (compile_tisean) after updating.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -92,16 +101,6 @@ N = length(y); % time-series length (number of samples)
 if N < 100
 	warning('Time series too short for c1')
 	out = NaN; return
-end
-% ++BF 12/5/2010 -- for some reason timeseries of length near a multiple of 128
-% stalls the TISEAN routine c1... -- let's do a slight workaround by removing the
-% last (few) points in this case...
-freakyStat = mod(N, 128);
-if freakyStat <= 6
-	fprintf(1, 'You''re not going to believe this but TISEAN has a problem freezing with this length time series!\n');
-	fprintf(1, 'I''m ignoring the last %u points of this time series...\n', freakyStat + 1);
-	y = y(1:end - (freakyStat + 1));
-	N = length(y); % new time-series length
 end
 % Also freezes on constant data
 if length(unique(y)) == 1
@@ -152,7 +151,7 @@ if (Nref > 0) && (Nref <= 1)
 	Nref = ceil(Nref * N); % specify a proportion of data length
 end
 
-Nrefmin = 100; % can't have fewer than 100 reference points
+Nrefmin = 500; % can't have fewer than 500 reference points (fewer gives unstable scaling ranges)
 Nrefmax = 2500; % for time reasons, don't use more than 2500 reference points
 
 if Nref > Nrefmax

@@ -7,11 +7,13 @@ function out = DN_HistogramMode(y, numBins, doSimple, doPlot)
 %
 % ---INPUTS:
 % y, the input data vector
-% numBins, the number of bins to use in the histogram, or the name of a
-%       binning rule for histcounts, e.g., 'auto' (default: 'auto')
-% doSimple, whether to use a simple binning method with linearly spaced bins
-%       between the minimum and maximum (BF_SimpleBinner; true, the default),
-%       or MATLAB's histcounts (false). Ignored if numBins is a text option.
+% numBins, the number of bins to use in the histogram, or the name of a rule for
+%       the number of bins ('auto', 'fd', 'sqrt' or 'sturges'; see BF_HistEdges)
+%       (default: 'auto')
+% doSimple, whether to use equal-width bins between the minimum and maximum, with
+%       edges given explicitly (BF_HistEdges; true, the default), or MATLAB's
+%       histcounts, which rounds the bin limits and width to 'nice' values (false).
+%       Ignored if numBins is a text option.
 % doPlot, whether to show a plot of what was computed (default: false)
 %
 % ---OUTPUTS:
@@ -61,14 +63,11 @@ end
 % -------------------------------------------------------------------------------
 
 % Compute the histogram from the data:
-if isnumeric(numBins)
-	if doSimple
-		[N, binEdges] = BF_SimpleBinner(y, numBins);
-	else
-		[N, binEdges] = histcounts(y, numBins);
-	end
-elseif ischar(numBins)
-	[N, binEdges] = histcounts(y, 'BinMethod', numBins);
+if isnumeric(numBins) && ~doSimple
+	[N, binEdges] = histcounts(y, numBins);
+elseif isnumeric(numBins) || ischar(numBins)
+	binEdges = BF_HistEdges(y, numBins);
+	N = histcounts(y, binEdges);
 else
 	error('Unknown format for numBins');
 end

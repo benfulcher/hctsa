@@ -169,13 +169,16 @@ switch windowStat
 		for i = 1:numSteps
 			yWin = y(getWindow(i));
 			Fy = fft(yWin - mean(yWin));
-			Py = abs(Fy(1:floor(end / 2) + 1)).^2; % one-sided power spectrum
-			Py = Py(Py > 0); % avoid log(0)
+			% One-sided power spectrum without the DC bin (zero after removing the
+			% mean, up to rounding), so that the number of frequencies, floor(n/2),
+			% does not depend on the last bit of the mean:
+			Py = abs(Fy(2:floor(end / 2) + 1)).^2;
 			if length(Py) < 2 || sum(Py) == 0
 				qs(i) = NaN;
 			else
 				Py = Py / sum(Py);
-				qs(i) = -sum(Py .* log2(Py)) / log2(length(Py)); % normalized to [0,1]
+				Py = Py(Py > 0); % 0*log(0) = 0
+				qs(i) = -sum(Py .* log2(Py)) / log2(floor(length(yWin) / 2)); % normalized to [0,1]
 			end
 		end
 	case 'mom3' % Third moment
@@ -257,7 +260,11 @@ switch acrossWinStat
 	case 'ent'
 		% get a load of statistics from kernel-smoothed distribution (inefficient since only one is used)
 		kssimpouts = DN_FitKernelSmooth(qs);
-		out = kssimpouts.entropy; % distributional entropy
+		if isstruct(kssimpouts)
+			out = kssimpouts.entropy; % distributional entropy
+		else
+			out = NaN; % (the local estimates are all the same)
+		end
 	otherwise
 		error('Unknown statistic: ''%s''.', acrossWinStat)
 end

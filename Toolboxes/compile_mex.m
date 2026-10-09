@@ -46,23 +46,6 @@ toolDir = currentDir;
 results = struct('name',{},'ok',{});
 
 % ------------------------------------------------------------------------------
-% Max Little's fastdfa code
-% ------------------------------------------------------------------------------
-fprintf(1,'fastdfa...');
-ok = true;
-try
-    cd(fullfile(toolDir,'Max_Little','fastdfa'));
-	mex ML_fastdfa_core.c
-    fprintf(1,' done.\n');
-catch emsg
-    ok = false;
-    fprintf(1,'%s\n',emsg.message);
-    fprintf(1,['ERROR: ML_fastdfa_core C code failed to compile. It appears that mex is not ' ...
-        'set up to work on this system (cf. ''doc mex'' and ''mex -setup'').\n']);
-end
-results(end+1) = struct('name','Max Little''s fastdfa','ok',ok);
-
-% ------------------------------------------------------------------------------
 % Max Little's Steps Bumps Toolkit
 % ------------------------------------------------------------------------------
 fprintf(1,'Max Little''s ''Steps and bumps'' toolkit...');

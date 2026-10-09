@@ -8,7 +8,7 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % operation no longer depends on TSTOOL). The statistic is computed on the series and on
 % each surrogate, and the outputs describe where the series' value lies in the distribution
 % of the surrogates' values (a Gaussian fit to them, their median and interquartile range,
-% and a kernel-smoothed density).
+% and a kernel-smoothed density, see BF_KSDensity).
 %
 % ---INPUTS:
 % y, the input time series
@@ -32,9 +32,26 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ---OUTPUTS: (s is the value of the statistic on the series; the surrogates' values have
 % mean muhat, standard deviation sigmahat, median and interquartile range iqrsurr)
 % meansurr, the mean of the statistic over the surrogates
+% meannumsurr, the mean over the surrogates of the statistic's numerator: for 'tc3',
+%         <x_n x_{n-tau} x_{n-2tau}>; for 'trev', <d^3>. Unlike meansurr it has no
+%         denominator, so it is not dominated by the few surrogates whose denominator is
+%         near zero (for 'tc3', |<x_n x_{n-tau}>| is small whenever the surrogate's
+%         lag-tau autocorrelation is). It is the mean third-order moment of the null
+%         ensemble: for AAFT surrogates (surrMethod = 2) it measures how much
+%         <x_n x_{n-tau} x_{n-2tau}> a static monotone transform of a linear Gaussian
+%         process with this series' distribution and autocorrelation produces. For 'trev'
+%         and for random-phase surrogates (surrMethod = 1) its expectation is near zero for
+%         every series (the null processes are time-reversible, and random phases cancel
+%         third-order moments of a zero-mean series); for permuted surrogates
+%         (surrMethod = 3) it depends only on the series' distribution.
 % stdsurr, the standard deviation of the statistic over the surrogates
 % normpatponmax, the Gaussian density N(muhat, sigmahat) at s relative to its peak value
 % stdfrommean, |s - muhat|/sigmahat
+% zsigned, (s - muhat)/sigmahat: the z-score of the series' statistic against the
+%         surrogates, keeping its sign (whether the series has more or less of the
+%         statistic than the null ensemble); NaN if sigmahat is at the rounding level of
+%         the surrogates' values (sigmahat <= 1e-10*max|value|), where no meaningful
+%         z-score exists
 % ztestp, the p-value of a z-test of s against N(muhat, sigmahat)
 % iqrsfrommedian, |s - median|/iqrsurr (NaN if iqrsurr = 0)
 % kspminfromext, the smaller of the kernel-density probabilities of a value below and above
@@ -42,7 +59,8 @@ function out = SD_Surrogates(y, tau, nsurr, surrMethod, surrfn, randomSeed)
 % ksphereonmax, the kernel density at s relative to the peak of N(muhat, sigmahat) (0 if s
 %         lies above the density grid)
 % ksiqrsfrommode, |s - (mode of the kernel density)|/iqrsurr (NaN if iqrsurr = 0)
-% normpatponmax, stdfrommean and ztestp are NaN if the surrogates all have the same value.
+% normpatponmax, stdfrommean, ztestp, kspminfromext and ksphereonmax are NaN if the
+% surrogates all have the same value.
 % The output is NaN if tau cannot be determined; an error is raised if the statistic fails
 % for all surrogates.
 
@@ -124,14 +142,15 @@ end
 % own tc3/trev functions used):
 switch surrfn
 	case 'tc3'
-		statFn = @(yy) CO_TC3(yy, tau).raw;
+		statFn = @(yy) CO_TC3(yy, tau);
 	case 'trev'
-		statFn = @(yy) CO_trev(yy, tau).raw;
+		statFn = @(yy) CO_trev(yy, tau);
 	otherwise
 		error('Unknown surrogate function ''%s''', surrfn)
 end
 
-tc3_y = statFn(y);
+statY = statFn(y);
+tc3_y = statY.raw;
 
 % Map TSTOOL's numeric surrogate-method convention onto SD_MakeSurrogates:
 switch surrMethod
@@ -149,8 +168,11 @@ end
 % evaluate the same statistic on each:
 surrogates = SD_MakeSurrogates(y, nativeSurrMethod, nsurr, [], randomSeed);
 tc3_surr = zeros(nsurr, 1);
+num_surr = zeros(nsurr, 1); % the statistic's numerator on each surrogate
 for i = 1:nsurr
-	tc3_surr(i) = statFn(surrogates(:, i));
+	statSurr = statFn(surrogates(:, i));
+	tc3_surr(i) = statSurr.raw;
+	num_surr(i) = statSurr.num;
 end
 
 if all(isnan(tc3_surr))
@@ -188,6 +210,13 @@ else
 	% (both of these stats are a monotonic function of normpatponmax)
 end
 
+% signed z-score (NaN if the surrogates' spread is at rounding level)
+if sigmahat <= 1e-10 * max(abs(tc3_surr))
+	out.zsigned = NaN;
+else
+	out.zsigned = (tc3_y - muhat) / sigmahat;
+end
+
 % iqrs from median
 iqrsurr = iqr(tc3_surr);
 if iqrsurr == 0
@@ -199,23 +228,29 @@ end
 % 3) basic info on surrogates
 out.stdsurr = sigmahat;
 out.meansurr = muhat;
+out.meannumsurr = mean(num_surr);
 
 % 4) kernel density test
-[ksf, ksx] = ksdensity(tc3_surr, 'function', 'pdf');
+[ksf, ksx] = BF_KSDensity(tc3_surr);
 % hold on;plot(ksx,ksf,'r')
-ksdx = ksx(2) - ksx(1);
-ihit = find(ksx > tc3_y, 1, 'first');
+if any(isnan(ksf)) % all surrogates have the same value: no scale to smooth over
+	out.kspminfromext = NaN;
+	out.ksphereonmax = NaN;
+else
+	ksdx = ksx(2) - ksx(1);
+	ihit = find(ksx > tc3_y, 1, 'first');
 
-if isempty(ihit) %% off the scale!
-	out.kspminfromext = 0;
-	out.ksphereonmax = 0;
-else % on the scale!
-	pfromleft = ksdx * sum(ksf(1:ihit));
-	% pfromright = ksdx*sum(ksf(ihit+1:end))
-	out.kspminfromext = min([pfromleft 1 - pfromleft]);
-	% out.phereonstd = ksf(ihit)/sigmahat;
-	out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
-	%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+	if isempty(ihit) %% off the scale!
+		out.kspminfromext = 0;
+		out.ksphereonmax = 0;
+	else % on the scale!
+		pfromleft = ksdx * sum(ksf(1:ihit));
+		% pfromright = ksdx*sum(ksf(ihit+1:end))
+		out.kspminfromext = min([pfromleft 1 - pfromleft]);
+		% out.phereonstd = ksf(ihit)/sigmahat;
+		out.ksphereonmax = ksf(ihit) / normpdf(muhat, muhat, sigmahat);
+		%     out.ksiqrsfrommode = abs(ksx(imode)-ksx(ihit))/iqr(tc3_surr);
+	end
 end
 
 % iqrs from mode

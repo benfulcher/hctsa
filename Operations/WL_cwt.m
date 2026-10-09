@@ -27,7 +27,8 @@ function out = WL_cwt(y, wname, maxScale)
 %        held by the coefficients whose scaled power exceeds its 99th, 98th, 95th,
 %        90th, 80th percentile (the strongest 1%, 2%, 5%, 10%, 20% of coefficients)
 % gam1, gam2: the shape and scale parameters of a gamma distribution fitted to the
-%        scaled power (gamfit; as the scaled power has mean 1, gam2 = 1/gam1)
+%        scaled power (gamfit; as the scaled power has mean 1, gam2 = 1/gam1); NaN if
+%        any scaled power is exactly zero, which the gamma distribution cannot describe
 % SC_h: the entropy of the energy distribution over all coefficients (in nats),
 %        relative to its maximum possible value, the log of the number of
 %        coefficients: 0 if the energy is spread evenly, negative when concentrated
@@ -170,9 +171,17 @@ if doPlot
 	ksdensity(SC(:));
 end
 
-gamma_phat = gamfit(SC(:));
-out.gam1 = gamma_phat(1);
-out.gam2 = gamma_phat(2);
+if any(SC(:) <= 0)
+	% A gamma distribution has no mass at exactly zero power (a coefficient that is
+	% exactly zero, as for an exactly constant stretch of the series), so its
+	% maximum-likelihood fit does not exist
+	out.gam1 = NaN;
+	out.gam2 = NaN;
+else
+	gamma_phat = gamfit(SC(:));
+	out.gam1 = gamma_phat(1);
+	out.gam2 = gamma_phat(2);
+end
 
 % ------------------------------------------------------------------------------
 %% 2D entropy
@@ -183,7 +192,8 @@ SC_a = SC ./ sum(SC(:));
 % entropy itself grows as log(numEntries) with the series length, whereas
 % -sum(p*log(p)) - log(numEntries) = -mean(SC*log(SC)) (<= 0) does not
 SC_a = SC_a(:);
-out.SC_h = -sum(SC_a .* log(SC_a)) - log(numEntries);
+SC_pos = SC_a(SC_a > 0); % (0*log(0) = 0 by continuity)
+out.SC_h = -sum(SC_pos .* log(SC_pos)) - log(numEntries);
 
 % ------------------------------------------------------------------------------
 %% Weird 2-D entropy idea -- first discretize
@@ -209,6 +219,7 @@ dd_SC = dd_SC ./ sum(dd_SC(:));
 
 % Compute entropy
 dd_SCO = dd_SC(:);
+dd_SCO = dd_SCO(dd_SCO > 0); % (0*log(0) = 0 by continuity)
 out.dd_SC_h = -sum(dd_SCO .* log(dd_SCO));
 
 % ------------------------------------------------------------------------------

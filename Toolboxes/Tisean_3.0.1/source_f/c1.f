@@ -57,6 +57,8 @@ c===========================================================================
       do 10 m=mfrom,mto
          write(iunit,'("#m= ",i5)') m
          pr=0.
+c        no embedded points at all: nothing to compute for this m
+         if(nmax-(m-1)*id.lt.1) goto 10
 C          Ben Fulcher, 2015-03-06 requires a fix to integer do loop for some compilers
          do 20 pl=log(1./(nmax-(m-1)*id)),0.,resl
             pln=pl

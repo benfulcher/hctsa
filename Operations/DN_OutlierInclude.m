@@ -15,8 +15,12 @@ function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
 %       number) (in samples).
 % The sweep stops when events are 2% or fewer of the points. The outputs measure
 % how these curves change with th, using exponential [f(x) = a*exp(b*x) + c] and
-% linear [f(x) = a*x + b] fits (which need the Curve Fitting Toolbox), and simple
-% statistics across thresholds. If a fit fails, its outputs are NaN.
+% linear [f(x) = a*x + b] least-squares fits, and simple statistics across
+% thresholds. The exponential fit is the global optimum over the rate b, with a and
+% c found by linear least squares (see BF_ExpFit), so it does not depend on a
+% starting point or optimizer settings; its R^2 lies between 0 and 1. If a fit is
+% not meaningful (too few thresholds, or a constant curve), the corresponding
+% outputs are NaN.
 %
 % If fixedThresh is given, the sweep and fits are skipped, and the statistics in
 % (1)-(3) are returned for that one threshold.
@@ -37,10 +41,12 @@ function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
 %
 % ---OUTPUTS:
 % From the sweep (fixedThresh not given):
-% mfexpa, mfexpb, mfexpc, mfexpr2, mfexprmse: the parameters a, b, c, R^2 and
-%       root-mean-square error of the exponential fit to the mean gap vs. th
-% nfexpa, nfexpb, nfexpc, nfexpr2, nfexprmse: the same for an exponential fit to
-%       the percentage of points that are events vs. th
+% mfexpb, mfexpr2, mfexprmse: the rate b, R^2 and root-mean-square error of the
+%       exponential fit to the mean gap vs. th (the amplitude a and offset c are not
+%       output: they become large and opposite in sign when the curve is nearly
+%       straight)
+% nfexpb, nfexpr2, nfexprmse: the same for an exponential fit to the percentage of
+%       points that are events vs. th
 % nfla, nflb, nflr2, nflrmse: slope a, intercept b, R^2 and root-mean-square
 %       error of a linear fit to the percentage of points that are events vs. th
 % mdtm, mdtmd, mdtstd: mean, median and standard deviation of the mean gap
@@ -52,8 +58,8 @@ function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
 % xcmerr1, xcmerrn1: cross-correlation (xcorr with 'coeff' normalization)
 %       between the mean gap and its standard error across thresholds, at lags
 %       +1 and -1
-% stdrfexpa, stdrfexpb, stdrfexpc, stdrfexpr2, stdrfexprmse: the parameters and
-%       fit quality of an exponential fit to std(times)/sqrt(their number) vs. th
+% stdrfexpb, stdrfexpr2, stdrfexprmse: the rate and fit quality of an exponential
+%       fit to std(times)/sqrt(their number) vs. th
 % stdrfla, stdrflb, stdrflr2, stdrflrmse: the same for a linear fit
 % From a single threshold (fixedThresh given; all NaN except propIncluded if events
 % are 2% or fewer of the points):
@@ -171,11 +177,6 @@ if ~isempty(fixedThresh)
 	out.stdRelTime = std(r) / sqrt(length(r));
 	return
 end
-
-% Check a Curve Fitting toolbox license is available (only needed for the
-% sweep-and-fit path below; the fixed-threshold path above has already
-% returned by this point):
-BF_CheckToolbox('curve_fitting_toolbox');
 
 if nargin < 3 || isempty(inc)
 	inc = 0.01; % increment through z-scored time-series values
@@ -302,78 +303,30 @@ end
 % ------------------------------------------------------------------------------
 %% Fit an exponential to the mean inter-event interval as a function of the threshold
 % ------------------------------------------------------------------------------
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [0.1 2.5 1]);
-f = fittype('a*exp(b*x)+c', 'options', s);
-emsg = '';
-try
-	[c, gof] = fit(thr', msDt(:, 1), f);
-catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting exponential growth to means: %s\n', emsg.message);
-end
-
-if isempty(emsg)
-	out.mfexpa = c.a;
-	out.mfexpb = c.b;
-	out.mfexpc = c.c;
-	out.mfexpr2 = gof.rsquare;
-	out.mfexprmse = gof.rmse;
-else
-	out.mfexpa = NaN;
-	out.mfexpb = NaN;
-	out.mfexpc = NaN;
-	out.mfexpr2 = NaN;
-	out.mfexprmse = NaN;
-end
+% (Global least-squares fits by variable projection: see BF_ExpFit. The amplitude a
+% and offset c are not output: they are poorly determined when the curve is close
+% to a straight line, as a and c then become large and opposite in sign)
+fExp = BF_ExpFit(thr', msDt(:, 1), true);
+out.mfexpb = fExp.b;
+out.mfexpr2 = fExp.r2;
+out.mfexprmse = fExp.rmse;
 
 % ------------------------------------------------------------------------------
 %% Fit an exponential to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [120, -1, -16]);
-f = fittype('a*exp(b*x)+c', 'options', s);
-emsg = '';
-try
-	[c, gof] = fit(thr', msDt(:, 3), f);
-catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting exponential decay to valid proportion: %s\n', emsg.message);
-end
-
-if isempty(emsg)
-	out.nfexpa = c.a;
-	out.nfexpb = c.b;
-	out.nfexpc = c.c; % (is linearly anticorrelated with c.a)
-	out.nfexpr2 = gof.rsquare;
-	out.nfexprmse = gof.rmse;
-else
-	out.nfexpa = NaN;
-	out.nfexpb = NaN;
-	out.nfexpc = NaN;
-	out.nfexpr2 = NaN;
-	out.nfexprmse = NaN;
-end
+fExp = BF_ExpFit(thr', msDt(:, 3), true);
+out.nfexpb = fExp.b;
+out.nfexpr2 = fExp.r2;
+out.nfexprmse = fExp.rmse;
 
 % ------------------------------------------------------------------------------
 %% Fit an linear trend to N: the valid proportion left in calculation
 % ------------------------------------------------------------------------------
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [-40, 100]);
-f = fittype('a*x+b', 'options', s);
-emsg = '';
-try
-	[c, gof] = fit(thr', msDt(:, 3), f);
-catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to valid proportion: %s\n', emsg.message);
-end
-
-if isempty(emsg)
-	out.nfla = c.a;
-	out.nflb = c.b;
-	out.nflr2 = gof.rsquare;
-	out.nflrmse = gof.rmse;
-else
-	out.nfla = NaN;
-	out.nflb = NaN;
-	out.nflr2 = NaN;
-	out.nflrmse = NaN;
-end
+fLin = SUB_LinearFit(thr', msDt(:, 3));
+out.nfla = fLin.a;
+out.nflb = fLin.b;
+out.nflr2 = fLin.r2;
+out.nflrmse = fLin.rmse;
 
 % ------------------------------------------------------------------------------
 %% Stationarity metrics
@@ -402,56 +355,41 @@ out.xcmerrn1 = xc(1); % this is the cross-correlation at lag -1
 % ------------------------------------------------------------------------------
 %% Fit exponential to std in range
 % ------------------------------------------------------------------------------
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [5, 1, 15]);
-f = fittype('a*exp(b*x)+c', 'options', s);
-emsg = [];
-try
-	[c, gof] = fit(thr', msDt(:, 6), f);
-catch emsg
-	warning('Error fitting exponential growth to std: %s\n', emsg.message);
-end
-
-if isempty(emsg)
-	out.stdrfexpa = c.a;
-	out.stdrfexpb = c.b;
-	out.stdrfexpc = c.c;
-	out.stdrfexpr2 = gof.rsquare;
-	out.stdrfexprmse = gof.rmse;
-else
-	out.stdrfexpa = NaN;
-	out.stdrfexpb = NaN;
-	out.stdrfexpc = NaN;
-	out.stdrfexpr2 = NaN;
-	out.stdrfexprmse = NaN;
-end
+fExp = BF_ExpFit(thr', msDt(:, 6), true);
+out.stdrfexpb = fExp.b;
+out.stdrfexpr2 = fExp.r2;
+out.stdrfexprmse = fExp.rmse;
 
 % ------------------------------------------------------------------------------
 %% Fit linear to errors in range
 % ------------------------------------------------------------------------------
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [40, 4]);
-f = fittype('a*x +b', 'options', s);
-emsg = '';
-try
-	[c, gof] = fit(thr', msDt(:, 6), f);
-catch emsg
-	fprintf(1, 'DN_OutlierInclude: error fitting linear trend to std: %s\n', emsg.message);
-end
-
-if isempty(emsg)
-	out.stdrfla = c.a;
-	out.stdrflb = c.b;
-	out.stdrflr2 = gof.rsquare;
-	out.stdrflrmse = gof.rmse;
-else
-	out.stdrfla = NaN;
-	out.stdrflb = NaN;
-	out.stdrflr2 = NaN;
-	out.stdrflrmse = NaN;
-end
+fLin = SUB_LinearFit(thr', msDt(:, 6));
+out.stdrfla = fLin.a;
+out.stdrflb = fLin.b;
+out.stdrflr2 = fLin.r2;
+out.stdrflrmse = fLin.rmse;
 
 if doPlot
 	figure('color', 'w')
 	errorbar(thr, msDt(:, 1), msDt(:, 2), 'k');
 end
 
+end
+
+% ------------------------------------------------------------------------------
+function f = SUB_LinearFit(x, y)
+	% Ordinary least-squares line y = a*x + b, with R^2 and root-mean-square error (n - 2 degrees of freedom)
+	n = length(y);
+	if n < 3 || ~(sum((y - mean(y)).^2) > 0)
+		% Too few points, or a constant curve: no meaningful fit
+		f = struct('a', NaN, 'b', NaN, 'r2', NaN, 'rmse', NaN);
+		return
+	end
+	p = polyfit(x, y, 1);
+	SSE = sum((y - polyval(p, x)).^2);
+	SST = sum((y - mean(y)).^2);
+	f.a = p(1);
+	f.b = p(2);
+	f.r2 = 1 - SSE/SST;
+	f.rmse = sqrt(SSE/(n - 2));
 end

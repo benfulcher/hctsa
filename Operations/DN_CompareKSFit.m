@@ -3,8 +3,9 @@ function out = DN_CompareKSFit(x, whatDistn)
 %
 % Fits a standard distribution to the data (by maximum likelihood, using
 % Statistics Toolbox functions), and compares it with a kernel-smoothed
-% estimate of the distribution of the values (ksdensity; "KS" here means
-% kernel-smoothed, not Kolmogorov-Smirnov). Both curves are evaluated on a
+% estimate of the distribution of the values (BF_KSDensity, a Gaussian kernel with
+% a normal-reference bandwidth; "KS" here means kernel-smoothed, not
+% Kolmogorov-Smirnov). Both curves are evaluated on a
 % common grid of 1000 points that covers the smoothed distribution and the body
 % of the fitted distribution (out to where it falls to 1/100 of its peak).
 % They are then compared by the area between them, the separation of their
@@ -198,7 +199,7 @@ end
 % ------------------------------------------------------------------------------
 % Estimate smoothed empirical distribution
 % ------------------------------------------------------------------------------
-[f, xi] = ksdensity(x);
+[f, xi] = BF_KSDensity(x);
 xi = xi(f > 1E-6); % only keep values greater than 1E-6
 if isempty(xi)
 	out = NaN; return
@@ -217,7 +218,7 @@ x2 = max([xf(2), xi(end)]);
 % ------------------------------------------------------------------------------
 % (Inefficient, but easier to do it this way)
 xi = linspace(x1, x2, 1000);
-f = ksdensity(x, xi); % the smoothed empirical distribution
+f = BF_KSDensity(x, xi); % the smoothed empirical distribution
 switch whatDistn
 	case 'norm'
 		ffit = normpdf(xi, a, b);

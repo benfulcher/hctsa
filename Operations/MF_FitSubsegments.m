@@ -39,8 +39,11 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % order, the order of the model to fit (default 2; a two-element vector [p, q] for
 %           'arma').
 %
-% subsetHow, how to choose segments from the time series, either 'uniform'
-%           (evenly spaced) or 'rand' (at random) (default).
+% subsetHow, how to choose segments from the time series: 'uniform' (evenly spaced),
+%           'spread' (start points spread over the series by the golden-ratio (Weyl)
+%           sequence: deterministic, evenly spread, and without the aliasing a regular
+%           spacing has with periodic series) or 'rand' (at random) (default). The
+%           random choice adds a dependence on the draw that 'spread' avoids.
 %
 % samplep, a two-vector specifying how many segments to take and of what length, of
 %           the form [nsamples, length], where length can be a proportion of the
@@ -48,8 +51,8 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %           time-series length). For model = 'arcrosspred', a scalar giving the
 %           number of non-overlapping segments to partition the whole series into.
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%           (for when subsetHow is 'rand')
+% randomSeed, the seed of the random start points (see BF_RandomSeed; the numbers come
+%           from the portable generator BF_Random; for when subsetHow is 'rand')
 %
 % ---OUTPUTS: depend on the model.
 % For 'arsbc', statistics across segments of the best AR order and its SBC:
@@ -185,11 +188,19 @@ switch subsetHow
 			l = samplep(2);
 		end
 
-		% Control the random seed (for reproducibility):
-		BF_ResetSeed(randomSeed);
+		% numPred random starting points (uniform on 1..N-l+1), reproducible from the seed:
+		spts = 1 + floor((N - l + 1) * BF_Random(numPred, BF_RandomSeed(randomSeed)));
+		r(:, 1) = spts;
+		r(:, 2) = spts + l - 1;
 
-		% numPred random starting points:
-		spts = randi(N - l + 1, numPred, 1);
+	case 'spread'
+		if samplep(2) < 1 % specified a fraction of time series
+			l = floor(N * samplep(2));
+		else % specified an absolute interval
+			l = samplep(2);
+		end
+		% start points on 1..N-l+1 from the golden-ratio (Weyl) sequence frac(j*phi):
+		spts = 1 + floor((N - l + 1) * mod((1:numPred)' * 0.6180339887498949, 1));
 		r(:, 1) = spts;
 		r(:, 2) = spts + l - 1;
 

@@ -38,7 +38,8 @@ function out = PH_ForcePotential(y, whatPotential, params)
 % ac1, ac10, ac50, the magnitude (absolute value) of the autocorrelation of x at
 %       lags 1, 10 and 50
 % tau, the first zero-crossing of the autocorrelation function of x
-% finaldev, the magnitude of the final position, |x(end)|
+% meanabs, the mean magnitude of the position, mean(|x|) (a robust summary of how far
+%       the particle is from the center; it is not sensitive to the exact end of the run)
 %
 % ---NOTES:
 % The update is the semi-implicit (symplectic) Euler scheme, x(t) = x(t-1) + v(t) dt
@@ -161,7 +162,7 @@ out.ac1 = abs(CO_AutoCorr(x, 1, 'Fourier')); % magnitude of autocorrelation at l
 out.ac10 = abs(CO_AutoCorr(x, 10, 'Fourier')); % magnitude of autocorrelation at lag 10
 out.ac50 = abs(CO_AutoCorr(x, 50, 'Fourier')); % magnitude of autocorrelation at lag 50
 out.tau = CO_FirstCrossing(x, 'ac', 0, 'continuous'); % first zero-crossing of the autocorrelation function
-out.finaldev = abs(x(end)); % final position
+out.meanabs = mean(abs(x)); % mean magnitude of the position
 
 % A couple of additional outputs for double well:
 if strcmp(whatPotential, 'dblwell')

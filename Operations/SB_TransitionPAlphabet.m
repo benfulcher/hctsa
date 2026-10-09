@@ -12,7 +12,8 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 % asymmetry sum(sum(abs(T - T'))), the trace of its covariance matrix, and the
 % standard deviation of its eigenvalues. Exponential decays a*exp(b*x) (and some
 % linear fits and change-point statistics) are then fitted to how these change
-% with the alphabet size x. Requires the Curve Fitting Toolbox.
+% with the alphabet size x. The exponential fits are global least-squares fits
+% (see BF_ExpFit), so R^2 lies between 0 and 1.
 %
 % ---INPUTS:
 % y, the input time series
@@ -92,11 +93,6 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
-%% Check that a Curve-Fitting Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox');
-
 if nargin < 2 || isempty(numGroups)
 	numGroups = (2:10); % compare across alphabet sizes from 2 to 10
 end
@@ -159,64 +155,51 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 
 	% 1) mean of diagonal elements of the transition matrix: shows an exponential
 	% decay to zero
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 1), f);
-	out.meandiagfexp_a = c.a;
-	out.meandiagfexp_b = c.b;
-	out.meandiagfexp_r2 = gof.rsquare;
-	out.meandiagfexp_adjr2 = gof.adjrsquare;
-	out.meandiagfexp_rmse = gof.rmse;
+	fExp = BF_ExpFit(numGroupsRange, store(:, 1), false);
+	out.meandiagfexp_a = fExp.a;
+	out.meandiagfexp_b = fExp.b;
+	out.meandiagfexp_r2 = fExp.r2;
+	out.meandiagfexp_adjr2 = fExp.adjr2;
+	out.meandiagfexp_rmse = fExp.rmse;
 
 	% 2) maximum of diagonal elements of the transition matrix: shows an exponential
 	% decay to zero
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 2), f);
-	out.maxdiagfexp_a = c.a;
-	out.maxdiagfexp_b = c.b;
-	out.maxdiagfexp_r2 = gof.rsquare;
-	out.maxdiagfexp_adjr2 = gof.adjrsquare;
-	out.maxdiagfexp_rmse = gof.rmse;
+	fExp = BF_ExpFit(numGroupsRange, store(:, 2), false);
+	out.maxdiagfexp_a = fExp.a;
+	out.maxdiagfexp_b = fExp.b;
+	out.maxdiagfexp_r2 = fExp.r2;
+	out.maxdiagfexp_adjr2 = fExp.adjr2;
+	out.maxdiagfexp_rmse = fExp.rmse;
 
 	% 3) trace of T
 	% fit exponential
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 3), f);
-	out.trfexp_a = c.a;
-	out.trfexp_b = c.b;
-	out.trfexp_r2 = gof.rsquare;
-	out.trfexp_adjr2 = gof.adjrsquare;
-	out.trfexp_rmse = gof.rmse;
+	fExp = BF_ExpFit(numGroupsRange, store(:, 3), false);
+	out.trfexp_a = fExp.a;
+	out.trfexp_b = fExp.b;
+	out.trfexp_r2 = fExp.r2;
+	out.trfexp_adjr2 = fExp.adjr2;
+	out.trfexp_rmse = fExp.rmse;
 
 	% Also fit linear from the start to a fifth, a tenth of the starting
 	% value
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [-0.05 1]);
-	f = fittype('a*x+b', 'options', s);
-
 	r1 = find(store(:, 3) > store(1, 3) / 5);
 	if length(r1) > 2
-		[~, gof] = fit(numGroupsRange(r1), store(r1, 3), f);
-		out.trflin5_adjr2 = gof.adjrsquare;
+		out.trflin5_adjr2 = SUB_LinearAdjR2(numGroupsRange(r1), store(r1, 3));
 	else
 		out.trflin5_adjr2 = NaN;
 	end
 
 	r2 = find(store(:, 3) > store(1, 3) / 10);
 	if length(r2) > 2
-		[~, gof] = fit(numGroupsRange(r2), store(r2, 3), f);
-		out.trflin10adjr2 = gof.adjrsquare;
+		out.trflin10adjr2 = SUB_LinearAdjR2(numGroupsRange(r2), store(r2, 3));
 	else
 		out.trflin10adjr2 = NaN;
 	end
 
 	% 4) Symmetry; differences in diagonal elements
 	% return the slope
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [0.1 0]);
-	f = fittype('a*x+b', 'options', s);
-	c = fit(numGroupsRange, store(:, 4), f);
-	out.symd_a = c.a;
+	p = polyfit(numGroupsRange, store(:, 4), 1);
+	out.symd_a = p(1);
 
 	% return approximately when starts to rise; where means before and
 	% after a moving dividing point are most different
@@ -242,25 +225,21 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 	else r1 = 1:length(numGroupsRange);
 	end
 	% fit exponential decay to range without possible first jump
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.5]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange(r1), store(r1, 5), f);
-	out.trcovfexp_a = c.a;
-	out.trcovfexp_b = c.b;
-	out.trcovfexp_r2 = gof.rsquare;
-	out.trcovfexp_adjr2 = gof.adjrsquare;
-	out.trcovfexp_rmse = gof.rmse;
+	fExp = BF_ExpFit(numGroupsRange(r1), store(r1, 5), false);
+	out.trcovfexp_a = fExp.a;
+	out.trcovfexp_b = fExp.b;
+	out.trcovfexp_r2 = fExp.r2;
+	out.trcovfexp_adjr2 = fExp.adjr2;
+	out.trcovfexp_rmse = fExp.rmse;
 
 	% 6) Standard deviation of eigenvalues of T
 	% Fit an exponential decay
-	s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [1, -0.2]);
-	f = fittype('a*exp(b*x)', 'options', s);
-	[c, gof] = fit(numGroupsRange, store(:, 6), f);
-	out.stdeigfexp_a = c.a;
-	out.stdeigfexp_b = c.b;
-	out.stdeigfexp_r2 = gof.rsquare;
-	out.stdeigfexp_adjr2 = gof.adjrsquare;
-	out.stdeigfexp_rmse = gof.rmse;
+	fExp = BF_ExpFit(numGroupsRange, store(:, 6), false);
+	out.stdeigfexp_a = fExp.a;
+	out.stdeigfexp_b = fExp.b;
+	out.stdeigfexp_r2 = fExp.r2;
+	out.stdeigfexp_adjr2 = fExp.adjr2;
+	out.stdeigfexp_rmse = fExp.rmse;
 
 end
 
@@ -268,6 +247,15 @@ end
 %% Subfunctions
 % ------------------------------------------------------------------------------
 
+function adjr2 = SUB_LinearAdjR2(x, y)
+	% Adjusted R^2 of an ordinary least-squares line fitted to y against x
+	nPts = length(y);
+	pFit = polyfit(x, y, 1);
+	rsq = 1 - sum((y - polyval(pFit, x)).^2) / sum((y - mean(y)).^2);
+	adjr2 = 1 - (1 - rsq)*(nPts - 1)/(nPts - 2);
+end
+
+% ------------------------------------------------------------------------------
 function yth = SUB_discretize(y, numGroups)
 	% 1) discretize the time series into a number of groups np
 	th = quantile(y, linspace(0, 1, numGroups + 1)); % thresholds for dividing the time series values

@@ -21,9 +21,9 @@ function yTransform = BF_RemovePoints(y, removeHow, p, removeOrSaturate, randomS
 % removeOrSaturate, whether to remove the points ('remove', the default) or to
 %       saturate their values ('saturate'; not possible with 'absclose' or
 %       'random')
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%       (only relevant for removeHow = 'random', which is otherwise
-%       irreproducible run to run; no registered feature uses it)
+% randomSeed, the seed of the random ordering (see BF_RandomSeed; default: 0), which
+%       comes from the portable generator BF_Random (only relevant for
+%       removeHow = 'random'; no registered feature uses it)
 %
 % ---OUTPUTS:
 % yTransform, the series after removing (a shorter series, in the original order) or
@@ -73,7 +73,7 @@ if nargin < 4 || isempty(removeOrSaturate)
 	removeOrSaturate = 'remove';
 end
 if nargin < 5
-	randomSeed = []; % default for BF_ResetSeed
+	randomSeed = []; % default for BF_RandomSeed
 end
 
 if ~BF_iszscored(y)
@@ -96,8 +96,7 @@ switch removeHow
 		% Remove/saturate a proportion p of points with the highest values
 		[~, is] = sort(y, 'ascend');
 	case 'random'
-		BF_ResetSeed(randomSeed); % (for reproducibility of the random ordering)
-		is = randperm(N);
+		is = BF_Random(N, BF_RandomSeed(randomSeed), 'perm')'; % random ordering, reproducible
 	otherwise
 		error('Unknown method ''%s''', removeHow);
 end

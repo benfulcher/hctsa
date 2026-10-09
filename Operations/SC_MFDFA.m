@@ -18,8 +18,8 @@ function out = SC_MFDFA(y, scaleRange, qRange, order)
 % the standard multifractal fingerprint. Its width, Delta-alpha, is the usual
 % "degree of multifractality".
 %
-% It differs from hctsa's other scaling-exponent estimators: SC_FastDFA and
-% SC_FluctAnal are monofractal (a single q = 2 exponent, no Legendre transform);
+% It differs from hctsa's other scaling-exponent estimators: SC_FluctAnal
+% is monofractal (a single q = 2 exponent, no Legendre transform);
 % SC_MMA also generalizes DFA across q but reports how the raw h(q) surface varies
 % with scale, and has no f(alpha) spectrum. SC_MFDFA fixes the scaling range and
 % focuses on the q axis.
