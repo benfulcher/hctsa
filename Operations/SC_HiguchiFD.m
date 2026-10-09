@@ -32,7 +32,7 @@ function out = SC_HiguchiFD(y, kmax)
 % theory", Physica D 31(2), 277-283 (1988).
 %
 % ---NOTES:
-% Unlike the DFA-style estimators (SC_FastDFA, SC_FluctAnal), which detrend a
+% Unlike DFA-style estimators (e.g., SC_FluctAnal), which detrend a
 % cumulative-sum (integrated) profile within windows and measure how fluctuations
 % scale with window size (targeting long-range-correlation-type self-affinity,
 % e.g., the Hurst exponent of fractional Brownian motion), Higuchi's method
