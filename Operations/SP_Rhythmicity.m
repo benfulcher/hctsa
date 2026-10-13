@@ -48,8 +48,8 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 % angular frequencies are 2*pi*f, as in SP_Summaries. LAVI is biased upward
 % when few cycles are available, so a frequency is used only when the samples
 % free of edge effects span at least minCycles cycles; the operation returns a
-% single NaN if fewer than 10 frequencies qualify (for the defaults, N of about
-% 250 or less).
+% single NaN if fewer than 10 frequencies qualify (for the defaults, N below
+% about 240).
 %
 % cf. SP_SpectralTimeFreq, whose spectral kurtosis also targets bursty
 % frequency bands but via the variance of band power across a spectrogram's
