@@ -37,8 +37,9 @@ function out = MF_AR_arcov(y, p)
 % the fitted coefficients and residuals are not meaningful (e.g., an exact sinusoid
 % with p > 2).
 %
-% The first p residuals are computed with the unseen values before the start of the
-% series set to zero, and are not excluded from the residual statistics.
+% The residuals are the one-step prediction errors of the N - p samples that have p
+% past values (the samples the model was fitted to); the first p samples, whose
+% prediction would need values before the start of the series, are excluded.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -103,6 +104,9 @@ end
 % ------------------------------------------------------------------------------
 y_est = filter([0, -a(2:end)], 1, y);
 err = y_est - y; % residuals (prediction minus data, the MF_ResidualAnalysis convention)
+% Keep only the samples with a full set of p past values (the first p predictions would
+% need values from before the start of the series):
+err = err(p+1:end);
 
 % Report the residuals through the shared contract, at the cheap 'core' level (this
 % operation is meant to stay cheap). Replaces the four hand-rolled statistics res_mu,
