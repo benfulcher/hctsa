@@ -37,7 +37,8 @@ function out = SC_MMA(y, doOverlap, scaleRange, qRange)
 %       standard deviation across scales of h (large if the scale dependence is
 %       very different at different q), and the standard deviation across
 %       scales of the standard deviation across q
-% A scalar NaN is returned if the series is too short for the scale range.
+% A scalar NaN is returned if the series is too short for the scale range, or if no
+% segment fluctuates at some scale (see NOTES).
 %
 % ---REFERENCES:
 % J. Gieraltowski, J. J. Zebrowski, and R. Baranowski, "Multiscale multifractal
@@ -47,6 +48,12 @@ function out = SC_MMA(y, doOverlap, scaleRange, qRange)
 % ---NOTES:
 % This is the PhysioNet implementation by Jan Gieraltowski, modified for hctsa;
 % see the licence block below for its citation requirements.
+% A segment that the quadratic detrending fits exactly (to within rounding: residual
+% variance at most 1e-20 of its mean square, e.g. a run of constant values) has no
+% fluctuation: its q-th moment is infinite for q < 0 (and the q = 0 geometric mean, for
+% which q = 1e-4 stands in, is zero), so it is left out of the average there; it
+% contributes 0 for q > 0. Otherwise rounding noise in such segments dominates the
+% q <= 0 moments (h up to about 70 was seen).
 
 % ------------------------------------------------------------------------------
 % Modified by Ben Fulcher for use in hctsa, 2015-05-12.
@@ -212,12 +219,27 @@ for s = sListFull
 		seg = segments(ni, :);
 		fit = polyfit(xbase, seg, 2);
 		variance = mean((seg - polyval(fit, xbase)).^2);
+		if variance <= 1e-20 * mean(seg.^2)
+			variance = 0; % the quadratic fits the segment exactly, to within rounding
+		end
 		f2nis(ni) = variance;
 	end
 
 	for q = qList
 		rowIdx = rowIdx + 1;
-		fqs(rowIdx, :) = [q, s, (mean(f2nis.^(q / 2)))^(1 / q)];
+		% (a segment with no fluctuation has an infinite moment for q < 0, and for q = 0,
+		% the geometric mean, which q = 1e-4 stands in for; so it is left out there, and
+		% contributes 0 for q > 0)
+		if q > 0.001
+			f2q = f2nis;
+		else
+			f2q = f2nis(f2nis > 0);
+		end
+		if isempty(f2q)
+			fqs(rowIdx, :) = [q, s, NaN];
+		else
+			fqs(rowIdx, :) = [q, s, (mean(f2q.^(q / 2)))^(1 / q)];
+		end
 	end
 end
 % fprintf(1,'Detrended fluctuations computed in %s\n',BF_TheTime(toc(timer)));
@@ -313,6 +335,11 @@ end
 % hqsPlotData (scale,q)
 
 % Global properties:
+if any(isnan(hqs(:)))
+	% A scale at which no segment fluctuates: the exponents for q < 0 are undefined
+	out = NaN;
+	return
+end
 allExponents = hqs(:);
 out.meanHurstExponent = mean(allExponents);
 out.stdHurstExponent = std(allExponents);

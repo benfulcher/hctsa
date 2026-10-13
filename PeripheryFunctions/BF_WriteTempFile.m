@@ -69,8 +69,11 @@ if ischar(dataVector) && strcmp(dataVector,'clear')
 end
 
 if nargin < 2
-    % precision (number of significant digits) to write
-    whatPrecision = 7;
+    % Precision (number of significant digits) to write: 17, enough to represent
+    % every double exactly, so the TISEAN program reads the same numbers that MATLAB
+    % holds. (With 7 digits, quantized or near-tied data gave different neighbor
+    % sets from the exact values, e.g. in lyap_r and false_nearest.)
+    whatPrecision = 17;
 end
 
 % Reuse the cached file if the incoming data is byte-for-byte identical to

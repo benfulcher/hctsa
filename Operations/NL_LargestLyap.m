@@ -75,8 +75,10 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       and Rossler flows sampled at 1x to 8x: spread 1.1-2x at N = 5000 and
 %       1.2-3.7x at N = 1000, against 4-16x for the per-sample slopes).
 % expfit_a, expfit_b, expfit_r2, expfit_adjr2, expfit_rmse: the parameters a and
-%       b of a fit p(t) = a*(1 - exp(b*t)) to the whole curve, with its R^2,
-%       adjusted R^2 and root-mean-square error
+%       b of a least-squares fit p(t) = a*(1 - exp(b*t)) to the whole curve, with
+%       its R^2, adjusted R^2 and root-mean-square error. The fit is the global
+%       optimum over rates 1e-5 <= |b| <= 5 per time step (b = -5 means the curve
+%       saturates within a step), found without a starting point.
 %
 % ---REFERENCES:
 % A. Wolf et al., "Determining Lyapunov exponents from a time series", Physica D
@@ -112,11 +114,6 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % You should have received a copy of the GNU General Public License along with
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
-
-% ------------------------------------------------------------------------------
-%% Check a curve-fitting toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('curve_fitting_toolbox');
 
 doPlot = 0; % whether to plot outputs to a figure
 
@@ -415,36 +412,19 @@ out.vse_gradient_pertau = out.vse_gradient * tau1e;
 out.ve_gradient_pertau = out.ve_gradient * tau1e;
 
 % Fit exponential
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [max(p) -0.5]);
-f = fittype('a*(1-exp(b*x))', 'options', s);
-fitWorked = 1;
-try
-	% t and p are both columns here (this used to rely on TSTOOL's
-	% spacing() returning t as a row, transposed back to a column to match
-	% fit()'s requirement that X be a column; with t now a column already,
-	% that transpose instead turned it into a row, which fit() rejects, so
-	% it's dropped):
-	[c, gof] = fit(t, p, f);
-catch
-	fitWorked = 0;
-end
-if fitWorked
-	out.expfit_a = c.a;
-	out.expfit_b = c.b;
-	out.expfit_r2 = gof.rsquare;
-	out.expfit_adjr2 = gof.adjrsquare;
-	out.expfit_rmse = gof.rmse;
-else
-	out.expfit_a = NaN;
-	out.expfit_b = NaN;
-	out.expfit_r2 = NaN;
-	out.expfit_adjr2 = NaN;
-	out.expfit_rmse = NaN;
-end
+% Least-squares fit of a saturating exponential, a*(1 - exp(b*t)): the global optimum
+% over rates 1e-5 <= |b| <= 5 per time step (SUB_SaturatingExpFit), with no starting
+% point to choose
+fExp = SUB_SaturatingExpFit(t, p, 5);
+out.expfit_a = fExp.a;
+out.expfit_b = fExp.b;
+out.expfit_r2 = fExp.r2;
+out.expfit_adjr2 = fExp.adjr2;
+out.expfit_rmse = fExp.rmse;
 
 if doPlot
 	hold('on')
-	plot(t, c.a * (1 - exp(c.b * t)), ':r');
+	plot(t, fExp.a * (1 - exp(fExp.b * t)), ':r');
 	hold('off')
 end
 
@@ -460,4 +440,58 @@ function badness = lfitbadness(x, y, gamma)
 end
 % ------------------------------------------------------------------------------
 
+end
+
+% ------------------------------------------------------------------------------
+function f = SUB_SaturatingExpFit(t, p, maxRate)
+	% Global least-squares fit of p = a*(1 - exp(b*t)). For a given rate b the best a is
+	% linear least squares in closed form, so only b is searched: on 200 log-spaced values of
+	% |b| from 1e-5 to maxRate (per time step) of each sign, then refined by 40 golden-section
+	% steps in log|b| around the best of these. A rate at the edge of the range means "at
+	% least this fast" (the curve saturates within a step). r2 = 1 - SSE/SST; adjr2 and rmse
+	% use n - 2 degrees of freedom. All NaN if p is constant or has fewer than three points.
+	t = t(:); p = p(:);
+	n = length(p);
+	if n < 3 || ~all(isfinite(p)) || ~(max(p) - min(p) > 1e-12 * max(abs(p)))
+		f = struct('a', NaN, 'b', NaN, 'r2', NaN, 'adjr2', NaN, 'rmse', NaN);
+		return
+	end
+	u = linspace(log(1e-5), log(maxRate), 200);
+	bGrid = [-exp(fliplr(u)), exp(u)]; % ascending rates
+	[~, k] = min(SSEofRate(bGrid));
+	if k <= length(u)
+		sgn = -1; j = length(u) + 1 - k;
+	else
+		sgn = 1; j = k - length(u);
+	end
+	lo = u(max(j - 1, 1));
+	hi = u(min(j + 1, length(u)));
+	phi = (sqrt(5) - 1) / 2;
+	for i = 1:40 % golden-section search in log|b|
+		u1 = hi - phi*(hi - lo);
+		u2 = lo + phi*(hi - lo);
+		if SSEofRate(sgn * exp(u1)) <= SSEofRate(sgn * exp(u2))
+			hi = u2;
+		else
+			lo = u1;
+		end
+	end
+	b = sgn * exp((lo + hi) / 2);
+	g = 1 - exp(b * t);
+	a = (g' * p) / (g' * g);
+	SSE = sum((p - a * g).^2);
+	SST = sum((p - mean(p)).^2);
+	f.a = a;
+	f.b = b;
+	f.r2 = 1 - SSE / SST;
+	f.adjr2 = 1 - (1 - f.r2) * (n - 1) / (n - 2);
+	f.rmse = sqrt(SSE / (n - 2));
+
+	function sse = SSEofRate(bs)
+		% SSE of the best a at each rate in bs
+		G = 1 - exp(t * bs); % each column is 1 - exp(b*t) for one rate
+		den = sum(G.^2, 1);
+		sse = sum(p.^2) - (G' * p)'.^2 ./ den;
+		sse(~(den > 0) | ~isfinite(sse)) = Inf;
+	end
 end
