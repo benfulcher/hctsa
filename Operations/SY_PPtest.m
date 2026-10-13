@@ -28,7 +28,10 @@ function out = SY_PPtest(y, lags, model, testStatistic)
 % For a vector of lags:
 % minpValue, meanpValue: the minimum and mean p-value across the tests
 % lagmaxp, lagminp: the lag at which the p-value is largest and smallest (the
-%       first such lag in the case of a tie)
+%       first such lag in the case of a tie). Computed but not registered as
+%       features: pptest clamps its p-values to the range of its tabulated
+%       distribution, so for most series the p-values at all lags tie at the
+%       clamp and the first lag is returned.
 % meanstat: the mean test statistic across the tests
 % minBIC: the minimum, across the tests, of the Bayesian information criterion of
 %       the test regression, per observation
