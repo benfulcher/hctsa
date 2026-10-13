@@ -27,10 +27,24 @@ function p = HT_MarginalTests(y, theTest)
 %           (v) 'ztest': Z-test, the data are drawn from a normal distribution
 %                       with a mean of zero and a (known) standard deviation of
 %                       one
+%           (vi) 'logjb': the logarithm of the Jarque-Bera statistic,
+%                       JB = n/6*(S^2 + (K - 3)^2/4), with S and K the (biased)
+%                       sample skewness and kurtosis (Jarque and Bera 1987): how far
+%                       the shape of the distribution is from normal. Unlike the
+%                       'jbtest' p-value, which is read from a table of limited range
+%                       (clamped to [0.001, 0.5]), it is not bounded, so it
+%                       distinguishes strongly non-normal distributions. NaN for a
+%                       constant series (S and K undefined) or if JB is exactly 0.
 %
 % ---OUTPUTS:
 % p, the p-value of the specified test: the probability, under the null
-% hypothesis above, of a test statistic at least as extreme as that observed.
+% hypothesis above, of a test statistic at least as extreme as that observed
+% (for 'logjb', log(JB) instead).
+%
+% ---REFERENCES:
+% C. M. Jarque and A. K. Bera, "A test for normality of observations and
+% regression residuals", International Statistical Review 55(2), 163-172 (1987).
+% DOI: 10.2307/1403192
 % Small values are evidence against the null hypothesis.
 
 % ------------------------------------------------------------------------------
@@ -82,6 +96,20 @@ switch theTest
 		[~, p] = jbtest(y);
 		warning('on', 'stats:jbtest:PTooBig'); % resume this warning
 		warning('on', 'stats:jbtest:PTooSmall'); % resume this warning
+
+	case 'logjb'
+		y = y(:);
+		n = length(y);
+		d = y - mean(y);
+		m2 = mean(d.^2);
+		S = mean(d.^3) / m2^1.5; % sample skewness
+		K = mean(d.^4) / m2^2; % sample kurtosis
+		JB = n / 6 * (S^2 + (K - 3)^2 / 4);
+		if JB > 0 && isfinite(JB)
+			p = log(JB);
+		else
+			p = NaN; % constant series, or exactly normal skewness and kurtosis (log(0))
+		end
 
 	otherwise
 		error('Unknown hypothesis test ''%s''', theTest);

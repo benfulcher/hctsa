@@ -70,6 +70,14 @@ classdef Robust_convergeTests < matlab.unittest.TestCase
             tc.verifyEqual(o1.meanCeps, o2.meanCeps, 'AbsTol', 1e-12);
         end
 
+        function marginalTestsLogJB(tc)
+            % log of the Jarque-Bera statistic from its definition (same value in pyhctsa)
+            x = [1; 2; 3; 4; 10; 2; 3; 1; 0; 5];
+            tc.verifyEqual(HT_MarginalTests(x, 'logjb'), 1.5018106117098595, 'AbsTol', 1e-12);
+            tc.verifyEqual(HT_MarginalTests(3*x + 7, 'logjb'), 1.5018106117098595, 'AbsTol', 1e-12);
+            tc.verifyTrue(isnan(HT_MarginalTests(ones(20, 1), 'logjb')));
+        end
+
         function saturatingFitsAreGlobal(tc)
             % SP_Summaries polysat fit: a curve that keeps rising like w^2 has b at the
             % upper limit (only a/b determined), deterministically
