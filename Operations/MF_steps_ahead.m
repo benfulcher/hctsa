@@ -35,9 +35,9 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % meanabs_h1, meanabs_h2, meanabs_h3, meanabs_h4, meanabs_h5, meanabs_h6: the same for the
 %       mean absolute error (meanabs_h<l>)
 % ac1_h1, ac1_h2, ac1_h3, ac1_h4, ac1_h5, ac1_h6: the absolute lag-1 autocorrelation of the
-%       model's errors at each horizon (ac1_h<l>; not a ratio; NaN if the standard
-%       deviation of the errors is below 1e-9 times that of the series, i.e., the errors do
-%       not vary beyond the level of rounding)
+%       model's errors at each horizon (ac1_h<l>; not a ratio; NaN if the errors do not
+%       vary beyond the level of rounding: their standard deviation is at most 1e-9 times
+%       the larger of the standard deviation of the series and their mean absolute value)
 % stde_meanabs_diff: the absolute value of the mean difference between the model's
 %       root-mean-square and mean absolute errors across horizons
 % stde_meandiff, stde_maxdiff, stde_stddiff: the mean, maximum, and standard
@@ -151,7 +151,7 @@ for i = 1:maxSteps
 
 	mf.rmserrs(i) = sqrt(mean(mres.^2));
 	mf.mabserrs(i) = mean(abs(mres));
-	if std(mres) < 1e-9 * std(y)
+	if ~(std(mres) > 1e-9 * max(std(y), mean(abs(mres)))) % (the rule of MF_ResidualAnalysis)
 		% Errors that do not vary beyond the level of rounding (e.g., an exactly
 		% predictable series): their autocorrelation is not meaningful
 		mf.ac1s(i) = NaN;

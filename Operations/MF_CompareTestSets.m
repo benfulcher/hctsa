@@ -57,9 +57,10 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % ac1_mean, ac1_median: the absolute value of the mean, and of the median, over
 %       segments of the lag-1 autocorrelation of the prediction errors
 % ac1_std, ac1_iqr: the standard deviation and interquartile range over segments of
-%       that autocorrelation (segments whose prediction errors have a standard deviation
-%       below 1e-9 times that of the series, i.e., errors that do not vary beyond the
-%       level of rounding, are excluded from the four ac1 statistics)
+%       that autocorrelation (segments whose prediction errors do not vary beyond the
+%       level of rounding, with a standard deviation at most 1e-9 times the larger of that
+%       of the series and their mean absolute value, are excluded from the four ac1
+%       statistics)
 % meane_mean, meane_std, meane_iqr: the mean, standard deviation and interquartile
 %       range over segments of the absolute difference between the mean prediction
 %       and the mean of the data
@@ -269,7 +270,7 @@ for i = 1:numPred
 	mres = yp - yTest;
 
 	rmserrs(i) = sqrt(mean(mres.^2));
-	if std(mres) < 1e-9 * sigmaY
+	if ~(std(mres) > 1e-9 * max(sigmaY, mean(abs(mres)))) % (the rule of MF_ResidualAnalysis)
 		% errors that do not vary beyond the level of rounding (e.g., the segment is
 		% predicted exactly): their autocorrelation is not meaningful, and the segment is
 		% left out of the ac1 summaries

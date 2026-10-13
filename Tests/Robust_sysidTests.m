@@ -88,6 +88,19 @@ classdef Robust_sysidTests < matlab.unittest.TestCase
             tc.verifyLessThan(o.stde_h1, 1e-9);
         end
 
+        function residualSummaryOfRoundingLevelResiduals(tc)
+            % residuals that do not vary beyond rounding: only meane, meanabs, stde are defined
+            rng(9); y = randn(300, 1);
+            for e = {1e-13 * randn(300, 1), 0.3 * ones(300, 1), zeros(300, 1)}
+                o = MF_ResidualAnalysis(e{1}, y, 'full');
+                tc.verifyTrue(all(isfinite([o.meane, o.meanabs, o.stde])));
+                tc.verifyTrue(all(isnan([o.maxonstd, o.ac1, o.ac2, o.ac3, o.propbth, o.taurat, ...
+                                o.sws, o.swm, o.ftbth, o.normksstat, o.popt, o.minsbc])));
+            end
+            o = MF_ResidualAnalysis(randn(300, 1), y, 'full'); % ordinary residuals: all defined
+            tc.verifyTrue(all(isfinite(cell2mat(struct2cell(o)))));
+        end
+
         function tooShortSeriesGiveNaN(tc)
             rng(8); y = randn(12, 1);
             tc.verifyTrue(isequaln(MF_StateSpace_n4sid(y, 3, 0.5, 1), NaN));

@@ -29,8 +29,8 @@ function out = MF_ExpSmoothing(x, ntrain, alpha)
 % ---OUTPUTS (when alpha is 'best'; the residual statistics are those of the
 % held-out samples, after the first ntrain):
 % alphamin, the fitted smoothing parameter (between 0.01 and 1)
-% alphamin_1, the vertex of the parabola fitted to the three lowest errors of the
-%           coarse search (not bounded to the interval 0 to 1)
+% slope05_1, the slope at alpha = 0.5 of the parabola fitted to the three lowest errors
+%           of the coarse search (negative if the error falls towards larger alpha)
 % p1_1, the size of the quadratic coefficient of that parabola
 % cup_1, the sign of that coefficient (+1 if the parabola opens upward)
 % meane, mean of the residuals (prediction minus data)
@@ -156,7 +156,11 @@ if strcmp(alpha, 'best')
 	[~, ix] = sort(rmses);
 	rkeep = ix(1:3); % fit on the 3 points closest to the minimum
 	p = polyfit(alphar(rkeep)', rmses(rkeep), 2);
-	out.alphamin_1 = -p(2) / (2 * p(1));
+	% Slope of the parabola at the middle of the scan, a + b for a*alpha^2 + b*alpha + c.
+	% (Its vertex, -b/(2a), was reported as alphamin_1 before: a ratio that is unbounded
+	% when the parabola is nearly flat. Together with p1_1 and cup_1 the slope carries the
+	% same information, vertex = 0.5 - slope/(2a), and stays finite and continuous.)
+	out.slope05_1 = p(1) + p(2);
 	out.p1_1 = abs(p(1)); % concavity
 	out.cup_1 = sign(p(1));
 
