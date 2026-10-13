@@ -48,7 +48,9 @@ function out = CO_FallingSticks(y)
 %       pi/2 flat-fall spike),
 % tau_p, tau_n, the first zero-crossing of the autocorrelation function of the
 %       sequence of fall angles of the positive or negative sticks (interpolated),
-% ac1_p, ac1_n, the lag-1 autocorrelation of those sequences.
+% ac1_p, ac1_n, the lag-1 autocorrelation of those sequences (tau and ac1 are NaN
+%       when the angles are constant, to rounding error, e.g. when all sticks fall flat;
+%       likewise skewness_all and kurtosis_all, and std_all is then 0).
 % Statistics with no sticks to work on are NaN.
 
 % ------------------------------------------------------------------------------
@@ -101,6 +103,9 @@ out.median_n = SUB_safeStat(@median, anglesNeg);
 out.mean_all = SUB_safeStat(@mean, allAngles);
 out.median_all = SUB_safeStat(@median, allAngles);
 out.std_all = SUB_safeStat(@std, allAngles);
+if ~isempty(allAngles) && SUB_isConstant(allAngles)
+	out.std_all = 0; % constant to rounding error: the spread is zero
+end
 
 % Asymmetry between the positive- and negative-branch fall angles:
 if ~isnan(out.mean_p) && ~isnan(out.mean_n)
@@ -134,19 +139,22 @@ out.propCase2_all = SUB_propCase2Pooled(casePos, caseNeg);
 % datasets it landed exactly on the pi/2 flat-fall spike every time, since
 % most series have >=10% flat falls -- it carries no information.)
 if length(allAngles) >= 2
-	out.skewness_all = skewness(allAngles);
-	out.kurtosis_all = kurtosis(allAngles);
 	out.q10_all = quantile(allAngles, 0.1);
 else
-	out.skewness_all = NaN;
-	out.kurtosis_all = NaN;
 	out.q10_all = NaN;
+end
+if length(allAngles) >= 2 && ~SUB_isConstant(allAngles)
+	out.skewness_all = skewness(allAngles);
+	out.kurtosis_all = kurtosis(allAngles);
+else
+	out.skewness_all = NaN; % undefined for constant angles
+	out.kurtosis_all = NaN;
 end
 
 % ------------------------------------------------------------------------------
 %% Persistence of the fall-angle sequence
 % ------------------------------------------------------------------------------
-if length(anglesPos) >= 2 && std(anglesPos) > 0
+if length(anglesPos) >= 2 && ~SUB_isConstant(anglesPos)
 	zAnglesPos = zscore(anglesPos);
 	out.tau_p = CO_FirstCrossing(zAnglesPos, 'ac', 0, 'continuous');
 	out.ac1_p = CO_AutoCorr(zAnglesPos, 1, 'Fourier');
@@ -155,7 +163,7 @@ else
 	out.ac1_p = NaN;
 end
 
-if length(anglesNeg) >= 2 && std(anglesNeg) > 0
+if length(anglesNeg) >= 2 && ~SUB_isConstant(anglesNeg)
 	zAnglesNeg = zscore(anglesNeg);
 	out.tau_n = CO_FirstCrossing(zAnglesNeg, 'ac', 0, 'continuous');
 	out.ac1_n = CO_AutoCorr(zAnglesNeg, 1, 'Fourier');
@@ -165,6 +173,13 @@ else
 end
 
 % -------------------------------------------------------------------------------
+function isConst = SUB_isConstant(x)
+	% A sequence of angles counts as constant when its spread is at rounding level
+	% (e.g., all sticks fall flat, but some angles differ in the last bits): zscore
+	% would then amplify the rounding noise, so the persistence statistics are NaN.
+	isConst = std(x) <= 1e-10 * max(1, max(abs(x)));
+end
+
 function [angles, colourCounts, caseCounts] = SUB_fallBranch(ix, y)
 	% Topples each stick in a same-sign index list ix towards later sticks in
 	% the same list, and returns:

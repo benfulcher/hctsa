@@ -2,8 +2,10 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % NL_FNN   How the fraction of false nearest neighbors falls as the embedding dimension of the series increases.
 %
 % Uses the false_nearest routine from the TISEAN package for nonlinear
-% time-series analysis. For each embedding dimension m = 1,...,maxm (delay tau),
-% every point's nearest neighbor (in the maximum norm) is found, excluding points
+% time-series analysis. For each embedding dimension m = 1,...,maxm, the time
+% series is embedded with delay tau (the lag in samples between successive
+% coordinates, so the point at time t is (y(t), y(t+tau), ..., y(t+(m-1)*tau))),
+% and every point's nearest neighbor (in the maximum norm) is found, excluding points
 % within the Theiler window in time. The neighbor is false if, when one more
 % coordinate is added, the two points move apart by more than escapeFactor times
 % their original distance. For a deterministic system the fraction of false
@@ -68,6 +70,11 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html and the
 % false_nearest documentation at
 % http://www.mpipks-dresden.mpg.de/~tisean/TISEAN_2.1/docs/docs_c/false_nearest.html
+%
+% The bundled false_nearest.c differs from TISEAN 3.0.1 in one respect: for a
+% scalar series, the delay (-d) sets the lag between embedding coordinates
+% (TISEAN 3.0.1 used a lag of one sample whatever the delay, applying -d only
+% to the number of points used).
 %
 % The fourth column of TISEAN's output (nHood2) is the square root of the mean
 % squared nearest-neighbor distance.

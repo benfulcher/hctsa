@@ -1,4 +1,4 @@
-function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
+function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 % NL_LyapSpec   The spectrum of Lyapunov exponents of the delay-embedded trajectory, showing how it stretches and contracts in each direction.
 %
 % Estimates the full spectrum of m Lyapunov exponents (not just the
@@ -61,6 +61,9 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin)
 %       smoothly sampled flow most neighbors lie along the same stretch of
 %       trajectory, biasing the local linear fits towards the flow direction);
 %       hctsa's copy adds one (-t).
+%
+% randomSeed, the seed of the tiny dither added to the series (see BF_RandomSeed;
+%       default: 42)
 %
 % (TISEAN's lyap_spec also ignores any delay: its -d option is disabled and the
 % delay fixed at 1, since the same constant sets the time step of the local
@@ -161,6 +164,9 @@ end
 if nargin < 6 || isempty(theilerWin)
     theilerWin = {'ac', 1};
 end
+if nargin < 7 || isempty(randomSeed)
+    randomSeed = 42;
+end
 
 y = y(:);
 N = length(y);
@@ -178,12 +184,11 @@ end
 % ------------------------------------------------------------------------------
 %% Tiny reproducible dither, to avoid the exact-low-dimensional-manifold
 %% pathology described above (negligible relative to real measurement noise;
-%% locally seeded and restored so this has no effect on the caller's rng state
-%% and the dither itself is identical, hence reproducible, across calls)
+%% drawn from the portable generator BF_Random with a fixed seed, so the dither
+%% is identical, hence reproducible, across calls, MATLAB releases and languages,
+%% and MATLAB's own random stream is untouched)
 % ------------------------------------------------------------------------------
-rngState = rng(42, 'twister');
-y = y + 0.001 * std(y) * randn(size(y));
-rng(rngState);
+y = y + 0.001 * std(y) * BF_Random(N, BF_RandomSeed(randomSeed), 'normal');
 
 % ------------------------------------------------------------------------------
 %% Resolve the embedding delay tau (m is already fixed/numeric)

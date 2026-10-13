@@ -7,8 +7,9 @@ function out = SP_SinusoidFit(y, model)
 % the data). Uses the 'fit' function from Matlab's Curve Fitting Toolbox.
 %
 % The fitted models are:
-%   'sinK':     a sum of K sinusoids, sum_{i=1..K} a_i*sin(b_i*t + c_i), with
-%               free amplitudes a_i, frequencies b_i, and phases c_i,
+%   'sinK':     a sum of K sinusoids, sum_{i=1..K} a_i*sin(2*pi*f_i*t + c_i), with
+%               free amplitudes a_i, phases c_i, and frequencies f_i in
+%               [1/(2N), 1/2 - 1/(2N)] cycles per sample,
 %   'fourierK': a K-term Fourier series,
 %               a0 + sum_{i=1..K} (a_i*cos(i*w*t) + b_i*sin(i*w*t)),
 %               with a single fitted fundamental frequency w (so that the terms
@@ -33,24 +34,29 @@ function out = SP_SinusoidFit(y, model)
 % ---OUTPUTS: a structure containing
 % r2, the R^2 of the fit
 % adjr2, the degrees-of-freedom-adjusted R^2
-% rmse, the root mean square error of the fit
+% rmse, the root mean square error of the fit (the residual sum of squares divided
+%         by the degrees of freedom of the error, as in the Curve Fitting Toolbox)
 % resAC1, the autocorrelation of the residuals at lag 1 (using the 'Fourier'
 %         method of CO_AutoCorr)
 % resAC2, the autocorrelation of the residuals at lag 2
-% resruns, the p-value of a runs test on the residuals (HT_IndependenceTests,
-%         'runstest')
-% If the model cannot be fitted (NaN or Inf computed by the model function), NaN
-% is returned instead of a structure.
+% resrunsz, the signed z-statistic of a runs test on the residuals (BF_RunsZ):
+%         negative when the residuals have fewer runs about their median than
+%         expected for a random order (slowly varying residuals)
+% If the model cannot be fitted (NaN or Inf computed by the model function, or
+% fewer than 3K+1 samples for K sinusoids), NaN is returned instead of a structure.
 %
 % ---NOTES:
 % This function holds the time-series-model branch of the former DN_SimpleFit,
 % from which it was split because the distribution of values is unaffected by
 % temporal ordering, whereas these fits are not. r2 and adjr2 are not registered
 % for the sin1/sin2/sin3 mops (rmse is).
-% The fit starts from the Curve Fitting Toolbox's own start points, which do not
-% depend on the random number generator: repeated calls, and calls in fresh MATLAB
-% sessions, give identical outputs. Nonlinear least squares for sums of sinusoids
-% can nevertheless end in a local minimum, so the fit need not be the global best.
+% The sinusoid frequencies are bounded below by 1/(2N) cycles per sample, because
+% a sinusoid of lower frequency cannot be told apart from a constant plus a linear
+% trend, so that its amplitude and phase are not determined, and the best-fitting
+% frequency of the unbounded fit of a trending series tends to zero. The search is
+% deterministic (no random starts, no iterative optimizer): see BF_FitSinusoids.
+% The Fourier series are fitted by the Curve Fitting Toolbox from its own start
+% points, which do not depend on the random number generator.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -82,13 +88,6 @@ function out = SP_SinusoidFit(y, model)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-% Preliminaries
-% ------------------------------------------------------------------------------
-
-% Check a curve-fitting toolbox license is available:
-BF_CheckToolbox('curve_fitting_toolbox');
-
-% ------------------------------------------------------------------------------
 %% Fit the model
 % ------------------------------------------------------------------------------
 TSmodels = {'sin1', 'sin2', 'sin3', 'fourier1', 'fourier2', 'fourier3'}; % valid time-series models
@@ -100,29 +99,47 @@ end
 if size(y, 2) > size(y, 1)
 	y = y';
 end % y must be a column vector
-t = (1:length(y))'; % Time variable for equal sampling of the univariate time series
-try
-	[cfun, gof, output] = fit(t, y, model); % fit the model
-catch emsg % this model can't even be fitted OR license problem
-	if strcmp(emsg.message, 'NaN computed by model function.') || strcmp(emsg.message, 'Inf computed by model function.')
-		fprintf(1, 'The model %s failed for this data -- returning NaNs for all fitting outputs\n', model);
+N = length(y);
+
+if strcmp(model(1:3), 'sin')
+	% Sum of K sinusoids: least squares over amplitudes and phases, searched over frequencies
+	K = str2double(model(4));
+	numParams = 3*K; % amplitude, frequency and phase of each sinusoid
+	if N <= numParams
 		out = NaN; return
-	else
-		error('Unexpected error fitting ''%s'' to the time series', model)
 	end
+	yfit = BF_FitSinusoids(y, K);
+	res = y - yfit;
+	sse = sum(res.^2);
+	sstot = sum((y - mean(y)).^2);
+	dfe = N - numParams; % degrees of freedom of the error
+	out.r2 = 1 - sse/sstot;
+	out.adjr2 = 1 - (1 - out.r2)*(N - 1)/dfe;
+	out.rmse = sqrt(sse/dfe);
+else
+	% Fourier series (Curve Fitting Toolbox; not registered)
+	BF_CheckToolbox('curve_fitting_toolbox');
+	t = (1:N)'; % Time variable for equal sampling of the univariate time series
+	try
+		[cfun, gof, output] = fit(t, y, model); % fit the model
+	catch emsg % this model can't even be fitted OR license problem
+		if strcmp(emsg.message, 'NaN computed by model function.') || strcmp(emsg.message, 'Inf computed by model function.')
+			fprintf(1, 'The model %s failed for this data -- returning NaNs for all fitting outputs\n', model);
+			out = NaN; return
+		else
+			error('Unexpected error fitting ''%s'' to the time series', model)
+		end
+	end
+	res = output.residuals;
+	sstot = sum((y - mean(y)).^2);
+	out.r2 = gof.rsquare;
+	out.adjr2 = gof.adjrsquare;
+	out.rmse = gof.rmse;
 end
 
 % ------------------------------------------------------------------------------
-%% Compute the outputs into a structure
+%% Remaining structure in the residuals
 % ------------------------------------------------------------------------------
-out.r2 = gof.rsquare; % rsquared (not currently registered by the sin1/sin2/sin3 mops,
-                       % which register rmse instead)
-out.adjr2 = gof.adjrsquare; % degrees of freedom-adjusted rsquared (not currently registered
-                             % by any mop -- redundant with r2 for these fixed-order fits)
-
-out.rmse = gof.rmse; % root mean square error
-out.resAC1 = CO_AutoCorr(output.residuals, 1, 'Fourier'); % autocorrelation of residuals at lag 1
-out.resAC2 = CO_AutoCorr(output.residuals, 2, 'Fourier'); % autocorrelation of residuals at lag 2
-out.resruns = HT_IndependenceTests(output.residuals, 'runstest'); % runs test on residuals -- outputs p-value
+[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, sstot);
 
 end

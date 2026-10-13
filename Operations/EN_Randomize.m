@@ -1,10 +1,13 @@
-function out = EN_Randomize(y, randomizeHow, randomSeed)
+function out = EN_Randomize(y, randomizeHow, randomSeed, numReps)
 % EN_Randomize   How properties of the series change as it is progressively randomized.
 %
 % Randomizes a copy of the input (z-scored) series one point at a time, according
 % to a randomization procedure, repeated 2N times for a series of length N, and
 % compares statistics of the randomized copy with the original at 21 checkpoints:
-% at the start and after every N/10 steps.
+% at the start and after every N/10 steps. The randomization is repeated numReps
+% times from the same series and the statistics at each checkpoint are averaged
+% over the repeats (a single randomization gives a noisy trajectory, and the fitted
+% parameters would mostly reflect that noise).
 %
 % ---INPUTS:
 % y, the input (z-scored) time series
@@ -17,7 +20,10 @@ function out = EN_Randomize(y, randomizeHow, randomSeed)
 %                  distribution of values never changes and only the temporal
 %                  properties do
 %       Default: 'statdist'.
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, the seed of the random choices (see BF_RandomSeed; they come from the
+%       portable generator BF_Random, so results are reproducible across languages)
+% numReps, the number of independent randomizations whose statistics are averaged
+%       (default: 20)
 %
 % ---OUTPUTS: for each of ten statistics measured at each checkpoint, six or seven
 % fields describing its trajectory over the 21 checkpoints. The statistics are:
@@ -111,6 +117,11 @@ end
 if nargin < 3
 	randomSeed = []; % default
 end
+
+% numReps: number of randomizations to average over
+if nargin < 4 || isempty(numReps)
+	numReps = 20;
+end
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
@@ -135,37 +146,40 @@ numCalcs = length(calc_pts); % some rounding issues inevitable
 
 statNames = {'xcn1', 'xc1', 'd1', 'ac1', 'ac2', 'ac3', 'ac4', 'permen3_1', 'statav5', 'swss5_1'};
 numStats = length(statNames);
-stats = zeros(numCalcs, numStats); % record a stat at each randomization increment
+statsAll = zeros(numCalcs, numStats, numReps); % record a stat at each randomization increment, for each repeat
 
-y_rand = y; % this vector will be randomized
+statsAll(1, :, :) = repmat(CalculateStats(y, y), [1, 1, numReps]); % initial condition: apply on itself
 
-stats(1, :) = CalculateStats(y, y_rand); % initial condition: apply on itself
-
-% Control the random seed (for reproducibility):
-BF_ResetSeed(randomSeed);
+% The random choices for every step of every repeat, reproducible from the seed
+% (portable generator BF_Random): two uniform draws per step, as indices uniform on
+% 1..N; repeat r uses the r-th block of 2*randp_max*N steps
+randIdxAll = 1 + floor(N * reshape(BF_Random(2 * randp_max * N * numReps, BF_RandomSeed(randomSeed)), 2, randp_max * N, numReps));
 
 % -------------------------------------------------------------------------------
 % Do the randomization
 % -------------------------------------------------------------------------------
 % fprintf(1,'%u/%u calculation points',numCalcs,N*randp_max)
 
+for rep = 1:numReps
+y_rand = y; % this vector will be randomized
+randIdx = randIdxAll(:, :, rep);
 for i = 1:N * randp_max
 	switch randomizeHow
 		case 'statdist'
 			% randomize by substituting a random element of the time series by
 			% a random element from the static original time series distribution
-			y_rand(randi(N)) = y(randi(N));
+			y_rand(randIdx(1, i)) = y(randIdx(2, i));
 
 		case 'dyndist'
 			% randomize by substituting a random element of the time series
 			% by a random element of the current, already partially randomized,
 			% time series
-			y_rand(randi(N)) = y_rand(randi(N));
+			y_rand(randIdx(1, i)) = y_rand(randIdx(2, i));
 
 		case 'permute'
 			% randomize by swapping elements of the time series so that
 			% the distribution remains static; only temporal properties will change
-			randis = randi(N, [2, 1]);
+			randis = randIdx(:, i);
 			tmp = y_rand(randis(1));
 			y_rand(randis(1)) = y_rand(randis(2));
 			y_rand(randis(2)) = tmp;
@@ -175,10 +189,12 @@ for i = 1:N * randp_max
 	end
 
 	if any(calc_pts == i)
-		stats(calc_pts == i, :) = CalculateStats(y, y_rand);
+		statsAll(calc_pts == i, :, rep) = CalculateStats(y, y_rand);
 	end
 
 end
+end
+stats = mean(statsAll, 3, 'omitnan'); % average over the repeats
 % fprintf(1,'Randomization took %s',BF_TheTime(toc(randTimer)));
 
 if doPlot

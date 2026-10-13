@@ -60,8 +60,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %       from N=10000 to N=20000, cheap enough not to crop by default; a
 %       warning is given above N = 50000 if it is ever set explicitly.
 %       Set to a number to crop longer series to their first maxN points.
-% randomSeed, whether (and how) to reset the random seed, using
-%             BF_ResetSeed, before sampling the poles (default: 'default')
+% randomSeed, ignored: the poles are spread evenly over the orbit (a deterministic
+%             low-discrepancy subset of the embedded points), not drawn at random. Kept
+%             so that existing calls still work.
 %
 % ---OUTPUTS:
 % propValidPoles, proportion of poles that gave a valid local dimension (at
@@ -197,9 +198,9 @@ end
 % ------------------------------------------------------------------------------
 %% Sample poles (reference points) from the embedded orbit
 % ------------------------------------------------------------------------------
-BF_ResetSeed(randomSeed);
 nPoles = min(nPoles, Nemb);
-poleIdx = randperm(Nemb, nPoles);
+poleIdx = BF_SpreadPerm(Nemb); % (deterministic; the first nPoles are spread evenly over the orbit)
+poleIdx = poleIdx(1:nPoles);
 
 localDim = nan(nPoles, 1);
 theta = nan(nPoles, 1);

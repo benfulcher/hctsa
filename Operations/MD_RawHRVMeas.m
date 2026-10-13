@@ -16,8 +16,8 @@ function out = MD_RawHRVMeas(x)
 %
 % ---OUTPUTS:
 % tri10, tri20, trisqrt, the triangular index: the number of samples divided by the
-%       count in the fullest bin of a histogram with 10 bins, 20 bins, or the
-%       square-root rule,
+%       count in the fullest bin of a histogram of equal-width bins spanning the data,
+%       with 10 bins, 20 bins, or ceil(sqrt(N)) bins,
 % SD1, 1000/sqrt(2) times the standard deviation of the successive differences
 %       (variability perpendicular to the line of identity in (x_t, x_{t+1})),
 % SD2, 1000 times sqrt(2*var(x) - 0.5*std(diff(x))^2) (variability along the line of
@@ -70,9 +70,10 @@ function out = MD_RawHRVMeas(x)
 N = length(x); % time-series length
 
 % Triangular histogram index
-out.tri10 = N / max(histcounts(x, 10));
-out.tri20 = N / max(histcounts(x, 20));
-out.trisqrt = N / max(histcounts(x, 'BinMethod', 'sqrt'));
+% (equal-width bins spanning the data, with explicit edges: BF_HistEdges)
+out.tri10 = N / max(histcounts(x, BF_HistEdges(x, 10)));
+out.tri20 = N / max(histcounts(x, BF_HistEdges(x, 20)));
+out.trisqrt = N / max(histcounts(x, BF_HistEdges(x, 'sqrt')));
 
 % 'Poincare plot measures': see
 % "Do Existing Measures ... ", Brennan et. al. (2001), IEEE Trans Biomed Eng 48(11)

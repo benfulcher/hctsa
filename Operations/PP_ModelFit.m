@@ -27,8 +27,8 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % model, the time-series model to fit to the transformed series (currently 'ar'
 %       is the only option)
 % order, the order of the AR model to fit (default: 2)
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%       (for the random draws used by rmgd)
+% randomSeed, the seed of the random draws used by rmgd (see BF_RandomSeed and
+%       PP_PreProcess; portable generator BF_Random)
 %
 % ---OUTPUTS: the ratios of the RMS prediction error of the AR model for the
 % preprocessed series to that for the original series:

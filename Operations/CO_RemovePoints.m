@@ -23,9 +23,9 @@ function out = CO_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % removeOrSaturate, whether to remove the points ('remove', the default) or to
 %       saturate their values ('saturate'; not possible with 'absclose' or
 %       'random')
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%       (only relevant for removeHow = 'random', which is otherwise
-%       irreproducible run to run; no registered feature uses it)
+% randomSeed, the seed of the random ordering (see BF_RandomSeed; default: 0), which
+%       comes from the portable generator BF_Random (only relevant for
+%       removeHow = 'random'; no registered feature uses it)
 %
 % ---OUTPUTS: statistics of the changed series, relative to the original:
 % fzcacrat, the ratio of the first zero-crossing of the autocorrelation function

@@ -41,12 +41,16 @@ c  rank points in x
          xn=x(n)
          i=int((xn-xmin)*sc)
          ip=jptr(i)
-         if ((ip.eq.0).or.(xn.le.x(ip))) then
+         if (ip.eq.0) then
+            jptr(i)=n
+         else if (xn.le.x(ip)) then
             jptr(i)=n
          else
  1          ipp=ip
             ip=list(ip)
-            if ((ip.gt.0).and.(xn.gt.x(ip))) goto 1
+            if (ip.gt.0) then
+               if (xn.gt.x(ip)) goto 1
+            endif
             list(ipp)=n
          endif
  30      list(n)=ip

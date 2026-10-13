@@ -286,9 +286,10 @@ if isprop(Gfit, 'Offset')
 	out.offset = Gfit.Offset;
 end
 
-indexAdjust = 0; % required because sometimes you fit at fewer lags than you
-% specified, but the errors output is a vector,
-% so sadly you have to keep count...
+% The variance-covariance matrix from estimate has one row/column per estimated parameter
+% (constant, GARCH lags, ARCH lags, then any leverage/DoF), in that order, whether or
+% not a coefficient was estimated at exactly zero, so the error for a lag is simply
+% indexed by its position.
 
 % -- GARCH component --
 for i = 1:P
@@ -299,10 +300,9 @@ for i = 1:P
 		% error) ///
 		if Gfit.GARCH{i} == 0
 			% no fit at this lag, even though it was specified
-			indexAdjust = indexAdjust + 1;
 			out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
 		else
-			out.(sprintf('GARCHerr_%u', i)) = errors(1 + i - indexAdjust); % first is the constant
+			out.(sprintf('GARCHerr_%u', i)) = errors(1 + i); % first is the constant
 		end
 	else
 		% fitted GARCH model not as specified
@@ -318,9 +318,8 @@ for i = 1:Q
 		if Gfit.ARCH{i} == 0
 			% No fit at this specified lag
 			out.(sprintf('ARCHerr_%u', i)) = NaN; % constant, then GARCH, then ARCH
-			indexAdjust = indexAdjust + 1;
 		else
-			out.(sprintf('ARCHerr_%u', i)) = errors(1 + length(Gfit.GARCH) + i - indexAdjust); % constant, then GARCH, then ARCH
+			out.(sprintf('ARCHerr_%u', i)) = errors(1 + length(Gfit.GARCH) + i); % constant, then GARCH, then ARCH
 		end
 	else
 		% ARCH fit not as specified
@@ -330,10 +329,8 @@ for i = 1:Q
 end
 
 % -- Leverage/asymmetry component (gjr/egarch only) --
-% Unlike GARCH_i/ARCH_i above, this doesn't need indexAdjust-style mid-vector
-% indexing: for the single-lag models this operation registers, the extra
-% parameter (leverage or DoF, below) is always the LAST element of `errors`,
-% however many earlier positions preceded it.
+% For the single-lag models this operation registers, the extra
+% parameter (leverage or DoF, below) is always the LAST element of `errors`.
 if isprop(Gfit, 'Leverage') && ~isempty(Gfit.Leverage)
 	out.leverage = Gfit.Leverage{1};
 	out.leverageerr = errors(end);

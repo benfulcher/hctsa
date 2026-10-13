@@ -32,7 +32,6 @@ DN_Quantile.m
 DN_RemovePoints.m
 DN_SimpleFit.m
 DN_Spread.m
-DN_TailIndex.m
 DN_TrimmedMean.m
 DN_PLeft.m
 EN_DistributionEntropy.m
@@ -109,18 +108,13 @@ Curve Fitting Toolbox (Matlab Toolbox)
 
 CO_AddNoise.m
 CO_AutoCorrShape.m
-DN_OutlierInclude.m
-DN_SimpleFit.m
 DT_IsSeasonal.m
 EN_Randomize.m
 FC_LocalSimple.m
-FC_LoopLocalSimple.m
 NL_LargestLyap.m
-NW_VisibilityGraph.m
 PD_PeriodicityWang.m
 PP_Compare.m
 PP_Iterate.m
-SB_TransitionPAlphabet.m
 SP_SinusoidFit.m
 SP_Summaries.m
 SY_StdNthDerChange.m

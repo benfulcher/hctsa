@@ -66,6 +66,10 @@ function out = MF_arfit(y, pmin, pmax, selector)
 % ACM Trans. Math. Softw. 27, 58 (2001).
 %
 % ---NOTES:
+% NaN is returned for a (nearly) exactly predictable series: when the estimated noise
+% variance is below 1e-12 of the variance of the series (e.g., an exact sinusoid), the
+% coefficients are not determined and the residuals are rounding noise.
+%
 % popt_sbc and popt_fpe are positions within pmin:pmax, so they equal the model
 % order only when pmin = 1.
 
@@ -130,6 +134,14 @@ end
 % Run the code with no intercept vector (all input data should be
 % zero-mean, z-scored)
 [west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y, pmin, pmax, selector, 'zero');
+
+% An exactly predictable series (e.g., a sinusoid) has a singular design and a noise
+% variance at the level of rounding error: the coefficients are not determined, the
+% residuals are rounding noise, and the eigenmodes sit on the unit circle (infinite
+% damping times), so there is nothing to report
+if Cest < 1e-12 * var(y) || ~(var(y) > 0)
+	out = NaN; return
+end
 
 % First, some definitions
 ps = (pmin:pmax);

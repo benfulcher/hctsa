@@ -16,7 +16,9 @@ function out = DN_HistogramAsymmetry(y, numBins, doSimple)
 % y, the input data vector
 % numBins, the number of bins to use in each histogram (default: 10)
 % doSimple, whether to use a simple binning method with linearly spaced bins
-%       (BF_SimpleBinner; true, the default), or MATLAB's histcounts (false)
+%       (BF_SimpleBinner; true, the default), or equal-width bins spanning the data of each
+%       side with their edges shifted by a tiny fraction of a bin so that values exactly on an
+%       edge always go to the upper bin (BF_HistEdges, then histcounts; false)
 %
 % ---OUTPUTS:
 % densityDiff, the proportion of nonzero values that are positive minus the
@@ -87,8 +89,8 @@ if doSimple
 	[countsPos, binEdgesPos] = BF_SimpleBinner(yPos, numBins);
 	[countsNeg, binEdgesNeg] = BF_SimpleBinner(yNeg, numBins);
 else
-	[countsPos, binEdgesPos] = histcounts(yPos, numBins);
-	[countsNeg, binEdgesNeg] = histcounts(yNeg, numBins);
+	[countsPos, binEdgesPos] = SUB_histogram(yPos, numBins);
+	[countsNeg, binEdgesNeg] = SUB_histogram(yNeg, numBins);
 end
 
 % Normalize by total counts:
@@ -116,4 +118,16 @@ out.posMode = mean(binCentersPos(pPos == out.modeProbPos));
 out.negMode = mean(binCentersNeg(pNeg == out.modeProbNeg));
 out.modeAsymmetry = out.posMode + out.negMode;
 
+end
+
+% ------------------------------------------------------------------------------
+function [counts, binEdges] = SUB_histogram(y, numBins)
+	% Counts in numBins equal-width bins spanning y (explicit edges: BF_HistEdges)
+	if isempty(y) % nothing on this side of the mean: no histogram
+		counts = zeros(1, numBins);
+		binEdges = NaN(1, numBins + 1);
+	else
+		binEdges = BF_HistEdges(y, numBins);
+		counts = histcounts(y, binEdges);
+	end
 end

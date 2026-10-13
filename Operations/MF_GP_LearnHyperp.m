@@ -18,6 +18,15 @@ function hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, nfeva
 % nfevals,       the number of function evaluations
 %
 % ---NOTES:
+% Noise floor: the noise standard deviations (the Gaussian likelihood's, and the
+% covNoise term's if present) are bounded below by 1% of the standard deviation of
+% the data. Without a bound the marginal likelihood of a smooth series is nearly
+% flat along a valley in which the noise runs to e^-12 or less, so the fitted noise
+% depends on where the optimizer stops and the predictive variance (and ratios with
+% it) is set by rounding error. The bounded noise acts as a measurement-noise floor.
+% Implemented by clamping the noise hyperparameters inside the objective, with a zero
+% gradient for a clamped coordinate.
+%
 % The pre-optimization hyperparameter initialization is data-informed,
 % component-by-component, for any covSum of covSEiso/covPeriodic/covRQiso/covNoise;
 % unrecognized components fall back to zero. (Data-informed initialization used to be
@@ -97,13 +106,25 @@ nhps = eval(s);
 covFunc1 = covFunc{1};
 covFunc2 = covFunc{2};
 hyp.cov = zeros(nhps, 1);
+noisePos = []; % positions of noise standard deviations among the covariance hyperparameters
 typicalDT = mean(diff(t)); % typical time-step -- used as a length-scale prior
 dataSpan = max(t) - min(t);
 if strcmp(covFunc1, 'covSum')
 	pos = 1;
 	for ci = 1:numel(covFunc2)
 		if ~ischar(covFunc2{ci})
-			pos = pos + 1; % non-string (e.g., degree-parameterized) component: leave at zero
+			% a parameterized component, e.g., {'covMaterniso',3}: gpml reports its number of hyperparameters
+			comp = covFunc2{ci};
+			numHyp = eval(feval(comp{:}));
+			compName = comp{1};
+			if isa(compName, 'function_handle')
+				compName = func2str(compName);
+			end
+			if strcmp(compName, 'covMaterniso')
+				hyp.cov(pos) = log(typicalDT);   % length-scale
+				hyp.cov(pos + 1) = 0;            % log-magnitude
+			end
+			pos = pos + numHyp;
 			continue
 		end
 		switch covFunc2{ci}
@@ -123,6 +144,7 @@ if strcmp(covFunc1, 'covSum')
 			pos = pos + 3;
 		case 'covNoise'
 			hyp.cov(pos) = log(0.1);             % noise magnitude
+			noisePos = [noisePos, pos];
 			pos = pos + 1;
 		otherwise
 			pos = pos + 1; % unrecognized component: leave at zero
@@ -135,7 +157,12 @@ end
 % ------------------------------------------------------------------------------
 try
 	% loghyper = minimize(init_loghyper, 'gpr', nfevals, covFunc, t, y);
-	hyp = minimize(hyp, @gp, nfevals, infAlg, meanFunc, covFunc, likFunc, t, y);
+	noiseFloor = log(0.01 * std(y)); % lower bound on log noise standard deviations
+	hyp.lik = max(hyp.lik, noiseFloor);
+	hyp.cov(noisePos) = max(hyp.cov(noisePos), noiseFloor);
+	hyp = minimize(hyp, @SUB_gpFloored, nfevals, noisePos, noiseFloor, infAlg, meanFunc, covFunc, likFunc, t, y);
+	hyp.lik = max(hyp.lik, noiseFloor); % (clamped coordinates can drift: same objective value)
+	hyp.cov(noisePos) = max(hyp.cov(noisePos), noiseFloor);
 catch emsg
 	if strcmp(emsg.identifier, 'MATLAB:posdef')
 		fprintf(1, 'Error with lack of positive definite matrix for this function\n');
@@ -147,4 +174,17 @@ catch emsg
 	end
 end
 
+end
+
+% ------------------------------------------------------------------------------
+function [nlZ, dnlZ] = SUB_gpFloored(hyp, noisePos, noiseFloor, varargin)
+	% gpml's negative log marginal likelihood with the noise hyperparameters clamped
+	% at noiseFloor (and zero gradient wherever they are clamped)
+	clampLik = (hyp.lik < noiseFloor);
+	clampCov = noisePos(hyp.cov(noisePos) < noiseFloor);
+	hyp.lik = max(hyp.lik, noiseFloor);
+	hyp.cov(noisePos) = max(hyp.cov(noisePos), noiseFloor);
+	[nlZ, dnlZ] = gp(hyp, varargin{:});
+	if clampLik, dnlZ.lik(:) = 0; end
+	dnlZ.cov(clampCov) = 0;
 end

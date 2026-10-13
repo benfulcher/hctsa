@@ -198,8 +198,10 @@ out.iqr = iqr(counts);
 out.iqronrange = out.iqr / range(counts);
 
 % --- Distribution
-% Using the sqrt binning method:
-[binP, binEdges] = histcounts(counts, 'BinMethod', 'sqrt', 'Normalization', 'probability');
+% Using the sqrt binning rule, with explicit edges (BF_HistEdges; the local densities
+% are fractions k/n, so many lie exactly on a bin edge):
+binEdges = BF_HistEdges(counts, 'sqrt');
+binP = histcounts(counts, binEdges, 'Normalization', 'probability');
 binCentres = mean([binEdges(1:end - 1); binEdges(2:end)]);
 [out.mode_val, mix] = max(binP);
 out.mode = binCentres(mix);

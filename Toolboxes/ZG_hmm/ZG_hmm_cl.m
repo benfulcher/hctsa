@@ -16,6 +16,9 @@
 % If 0 or 1 output arguments requested, lik is returned. If 2 output
 % arguments requested, [lik likv] is returned.
 % 
+% Modified from the original: emission probabilities are rescaled in the log domain
+% at each time step so that observations far from every state do not underflow.
+%
 % Machine Learning Toolbox
 % Version 1.0  01-Apr-96
 % Copyright (c) by Zoubin Ghahramani
@@ -69,13 +72,16 @@ for n = 1:N
   
   B = zeros(T,K); 
   iCov = inv(Cov);      
-  k2 = k1/sqrt(det(Cov));
-  for i = 1:T
-    for l = 1:K
-      d = Mu(l,:)-X((n-1)*T+i,:);
-      B(i,l) = k2*exp(-0.5*d*iCov*d');
-    end; 
-  end; 
+  logk2 = log(k1)-0.5*log(det(Cov));
+  logB = zeros(T,K);
+  for l = 1:K
+    d = X((n-1)*T+1:n*T,:)-ones(T,1)*Mu(l,:);
+    logB(:,l) = logk2-0.5*sum((d*iCov).*d,2);
+  end;
+  % Rescale each row so that its largest emission probability is 1 (no underflow);
+  % the scale factors are added back to the log likelihood
+  shift = max(logB,[],2);
+  B = exp(logB-shift*ones(1,K));
   
   scale = zeros(T,1);
   alpha(1,:) = Pi(:)'.*B(1,:);
@@ -87,8 +93,8 @@ for n = 1:N
     alpha(i,:) = alpha(i,:)/(scale(i)+tiny);
   end;
 
-  likv(n) = sum(log(scale+(scale == 0)*tiny));
-  Scale = Scale+log(scale+(scale == 0)*tiny);
+  likv(n) = sum(log(scale+(scale == 0)*tiny))+sum(shift);
+  Scale = Scale+log(scale+(scale == 0)*tiny)+shift;
 end;
 
 lik = sum(Scale);

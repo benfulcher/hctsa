@@ -6,12 +6,18 @@ function mi = BF_MutualInformation(v1,v2,r1,r2,numBins)
 %---INPUTS:
 % v1, the first input vector
 % v2, the second input vector
-% r1, the bin-partitioning method for the first input vector, v1
+% r1, the bin-partitioning method for the first input vector, v1: 'range' (equal-width
+%     bins spanning the data, the default) or 'quantile' (bins with equal numbers of values)
 % r2, the bin-partitioning method for the second input vector, v2
-% numBins, the number of bins to partition each vector into.
+% numBins, the number of bins to partition each vector into (default: 10).
 %
 % NB: r1 and r2 can also be two-component vectors, that specify a custom range
 %     for binning
+%
+% The equal-width bin edges are written out explicitly (BF_HistEdges: width
+% (max - min)/numBins, edges shifted down by a tiny fraction of a bin so that a value
+% exactly on an edge always goes to the upper bin) rather than left to a rounding of the
+% last bit. If a vector is constant there is nothing to bin: the mutual information is NaN.
 %
 %---OUTPUT:
 % mi, the mutual information computed between v1 and v2
@@ -66,6 +72,9 @@ if length(v1) ~= length(v2)
 end
 
 N = length(v1); % length of vectors
+if (ischar(r1) && strcmp(r1, 'range') && range(v1) == 0) || (ischar(r2) && strcmp(r2, 'range') && range(v2) == 0)
+    mi = NaN; return % a constant vector has no distribution to bin
+end
 
 % Make sure both column vectors
 if size(v1,2) > size(v1,1), v1 = v1'; end
@@ -120,17 +129,15 @@ end
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 function edges = SUB_GiveMeEdges(r,v,nbins)
-    EE = 1E-6; % this small addition gets lost in the last bin
-    if strcmp(r,'range')
-        edges = linspace(min(v),max(v)+EE,nbins+1);
+    if ischar(r) && strcmp(r,'range')
+        edges = BF_HistEdges(v,nbins); % equal-width bins spanning the data
 
-    elseif strcmp(r,'quantile') % bin edges based on quantiles
+    elseif ischar(r) && strcmp(r,'quantile') % bin edges based on quantiles
+        EE = 1E-6*range(v); % this small addition (relative to the data) gets lost in the last bin
         edges = quantile(v,linspace(0,1,nbins+1));
-%             edges(1) = edges(1) - 0.1;
         edges(end) = edges(end) + EE;
-%             edges = sort(unique(edges)); % in case you have many repeated values -- will bias MI calculation
-    elseif length(r)==2 % a two-component vector
-        edges = linspace(r(1),r(2)+EE,nbins+1);
+    elseif isnumeric(r) && length(r)==2 % a two-component vector
+        edges = BF_HistEdges(v,nbins,r); % equal-width bins spanning the given range
     else
         error('Unknown partitioning method ''%s''',r);
     end

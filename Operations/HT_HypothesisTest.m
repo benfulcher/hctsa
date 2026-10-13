@@ -11,11 +11,11 @@ function p = HT_HypothesisTest(x, theTest)
 %
 % theTest, the hypothesis test to perform, dispatched as:
 %           HT_MarginalTests: 'signtest', 'vartest', 'ztest', 'signrank', 'jbtest'
-%           HT_IndependenceTests: 'runstest', 'lbq'
+%           HT_IndependenceTests: 'runsz', 'runstest', 'lbq'
 %
 % ---OUTPUT:
 % p-value from the specified statistical test (identical to that of the function
-% it dispatches to)
+% it dispatches to; the z-statistic of the runs test for 'runsz')
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -58,7 +58,7 @@ switch theTest
 	case {'signtest','vartest','ztest','signrank','jbtest'}
 		p = HT_MarginalTests(x, theTest);
 
-	case {'runstest','lbq'}
+	case {'runsz','runstest','lbq'}
 		p = HT_IndependenceTests(x, theTest);
 
 	otherwise

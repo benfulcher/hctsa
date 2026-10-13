@@ -41,7 +41,7 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 %             samples (see BF_TheilerWindow and NL_RQA; default: {'ac', 1}). Narrowed to
 %             Nemb/5 for short series.
 % rr, target recurrence rate used to set the neighborhood radius (the radius is set once,
-%     from the full embedded series, to the rr-quantile of a subsample of pairwise
+%     from the full embedded series, to the rr-quantile of the pairwise
 %     distances; the same radius is then reused for every segment below so that
 %     segment-to-segment differences reflect the dynamics rather than a re-calibrated
 %     threshold; default: 0.1)
@@ -54,8 +54,8 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 %              (default: 4)
 % maxN, the maximum number of samples to consider (cf. NL_RQA; default: 10000); 'full' to
 %       disable cropping
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (cf. NL_RQA;
-%             default: 'default')
+% randomSeed, ignored (see NL_RQA): the radius does not involve random numbers. Kept so
+%             that existing calls still work.
 %
 % ---OUTPUTS:
 % T_MRT, the mean recurrence time of the full series (the mean white-line length w)
@@ -122,7 +122,7 @@ if nargin < 7 || isempty(maxN)
     maxN = 10000;
 end
 if nargin < 8 || isempty(randomSeed)
-    randomSeed = 'default';
+    randomSeed = 'default'; % (not used)
 end
 
 if ischar(maxN) && strcmp(maxN, 'full')
@@ -161,9 +161,9 @@ end
 %% Set the neighborhood radius once, from the full embedded series, to
 %% achieve the target recurrence rate rr (same logic as NL_RQA)
 % ------------------------------------------------------------------------------
-nSub = min(500, Nemb);
-BF_ResetSeed(randomSeed);
-subIdx = randperm(Nemb, nSub);
+nSub = min(2000, Nemb);
+subIdx = BF_SpreadPerm(Nemb); % (deterministic; the first nSub points are spread evenly over the series)
+subIdx = subIdx(1:nSub);
 Dsub = pdist(Y(subIdx, :));
 radius = quantile(Dsub, rr);
 if radius <= 0

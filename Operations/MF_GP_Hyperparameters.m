@@ -1,4 +1,4 @@
-function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed)
+function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, randomSeed, numDraws)
 % MF_GP_Hyperparameters   Fits a Gaussian process to the series and reports its fitted kernel parameters and goodness of fit.
 %
 % Models the series as a smooth function of time using a Gaussian process (GP).
@@ -6,13 +6,16 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % function covFunc, e.g., (i) a sum of squared exponential and noise terms, or
 % (ii) a sum of squared exponential, periodic, and noise terms. The log
 % hyperparameters are found by maximizing the marginal likelihood (at most 50
-% function evaluations), starting from a data-informed initial guess. Goodness of
+% function evaluations, with the noise standard deviation bounded below by 1% of
+% that of the data), starting from a data-informed initial guess. Goodness of
 % fit is summarized by the per-point negative log marginal likelihood, the error of the fitted mean, and
 % the GP's predictive standard deviation.
 %
 % Fitting is O(N^3), so the model is fitted to at most maxN samples from the time
 % series, chosen by (i) resampling the time series down to this many points,
-% (ii) taking the first maxN samples, or (iii) taking random samples.
+% (ii) taking the first maxN samples, or (iii) taking random samples (in which case
+% the fit is repeated for numDraws different random samples and the outputs are
+% averaged over them).
 % Times are the sample indices (squishorsquash = 1), so length scales and periods
 % are in samples of the cut series. The output is NaN if the fit fails or if the
 % fitted mean is nearly constant (standard deviation below 0.01).
@@ -44,8 +47,15 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %           'random_both': take maxN consecutive samples from a random position,
 %                          then a random fifth of them
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed,
-%             for settings of resampleHow that involve random number generation
+% randomSeed, the seed of the random numbers (see BF_RandomSeed; they come from the
+%             portable generator BF_Random), for settings of resampleHow that involve
+%             random number generation
+%
+% numDraws, the number of independent random samples to fit, for the settings of
+%             resampleHow that involve random number generation (default: 20). The
+%             outputs are the means over the draws that gave a valid fit: a single
+%             random sample of a few tens of points is dominated by which points
+%             happened to be drawn, but the average over draws is not.
 %
 % ---OUTPUTS:
 % logh1, logh2, logh3, logh4, logh5, logh6: the log hyperparameters of the fitted covariance function, in
@@ -66,6 +76,13 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       sampled times
 % maxS, minS, meanS: maximum, minimum, and mean of the GP's predictive standard
 %       deviation over 1000 equally spaced times spanning the sampled series
+% oosmedabserr: out-of-sample error, for the random-subsample settings of resampleHow
+%       ('random_i', 'random_both'): the median absolute difference between the series
+%       and the GP mean at the times between the first and last sampled time that were
+%       not sampled (so are not seen by the fit), in units of the series' standard
+%       deviation. How well a GP fitted to a sparse, irregular subsample interpolates
+%       the rest of the series. NaN when every point in that span was sampled (e.g.,
+%       'first', 'resample', or a series no longer than maxN).
 %
 % ---NOTES:
 % For the covSEiso+covPeriodic+covNoise variants: the installed gpml (v4.2)'s
@@ -179,6 +196,35 @@ if nargin < 6
 	randomSeed = [];
 end
 
+if nargin < 7 || isempty(numDraws)
+	numDraws = 20;
+end
+
+% ------------------------------------------------------------------------------
+%% Random samples: average the fit over several independent draws
+% ------------------------------------------------------------------------------
+if numDraws > 1 && maxN > 0 && N > maxN && ismember(resampleHow, {'random_i', 'random_consec', 'random_both'})
+	seed0 = BF_RandomSeed(randomSeed);
+	outDraws = cell(numDraws, 1);
+	for d = 1:numDraws
+		% (draw d uses the seed 2*numDraws*seed0 + 2*(d-1), and the next one as well for
+		% 'random_both', so that different seeds share no draws)
+		outDraws{d} = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleHow, 2 * numDraws * seed0 + 2 * (d - 1), 1);
+	end
+	isValid = cellfun(@isstruct, outDraws);
+	if sum(isValid) < numDraws / 2
+		out = NaN; return % too few draws gave a usable fit
+	end
+	outDraws = outDraws(isValid);
+	fieldNames = fieldnames(outDraws{1});
+	out = struct();
+	for f = 1:length(fieldNames)
+		vals = cellfun(@(o) o.(fieldNames{f}), outDraws);
+		out.(fieldNames{f}) = mean(vals, 'omitnan');
+	end
+	return
+end
+
 % Inference algorithm -- use the Laplace approximation:
 % Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
 % Laplace approximation is exact but is computed by Newton iteration, and
@@ -191,6 +237,7 @@ infAlg = @infGaussLik;
 % ------------------------------------------------------------------------------
 %% Downsample long time series
 % ------------------------------------------------------------------------------
+tOut = []; yOut = []; % times and values of unsampled points within the sampled span
 if maxN == 0
 	slowThreshold = 2000;
 	if N > slowThreshold
@@ -218,19 +265,20 @@ elseif (maxN > 0) && (N > maxN)
 		case 'random_i' % takes maxN random indicies in the time series
 			% Set time index
 			t = SUB_settimeindex(N, squishorsquash);
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-			% Now take samples (unevenly spaced!!)
-			ii = randsample(N, maxN);
-			ii = sort(ii, 'ascend');
+			% Now take samples (unevenly spaced!!): maxN distinct indices, chosen
+			% reproducibly from the seed
+			ii = BF_Random(N, BF_RandomSeed(randomSeed), 'perm');
+			ii = sort(ii(1:maxN), 'ascend');
+			% the unsampled points between the first and last sampled ones (for oosmedabserr):
+			iOut = setdiff((ii(1):ii(end))', ii(:));
+			tOut = (t(iOut) - t(ii(1))) / (t(ii(end)) - t(ii(1))) * (maxN - 1) + 1; % same respacing
+			yOut = y(iOut);
 			t = t(ii);
 			t = (t - min(t)) / range(t) * (maxN - 1) + 1; % respace from 1:maxN
 			y = y(ii);
 
 		case 'random_consec' % takes maxN consecutive indicies from a random position in the time series
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
-			sind = randi(N - maxN + 1); % start index
+			sind = 1 + floor((N - maxN + 1) * BF_Random(1, BF_RandomSeed(randomSeed))); % start index (uniform on 1..N-maxN+1)
 			y = y(sind:sind + maxN - 1); % take this bit
 			t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
@@ -239,16 +287,17 @@ elseif (maxN > 0) && (N > maxN)
 			t = SUB_settimeindex(maxN, squishorsquash); % set time index
 
 		case 'random_both' % takes a random starting position and then takes a 1/5 sample from that
-			% Control the random seed (for reproducibility):
-			BF_ResetSeed(randomSeed);
 			% Take sample from random position in time series
-			sind = randi(N - maxN + 1); % start index
+			seed = BF_RandomSeed(randomSeed);
+			sind = 1 + floor((N - maxN + 1) * BF_Random(1, seed)); % start index (uniform on 1..N-maxN+1)
 			y = y(sind:sind + maxN - 1); % take this bit
 			N = length(y); % update time series length (should be maxN)
 			t = SUB_settimeindex(N, squishorsquash); % set time index
 			% Now take samples (unevenly spaced!!)
-			ii = randsample(N, ceil(maxN / 5)); % This 5 is really a parameter...
-			ii = sort(ii, 'ascend');
+			ii = BF_Random(N, seed + 1, 'perm'); % (a second stream, independent of the start index)
+			ii = sort(ii(1:ceil(maxN / 5)), 'ascend'); % This 5 is really a parameter...
+			iOut = setdiff((ii(1):ii(end))', ii(:)); % unsampled points within the sampled span
+			tOut = t(iOut); yOut = y(iOut);
 			t = t(ii);
 			y = y(ii);
 
@@ -359,6 +408,14 @@ S = sqrt(S2); % standard deviation function (S2 is the variance)
 out.maxS = max(S); % maximum predictive standard deviation
 out.minS = min(S); % minimum predictive standard deviation
 out.meanS = mean(S); % mean predictive standard deviation
+
+% Out-of-sample error: the GP mean at the unsampled times within the sampled span
+if ~isempty(tOut)
+	muOut = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, tOut);
+	out.oosmedabserr = median(abs(yOut - muOut));
+else
+	out.oosmedabserr = NaN;
+end
 
 % ------------------------------------------------------------------------------
 function t = SUB_settimeindex(N, squishorsquash)

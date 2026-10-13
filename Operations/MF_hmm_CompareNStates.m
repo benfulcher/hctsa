@@ -1,14 +1,16 @@
-function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
+function out = MF_hmm_CompareNStates(y, trainp, nstater)
 % MF_hmm_CompareNStates   How the fit of hidden Markov models to the series changes with the number of hidden states.
 %
 % Fits Gaussian hidden Markov models (HMMs) with different numbers of states to
 % the first trainp proportion of the time series (each with at most 30 cycles of
 % EM), and compares the resulting log-likelihoods per sample on the training part
-% and on the held-out remainder.
+% and on the held-out remainder. Each model is fitted deterministically, by the best
+% of six fixed starting points with a floor on the shared variance (ZG_hmm_fit, as
+% in MF_hmm_Fit).
 %
 % The code relies on Zoubin Gharamani's implementation of HMMs for real-valued
 % Gaussian-distributed observations, including the hmm and hmm_cl routines (
-% renamed ZG_hmm and ZG_hmm_cl here).
+% renamed ZG_hmm and ZG_hmm_cl here), and ZG_hmm_fit.
 % Implementation of HMMs for real-valued Gaussian observations:
 % http://www.gatsby.ucl.ac.uk/~zoubin/software.html
 % or, specifically:
@@ -22,9 +24,6 @@ function out = MF_hmm_CompareNStates(y, trainp, nstater, randomSeed)
 %         (default: 0.6)
 %
 % nstater, the vector of numbers of states to compare (default: 2:4)
-%
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
-%             (done once, before the first fit)
 %
 % ---OUTPUTS:
 % meanLLtrain, maxLLtrain: mean and maximum across models of the log-likelihood per
@@ -84,15 +83,6 @@ if nargin < 3 || isempty(nstater)
 	nstater = (2:4); % use 2:4 states
 end
 
-if nargin < 4
-	randomSeed = [];
-end
-
-% -------------------------------------------------------------------------------
-% Deal with random seeds
-% -------------------------------------------------------------------------------
-BF_ResetSeed(randomSeed); % reset the random seed if specified
-
 % ------------------------------------------------------------------------------
 %% Train the HMM
 % ------------------------------------------------------------------------------
@@ -120,8 +110,8 @@ LLtests = zeros(Nstate, 1);
 for j = 1:Nstate
 	numStates = nstater(j);
 	% train HMM with <numStates> states for 30 cycles of EM (or until
-	% convergence); default termination tolerance
-	[Mu, Cov, P, Pi, LL] = ZG_hmm(yTrain, Ntrain, numStates, 30);
+	% convergence), from fixed starting points; default termination tolerance
+	[Mu, Cov, P, Pi, LL] = ZG_hmm_fit(yTrain, numStates, 30);
 
 	LLtrains(j) = LL(end) / Ntrain;
 

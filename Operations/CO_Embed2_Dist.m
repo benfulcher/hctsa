@@ -24,7 +24,8 @@ function out = CO_Embed2_Dist(y, tau)
 % d_expfit_nlogL, the negative log-likelihood per distance of a maximum-likelihood
 %       exponential fit to the distances,
 % d_expfit_meandiff, the mean absolute difference between the histogram of
-%       distances (automatic binning, normalized as a probability density) and the
+%       distances (equal-width bins, their number the larger of the Sturges and
+%       Freedman-Diaconis rules, normalized as a probability density) and the
 %       fitted exponential density at the bin centres.
 %
 % ---NOTES:
@@ -142,8 +143,12 @@ nlogL = explike(l, d) / numel(d);
 out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:
-% Use a histogram with automatic binning
-[N, binEdges] = histcounts(d, 'BinMethod', 'auto', 'Normalization', 'pdf');
+% Use a histogram with automatic binning (BF_HistEdges 'auto', explicit edges)
+if range(d) == 0 % all distances equal: no distribution to compare with the fit
+	out.d_expfit_meandiff = NaN; return
+end
+binEdges = BF_HistEdges(d, 'auto');
+N = histcounts(d, binEdges, 'Normalization', 'pdf');
 binCentres = mean([binEdges(1:end - 1); binEdges(2:end)]);
 expf = exppdf(binCentres, l); % exponential fit in each bin
 out.d_expfit_meandiff = mean(abs(N - expf)); % mean absolute error of fit

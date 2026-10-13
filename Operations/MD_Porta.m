@@ -2,7 +2,7 @@ function out = MD_Porta(x,numLevels)
 % MD_Porta   Porta's symbolic-dynamics word-type indices.
 %
 % Quantizes the time series into a small number of levels (numLevels equal-width
-% bins spanning its range, by discretize) and classifies consecutive length-3
+% bins spanning its range, with explicit edges from BF_HistEdges) and classifies consecutive length-3
 % "words" of symbols by their pattern of variation:
 %   0V   -- no variation (all three symbols equal)
 %   1V   -- one variation (exactly one of the two transitions is flat)
@@ -89,7 +89,7 @@ if std(x) == 0
     return
 end
 
-sym = discretize(x, numLevels); % quantize into 1:numLevels
+sym = discretize(x, BF_HistEdges(x, numLevels)); % quantize into 1:numLevels equal-width levels spanning the data
 
 d = diff(sym); % transitions between consecutive symbols
 d1 = d(1:end-1); % first transition of each length-3 word

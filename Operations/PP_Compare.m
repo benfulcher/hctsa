@@ -22,8 +22,10 @@ function out = PP_Compare(y, detrndmeth)
 % detrndmeth, the preprocessing to apply (default: 'medianf3'):
 %       'poly<n>': remove a polynomial of order n = 1-9 (Curve Fitting Toolbox),
 %           e.g., 'poly1', a linear detrending
-%       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(b1*x+c1) + ...
-%           (Curve Fitting Toolbox), e.g., 'sin1'
+%       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(2*pi*f1*t+c1) + ... fitted
+%           by least squares to the mean-subtracted series, with frequencies searched
+%           deterministically between 1/(2N) and 1/2 - 1/(2N) cycles per sample
+%           (BF_FitSinusoids), e.g., 'sin1'
 %       'spline<npieces><order>': remove a least-squares spline fitted with
 %           spap2 (Spline Toolbox) with the given number of polynomial pieces and
 %           spline order, e.g., 'spline24', a cubic spline with 2 pieces
@@ -49,8 +51,8 @@ function out = PP_Compare(y, detrndmeth)
 % olbt_s5, the standard deviation after trimming the 5% most extreme values at each
 %       end, relative to that of the full series (DN_OutlierTest)
 % Differences (statistics that can be negative or zero):
-% gauss1_kd_r2, gauss1_kd_resAC1, gauss1_kd_resruns, the R^2, the lag-1
-%       autocorrelation of the residuals, and the runs-test p-value of the residuals
+% gauss1_kd_r2, gauss1_kd_resAC1, gauss1_kd_resrunsz, the R^2, the lag-1
+%       autocorrelation of the residuals, and the runs-test z-statistic of the residuals
 %       of a Gaussian fit to the kernel-smoothed distribution (DN_SimpleFit)
 % kscn_peaksepy, kscn_peaksepx, kscn_relent, the peak separation in height and in
 %       position, and the relative entropy, of the kernel-smoothed distribution
@@ -121,12 +123,14 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isnan(str2doub
 	% 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isnan(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
 
-	% Check a curve-fitting toolbox license is available:
-	BF_CheckToolbox('curve_fitting_toolbox');
-
-	[cfun, gof] = fit(r, y, detrndmeth);
-	y_fit = feval(cfun, r);
-	y_d = y - y_fit;
+	% (the mean is removed first: the sinusoids have no offset, and the frequencies
+	% are bounded away from zero, so they could not otherwise absorb a non-zero mean)
+	numSin = str2double(detrndmeth(4));
+	if N <= 3*numSin
+		out = NaN; % too short to fit this many sinusoids
+		return
+	end
+	y_d = y - mean(y) - BF_FitSinusoids(y - mean(y), numSin);
 
 	% 3) Spline detrend
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isnan(str2double(detrndmeth(7))) && ~isnan(str2double(detrndmeth(8)))
@@ -236,11 +240,11 @@ if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	% fitting gaussian failed -- returns a NaN rather than a structure
 	out.gauss1_kd_r2 = NaN;
 	out.gauss1_kd_resAC1 = NaN;
-	out.gauss1_kd_resruns = NaN;
+	out.gauss1_kd_resrunsz = NaN;
 else
 	out.gauss1_kd_r2 = f_diff(me1.r2, me2.r2);
 	out.gauss1_kd_resAC1 = f_diff(me1.resAC1, me2.resAC1);
-	out.gauss1_kd_resruns = f_diff(me1.resruns, me2.resruns);
+	out.gauss1_kd_resrunsz = f_diff(me1.resrunsz, me2.resrunsz);
 end
 
 % (b) compare distribution to fitted normal distribution

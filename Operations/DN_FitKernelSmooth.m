@@ -2,8 +2,9 @@ function out = DN_FitKernelSmooth(x, varargin)
 % DN_FitKernelSmooth   Statistics of a kernel-smoothed distribution of the data.
 %
 % Estimates the distribution of the values with a kernel-smoothed density
-% (ksdensity, with its default settings: a Gaussian kernel and 100 grid points)
-% and returns statistics summarizing its shape: the number of peaks, the
+% (BF_KSDensity: a Gaussian kernel with a normal-reference bandwidth, evaluated
+% on 100 grid points from three bandwidths below the minimum to three above the
+% maximum) and returns statistics summarizing its shape: the number of peaks, the
 % height of the highest peak, the entropy, and two measures of asymmetry about
 % the mean. Optionally, also counts the crossings of the curve through given
 % heights, measures the area under the curve where it is lower than given
@@ -33,9 +34,10 @@ function out = DN_FitKernelSmooth(x, varargin)
 %       -0.0002, i.e., clearly peaked)
 % max, the height of the highest peak
 % entropy, the entropy of the distribution, -sum(f*log(f)*dx), in nats
-% asym, the probability mass above the mean divided by that below it
+% asym, the probability mass above the mean divided by that below it (NaN if there
+%       is essentially none below)
 % plsym, the total variation of the curve below the mean divided by that
-%       above the mean
+%       above the mean (NaN if there is none above)
 % numcross_005, numcross_010, numcross_020, numcross_030, numcross_040,
 % numcross_050, ...: the number of crossings of each threshold given to
 %       'numcross' (named for the threshold to two decimal places, without the
@@ -96,7 +98,10 @@ clear inputP;
 m = mean(x);
 
 % First compute the smoothed empirical distribution of values in the time series
-[f, xi] = ksdensity(x);
+[f, xi] = BF_KSDensity(x);
+if any(isnan(f)) % constant data: no scale to smooth over
+	out = NaN; return
+end
 
 % 1. Number of peaks
 df = diff(f);
@@ -113,12 +118,20 @@ out.entropy = -sum(f(f > 0) .* log(f(f > 0)) * (xi(2) - xi(1))); % entropy of th
 % 4. Assymetry
 out1 = sum(f(xi > m) .* (xi(2) - xi(1)));
 out2 = sum(f(xi < m) .* (xi(2) - xi(1)));
-out.asym = out1 / out2;
+if out2 < 1e-10 % (essentially) no mass below the mean: the ratio is not meaningful
+	out.asym = NaN;
+else
+	out.asym = out1 / out2;
+end
 
 % 5. Plsym
 out1 = sum(abs(diff(f(xi < m))) .* (xi(2) - xi(1)));
 out2 = sum(abs(diff(f(xi > m))) .* (xi(2) - xi(1)));
-out.plsym = out1 / out2;
+if out2 < 1e-10 % no variation above the mean
+	out.plsym = NaN;
+else
+	out.plsym = out1 / out2;
+end
 
 % ------------------------------------------------------------------------------
 % 6. Numcross

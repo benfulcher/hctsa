@@ -270,15 +270,14 @@ int main(int argc,char **argv)
   }
   check_alloc(vcomp=(unsigned int*)malloc(sizeof(int)*(maxdim)));
   check_alloc(vemb=(unsigned int*)malloc(sizeof(int)*(maxdim)));
+  /* Embedding coordinate i is component i%comp at lag (i/comp)*delay. For a
+     scalar series (comp == 1) this is a delay embedding with lag i*delay.
+     (Upstream TISEAN 3.0.0/3.0.1 special-cased comp == 1 with vemb[i]=i, so
+     the -d option never set the lag between coordinates in the scalar case,
+     only the loop bounds above.) */
   for (i=0;i<maxdim;i++) {
-    if (comp == 1) {
-      vcomp[i]=0;
-      vemb[i]=i;
-    }
-    else {
-      vcomp[i]=i%comp;
-      vemb[i]=(i/comp)*delay;
-    }
+    vcomp[i]=i%comp;
+    vemb[i]=(i/comp)*delay;
   }
   for (emb=minemb;emb<=maxemb;emb++) {
     dim=emb*comp-1;

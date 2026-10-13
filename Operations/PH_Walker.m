@@ -68,7 +68,8 @@ function out = PH_Walker(y, walkerRule, walkerParams)
 %       times the grid spacing, so it is at most 2 and does not depend on
 %       the range of the data)
 % The residual, w - y:
-% res_runstest: p-value of a runs test for randomness
+% res_runsz: signed z-statistic of a runs test for randomness of the residual
+%       (BF_RunsZ): negative when it has fewer runs about its median than expected
 % res_swss5_1: variability of the residual's standard deviation across 5 windows
 % res_ac1: lag-1 autocorrelation
 
@@ -268,14 +269,13 @@ out.sw_ansarib_pval = pval; % p-value from the test
 % out.sw_ansarib_Wstar = stats.Wstar; % Approximate normal statistic
 % test statistics are length dependent. Remove.
 
-r = linspace(min(min(y), min(w)), max(max(y), max(w)), 200); % make range of ksdensity uniform across all subsegments
-dy = ksdensity(y, r); dw = ksdensity(w, r); % the kernel-smoothed distributions
+r = linspace(min(min(y), min(w)), max(max(y), max(w)), 200); % common grid for both densities
+dy = BF_KSDensity(y, r); dw = BF_KSDensity(w, r); % the kernel-smoothed distributions (Gaussian kernel, explicit bandwidth)
 out.sw_distdiff = sum(abs(dy - dw)) * (r(2) - r(1)); % integral of |density difference| (grid spacing x sum)
 
 % (iii) Looking at residuals between time series and walker
 res = w - y;
-[~, pval] = runstest(res); % runs test
-out.res_runstest = pval;
+out.res_runsz = BF_RunsZ(res); % runs test z-statistic
 out.res_swss5_1 = SY_SlidingWindow(res, 'std', 'std', 5, 1); % sliding window stationarity
 out.res_ac1 = CO_AutoCorr(res, 1); % auto correlation at lag-1
 

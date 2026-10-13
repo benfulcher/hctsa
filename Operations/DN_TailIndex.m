@@ -30,10 +30,10 @@ function out = DN_TailIndex(y, tailFrac)
 % (ii) the moment estimator of Dekkers, Einmahl and de Haan (1989), which
 %       extends the Hill estimator to any sign of xi, including light-tailed
 %       distributions with a finite end point (xi < 0);
-% (iii) the shape parameter of a generalized Pareto distribution fitted by
-%       maximum likelihood to the k exceedances over the (k+1)-th largest value
-%       (the peaks-over-threshold method; Pickands, 1975), using gpfit from
-%       MATLAB's Statistics Toolbox.
+% (iii) the shape parameter of a generalized Pareto distribution fitted to the k
+%       exceedances over the (k+1)-th largest value (the peaks-over-threshold
+%       method; Pickands, 1975), by the method of probability-weighted moments
+%       (Hosking and Wallis, 1987), which has a closed form.
 %
 % ---INPUTS:
 % y, the input time series
@@ -63,6 +63,8 @@ function out = DN_TailIndex(y, tailFrac)
 % of an extreme-value distribution", Ann. Stat. 17, 1833 (1989).
 % J. Pickands III, "Statistical inference using extreme order statistics",
 % Ann. Stat. 3, 119 (1975).
+% J.R.M. Hosking and J.R. Wallis, "Parameter and quantile estimation for the
+% generalized Pareto distribution", Technometrics 29, 339 (1987).
 %
 % ---NOTES:
 % With k tail values, the standard error of the Hill estimate is about xi/sqrt(k),
@@ -111,10 +113,6 @@ function out = DN_TailIndex(y, tailFrac)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-% (gpfit, used for the generalized Pareto fits, is in the Statistics and Machine
-% Learning Toolbox)
-BF_CheckToolbox('statistics_toolbox');
-
 if nargin < 2 || isempty(tailFrac)
     tailFrac = 0.05;
 end
@@ -188,16 +186,19 @@ end
 
 % ------------------------------------------------------------------------------
 function xi = gpdShape(exceed)
-    % Maximum-likelihood shape of a generalized Pareto fit (Statistics Toolbox)
+    % Shape of a generalized Pareto fit by probability-weighted moments (Hosking and
+    % Wallis, 1987): with a0 the mean of the exceedances and a1 the mean of
+    % (1 - p_i)*z_i for the ascending exceedances z_i with plotting positions
+    % p_i = (i - 0.35)/n, xi = 2 - a0/(a0 - 2*a1)
     if any(exceed <= 0)
         xi = NaN; return % ties between the tail values and the threshold
     end
-    warnState = warning('off', 'all');
-    try
-        parmhat = gpfit(exceed);
-        xi = parmhat(1);
-    catch
+    n = numel(exceed);
+    z = sort(exceed(:), 'ascend');
+    a0 = mean(z);
+    a1 = mean((1 - ((1:n)' - 0.35) / n) .* z);
+    xi = 2 - a0 / (a0 - 2 * a1);
+    if ~isfinite(xi)
         xi = NaN;
     end
-    warning(warnState);
 end

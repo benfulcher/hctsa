@@ -1,4 +1,4 @@
-function [Mu, Cov, P, Pi, LL] = ZG_hmm(X,T,K,cyc,tol)
+function [Mu, Cov, P, Pi, LL] = ZG_hmm(X,T,K,cyc,tol,init,covFloor)
 % Gaussian Observation Hidden Markov Model
 %
 % X - N x p data matrix
@@ -6,6 +6,14 @@ function [Mu, Cov, P, Pi, LL] = ZG_hmm(X,T,K,cyc,tol)
 % K - number of states (default 2)
 % cyc - maximum number of cycles of Baum-Welch (default 100)
 % tol - termination tolerance (prop change in likelihood) (default 0.0001)
+% init - (optional) a structure with fields Mu, Cov, P, Pi giving the initial
+%        parameters; by default the initial means are drawn at random
+% covFloor - (optional) lower bound on the diagonal of the output covariance, applied
+%        at every M step (default 0: no bound)
+%
+% Modified from the original: optional deterministic initialization (init) and
+% covariance floor (covFloor), and the emission probabilities are rescaled in the log
+% domain at each time step so that observations far from every state do not underflow.
 %
 % Mu - mean vectors
 % Cov - output covariance matrix (full, tied across states)
@@ -48,9 +56,11 @@ function [Mu, Cov, P, Pi, LL] = ZG_hmm(X,T,K,cyc,tol)
 p = length(X(1,:));
 N = length(X(:,1));
 
-if nargin < 5   tol=0.0001; end
+if nargin < 5 || isempty(tol)   tol=0.0001; end
 if nargin < 4   cyc=100; end
 if nargin < 3   K=2; end
+if nargin < 6   init=[]; end
+if nargin < 7   covFloor=0; end
 if nargin < 2   T=N; end
 
 if (rem(N,T)~=0)
@@ -58,15 +68,19 @@ if (rem(N,T)~=0)
 end
 N = N/T;
 
-Cov=diag(diag(cov(X)));
+if isempty(init)
+  Cov=diag(diag(cov(X)));
 
-Mu=randn(K,p)*sqrtm(Cov)+ones(K,1)*mean(X);
+  Mu=randn(K,p)*sqrtm(Cov)+ones(K,1)*mean(X);
 
-Pi=rand(1,K);
-Pi=Pi/sum(Pi);
+  Pi=rand(1,K);
+  Pi=Pi/sum(Pi);
 
-P=rand(K);
-P=ZG_rdiv(P,ZG_rsum(P));
+  P=rand(K);
+  P=ZG_rdiv(P,ZG_rsum(P));
+else
+  Mu=init.Mu; Cov=init.Cov; P=init.P; Pi=init.Pi;
+end
 
 LL=[];
 lik=0;
@@ -91,13 +105,16 @@ for cycle=1:cyc
   for n=1:N
 
     iCov=inv(Cov);
-    k2=k1/sqrt(det(Cov));
-    for i=1:T
-      for l=1:K
-	d=Mu(l,:)-X((n-1)*T+i,:);
-	B(i,l)=k2*exp(-0.5*d*iCov*d');
-      end
+    logk2=log(k1)-0.5*log(det(Cov));
+    logB=zeros(T,K);
+    for l=1:K
+      d=X((n-1)*T+1:n*T,:)-ones(T,1)*Mu(l,:);
+      logB(:,l)=logk2-0.5*sum((d*iCov).*d,2);
     end
+    % Scale each row so its largest emission probability is 1 (no underflow); the
+    % scale factors are added back to the log likelihood below
+    shift=max(logB,[],2);
+    B=exp(logB-shift*ones(1,K));
 
     scale=zeros(T,1);
     alpha(1,:)=Pi.*B(1,:);
@@ -124,7 +141,7 @@ for cycle=1:cyc
       xi(i,:)=t(:)'/sum(t(:));
     end
 
-    Scale=Scale+log(scale);
+    Scale=Scale+log(scale)+shift;
     Gamma=[Gamma; gamma];
     Gammasum=Gammasum+gammasum;
     Xi=Xi+xi;
@@ -156,6 +173,7 @@ for cycle=1:cyc
     Cov=Cov+ZG_rprod(d,Gamma(:,l))'*d;
   end
   Cov=Cov/(sum(Gammasum));
+  Cov(1:p+1:end)=max(Cov(1:p+1:end),covFloor); % lower bound on the variances (diagonal)
 
   oldlik=lik;
   lik=sum(Scale);

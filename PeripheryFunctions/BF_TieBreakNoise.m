@@ -8,15 +8,18 @@ function y = BF_TieBreakNoise(y, seed)
 % nearest-neighbor (e.g., Kraskov/KSG mutual information) estimators
 % degenerate on quantized or periodic-orbit data.
 %
-% The noise is drawn from a private, fixed-seed RandStream (rather than the
-% global one, or JIDT's own internal Java RNG via its NOISE_LEVEL_TO_ADD
-% property, which cannot be seeded in the bundled JIDT build), so that the
-% same input always yields the same jittered output, and nothing about the
-% caller's global random state is consumed or disturbed.
+% The noise comes from the portable generator BF_Random with a fixed seed (rather
+% than the global stream, or JIDT's own internal Java RNG via its NOISE_LEVEL_TO_ADD
+% property, which cannot be seeded in the bundled JIDT build), so that the same
+% input always yields the same jittered output in any MATLAB release and in Python,
+% and nothing about the caller's global random state is consumed or disturbed.
+% (A deterministic low-discrepancy sequence in place of random noise was tried and
+% rejected: its regular lattice structure biased the Kraskov estimates of tied
+% series, which random noise does not.)
 %
 %---INPUTS:
 % y, the input vector (or matrix; the repeat test and noise scale use all elements)
-% seed, [opt, default 0] seed for the private stream (use different seeds for
+% seed, [opt, default 0] seed for the BF_Random stream (use different seeds for
 %       different variables that will be jittered and then compared to one another)
 %
 %---OUTPUTS:
@@ -60,8 +63,7 @@ end
 uniqueFrac = numel(unique(y(:))) / numel(y);
 sigma = std(y(:));
 if uniqueFrac < 0.9 && sigma > 0
-    rs = RandStream('mt19937ar', 'Seed', seed); % private stream: reproducible, leaves the global stream alone
-    y = y + 1e-10 * sigma * randn(rs, size(y));
+    y = y + 1e-10 * sigma * reshape(BF_Random(numel(y), seed, 'normal'), size(y));
 end
 
 end

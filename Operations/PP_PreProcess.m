@@ -17,7 +17,8 @@ function [yp, best] = PP_PreProcess(y, chooseBest, order, beatThis, doSpectral, 
 %
 % doSpectral, whether to include spectral processing
 %
-% randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
+% randomSeed, the seed of the random normal numbers of the Gaussian rank map 'rmgd' (see
+%       BF_RandomSeed; portable generator BF_Random)
 %
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
@@ -126,10 +127,8 @@ yp.p2_40 = SUB_rempt(y, 2, 40);
 %% Rank map onto Gaussian distribution
 % ------------------------------------------------------------------------------
 
-% Control the random seed (for reproducibility):
-BF_ResetSeed(randomSeed);
-
-x = sort(randn(N, 1), 'ascend'); % generate N samples from a Normal distribution
+% N samples from a Normal distribution (reproducible: portable generator BF_Random)
+x = sort(BF_Random(N, BF_RandomSeed(randomSeed), 'normal'), 'ascend');
 % could use mapping through linspace, but then a choice of the most
 % extreme... I think it's statistically better to do this...? It makes it a
 % stochastic algorithm, though...

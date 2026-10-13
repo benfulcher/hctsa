@@ -24,9 +24,9 @@ function out = SY_VarRatioTest(y, periods, IIDs)
 % For a single test:
 % pValue, stat, ratio: the p-value, test statistic, and variance ratio
 % For multiple periods/IIDs:
-% maxpValue, minpValue, meanpValue: the maximum, minimum, and mean p-value
 % periodmaxpValue, periodminpValue: the period of the test with the largest and
-%       smallest p-value
+%       smallest p-value (found from the absolute test statistic, which orders the
+%       tests exactly as the p-value does but, unlike it, does not saturate at 0)
 % IIDperiodmaxpValue, IIDperiodminpValue: the IID setting of the test with the
 %       largest and smallest p-value
 % meanstat, maxstat, minstat: the mean, maximum, and minimum test statistic
@@ -98,12 +98,13 @@ if length(h) == 1
 
 else
 	% Return statistics on multiple outputs for multiple periods/IIDs
-	out.maxpValue = max(pValue);
-	out.minpValue = min(pValue);
-	out.meanpValue = mean(pValue);
-
-	imaxp = find(pValue == max(pValue), 1, 'first');
-	iminp = find(pValue == min(pValue), 1, 'first');
+	%
+	% The tests with the largest and smallest p-value are found from the absolute
+	% test statistic: the (two-sided) p-value is a decreasing function of |stat|, but
+	% is exactly 0 (so tied) for strong departures from a random walk, where its
+	% extremes would be decided by the floor of double precision.
+	[~, imaxp] = min(abs(stat)); % largest p-value
+	[~, iminp] = max(abs(stat)); % smallest p-value
 	out.periodmaxpValue = periods(imaxp);
 	out.periodminpValue = periods(iminp);
 	out.IIDperiodmaxpValue = IIDs(imaxp);

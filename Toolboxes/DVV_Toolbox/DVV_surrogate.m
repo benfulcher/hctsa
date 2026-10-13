@@ -34,6 +34,10 @@ function Xs = DVV_surrogate(X, Ns)
 % Validated against Bonn EEG and Empirical1000: with the RNG seed matched,
 % reproduces the pre-fix algorithm's own output almost exactly (r>=0.986
 % across all 15 downstream NL_DVV output fields).
+% (3) The spectrum-matched series s is now real(ifft(...)) in the real-valued branch:
+%     ifft of the conjugate-symmetric spectrum has ~1e-16 imaginary parts, and sort() of
+%     a complex vector ranks by magnitude (not by value), which rank-ordered the surrogate
+%     by |s| instead of s.
 % The complex-valued branch is untouched (unused by hctsa, unvalidated).
 %
 %   A Delay Vector Variance (DVV) toolbox for MATLAB
@@ -113,7 +117,10 @@ if (isreal(X))
 
             % Amplitude spectrum matching
             ang_r_prev = angle(fft(r_prev));
-            s = ifft(X_amp .* exp(ang_r_prev.*sqrt(-1)));
+            % (ifft of the conjugate-symmetric spectrum is real up to rounding error (~1e-16
+            % imaginary parts); take the real part, since sort on a complex vector would
+            % rank by magnitude rather than by value)
+            s = real(ifft(X_amp .* exp(ang_r_prev.*sqrt(-1))));
 
             % Rank ordering in order to scale to original signal distribution
             [s_sort, Ind] = sort(s);

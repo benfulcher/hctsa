@@ -1,30 +1,39 @@
 function p = HT_IndependenceTests(y, theTest)
-% HT_IndependenceTests     p-value of a hypothesis test of serial independence.
+% HT_IndependenceTests     Statistic or p-value of a test of serial independence.
 %
 % These tests ask whether the temporal ordering of the time series carries
 % structure: the null hypothesis is that successive values are independent (no
-% serial dependence). Unlike the tests in HT_MarginalTests, the p-value
+% serial dependence). Unlike the tests in HT_MarginalTests, the result
 % depends on the order of the measurements, and can change if the series is
 % reordered.
 %
-% Tests are implemented as functions in Matlab's Statistics Toolbox
-% (except the Ljung-Box Q-test, which uses the Econometrics Toolbox).
+% The runs test is returned as its z-statistic (computed here in closed form), and
+% the other tests as p-values from Matlab's Statistics Toolbox (except the
+% Ljung-Box Q-test, which uses the Econometrics Toolbox).
 %
 % ---INPUTS:
 % y, the input time series
 %
 % theTest, the hypothesis test to perform (and the null hypothesis that it tests):
-%           (i) 'runstest': runs test for randomness, the values occur in random
+%           (i) 'runsz': runs test for randomness, the values occur in random
 %                       order (assessed from the number of runs of values above and
-%                       below a cutoff, using the Matlab default cutoff, the median)
-%           (ii) 'lbq': Ljung-Box Q-test for residual autocorrelation, the series
+%                       below the median); returns the signed z-statistic of the
+%                       number of runs (BF_RunsZ): negative for fewer runs than
+%                       expected (positive serial dependence), positive for more
+%                       (alternation). Approximately standard normal under the
+%                       null hypothesis
+%           (ii) 'runstest': the p-value of the same hypothesis from Matlab's
+%                       runstest, which uses the mean as cutoff (not registered:
+%                       the p-value of strongly structured series underflows to 0)
+%           (iii) 'lbq': Ljung-Box Q-test for residual autocorrelation, the series
 %                       has no autocorrelation (all autocorrelations are zero,
 %                       jointly over the lags considered by Matlab's default)
 %
 % ---OUTPUTS:
-% p, a scalar: the p-value of the specified test: the probability, under the null hypothesis
-% above, of a test statistic at least as extreme as that observed. Small values
-% are evidence against the null hypothesis (i.e., evidence of serial dependence).
+% p, a scalar: for 'runsz', the z-statistic described above; otherwise the p-value of
+% the specified test: the probability, under the null hypothesis above, of a test
+% statistic at least as extreme as that observed. Small values are evidence
+% against the null hypothesis (i.e., evidence of serial dependence).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -56,6 +65,9 @@ function p = HT_IndependenceTests(y, theTest)
 % ------------------------------------------------------------------------------
 
 switch theTest
+	case 'runsz'
+		p = BF_RunsZ(y);
+
 	case 'runstest' % Statistics Toolbox
 		[~, p] = runstest(y);
 

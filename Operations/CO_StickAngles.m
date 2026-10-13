@@ -19,11 +19,13 @@ function out = CO_StickAngles(y)
 % mean_p, median_p, mean_n, median_n, mean, median, std, the mean, median and
 %       standard deviation of the angles (for the positive set, negative set, or
 %       all angles),
-% pnsumabsdiff, the summed absolute difference between smoothed density estimates
-%       of the positive and negative angles,
+% pnsumabsdiff, the summed absolute difference between the histograms (the proportion
+%       of angles in each of 20 bins spanning -pi/2 to pi/2) of the positive and
+%       negative angles (0 if identical, 2 if they share no bin),
 % symks_p, symks_n, the asymmetry about zero of the distribution of the positive or
-%       negative set's angles (summed absolute difference between its smoothed
-%       density and its mirror image),
+%       negative set's angles: half the summed absolute difference between its
+%       histogram (as above) and its mirror image (0 if symmetric, 1 if all angles
+%       are in bins whose mirror image is empty),
 % ratmean_p, ratmean_n, the mean of the positive angles divided by the mean of the
 %       negative angles within the positive or negative set,
 % statav2_p_m, statav2_p_s, statav3_p_m, statav3_p_s, statav4_p_m, statav4_p_s,
@@ -110,8 +112,8 @@ if doPlot
 	% A few options of what to plot:
 	hold off; plot(angles{1}, '.k'); hold on
 	plot(angles{2}, '.r'); hold off;
-	[yp, xp] = ksdensity(angles{1});
-	[yn, xn] = ksdensity(angles{2});
+	[yp, xp] = BF_KSDensity(angles{1});
+	[yn, xn] = BF_KSDensity(angles{2});
 	plot(xp, yp, 'r'); hold on; plot(xn, yn, 'b');
 	histogram(angles{1}, 50);
 end
@@ -135,12 +137,14 @@ out.median = median(allAngles);
 % ------------------------------------------------------------------------------
 %% Difference between positive and negative angles
 % ------------------------------------------------------------------------------
-% Return difference in densities
-ksx = linspace(min(allAngles), max(allAngles), 200);
+% Angles lie in (-pi/2, pi/2), so histograms with fixed bins over that support need
+% no smoothing parameter and are bounded (a kernel density would depend on the
+% bandwidth, which collapses when the angles are tied)
+binEdges = BF_HistEdges(allAngles, 20, [-pi / 2, pi / 2]);
 if ~isempty(angles{1}) && ~isempty(angles{2})
-	ksy1 = ksdensity(angles{1}, ksx); % spans the range of full extent (of both positive and negative angles)
-	ksy2 = ksdensity(angles{2}, ksx); % spans the range of full extent (of both positive and negative angles)
-	out.pnsumabsdiff = sum(abs(ksy1 - ksy2));
+	px1 = histcounts(angles{1}, binEdges, 'Normalization', 'probability');
+	px2 = histcounts(angles{2}, binEdges, 'Normalization', 'probability');
+	out.pnsumabsdiff = sum(abs(px1 - px2));
 else
 	out.pnsumabsdiff = NaN;
 end
@@ -149,11 +153,11 @@ end
 %% How symmetric is the distribution of angles?
 % ------------------------------------------------------------------------------
 % on raw outputs
-% difference between ksdensities of positive and negative portions
+% difference between the histogram of the positive (negative) set and its mirror image
+% about zero (the bins are symmetric about zero):
 if ~isempty(angles{1});
-	maxdev = max(abs(angles{1}));
-	ksy1 = ksdensity(angles{1}, linspace(-maxdev, maxdev, 201));
-	out.symks_p = sum(abs(ksy1(1:100) - fliplr(ksy1(102:end))));
+	px1 = histcounts(angles{1}, binEdges, 'Normalization', 'probability');
+	out.symks_p = 0.5 * sum(abs(px1 - fliplr(px1)));
 	out.ratmean_p = mean(angles{1}(angles{1} > 0)) / mean(angles{1}(angles{1} < 0));
 else
 	out.symks_p = NaN;
@@ -161,9 +165,8 @@ else
 end
 
 if ~isempty(angles{2})
-	maxdev = max(abs(angles{2}));
-	ksy2 = ksdensity(angles{2}, linspace(-maxdev, maxdev, 201));
-	out.symks_n = sum(abs(ksy2(1:100) - fliplr(ksy2(102:end))));
+	px2 = histcounts(angles{2}, binEdges, 'Normalization', 'probability');
+	out.symks_n = 0.5 * sum(abs(px2 - fliplr(px2)));
 	out.ratmean_n = mean(angles{2}(angles{2} > 0)) / mean(angles{2}(angles{2} < 0));
 else
 	out.symks_n = NaN;

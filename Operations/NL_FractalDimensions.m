@@ -33,8 +33,9 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % y, column vector of time series data
 % kmin, minimum number of neighbours for each reference point
 % kmax, maximum number of neighbours for each reference point
-% Nref, number of randomly-chosen reference points (-1: use all points; a
-%       number between 0 and 1: that proportion of the embedded points)
+% Nref, number of reference points, spread evenly over the embedded series (a
+%       deterministic low-discrepancy subset; -1: use all points; a number between
+%       0 and 1: that proportion of the embedded points)
 % gstart, starting value for moments
 % gend, end value for moments
 % past [opt], Theiler window of samples to exclude before and after each
@@ -49,12 +50,8 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %              of the Kraskov automutual information and the 'ac1e' delay; see
 %              BF_GetTau); m is a number of dimensions or 'fnn' (chosen by false
 %              nearest neighbors). Default: {'ac','fnn'}
-% randomSeed [opt], whether (and how) to reset the random seed, using
-%             BF_ResetSeed, before choosing reference points (relevant
-%             whenever Nref ~= -1, since that involves a random subsample of
-%             points). Defaults to 'default' (a fixed seed) so this operation
-%             is reproducible by default rather than genuinely stochastic
-%             run-to-run.
+% randomSeed [opt], not used by the choice of reference points, which is deterministic;
+%             passed on to the embedding (BF_Embed). Defaults to 'default'.
 %
 % ---OUTPUTS:
 % rangeDq, maxDq, meanDq: range, maximum and mean of D across the moments
@@ -116,7 +113,7 @@ if nargin < 3 || isempty(kmax)
 	fprintf(1, 'Using default maximum number of neighbours, kmax = %u\n', kmax);
 end
 
-% (3) Number of randomly-chosen reference points, Nref
+% (3) Number of reference points, Nref
 if nargin < 4 || isempty(Nref)
 	Nref = 0.2; % default:  20% of the time series length
 	fprintf(1, 'Using default number of reference points: Nref = %f\n', Nref);
@@ -158,7 +155,7 @@ if nargin < 9 || isempty(embedParams)
 	fprintf(1, 'Using default embedding parameters of autocorrelation for tau and cao method for m\n');
 end
 
-% (9) Random seed, for reproducibility of the random reference-point subsample
+% (9) Random seed (for the embedding)
 if nargin < 10 || isempty(randomSeed)
 	randomSeed = 'default';
 end
@@ -188,8 +185,8 @@ end
 if Nref == -1 || Nref >= N_embed
 	refIdx = 1:N_embed;
 else
-	BF_ResetSeed(randomSeed); % for reproducibility of this random subsample
-	refIdx = randperm(N_embed, Nref);
+	refIdx = BF_SpreadPerm(N_embed); % (deterministic; the first Nref points are spread evenly over the series)
+	refIdx = refIdx(1:Nref)';
 end
 R = length(refIdx);
 

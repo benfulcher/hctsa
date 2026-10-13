@@ -50,7 +50,7 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % hcgdist, rangecgdist, pzeroscgdist, the entropy, range and proportion of zeros of the
 %      profile after summing it into 20 equal bins of lags (as a distribution over bins)
 % maxhisthist, phisthistmin, hhisthist, the maximum, the first (lowest-value) bin
-%      probability, and the entropy of the histogram of profile values (square-root bins)
+%      probability, and the entropy of the histogram of profile values (ceil(sqrt(n)) equal-width bins, BF_HistEdges)
 %
 % ---REFERENCES:
 % Marwan et al., Phys. Rep. 438, 237 (2007) (recurrence quantification analysis).
@@ -256,7 +256,8 @@ out.pzeroscgdist = sum(cglav == 0) / numBins;
 % ------------------------------------------------------------------------------
 %% Get distribution of distribution of return times
 % ------------------------------------------------------------------------------
-[nhist, binEdges] = histcounts(Trett, 'BinMethod', 'sqrt', 'Normalization', 'probability');
+binEdges = BF_HistEdges(Trett, 'sqrt'); % ceil(sqrt(n)) equal-width bins spanning the values
+nhist = histcounts(Trett, binEdges, 'Normalization', 'probability');
 if doPlot
 	binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
 	figure('color', 'w');
