@@ -252,6 +252,62 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyTrue(isnan(BF_GetTau(y,'mi')));
         end
 
+        function test_BF_GetTau_MIRobustToTinyPerturbation(testCase)
+            % 'mi' uses tie-aware ranks with a fixed jitter, so a perturbation far
+            % below the quantization step of a quantized series leaves the ranks,
+            % and hence the delay, unchanged.
+            T = 30;
+            rng(27);
+            y = filter(1, [1, -2*0.95*cos(2*pi/T), 0.95^2], randn(2000,1));
+            y = zscore(round(4*zscore(y)));
+            yPert = y + 1e-8*BF_Random(numel(y), 1, 'normal');
+            tau = BF_GetTau(y,'mi');
+            testCase.verifyGreaterThan(tau, 1);
+            testCase.verifyEqual(BF_GetTau(yPert,'mi'), tau);
+        end
+
+        %-------------------------------------------------------------
+        % CP_WaveletVarChg
+        %-------------------------------------------------------------
+        function test_CP_WaveletVarChg_StationaryNoiseMostlyZero(testCase)
+            % The number of change points is calibrated to be 0 for about 95% of
+            % stationary series.
+            numChanges = zeros(10,1);
+            for k = 1:10
+                rng(100 + k);
+                numChanges(k) = CP_WaveletVarChg(zscore(randn(1000,1)),'db3',2,10,0.01);
+            end
+            testCase.verifyLessThanOrEqual(sum(numChanges > 0), 2);
+        end
+
+        function test_CP_WaveletVarChg_DetectsVarianceChange(testCase)
+            % A threefold change in standard deviation half way through
+            rng(31);
+            y = randn(2000,1);
+            y(1001:end) = 3*y(1001:end);
+            testCase.verifyGreaterThanOrEqual(CP_WaveletVarChg(zscore(y),'db3',2,10,0.01), 1);
+        end
+
+        %-------------------------------------------------------------
+        % NL_EmbedCluster
+        %-------------------------------------------------------------
+        function test_NL_EmbedCluster_SeparationStatistics(testCase)
+            % sep_pp is about 2/pi for a Gaussian cloud and near 1 for two
+            % well-separated states; both separation statistics increase.
+            rng(32);
+            yNoise = zscore(randn(2000,1));
+            state = mod(cumsum(rand(2000,1) < 0.01), 2);
+            ySwitch = zscore(6*state + randn(2000,1));
+            outNoise = NL_EmbedCluster(yNoise, 1, 2, 4, 'full');
+            outSwitch = NL_EmbedCluster(ySwitch, 1, 2, 4, 'full');
+            testCase.verifyEqual(fieldnames(outNoise), {'bestK'; 'bicgain'; 'sep_mahal'; 'sep_pp'});
+            testCase.verifyGreaterThan(outNoise.sep_pp, 0.55);
+            testCase.verifyLessThan(outNoise.sep_pp, 0.75);
+            testCase.verifyGreaterThan(outSwitch.sep_pp, 0.9);
+            testCase.verifyGreaterThan(outSwitch.sep_mahal, outNoise.sep_mahal);
+            testCase.verifyGreaterThan(outSwitch.bicgain, 0);
+        end
+
         function test_BF_PreProcess_DecimateAC1e(testCase)
             % Keeps every tau-th sample, with tau from BF_GetTau(y,'ac1e').
             rng(25);
@@ -876,16 +932,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % A clean periodic orbit traces a loop in delay-embedding space,
             % which should show up as one strongly persistent H1 topological
             % feature; noise and chaotic (non-orbit-forming) dynamics
-            % shouldn't. Verified directly during development: with the
-            % default tau='mi' embedding, a clean sine wave gives
-            % maxPersistenceH1 ~0.55, versus ~0.01-0.06 for white noise /
-            % noisy sine / a chaotic logistic map -- an order of magnitude
-            % apart.
+            % shouldn't. With the default tau='mi' embedding, a clean sine
+            % wave gives maxPersistenceH1 ~0.8, versus ~0.01-0.06 for white
+            % noise / noisy sine / a chaotic logistic map -- an order of
+            % magnitude apart. (The period is not a whole number of samples:
+            % a sine with an integer period takes only a few distinct values,
+            % whose automutual information is flat across lags, so the 'mi'
+            % delay is arbitrary there.)
             rng(41);
             N = 500;
             t = (1:N)';
 
-            outSine = NL_PersistentHomology(sin(2*pi*t/20));
+            outSine = NL_PersistentHomology(sin(2*pi*t/20.3));
             outNoise = NL_PersistentHomology(randn(N,1));
             testCase.verifyGreaterThan(outSine.maxPersistenceH1, 5*outNoise.maxPersistenceH1, ...
                 'The periodic orbit''s loop persistence should be far larger than noise''s.');
