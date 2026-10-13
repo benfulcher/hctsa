@@ -252,6 +252,20 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyTrue(isnan(BF_GetTau(y,'mi')));
         end
 
+        function test_BF_GetTau_MIRobustToTinyPerturbation(testCase)
+            % 'mi' uses tie-aware ranks with a fixed jitter, so a perturbation far
+            % below the quantization step of a quantized series leaves the ranks,
+            % and hence the delay, unchanged.
+            T = 30;
+            rng(27);
+            y = filter(1, [1, -2*0.95*cos(2*pi/T), 0.95^2], randn(2000,1));
+            y = zscore(round(4*zscore(y)));
+            yPert = y + 1e-8*BF_Random(numel(y), 1, 'normal');
+            tau = BF_GetTau(y,'mi');
+            testCase.verifyGreaterThan(tau, 1);
+            testCase.verifyEqual(BF_GetTau(yPert,'mi'), tau);
+        end
+
         function test_BF_PreProcess_DecimateAC1e(testCase)
             % Keeps every tau-th sample, with tau from BF_GetTau(y,'ac1e').
             rng(25);
