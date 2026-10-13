@@ -18,7 +18,8 @@ function out = CO_AutoCorr(y, tau, whatMethod)
 % ---OUTPUTS:
 % out, the autocorrelation at the given time lag (one value per lag in
 %       tau; the full function from lag 0 if tau is empty). Lags that are negative or
-%       longer than the series give NaN for 'Fourier'.
+%       longer than the series give NaN for 'Fourier', as do all lags of a constant
+%       series.
 %
 % ---NOTES:
 % Specifying whatMethod = 'TimeDomain' can tolerate NaN values in the time series.
@@ -126,13 +127,20 @@ switch whatMethod
 		end
 
 		if ~foundInCache
-			nFFT = 2^(nextpow2(N) + 1);
-			F = fft(y - mean(y), nFFT);
-			F = F .* conj(F);
-			acf = ifft(F); % Wiener–Khinchin
-			acf = acf ./ acf(1); % Normalize
-			acf = real(acf);
-			acf = acf(1:N);
+			if max(y) == min(y)
+				% A constant series has no autocorrelation (0/0). (Its mean can differ
+				% from the values by rounding, which would otherwise leave a spurious
+				% (N - k)/N.)
+				acf = NaN(N, 1);
+			else
+				nFFT = 2^(nextpow2(N) + 1);
+				F = fft(y - mean(y), nFFT);
+				F = F .* conj(F);
+				acf = ifft(F); % Wiener–Khinchin
+				acf = acf ./ acf(1); % Normalize
+				acf = real(acf);
+				acf = acf(1:N);
+			end
 
 			% Remember this series' ACF (simple FIFO eviction once full):
 			cacheY{end + 1} = y;
