@@ -3,8 +3,7 @@ function out = MF_CompareAR(y, orders, testHow)
 %
 % Fits autoregressive (AR) models of a range of orders, and compares the loss of each
 % (the mean squared one-step prediction error, see NOTES) when the model fitted to
-% a training segment is applied to a test segment. Uses functions from MATLAB's System
-% Identification Toolbox: iddata, arxstruc and selstruc. Statistics are taken over the
+% a training segment is applied to a test segment. Statistics are taken over the
 % loss as a function of model order, v.
 %
 % ---INPUTS:
@@ -33,27 +32,30 @@ function out = MF_CompareAR(y, orders, testHow)
 %       is below 10% of its maximum (NaN if none)
 % whereen4, the first position in the list of orders from which it is below 1e-4
 %       (NaN if none)
-% best_n, the order with the smallest loss (selstruc with criterion 0)
-% aic_n, the order that minimizes Akaike's Information Criterion
-% bestaic, the minimum value of Akaike's Information Criterion over orders
+% best_n, the order with the smallest loss
+% aic_n, the order that minimizes Akaike's Information Criterion,
+%       log(loss*(1 + 2*order/n)) with n the number of test points scored
+% bestaic, the minimum value of that criterion over orders
 %
 % ---NOTES:
-% The loss is the first row of arxstruc's output: the sum of squared one-step
-% prediction errors on the test segment, divided by the length of the test segment
-% (checked against a least-squares fit by hand, to machine precision). The first
-% max(orders) + 1 points of the training and test segments are excluded from the fit
-% and from the sum, so that every order is scored on the same points, but the sum is
-% still divided by the full test length. The loss is therefore the mean squared
-% error scaled by about 1 - (max(orders) + 1)/(test length) (e.g. 0.99 for orders
-% 1:10 and 1000 test points), the same for every order.
+% For each order p, an AR(p) model without a constant is fitted by least squares to the
+% training segment and scored on the test segment. All orders are fitted to and scored
+% on the same points: the first max(orders) points of each segment are excluded (they
+% lack a full set of max(orders) past values). The loss is the mean squared one-step
+% prediction error over the n scored test points.
 %
 % With testHow = 'all' the models are tested on the data they were trained on, so the
 % loss measures in-sample fit: it cannot rise with the model order, and features such
 % as minv, propgain1min and where01max mostly describe how fast the fit improves with
 % order. Use a training fraction (e.g. 0.5) for a genuine out-of-sample comparison.
 %
+% best_n and aic_n (AIC(p) = log(max(v(p), floor)*(1 + 2p/n))) are chosen from the
+% losses floored at 1e-10 times the mean square of the test segment, so that orders
+% whose loss is at the level of rounding error (an exactly predictable series) tie and
+% the lowest of them is chosen; bestaic is the minimum of that criterion.
+%
 % If the series is too short for the highest order (the training segment must have more
-% than 2*max(orders) + 1 points, and the test segment more than max(orders) + 1), the
+% than 2*max(orders) points, and the test segment more than max(orders)), the
 % highest-order models interpolate the training data and the loss is at machine precision;
 % NaN is returned for every output.
 
@@ -86,19 +88,13 @@ function out = MF_CompareAR(y, orders, testHow)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-% ------------------------------------------------------------------------------
-%% Check that a System Identification Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox');
-
 % Preliminaries
 doPlot = false; % set to true to plot outputs
 N = length(y); % length of time series, N
 
 %% Check Inputs
 % (1) Time series, y
-% Convert y to time series object
-y = iddata(y, [], 1);
+y = y(:);
 
 % (2) Model orders:
 if nargin < 2 || isempty(orders)
@@ -139,24 +135,40 @@ end
 
 % The loss is only meaningful if the highest-order model is identifiable from the training
 % segment (more points fitted than parameters) and the test segment has points to score.
-% Otherwise arxstruc returns a perfect fit (loss at machine precision, eps) for the high
-% orders, or for all of them, and the statistics are an artifact: the output is then NaN.
+% Otherwise the highest orders interpolate the training data (loss at machine precision)
+% and the statistics are an artifact: the output is then NaN.
 maxOrder = max(orders(:));
-nScoredTrain = size(yTrain, 1) - maxOrder - 1; % points fitted (the first maxOrder + 1 are excluded)
-nScoredTest = size(yTest, 1) - maxOrder - 1;
+nScoredTrain = length(yTrain) - maxOrder; % points fitted (the first maxOrder are excluded)
+nScoredTest = length(yTest) - maxOrder;
 if nScoredTrain <= maxOrder || nScoredTest < 1
 	out = NaN; % series too short for this range of orders
 	return
 end
 
-V = arxstruc(yTrain, yTest, orders);
+% Least-squares AR fits (targets from maxOrder + 1) scored on the test segment
+numOrders = length(orders);
+v = zeros(1, numOrders);
+for k = 1:numOrders
+	p = orders(k);
+	tTrain = (maxOrder + 1:length(yTrain))';
+	Xtrain = zeros(length(tTrain), p);
+	tTest = (maxOrder + 1:length(yTest))';
+	Xtest = zeros(length(tTest), p);
+	for j = 1:p
+		Xtrain(:, j) = yTrain(tTrain - j);
+		Xtest(:, j) = yTest(tTest - j);
+	end
+	phi = BF_Pinv(Xtrain) * yTrain(tTrain);
+	err = yTest(tTest) - Xtest * phi;
+	v(k) = mean(err.^2);
+end
+nTest = nScoredTest;
 
 % ------------------------------------------------------------------------------
 %% Output
 % ------------------------------------------------------------------------------
 % Statistics on V, which contains loss functions at each order (normalized sum of
 % squared prediction errors)
-v = V(1, 1:end - 1); % the loss function vector over the range of orders
 
 out.maxv = max(v);
 out.minv = min(v);
@@ -200,22 +212,15 @@ if doPlot
 end
 
 % ------------------------------------------------------------------------------
-%% Use selstruc function to obtain 'best' order measures
+%% 'Best' orders by loss and by AIC
 % ------------------------------------------------------------------------------
-% Get specific 'best' measures
-[nn, vmod0] = selstruc(V, 0); % minimizes squared prediction errors
-out.best_n = nn;
-
-[nn, vmodaic] = selstruc(V, 'aic'); % minimize Akaike's Information Criterion (AIC)
-out.aic_n = nn; % optimum model order minimizing AIC in the range given
-% vmodaic is [2 x numOrders]: row 1 holds the AIC of each candidate model, row 2 the orders.
-% (Note: the previous form, vmodaic(nn == min(nn)), indexed with a logical scalar and so
-%  always returned element 1 -- the AIC of the *first* model, not the best one.)
-out.bestaic = min(vmodaic(1, :));
-
-% Using minimum description length is basically the same as using AIC:
-% [nn, vmodmdl] = selstruc(V,'mdl'); % minimize Rissanen's Minimum Description Length (MDL)
-% out.mdl_n = nn; % optimal model order minimizing MDL in the range given
-% out.bestmdl = vmodmdl(nn == min(nn));
+% Losses floored at the level of rounding error, so that exactly predictable series tie
+floorV = 1e-10 * mean(yTest.^2);
+vFloored = max(v, floorV);
+[~, ix] = min(vFloored);
+out.best_n = orders(ix);
+aic = log(vFloored .* (1 + 2 * orders' / nTest));
+[out.bestaic, ix] = min(aic);
+out.aic_n = orders(ix);
 
 end
