@@ -1546,9 +1546,13 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(outS.lavi_freqAtMax, 2*pi*f0, 'RelTol', 0.2, ...
                 'The most rhythmic frequency should be the oscillation frequency.');
 
-            % The amplitude-weighted spectrum (LC) should tell the same story:
-            testCase.verifyGreaterThan(outS.lc_max, outB.lc_max + 0.15, ...
-                'Lagged coherence should also separate sustained from bursty.');
+            % Relative to the spectral null (what the power spectrum alone
+            % implies), the sustained oscillation is more rhythmic and the
+            % bursts are less so, at the dominant frequency:
+            testCase.verifyGreaterThan(outS.ex_atPeakPower, 0.03, ...
+                'A sustained oscillation should be more rhythmic than its spectrum implies.');
+            testCase.verifyLessThan(outB.ex_atPeakPower, 0, ...
+                'Bursts should be less rhythmic than their spectrum implies.');
 
             % Smoothed band count: one dominant rhythmic band for the
             % sustained oscillation, and no more bands than the (jaggier)
@@ -1570,6 +1574,38 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'White noise should show no strongly prominent rhythmic band.');
             testCase.verifyLessThanOrEqual(out.lavi_numPeaks, 2, ...
                 'Smoothing should leave white noise with essentially no rhythmic bands.');
+        end
+
+        function test_SP_Rhythmicity_WhiteNoiseFloorMatchesTheory(testCase)
+            % With an m-cycle wavelet and a lag of tau cycles, the wavelet
+            % output of white noise has lag correlation exp(-pi^2 tau^2/m^2)
+            % (0.411 for m = 5, tau = 1.5), so its LAVI converges to
+            % [E(rho^2) - (1-rho^2) K(rho^2)]/rho = 0.330 at every frequency.
+            rng(5);
+            rho = exp(-pi^2*1.5^2/5^2);
+            [K, E] = ellipke(rho^2);
+            floorTheory = (E - (1-rho^2)*K)/rho;
+            out = SP_Rhythmicity(randn(20000,1));
+            testCase.verifyEqual(out.lavi_median, floorTheory, 'AbsTol', 0.015, ...
+                'The white-noise LAVI floor should match the theoretical value.');
+            testCase.verifyEqual(out.ex_mean, 0, 'AbsTol', 0.01, ...
+                'White noise should sit on its spectral null.');
+        end
+
+        function test_SP_Rhythmicity_LinearGaussianSitsOnNull(testCase)
+            % The spectral null is what a Gaussian process with the same
+            % spectrum gives, so a linear Gaussian process with a strong
+            % spectral peak (a stochastic AR(2) oscillator) has high raw
+            % LAVI at its peak but no excess there.
+            rng(17);
+            y = filter(1, [1 -1.8*cos(2*pi*0.1) 0.81], randn(8000,1));
+            out = SP_Rhythmicity(y);
+            testCase.verifyGreaterThan(out.lavi_atPeakPower, out.lavi_median + 0.1, ...
+                'The spectral peak should raise the raw LAVI.');
+            testCase.verifyEqual(out.ex_atPeakPower, 0, 'AbsTol', 0.03, ...
+                'A linear Gaussian process should show no excess rhythmicity at its peak.');
+            testCase.verifyEqual(out.ex_mean, 0, 'AbsTol', 0.015, ...
+                'A linear Gaussian process should sit on its spectral null overall.');
         end
 
         function test_SP_Rhythmicity_SmoothingReducesSpuriousBandCount(testCase)

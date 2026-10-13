@@ -1,4 +1,4 @@
-function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin)
+function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycles)
 % SP_Rhythmicity   Phase-persistence ("rhythmicity") spectrum of a time series.
 %
 % A power spectrum cannot tell a sustained oscillation apart from a train of
@@ -6,42 +6,50 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin)
 % operation instead asks, at each frequency, how *predictable* the phase is a
 % fixed number of cycles into the future -- high for an oscillation that keeps
 % ticking (sustained/"rhythmic"), low for one that only flickers on
-% intermittently (transient/"bursty") even when the two have identical power.
+% intermittently (transient/"bursty").
 %
-% Method (adapted from G. Karvat et al., "Universal rhythmic architecture
-% uncovers two modes of neural dynamics", Nature Communications (2026), the
-% Lagged-Angle Vector Index / LAVI; itself a single-lag refinement of the
-% lagged-coherence measure of J. Fransen et al., NeuroImage 111, 158 (2015)):
+% Method (the Lagged-Angle Vector Index, LAVI, of G. Karvat et al., "Universal
+% rhythmic architecture uncovers two modes of neural dynamics", Nature
+% Communications 17 (2026); a phase-only refinement of the lagged coherence of
+% J. Fransen et al., NeuroImage 111, 158 (2015)):
 %
 % (1) Complex Morlet wavelet transform at each analysis frequency f (m cycles
-%     per wavelet), giving instantaneous phase phi(t,f) and amplitude a(t,f).
-%     No Wavelet Toolbox dependency -- the transform is an FFT-domain
-%     convolution here.
-% (2) At each f, compare the wavelet coefficient at time t with the one at
-%     t+L, where the lag L = round(tau/f) samples is a fixed tau cycles. Two
-%     rhythmicity spectra are built from this comparison:
-%       * LAVI(f) = | mean_t exp( 1i*[ phi(t,f) - phi(t+L,f) ] ) |, the mean
-%         resultant length of the phase-difference distribution (pure phase,
-%         in [0,1]); 1 => phase advances by a perfectly repeatable amount
-%         every tau cycles (a stable rhythm), ~0 => the phase L samples ahead
-%         is unpredictable.
-%       * LC(f), the amplitude-weighted version: the classic lagged-coherence
-%         estimator | sum_t x(t,f) conj(x(t+L,f)) | / sqrt( sum|x(t,f)|^2 *
-%         sum|x(t+L,f)|^2 ), also in [0,1]. LAVI weights every timepoint
-%         equally; LC lets high-amplitude timepoints dominate, so the two
-%         diverge when rhythmic and arrhythmic epochs differ in power.
-% (3) Each spectrum has a stable baseline (its own median across frequency),
-%     so peaks above baseline flag sustained bands and troughs below it flag
-%     transient/bursty bands. Both are summarized below with the same battery
-%     of statistics (prefixes lavi_ and lc_), so the phase-only and
-%     amplitude-weighted views can be compared directly.
+%     per wavelet), giving the instantaneous phase phi(t,f). No Wavelet
+%     Toolbox dependency -- the transform is an FFT-domain convolution here.
+% (2) LAVI(f) = | mean_t exp( 1i*[ phi(t,f) - phi(t+L,f) ] ) |, with the lag
+%     L = round(tau/f) samples a fixed tau cycles: the mean resultant length
+%     of the lagged phase differences, in [0,1]. 1 => the phase advances by a
+%     perfectly repeatable amount every tau cycles (a stable rhythm).
+% (3) The spectral null. Part of LAVI is set by the power spectrum alone: a
+%     Gaussian process with the same spectrum (equivalently, the mean over
+%     phase-randomized surrogates) has a lag-L correlation rho(f) of its
+%     wavelet output, computed here exactly from the series' own periodogram,
+%     and its expected LAVI is then the mean resultant length of the phase
+%     difference of a circular complex Gaussian pair,
+%         LAVI0(f) = (pi/4) rho 2F1(1/2,1/2;2;rho^2)
+%                  = [E(rho^2) - (1 - rho^2) K(rho^2)] / rho,
+%     with K and E the complete elliptic integrals. This includes a floor that
+%     the method has even for white noise: the wavelet overlaps itself across
+%     the lag, so rho = exp(-pi^2 tau^2/m^2) (0.41 for the defaults) and LAVI0 =
+%     0.33. The excess, LAVI(f) - LAVI0(f), is the part of the rhythmicity
+%     spectrum that the power spectrum does not determine: about zero for any
+%     linear Gaussian process, positive for a sustained oscillation, negative
+%     for bursts. This takes the place of the surrogate "noise ribbon" of
+%     Karvat et al., deterministically and at the cost of one extra FFT per
+%     frequency.
+%
+% (The amplitude-weighted lagged coherence, |sum_t x(t,f) conj(x(t+L,f))| /
+% sqrt(sum|x(t,f)|^2 sum|x(t+L,f)|^2), is deliberately not reported: up to edge
+% effects it is the normalized lag-L autocorrelation of the wavelet output, a
+% fixed function of the periodogram -- exactly rho(f) above.)
 %
 % Following hctsa convention the series is treated as evenly sampled with unit
 % spacing: frequencies are in cycles per sample (0 to 0.5) and reported
-% angular frequencies are 2*pi*f, as in SP_Summaries. A given frequency is
-% skipped (NaN, excluded from the summaries) when the series is too short to
-% support its wavelet plus lag; the operation returns a single NaN if fewer
-% than 10 frequencies survive.
+% angular frequencies are 2*pi*f, as in SP_Summaries. LAVI is biased upward
+% when few cycles are available, so a frequency is used only when the samples
+% free of edge effects span at least minCycles cycles; the operation returns a
+% single NaN if fewer than 10 frequencies qualify (for the defaults, N of about
+% 250 or less).
 %
 % cf. SP_SpectralTimeFreq, whose spectral kurtosis also targets bursty
 % frequency bands but via the variance of band power across a spectrogram's
@@ -52,12 +60,12 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin)
 % ---INPUTS:
 % y, the input time series
 %
-% m, width of the Morlet wavelet in cycles (default: 5). Larger m = sharper
-%    frequency resolution, blunter time resolution.
+% m, width of the Morlet wavelet in cycles (default: 5, as in Karvat et al.).
+%    Larger m = sharper frequency resolution, blunter time resolution.
 %
 % tau, the lag at which phase persistence is measured, in cycles (default:
-%      1.5). Per Karvat et al. the relative shape of the rhythmicity spectrum
-%      is nearly independent of this choice, so a single lag suffices.
+%      1.5, as in Karvat et al., who report that the relative shape of the
+%      rhythmicity spectrum is nearly independent of this choice).
 %
 % nFreq, number of log-spaced analysis frequencies (default: 40).
 %
@@ -68,44 +76,40 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin)
 %
 % smoothWin, width (in frequency bins, forced odd) of the moving-average
 %       (Daniell) spectral window applied before counting rhythmic bands
-%       (default: 5; 1 disables it). Welch-style segment averaging is not
-%       used -- for typical hctsa series lengths each segment would fall
-%       below the wavelet-plus-lag length -- so estimate variance is instead
-%       reduced by this frequency-domain smoother, and only the band count
-%       (lavi_numPeaks / lc_numPeaks) is taken from the smoothed spectrum;
-%       every other statistic uses the raw spectrum.
+%       (default: 5; 1 disables it). Only the band count (lavi_numPeaks) is
+%       taken from the smoothed spectrum; every other statistic uses the raw
+%       spectrum.
 %
-% ---OUTPUTS: the same statistics are returned for the phase-only spectrum
-% LAVI(f) (prefix lavi_) and the amplitude-weighted spectrum LC(f) (prefix
-% lc_), computed over the frequencies that survive the length check:
-% *_mean, *_median, *_std, *_iqr, *_max, *_min, *_range, basic level and
-%       spread of rhythmicity across frequency (*_median is the baseline).
-% *_maxOnMedian, peak rhythmicity relative to the baseline -- how far the
-%       most sustained band stands out.
-% *_freqAtMax, *_freqAtMin, angular frequency (2*pi*f) of the most sustained
-%       and most transient band.
-% *_meanAboveMedian, mean amount by which above-baseline frequencies exceed
-%       the baseline (average prominence of sustained bands).
-% *_fracSustained, *_fracTransient, fraction of frequencies sitting more than
-%       2 scaled-MAD above / below the baseline -- a data-driven stand-in for
-%       the surrogate "noise ribbon" of the original method (which needs many
-%       minutes of data and is not attempted here).
-% *_areaSustained, area of the spectrum above its baseline, integrated over
-%       log-frequency and normalized by the log-frequency span: the total
-%       "sustained mass" of the spectrum.
-% *_slope, ordinary-least-squares slope of the spectrum against log10(f):
-%       does rhythmicity concentrate at low or high frequencies?
-% *_ac1, lag-1 autocorrelation of the spectrum across frequency: a smooth
-%       profile (broad bands) vs. a jagged one.
-% *_numPeaks, number of local maxima of the smoothed spectrum that exceed the
-%       baseline by at least one scaled-MAD (number of distinct rhythmic
-%       bands).
-% *_corrPower, Spearman correlation between the spectrum and log10 of the
-%       mean wavelet power at f: near 0 => rhythmicity carries information
-%       beyond the power spectrum; near 1 => it largely tracks power.
-% lc_corrLAVI, Spearman correlation between the LC and LAVI spectra: near 1 =>
-%       amplitude weighting barely changes the picture; lower => rhythmic and
-%       arrhythmic epochs differ systematically in power.
+% minCycles, the minimum number of cycles of f that the edge-free samples must
+%       span for f to be used (default: 40, which keeps the upward bias of
+%       LAVI to about 0.02).
+%
+% ---OUTPUTS: computed over the frequencies that qualify.
+% The rhythmicity spectrum LAVI(f):
+% lavi_mean, lavi_median, lavi_std, lavi_iqr, lavi_max, lavi_min, lavi_range,
+%       basic level and spread of rhythmicity across frequency (lavi_median is
+%       the baseline).
+% lavi_maxOnMedian, peak rhythmicity relative to the baseline.
+% lavi_freqAtMax, lavi_freqAtMin, angular frequency (2*pi*f) of the most
+%       sustained and most transient band.
+% lavi_meanAboveMedian, mean amount by which above-baseline frequencies exceed
+%       the baseline.
+% lavi_fracSustained, lavi_fracTransient, fraction of frequencies more than 2
+%       scaled-MAD above / below the baseline.
+% lavi_areaSustained, area of the spectrum above its baseline, integrated over
+%       log-frequency and normalized by the log-frequency span.
+% lavi_ac1, lag-1 autocorrelation of the spectrum across frequency.
+% lavi_numPeaks, number of local maxima of the smoothed spectrum that exceed
+%       the baseline by at least one scaled-MAD (distinct rhythmic bands).
+% lavi_atPeakPower, LAVI at the frequency with the most wavelet power.
+% The excess over the spectral null, LAVI(f) - LAVI0(f):
+% ex_mean, ex_std, ex_max, ex_min, level and spread of the rhythmicity that the
+%       power spectrum does not account for.
+% ex_freqAtMax, ex_freqAtMin, angular frequency of the largest and smallest
+%       excess.
+% ex_atPeakPower, the excess at the frequency with the most wavelet power: is
+%       the dominant oscillation more sustained (> 0) or more bursty (< 0) than
+%       its spectrum implies?
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -160,6 +164,9 @@ end
 if nargin < 7 || isempty(smoothWin)
     smoothWin = 5;
 end
+if nargin < 8 || isempty(minCycles)
+    minCycles = 40;
+end
 smoothWin = max(1, round(smoothWin));
 if mod(smoothWin, 2) == 0
     smoothWin = smoothWin + 1; % keep the moving average centered
@@ -181,20 +188,22 @@ y = y - mean(y);
 freqs = logspace(log10(fLow), log10(fHigh), nFreq)';
 
 % ------------------------------------------------------------------------------
-%% Complex Morlet wavelet transform (FFT-domain convolution; no toolbox)
+%% At each frequency: wavelet transform (FFT-domain convolution; no toolbox),
+%% LAVI, and its spectral null
 % ------------------------------------------------------------------------------
-% Per frequency we also record the wavelet half-length, so the lagged step
-% below can discard the edge-contaminated samples.
-X = complex(nan(N, nFreq));
-halfLen = nan(nFreq, 1);
+lavi = nan(nFreq, 1);
+laviNull = nan(nFreq, 1);
+power = nan(nFreq, 1);
 for fi = 1:nFreq
     f = freqs(fi);
     sigmaT = m / (2*pi*f); % Gaussian envelope s.d. in samples
     h = ceil(3.5 * sigmaT); % wavelet support: +/- 3.5 s.d.
-    if 2*h + 1 >= N
-        continue % wavelet longer than the series: leave this frequency NaN
+    L = max(1, round(tau / f)); % lag in samples
+    lo = h + 1; % samples lo:hi (and lo+L:hi+L) are free of edge effects
+    hi = N - h - L;
+    if (hi - lo + 1) * f < minCycles
+        continue % too few cycles for an unbiased estimate: leave this frequency NaN
     end
-    halfLen(fi) = h;
 
     t = (-h:h)';
     psi = exp(2i*pi*f*t) .* exp(-t.^2 / (2*sigmaT^2));
@@ -203,151 +212,117 @@ for fi = 1:nFreq
 
     % Linear convolution via FFT, then take the length-N 'same' segment:
     Lconv = N + numel(psi) - 1;
-    c = ifft(fft(y, Lconv) .* fft(psi, Lconv));
-    X(:, fi) = c(h+1 : h+N);
-end
+    Y = fft(y, Lconv);
+    W = fft(psi, Lconv);
+    c = ifft(Y .* W);
+    X = c(h+1 : h+N);
 
-% ------------------------------------------------------------------------------
-%% Lagged phase persistence at each frequency: LAVI (phase-only) and LC
-%% (amplitude-weighted lagged coherence)
-% ------------------------------------------------------------------------------
-lavi = nan(nFreq, 1);
-lc = nan(nFreq, 1);
-logPower = nan(nFreq, 1);
-for fi = 1:nFreq
-    if isnan(halfLen(fi))
-        continue
-    end
-    f = freqs(fi);
-    h = halfLen(fi);
-    L = max(1, round(tau / f)); % lag in samples
-
-    lo = h + 1;
-    hi = N - h - L;
-    minValid = max(64, 3*L); % enough independent lag spans for a stable estimate
-    if hi - lo + 1 < minValid
-        continue
-    end
-
-    x1 = X(lo:hi, fi);
-    x2 = X(lo+L:hi+L, fi);
-
+    x1 = X(lo:hi);
+    x2 = X(lo+L:hi+L);
     lavi(fi) = abs(mean(exp(1i * (angle(x1) - angle(x2)))));
-    lc(fi) = abs(sum(x1 .* conj(x2))) / sqrt(sum(abs(x1).^2) * sum(abs(x2).^2));
-    logPower(fi) = log10(mean(abs(x1).^2));
+    power(fi) = mean(abs(x1).^2);
+
+    % Spectral null: the lag-L autocorrelation of the wavelet output implied by
+    % the (zero-padded, so linear) periodogram, and the LAVI it implies for a
+    % Gaussian process:
+    r = ifft(abs(Y).^2 .* abs(W).^2);
+    laviNull(fi) = SUB_laviFromRho(abs(r(L+1)) / real(r(1)));
 end
 
 % ------------------------------------------------------------------------------
-%% Summarize each rhythmicity spectrum
+%% Summarize
 % ------------------------------------------------------------------------------
-valid = isfinite(lavi) & isfinite(lc);
+valid = isfinite(lavi) & isfinite(laviNull);
 if sum(valid) < 10
     out = NaN; return % too little of the spectrum is estimable to summarize
 end
 
 f = freqs(valid);
 logf = log10(f);
-P = logPower(valid);
-Lavi = lavi(valid);
-Lc = lc(valid);
+S = lavi(valid);
+ex = S - laviNull(valid);
+[~, iPow] = max(power(valid));
 
-out = SUB_summarize(Lavi, f, logf, P, smoothWin, 'lavi_');
-out = SUB_mergeStruct(out, SUB_summarize(Lc, f, logf, P, smoothWin, 'lc_'));
+% The rhythmicity spectrum LAVI(f):
+med = median(S);
+scaledMAD = 1.4826 * median(abs(S - med));
 
-% How much does the amplitude weighting change the rhythmicity spectrum?
-if std(Lavi) < eps || std(Lc) < eps
-    out.lc_corrLAVI = NaN;
+out.lavi_mean = mean(S);
+out.lavi_median = med;
+out.lavi_std = std(S);
+out.lavi_iqr = iqr(S);
+out.lavi_max = max(S);
+out.lavi_min = min(S);
+out.lavi_range = max(S) - min(S);
+out.lavi_maxOnMedian = max(S) / med;
+
+[~, iMax] = max(S);
+[~, iMin] = min(S);
+out.lavi_freqAtMax = 2*pi*f(iMax);
+out.lavi_freqAtMin = 2*pi*f(iMin);
+
+above = S(S > med) - med;
+if isempty(above)
+    out.lavi_meanAboveMedian = 0;
 else
-    out.lc_corrLAVI = SUB_spearman(Lc, Lavi);
+    out.lavi_meanAboveMedian = mean(above);
 end
 
+if scaledMAD < eps
+    out.lavi_fracSustained = 0;
+    out.lavi_fracTransient = 0;
+else
+    out.lavi_fracSustained = mean(S > med + 2*scaledMAD);
+    out.lavi_fracTransient = mean(S < med - 2*scaledMAD);
 end
 
-% ==============================================================================
-function s = SUB_summarize(S, f, logf, P, smoothWin, prefix)
-    % Battery of summary statistics for one rhythmicity spectrum S(f).
-    med = median(S);
-    scaledMAD = 1.4826 * median(abs(S - med));
+% Area above baseline, integrated over log-frequency, span-normalized:
+out.lavi_areaSustained = trapz(logf, max(S - med, 0)) / (logf(end) - logf(1));
 
-    s.([prefix 'mean']) = mean(S);
-    s.([prefix 'median']) = med;
-    s.([prefix 'std']) = std(S);
-    s.([prefix 'iqr']) = iqr(S);
-    s.([prefix 'max']) = max(S);
-    s.([prefix 'min']) = min(S);
-    s.([prefix 'range']) = max(S) - min(S);
-    s.([prefix 'maxOnMedian']) = max(S) / med;
+% Lag-1 autocorrelation of the spectrum across frequency:
+S0 = S - mean(S);
+denom = sum(S0.^2);
+if denom < eps
+    out.lavi_ac1 = NaN;
+else
+    out.lavi_ac1 = sum(S0(1:end-1) .* S0(2:end)) / denom;
+end
 
-    [~, iMax] = max(S);
-    [~, iMin] = min(S);
-    s.([prefix 'freqAtMax']) = 2*pi*f(iMax);
-    s.([prefix 'freqAtMin']) = 2*pi*f(iMin);
+% Number of rhythmic bands: local maxima of the smoothed spectrum that clear
+% the baseline by at least one scaled-MAD (a Daniell/moving-average window
+% stands in for Welch-style segment averaging, which the series is too short
+% to afford here).
+Ssm = movmean(S, smoothWin);
+dS = diff(Ssm);
+isPeak = [false; (dS(1:end-1) > 0) & (dS(2:end) <= 0); false];
+out.lavi_numPeaks = sum(isPeak & (Ssm > med + scaledMAD));
 
-    above = S(S > med) - med;
-    if isempty(above)
-        s.([prefix 'meanAboveMedian']) = 0;
-    else
-        s.([prefix 'meanAboveMedian']) = mean(above);
-    end
+out.lavi_atPeakPower = S(iPow);
 
-    if scaledMAD < eps
-        s.([prefix 'fracSustained']) = 0;
-        s.([prefix 'fracTransient']) = 0;
-    else
-        s.([prefix 'fracSustained']) = mean(S > med + 2*scaledMAD);
-        s.([prefix 'fracTransient']) = mean(S < med - 2*scaledMAD);
-    end
+% The excess over the spectral null:
+out.ex_mean = mean(ex);
+out.ex_std = std(ex);
+out.ex_max = max(ex);
+out.ex_min = min(ex);
+[~, iMax] = max(ex);
+[~, iMin] = min(ex);
+out.ex_freqAtMax = 2*pi*f(iMax);
+out.ex_freqAtMin = 2*pi*f(iMin);
+out.ex_atPeakPower = ex(iPow);
 
-    % Area above baseline, integrated over log-frequency, span-normalized:
-    s.([prefix 'areaSustained']) = trapz(logf, max(S - med, 0)) / (logf(end) - logf(1));
-
-    % OLS slope of the spectrum against log-frequency:
-    pf = polyfit(logf, S, 1);
-    s.([prefix 'slope']) = pf(1);
-
-    % Lag-1 autocorrelation of the spectrum across frequency:
-    S0 = S - mean(S);
-    denom = sum(S0.^2);
-    if denom < eps
-        s.([prefix 'ac1']) = NaN;
-    else
-        s.([prefix 'ac1']) = sum(S0(1:end-1) .* S0(2:end)) / denom;
-    end
-
-    % Number of rhythmic bands: local maxima of the smoothed spectrum that
-    % clear the baseline by at least one scaled-MAD (a Daniell/moving-average
-    % window stands in for Welch-style segment averaging, which the series is
-    % too short to afford here).
-    Ssm = movmean(S, smoothWin);
-    thresh = med + max(scaledMAD, 0);
-    dS = diff(Ssm);
-    isPeak = [false; (dS(1:end-1) > 0) & (dS(2:end) <= 0); false];
-    s.([prefix 'numPeaks']) = sum(isPeak & (Ssm > thresh));
-
-    % Does rhythmicity just track power?
-    if std(P) < eps
-        s.([prefix 'corrPower']) = NaN;
-    else
-        s.([prefix 'corrPower']) = SUB_spearman(S, P);
-    end
 end
 
 % ==============================================================================
-function a = SUB_mergeStruct(a, b)
-    fn = fieldnames(b);
-    for i = 1:numel(fn)
-        a.(fn{i}) = b.(fn{i});
+function g = SUB_laviFromRho(rho)
+    % Mean resultant length of the phase difference of a circular complex
+    % Gaussian pair with correlation magnitude rho:
+    % (pi/4) rho 2F1(1/2,1/2;2;rho^2) = [E(rho^2) - (1 - rho^2) K(rho^2)] / rho.
+    if rho < 1e-6
+        g = pi * rho / 4; % small-rho limit (avoids 0/0)
+    elseif rho >= 1
+        g = 1;
+    else
+        [K, E] = ellipke(rho^2);
+        g = (E - (1 - rho^2) * K) / rho;
     end
-end
-
-% ==============================================================================
-function r = SUB_spearman(a, b)
-    % Spearman rank correlation without a Statistics Toolbox dependency
-    % (continuous wavelet quantities: ties are measure-zero, ignored).
-    n = numel(a);
-    [~, oa] = sort(a); ra = zeros(n,1); ra(oa) = 1:n;
-    [~, ob] = sort(b); rb = zeros(n,1); rb(ob) = 1:n;
-    ra = ra - mean(ra);
-    rb = rb - mean(rb);
-    r = sum(ra .* rb) / sqrt(sum(ra.^2) * sum(rb.^2));
 end
