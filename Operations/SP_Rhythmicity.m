@@ -173,7 +173,7 @@ if fLow <= 0 || fLow >= fHigh
 end
 
 N = length(y);
-if std(y) < eps
+if max(y) == min(y)
     out = NaN; return % constant series carries no phase information
 end
 y = y - mean(y);
