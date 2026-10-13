@@ -19,6 +19,9 @@ It extracts thousands of time-series features from a collection of univariate ti
 
 __Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applications__ of _hctsa_ :nerd_face:
 
+> :snake: **Python:** active development is transitioning to [_pyhctsa_](https://github.com/DynamicsAndNeuralSystems/pyhctsa), a native Python implementation of the _hctsa_ feature library.
+> _hctsa_ remains maintained and will continue to be developed, but most new development will happen in _pyhctsa_.
+
 ## Installation and quick start :arrow_down:
 
 For users _familiar with git_ (recommended), please [make a fork](https://help.github.com/articles/fork-a-repo/) of the repo and then clone it to your local machine.
@@ -91,3 +94,5 @@ Note that, in the case that some of them are unavailable, _hctsa_ can still be u
 - Zoubin Ghahramani's [Hidden Markov Model (HMM) code](http://mlg.eng.cam.ac.uk/zoubin/software.html) (MIT license).
 - Danny Kaplan's Code for embedding statistics (GPL license).
 - Ulrich Bauer's [_ripser_ persistent homology tool, version 1.2.1](https://github.com/Ripser/ripser) (MIT license).
+- Tolga Esat Özkurt's [nonlinearity measure code](https://github.com/tolgaozkurt/nonlinearity_measure) ([Özkurt et al., 2020](https://doi.org/10.1016/j.neuroimage.2020.117356)) (unlicensed).
+- The [_catch22_ feature set](https://github.com/DynamicsAndNeuralSystems/catch22), included as a git submodule (GPL license).
