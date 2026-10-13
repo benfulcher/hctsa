@@ -1,16 +1,19 @@
 function out = MF_ExpSmoothing(x, ntrain, alpha)
 % MF_ExpSmoothing   Exponential smoothing as a one-step forecaster: the best smoothing parameter and its residuals.
 %
-% Fits an exponential smoothing model to the time series, in which the forecast is an
-% exponentially weighted average of past values, S(t) = alpha*X(t) + (1-alpha)*S(t-1),
-% and alpha is the smoothing parameter. The best alpha is found by minimizing the
-% root-mean-square one-step prediction error over a training set (the first ntrain
-% samples): a coarse search over five values from 0.1 to 0.9, with a parabola fitted
-% to the three lowest errors, and then a finer search around its minimum. The chosen
-% alpha is then used to forecast each sample after the training set from the samples
-% before it, and the outputs report alpha and statistics of the residuals of these
-% held-out forecasts, from the shared residual summary MF_ResidualAnalysis (at its
-% 'full' level).
+% Fits a simple exponential smoothing model to the time series, in which the forecast
+% of X(t) is the level S(t-1), an exponentially weighted average of past values,
+% S(t) = alpha*X(t) + (1-alpha)*S(t-1), with the initial level the mean of the first
+% (up to) 10 samples; alpha is the smoothing parameter. The best alpha is the value in
+% [0.01, 1] that minimizes the root-mean-square one-step prediction error over a
+% training set (the first ntrain samples, all but the first forecast scored): the error
+% is evaluated on the grid 0.01, 0.02, ..., 1 and the best grid point g is refined by 40
+% golden-section steps on [max(0.01, g - 0.01), min(1, g + 0.01)]. A coarse search over
+% five values from 0.1 to 0.9, with a parabola fitted to the three lowest errors, is
+% also reported. The chosen alpha is then used to forecast each sample after the
+% training set from the samples before it, and the outputs report alpha and statistics
+% of the residuals of these held-out forecasts, from the shared residual summary
+% MF_ResidualAnalysis (at its 'full' level).
 %
 % ---INPUTS:
 % x, the input time series
@@ -26,7 +29,7 @@ function out = MF_ExpSmoothing(x, ntrain, alpha)
 % ---OUTPUTS (when alpha is 'best'; the residual statistics are those of the
 % held-out samples, after the first ntrain):
 % alphamin, the fitted smoothing parameter (between 0.01 and 1)
-% alphamin_1, the first estimate of it: the minimum of the parabola fitted in the
+% alphamin_1, the vertex of the parabola fitted to the three lowest errors of the
 %           coarse search (not bounded to the interval 0 to 1)
 % p1_1, the size of the quadratic coefficient of that parabola
 % cup_1, the sign of that coefficient (+1 if the parabola opens upward)
@@ -52,6 +55,10 @@ function out = MF_ExpSmoothing(x, ntrain, alpha)
 %
 % ---REFERENCES:
 % C. Chatfield, "The Analysis of Time Series", CRC Press LLC (2004).
+% R. G. Brown, "Smoothing, Forecasting and Prediction of Discrete Time Series",
+% Prentice-Hall (1963).
+% J. Kiefer, "Sequential minimax search for a maximum", Proc. Amer. Math. Soc. 4, 502
+% (1953) (golden-section search).
 %
 % ---NOTES:
 % The residuals are those of the one-step forecasts of the held-out samples only
@@ -136,99 +143,52 @@ end
 % Finding optimum parameter A [0,1] using RMSE
 
 if strcmp(alpha, 'best')
-	%% (*) Optimize alpha (*)
-	% optimize alpha over the training set xtrain. This is a choice to only use
-	% the first section of the time series. The length of the training set is
-	% set in the input
-	% optimize alpha based on the defined training set of time series values
-
-	% Training set xtrain
 	xtrain = x(1:ntrain);
-
-	% Do a descent: fit a quadratic to available points.
-	% (This replaces a dead 'bruteForce' alternative that was permanently disabled by a
-	%  hardcoded flag and could not have run as written -- it referenced an undefined
-	%  variable 'j' in 'rmses(j)', an undefined 'rmse_n', and called the interactive
-	%  'input()', which would have hung a batch job. This descent branch was always the
-	%  only code path actually exercised.)
-
-	% (1) use alpha = 0.01, 0.1, 0.5, 0.8
-	%         alphar = [0.1, 0.2, 0.5, 0.8, 0.9];
+	% Coarse search, reported through the parabola fitted to its three lowest errors:
 	alphar = linspace(0.1, 0.9, 5);
-	rmses = zeros(4, 1);
-
+	rmses = zeros(5, 1);
 	for k = 1:length(alphar)
-		a = alphar(k);
-
-		xf = SUB_fit_exp_smooth(xtrain, a);
-
-		% Issue forecasts
-		fore = xf(3:end);
-		orig = xtrain(3:end);
-		rmses(k) = sqrt(mean((fore - orig).^2)); % compute rmse
+		rmses(k) = SUB_rmse(xtrain, alphar(k));
 	end
-
-	% fit quadratic to set alpha
-	[sort_rmses, ix] = sort(rmses);
-	rkeep = ix(1:3); % fit on 3 points closest to minimum
+	if any(~isfinite(rmses))
+		out = NaN; return
+	end
+	[~, ix] = sort(rmses);
+	rkeep = ix(1:3); % fit on the 3 points closest to the minimum
 	p = polyfit(alphar(rkeep)', rmses(rkeep), 2);
-	aar = (0:0.005:1);
-	y = polyval(p, aar);
-	%         plot(aar,y,':k'); hold on;
-	%         plot(alphar,rmses,'or');
-	%         plot(alphar(rkeep),rmses(rkeep),'*m'); hold off
-	alphamin = -p(2) / (2 * p(1));
-	out.alphamin_1 = alphamin;
+	out.alphamin_1 = -p(2) / (2 * p(1));
 	out.p1_1 = abs(p(1)); % concavity
 	out.cup_1 = sign(p(1));
 
-	if p(1) < 0 % concave down -- it's looking at a maximum
-		% weird case
-		if y(1) < y(end);
-			alphamin = 0.01;
-		else
-			alphamin = 1;
-		end
-	else
-		% Search again around this
-		alphar = linspace(alphamin - 0.1, alphamin + 0.1, 5);
-		if any(alphar <= 0)
-			alphar = linspace(0.01, max(alphamin, 0) + 0.1, 5);
-		elseif any(alphar >= 1)
-			alphar = linspace(min(alphamin, 1) - 0.1, 1, 5);
-		end
-
-		for k = 1:length(alphar)
-			a = alphar(k);
-
-			xf = SUB_fit_exp_smooth(xtrain, a);
-
-			% Issue forecasts
-			fore = xf(3:end);
-			orig = xtrain(3:end);
-			rmses(k) = sqrt(mean((fore - orig).^2)); % compute rmse
-
-		end
-
-		% Fit quadratic to set alpha
-		p = polyfit(alphar', rmses, 2);
-		%             aar = 0:0.005:1;
-		%             y = polyval(p,aar);
-		%             plot(aar,y,':k'); hold on;
-		%             plot(alphar,rmses,'or'); hold off
-
-		if p(1) < 0
-			alphamin = alphar(rmses == min(rmses));
-			% This is quite bad -- the first step didn't find a local
-			% minimum...
-		else % minimum of quadratic fit
-			alphamin = -p(2) / (2 * p(1));
-			if alphamin > 1, alphamin = 1; end
-			if alphamin <= 0, alphamin = 0.01; end
-		end
-
+	% The best alpha: a grid of step 0.01, then golden-section refinement
+	grid = (1:100)' / 100;
+	gridErr = zeros(100, 1);
+	for k = 1:100
+		gridErr(k) = SUB_rmse(xtrain, grid(k));
 	end
-
+	[bestErr, ix] = min(gridErr);
+	g = grid(ix);
+	lo = max(0.01, g - 0.01); hi = min(1, g + 0.01);
+	ratio = (sqrt(5) - 1) / 2;
+	c = hi - ratio * (hi - lo); d = lo + ratio * (hi - lo);
+	fc = SUB_rmse(xtrain, c); fd = SUB_rmse(xtrain, d);
+	for k = 1:40
+		if fc <= fd
+			hi = d; d = c; fd = fc;
+			c = hi - ratio * (hi - lo);
+			fc = SUB_rmse(xtrain, c);
+		else
+			lo = c; c = d; fc = fd;
+			d = lo + ratio * (hi - lo);
+			fd = SUB_rmse(xtrain, d);
+		end
+	end
+	aRef = (lo + hi) / 2;
+	if SUB_rmse(xtrain, aRef) < bestErr
+		alphamin = aRef;
+	else
+		alphamin = g;
+	end
 	out.alphamin = alphamin;
 	alpha = alphamin;
 end
@@ -276,25 +236,17 @@ end
 
 % ------------------------------------------------------------------------------
 function xf = SUB_fit_exp_smooth(x, a)
-	% The forecast of x(ii+1) restarts the smoother at the start of the series, with
-	% initial value s(1) = mean(x(1:ii-1)), and runs s(jj) = a*x(jj) + (1-a)*s(jj-1)
-	% for jj = 2:ii. Unrolling the recursion, the forecast is
-	%   s(ii) = (1-a)^(ii-1)*mean(x(1:ii-1)) + sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj),
-	% where the sum is itself a one-pole filter of x(2:end), so all forecasts are
-	% found in O(N) rather than by restarting the loop at every ii.
+	% One-step forecasts: xf(t) = S(t-1), with S(0) the mean of the first (up to) 10 samples
 	x = x(:);
-	nx = length(x);
-	xf = zeros(nx, 1);
-	if nx < 3
-		return
-	end
-
-	ii = (2:nx - 1)';
-	runMean = cumsum(x(1:nx - 2)) ./ (1:nx - 2)'; % mean(x(1:ii-1))
-	ewma = filter(a, [1, -(1 - a)], [0; x(2:end)]); % sum_{jj=2}^{ii} a*(1-a)^(ii-jj)*x(jj)
-
-	% S(t) = Xf(t) is forecasted value for X(t+1)
-	xf(ii + 1) = (1 - a).^(ii - 1) .* runMean + ewma(ii);
+	level0 = mean(x(1:min(10, length(x))));
+	level = filter(a, [1, -(1 - a)], x, (1 - a) * level0);
+	xf = [level0; level(1:end-1)];
+end
+% ------------------------------------------------------------------------------
+function e = SUB_rmse(x, a)
+	% Root-mean-square one-step error, all but the first forecast
+	xf = SUB_fit_exp_smooth(x, a);
+	e = sqrt(mean((xf(2:end) - x(2:end)).^2));
 end
 
 end
