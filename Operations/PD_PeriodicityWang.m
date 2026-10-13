@@ -9,7 +9,7 @@ function out = PD_PeriodicityWang(y)
 %   (a) there is a trough before it,
 %   (b) the difference between the peak and the trough is at least a threshold,
 %   (c) the peak corresponds to positive correlation.
-% If no peak qualifies, the output is 1.
+% If no peak qualifies, the output is 0 (no periodicity at that threshold).
 %
 % The single threshold of 0.01 was considered in the original paper; this code uses a range
 % of thresholds: 0, 0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N), and 10/sqrt(N), where N is the
@@ -19,8 +19,9 @@ function out = PD_PeriodicityWang(y)
 % y, the input time series (should be z-scored; a warning is issued otherwise).
 %
 % ---OUTPUTS:
-% th1, th2, th3, th4, th5, th6, th7, the period (in samples) found with the thresholds 0,
-%       0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N) and 10/sqrt(N) respectively.
+% th0, th0_01, th0_1, th0_2, th1_sqrtN, th5_sqrtN, th10_sqrtN, the period (in samples)
+%       found with the thresholds 0, 0.01, 0.1, 0.2, 1/sqrt(N), 5/sqrt(N) and 10/sqrt(N)
+%       respectively (0 if no peak qualifies).
 %
 % ---REFERENCES:
 % Wang, Wirth & Wang, "Structure-based Statistical Features and Multivariate Time Series
@@ -79,6 +80,7 @@ end
 N = length(y); % length of the time series
 % The thresholds with which to count a peak:
 ths = [0, 0.01, 0.1, 0.2, 1 / sqrt(N), 5 / sqrt(N), 10 / sqrt(N)];
+thNames = {'th0', 'th0_01', 'th0_1', 'th0_2', 'th1_sqrtN', 'th5_sqrtN', 'th10_sqrtN'}; % output names
 numThresholds = length(ths); % the number of thresholds
 
 % -------------------------------------------------------------------------------
@@ -135,7 +137,7 @@ numPeaks = length(peaks);
 
 theFreqs = zeros(numThresholds, 1);
 for k = 1:numThresholds
-	theFreqs(k) = 1;
+	theFreqs(k) = 0; % no qualifying peak: no periodicity at this threshold
 	for i = 1:numPeaks % search through all peaks for one that meets the condition
 		ipeak = peaks(i); % acf lag at which there is a peak
 		thepeak = acf(ipeak); % acf at the peak
@@ -171,7 +173,7 @@ end
 % Convert vector into a structure for output
 % -------------------------------------------------------------------------------
 for i = 1:numThresholds
-	out.(sprintf('th%u', i)) = theFreqs(i);
+	out.(thNames{i}) = theFreqs(i);
 end
 
 end
