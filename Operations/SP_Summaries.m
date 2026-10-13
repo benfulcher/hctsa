@@ -67,9 +67,10 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % logac1, logac2, logtau for log(S)
 %
 % Cumulative power:
-% wmax_5, wmax_10, wmax_25, wmax_50, wmax_75, wmax_90, wmax_95, wmax_99: the
-% frequency below which 5%, 10%, ..., 99% of the power lies (wmax_50 is the
-% median frequency; it was previously named 'centroid')
+% wq_5, wq_10, wq_25, wq_50, wq_75, wq_90, wq_95, wq_99: frequency quantiles of the
+% power spectrum, wq_p being the (angular) frequency below which p% of the power lies.
+% wq_50 is the median frequency. (These were previously named wmax_p, and wq_50 was
+% named 'centroid'.)
 %
 % Power-weighted moments of frequency:
 % specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
@@ -542,17 +543,17 @@ out.logtau = CO_FirstCrossing(logS, 'ac', 0, 'continuous') * dw; % see tau's N-i
 % i.e. at a value proportional to the transform length).
 csS = cumsum(S) * dw;
 
-f_frac_w_max = @(f) w(find(csS >= csS(end) * f, 1, 'first'));
+f_quantile_w = @(f) w(find(csS >= csS(end) * f, 1, 'first'));
 
 % At what frequency is csS a fraction p of its maximum?
-out.wmax_5 = f_frac_w_max(0.05);
-out.wmax_10 = f_frac_w_max(0.1);
-out.wmax_25 = f_frac_w_max(0.25);
-out.wmax_50 = f_frac_w_max(0.5);
-out.wmax_75 = f_frac_w_max(0.75);
-out.wmax_90 = f_frac_w_max(0.9);
-out.wmax_95 = f_frac_w_max(0.95);
-out.wmax_99 = f_frac_w_max(0.99);
+out.wq_5 = f_quantile_w(0.05);
+out.wq_10 = f_quantile_w(0.1);
+out.wq_25 = f_quantile_w(0.25);
+out.wq_50 = f_quantile_w(0.5);
+out.wq_75 = f_quantile_w(0.75);
+out.wq_90 = f_quantile_w(0.9);
+out.wq_95 = f_quantile_w(0.95);
+out.wq_99 = f_quantile_w(0.99);
 
 % ------------------------------------------------------------------------------
 % Power-weighted moments of the frequency distribution
@@ -560,10 +561,9 @@ out.wmax_99 = f_frac_w_max(0.99);
 % Note these are a genuinely different family from both of the
 % frequency-summarizing families above and the moments of S computed
 % earlier, in a way the naming can obscure:
-%   - `wmax_50` above is the *median* frequency (where csS reaches 50%),
+%   - `wq_50` above is the *median* frequency (where csS reaches 50%),
 %     NOT the power-weighted mean frequency computed here. (It was
-%     previously named `centroid`, a misnomer; catch22 v1.0 uses
-%     SP_Summaries_fft_wmax_50.)
+%     previously named `centroid`, a misnomer.)
 %   - `mom3` (skewness of S) summarizes the distribution of power
 %     *values*, which is entirely order-agnostic in frequency: shuffle
 %     the spectrum bin-for-bin and mom3 is unchanged. It says nothing
@@ -571,10 +571,10 @@ out.wmax_99 = f_frac_w_max(0.99);
 % The moments below instead treat the (non-negative) spectrum as a
 % weighting over frequency and take moments of frequency itself -- the
 % standard spectral centroid/spread/skewness/kurtosis (cf. the MPEG-7
-% audio descriptors). Relative to the wmax_* quantiles, which describe
+% audio descriptors). Relative to the wq_* quantiles, which describe
 % the same frequency distribution non-parametrically, these weight the
 % tails much more heavily: a small amount of power far out in frequency
-% moves specSkew/specKurt substantially and wmax_90 not at all.
+% moves specSkew/specKurt substantially and wq_90 not at all.
 %
 % There is deliberately no log-domain companion here (unlike most of the
 % families above): S enters as a *weight*, not as a value being
@@ -582,9 +582,9 @@ out.wmax_99 = f_frac_w_max(0.99);
 % would produce meaningless (signed) 'weights'.
 %
 % On redundancy: checked on 1000 real series, the two low-order moments
-% are substantially re-descriptions of the wmax_* quantiles already
-% computed above -- specCentroid vs wmax_75 R^2 = 0.91 (and vs the
-% median frequency `wmax_50`, 0.88), specSpread vs the 10-90% width
+% are substantially re-descriptions of the wq_* quantiles already
+% computed above -- specCentroid vs wq_75 R^2 = 0.91 (and vs the
+% median frequency `wq_50`, 0.88), specSpread vs the 10-90% width
 % w10_90 R^2 = 0.92. That is unsurprising (a mean tracks a median, a
 % standard deviation tracks an inter-quantile width). They are kept and
 % registered anyway, deliberately: specCentroid and specSpread are the
