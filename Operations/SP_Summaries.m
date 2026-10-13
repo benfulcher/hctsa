@@ -81,7 +81,9 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 %       coefficients and goodness of a quadratic fit to the cumulative area under S
 %       as a function of w (fpoly2_sse is the integrated squared error)
 % fpolysat_a, fpolysat_b, fpolysat_r2, fpolysat_rmse: parameters and goodness of
-%       a*w^2/(b+w^2)
+%       the least-squares fit of a*w^2/(b+w^2), the global optimum over
+%       1e-6 <= b/max(w)^2 <= 100 (a curve that keeps rising like w^2 gives the
+%       largest b)
 %
 % Entropy, flatness and areas:
 % spect_shann_ent: differential Shannon entropy of the power distribution over
@@ -632,14 +634,15 @@ out.fpoly2_sse = gof.sse * dw; % integrated (not summed) squared error
 out.fpoly2_r2 = gof.rsquare;
 out.fpoly2_rmse = gof.rmse;
 
-% (ii) Fit polysat a*x^2/(b+x^2) (has zero derivative at zero, though)
-s = fitoptions('Method', 'NonlinearLeastSquares', 'StartPoint', [csS(end), 100]);
-f = fittype('a*x^2/(b+x^2)', 'independent', 'x', 'options', s); % set 'a' from maximum
-[c, gof] = fit(w', csS', f);
-out.fpolysat_a = c.a;
-out.fpolysat_b = c.b; % this is important
-out.fpolysat_r2 = gof.rsquare; % this is more important!
-out.fpolysat_rmse = gof.rmse;
+% (ii) Fit polysat a*x^2/(b+x^2) (has zero derivative at zero, though), by least squares:
+% the global optimum over 1e-6 <= b/max(w)^2 <= 100 (SUB_PolySatFit). a and b are only
+% separately determined when the curve bends over within the range of w; for a curve
+% that keeps rising like w^2 the best b is the upper limit (only a/b then matters).
+fSat = SUB_PolySatFit(w', csS');
+out.fpolysat_a = fSat.a;
+out.fpolysat_b = fSat.b; % this is important
+out.fpolysat_r2 = fSat.r2; % this is more important!
+out.fpolysat_rmse = fSat.rmse;
 
 % ------------------------------------------------------------------------------
 % Shannon spectral entropy
@@ -818,4 +821,48 @@ function out = giveMeRobustStats(xData, yData, textID, out, whichStats)
 	end
 end
 
+end
+
+% ------------------------------------------------------------------------------
+function f = SUB_PolySatFit(w, y)
+	% Global least-squares fit of y = a*w^2/(b + w^2) with b in [1e-6, 100]*max(w)^2. For a
+	% given b the best a is linear least squares in closed form, so only b is searched: on
+	% 200 log-spaced values, then refined by 40 golden-section steps in log(b) around the
+	% best of these. r2 = 1 - SSE/SST; rmse uses n - 2 degrees of freedom. NaN if y is
+	% constant.
+	w = w(:); y = y(:);
+	n = length(y);
+	if n < 3 || ~all(isfinite(y)) || ~(max(y) - min(y) > 1e-12 * max(abs(y)))
+		f = struct('a', NaN, 'b', NaN, 'r2', NaN, 'rmse', NaN);
+		return
+	end
+	w2 = w.^2;
+	scale = max(w2);
+	u = linspace(log(1e-6 * scale), log(1e2 * scale), 200);
+	[~, k] = min(SSEofLogB(u));
+	lo = u(max(k - 1, 1));
+	hi = u(min(k + 1, length(u)));
+	phi = (sqrt(5) - 1) / 2;
+	for i = 1:40 % golden-section search in log(b)
+		u1 = hi - phi*(hi - lo);
+		u2 = lo + phi*(hi - lo);
+		if SSEofLogB(u1) <= SSEofLogB(u2)
+			hi = u2;
+		else
+			lo = u1;
+		end
+	end
+	b = exp((lo + hi) / 2);
+	g = w2 ./ (b + w2);
+	a = (g' * y) / (g' * g);
+	SSE = sum((y - a * g).^2);
+	f.a = a;
+	f.b = b;
+	f.r2 = 1 - SSE / sum((y - mean(y)).^2);
+	f.rmse = sqrt(SSE / (n - 2));
+
+	function sse = SSEofLogB(lb)
+		G = w2 ./ (exp(lb) + w2); % each column is w^2/(b + w^2) for one b
+		sse = sum(y.^2) - (G' * y)'.^2 ./ sum(G.^2, 1);
+	end
 end
