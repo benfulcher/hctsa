@@ -115,10 +115,6 @@ addpath(fullfile(hctsaDir,'Toolboxes','Physionet'));
 fprintf(1,', Max Little''s steps_bumps toolkit')
 addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','steps_bumps_toolkit'));
 
-% Max Little's fastdfa code
-fprintf(1,', fastdfa')
-addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','fastdfa'));
-
 % Max Little's rpde code
 fprintf(1,', rpde')
 addpath(fullfile(hctsaDir,'Toolboxes','Max_Little','rpde'));

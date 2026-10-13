@@ -792,8 +792,6 @@ SB_TransitionMatrix(x_z,'updown',2,'ac')	SB_TransitionMatrix_ud2ac
 SB_TransitionMatrix(x_z,'updown',2,1)	SB_TransitionMatrix_ud21
 SB_TransitionPAlphabet(x_z,2:20,'ac1e')	SB_TransitionPAlphabet_20_ac1e
 SB_TransitionPAlphabet(x_z,2:40,1)	SB_TransitionPAlphabet_40_1
-SC_FastDFA(x_z)	    SC_FastDFA
-SC_FastDFA(zscore(BF_PreProcess(x_z,'decimate_ac1e')))	SC_FastDFA_dec
 SC_HiguchiFD(x_z,8)	SC_HiguchiFD_8
 SC_HiguchiFD(zscore(BF_PreProcess(x_z,'decimate_ac1e')),8)	SC_HiguchiFD_8_dec
 SC_FluctAnal(x_z,2,'dfa',50,0,[],true)	SC_FluctAnal_2_dfa_50_0_logi
