@@ -110,6 +110,11 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 % ex_atPeakPower, the excess at the frequency with the most wavelet power: is
 %       the dominant oscillation more sustained (> 0) or more bursty (< 0) than
 %       its spectrum implies?
+%
+% For a broadband series with no rhythm, the frequency locations (*_freqAtMax)
+% tend to fall at the lowest qualifying frequency, where a small residual
+% upward bias of LAVI (about 0.01-0.02 at minCycles = 40) remains; that
+% frequency depends on N.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
