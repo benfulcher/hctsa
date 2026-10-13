@@ -2,24 +2,24 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % NL_EmbedCluster   Whether the time-delay embedding of the series forms separate clusters of points.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA,
-% NL_EmbedKernelPCA) and fits Gaussian mixture models with a small grid of
-% component counts (1,...,kMax) to the resulting point cloud. A dynamical
-% process whose trajectory visits distinct regions of phase space (e.g.,
-% alternating between two attractor states, or a system with intermittent
-% bursts) leaves a multi-modal point cloud in the embedding; a process with a
-% single smooth (e.g., unimodal-stochastic or single-loop periodic) attractor
-% does not. This is a distinct signal from marginal-distribution
-% multi-modality (e.g. DN_ kurtosis/bimodality stats on the raw values), since
-% two states can overlap entirely in amplitude yet still separate cleanly once
-% lagged coordinates are added, and from regime-switching detected by
-% MF_hmm_Fit / MF_hmm_CompareNStates, which cluster points in raw-amplitude
-% (not lagged/embedded) space.
+% NL_EmbedKernelPCA) and asks whether the resulting point cloud is made of
+% distinct groups. A dynamical process whose trajectory visits distinct regions
+% of phase space (e.g., alternating between two attractor states, or a system
+% with intermittent bursts) leaves a multi-modal point cloud in the embedding; a
+% process with a single smooth (e.g., unimodal-stochastic or single-loop
+% periodic) attractor does not. This is a distinct signal from
+% marginal-distribution multi-modality (e.g., DN_ kurtosis/bimodality stats on
+% the raw values), since two states can overlap entirely in amplitude yet still
+% separate cleanly once lagged coordinates are added, and from regime-switching
+% detected by MF_hmm_Fit / MF_hmm_CompareNStates, which cluster points in
+% raw-amplitude (not lagged/embedded) space.
 %
-% Rather than reporting only the BIC-optimal number of components (a
-% discrete, model-selection-driven output that can be noisy/discontinuous
-% across similar time series), the main outputs are continuous separation
-% statistics from a *fixed* 2-component fit, alongside the (secondary)
-% BIC-optimal k for reference.
+% Two kinds of statistic are computed. bestK and bicgain come from Gaussian
+% mixture models with 1, ..., kMax components, and describe how much
+% non-Gaussian mixture structure the cloud has. sep_mahal and sep_pp measure the
+% separation of a two-group split of the cloud; both are always defined, even
+% when two groups are not favored over one, so they are small (but nonzero) for
+% a unimodal cloud and grow with the separation of genuine clusters.
 %
 % ---INPUTS:
 % y, the input time series
@@ -30,63 +30,68 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % m, the embedding dimension (default: 2)
 % kMax, the maximum number of Gaussian mixture components to consider when
 %       searching for the BIC-optimal component count (default: 4)
-% maxN, the maximum number of embedded points used to fit the mixture models.
-%       Defaults to 'full' (no cropping) -- measured cost is cheap and scales
-%       mildly with N, unlike hctsa's O(N^3)-type operations. Set to a number
-%       to reduce longer embeddings to their first maxN points instead (a
-%       warning is issued whenever that cropping actually happens, since
-%       separation estimates are still noisy at small N and keep sharpening
-%       with more -- it would be a memory/time cap, not a convergence point).
+% maxN, the maximum number of embedded points used. Defaults to 'full' (no
+%       cropping): the cost scales mildly with N. Set to a number to reduce
+%       longer embeddings to their first maxN points instead (a warning is
+%       issued whenever that cropping happens, since the separation estimates
+%       keep sharpening with more points: it is a memory/time cap, not a
+%       convergence point).
 %
 % ---OUTPUTS:
 % bestK, the BIC-optimal number of mixture components over 1:kMax
-% dBIC, the relative BIC improvement of the best fit over a single
-%       (unimodal) Gaussian fit, (BIC_1 - BIC_best)/|BIC_1|; 0 when bestK == 1
-%       (no clustering evidence)
-% sep_mahal, log1p-compressed Mahalanobis separation between the two
-%       component means of a fixed 2-component fit, using their pooled
-%       covariance (log-compressed to tame the heavy tail from
-%       near-singular covariance on near-deterministic embeddings; see NOTES)
-% sep_conf, mean posterior cluster-assignment confidence (mean of the larger
-%       of each point's two posterior probabilities) under the 2-component
-%       fit; ranges [0.5, 1], with 0.5 indicating fully ambiguous assignment
-% sep_silh, mean silhouette value of the hard (posterior-argmax) 2-cluster
-%       assignment
-% sep_weightbalance, ratio of the smaller to the larger mixture weight under
-%       the 2-component fit; 1 for balanced clusters, ->0 as one component
-%       comes to dominate (degenerating towards a unimodal fit)
+% bicgain, the BIC improvement of the best fit over a single Gaussian fit, per
+%       embedded point, (BIC_1 - BIC_best)/(2N) for N embedded points (the gain
+%       in maximized log-likelihood per point, less the penalty for the extra
+%       parameters); 0 when bestK == 1
+% sep_mahal, log1p of the Mahalanobis separation between the two component
+%       means of a 2-component Gaussian mixture fit, using their pooled
+%       covariance (log-compressed to tame the heavy tail from near-singular
+%       covariance on near-deterministic embeddings). The fit starts from
+%       deterministic hard splits of the points (see NOTES).
+% sep_pp, projection-pursuit two-means separation: the largest fraction of the
+%       variance of the whitened point cloud that lies between the two groups of
+%       an optimal two-group split along a direction, over a fixed grid of
+%       directions (see NOTES). About 2/pi (0.64) for Gaussian data, and 1 for
+%       two distinct point masses.
 %
 % ---NOTES:
-% Each mixture is fitted from 10 k-means++ starts (the best likelihood is kept; the generator is
-% seeded inside the function): a few starts leave the sep_* outputs dependent on which starts
-% were drawn.
-% The sep_* outputs are always computed from a fixed 2-component fit, so they
-% are not gated by whether that fit is actually favoured by BIC over a single
-% Gaussian: even a genuinely unimodal-but-elongated point cloud (e.g. AR(1)
-% noise) gets split into two "confident" halves with non-trivial sep_conf/
-% sep_mahal. Likewise, a curved-but-unimodal manifold (e.g. the ring traced
-% out by a periodic signal in a 2-d embedding) is poorly fit by any single
-% elliptical Gaussian and so also drives bestK/dBIC up, despite having no
-% distinct dynamical states in the sense this feature was designed to catch.
-% dBIC == 0 (bestK == 1) is a clean "no mixture structure at all" signal, but
-% dBIC > 0 does not by itself distinguish true multi-modality from curvature;
-% cross-reference against a periodicity/shape feature (e.g. SP_Summaries,
-% CO_Embed2_Shapes) when that distinction matters. Confirmed empirically on a
-% two-regime switching process (bestK=3-4, dBIC>1, sep_mahal~2.7, sep_silh~0.98)
-% vs. AR(1) noise and white noise (bestK=1, dBIC=0, sep_mahal~0.1-0.7) vs. a
-% clean sine wave (bestK=4, dBIC~0.4, sep_mahal~1.3 -- curvature, not
-% multi-modality).
+% The mixtures behind bestK and bicgain are fitted with full covariances,
+% k-means++ initialization (10 replicates, the best likelihood is kept; the
+% generator is seeded inside the function), at most 500 iterations, and a
+% covariance regularization of 1e-6 times the mean variance of the embedded
+% coordinates. On a unimodal cloud the 2-component likelihood has near-equal
+% optima (splits along different directions, or a concentric core and halo for
+% heavy tails), so statistics of which optimum a randomly started fit finds
+% depend on the random starts; the BIC values themselves do not.
 %
-% Redundancy-checked (r>=0.9 threshold) against MF_hmm_Fit, MF_hmm_CompareNStates,
-% CO_Embed2_Shapes and NL_EmbedKernelPCA on two collections of real-world series
-% (max|r|=0.79 on the first). On the second, the pre-log1p sep_mahal correlated
-% r=0.98 (Pearson) with MF_hmm_CompareNStates.chLLtrain -- but this was entirely
-% driven by two chaotic-map series (logistic, Ricker) whose near-noiseless
-% embeddings collapse onto a thin curve, producing near-singular pooled covariance
-% and raw Mahalanobis separations >2000; Spearman r was only 0.50, and trimming
-% the top 1% by |chLLtrain| dropped Pearson r to 0.21. The log1p compression
-% above (motivated independently, by the same degenerate cases) resolves this
-% apparent redundancy along with the numerical issue.
+% sep_pp: the embedded cloud is whitened (zero mean, identity covariance; the
+% coordinates are its principal components, each eigenvector signed so that its
+% largest-magnitude element is positive) and projected onto a fixed grid of
+% directions: 90 equally spaced angles in [0, pi) for m = 2; 300
+% Fibonacci-lattice points on the upper hemisphere for m = 3; the single axis
+% for m = 1; and 300 points of a generalized golden-ratio (low-discrepancy)
+% sequence mapped to the sphere for m > 3. For each direction the exact optimal
+% one-dimensional two-means split is found (scanning every cut point between
+% distinct sorted values), and its between-group sum of squares as a fraction
+% of the total is recorded; sep_pp is the maximum over directions.
+%
+% sep_mahal: the 2-component mixture is fitted by EM from the hard split at the
+% optimal one-dimensional two-means threshold along the first principal
+% component, and again from the split found for sep_pp. Each fit starts from
+% the two groups' proportions, means and regularized covariances, and iterates
+% until the mean log-likelihood per point changes by less than 1e-6 (at most
+% 500 iterations); the fit of higher likelihood is kept. If neither split can
+% start a fit (e.g., a group with no more than m points), splits at the median
+% of the same two projections are used, and then the 2-component fit of the
+% BIC search (if kMax >= 2). sep_mahal is NaN only if no 2-component fit is
+% possible.
+%
+% A curved-but-unimodal manifold (e.g., the ring traced out by a periodic
+% signal in a 2-d embedding) is poorly fit by any single elliptical Gaussian and
+% so also raises bestK and bicgain, despite having no distinct dynamical states;
+% bicgain == 0 (bestK == 1) is a clean "no mixture structure at all" signal.
+% bicgain measures non-Gaussian mixture structure in general (e.g., a skewed
+% marginal distribution also raises it), not separation specifically.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -133,10 +138,8 @@ if nargin < 4 || isempty(kMax)
 end
 
 if nargin < 5 || isempty(maxN)
-	% Defaults to no cropping: measured cost is cheap and scales mildly
-	% (0.66s at N=10000, 0.89s at N=20000 -- fitgmdist's per-iteration cost
-	% is O(N*d*k), no O(N^2) memory footprint), so cropping by default isn't
-	% warranted the way it is for e.g. NL_EmbedKernelPCA's O(N^3) eigendecomp.
+	% No cropping by default: fitgmdist's per-iteration cost is O(N*m*k), with no
+	% O(N^2) memory footprint (unlike, e.g., NL_EmbedKernelPCA)
 	maxN = 'full';
 end
 
@@ -213,8 +216,10 @@ end
 
 % Some replicates legitimately fail to converge within MaxIter (the best of
 % the remaining replicates is still used); this is expected often enough
-% across a large batch of time series that the warning is silenced here:
-warningState = warning('off', 'stats:gmdistribution:FailedToConvergeReps');
+% across a large batch of time series that the warnings are silenced here:
+warningState = warning;
+warning('off', 'stats:gmdistribution:FailedToConvergeReps');
+warning('off', 'stats:gmdistribution:FailedToConverge');
 for k = 2:kMax
 	try
 		gmModels{k} = fitgmdist(y_gmm, k, 'CovarianceType', 'full', ...
@@ -232,50 +237,213 @@ rng(rngState);
 [~, bestK] = min(BIC);
 out.bestK = bestK;
 if bestK == 1
-	out.dBIC = 0;
+	out.bicgain = 0;
 else
-	out.dBIC = (BIC(1) - BIC(bestK)) / abs(BIC(1));
+	out.bicgain = (BIC(1) - BIC(bestK)) / (2*N);
 end
+out.sep_mahal = NaN; % (set below)
 
 % ------------------------------------------------------------------------------
-% Continuous separation statistics from a fixed 2-component fit
+% Whitened cloud (zero mean, identity covariance) along its principal axes
 % ------------------------------------------------------------------------------
-if kMax < 2 || isempty(gmModels{2})
-	out.sep_mahal = NaN;
-	out.sep_conf = NaN;
-	out.sep_silh = NaN;
-	out.sep_weightbalance = NaN;
+centered = y_gmm - mean(y_gmm, 1);
+[evecs, evals] = eig(cov(centered));
+[evals, ix] = sort(diag(evals), 'ascend');
+evecs = evecs(:, ix);
+% (fix the arbitrary sign of each eigenvector: its largest-magnitude element is positive)
+[~, iMax] = max(abs(evecs), [], 1);
+evecs = evecs .* sign(evecs(sub2ind([m, m], iMax, 1:m)));
+evals = max(evals, 1e-12 * max(evals)); % (a rank-deficient cloud)
+white = (centered * evecs) ./ sqrt(evals');
+pc1 = white(:, end); % (the largest-variance axis; a rescaling does not change a split)
+
+% ------------------------------------------------------------------------------
+% sep_pp: best optimal two-means split over a fixed grid of directions
+% ------------------------------------------------------------------------------
+directions = SplitDirections(m);
+numDirections = size(directions, 1);
+r2 = zeros(numDirections, 1);
+thr = zeros(numDirections, 1);
+for lo = 1:50:numDirections % (chunked to bound memory for long series)
+	hi = min(lo + 49, numDirections);
+	[r2(lo:hi), thr(lo:hi)] = OptimalTwoMeansSplits(white * directions(lo:hi, :)');
+end
+[out.sep_pp, iBest] = max(r2);
+ppProj = white * directions(iBest, :)';
+
+% ------------------------------------------------------------------------------
+% sep_mahal: 2-component mixture from deterministic hard-split starts (along the
+% sep_pp direction and along PC1)
+% ------------------------------------------------------------------------------
+[~, pc1Thr] = OptimalTwoMeansSplits(pc1);
+gm2 = [];
+for attempt = 1:2
+	if attempt == 1
+		starts = {ppProj > thr(iBest), pc1 > pc1Thr};
+	else % (fallback: splits at the median)
+		starts = {ppProj > median(ppProj), pc1 > median(pc1)};
+	end
+	bestLL = -Inf;
+	for j = 1:2
+		gmj = GMM2FromLabels(y_gmm, starts{j}, regVal);
+		if ~isempty(gmj) && gmj.meanLogLik > bestLL
+			gm2 = gmj;
+			bestLL = gmj.meanLogLik;
+		end
+	end
+	if ~isempty(gm2)
+		break
+	end
+end
+if isempty(gm2) && kMax >= 2 && ~isempty(gmModels{2})
+	% (last resort: the k-means++ fit from the BIC search)
+	gm2 = struct('mu', gmModels{2}.mu, 'Sigma', gmModels{2}.Sigma);
+end
+if isempty(gm2)
 	return
 end
 
-gm2 = gmModels{2};
-post = posterior(gm2, y_gmm);
-[maxPost, clustIdx] = max(post, [], 2);
-
-out.sep_conf = mean(maxPost);
-out.sep_weightbalance = min(gm2.ComponentProportion) / max(gm2.ComponentProportion);
-
 pooledCov = (gm2.Sigma(:, :, 1) + gm2.Sigma(:, :, 2)) / 2;
 dMu = gm2.mu(1, :) - gm2.mu(2, :);
-mahal_raw = sqrt(dMu / pooledCov * dMu');
-% log1p-compressed: raw Mahalanobis separation is numerically unstable for
-% near-deterministic embeddings (e.g. low-noise chaotic maps, whose points
-% collapse onto a thin curve), where pooledCov can be near-singular and
-% mahal_raw explodes to values in the thousands despite no real multi-modal
-% structure (empirically confirmed on logistic and Ricker map series:
-% mahal_raw > 2000 vs. a typical well-separated
-% two-regime process giving mahal_raw ~ 10-15). The log keeps sep_mahal
-% monotonic in separation while preventing these degenerate cases from
-% dominating any downstream (e.g. z-scored, correlation-based) analysis:
-out.sep_mahal = log1p(mahal_raw);
+% log1p-compressed: the raw Mahalanobis separation is numerically unstable for
+% near-deterministic embeddings (e.g., low-noise chaotic maps, whose points
+% collapse onto a thin curve), where pooledCov can be near-singular and the raw
+% separation explodes to values in the thousands despite no multi-modal
+% structure. The log keeps sep_mahal monotonic in separation while preventing
+% these degenerate cases from dominating downstream analyses:
+out.sep_mahal = log1p(sqrt(dMu / pooledCov * dMu'));
 
-if numel(unique(clustIdx)) < 2
-	% All points collapsed onto one component under hard assignment: no
-	% separation to measure
-	out.sep_silh = 0;
-else
-	s = silhouette(y_gmm, clustIdx);
-	out.sep_silh = mean(s);
 end
-
+% ------------------------------------------------------------------------------
+function [r2, thr] = OptimalTwoMeansSplits(proj)
+	% Exact optimal two-cluster (1-D 2-means) split of each column of proj: the cut
+	% between distinct consecutive sorted values that maximizes the between-cluster
+	% sum of squares. r2 is that sum of squares as a fraction of the total (0 for a
+	% constant column); thr is the cut point, midway between the values either side.
+	[n, d] = size(proj);
+	zs = sort(proj, 1);
+	csum = cumsum(zs, 1);
+	nLo = (1:n - 1)';
+	meanLo = csum(1:end - 1, :) ./ nLo;
+	meanHi = (csum(end, :) - csum(1:end - 1, :)) ./ (n - nLo);
+	bss = nLo .* (n - nLo) / n .* (meanLo - meanHi).^2;
+	bss(zs(1:end - 1, :) == zs(2:end, :)) = -Inf; % (no cut between tied values)
+	[bssMax, j] = max(bss, [], 1);
+	tss = sum((zs - mean(zs, 1)).^2, 1);
+	r2 = zeros(d, 1);
+	ok = tss > 0 & isfinite(bssMax);
+	r2(ok) = bssMax(ok) ./ tss(ok);
+	r2 = min(max(r2, 0), 1);
+	idx = sub2ind([n, d], j, 1:d);
+	thr = 0.5 * (zs(idx) + zs(idx + 1))';
+end
+% ------------------------------------------------------------------------------
+function dirs = SplitDirections(m)
+	% Fixed grid of unit directions in m dimensions (one per row; a direction and its
+	% negative describe the same split, so only a hemisphere is covered)
+	if m == 1
+		dirs = 1;
+	elseif m == 2
+		theta = (0:89)' * pi / 90;
+		dirs = [cos(theta), sin(theta)];
+	elseif m == 3
+		numDirs = 300;
+		k = (0:numDirs - 1)' + 0.5;
+		z = k / numDirs;
+		phi = pi * (1 + sqrt(5)) * k;
+		r = sqrt(1 - z.^2);
+		dirs = [r .* cos(phi), r .* sin(phi), z];
+	else
+		% Generalized golden-ratio sequence (x^(m+1) = x + 1) mapped to the sphere
+		numDirs = 300;
+		phiM = 2;
+		for it = 1:50
+			phiM = (1 + phiM)^(1 / (m + 1));
+		end
+		alpha = (1 / phiM).^(1:m);
+		u = mod(0.5 + (1:numDirs)' * alpha, 1);
+		u = min(max(u, 1e-12), 1 - 1e-12);
+		dirs = -sqrt(2) * erfcinv(2 * u); % (standard normal quantiles)
+		dirs = dirs ./ sqrt(sum(dirs.^2, 2));
+		dirs = dirs .* (1 - 2 * (dirs(:, 1) < 0));
+	end
+end
+% ------------------------------------------------------------------------------
+function gm = GMM2FromLabels(Y, labels, regVal)
+	% Two-component full-covariance Gaussian mixture fitted by EM, started from the
+	% hard assignment labels (true/false): the two groups' proportions, means and
+	% regularized covariances. Each iteration is an E-step followed by an M-step
+	% (covariances regularized by adding regVal to the diagonal); iterations stop
+	% when the mean log-likelihood per point (evaluated at the E-step) changes by
+	% less than 1e-6, or after 500 iterations. Returns a structure with fields mu,
+	% Sigma and meanLogLik (the mean log-likelihood per point of the final fit), or
+	% empty if a group has no more than m points or a covariance is not positive
+	% definite.
+	[n, m] = size(Y);
+	groups = {~labels, labels};
+	if min(cellfun(@nnz, groups)) <= m
+		gm = []; return
+	end
+	mu = zeros(2, m);
+	Sigma = zeros(m, m, 2);
+	w = zeros(1, 2);
+	for g = 1:2
+		Yg = Y(groups{g}, :);
+		mu(g, :) = mean(Yg, 1);
+		Sigma(:, :, g) = cov(Yg) + regVal * eye(m);
+		w(g) = mean(groups{g});
+	end
+	maxIter = 500;
+	tol = 1e-6;
+	lowerBound = -Inf;
+	for it = 1:maxIter
+		% E-step:
+		[logProb, ok] = WeightedLogProb(Y, w, mu, Sigma);
+		if ~ok
+			gm = []; return
+		end
+		logProbNorm = LogSumExp(logProb);
+		resp = exp(logProb - logProbNorm);
+		% M-step:
+		nk = sum(resp, 1) + 10 * eps;
+		mu = (resp' * Y) ./ nk';
+		for k = 1:2
+			d = Y - mu(k, :);
+			Sigma(:, :, k) = ((resp(:, k) .* d)' * d) / nk(k) + regVal * eye(m);
+		end
+		w = nk / sum(nk);
+		% Convergence:
+		previousBound = lowerBound;
+		lowerBound = mean(logProbNorm);
+		if abs(lowerBound - previousBound) < tol
+			break
+		end
+	end
+	[logProb, ok] = WeightedLogProb(Y, w, mu, Sigma);
+	if ~ok
+		gm = []; return
+	end
+	gm = struct('mu', mu, 'Sigma', Sigma, 'meanLogLik', mean(LogSumExp(logProb)));
+end
+% ------------------------------------------------------------------------------
+function [logProb, ok] = WeightedLogProb(Y, w, mu, Sigma)
+	% log(w_k) + log N(y | mu_k, Sigma_k) for each point (row) and component (column)
+	[n, m] = size(Y);
+	K = numel(w);
+	logProb = zeros(n, K);
+	ok = true;
+	for k = 1:K
+		[R, p] = chol(Sigma(:, :, k)); % (Sigma = R'*R)
+		if p > 0
+			ok = false; return
+		end
+		z = (Y - mu(k, :)) / R;
+		logProb(:, k) = -0.5 * (m * log(2*pi) + sum(z.^2, 2)) - sum(log(diag(R))) + log(w(k));
+	end
+end
+% ------------------------------------------------------------------------------
+function s = LogSumExp(a)
+	% log(sum(exp(a), 2)), computed stably
+	aMax = max(a, [], 2);
+	s = aMax + log(sum(exp(a - aMax), 2));
 end
