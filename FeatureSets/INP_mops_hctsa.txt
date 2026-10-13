@@ -276,12 +276,8 @@ CP_ML_StepDetect(x_z,'l1pwc',3)	CP_ML_StepDetect_l1pwc_3
 CP_ML_StepDetect(x_z,'l1pwc',10)	CP_ML_StepDetect_l1pwc_10
 CP_WaveletVarChg(x_z,'db3',2,10,0.01)	CP_WaveletVarChg_db3_2_10_001
 CP_WaveletVarChg(x_z,'db3',3,10,0.01)	CP_WaveletVarChg_db3_3_10_001
-CP_WaveletVarChg(x_z,'db3',4,10,0.01)	CP_WaveletVarChg_db3_4_10_001
-CP_WaveletVarChg(x_z,'db3',5,10,0.01)	CP_WaveletVarChg_db3_5_10_001
 CP_WaveletVarChg(x_z,'sym2',2,10,0.01)	CP_WaveletVarChg_sym2_2_10_001
 CP_WaveletVarChg(x_z,'sym2',3,10,0.01)	CP_WaveletVarChg_sym2_3_10_001
-CP_WaveletVarChg(x_z,'sym2',4,10,0.01)	CP_WaveletVarChg_sym2_4_10_001
-CP_WaveletVarChg(x_z,'sym2',5,10,0.01)	CP_WaveletVarChg_sym2_5_10_001
 CR_RAD(x_z,1,true)                 CR_RAD_1
 CR_RAD(x_z,2,true)                 CR_RAD_2
 CR_RAD(x_z,'tau',true)             CR_RAD_tau
