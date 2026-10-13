@@ -932,16 +932,18 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % A clean periodic orbit traces a loop in delay-embedding space,
             % which should show up as one strongly persistent H1 topological
             % feature; noise and chaotic (non-orbit-forming) dynamics
-            % shouldn't. Verified directly during development: with the
-            % default tau='mi' embedding, a clean sine wave gives
-            % maxPersistenceH1 ~0.55, versus ~0.01-0.06 for white noise /
-            % noisy sine / a chaotic logistic map -- an order of magnitude
-            % apart.
+            % shouldn't. With the default tau='mi' embedding, a clean sine
+            % wave gives maxPersistenceH1 ~0.8, versus ~0.01-0.06 for white
+            % noise / noisy sine / a chaotic logistic map -- an order of
+            % magnitude apart. (The period is not a whole number of samples:
+            % a sine with an integer period takes only a few distinct values,
+            % whose automutual information is flat across lags, so the 'mi'
+            % delay is arbitrary there.)
             rng(41);
             N = 500;
             t = (1:N)';
 
-            outSine = NL_PersistentHomology(sin(2*pi*t/20));
+            outSine = NL_PersistentHomology(sin(2*pi*t/20.3));
             outNoise = NL_PersistentHomology(randn(N,1));
             testCase.verifyGreaterThan(outSine.maxPersistenceH1, 5*outNoise.maxPersistenceH1, ...
                 'The periodic orbit''s loop persistence should be far larger than noise''s.');
