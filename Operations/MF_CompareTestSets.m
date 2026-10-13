@@ -13,8 +13,10 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % Similar to MF_FitSubsegments, except that the model is fitted on the full time
 % series and tested on different local segments.
 %
-% Uses iddata and predict from MATLAB's System Identification Toolbox, and ar, n4sid
-% or armax to fit the model.
+% The model is fitted with BF_FitPredictorModel (AR: forward-backward least squares;
+% state space: N4SID subspace identification; ARMA: conditional least squares) and its
+% predictions of each segment start from a diffuse (completely unknown) initial state
+% (BF_SSPredict).
 %
 % ---INPUTS:
 % y, the input time series
@@ -26,8 +28,8 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 %
 % ord, the order of the model to fit (default 2; a two-element vector for 'arma'),
 %       or 'best' to select it automatically: for 'ar', the order from 1 to 10
-%       minimizing the Schwarz Bayesian criterion (ARFIT_arfit); for 'ss', as chosen
-%       by n4sid.
+%       minimizing the Schwarz Bayesian criterion (ARFIT_arfit); for 'ss', the order
+%       from 1 to 10 minimizing Akaike's information criterion (BF_SubspaceID).
 %
 % subsetHow, how to select the test segments:
 %           (i) 'rand', at random (default),
@@ -55,7 +57,9 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % ac1_mean, ac1_median: the absolute value of the mean, and of the median, over
 %       segments of the lag-1 autocorrelation of the prediction errors
 % ac1_std, ac1_iqr: the standard deviation and interquartile range over segments of
-%       that autocorrelation
+%       that autocorrelation (segments whose prediction errors have a standard deviation
+%       below 1e-9 times that of the series, i.e., errors that do not vary beyond the
+%       level of rounding, are excluded from the four ac1 statistics)
 % meane_mean, meane_std, meane_iqr: the mean, standard deviation and interquartile
 %       range over segments of the absolute difference between the mean prediction
 %       and the mean of the data
@@ -65,6 +69,10 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 %       are near-constant are excluded)
 %
 % ---NOTES:
+% The first samples of each segment determine the initial state of the predictor and
+% are not predicted (the first n + steps - 1 for a model of order n); the statistics of a
+% segment use the samples predicted, and are NaN for a segment with fewer than 3 of them.
+% All outputs are NaN if the model cannot be fitted.
 % Redundant fields (mabserrs, and the medians of stde and meane) are not returned:
 % each correlated at |r| >= 0.9 with a retained field, on each of two collections of
 % real-world series and in all registered operations that use this function.
@@ -99,11 +107,6 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check that a System Identification Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox');
-
-% ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
@@ -116,9 +119,8 @@ if nargin < 1 || isempty(y)
 	error('No input time series provided');
 end
 
-% Convert y to time series object for the System Identification Toolbox
 sigmaY = std(y); % used to flag degenerate (near-constant) test segments below
-y = iddata(y, [], 1);
+y = y(:);
 
 % (2) Model, the type of model to fit
 if nargin < 2 || isempty(theModel)
@@ -161,29 +163,13 @@ end
 % [could also fit multiple models using data not in multiple test sets, but
 % this is messier]
 
-switch theModel
-	case 'ar' % fit an ar model of specified order
-		if strcmp(ord, 'best')
-			% Use arfit software to retrieve the optimum ar order by some
-			% criterion (Schwartz's Bayesian Criterion, SBC)
-			try
-				[west, Aest, Cest, SBC, FPE, th] = ARFIT_arfit(y.y, 1, 10, 'sbc', 'zero');
-			catch
-				error('Error running ''arfit'' -- is the ARFIT toolbox installed?')
-			end
-			ord = length(Aest);
-		end
-		m = ar(y, ord);
-
-	case 'ss' % fit a state space model of specified order
-		m = n4sid(y, ord);
-
-	case 'arma' % fit an arma model of specified orders
-		% Note: order should be a two-component vector
-		m = armax(y, ord);
-
-	otherwise
-		error('Unknown model ''%s''', theModel);
+try
+	[A, K, C] = BF_FitPredictorModel(y, theModel, ord);
+catch emsg
+	if contains(emsg.message, 'Unknown model')
+		rethrow(emsg);
+	end
+	out = NaN; return % the model cannot be fitted
 end
 
 % ------------------------------------------------------------------------------
@@ -269,37 +255,44 @@ for i = 1:numPred
 	% Retrieve the test data:
 	yTest = y(r(i, 1):r(i, 2));
 
-	% Compute step-ahead predictions using System Identification Toolbox:
-	yp = predict(m, yTest, steps); % across test set using model, m,
-	% fitted to entire data set
-
-	%     e = pe(m, yTest); % prediction errors -- exactly the same as returning
-	%                       % residuals of 1-step-ahead prediction model
-
-	% plot the two:
-	% plot(y,yp);
+	% Step-ahead predictions across the test segment, using the model fitted to all the
+	% data and a diffuse initial state (the first predictions are undefined):
+	yp = BF_SSPredict(A, K, C, yTest, steps);
+	defined = ~isnan(yp);
+	if sum(defined) < 3
+		rmserrs(i) = NaN; ac1s(i) = NaN; meandiffs(i) = NaN; stdrats(i) = NaN;
+		continue
+	end
+	yp = yp(defined); yTest = yTest(defined);
 
 	% Get statistics on residuals:
-	mres = yp.y - yTest.y;
+	mres = yp - yTest;
 
 	rmserrs(i) = sqrt(mean(mres.^2));
-	ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	if std(mres) < 1e-9 * sigmaY
+		% errors that do not vary beyond the level of rounding (e.g., the segment is
+		% predicted exactly): their autocorrelation is not meaningful, and the segment is
+		% left out of the ac1 summaries
+		ac1s(i) = NaN;
+	else
+		ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	end
 
 	% Get statistics on output time series
-	meandiffs(i) = abs(mean(yp.y) - mean(yTest.y));
-	% Guard against near-constant test segments: std(yTest.y) can land at
+	meandiffs(i) = abs(mean(yp) - mean(yTest));
+	% Guard against near-constant test segments: std(yTest) can land at
 	% floating-point noise (rather than a genuinely small but real value)
 	% when a short random/uniform segment happens to sit in a flat/clipped
 	% stretch of the input -- verified empirically (2500 segments across 100
 	% real series): the ratio's population is smooth from ~1e-3 upward, with
 	% a separate, disjoint cluster at <1e-15 coming from exactly-constant
-	% segments. Below that gap, std(yp.y)/std(yTest.y) is undefined rather
+	% segments. Below that gap, std(yp)/std(yTest) is undefined rather
 	% than just large, so exclude it instead of letting it dominate the
 	% mean/std/iqr summaries below.
-	if std(yTest.y) < 1e-6 * sigmaY
+	if std(yTest) < 1e-6 * sigmaY
 		stdrats(i) = NaN;
 	else
-		stdrats(i) = std(yp.y) / std(yTest.y);
+		stdrats(i) = std(yp) / std(yTest);
 	end
 
 	%     % 1) Get statistics on residuals
@@ -327,10 +320,11 @@ out.stde_iqr = iqr(rmserrs);
 
 % Autocorrelations at lag 1, ac1s
 % NOT absolute values of ac1s... absolute values of operations on *raw* ac1s...
-out.ac1_mean = abs(mean(ac1s));
-out.ac1_median = abs(median(ac1s));
-out.ac1_std = std(ac1s);
-out.ac1_iqr = iqr(ac1s);
+validAC1s = ac1s(~isnan(ac1s));
+out.ac1_mean = abs(mean(validAC1s));
+out.ac1_median = abs(median(validAC1s));
+out.ac1_std = std(validAC1s);
+out.ac1_iqr = iqr(validAC1s);
 
 % Differences in mean between two series
 % (median dropped: r>=0.9 with meane_mean across all 4 registered mops, on

@@ -5,10 +5,10 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % across a range of prediction lengths, l, which is made to vary from
 % 1-step ahead to maxSteps steps-ahead predictions.
 %
-% Models are fit using code from Matlab's System Identification Toolbox:
-%       (i) AR models using the ar function,
-%       (ii) ARMA models using armax code, and
-%       (iii) state-space models using n4sid code.
+% Models are fitted (BF_FitPredictorModel) as:
+%       (i) AR models by forward-backward least squares (BF_ARfb),
+%       (ii) ARMA models by conditional least squares (BF_ARMAfit), and
+%       (iii) state-space models by N4SID subspace identification (BF_SubspaceID).
 %
 % The model is fitted on the full time series and then used to predict the same
 % data (so all predictions are within the sample).
@@ -23,9 +23,9 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % model, the time-series model to fit: 'ar', 'arma', or 'ss'
 % order, the order of the model to fit: an integer for 'ar' and 'ss', a two-vector
 %       [p, q] for 'arma', or the string 'best'. For 'ar', 'best' picks the order
-%       (1 to 10) by Schwarz's Bayesian criterion using ARfit; for 'ss', n4sid
-%       chooses the order from 1 to 10 by a gap rule on its Hankel singular values
-%       (see NOTES). (Default: 2)
+%       (1 to 10) by Schwarz's Bayesian criterion using ARfit; for 'ss', the order
+%       from 1 to 10 that minimizes Akaike's information criterion (BF_SubspaceID).
+%       (Default: 2)
 % maxSteps, the maximum number of steps ahead to predict (default: 6)
 %
 % ---OUTPUTS:
@@ -35,7 +35,9 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % meanabs_h1, meanabs_h2, meanabs_h3, meanabs_h4, meanabs_h5, meanabs_h6: the same for the
 %       mean absolute error (meanabs_h<l>)
 % ac1_h1, ac1_h2, ac1_h3, ac1_h4, ac1_h5, ac1_h6: the absolute lag-1 autocorrelation of the
-%       model's errors at each horizon (ac1_h<l>; not a ratio)
+%       model's errors at each horizon (ac1_h<l>; not a ratio; NaN if the standard
+%       deviation of the errors is below 1e-9 times that of the series, i.e., the errors do
+%       not vary beyond the level of rounding)
 % stde_meanabs_diff: the absolute value of the mean difference between the model's
 %       root-mean-square and mean absolute errors across horizons
 % stde_meandiff, stde_maxdiff, stde_stddiff: the mean, maximum, and standard
@@ -47,14 +49,11 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % predictors.)
 %
 % ---NOTES:
-% With model = 'ss' and order = 'best', n4sid(y, 'best') computes the Hankel singular
-% values of the data (N4Weight 'auto', i.e. CVA, and an N4Horizon chosen
-% automatically) and sets the order to the number of singular values whose logarithm
-% lies above the midpoint between the largest and smallest log singular value,
-% limited to 1 to 10. No information criterion is used. For series with no clear
-% gap in the singular values (white noise, chaotic maps, short noisy AR processes)
-% the chosen order varies widely between realizations (e.g. 4 to 10 for white noise
-% of length 1000), whereas a sine plus noise gives 2 and a random walk 1 almost always.
+% The predictions of the fitted model start from a diffuse (completely unknown)
+% initial state (BF_SSPredict): the first samples, which determine it, are not predicted
+% (the first n + l - 1 at horizon l for a model of order n), and the error statistics
+% average over the samples predicted. All outputs are NaN if the model cannot be
+% fitted.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -86,20 +85,10 @@ function out = MF_steps_ahead(y, model, order, maxSteps)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check that a System Identification Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox');
-
-% ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
+y = y(:);
 N = length(y); % length of the input time series
-
-% ------------------------------------------------------------------------------
-%% Inputs
-% ------------------------------------------------------------------------------
-% y, column vector of equally-spaced time series measurements
-y = iddata(y, [], 1); % Convert y to time series object
 
 % model, a string specifying the model type to fit
 if nargin < 2 || isempty(model)
@@ -119,40 +108,21 @@ if nargin < 4 || isempty(maxSteps)
 end
 
 % ------------------------------------------------------------------------------
-%% Set up training and test sets
+%% Fit the model on the whole time series
 % ------------------------------------------------------------------------------
-yTrain = y; % the whole time series
-yTest = y; % the whole time series
-
-% ------------------------------------------------------------------------------
-%% Fit the model on training data, yTrain (all data)
-% ------------------------------------------------------------------------------
-switch model
-	case 'ar' % AR model
-		if strcmp(order, 'best') % fit 'best' AR model; by sbc
-			% Use arfit software to retrieve the optimum ar order by some
-			% criterion (Schwartz's Bayesian Criterion, SBC)
-			% Uses Matlab code from ARfit
-			% http://www.gps.caltech.edu/~tapio/arfit/
-			[~, Aest] = ARFIT_arfit(yTrain.y, 1, 10, 'sbc', 'zero');
-			order = length(Aest);
-		end
-		m = ar(yTrain, order);
-
-	case 'arma'
-		m = armax(yTrain, order);
-
-	case 'ss'
-		m = n4sid(yTrain, order);
-
-	otherwise
-		error('Unknown model ''%s''', model);
+try
+	[A, K, C] = BF_FitPredictorModel(y, model, order);
+catch emsg
+	if contains(emsg.message, 'Unknown model')
+		rethrow(emsg);
+	end
+	out = NaN; return % the model cannot be fitted
 end
 
 % ------------------------------------------------------------------------------
 %% Do the model and dumb predictions
 % ------------------------------------------------------------------------------
-yy = y.y;
+yy = y;
 steps = 1:maxSteps;
 
 % Initialize statistic vectors
@@ -173,15 +143,21 @@ sm2.ac1s = zeros(maxSteps, 1);
 
 for i = 1:maxSteps
 	% (1) *** Model m ***
-	yp = predict(m, yTest, steps(i)); % across test set
+	yp = BF_SSPredict(A, K, C, y, steps(i)); % across the whole series
 
-	% Get statistics on residuals
-	mres = yp.y - yTest.y;
-	mres = mres(i:end);
+	% Get statistics on residuals (of the samples that can be predicted)
+	mres = yp - y;
+	mres = mres(~isnan(mres));
 
 	mf.rmserrs(i) = sqrt(mean(mres.^2));
 	mf.mabserrs(i) = mean(abs(mres));
-	mf.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	if std(mres) < 1e-9 * std(y)
+		% Errors that do not vary beyond the level of rounding (e.g., an exactly
+		% predictable series): their autocorrelation is not meaningful
+		mf.ac1s(i) = NaN;
+	else
+		mf.ac1s(i) = CO_AutoCorr(mres, 1, 'Fourier');
+	end
 
 	% (2) *** Sliding mean 1 ***
 	% A sliding mean of length 1

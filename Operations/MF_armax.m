@@ -2,14 +2,11 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % MF_armax   The coefficients of a fitted ARMA model, and how well it predicts the later part of the series.
 %
 % Fits an autoregressive moving-average (ARMA) model with orders [p, q] to the whole
-% time series, using armax from Matlab's System Identification Toolbox. The
+% time series by conditional least squares from a Hannan-Rissanen start (BF_ARMAfit). The
 % coefficients, their uncertainties, and the goodness of fit are from this fit.
 % The model is then fitted again to the first pTrain proportion of the time series
 % and used to predict the remainder numSteps samples ahead; the prediction
 % residuals (prediction minus data) are summarized with MF_ResidualAnalysis.
-%
-% Uses the functions iddata, armax, aic, and predict from Matlab's System
-% Identification Toolbox
 %
 % ---INPUTS:
 %
@@ -25,15 +22,16 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 %           (default: 1)
 %
 % ---OUTPUTS:
-% From the model fitted to the entire time series, in the Matlab convention
+% From the model fitted to the entire time series, in the convention
 % y(t) + a1 y(t-1) + ... + ap y(t-p) = e(t) + c1 e(t-1) + ... + cq e(t-q):
 % AR_1, AR_2, AR_3: the AR coefficients a1, ..., ap (the negatives of the usual AR
 %       coefficients)
 % MA_1, MA_2: the MA coefficients c1, ..., cq
-% maxda, maxdc: the largest estimated standard deviation of the AR and MA
-%       coefficients (from the covariance of the parameter estimates)
-% noisevar, lossfn, fpe: the noise variance, loss function, and Akaike's final
-%       prediction error of the fit
+% maxda, maxdc: the largest standard error of the AR and MA coefficients (from the
+%       Jacobian of the residuals at the optimum; NaN if p or q is 0)
+% noisevar, lossfn, fpe: the noise variance lossfn*N/(N - p - q), the loss function
+%       (the mean squared one-step prediction error), and Akaike's final prediction
+%       error lossfn*(1 + (p + q)/N)/(1 - (p + q)/N) of the fit
 % From the residuals of the predictions of the held-out portion (MF_ResidualAnalysis):
 % meane, meanabs, stde, maxonstd: mean, mean absolute value, standard deviation,
 %       and largest absolute value (in standard deviations) of the residuals
@@ -48,8 +46,17 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 %       SBC, from 1 to 10) and its SBC
 %
 % ---NOTES:
+% The fit (BF_ARMAfit) is a fully specified deterministic procedure: a Hannan-Rissanen
+% start refined by Levenberg-Marquardt iterations on the conditional sum of squares,
+% with the MA polynomial kept invertible. The coefficients are poorly determined where an ARMA model is poorly
+% identified (nearly cancelling AR and MA polynomials, as for near-white series, where
+% only the loss, noisevar and fpe are well determined).
+% Predictions start from a diffuse (completely unknown) initial state (BF_SSPredict), so
+% the first max(p, q) + numSteps - 1 samples of a series are not predicted; the loss and
+% the residual summaries average over the samples predicted.
 % The held-out portion starts at sample floor(pTrain*N), overlapping the training
-% portion by one sample.
+% portion by one sample. All outputs are NaN if the model cannot be fitted (a series
+% too short for the orders).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -81,124 +88,75 @@ function out = MF_armax(y, orders, pTrain, numSteps)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check that a System Identification Toolbox license is available:
+%% Check inputs
 % ------------------------------------------------------------------------------
-BF_CheckToolbox('identification_toolbox');
-
-% ------------------------------------------------------------------------------
-%% Prepare Inputs
-% ------------------------------------------------------------------------------
-% (1) y, the time series as a column vector
-if size(y, 2) > size(y, 1)
-	y = y'; % ensure a column vector
-end
+y = y(:);
 N = length(y); % number of samples
-% Convert y to time series object
-y = iddata(y, [], 1);
 
-% orders; vector specifying the AR and MA components
 if nargin < 2 || isempty(orders)
 	orders = [3, 3]; % AR3, MA3
 end
+p = orders(1); q = orders(2);
 if nargin < 3 || isempty(pTrain)
 	pTrain = 0.8; % train on 80% of the data
 end
-% if nargin < 4 || isempty(trainmode)
-%     trainmode = 'first'; % trains on first pTrain proportion of the data.
-% end
 if nargin < 4 || isempty(numSteps)
 	numSteps = 1; % one-step-ahead predictions
 end
 
 % ------------------------------------------------------------------------------
-%% Fit the model
+%% Fit the ARMA model to the whole time series
 % ------------------------------------------------------------------------------
-
-% Uses the System Identification Toolbox function armax
-m = armax(y, orders);
-
-% ------------------------------------------------------------------------------
-%% Statistics on model
-% ------------------------------------------------------------------------------
-
-c_ar = m.a; % AR coefficients
-c_ma = m.c; % MA coefficients
-% Standard deviations of the AR and MA coefficients (the leading, fixed 1 has
-% standard deviation 0). These are identical to the dA, dC outputs of
-% [A,B,C,D,F,dA,dB,dC] = polydata(m).
-da = m.da;
-dc = m.dc;
-
-% Make these outputs
-if length(c_ar) > 1
-	for i = 2:length(c_ar)
-		out.(sprintf('AR_%u', i - 1)) = c_ar(i);
-	end
-end
-if length(c_ma) > 1
-	for i = 2:length(c_ma)
-		out.(sprintf('MA_%u', i - 1)) = c_ma(i);
-	end
+try
+	[a, c, coefSD, loss] = BF_ARMAfit(y, p, q);
+catch
+	out = NaN; return % too few samples for the orders
 end
 
-if isempty(da)
+for i = 1:p
+	out.(sprintf('AR_%u', i)) = a(i + 1);
+end
+for i = 1:q
+	out.(sprintf('MA_%u', i)) = c(i + 1);
+end
+if p == 0
 	out.maxda = NaN;
 else
-	out.maxda = max(da);
+	out.maxda = max(coefSD(1:p));
 end
-if isempty(dc)
+if q == 0
 	out.maxdc = NaN;
 else
-	out.maxdc = max(dc);
+	out.maxdc = max(coefSD(p+1:end));
 end
 
-% ------------------------------------------------------------------------------
-% Fit statistics
-% ------------------------------------------------------------------------------
-
-% These three measures are basically equivalent -- default hctsa library
-% only records fpe.
-out.noisevar = m.NoiseVariance; % covariance matrix of noise source
-% covmat = m.CovarianceMatrix; % covariance matrix for parameter vector
-% parameters = m.ParameterVector; % parameter vector for model: initial values, I'd say...
-out.lossfn = m.EstimationInfo.LossFcn;
-out.fpe = m.EstimationInfo.FPE; % Final prediction error of model
-
-% out.lastimprovement = m.EstimationInfo.LastImprovement; % Last improvement made in iteration
-% (Dropped: aic = aic(m). It is rank-identical to fpe -- Spearman 1.0000 on two
-%  collections of real-world series -- so only fpe is kept,
-%  matching the choice made in MF_arfit and MF_FitSubsegments.)
+% Goodness of fit
+nPar = p + q;
+out.noisevar = loss * N / (N - nPar);
+out.lossfn = loss;
+out.fpe = loss * (1 + nPar/N) / (1 - nPar/N); % Akaike's final prediction error
 
 % ------------------------------------------------------------------------------
-%% Prediction
+%% Fit to the training portion, predict the test portion
 % ------------------------------------------------------------------------------
-
-% Select first portion of data for estimation
-% This could be any portion, actually... Maybe could look at robustness of
-% model to different training sets...
 ytrain = y(1:floor(pTrain * N));
-% ytest = y;
-ytest = y(floor(pTrain * N):end); % overlap
-
-% Train the model on just this portion
-mp = armax(ytrain, orders);
-
-% Compute step-ahead predictions
-% Maybe look at trends across different prediction horizons...
-yp = predict(mp, ytest, numSteps, 'init', 'e'); % across whole dataset
-
-mresiduals = yp.y - ytest.y; % prediction minus data (the MF_ResidualAnalysis convention)
+ytest = y(floor(pTrain * N):end); % overlap by one sample
+try
+	[ap, cp] = BF_ARMAfit(ytrain, p, q);
+catch
+	out = NaN; return
+end
+[A, K, C] = BF_ARMAtoSS(ap, cp);
+yp = BF_SSPredict(A, K, C, ytest, numSteps);
+mresiduals = yp - ytest; % prediction minus data (the MF_ResidualAnalysis convention)
+mresiduals = mresiduals(~isnan(mresiduals)); % the samples that can be predicted
 
 % ------------------------------------------------------------------------------
-% Get statistics on residuals
+%% Residual analysis
 % ------------------------------------------------------------------------------
-residout = MF_ResidualAnalysis(mresiduals, ytest.y, 'full');
-
-% Convert these to local outputs in quick loop
-% Note that default hctsa library does not include rmse field, which is highly
-% correlated with the stde field
+residout = MF_ResidualAnalysis(mresiduals, ytest, 'full');
 fields = fieldnames(residout);
-for k = 1:length(fields);
+for k = 1:length(fields)
 	out.(fields{k}) = residout.(fields{k});
 end
 

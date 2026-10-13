@@ -15,15 +15,15 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %                       Bayesian criterion (SBC) using the ARfit package. Outputs
 %                       are on how the optimal order and the SBC vary in different
 %                       parts of the time series. (The order input is not used.)
-%           'ar': fits an AR model of a specified order using ar from MATLAB's
-%                   System Identification Toolbox. Outputs are on how Akaike's Final
+%           'ar': fits an AR model of a specified order by forward-backward least
+%                   squares (BF_ARfb). Outputs are on how Akaike's Final
 %                   Prediction Error (FPE) and the fitted AR parameters vary across
 %                   the segments.
-%           'ss': fits a state-space model of a given order using n4sid from
-%                   MATLAB's System Identification Toolbox. Outputs are on how the
+%           'ss': fits a state-space model of a given order by N4SID subspace
+%                   identification (BF_SubspaceID). Outputs are on how the
 %                   FPE varies.
-%           'arma': fits an ARMA model using armax from MATLAB's System
-%                   Identification Toolbox. Outputs are on the FPE and the fitted AR
+%           'arma': fits an ARMA model by conditional least squares
+%                   (BF_ARMAfit). Outputs are on the FPE and the fitted AR
 %                   and MA parameters.
 %           'arcrosspred': splits the series into samplep non-overlapping segments,
 %                   fits an AR model of the given order to each, and uses every
@@ -85,6 +85,14 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 %   mineig: the smallest real part of the eigenvalues of the matrix
 %
 % ---NOTES:
+% FPE = V*(1 + d/l)/(1 - d/l) for a segment of length l, with V the mean squared
+% one-step prediction error and d the number of free parameters (p for an AR(p) model,
+% whose V is over the l - p samples with p past values; 2n for an order-n state-space
+% model and p + q for an ARMA model, whose V is over the samples predicted from a
+% diffuse initial state, BF_SSPredict). In 'arcrosspred' every model predicts each
+% segment from a diffuse initial state, so the first 'order' samples of a segment are
+% not predicted.
+%
 % 'arcrosspred': the level statistics (trace, mean, min, max, eigenvalue levels) of
 % the cross-prediction matrix correlated at |r| = 0.89-0.98 with this function's own
 % 'ar' fpe_mean/min/max fields on two collections of real-world series (150 series
@@ -139,8 +147,7 @@ N = length(y); % length of time series
 if nargin < 1 || isempty(y)
 	error('Give us a time series, ya mug');
 end
-% Convert y to time series object
-y = iddata(y, [], 1);
+y = y(:);
 
 % (2) model, the type of model to fit
 if nargin < 2 || isempty(model)
@@ -240,7 +247,7 @@ switch model
 		% option.
 		orders = zeros(numPred, 1);
 		sbcs = zeros(numPred, 1);
-		yy = y.y;
+		yy = y;
 		for i = 1:numPred
 			% Use arfit software to retrieve the optimum AR(p) order by
 			% Schwartz's Bayesian Criterion, SBC (or BIC); in the range
@@ -278,17 +285,12 @@ switch model
 		%% Fit AR model of specified order
 		% Return statistics on parameters and goodness of fit
 
-		%% Check that a System Identification Toolbox license is available to run the 'ar' function:
-		BF_CheckToolbox('identification_toolbox');
 
 		fpes = zeros(numPred, 1);
 		as = zeros(numPred, order + 1);
 		for i = 1:numPred
 			% fit the ar model
-			m = ar(y(r(i, 1):r(i, 2)), order);
-			% get parameters and goodness of fit
-			fpes(i) = m.EstimationInfo.FPE;
-			as(i, :) = m.a;
+			[as(i, :), fpes(i)] = BF_ARfb(y(r(i, 1):r(i, 2)), order);
 		end
 
 		% statistics on FPE
@@ -318,9 +320,6 @@ switch model
 		%% RMSE matrix. Only its spread/off-diagonal statistics are
 		%% returned -- see NOTES for why the level statistics are omitted.
 
-		%% Check that a System Identification Toolbox license is available:
-		BF_CheckToolbox('identification_toolbox');
-
 		minSegLength = 5 * (order + 1); % need enough points to fit AR(order) and predict meaningfully
 		if any(r(:, 2) - r(:, 1) + 1 < minSegLength)
 			warning('Segments too short to reliably cross-predict with an AR(%u) model', order);
@@ -332,18 +331,22 @@ switch model
 			models = cell(numPred, 1);
 			for i = 1:numPred
 				segs{i} = y(r(i, 1):r(i, 2));
-				models{i} = ar(segs{i}, order);
+				models{i} = BF_ARfb(segs{i}, order);
 			end
 			xperr = zeros(numPred); % cross-prediction RMSE from using segment i's model on segment j
 			for i = 1:numPred
 				for j = 1:numPred
-					yp = predict(models{i}, segs{j}, 1);
-					res = yp.y - segs{j}.y;
+					[A, K, C] = BF_ARMAtoSS(models{i}, 1);
+					res = BF_SSPredict(A, K, C, segs{j}, 1) - segs{j};
+					res = res(~isnan(res)); % (the first 'order' samples are not predicted)
 					xperr(i, j) = sqrt(mean(res.^2));
 				end
 			end
 		catch
 			% A segment was degenerate (e.g. near-constant) for AR fitting/prediction
+			out = NaN; return
+		end
+		if any(~isfinite(xperr(:)))
 			out = NaN; return
 		end
 
@@ -385,13 +388,15 @@ switch model
 		% Could do parameters too, but I this would involve many outputs
 		fpes = zeros(numPred, 1);
 		for i = 1:numPred
-			try  m = n4sid(y(r(i, 1):r(i, 2)), order);
+			seg = y(r(i, 1):r(i, 2));
+			try
+				m = BF_SubspaceID(seg, order);
 			catch
-				% Some range of the time series is invalid for fitting the
-				% model to.
-				error('Couldn''t fit this state space model')
+				% A segment is too short (or degenerate) for the model
+				out = NaN; return
 			end
-			fpes(i) = m.EstimationInfo.FPE;
+			l = length(seg);
+			fpes(i) = m.loss * (1 + 2*m.order/l) / (1 - 2*m.order/l);
 		end
 
 		% statistics on FPE
@@ -410,14 +415,14 @@ switch model
 		qs = zeros(numPred, order(2) + 1);
 
 		for i = 1:numPred
+			seg = y(r(i, 1):r(i, 2));
 			try
-				m = armax(y(r(i, 1):r(i, 2)), order);
+				[ps(i, :), qs(i, :), ~, loss] = BF_ARMAfit(seg, order(1), order(2));
 			catch emsg
 				error('Couldn''t fit this ARMA model')
 			end
-			fpes(i) = m.EstimationInfo.FPE;
-			ps(i, :) = m.a;
-			qs(i, :) = m.c;
+			l = length(seg);
+			fpes(i) = loss * (1 + sum(order)/l) / (1 - sum(order)/l);
 		end
 
 		% statistics on FPE

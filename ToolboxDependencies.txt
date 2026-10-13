@@ -121,17 +121,8 @@ SY_StdNthDerChange.m
 
 System Identification Toolbox (Matlab Toolbox)
 
-MF_CompareAR.m
-MF_CompareTestSets.m
-MF_ExpSmoothing.m
-MF_FitSubsegments.m
 MF_GARCHcompare.m
 MF_GARCHfit.m
-MF_ResidualAnalysis.m
-MF_StateSpaceCompOrder.m
-MF_StateSpace_n4sid.m
-MF_armax.m
-MF_steps_ahead.m
 PP_ModelFit.m
 PP_PreProcess.m
 SD_SurrogateTest.m
