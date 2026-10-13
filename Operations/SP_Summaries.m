@@ -67,9 +67,9 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % logac1, logac2, logtau for log(S)
 %
 % Cumulative power:
-% wmax_5, wmax_10, wmax_25, centroid, wmax_75, wmax_90, wmax_95, wmax_99: the
-% frequency below which 5%, 10%, ..., 99% of the power lies (centroid is the
-% median frequency, 50%)
+% wmax_5, wmax_10, wmax_25, wmax_50, wmax_75, wmax_90, wmax_95, wmax_99: the
+% frequency below which 5%, 10%, ..., 99% of the power lies (wmax_50 is the
+% median frequency; it was previously named 'centroid')
 %
 % Power-weighted moments of frequency:
 % specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
@@ -548,7 +548,7 @@ f_frac_w_max = @(f) w(find(csS >= csS(end) * f, 1, 'first'));
 out.wmax_5 = f_frac_w_max(0.05);
 out.wmax_10 = f_frac_w_max(0.1);
 out.wmax_25 = f_frac_w_max(0.25);
-out.centroid = f_frac_w_max(0.5);
+out.wmax_50 = f_frac_w_max(0.5);
 out.wmax_75 = f_frac_w_max(0.75);
 out.wmax_90 = f_frac_w_max(0.9);
 out.wmax_95 = f_frac_w_max(0.95);
@@ -560,12 +560,10 @@ out.wmax_99 = f_frac_w_max(0.99);
 % Note these are a genuinely different family from both of the
 % frequency-summarizing families above and the moments of S computed
 % earlier, in a way the naming can obscure:
-%   - `centroid` above is the *median* frequency (where csS reaches 50%),
-%     NOT the power-weighted mean frequency computed here. It keeps that
-%     (strictly speaking, misnamed) name because it is one of the
-%     canonical catch22 features (SP_Summaries_welch_rect_centroid),
-%     externally mirrored in the catch22 C/Python implementations -- so
-%     the name carries a compatibility contract and must not change.
+%   - `wmax_50` above is the *median* frequency (where csS reaches 50%),
+%     NOT the power-weighted mean frequency computed here. (It was
+%     previously named `centroid`, a misnomer; catch22 v1.0 uses
+%     SP_Summaries_fft_wmax_50.)
 %   - `mom3` (skewness of S) summarizes the distribution of power
 %     *values*, which is entirely order-agnostic in frequency: shuffle
 %     the spectrum bin-for-bin and mom3 is unchanged. It says nothing
@@ -586,7 +584,7 @@ out.wmax_99 = f_frac_w_max(0.99);
 % On redundancy: checked on 1000 real series, the two low-order moments
 % are substantially re-descriptions of the wmax_* quantiles already
 % computed above -- specCentroid vs wmax_75 R^2 = 0.91 (and vs the
-% median-frequency `centroid`, 0.88), specSpread vs the 10-90% width
+% median frequency `wmax_50`, 0.88), specSpread vs the 10-90% width
 % w10_90 R^2 = 0.92. That is unsurprising (a mean tracks a median, a
 % standard deviation tracks an inter-quantile width). They are kept and
 % registered anyway, deliberately: specCentroid and specSpread are the

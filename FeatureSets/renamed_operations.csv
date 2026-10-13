@@ -1747,3 +1747,9 @@ CP_WaveletVarChg_db3_4_10_001,,"deregistered: the level-4 and level-5 wavelet de
 CP_WaveletVarChg_db3_5_10_001,,"deregistered: the level-4 and level-5 wavelet details are too smooth for the calibrated change-point rule to detect variance changes (about 15 times fewer effective observations than samples at level 5), so the count is 0 for most series; levels 2-3 retained"
 CP_WaveletVarChg_sym2_4_10_001,,"deregistered: the level-4 and level-5 wavelet details are too smooth for the calibrated change-point rule to detect variance changes (about 15 times fewer effective observations than samples at level 5), so the count is 0 for most series; levels 2-3 retained"
 CP_WaveletVarChg_sym2_5_10_001,,"deregistered: the level-4 and level-5 wavelet details are too smooth for the calibrated change-point rule to detect variance changes (about 15 times fewer effective observations than samples at level 5), so the count is 0 for most series; levels 2-3 retained"
+SP_Summaries_fft_centroid,SP_Summaries_fft_wmax_50,the median frequency (50% of the power): renamed from the misnomer 'centroid' to join the wmax_* family (catch22 v1.0)
+SP_Summaries_pgram_hamm_centroid,SP_Summaries_pgram_hamm_wmax_50,the median frequency (50% of the power): renamed from the misnomer 'centroid' to join the wmax_* family (catch22 v1.0)
+SP_Summaries_welch_rect_centroid,SP_Summaries_welch_rect_wmax_50,the median frequency (50% of the power): renamed from the misnomer 'centroid' to join the wmax_* family (catch22 v1.0)
+PD_PeriodicityWang_th0.01,PD_PeriodicityWang_th0_01,output named for its threshold without a decimal point (catch22 v1.0)
+PD_PeriodicityWang_th0.1,PD_PeriodicityWang_th0_1,output named for its threshold without a decimal point (catch22 v1.0)
+PD_PeriodicityWang_th0.2,PD_PeriodicityWang_th0_2,output named for its threshold without a decimal point (catch22 v1.0)
