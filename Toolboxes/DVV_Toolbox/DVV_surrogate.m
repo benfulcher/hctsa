@@ -1,4 +1,4 @@
-function Xs = DVV_surrogate(X, Ns)
+function Xs = DVV_surrogate(X, Ns, perms)
 % Generates surrogate data for real and complex signals
 %
 % Surrogate data generation using iterated amplitude adjusted fourier
@@ -11,6 +11,9 @@ function Xs = DVV_surrogate(X, Ns)
 % INPUTS:
 % X:        Input time series (can be real-valued or complex)
 % Ns:       No. of surrogates to be generated
+% perms:    (optional; hctsa modification) N-by-Ns matrix whose columns are the
+%           starting permutations of the surrogates (real-valued branch); by
+%           default they are drawn with randperm, as in the original
 %
 % OUTPUTS:
 % Xs:   Generated surrogates
@@ -101,7 +104,11 @@ if (isreal(X))
     for a = 1:Ns
 
         % Random permutation of the original time series
-        X_random = X(randperm(length(X)));
+        if nargin >= 3 && ~isempty(perms)
+            X_random = X(perms(:,a));
+        else
+            X_random = X(randperm(length(X)));
+        end
 
         % Initializations
         r_prev = X_random;
