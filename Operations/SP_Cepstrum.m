@@ -204,6 +204,10 @@ halfLogMag = logMag(1:nHalf);
 fIdx = (0:nHalf - 1)' / (nHalf - 1); % normalized frequency axis for conditioning
 pEnv = polyfit(fIdx(2:end), halfLogMag(2:end), envOrder);
 halfDetrended = halfLogMag - polyval(pEnv, fIdx);
+% The zero-frequency bin is set to the envelope (0 after detrending): for a z-scored
+% series |X| there is rounding noise (log|X| anywhere from about -36 to -28), which
+% would add an arbitrary constant, (log|X(0)| - envelope)/NFFT, to the whole cepstrum.
+halfDetrended(1) = 0;
 
 % Mirror back to a full Hermitian-symmetric spectrum so the cepstrum is real:
 logMagDetrended = [halfDetrended; flipud(halfDetrended(2:end - 1))];
