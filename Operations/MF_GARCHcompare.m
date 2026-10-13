@@ -60,7 +60,10 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % bestpLLF/bestqLLF select the order with the maximum log-likelihood, as the
 % best-fitting model has the highest log-likelihood (AIC and BIC are minimized).
 % (Selecting the minimum, as an earlier version did, almost always returned the
-% lowest-complexity corner of the (pr,qr) grid.)
+% lowest-complexity corner of the (pr,qr) grid.) They are not registered in hctsa's
+% feature set: the models are nested, so their maximized likelihoods differ mostly at
+% the level of the optimizer's tolerance, and the selected orders change under tiny
+% perturbations of the series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
