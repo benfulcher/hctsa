@@ -1750,3 +1750,7 @@ CP_WaveletVarChg_sym2_5_10_001,,"deregistered: the level-4 and level-5 wavelet d
 DN_CompareKSFit_uni_psx,,"deregistered: a fitted uniform density is flat, so it has no peak position (the value was the first grid point inside the fitted support, set by tie-breaking); now NaN"
 SY_PPtest_0_5_ar_t1_lagmaxp,,"deregistered: constant (lag 0 on 999 of 1000 series): pptest p-values are clamped to the range of its tabulated distribution, so the p-values at all lags tie at the clamp and the first lag is returned"
 SY_PPtest_0_5_ar_t1_lagminp,,"deregistered: nearly constant (lag 0 on 955 of 1000 series): pptest p-values are clamped to the range of its tabulated distribution, so the p-values at all lags tie at the clamp and the first lag is returned"
+NL_DVV_3_100_2_50_10_default_numZeroCrossings,,"deregistered: unsalvageably seed-dependent: correlation between two random seeds 0.43 on the 1000x1000 series (0.45 even with 400 reference vectors); driven by the surrogates"
+NL_DVV_3_100_2_50_10_default_ac1e_numZeroCrossings,,"deregistered: unsalvageably seed-dependent: correlation between two random seeds 0.38 on the 1000x1000 series; driven by the surrogates"
+NL_DVV_3_100_2_50_10_default_stdDiff,,"deregistered: seed-dependent: correlation between two random seeds 0.64 on the 1000x1000 series (the choice of 100 reference vectors)"
+NL_DVV_3_100_2_50_10_default_ac1e_stdDiff,,"deregistered: seed-dependent: correlation between two random seeds 0.57 on the 1000x1000 series (the choice of 100 reference vectors)"

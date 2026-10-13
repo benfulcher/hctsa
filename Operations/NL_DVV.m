@@ -39,11 +39,13 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
 % trend, slope of a linear fit to the data curve
 % max, min, mean: maximum, minimum and mean of the data curve
 % meanDiff, stdDiff: mean and standard deviation of the successive differences
-%           of the data curve
+%           of the data curve (stdDiff is computed but not registered: it depends
+%           mostly on the choice of reference vectors)
 % trendDiff, slope of a linear fit to the successive differences
 % rmsDiffSurr, meanDiffSurr: root-mean-square and mean difference between the
 %           data curve and the mean surrogate curve
-% numZeroCrossings, number of sign changes of that difference
+% numZeroCrossings, number of sign changes of that difference (computed but not
+%           registered: it depends mostly on the random draws)
 % trendSurr, slope of a linear fit to the mean surrogate curve
 % meanDiffTrendSurr, trendSurr minus trend
 % meanNormCDF, mean over distances of the Gaussian cumulative probability of the
