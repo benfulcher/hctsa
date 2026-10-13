@@ -266,6 +266,28 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(BF_GetTau(yPert,'mi'), tau);
         end
 
+        %-------------------------------------------------------------
+        % CP_WaveletVarChg
+        %-------------------------------------------------------------
+        function test_CP_WaveletVarChg_StationaryNoiseMostlyZero(testCase)
+            % The number of change points is calibrated to be 0 for about 95% of
+            % stationary series.
+            numChanges = zeros(10,1);
+            for k = 1:10
+                rng(100 + k);
+                numChanges(k) = CP_WaveletVarChg(zscore(randn(1000,1)),'db3',2,10,0.01);
+            end
+            testCase.verifyLessThanOrEqual(sum(numChanges > 0), 2);
+        end
+
+        function test_CP_WaveletVarChg_DetectsVarianceChange(testCase)
+            % A threefold change in standard deviation half way through
+            rng(31);
+            y = randn(2000,1);
+            y(1001:end) = 3*y(1001:end);
+            testCase.verifyGreaterThanOrEqual(CP_WaveletVarChg(zscore(y),'db3',2,10,0.01), 1);
+        end
+
         function test_BF_PreProcess_DecimateAC1e(testCase)
             % Keeps every tau-th sample, with tau from BF_GetTau(y,'ac1e').
             rng(25);
