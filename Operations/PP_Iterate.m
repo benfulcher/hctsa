@@ -131,7 +131,10 @@ for q = 1:length(nRange)
 			y_d = diff(y, ndiffs);
 
 		case 'medianf' % Median Filter; n is the order of filtering
-			y_d = medfilt1(y, n);
+			% (the first and last values are repeated beyond the ends, so the filtered series is
+			% not pulled toward zero there, which would depend on the offset of the data)
+			lo = floor(n / 2); hi = n - 1 - lo;
+			y_d = movmedian([repmat(y(1), lo, 1); y(:); repmat(y(end), hi, 1)], [lo, hi], 'Endpoints', 'discard');
 
 		case 'rav' % Running Average; n is the window size
 			y_d = filter(ones(1, n) / n, 1, y);
