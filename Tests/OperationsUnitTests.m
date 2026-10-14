@@ -1608,6 +1608,25 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 'A linear Gaussian process should sit on its spectral null overall.');
         end
 
+        function test_SP_Rhythmicity_RoundoffCoefficientsHaveNoPhase(testCase)
+            % A sparse spike train is constant across the wavelet's support at
+            % many time points, where the coefficients are round-off and
+            % their phase is meaningless. Those coefficients are left out, so
+            % perturbing the input at the level of round-off must not move
+            % any output.
+            rng(3);
+            y = zeros(3000,1);
+            y(randperm(3000, 12)) = 1 + rand(12,1);
+            y = zscore(y);
+            out1 = SP_Rhythmicity(y);
+            out2 = SP_Rhythmicity(y + 1e-15*randn(size(y)));
+            fn = fieldnames(out1);
+            for k = 1:numel(fn)
+                testCase.verifyEqual(out2.(fn{k}), out1.(fn{k}), 'AbsTol', 1e-8, ...
+                    sprintf('%s should not depend on round-off.', fn{k}));
+            end
+        end
+
         function test_SP_Rhythmicity_SmoothingReducesSpuriousBandCount(testCase)
             % The smoothWin argument should monotonically (weakly) shrink the
             % rhythmic-band count on a noisy spectrum: more smoothing, fewer

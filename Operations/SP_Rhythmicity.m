@@ -20,6 +20,13 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 %     L = round(tau/f) samples a fixed tau cycles: the mean resultant length
 %     of the lagged phase differences, in [0,1]. 1 => the phase advances by a
 %     perfectly repeatable amount every tau cycles (a stable rhythm).
+%     A coefficient with |x(t,f)| < 1e-6 max_t |x(t,f)| (the maximum over the
+%     edge-free samples at that frequency; under 1e-12 of the peak power) has
+%     no meaningful phase -- typically where a spiky or skewed series is
+%     (nearly) constant across the wavelet's support, down to coefficients that
+%     are pure round-off -- and any pair (t, t+L) involving one is left out of
+%     the mean. Without this, such pairs make the output depend on round-off
+%     (and so on the machine and FFT library).
 % (3) The spectral null. Part of LAVI is set by the power spectrum alone: a
 %     Gaussian process with the same spectrum (equivalently, the mean over
 %     phase-randomized surrogates) has a lag-L correlation rho(f) of its
@@ -46,8 +53,9 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 % Following hctsa convention the series is treated as evenly sampled with unit
 % spacing: frequencies are in cycles per sample (0 to 0.5) and reported
 % angular frequencies are 2*pi*f, as in SP_Summaries. LAVI is biased upward
-% when few cycles are available, so a frequency is used only when the samples
-% free of edge effects span at least minCycles cycles; the operation returns a
+% when few cycles are available, so a frequency is used only when the pairs used
+% (free of edge effects, with a defined phase) span at least minCycles cycles,
+% i.e. number of pairs x f >= minCycles; the operation returns a
 % single NaN if fewer than 10 frequencies qualify (for the defaults, N below
 % about 240).
 %
@@ -80,14 +88,14 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 %       taken from the smoothed spectrum; every other statistic uses the raw
 %       spectrum.
 %
-% minCycles, the minimum number of cycles of f that the edge-free samples must
-%       span for f to be used (default: 40, which keeps the upward bias of
-%       LAVI to about 0.02).
+% minCycles, the minimum number of cycles of f that the pairs used must span
+%       for f to be used (default: 40, which keeps the upward bias of LAVI to
+%       about 0.02).
 %
 % ---OUTPUTS: computed over the frequencies that qualify.
 % The rhythmicity spectrum LAVI(f):
-% lavi_mean, lavi_median, lavi_std, lavi_iqr, lavi_max, lavi_min, lavi_range,
-%       basic level and spread of rhythmicity across frequency (lavi_median is
+% lavi_mean, lavi_median, lavi_std, lavi_iqr, lavi_max, lavi_min, basic
+%       level and spread of rhythmicity across frequency (lavi_median is
 %       the baseline).
 % lavi_maxOnMedian, peak rhythmicity relative to the baseline.
 % lavi_freqAtMax, lavi_freqAtMin, angular frequency (2*pi*f) of the most
@@ -96,8 +104,6 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 %       the baseline.
 % lavi_fracSustained, lavi_fracTransient, fraction of frequencies more than 2
 %       scaled-MAD above / below the baseline.
-% lavi_areaSustained, area of the spectrum above its baseline, integrated over
-%       log-frequency and normalized by the log-frequency span.
 % lavi_ac1, lag-1 autocorrelation of the spectrum across frequency.
 % lavi_numPeaks, number of local maxima of the smoothed spectrum that exceed
 %       the baseline by at least one scaled-MAD (distinct rhythmic bands).
@@ -224,7 +230,15 @@ for fi = 1:nFreq
 
     x1 = X(lo:hi);
     x2 = X(lo+L:hi+L);
-    lavi(fi) = abs(mean(exp(1i * (angle(x1) - angle(x2)))));
+    % Coefficients below 1e-6 of the largest edge-free magnitude at this
+    % frequency (under 1e-12 of its peak power) have no meaningful phase -- at
+    % worst it is round-off: leave out pairs involving one.
+    tol = 1e-6 * max(abs(X(lo:hi+L)));
+    hasPhase = abs(x1) >= tol & abs(x2) >= tol;
+    if sum(hasPhase) * f < minCycles
+        continue % too few cycles with a defined phase
+    end
+    lavi(fi) = abs(mean(exp(1i * (angle(x1(hasPhase)) - angle(x2(hasPhase))))));
     power(fi) = mean(abs(x1).^2);
 
     % Spectral null: the lag-L autocorrelation of the wavelet output implied by
@@ -243,7 +257,6 @@ if sum(valid) < 10
 end
 
 f = freqs(valid);
-logf = log10(f);
 S = lavi(valid);
 ex = S - laviNull(valid);
 [~, iPow] = max(power(valid));
@@ -258,7 +271,6 @@ out.lavi_std = std(S);
 out.lavi_iqr = iqr(S);
 out.lavi_max = max(S);
 out.lavi_min = min(S);
-out.lavi_range = max(S) - min(S);
 out.lavi_maxOnMedian = max(S) / med;
 
 [~, iMax] = max(S);
@@ -280,9 +292,6 @@ else
     out.lavi_fracSustained = mean(S > med + 2*scaledMAD);
     out.lavi_fracTransient = mean(S < med - 2*scaledMAD);
 end
-
-% Area above baseline, integrated over log-frequency, span-normalized:
-out.lavi_areaSustained = trapz(logf, max(S - med, 0)) / (logf(end) - logf(1));
 
 % Lag-1 autocorrelation of the spectrum across frequency:
 S0 = S - mean(S);
