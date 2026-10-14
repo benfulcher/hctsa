@@ -1,4 +1,4 @@
-function data = DVV_dvv(x, m, Nsub, nd, Ntv, tau)
+function data = DVV_dvv(x, m, Nsub, nd, Ntv, tau, refDV)
 % Delay Vector Variance method for real and complex signals
 %
 %
@@ -10,6 +10,9 @@ function data = DVV_dvv(x, m, Nsub, nd, Ntv, tau)
 %	nd      Span over which to perform DVV
 %	tau     time delay between delay-vector elements, in samples (default 1).
 %	        hctsa modification: the original fixed tau = 1.
+%	refDV   (optional) indices (1 to N - m*tau) of the Nsub reference delay vectors.
+%	        hctsa modification: by default they are drawn at random (randsample),
+%	        as in the original.
 %
 %
 %   A Delay Vector Variance (DVV) toolbox for MATLAB
@@ -68,7 +71,11 @@ if size(x,2) > size(x,1)
 end
 
 % Generate Nsub subset from existing DV's, randomly
-ref = randsample(N - m*tau,Nsub) + m*tau;
+if nargin < 7 || isempty(refDV)
+    ref = randsample(N - m*tau,Nsub) + m*tau;
+else
+    ref = refDV(:) + m*tau; % (the target index of each reference delay vector)
+end
 
 % Compute pairwise distances between reference DVs and all DVs
 % (hctsa modification: the original evaluated norm() once per (reference,
@@ -96,9 +103,10 @@ rd = avg-nd*variance + (2*nd*variance*n)/(Ntv-1);
 % (hctsa modification: the original looped over every (rd, reference) pair
 % with a find() and a var() over the selected targets. Equivalent here:
 % for each reference, sort its distances once and read the variance of
-% the targets within each rd off cumulative sums. The original excluded the
-% target with raw index k (the loop counter, not ref(k)) from each set; that
-% is reproduced exactly so results are unchanged.)
+% the targets within each rd off cumulative sums. The set around a reference
+% excludes the reference vector itself (at distance 0, so in every set with
+% rd >= 0); the original instead excluded the target with raw index k, the loop
+% counter rather than ref(k).)
 tot = zeros(1, Ntv);
 count = zeros(1, Ntv);
 rdRow = rd(:)';
@@ -110,14 +118,11 @@ for k = 1:Nsub
     c = sum(ds <= rdRow, 1); % number of targets within each rd (1 x Ntv)
     s1 = zeros(1, Ntv); s2 = zeros(1, Ntv);
     s1(c > 0) = S1(c(c > 0)); s2(c > 0) = S2(c(c > 0));
-    % Exclude target index k, as the original did (only possible when k is a
-    % valid target index, i.e., k > m*tau, and it lies within rd):
-    if k > m*tau
-        isIn = d(k - m*tau, k) <= rdRow;
-        c(isIn) = c(isIn) - 1;
-        s1(isIn) = s1(isIn) - x(k);
-        s2(isIn) = s2(isIn) - x(k)^2;
-    end
+    % Exclude the reference vector itself (distance 0, so within every rd >= 0):
+    isIn = rdRow >= 0;
+    c(isIn) = c(isIn) - 1;
+    s1(isIn) = s1(isIn) - x(ref(k));
+    s2(isIn) = s2(isIn) - x(ref(k))^2;
     % Only those variance values are considered for which the corresponding
     % sets have atleast 30 DVs
     ok = (c >= 30) & (rdRow > 0);

@@ -380,8 +380,8 @@ end
 function f = SUB_LinearFit(x, y)
 	% Ordinary least-squares line y = a*x + b, with R^2 and root-mean-square error (n - 2 degrees of freedom)
 	n = length(y);
-	if n < 3 || ~(sum((y - mean(y)).^2) > 0)
-		% Too few points, or a constant curve: no meaningful fit
+	if n < 3 || ~(max(y) - min(y) > 1e-12 * max(abs(y)))
+		% Too few points, or a constant curve (to within rounding): no meaningful fit
 		f = struct('a', NaN, 'b', NaN, 'r2', NaN, 'rmse', NaN);
 		return
 	end

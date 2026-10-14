@@ -2,8 +2,8 @@ function out = NL_PoincareSection(y, ref, embedParams)
 % NL_PoincareSection   Poincare section analysis of a time series.
 %
 % Time-delay embeds the time series in three dimensions and computes a Poincare section
-% using TISEAN's 'poincare', which cuts the trajectory on a fixed embedding coordinate (the
-% last, by convention) held at its own mean, in a single crossing direction. Each crossing
+% with the algorithm of TISEAN's 'poincare', which cuts the trajectory on a fixed embedding
+% coordinate (the last, by convention) held at its own mean, in a single crossing direction. Each crossing
 % gives a point (x, y) on the 2-dimensional section: the other two embedding coordinates
 % at the (interpolated) crossing. The outputs describe this cloud of points: the proportion
 % of time points that cross; the spread, range and autocorrelation of x, y and of the
@@ -129,36 +129,16 @@ if isnan(tau)
 end
 m = tm(2);
 
-filePath = BF_WriteTempFile(y);
-outFilePath = [filePath '.poin'];
-
-% Cut on the last (m-th) embedding coordinate, at TISEAN's own default
-% threshold (that coordinate's mean):
-[~, res] = BF_TiseanSystem(sprintf('poincare -d%u -m%u -q%u -C%u -o %s %s', ...
-						  tau, m, m, direction, outFilePath, filePath));
-
-if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
-	if exist(outFilePath, 'file'), delete(outFilePath); end
-	error('Call to TISEAN function ''poincare'' failed.');
-end
-
-if ~exist(outFilePath, 'file')
-	error('TISEAN function ''poincare'' did not produce a .poin output file.');
-end
-
-% An empty output file means no crossings were found in this direction
-% (dlmread errors on an empty file, so check first):
-fileInfo = dir(outFilePath);
-if fileInfo.bytes == 0
-	delete(outFilePath);
+% Cut on the last (m-th) embedding coordinate at the mean of the series (the
+% algorithm of TISEAN's poincare with its defaults, computed here in double precision):
+v = SUB_PoincareCut(y, m, tau, direction);
+if size(v, 1) == 0
 	fprintf(1, 'No section points found to run NL_PoincareSection\n');
 	out = NaN; return
 end
 
 % Columns are the two uncut embedding coordinates, followed by the
 % (interpolated) crossing time -- only the first two are point coordinates:
-v = dlmread(outFilePath);
-delete(outFilePath);
 v = v(:, 1:2);
 NN = size(v, 1);
 
@@ -289,4 +269,42 @@ function boxcounts = subcountboxes(x, y, nbox)
 end
 % ------------------------------------------------------------------------------
 
+end
+
+% ------------------------------------------------------------------------------
+function v = SUB_PoincareCut(s, m, tau, direction)
+	% The algorithm of TISEAN's poincare (-d tau -m m -q m -C direction, cut at the
+	% default level, the mean of the series), in double precision. With the delay
+	% vector at time i being (s(i - (m-1)*tau), ..., s(i - tau), s(i)), a crossing is
+	% s(i) < c <= s(i+1) (direction 0, from below) or s(i) > c >= s(i+1) (direction 1,
+	% from above), at the fractional time i + delta, delta = (s(i) - c)/(s(i) - s(i+1)).
+	% Each row of v holds the other m-1 coordinates linearly interpolated to that time,
+	% s(j) + delta*(s(j+1) - s(j)) for j = i - (m-1)*tau, ..., i - tau, then the time
+	% since the previous crossing; the first crossing only starts the clock.
+	s = s(:);
+	N = length(s);
+	c = 0; % the mean, as TISEAN sums it (in order)
+	for k = 1:N
+		c = c + s(k);
+	end
+	c = c / N;
+	i = ((m - 1)*tau + 1:N - 1)';
+	if direction == 0
+		i = i(s(i) < c & s(i + 1) >= c);
+	else
+		i = i(s(i) > c & s(i + 1) <= c);
+	end
+	if length(i) < 2
+		v = zeros(0, m);
+		return
+	end
+	delta = (s(i) - c) ./ (s(i) - s(i + 1));
+	t = (i - 1) + delta; % (0-based crossing times)
+	v = zeros(length(i), m);
+	for k = 1:m - 1
+		j = i - (m - k)*tau;
+		v(:, k) = s(j) + delta .* (s(j + 1) - s(j));
+	end
+	v(:, m) = [NaN; diff(t)];
+	v = v(2:end, :);
 end

@@ -98,6 +98,14 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 %       by the Schwarz Bayesian criterion, and its criterion value
 %
 % ---NOTES:
+% Not registered in hctsa's feature set: summaryexitflag (the exit flag of the
+% optimizer, not a property of the series), constant (redundant with persistence),
+% and constanterr and GARCHerr_1 (standard errors of coefficients that are not
+% identified when the ARCH coefficient is near 0, unstable to tiny perturbations of
+% the series). Where the ARCH coefficient is near 0, GARCH_1 and persistence are
+% themselves only weakly determined by the data (the likelihood is nearly flat in
+% that direction).
+%
 % Only the P = 1, Q = 1 registration remains. The P = 1, Q = 2 registration was
 % dropped as almost entirely redundant with it (r = 0.9-1.0 across nearly every
 % output field, on two collections of real-world series). MF_GARCHcompare, which

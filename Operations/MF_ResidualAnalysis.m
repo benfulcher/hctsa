@@ -42,6 +42,14 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 %   normksstat Kolmogorov-Smirnov statistic against a normal distribution
 %   popt       order of an AR model fitted to the residuals (SBC-selected)
 %   minsbc     the corresponding Schwarz criterion
+%
+% ---NOTES:
+% Residuals that do not vary beyond the level of rounding error (an exactly
+% predictable series: std(e) <= 1e-9 * max(std(y), mean(abs(e))), with std(y) taken as 0
+% if y is not supplied) carry no information on their shape: their autocorrelations,
+% their standardized size and their windowed statistics are rounding noise. Then only
+% meane, meanabs and stde (which have meaningful limiting values) are returned, and all
+% other fields are NaN.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -99,6 +107,13 @@ elseif all(e < 0)
 	warning('Very weird that ALL model residuals are negative...')
 end
 N = length(e);
+if isempty(y)
+	scaleY = 0;
+else
+	scaleY = std(y);
+end
+% Residuals that do not vary beyond rounding (see NOTES):
+isRoundingLevel = ~(std(e) > 1e-9 * max(scaleY, mean(abs(e))));
 
 % ------------------------------------------------------------------------------
 %% Location, scale, and shape
@@ -106,18 +121,21 @@ N = length(e);
 out.meane = mean(e);
 out.meanabs = mean(abs(e));
 out.stde = std(e);
-if std(e) == 0
-	out.maxonstd = 0;
-else
-	out.maxonstd = max(abs(e)) / std(e);
+if isRoundingLevel
+	% every other field is a rounding-noise statistic: NaN
+	shapeFields = {'maxonstd', 'ac1', 'ac2', 'ac3', 'propbth', 'taurat', 'sws', 'swm'};
+	if strcmp(summaryLevel, 'full')
+		shapeFields = [shapeFields, {'ftbth', 'normksstat', 'popt', 'minsbc'}];
+	end
+	for k = 1:numel(shapeFields)
+		out.(shapeFields{k}) = NaN;
+	end
+	return
 end
+out.maxonstd = max(abs(e)) / std(e);
 
 % z-score the residuals for everything that follows (all of it is scale-free anyway):
-if std(e) == 0
-	eZ = zeros(N, 1);
-else
-	eZ = zscore(e);
-end
+eZ = zscore(e);
 
 % ------------------------------------------------------------------------------
 %% Serial correlation

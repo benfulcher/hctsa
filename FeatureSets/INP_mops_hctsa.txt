@@ -573,7 +573,7 @@ HT_DistributionTest(x,'ks','norm')				HT_DistributionTest_ks_norm
 HT_DistributionTest(x,'ks','rayleigh')			HT_DistributionTest_ks_rayl
 HT_DistributionTest(x,'ks','uni')				HT_DistributionTest_ks_uni
 HT_DistributionTest(x,'ks','wbl')				HT_DistributionTest_ks_wbl
-HT_MarginalTests(x,'jbtest')		HT_MarginalTests_jbtest
+HT_MarginalTests(x,'logjb')		HT_MarginalTests_logjb
 HT_IndependenceTests(x_z,'lbq')			HT_IndependenceTests_lbq
 HT_IndependenceTests(x,'runsz')	HT_IndependenceTests_runsz
 HT_MarginalTests(x_z,'signrank')	HT_MarginalTests_signrank
@@ -735,7 +735,6 @@ PD_PeriodicityWang(x_z)	PD_PeriodicityWang
 PH_KramersMoyal(x_z,1,15)	PH_KramersMoyal_1_15
 PH_ForcePotential(x_z,'dblwell',[1,0.2,0.1])	PH_ForcePotential_dblwell_1_02_01
 PH_ForcePotential(x_z,'dblwell',[1,0.5,0.2])	PH_ForcePotential_dblwell_1_05_02
-PH_ForcePotential(x_z,'dblwell',[2,0.05,0.2])	PH_ForcePotential_dblwell_2_005_02
 PH_ForcePotential(x_z,'dblwell',[3,0.01,0.1])	PH_ForcePotential_dblwell_3_001_01
 PH_ForcePotential(x_z,'sine',[0.5,5,0.1])	PH_ForcePotential_sine_05_5_01
 PH_ForcePotential(x_z,'sine',[1,2,0.1])	    PH_ForcePotential_sine_1_2_01

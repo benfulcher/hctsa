@@ -27,7 +27,9 @@ function f = BF_ExpFit(x, y, withOffset, maxRate)
 %       the search includes the constant model b = 0
 % adjr2: adjusted R^2, 1 - (1 - r2)*(n - 1)/(n - p), for p = 3 (or 2) parameters
 % rmse: root-mean-square error of the fit, sqrt(SSE/(n - p))
-% All are NaN if y is constant or not finite, or if there are not more data points
+% All are NaN if y is constant (to within 1e-12 of its largest magnitude, so that
+% rounding differences between equal values are not fitted) or not finite, or if
+% there are not more data points
 % than parameters.
 
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -71,7 +73,7 @@ n = length(y);
 numParams = 2 + withOffset;
 yc = y - mean(y);
 SST = sum(yc.^2);
-if n <= numParams || ~(SST > 0) || ~all(isfinite(y)) || range(x) == 0
+if n <= numParams || ~all(isfinite(y)) || range(x) == 0 || ~(max(y) - min(y) > 1e-12 * max(abs(y)))
 	f = struct('a', NaN, 'b', NaN, 'c', NaN, 'r2', NaN, 'adjr2', NaN, 'rmse', NaN);
 	return
 end

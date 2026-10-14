@@ -30,7 +30,8 @@ function out = PP_Compare(y, detrndmeth)
 %           spap2 (Spline Toolbox) with the given number of polynomial pieces and
 %           spline order, e.g., 'spline24', a cubic spline with 2 pieces
 %       'diff<n>': take n successive differences, e.g., 'diff3'
-%       'medianf<n>': a running median filter of length n (medfilt1), e.g., 'medianf3'
+%       'medianf<n>': a running median filter of length n (centered; the end values
+%           are repeated beyond the ends), e.g., 'medianf3'
 %       'rav<n>': a running mean filter of length n (filter), e.g., 'rav5'
 %       'resample_<p>_<q>': resample the series by the ratio p/q (resample); e.g.,
 %           'resample_1_2' halves the length and 'resample_10_1' multiplies it by 10
@@ -152,7 +153,10 @@ elseif length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'diff') && ~isnan(str2
 	% 5) Median Filter
 elseif length(detrndmeth) > 7 && strcmp(detrndmeth(1:7), 'medianf') && ~isnan(str2double(detrndmeth(8:end)))
 	n = str2double(detrndmeth(8:end)); % order of filtering
-	y_d = medfilt1(y, n);
+	% (the first and last values are repeated beyond the ends, so the filtered series is
+	% not pulled toward zero there, which would depend on the offset of the data)
+	lo = floor(n / 2); hi = n - 1 - lo;
+	y_d = movmedian([repmat(y(1), lo, 1); y(:); repmat(y(end), hi, 1)], [lo, hi], 'Endpoints', 'discard');
 
 	% 6) Running Average
 elseif length(detrndmeth) > 3 && strcmp(detrndmeth(1:3), 'rav') && ~isnan(str2double(detrndmeth(4:end)))
