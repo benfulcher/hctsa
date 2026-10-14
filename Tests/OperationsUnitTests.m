@@ -1509,6 +1509,148 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
                 EN_DispEn(y, 2, 6, 1).normDispEn, 'AbsTol', 1e-12);
         end
 
+        %-------------------------------------------------------------
+        % SP_Rhythmicity
+        %-------------------------------------------------------------
+        function test_SP_Rhythmicity_SustainedVsBurstySamePower(testCase)
+            % The whole point of the rhythmicity index: against a common
+            % noise floor, a sustained oscillation and a train of brief
+            % bursts at the SAME frequency and matched power are told apart
+            % -- the sustained one has far higher phase persistence, so a
+            % taller, more prominent peak in the rhythmicity spectrum, at
+            % the right frequency. (A noise floor is needed: LAVI of a *pure*
+            % sinusoid saturates near 1 at every frequency, because the
+            % off-band wavelet output is still a phase-coherent copy of the
+            % tone -- see Karvat et al.)
+            rng(7);
+            N = 3000;
+            t = (1:N)';
+            f0 = 0.05; % cycles/sample, inside the default [0.02,0.4] grid
+
+            carrier = sin(2*pi*f0*t);
+            period = 1/f0;
+            env = double(mod(floor(t/(3*period)), 3) == 0); % ~3-cycle-on, 6-off
+            bursts = env .* sin(2*pi*f0*t);
+            bursts = bursts / std(bursts) * std(carrier); % power-match to carrier
+
+            noise = randn(N,1);
+            outS = SP_Rhythmicity(carrier + noise);
+            outB = SP_Rhythmicity(bursts + noise);
+
+            testCase.verifyGreaterThan(outS.lavi_max, 0.85, ...
+                'A sustained oscillation above noise should have high peak phase persistence.');
+            testCase.verifyGreaterThan(outS.lavi_max, outB.lavi_max + 0.2, ...
+                'Sustained oscillation should be markedly more rhythmic than power-matched bursts.');
+            testCase.verifyGreaterThan(outS.lavi_maxOnMedian, outB.lavi_maxOnMedian, ...
+                'The sustained band should stand out further above the rhythmicity baseline.');
+            testCase.verifyEqual(outS.lavi_freqAtMax, 2*pi*f0, 'RelTol', 0.2, ...
+                'The most rhythmic frequency should be the oscillation frequency.');
+
+            % Relative to the spectral null (what the power spectrum alone
+            % implies), the sustained oscillation is more rhythmic and the
+            % bursts are less so, at the dominant frequency:
+            testCase.verifyGreaterThan(outS.ex_atPeakPower, 0.03, ...
+                'A sustained oscillation should be more rhythmic than its spectrum implies.');
+            testCase.verifyLessThan(outB.ex_atPeakPower, 0, ...
+                'Bursts should be less rhythmic than their spectrum implies.');
+
+            % Smoothed band count: one dominant rhythmic band for the
+            % sustained oscillation, and no more bands than the (jaggier)
+            % bursty case would spuriously produce.
+            testCase.verifyGreaterThanOrEqual(outS.lavi_numPeaks, 1, ...
+                'The sustained oscillation should register at least one rhythmic band.');
+            testCase.verifyLessThanOrEqual(outS.lavi_numPeaks, 3, ...
+                'Smoothing should keep the sustained-oscillation band count small.');
+        end
+
+        function test_SP_Rhythmicity_WhiteNoiseHasLowFlatRhythmicity(testCase)
+            % White noise has no sustained rhythm at any frequency: LAVI
+            % should sit low and roughly flat, with a small maxOnMedian.
+            rng(11);
+            out = SP_Rhythmicity(randn(4000,1));
+            testCase.verifyLessThan(out.lavi_median, 0.4, ...
+                'White noise should have low baseline rhythmicity.');
+            testCase.verifyLessThan(out.lavi_maxOnMedian, 2, ...
+                'White noise should show no strongly prominent rhythmic band.');
+            testCase.verifyLessThanOrEqual(out.lavi_numPeaks, 2, ...
+                'Smoothing should leave white noise with essentially no rhythmic bands.');
+        end
+
+        function test_SP_Rhythmicity_WhiteNoiseFloorMatchesTheory(testCase)
+            % With an m-cycle wavelet and a lag of tau cycles, the wavelet
+            % output of white noise has lag correlation exp(-pi^2 tau^2/m^2)
+            % (0.411 for m = 5, tau = 1.5), so its LAVI converges to
+            % [E(rho^2) - (1-rho^2) K(rho^2)]/rho = 0.330 at every frequency.
+            rng(5);
+            rho = exp(-pi^2*1.5^2/5^2);
+            [K, E] = ellipke(rho^2);
+            floorTheory = (E - (1-rho^2)*K)/rho;
+            out = SP_Rhythmicity(randn(20000,1));
+            testCase.verifyEqual(out.lavi_median, floorTheory, 'AbsTol', 0.015, ...
+                'The white-noise LAVI floor should match the theoretical value.');
+            testCase.verifyEqual(out.ex_mean, 0, 'AbsTol', 0.01, ...
+                'White noise should sit on its spectral null.');
+        end
+
+        function test_SP_Rhythmicity_LinearGaussianSitsOnNull(testCase)
+            % The spectral null is what a Gaussian process with the same
+            % spectrum gives, so a linear Gaussian process with a strong
+            % spectral peak (a stochastic AR(2) oscillator) has high raw
+            % LAVI at its peak but no excess there.
+            rng(17);
+            y = filter(1, [1 -1.8*cos(2*pi*0.1) 0.81], randn(8000,1));
+            out = SP_Rhythmicity(y);
+            testCase.verifyGreaterThan(out.lavi_atPeakPower, out.lavi_median + 0.1, ...
+                'The spectral peak should raise the raw LAVI.');
+            testCase.verifyEqual(out.ex_atPeakPower, 0, 'AbsTol', 0.03, ...
+                'A linear Gaussian process should show no excess rhythmicity at its peak.');
+            testCase.verifyEqual(out.ex_mean, 0, 'AbsTol', 0.015, ...
+                'A linear Gaussian process should sit on its spectral null overall.');
+        end
+
+        function test_SP_Rhythmicity_RoundoffCoefficientsHaveNoPhase(testCase)
+            % A sparse spike train is constant across the wavelet's support at
+            % many time points, where the coefficients are round-off and
+            % their phase is meaningless. Those coefficients are left out, so
+            % perturbing the input at the level of round-off must not move
+            % any output.
+            rng(3);
+            y = zeros(3000,1);
+            y(randperm(3000, 12)) = 1 + rand(12,1);
+            y = zscore(y);
+            out1 = SP_Rhythmicity(y);
+            out2 = SP_Rhythmicity(y + 1e-15*randn(size(y)));
+            fn = fieldnames(out1);
+            for k = 1:numel(fn)
+                testCase.verifyEqual(out2.(fn{k}), out1.(fn{k}), 'AbsTol', 1e-8, ...
+                    sprintf('%s should not depend on round-off.', fn{k}));
+            end
+        end
+
+        function test_SP_Rhythmicity_SmoothingReducesSpuriousBandCount(testCase)
+            % The smoothWin argument should monotonically (weakly) shrink the
+            % rhythmic-band count on a noisy spectrum: more smoothing, fewer
+            % spurious local maxima.
+            rng(23);
+            y = filter(1, [1 -0.7], randn(3000,1)); % AR(1): jagged LAVI spectrum
+            nUnsmoothed = SP_Rhythmicity(y, [], [], [], [], [], 1).lavi_numPeaks;
+            nSmoothed = SP_Rhythmicity(y, [], [], [], [], [], 9).lavi_numPeaks;
+            testCase.verifyLessThanOrEqual(nSmoothed, nUnsmoothed, ...
+                'A wider Daniell window should not increase the band count.');
+        end
+
+        function test_SP_Rhythmicity_DegenerateInputsReturnNaN(testCase)
+            % Constant series (no phase) and series too short to fit even a
+            % handful of the analysis wavelets should return a scalar NaN,
+            % matching the codebase NaN-vs-error convention.
+            testCase.verifyTrue(isscalar(SP_Rhythmicity(ones(2000,1))) && ...
+                isnan(SP_Rhythmicity(ones(2000,1))), ...
+                'A constant series carries no phase information.');
+            testCase.verifyTrue(isscalar(SP_Rhythmicity(randn(40,1))) && ...
+                isnan(SP_Rhythmicity(randn(40,1))), ...
+                'A too-short series cannot support the rhythmicity spectrum.');
+        end
+
     end
 end
 

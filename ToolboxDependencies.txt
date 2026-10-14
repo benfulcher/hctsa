@@ -71,6 +71,7 @@ SB_TransitionPAlphabet.m
 SC_FluctAnal.m
 SD_SurrogateTest.m
 SD_Surrogates.m
+SP_Rhythmicity.m
 SP_SinusoidFit.m
 SP_Summaries.m
 ST_LocalExtrema.m
