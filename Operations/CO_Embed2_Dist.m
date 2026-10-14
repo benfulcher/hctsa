@@ -144,7 +144,7 @@ out.d_expfit_nlogL = nlogL;
 
 % Sum of abs differences between exp fit and observed:
 % Use a histogram with automatic binning (BF_HistEdges 'auto', explicit edges)
-if range(d) == 0 % all distances equal: no distribution to compare with the fit
+if range(d) <= 1e-12 * max(d) % all distances equal (to within rounding): no distribution to compare with the fit
 	out.d_expfit_meandiff = NaN; return
 end
 binEdges = BF_HistEdges(d, 'auto');
