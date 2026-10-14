@@ -25,6 +25,13 @@ function edges = BF_HistEdges(y, binRule, limits)
 %
 % ---OUTPUTS:
 % edges, a row vector of numBins + 1 increasing bin edges.
+%
+% Spreads at the level of rounding are treated as zero: data whose range is at most
+% 1e-12 of their largest magnitude are treated as constant (one bin), and an IQR at
+% most 1e-12 of the largest magnitude counts as zero in the rules. Values that are
+% mathematically equal but computed by different arithmetic (e.g., distances
+% between points of a lattice-valued series) differ in their last bits, and would
+% otherwise set the number of bins, or the bins themselves, by round-off.
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
@@ -62,7 +69,8 @@ end
 y = y(~isnan(y));
 n = length(y);
 dataRange = max(y) - min(y); % (for the rules)
-if nargin >= 3 && ~isempty(limits)
+useLimits = nargin >= 3 && ~isempty(limits);
+if useLimits
 	lo = limits(1);
 	hi = limits(2);
 else
@@ -77,8 +85,9 @@ if isnumeric(binRule)
 	numBins = binRule;
 else
 	numSturges = ceil(log2(n) + 1);
-	if dataRange > 0
-		fdWidth = 2 * iqr(y) * n^(-1/3);
+	iqrY = iqr(y);
+	if dataRange > 0 && iqrY > 1e-12 * max(abs(y)) % (an IQR at the level of rounding counts as 0)
+		fdWidth = 2 * iqrY * n^(-1/3);
 	else
 		fdWidth = 0;
 	end
@@ -105,7 +114,8 @@ end
 % ------------------------------------------------------------------------------
 % Bin edges
 % ------------------------------------------------------------------------------
-if hi == lo % constant data: one bin of unit width
+if hi == lo || (~useLimits && dataRange <= 1e-12 * max(abs(y)))
+	% constant data (or constant to within rounding): one bin of unit width
 	edges = lo + [-0.5, 0.5];
 	return
 end

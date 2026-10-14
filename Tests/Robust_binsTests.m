@@ -95,6 +95,21 @@ classdef Robust_binsTests < matlab.unittest.TestCase
             tc.verifyEqual(v, SY_SlidingWindow(y, 'specen', 'std', 5, 1));
         end
 
+        function histEdgesRoundoffSpreads(tc)
+            % values that are equal but for their last bits (as computed distances
+            % between lattice points can be) give the same bins as the exact ties
+            tied = [zeros(20, 1); ones(60, 1); 2*ones(20, 1)];
+            jittered = tied; jittered(21:80) = 1 + (0:59)'*eps;
+            tc.verifyGreaterThan(iqr(jittered), 0); % the IQR is round-off, not 0
+            tc.verifyEqual(BF_HistEdges(jittered, 'auto'), BF_HistEdges(tied, 'auto'), 'AbsTol', 1e-12);
+            tc.verifyEqual(numel(BF_HistEdges(jittered, 'fd')) - 1, ceil(log2(100) + 1)); % Sturges, as for IQR = 0
+            % data constant to within rounding: one bin, as for constant data
+            tc.verifyEqual(numel(BF_HistEdges(1 + (0:9)'*eps, 10)), 2);
+            tc.verifyEqual(numel(BF_HistEdges(1 + (0:9)'*eps, 'auto')), 2);
+            % explicit limits are still honored
+            tc.verifyEqual(numel(BF_HistEdges(1 + (0:9)'*eps, 4, [0 2])), 5);
+        end
+
         function kernelSmoothDegenerate(tc)
             tc.verifyTrue(isnan(DN_FitKernelSmooth(ones(50, 1))));
             rng(9); o = DN_FitKernelSmooth(randn(500, 1));
