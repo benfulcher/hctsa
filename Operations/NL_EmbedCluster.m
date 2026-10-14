@@ -1,4 +1,4 @@
-function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
+function out = NL_EmbedCluster(y, tau, m, maxN)
 % NL_EmbedCluster   Whether the time-delay embedding of the series forms separate clusters of points.
 %
 % Reconstructs the time series as a time-delay embedding (as in NL_EmbedPCA,
@@ -6,20 +6,19 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 % distinct groups. A dynamical process whose trajectory visits distinct regions
 % of phase space (e.g., alternating between two attractor states, or a system
 % with intermittent bursts) leaves a multi-modal point cloud in the embedding; a
-% process with a single smooth (e.g., unimodal-stochastic or single-loop
-% periodic) attractor does not. This is a distinct signal from
-% marginal-distribution multi-modality (e.g., DN_ kurtosis/bimodality stats on
-% the raw values), since two states can overlap entirely in amplitude yet still
-% separate cleanly once lagged coordinates are added, and from regime-switching
-% detected by MF_hmm_Fit / MF_hmm_CompareNStates, which cluster points in
-% raw-amplitude (not lagged/embedded) space.
+% process with a single smooth (e.g., unimodal-stochastic) attractor does not.
+% This is a distinct signal from marginal-distribution multi-modality (e.g., DN_
+% kurtosis/bimodality stats on the raw values), since two states can overlap
+% entirely in amplitude yet still separate cleanly once lagged coordinates are
+% added, and from regime-switching detected by MF_hmm_Fit / MF_hmm_CompareNStates,
+% which cluster points in raw-amplitude (not lagged/embedded) space.
 %
-% Two kinds of statistic are computed. bestK and bicgain come from Gaussian
-% mixture models with 1, ..., kMax components, and describe how much
-% non-Gaussian mixture structure the cloud has. sep_mahal and sep_pp measure the
-% separation of a two-group split of the cloud; both are always defined, even
-% when two groups are not favored over one, so they are small (but nonzero) for
-% a unimodal cloud and grow with the separation of genuine clusters.
+% All statistics are computed on the whitened cloud (zero mean, identity
+% covariance), so they do not depend on its scale or orientation. sep_pp,
+% sep_mahal and valley measure the separation of a two-group split of the cloud;
+% they are always defined, even when two groups are not favored over one, and grow
+% with the separation of genuine clusters. nongauss measures how far the cloud is
+% from a single Gaussian, whatever the reason.
 %
 % ---INPUTS:
 % y, the input time series
@@ -28,70 +27,77 @@ function out = NL_EmbedCluster(y, tau, m, kMax, maxN)
 %      'mi' for the smaller of the first minimum of the Kraskov automutual
 %      information and the 'ac1e' delay (see BF_GetTau; default: 'ac')
 % m, the embedding dimension (default: 2)
-% kMax, the maximum number of Gaussian mixture components to consider when
-%       searching for the BIC-optimal component count (default: 4)
 % maxN, the maximum number of embedded points used. Defaults to 'full' (no
-%       cropping): the cost scales mildly with N. Set to a number to reduce
-%       longer embeddings to their first maxN points instead (a warning is
-%       issued whenever that cropping happens, since the separation estimates
-%       keep sharpening with more points: it is a memory/time cap, not a
-%       convergence point).
+%       cropping). Set to a number to reduce longer embeddings to their first maxN
+%       points instead (a warning is issued whenever that cropping happens, since
+%       the estimates keep sharpening with more points: it is a memory/time cap,
+%       not a convergence point).
 %
 % ---OUTPUTS:
-% bestK, the BIC-optimal number of mixture components over 1:kMax
-% bicgain, the BIC improvement of the best fit over a single Gaussian fit, per
-%       embedded point, (BIC_1 - BIC_best)/(2N) for N embedded points (the gain
-%       in maximized log-likelihood per point, less the penalty for the extra
-%       parameters); 0 when bestK == 1
-% sep_mahal, log1p of the Mahalanobis separation between the two component
-%       means of a 2-component Gaussian mixture fit, using their pooled
-%       covariance (log-compressed to tame the heavy tail from near-singular
-%       covariance on near-deterministic embeddings). The fit starts from
-%       deterministic hard splits of the points (see NOTES).
 % sep_pp, projection-pursuit two-means separation: the largest fraction of the
 %       variance of the whitened point cloud that lies between the two groups of
 %       an optimal two-group split along a direction, over a fixed grid of
 %       directions (see NOTES). About 2/pi (0.64) for Gaussian data, and 1 for
 %       two distinct point masses.
+% sep_mahal, log1p of the Mahalanobis separation between the two component
+%       means of a 2-component Gaussian mixture fit, using their pooled
+%       covariance (log-compressed to tame the heavy tail from near-singular
+%       covariance on near-deterministic embeddings). The fit starts from
+%       deterministic hard splits of the points (see NOTES).
+% valley, the depth of the density valley at the sep_pp split: one minus the
+%       kernel density of the projected points at the cut, relative to the
+%       smaller of the densities at the two groups' median points, floored at 0.
+%       0 when the projected density has no dip at the cut (e.g., any unimodal
+%       cloud), and 1 when the two groups are separated by an empty gap.
+% nongauss, the negentropy of the whitened cloud, in nats: the entropy of a
+%       Gaussian with the same covariance minus the cloud's entropy, estimated
+%       from nearest-neighbor distances (see NOTES). Near 0 for Gaussian data, and
+%       larger the more structured (clustered, curved, skewed or heavy-tailed)
+%       the cloud.
 %
 % ---NOTES:
-% The mixtures behind bestK and bicgain are fitted with full covariances,
-% k-means++ initialization (10 replicates, the best likelihood is kept; the
-% generator is seeded inside the function), at most 500 iterations, and a
-% covariance regularization of 1e-6 times the mean variance of the embedded
-% coordinates. On a unimodal cloud the 2-component likelihood has near-equal
-% optima (splits along different directions, or a concentric core and halo for
-% heavy tails), so statistics of which optimum a randomly started fit finds
-% depend on the random starts; the BIC values themselves do not.
+% The cloud is whitened along its principal axes (each eigenvector signed so
+% that its largest-magnitude element is positive).
 %
-% sep_pp: the embedded cloud is whitened (zero mean, identity covariance; the
-% coordinates are its principal components, each eigenvector signed so that its
-% largest-magnitude element is positive) and projected onto a fixed grid of
-% directions: 90 equally spaced angles in [0, pi) for m = 2; 300
-% Fibonacci-lattice points on the upper hemisphere for m = 3; the single axis
-% for m = 1; and 300 points of a generalized golden-ratio (low-discrepancy)
-% sequence mapped to the sphere for m > 3. For each direction the exact optimal
-% one-dimensional two-means split is found (scanning every cut point between
-% distinct sorted values), and its between-group sum of squares as a fraction
-% of the total is recorded; sep_pp is the maximum over directions.
+% sep_pp: the whitened cloud is projected onto a fixed grid of directions: 90
+% equally spaced angles in [0, pi) for m = 2; 300 Fibonacci-lattice points on the
+% upper hemisphere for m = 3; the single axis for m = 1; and 300 points of a
+% generalized golden-ratio (low-discrepancy) sequence mapped to the sphere for
+% m > 3. For each direction the exact optimal one-dimensional two-means split is
+% found (scanning every cut point between distinct sorted values), and its
+% between-group sum of squares as a fraction of the total is recorded; sep_pp is
+% the maximum over directions.
 %
 % sep_mahal: the 2-component mixture is fitted by EM from the hard split at the
 % optimal one-dimensional two-means threshold along the first principal
 % component, and again from the split found for sep_pp. Each fit starts from
-% the two groups' proportions, means and regularized covariances, and iterates
-% until the mean log-likelihood per point changes by less than 1e-6 (at most
-% 500 iterations); the fit of higher likelihood is kept. If neither split can
-% start a fit (e.g., a group with no more than m points), splits at the median
-% of the same two projections are used, and then the 2-component fit of the
-% BIC search (if kMax >= 2). sep_mahal is NaN only if no 2-component fit is
-% possible.
+% the two groups' proportions, means and regularized covariances (a
+% regularization of 1e-6 times the mean variance of the embedded coordinates),
+% and iterates until the mean log-likelihood per point changes by less than 1e-6
+% (at most 500 iterations); the fit of higher likelihood is kept. If neither
+% split can start a fit (e.g., a group with no more than m points), splits at the
+% median of the same two projections are used. sep_mahal is NaN only if no
+% 2-component fit is possible.
 %
-% A curved-but-unimodal manifold (e.g., the ring traced out by a periodic
-% signal in a 2-d embedding) is poorly fit by any single elliptical Gaussian and
-% so also raises bestK and bicgain, despite having no distinct dynamical states;
-% bicgain == 0 (bestK == 1) is a clean "no mixture structure at all" signal.
-% bicgain measures non-Gaussian mixture structure in general (e.g., a skewed
-% marginal distribution also raises it), not separation specifically.
+% valley: the points are projected onto the sep_pp direction (unit variance) and
+% their density is estimated with a Gaussian kernel of bandwidth 0.9*N^(-1/5),
+% Silverman's rule of thumb for unit variance. The density is evaluated at the
+% cut and at each group's lower median point (a data point, so that both
+% densities are positive).
+%
+% nongauss: the entropy of the whitened cloud is estimated with the
+% Kozachenko-Leonenko nearest-neighbor estimator (k = 5 neighbors), with each
+% nearest-neighbor distance floored at 0.01 (in whitened units), so that repeated
+% values (point masses) give a finite, saturating value rather than a divergent
+% one. The Gaussian reference entropy is that of the identity covariance,
+% (m/2)*log(2*pi*e).
+%
+% A curved-but-unimodal manifold (e.g., the ring traced out by a periodic signal
+% in a 2-d embedding) has a bimodal projection along any direction, and so also
+% raises sep_pp, sep_mahal and valley, despite having no distinct dynamical
+% states; it also raises nongauss, which measures departure from Gaussianity in
+% general (e.g., a skewed marginal distribution also raises it), not separation
+% specifically.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -133,14 +139,8 @@ if nargin < 3 || isempty(m)
 	m = 2; % two-dimensional embedding by default
 end
 
-if nargin < 4 || isempty(kMax)
-	kMax = 4; % search up to 4 mixture components
-end
-
-if nargin < 5 || isempty(maxN)
-	% No cropping by default: fitgmdist's per-iteration cost is O(N*m*k), with no
-	% O(N^2) memory footprint (unlike, e.g., NL_EmbedKernelPCA)
-	maxN = 'full';
+if nargin < 4 || isempty(maxN)
+	maxN = 'full'; % no cropping by default
 end
 
 % ------------------------------------------------------------------------------
@@ -154,12 +154,12 @@ if isnan(y_embed)
 	out = NaN; return
 end
 
-% Need enough points, relative to m and kMax, for a well-posed full-covariance
-% fit at the largest component count considered:
+% Need enough points, relative to m, for well-posed two-group fits and density
+% estimates:
 Nembed = size(y_embed, 1);
-if Nembed < 20 * m * kMax
-	fprintf(1, 'Not enough embedded points (%u) for a stable %u-dimensional, up-to-%u-component mixture fit\n', ...
-			Nembed, m, kMax);
+if Nembed < 80 * m
+	fprintf(1, 'Not enough embedded points (%u) for stable %u-dimensional cluster statistics\n', ...
+			Nembed, m);
 	out = NaN; return
 end
 
@@ -172,81 +172,22 @@ end
 % Crop to maxN embedded points (memory/time cap)
 % ------------------------------------------------------------------------------
 if ischar(maxN) && strcmp(maxN, 'full')
-	y_gmm = y_embed;
+	y_cloud = y_embed;
 else
 	if Nembed > maxN
-		warning(['Cropping to the first %u of %u embedded points for mixture fitting ' ...
+		warning(['Cropping to the first %u of %u embedded points ' ...
 				 '(memory/time cap, not a convergence point -- raise maxN or use ''full'' ' ...
 				 'for a more precise, more expensive estimate)'], maxN, Nembed);
-		y_gmm = y_embed(1:maxN, :);
+		y_cloud = y_embed(1:maxN, :);
 	else
-		y_gmm = y_embed;
+		y_cloud = y_embed;
 	end
 end
-N = size(y_gmm, 1);
-
-% Regularize covariance estimates proportionally to the data's own scale
-% (y is z-scored, but the embedded coordinates can still have any variance):
-regVal = 1e-6 * mean(var(y_gmm));
-gmOptions = statset('MaxIter', 500, 'Display', 'off');
-
-% ------------------------------------------------------------------------------
-% Fit a grid of mixture models, k = 1, ..., kMax, and record their BIC
-% ------------------------------------------------------------------------------
-BIC = NaN(kMax, 1);
-gmModels = cell(kMax, 1);
-
-% fitgmdist's k-means++ initialization draws from the global random stream,
-% so seed it locally (and restore the caller's state afterwards) for
-% reproducible results independent of what ran before this operation:
-rngState = rng(0, 'twister');
-try
-	% (same covariance regularization and replicates as the k >= 2 fits below, so
-	% that the BIC values are comparable and the fit survives a near-singular cloud)
-	gmModels{1} = fitgmdist(y_gmm, 1, 'CovarianceType', 'full', ...
-							'RegularizationValue', regVal, 'Replicates', 10, ...
-							'Options', gmOptions, 'Start', 'plus');
-	BIC(1) = gmModels{1}.BIC;
-catch
-	% A single-component Gaussian fit failing (degenerate covariance) means
-	% no useful mixture structure can be assessed either:
-	rng(rngState);
-	out = NaN; return
-end
-
-% Some replicates legitimately fail to converge within MaxIter (the best of
-% the remaining replicates is still used); this is expected often enough
-% across a large batch of time series that the warnings are silenced here:
-warningState = warning;
-warning('off', 'stats:gmdistribution:FailedToConvergeReps');
-warning('off', 'stats:gmdistribution:FailedToConverge');
-for k = 2:kMax
-	try
-		gmModels{k} = fitgmdist(y_gmm, k, 'CovarianceType', 'full', ...
-								'RegularizationValue', regVal, 'Replicates', 10, ...
-								'Options', gmOptions, 'Start', 'plus');
-		BIC(k) = gmModels{k}.BIC;
-	catch
-		% This k failed to converge to a valid fit (e.g., an empty or
-		% near-singular component); leave BIC(k) as NaN and move on
-	end
-end
-warning(warningState);
-rng(rngState);
-
-[~, bestK] = min(BIC);
-out.bestK = bestK;
-if bestK == 1
-	out.bicgain = 0;
-else
-	out.bicgain = (BIC(1) - BIC(bestK)) / (2*N);
-end
-out.sep_mahal = NaN; % (set below)
 
 % ------------------------------------------------------------------------------
 % Whitened cloud (zero mean, identity covariance) along its principal axes
 % ------------------------------------------------------------------------------
-centered = y_gmm - mean(y_gmm, 1);
+centered = y_cloud - mean(y_cloud, 1);
 [evecs, evals] = eig(cov(centered));
 [evals, ix] = sort(diag(evals), 'ascend');
 evecs = evecs(:, ix);
@@ -275,6 +216,9 @@ ppProj = white * directions(iBest, :)';
 % sep_mahal: 2-component mixture from deterministic hard-split starts (along the
 % sep_pp direction and along PC1)
 % ------------------------------------------------------------------------------
+% Regularize covariance estimates proportionally to the data's own scale
+% (y is z-scored, but the embedded coordinates can still have any variance):
+regVal = 1e-6 * mean(var(y_cloud));
 [~, pc1Thr] = OptimalTwoMeansSplits(pc1);
 gm2 = [];
 for attempt = 1:2
@@ -285,7 +229,7 @@ for attempt = 1:2
 	end
 	bestLL = -Inf;
 	for j = 1:2
-		gmj = GMM2FromLabels(y_gmm, starts{j}, regVal);
+		gmj = GMM2FromLabels(y_cloud, starts{j}, regVal);
 		if ~isempty(gmj) && gmj.meanLogLik > bestLL
 			gm2 = gmj;
 			bestLL = gmj.meanLogLik;
@@ -295,23 +239,29 @@ for attempt = 1:2
 		break
 	end
 end
-if isempty(gm2) && kMax >= 2 && ~isempty(gmModels{2})
-	% (last resort: the k-means++ fit from the BIC search)
-	gm2 = struct('mu', gmModels{2}.mu, 'Sigma', gmModels{2}.Sigma);
-end
 if isempty(gm2)
-	return
+	out.sep_mahal = NaN;
+else
+	pooledCov = (gm2.Sigma(:, :, 1) + gm2.Sigma(:, :, 2)) / 2;
+	dMu = gm2.mu(1, :) - gm2.mu(2, :);
+	% log1p-compressed: the raw Mahalanobis separation is numerically unstable for
+	% near-deterministic embeddings (e.g., low-noise chaotic maps, whose points
+	% collapse onto a thin curve), where pooledCov can be near-singular and the raw
+	% separation explodes to values in the thousands despite no multi-modal
+	% structure. The log keeps sep_mahal monotonic in separation while preventing
+	% these degenerate cases from dominating downstream analyses:
+	out.sep_mahal = log1p(sqrt(dMu / pooledCov * dMu'));
 end
 
-pooledCov = (gm2.Sigma(:, :, 1) + gm2.Sigma(:, :, 2)) / 2;
-dMu = gm2.mu(1, :) - gm2.mu(2, :);
-% log1p-compressed: the raw Mahalanobis separation is numerically unstable for
-% near-deterministic embeddings (e.g., low-noise chaotic maps, whose points
-% collapse onto a thin curve), where pooledCov can be near-singular and the raw
-% separation explodes to values in the thousands despite no multi-modal
-% structure. The log keeps sep_mahal monotonic in separation while preventing
-% these degenerate cases from dominating downstream analyses:
-out.sep_mahal = log1p(sqrt(dMu / pooledCov * dMu'));
+% ------------------------------------------------------------------------------
+% valley: depth of the density valley at the sep_pp cut
+% ------------------------------------------------------------------------------
+out.valley = ValleyDepth(ppProj, thr(iBest));
+
+% ------------------------------------------------------------------------------
+% nongauss: negentropy of the whitened cloud (nearest-neighbor entropy estimate)
+% ------------------------------------------------------------------------------
+out.nongauss = Negentropy(white);
 
 end
 % ------------------------------------------------------------------------------
@@ -446,4 +396,34 @@ function s = LogSumExp(a)
 	% log(sum(exp(a), 2)), computed stably
 	aMax = max(a, [], 2);
 	s = aMax + log(sum(exp(a - aMax), 2));
+end
+% ------------------------------------------------------------------------------
+function v = ValleyDepth(proj, thr)
+	% Depth of the density valley at the cut thr of the projected points proj (unit
+	% variance): one minus the Gaussian-kernel density at thr relative to the smaller
+	% of the densities at the two groups' lower median points, floored at 0. The
+	% bandwidth is Silverman's rule of thumb for unit variance, 0.9*N^(-1/5).
+	h = 0.9 * numel(proj)^(-1/5);
+	kde = @(x) mean(exp(-0.5 * ((x - proj) / h).^2));
+	lo = sort(proj(proj <= thr));
+	hi = sort(proj(proj > thr));
+	if isempty(lo) || isempty(hi)
+		v = 0; return
+	end
+	fRef = min(kde(lo(ceil(numel(lo) / 2))), kde(hi(ceil(numel(hi) / 2))));
+	v = max(0, 1 - kde(thr) / fRef);
+end
+% ------------------------------------------------------------------------------
+function ng = Negentropy(Y)
+	% Negentropy (nats) of the whitened point cloud Y (one point per row): the entropy
+	% of the identity-covariance Gaussian, (m/2)*log(2*pi*e), minus the
+	% Kozachenko-Leonenko nearest-neighbor entropy estimate (k = 5 neighbors), with
+	% each nearest-neighbor distance floored at 0.01.
+	[n, m] = size(Y);
+	k = 5;
+	[~, dist] = knnsearch(Y, Y, 'K', k + 1); % (each point is among its own nearest neighbors)
+	r = max(dist(:, end), 0.01);
+	logVolUnitBall = (m / 2) * log(pi) - gammaln(m / 2 + 1);
+	H = psi(n) - psi(k) + logVolUnitBall + m * mean(log(r));
+	ng = (m / 2) * log(2 * pi * exp(1)) - H;
 end

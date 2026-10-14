@@ -293,19 +293,23 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         %-------------------------------------------------------------
         function test_NL_EmbedCluster_SeparationStatistics(testCase)
             % sep_pp is about 2/pi for a Gaussian cloud and near 1 for two
-            % well-separated states; both separation statistics increase.
+            % well-separated states; the other statistics also increase, and
+            % valley and nongauss are near 0 for Gaussian noise.
             rng(32);
             yNoise = zscore(randn(2000,1));
             state = mod(cumsum(rand(2000,1) < 0.01), 2);
             ySwitch = zscore(6*state + randn(2000,1));
-            outNoise = NL_EmbedCluster(yNoise, 1, 2, 4, 'full');
-            outSwitch = NL_EmbedCluster(ySwitch, 1, 2, 4, 'full');
-            testCase.verifyEqual(fieldnames(outNoise), {'bestK'; 'bicgain'; 'sep_mahal'; 'sep_pp'});
+            outNoise = NL_EmbedCluster(yNoise, 1, 2, 'full');
+            outSwitch = NL_EmbedCluster(ySwitch, 1, 2, 'full');
+            testCase.verifyEqual(fieldnames(outNoise), {'sep_pp'; 'sep_mahal'; 'valley'; 'nongauss'});
             testCase.verifyGreaterThan(outNoise.sep_pp, 0.55);
             testCase.verifyLessThan(outNoise.sep_pp, 0.75);
             testCase.verifyGreaterThan(outSwitch.sep_pp, 0.9);
             testCase.verifyGreaterThan(outSwitch.sep_mahal, outNoise.sep_mahal);
-            testCase.verifyGreaterThan(outSwitch.bicgain, 0);
+            testCase.verifyLessThan(outNoise.valley, 0.1);
+            testCase.verifyGreaterThan(outSwitch.valley, 0.9);
+            testCase.verifyLessThan(abs(outNoise.nongauss), 0.1);
+            testCase.verifyGreaterThan(outSwitch.nongauss, outNoise.nongauss + 0.3);
         end
 
         function test_BF_PreProcess_DecimateAC1e(testCase)
