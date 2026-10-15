@@ -44,8 +44,8 @@ function out = CO_AutoCorrX2Shape(y, maxLag)
 %
 % ---REFERENCES:
 % J.-P. Bouchaud, A. Matacz and M. Potters, "Leverage effect in financial markets: the
-% retarded volatility model", Phys. Rev. Lett. 87, 228701 (2001) (the leverage-effect
-% correlation function). DOI: 10.1103/PhysRevLett.87.228701
+% retarded volatility model", Phys. Rev. Lett. 87, 228701 (2001) (the forward profile;
+% see CO_AutoCorrX2). DOI: 10.1103/PhysRevLett.87.228701
 %
 % ---NOTES:
 % For N < 40 the 'doubleDrown' bound floor(N/4) is below 10, so maxLag can be

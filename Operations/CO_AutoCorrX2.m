@@ -1,10 +1,11 @@
 function out = CO_AutoCorrX2(y, taus, whatDirection)
 % CO_AutoCorrX2   Asymmetric squared cross-correlation of a time series.
 %
-% Computes a lag-resolved generalization of the 'leverage effect' correlation
-% used to detect asymmetric volatility feedback (e.g., Bouchaud, Matacz &
-% Potters, Phys. Rev. Lett. 87, 228701 (2001)): instead of the usual
-% autocorrelation <x_t.x_{t+tau}>, one term is squared:
+% Computes lag-resolved correlations between a time series and its square:
+% instead of the usual autocorrelation <x_t.x_{t+tau}>, one term is squared.
+% In finance, the forward version measures the 'leverage effect', in which falls
+% in price are followed by increased volatility (e.g., Bouchaud, Matacz &
+% Potters, Phys. Rev. Lett. 87, 228701 (2001)):
 %
 %   forward:  <x_t.x_{t+tau}^2>   -- does the (signed) value now predict the
 %                                     squared (unsigned/energy) value later?
@@ -13,8 +14,8 @@ function out = CO_AutoCorrX2(y, taus, whatDirection)
 %
 % For time-reversible, linear processes these two are equal (up to sampling
 % noise); a systematic difference between them is a signature of nonlinear,
-% time-irreversible structure such as volatility clustering with a leverage
-% (asymmetric) feedback.
+% time-irreversible structure, such as volatility that rises more after falls
+% than after rises.
 %
 % Note that CO_NonlinearAutocorr(x_z,[0,tau],false) and
 % CO_NonlinearAutocorr(x_z,[tau,tau],false) already compute the backward and
