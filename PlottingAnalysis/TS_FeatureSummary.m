@@ -48,7 +48,7 @@ end
 if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
-if nargin < 4
+if nargin < 4 || isempty(doInspect)
     doInspect = false;
 end
 if nargin < 5 || isempty(annotateParams) % annotation parameters

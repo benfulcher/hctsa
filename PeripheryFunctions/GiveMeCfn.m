@@ -76,7 +76,7 @@ if strcmp(cfnParams.whatClassifier,'fast-linear')
     else
         if nargout == 1
             % It's faster to use classify if we only want the accuracy
-            accuracy = BF_LossFunction(yTest,classify(yTest,XTrain,yTrain),...
+            accuracy = BF_LossFunction(yTest,classify(XTest,XTrain,yTrain,'linear','empirical'),...
                             cfnParams.whatLoss,cfnParams.classLabels);
             return;
         else
@@ -210,7 +210,7 @@ else
             % Naive Bayes classifier:
             t = templateNaiveBayes('DistributionNames','normal');
             if beVerbose, fprintf(1,'Using a naive Bayes classifier\n'); end
-        case {'svm','svm-linear','svm-linear-lowdim'}
+        case {'svm','svm-linear','svm-linear-highdim','svm-linear-lowdim'}
             t = templateSVM('KernelFunction','linear');
             if beVerbose, fprintf(1,'Using a linear svm classifier\n'); end
         case 'svm-rbf'
@@ -223,7 +223,7 @@ else
         end
 
         % Fit the model:
-        if ismember(cfnParams.whatClassifier,{'svm-linear','svm-rbf','linear','linclass','diaglinear'}) && cfnParams.doReweight
+        if ismember(cfnParams.whatClassifier,{'svm-linear','svm-linear-highdim','svm-rbf','linear','linclass','diaglinear'}) && cfnParams.doReweight
             % Reweight to give equal weight to each class (in case of class imbalance)
             if cfnParams.numFolds > 0
                 Mdl = fitcecoc(XTrain,yTrain,'Learners',t,'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);

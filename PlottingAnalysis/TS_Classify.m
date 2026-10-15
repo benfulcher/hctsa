@@ -317,6 +317,7 @@ end
 %% Save trained classifier
 %-------------------------------------------------------------------------------
 % E.g., for loading in later for classifying a new dataset
+jointClassifier = []; % no classifier is trained unless a filename is specified
 if ~isempty(cfnParams.classifierFilename)
     warning('Saving classifier is not yet supported.')
     [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...

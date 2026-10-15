@@ -1,5 +1,6 @@
 function fn_handle = GiveMeFunctionHandle(cfnParams)
 % GiveMeFunctionHandle  Returns a function handle for computing classification accuracy
+%                       (fitting on training data and evaluating on test data)
 %
 %---INPUTS:
 % cfnParams, parameters for the classification, e.g., set with
@@ -27,85 +28,12 @@ function fn_handle = GiveMeFunctionHandle(cfnParams)
 % California, 94041, USA.
 % ------------------------------------------------------------------------------
 
-% Set empty function handle:
-fn_handle = [];
-
-%-------------------------------------------------------------------------------
-% Set the function handle to compute the accuracy/loss measure:
-%-------------------------------------------------------------------------------
-if strcmp(cfnParams.whatClassifier,'fast-linear')
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
-    fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,classify(XTest,XTrain,yTrain,'linear'));
-    return
-end
-
-%-------------------------------------------------------------------------------
-% Binary model (easier), we can do it in one line:
-%-------------------------------------------------------------------------------
-if cfnParams.numClasses==2
-    % Set the loss function:
-    fn_loss = @(yTest,yPredict) BF_LossFunction(yTest,yPredict,cfnParams.whatLoss,cfnParams.classLabels);
-
-    switch cfnParams.whatClassifier
-    case 'knn'
-        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcknn(XTrain,yTrain),XTest));
-    case 'tree'
-        fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitctree(XTrain,yTrain),XTest));
-    case {'linear','linclass'}
-        if cfnParams.doReweight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
-                                    'SaveMemory','on','Weights',InverseProbWeight(yTrain)),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-                        fn_loss(yTest,predict(fitcdiscr(XTrain,yTrain,'FillCoeffs','off',...
-                                    'SaveMemory','on'),XTest));
-        end
-    case {'svm','svm-linear','svm-linear-highdim'}
-        % This one uses the fitclinear function (fast; suited for high-dimensional datasets)
-        if cfnParams.doReweight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitclinear(XTrain,yTrain,...
-                                    'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitclinear(XTrain,yTrain,...
-                                    'KernelFunction','linear'),XTest));
-        end
-    case {'svm-linear-lowdim'}
-        % This one uses the fitcsvm function (slower; suited for low-dimensional datasets)
-        if cfnParams.doReweight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','linear','Weights',InverseProbWeight(yTrain)),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','linear'),XTest));
-        end
-    case 'svm-rbf'
-        if cfnParams.doReweight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','rbf','Weights',InverseProbWeight(yTrain)),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcsvm(XTrain,yTrain,...
-                                    'KernelFunction','rbf'),XTest));
-        end
-    case 'diaglinear'
-        if cfnParams.doReweight
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain,...
-                                                    'Weights',InverseProbWeight(yTrain)),XTest));
-        else
-            fn_handle = @(XTrain,yTrain,XTest,yTest) fn_loss(yTest,predict(fitcnb(XTrain,yTrain),XTest));
-        end
-    otherwise
-        warning('Unknown classifier: ''%s''',cfnParams.whatClassifier);
-    end
-end
-
-%-------------------------------------------------------------------------------
-
-if isempty(fn_handle)
-    % Multiclass, have to use the Cfn function (which is slower to use as a function handle)
-    % OR: unknown classifier set above
-    fn_handle = @(XTrain,yTrain,XTest,yTest) ...
-        GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,false);
-end
+% The classifier is fit and evaluated by GiveMeCfn, with a single train/test
+% split (no cross-validation), so the handle gives the same results as GiveMeCfn
+% for every classifier. As a function of (XTrain,yTrain,XTest,yTest), it returns
+% the performance measure (cfnParams.whatLoss) in the test set and, when a second
+% output is requested, the trained model.
+cfnParams.numFolds = 0;
+fn_handle = @(XTrain,yTrain,XTest,yTest) GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,false);
 
 end
