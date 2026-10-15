@@ -73,7 +73,9 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % std_mu_data: standard deviation of the GP mean at the sampled times (if not close
 %       to one, the GP has not followed the z-scored data)
 % std_S_data: standard deviation of the GP's predictive standard deviation at the
-%       sampled times
+%       sampled times (informative only for irregularly sampled times, as with
+%       'random_i': for evenly spaced times the predictive standard deviation is
+%       constant except near the ends)
 % maxS, minS, meanS: maximum, minimum, and mean of the GP's predictive standard
 %       deviation over 1000 equally spaced times spanning the sampled series
 % oosmedabserr: out-of-sample error, for the random-subsample settings of resampleHow
@@ -239,7 +241,7 @@ elseif (maxN > 0) && (N > maxN)
 				y = y(1:maxN);
 			end
 			if beVocal
-				fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN);
+				fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN); %#ok<UNRCH>
 			end
 			N = length(y); % update time series length (should be maxN)
 			t = SUB_settimeindex(N, squishorsquash); % set time index
@@ -337,7 +339,7 @@ end
 %% For Plotting
 % ------------------------------------------------------------------------------
 if doPlot
-	xstar = t;
+	xstar = t; %#ok<UNRCH>
 	% xstar = linspace(min(t),max(t),1000)';
 	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar);
 	% S2p = S2 - exp(2*logHyper(3)); % remove noise from predictions
