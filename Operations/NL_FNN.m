@@ -27,12 +27,15 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % theilerWin, the Theiler window: {'ac', k} for k times the first zero-crossing
 %             of the autocorrelation function, or a number of samples (see
 %             BF_TheilerWindow; default: {'ac',1})
-% justBest, if 1 just outputs a scalar estimate of embedding dimension: the first
+% justBest, if 1 just outputs a scalar estimate of embedding dimension: the
+%           smallest dimension not ruled out by the test. This is the first
 %           dimension at which the fraction of false nearest neighbors is below
-%           bestp; if it never is, one more than the largest dimension computed when
-%           TISEAN stopped early (no neighbors left within its search range at the
-%           next dimension), and maxm otherwise: the dimension is never larger than
-%           maxm (default: 1)
+%           bestp; if it never is, it is one more than the largest dimension
+%           TISEAN computed (maxm + 1 when every dimension up to maxm was computed;
+%           one more than the last when TISEAN stopped early, having no neighbors
+%           left within its search range). In that non-converged case the value
+%           is a lower bound: every dimension below it was tested and failed the
+%           criterion (default: 1)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %        dimension (default: 0.4)
 % escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
@@ -238,9 +241,9 @@ end
 % Output(s)
 % ------------------------------------------------------------------------------
 if justBest
-	% We just want a scalar to choose the embedding with
-	% (capped at maxm, the largest dimension tested: never below bestp up to maxm gives maxm)
-	out = min(firstunderf(bestp, mDim, pNN), maxm);
+	% We just want a scalar to choose the embedding with: the smallest dimension
+	% not ruled out (a lower bound if the fraction never falls below bestp)
+	out = firstunderf(bestp, mDim, pNN);
 	return
 end
 

@@ -13,9 +13,12 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,~,beVocal)
 %       'ac1e'); see BF_GetTau.
 %
 % m, the embedding dimension. Must be a cell specifying method and parameters,
-%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1: the first
-%    dimension (up to 10) at which the fraction of false nearest neighbors (NL_FNN)
-%    is below 0.1; the dimension is at most 10, the largest dimension tested...
+%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1: the smallest
+%    dimension not ruled out by false nearest neighbors (NL_FNN, dimensions 1 to
+%    10), i.e., the first dimension at which the fraction of false nearest
+%    neighbors is below 0.1, or, if it never is, one more than the largest
+%    dimension TISEAN computed (11 when all ten were computed). In that case the
+%    dimension is a lower bound: all smaller dimensions failed the criterion...
 %
 % justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
 %           actual embedding (default = 0, i.e., do the embedding).
