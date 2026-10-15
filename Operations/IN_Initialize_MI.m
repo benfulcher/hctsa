@@ -1,4 +1,4 @@
-function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise, y)
+function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise, ~)
 % IN_Initialize_MI  Initialize Information Dynamics Toolkit object for MI computation.
 %
 % ---INPUTS:
@@ -9,8 +9,7 @@ function miCalc = IN_Initialize_MI(estMethod, extraParam, addNoise, y)
 %           (*) 'kraskov1'
 %           (*) 'kraskov2'
 %
-% y: (optional) the data about to be analyzed, used only to check for a high
-%    proportion of repeated values when addNoise is false (see below).
+% (A fourth input is accepted and ignored, for compatibility with existing calls.)
 %
 % cf. Kraskov, A., Stoegbauer, H., Grassberger, P., Estimating mutual
 % information: http://dx.doi.org/10.1103/PhysRevE.69.066138
@@ -49,9 +48,6 @@ if nargin < 2
 end
 if nargin < 3
 	addNoise = false; % deterministic by default
-end
-if nargin < 4
-	y = [];
 end
 
 % ------------------------------------------------------------------------------

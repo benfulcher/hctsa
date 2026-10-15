@@ -68,10 +68,10 @@ clear('inputP');
 
 %-------------------------------------------------------------------------------
 fprintf('Loading pre-trained classifier from %s...', fileName_classifier);
-load(fileName_classifier);
+classifierData = load(fileName_classifier); % fields: classes, jointClassifier, and (optionally) featureClassifier
 fprintf('Done.\n');
 
-classes = reshape(classes,length(classes),1);
+classes = reshape(classifierData.classes,length(classifierData.classes),1);
 
 %-------------------------------------------------------------------------------
 % Choose classifier:
@@ -87,30 +87,30 @@ if ~isempty(classifierType)
     end
 else
     % Otherwise, select the model with the best cross-validated accuracy
-    if exist('featureClassifier','var')
-      if exist('jointClassifier','var')
-        if any(featureClassifier.CVAccuracy > jointClassifier.CVAccuracy)
+    if isfield(classifierData,'featureClassifier')
+      if isfield(classifierData,'jointClassifier')
+        if any(classifierData.featureClassifier.CVAccuracy > classifierData.jointClassifier.CVAccuracy)
           useAllFeatures = false;
         end
       else
         useAllFeatures = false;
       end
-    elseif ~exist('jointClassifier','var')
+    elseif ~isfield(classifierData,'jointClassifier')
       useAllFeatures = false;
     end
 end
 
 if useAllFeatures
     % The joint classifier combines all features in the feature matrix
-    myClassifier = jointClassifier;
+    myClassifier = classifierData.jointClassifier;
     myAcc = myClassifier.Accuracy;
 
     fprintf('Using joint classifier (%u features) [acc=%.2f%% for %u classes].\n',...
-            length(jointClassifier.Operation.ID),myAcc, ...
+            length(myClassifier.Operation.ID),myAcc, ...
             length(myClassifier.Mdl.ClassNames));
 else
     % Otherwise, we use an individual classifier
-    myClassifier = featureClassifier;
+    myClassifier = classifierData.featureClassifier;
     myAcc = myClassifier.Accuracy;
 
     % We can't normalize for only one feature
@@ -175,7 +175,7 @@ if toRecompute
 
     % Init hctsa matrix...
     save(tsFilename,'timeSeriesData','labels','keywords','-v7.3');
-    TS_Init(tsFilename,'','',0,predictionFilename);
+    TS_Init(tsFilename,'hctsa',false,predictionFilename);
     delete(tsFilename);
 
     % ...and compute the features that we'll need
