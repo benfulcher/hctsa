@@ -1,14 +1,17 @@
 function BF_AnnotateRect(featureVector,groupLabels,cfnParams,colors,ax,underOrLeft)
 % BF_AnnotateRect Annotates rectangles under distributions for group classification
 %
+% Fits a classifier to the 1-d feature and draws colored rectangles showing the
+% predicted class along the axis.
+%
 %---INPUTS:
-% whatCfn, the classification method to use
 % featureVector, the values given to each observation
 % groupLabels, the class labels assigned to each observation
-% numClasses, the number of classes (usually the max of the groupLabels)
-% colors, a custom cell of colors for plotting
-% ax, the handle for the axes to annotate
-% underOrLeft, where to annotate (bottom, or to the left of the plot)
+% cfnParams, the classification parameters (cf. GiveMeCfn)
+% colors, a cell of colors for plotting, one for each class (default: the dark2 set)
+% ax, the handle for the axes to annotate (default: gca)
+% underOrLeft, where to annotate: 'under' (below the plot, default) or 'left' (to the
+%               left of the plot)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -43,6 +46,7 @@ function BF_AnnotateRect(featureVector,groupLabels,cfnParams,colors,ax,underOrLe
 % Check Inputs:
 %-------------------------------------------------------------------------------
 if nargin < 4
+    numClasses = numel(unique(groupLabels));
     colors = BF_GetColorMap('dark2',numClasses,1);
 end
 if nargin < 5
@@ -60,7 +64,7 @@ numIncrements = 100;
 try
     [~,Mdl] = GiveMeCfn(featureVector,groupLabels,[],[],cfnParams,false);
 catch emsg
-    warning('Unable to fit classification model')
+    warning('Unable to fit classification model: %s',emsg.message)
     return
 end
 

@@ -1,13 +1,16 @@
 function BF_PlotCorrMat(D_corr,rangeHow,makeFigure)
 % BF_PlotCorrMat    Visualization of a pairwise similarity matrix
 %
-% Attempts to determine a set of smaller clusters of objects showing similar
-% behavior.
+% Plots a square matrix (e.g., of correlation coefficients) as an image, with
+% a colormap chosen by the range of values, and NaNs drawn in black.
 %
 %---INPUTS:
-% D_corr, a pairwise distance matrix
-% rangeHow, the colorbar extent: (i) 'auto' (automatic)
-%                                (ii) '-1to1' (range from -1 to 1)
+% D_corr, a square matrix (or its vector form, cf. squareform) of pairwise
+%               similarities or correlations
+% rangeHow, the colorbar extent: (i) 'auto' (automatic: grayscale, or 'balanced' when
+%                                    there are both positive and negative values)
+%                                (ii) 'n1to1' (range from -1 to 1; '-1to1' is
+%                                    accepted as a synonym)
 %                                (iii) '0to1' (range from 0 to 1)
 %                                (iv) 'balanced' (range from -X to X, for max possible X)
 %                                (v) 'positive' (range from 0 to X, for max possible X)
@@ -44,6 +47,9 @@ if nargin < 2 || isempty(rangeHow)
 end
 if nargin < 3
     makeFigure = false;
+end
+if strcmp(rangeHow,'-1to1')
+    rangeHow = 'n1to1';
 end
 
 %-------------------------------------------------------------------------------
@@ -94,14 +100,13 @@ otherwise
 end
 
 % ------------------------------------------------------------------------------
-% Superimpose black rectangles over NaN values
+% Superimpose black over NaN values (a single black image that is transparent
+% everywhere except at the NaNs, rather than a rectangle for each NaN)
 
 if any(isnan(D_corr(:)))
-    [theNaNs_i,theNaNs_j] = find(isnan(D_corr));
-    for i = 1:length(theNaNs_i)
-        rectangle('Position',[theNaNs_j(i)-0.5,theNaNs_i(i)-0.5,1,1],'FaceColor','k', ...
-                        'EdgeColor','k')
-    end
+    % (a low-level image call, which adds to the axes rather than replacing the matrix)
+    image('Parent',gca,'XData',[1,size(D_corr,2)],'YData',[1,size(D_corr,1)], ...
+            'CData',zeros([size(D_corr),3]),'AlphaData',double(isnan(D_corr)))
 end
 
 % Remove ticks:

@@ -1,8 +1,21 @@
 function reducedIDs = TS_ReduceFeatureSet(whatData,distThreshold,useSpearman)
-% Unsupervised clustering to a reduced feature set
+% TS_ReduceFeatureSet   Unsupervised clustering to a reduced feature set
 %
-%---Output:
+% Clusters features by the magnitude of their correlation across time series
+% (complete-linkage clustering on the distance 1 - |rho|), and returns the
+% most central feature of each cluster. Features that are constant (or all NaN)
+% have no defined correlation and are left out. A figure showing the clustering
+% is drawn (cf. BF_ClusterDown).
+%
+%---INPUTS (all optional; empty inputs take the defaults):
+% whatData, the hctsa data to use (cf. TS_LoadData; default: 'norm')
+% distThreshold, the distance, 1 - |rho|, at which the dendrogram is cut into clusters
+%               (default: 0.2). All features in a cluster have |rho| >= 1 - distThreshold.
+% useSpearman, true to use Spearman correlations (default), false for Pearson
+%
+%---OUTPUT:
 % reducedIDs, A set of Operation IDs that forms the new reduced feature set
+%             (the most central feature of each cluster, largest clusters first)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -29,13 +42,13 @@ function reducedIDs = TS_ReduceFeatureSet(whatData,distThreshold,useSpearman)
 %-------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
-if nargin < 1
+if nargin < 1 || isempty(whatData)
     whatData = 'norm';
 end
-if nargin < 2
+if nargin < 2 || isempty(distThreshold)
     distThreshold = 0.2;
 end
-if nargin < 3
+if nargin < 3 || isempty(useSpearman)
     useSpearman = true;
 end
 
@@ -43,11 +56,21 @@ end
 % Load in data:
 [TS_DataMat,~,Operations] = TS_LoadData(whatData);
 
-% Compute correlation distances between all pairs of features on the data:
+% Leave out features with no defined correlation (constant or all NaN):
+featureStd = std(TS_DataMat,0,1,'omitnan');
+isDefined = (featureStd > 0);
+if ~all(isDefined)
+    fprintf(1,'Leaving out %u constant or all-NaN features.\n',sum(~isDefined));
+end
+Operations = Operations(isDefined,:);
+TS_DataMat = TS_DataMat(:,isDefined);
+
+% Compute correlation distances (1 - rho) between all pairs of features, using the
+% overlapping good values of each pair when there are NaNs:
 if useSpearman
-    rawDistVec = pdist(TS_DataMat','spearman');
+    rawDistVec = BF_pdist(TS_DataMat','Spearman',true,[],true);
 else
-    rawDistVec = pdist(TS_DataMat','corr');
+    rawDistVec = BF_pdist(TS_DataMat','Pearson',true,[],true);
 end
 
 % Cluster down with abscorr linkage clustering:

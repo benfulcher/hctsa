@@ -1,4 +1,4 @@
-function R = BF_pdist(dataMatrix,distMetric,toVector,opts,beSilent,minPropGood)
+function R = BF_pdist(dataMatrix,distMetric,toVector,~,beSilent,minPropGood)
 % BF_pdist  Pairwise distances between rows of a data matrix.
 %
 % Same as pdist but then goes through and fills in NaNs with values
@@ -9,6 +9,30 @@ function R = BF_pdist(dataMatrix,distMetric,toVector,opts,beSilent,minPropGood)
 % (which reproduces a naive per-pair loop exactly); Euclidean distance
 % has no native pairwise-complete equivalent, so it still uses an explicit
 % per-pair loop.
+%
+% A correlation that is undefined for a pair (e.g., a constant row) is given the
+% maximum distance for the metric: 2 for the signed correlation distances, 1 for
+% 'abscorr'.
+%
+%---INPUTS:
+% dataMatrix, the data matrix; distances are computed between its rows
+% distMetric, the distance metric (default: 'euclidean'):
+%       'euclidean'/'Euclidean': Euclidean distance (for pairs with missing values,
+%                   computed on the overlapping good values and rescaled by
+%                   sqrt(numFeatures/numGoodValues))
+%       'Pearson'/'PearsonCorr'/'corr'/'correlation': 1 - Pearson correlation
+%       'Spearman': 1 - Spearman correlation
+%       'abscorr': 1 - |Spearman correlation|
+%       'corr_fast'/'abscorr_fast': 1 - R and 1 - |R| using BF_NaNCov (an approximation
+%                   to the Pearson correlation when there are missing values)
+%       'mi-gaussian': Gaussian mutual information (nats) between rows, a similarity
+%                   (not a distance; its diagonal is Inf and toVector is not possible).
+%                   'mi' is the deprecated name for this metric.
+% toVector, return the distances as a vector, as pdist does (default: false, a matrix)
+% (the fourth input is unused; pass [])
+% beSilent, suppress progress messages (default: false)
+% minPropGood, the minimum proportion of overlapping good values required to compute
+%       a distance for a pair (default: 0)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -42,9 +66,6 @@ end
 if nargin < 3 || isempty(toVector)
     toVector = false;
 end
-if nargin < 4
-    opts = [];
-end
 if nargin < 5
     beSilent = false;
 end
@@ -68,34 +89,11 @@ case {'mi-gaussian','mi'}
         warning('hctsa:deprecated',['BF_pdist metric ''mi'' is deprecated: it is the Gaussian ' ...
                     'mutual information, now named ''mi-gaussian''.']);
     end
-    if ~isempty(opts)
-        numBins = opts; %#ok<NASGU> (only used by the commented-out histogram estimator below)
-    else
-        numBins = 10; %#ok<NASGU>
-    end
-
-    goodies = ~isnan(dataMatrix); % now we can deal with NaNs into design matrix
-
-    mis = zeros(n1);
-    mitimer = tic; % Way faster to not store the time taken for every iteration
-    for i = 1:n1
-        % tic
-        goodi = goodies(i,:);
-        for j = i:n1
-            goodj = goodies(j,:);
-            goodboth = (goodi & goodj);
-            % Using Information Dynamics Toolkit:
-            mis(i,j) = IN_MutualInfo(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'gaussian');
-            % mis(i,j) = BF_MutualInformation(dataMatrix(i,goodboth),dataMatrix(j,goodboth),'quantile','quantile',numBins); % by quantile with numBins
-            mis(j,i) = mis(i,j);
-        end
-        if (mod(i,floor(n1/50)) == 0)
-            fprintf(1,'Approximately %s remaining! We''re at %u / %u\n', ...
-                        BF_TheTime(toc(mitimer)/i*(n1-i)),i,n1);
-        end
-    end
-    R = mis; % not really an R but ok.
-    clear('mitimer','mis');
+    % Gaussian mutual information is -0.5*log(1-r^2) for correlation r, using the
+    % overlapping good values of each pair:
+    r = corr(dataMatrix','Rows','pairwise');
+    R = -0.5*log(1 - r.^2);
+    R(1:n1+1:end) = Inf; % a variable has unbounded information about itself
 
 case {'corr_fast','abscorr_fast'}
     % Try using fast approximation to correlation coefficients when data includes NaNs
@@ -114,7 +112,15 @@ case {'corr_fast','abscorr_fast'}
 
 case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correlation','abscorr'}
 
-    isCorrType = ~ismember(distMetric,{'Euclidean','euclidean','PearsonCorr','Pearson'});
+    % Distance for an undefined correlation (before the abscorr transform at the end,
+    % which maps R = 1 - rho to 1 - |rho|, so rho = 0 is the largest distance there):
+    if strcmp(distMetric,'abscorr')
+        undefinedDist = 1;
+    else
+        undefinedDist = 2;
+    end
+
+    isCorrType = ~ismember(distMetric,{'Euclidean','euclidean'});
 
     if isCorrType && ~any(isnan(dataMatrix(:)))
         % Fast path: no NaNs anywhere, so there is nothing for the fixup
@@ -131,7 +137,7 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
         end
         tic
         R = 1 - corr(dataMatrix','Type',corrType);
-        R(isnan(R)) = 2; % subdc's fallback: undefined (e.g. constant-value row) correlation -> max distance
+        R(isnan(R)) = undefinedDist; % undefined (e.g., constant-value row) correlation -> max distance
         R(1:n1+1:end) = 0; % exact self-distance (matches squareform's convention; applied last, overriding the fallback above for a degenerate row's self-entry)
         if ~beSilent
             fprintf(1,' Done in %s.\n',BF_TheTime(toc));
@@ -144,7 +150,7 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
         % below instead, so no per-pair distance function is needed for them)
         % ------------------------------------------------------------------------------
         if ismember(distMetric,{'Euclidean','euclidean'})
-            dij = @(v1,v2) sqrt(sum((v1-v2).^2))/length(v1)*n2; % if less entries, don't bias
+            dij = @(v1,v2) sqrt(sum((v1-v2).^2)*n2/length(v1)); % if less entries, don't bias
         end
 
         % First use in-built pdist, which is fast
@@ -155,6 +161,8 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
         if strcmp(distMetric,'abscorr')
             % Feature-feature Correlations are Spearman by default
             R = pdist(dataMatrix,'Spearman');
+        elseif ismember(distMetric,{'Pearson','PearsonCorr'})
+            R = pdist(dataMatrix,'correlation');
         else
             R = pdist(dataMatrix,distMetric);
         end
@@ -220,10 +228,10 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
             % looping pair-by-pair -- while still only touching the rows that
             % actually need it, keeping the fast path fast when few rows are
             % NaN-affected.
-            if ismember(distMetric,{'PearsonCorr','Pearson'})
-                corrType = 'Pearson';
-            else
+            if ismember(distMetric,{'Spearman','abscorr'})
                 corrType = 'Spearman';
+            else
+                corrType = 'Pearson'; % as for pdist's 'corr'/'correlation'
             end
 
             if ~beSilent
@@ -234,7 +242,7 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
 
             Csub = corr(dataMatrix(affectedRows,:)',dataMatrix','Type',corrType,'Rows','pairwise');
             Dsub = 1 - Csub;
-            Dsub(isnan(Csub)) = 2; % subdc's fallback: undefined (e.g. constant-value) correlation -> max distance
+            Dsub(isnan(Csub)) = undefinedDist; % undefined (e.g., constant-value) correlation -> max distance
             overlapProp = (NotNaN(affectedRows,:) * NotNaN') / n2; % proportion of overlapping good values, per pair
             Dsub(overlapProp <= minPropGood) = NaN; % not enough good, overlapping set of values
 
