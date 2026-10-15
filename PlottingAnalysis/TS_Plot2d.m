@@ -14,20 +14,30 @@ function [f,handles] = TS_Plot2d(featureData,TimeSeries,featureLabels,annotatePa
 %
 % annotateParams, a structure containing all the information about how to annotate
 %           data points. Fields can include (cf. BF_AnnotatePoints):
-%               - n, the number of data points to annotate
-%               - userInput, 0: randomly selected datapoints, 1: user clicks to annotate datapoints
+%               - n, the number of data points to annotate (default: 6; 0 for no annotation)
+%               - userInput, false: randomly selected datapoints, true (default): the
+%                           user clicks on the plot to pick each datapoint to annotate
+%                           (blocks until n points have been picked)
 %               - fdim, 1x2 vector with width and height of time series as fraction of plot size
 %               - maxL, maximum length of annotated time series
-%               - textAnnotation: 'Name', 'ID', or 'none' to annotate this data
-%               - cmap, a cell of colors, with elements for each group
+%               - textAnnotation: 'Name', 'ID', 'length', or 'none' (default) to annotate this data
+%               - cmap, a color map name (cf. BF_GetColorMap), or a cell or matrix
+%                       of colors, with an element for each group
 %               - theMarkerSize, a custom marker size
 %               - theLineWidth: line width for annotated time series
+%               - makeFigure, false to plot in the current figure (default: true,
+%                           a new figure)
+%           To turn off annotation, set annotateParams to 0 (or false), or set the
+%           field n to 0. To annotate without waiting for user input, set userInput to false.
+%           Can also be a positive integer, to annotate that many points.
 %
 % showDistr, if true (default), plots marginal density estimates for each variable
 %                   (above and to the right of the plot), otherwise set to false.
 %
-% cfnParams, (optional) custom classification parameters to fit.
-
+% cfnParams, (optional) custom classification parameters to fit (cf.,
+%           GiveMeDefaultClassificationParams). If empty (default), the default
+%           parameters are used; an empty structure turns off classification.
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -66,6 +76,14 @@ end
 
 if nargin < 4 || isempty(annotateParams)
     annotateParams = struct('n',6); % annotate for six points
+elseif ~isstruct(annotateParams)
+    if isequal(annotateParams,false) || isequal(annotateParams,0)
+        annotateParams = struct('n',0); % no annotation
+    elseif isequal(annotateParams,true)
+        annotateParams = struct('n',6);
+    else
+        annotateParams = struct('n',annotateParams);
+    end
 end
 
 % By default, plot kernel density estimates above and on the side of the plot:
@@ -73,7 +91,7 @@ if nargin < 5 || isempty(showDistr)
     showDistr = true;
 end
 
-if nargin < 6
+if nargin < 6 || isempty(cfnParams)
     cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
 end
 if isfield(cfnParams,'numFolds')
@@ -89,6 +107,9 @@ end
 %-------------------------------------------------------------------------------
 % Preliminaries
 %-------------------------------------------------------------------------------
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    TimeSeries.Group = removecats(TimeSeries.Group); % only count classes with members
+end
 groupLabels = TS_ExtractGroupLabels(TimeSeries);
 classLabels = categories(groupLabels);
 numClasses = length(classLabels);
@@ -113,6 +134,13 @@ else
             groupColors = annotateParams.cmap; % specify the cell itself
         elseif ischar(annotateParams.cmap)
             groupColors = BF_GetColorMap(annotateParams.cmap,numClasses,1);
+        elseif isnumeric(annotateParams.cmap)
+            groupColors = num2cell(annotateParams.cmap,2); % one RGB row per class
+        else
+            error('cmap must be a color map name, a cell of colors, or a matrix of colors');
+        end
+        if length(groupColors) < numClasses
+            error('cmap specifies %u colors but there are %u classes',length(groupColors),numClasses);
         end
     else
         groupColors = GiveMeColors(numClasses);
@@ -196,14 +224,17 @@ end
 %% Do classification and plot a classify boundary?
 % ------------------------------------------------------------------------------
 didClassify = false;
-if numClasses > 1 && ~isempty(fields(cfnParams))
+isLabeled = ~isundefined(groupLabels); % classify only labeled time series
+labeledData = featureData(isLabeled,:);
+labeledGroups = groupLabels(isLabeled);
+if numClasses > 1 && ~isempty(fieldnames(cfnParams))
     % Compute the in-sample classification rate:
     classRate = nan(3,1); % classRate1, classRate2, classRateboth
     try
         fprintf(1,'Estimating %u-class classification rates for each feature (and in combination)...\n',numClasses);
-        classRate(1) = GiveMeCfn(featureData(:,1),groupLabels,featureData(:,1),groupLabels,cfnParams);
-        classRate(2) = GiveMeCfn(featureData(:,2),groupLabels,featureData(:,2),groupLabels,cfnParams);
-        classRate(3) = GiveMeCfn(featureData,groupLabels,featureData(:,1:2),groupLabels,cfnParams);
+        classRate(1) = GiveMeCfn(labeledData(:,1),labeledGroups,labeledData(:,1),labeledGroups,cfnParams);
+        classRate(2) = GiveMeCfn(labeledData(:,2),labeledGroups,labeledData(:,2),labeledGroups,cfnParams);
+        classRate(3) = GiveMeCfn(labeledData,labeledGroups,labeledData,labeledGroups,cfnParams);
         % Record that classification was performed successfully:
         didClassify = true;
         fprintf(1,'%s in 2-dim space: %.2f%%\n',cfnParams.whatLoss,classRate(3));
@@ -215,7 +246,7 @@ if numClasses > 1 && ~isempty(fields(cfnParams))
     if numClasses < 5
         fprintf(1,'Estimating classification boundaries...\n');
         % Train the model (in-sample):
-        [~,Mdl] = GiveMeCfn(featureData,groupLabels,featureData,groupLabels,cfnParams);
+        [~,Mdl] = GiveMeCfn(labeledData,labeledGroups,labeledData,labeledGroups,cfnParams);
 
         % Predict scores over the 150x150 grid through space
         gridInc = 150;

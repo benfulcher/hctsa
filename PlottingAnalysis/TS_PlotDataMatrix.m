@@ -6,13 +6,19 @@ function TS_PlotDataMatrix(varargin)
 % TS_PlotDataMatrix('whatData','norm'); % plots normalized data
 %
 %---INPUTS:
-% whatData: specify 'norm' for normalized data in HCTSA_N.mat, 'cl' for clustered
-%         data in HCTSA_N.mat (default), or specify a filename to load data
-%         from that file.
-% addTimeSeries: set to 1 to annotate time series segments to the left of the data matrix
+% whatData: specify 'norm' for normalized data in HCTSA_N.mat (default), or specify
+%         a filename to load data from that file. Clustered data (cf. TS_Cluster)
+%         is always used if it exists.
+% addTimeSeries: set to 1 (default) to annotate time series segments to the left of
+%         the data matrix
 % timeSeriesLength: length of time-series annotations (number of samples)
-% colorGroups: set to 1 to color time-series groups with different colormaps
-% customColorMap: use a custom color map (name to match an option in BF_GetColorMap)
+% colorGroups: set to 1 to color time-series groups with different colormaps (the
+%         values of each group are scaled to span their own colormap, so colors can
+%         only be compared within a group)
+% groupReorder: set to 1 to sort time series by group, and cluster within each group
+% customColorMap: use a custom color map for ungrouped data (name to match an option
+%         in BF_GetColorMap, or 'gray'). Default: 'redyellowblue'. (Colors are
+%         chosen automatically when colorGroups is true and there are groups.)
 % colorNaNs: whether to plot rectangles over special-values in the matrix (default: 1)
 % customOrder: reorder rows and columns according to provided permutation vectors
 %
@@ -125,6 +131,7 @@ end
 % Check group information
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
+    TimeSeries.Group = removecats(TimeSeries.Group); % only count groups with members
     [timeSeriesGroups,~,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 else
 	timeSeriesGroups = [];
@@ -150,8 +157,11 @@ if groupReorder
 	    ixAgain = ixData;
 	    for i = 1:numClasses
 	        isGroup = groupLabelsInteger(ixData)==i;
-	        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
 	        istmp = ixData(isGroup);
+	        if sum(isGroup) < 3
+	            continue % too few time series to cluster: keep their order
+	        end
+	        ordering = BF_ClusterReorder(dataMatReOrd(isGroup,:),'euclidean','average');
 	        ixAgain(isGroup) = istmp(ordering);
 	    end
 	    ixData = ixAgain; % set ordering to ordering within groups
@@ -202,8 +212,10 @@ if numGroups <= 1
     numColorMapGrads = 8; % number of gradations in each set of colourmap
     if strcmp(customColorMap,'redyellowblue')
         customColorMap = flipud(BF_GetColorMap('redyellowblue',numColorMapGrads,0));
-    else
+    elseif strcmp(customColorMap,'gray')
         customColorMap = gray(numColorMapGrads);
+    else
+        customColorMap = BF_GetColorMap(customColorMap,numColorMapGrads,0);
     end
 elseif numGroups == 2
 	% Special case to make a nice red and blue one
@@ -303,7 +315,11 @@ cB = colorbar('eastoutside');
 cB.Label.String = 'Output';
 if numGroups > 0
 	cB.Ticks = 0.5:1:numGroups;
-	cB.TickLabels = categories(timeSeriesGroups);
+	groupNames = categories(timeSeriesGroups);
+	if numGroups > length(groupNames)
+	    groupNames{end+1} = '(unlabeled)'; % the extra group of unlabeled time series
+	end
+	cB.TickLabels = groupNames;
 	cB.TickLabelInterpreter = 'none';
 end
 

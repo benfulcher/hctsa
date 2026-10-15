@@ -1,4 +1,4 @@
-function hadProblem = TS_InspectQuality(inspectWhat,customFile)
+function hadProblem = TS_InspectQuality(inspectWhat,customFile,askIfLarge)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
 % This function loads the calculation quality information from HCTSA.mat,
@@ -19,6 +19,10 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %
 % customFile: run on a custom HCTSA file (HCTSA.mat by default), can also be
 %             strings like 'raw' or 'norm' (cf. TS_LoadData)
+%
+% askIfLarge: (logical) whether to wait for a key press before plotting a very
+%             large matrix (more than 900,000 values, for 'full' and 'reduced')
+%             (default: true). Set to false to plot without waiting.
 %
 %---OUTPUTS:
 % hadProblem: a logical vector indicating which operations (or, for 'master',
@@ -54,6 +58,12 @@ if nargin < 1 || isempty(inspectWhat)
 end
 if nargin < 2
     customFile = 'raw'; % use un-normalized data by default, 'HCTSA.mat'
+end
+if nargin < 3 || isempty(askIfLarge)
+    askIfLarge = true;
+end
+if ~ismember(inspectWhat,{'full','all','reduced','master','summary'})
+    error('Unknown input option ''%s''',inspectWhat);
 end
 
 % ------------------------------------------------------------------------------
@@ -110,7 +120,7 @@ case {'full','all'}
 
 case 'reduced'
     % First find where problems exist, and only show these columns
-    qualityMean = mean(TS_Quality,'omitnan');
+    qualityMean = mean(TS_Quality,1,'omitnan');
     hadProblem = (qualityMean > 0);
 
     if sum(hadProblem)==0
@@ -136,7 +146,7 @@ case 'reduced'
     ax.XTickLabel = Operations.ID(hadProblem);
     ax.XTickLabelRotation = 90;
 
-    title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values',...
+    title(sprintf('Displaying %u x %u (%u/%u operations with some special values)',...
                     size(TS_Quality,1),sum(hadProblem),sum(hadProblem),size(TS_Quality,2)),...
                     'interpreter','none')
 
@@ -164,7 +174,13 @@ case 'master'
     end
 
     % Focus on master operations with problems:
-    hadProblem = (mean(qualities) > 0);
+    hadProblem = (mean(qualities,1) > 0);
+
+    if sum(hadProblem)==0
+        fprintf(1,'No master operations have problems! Nothing to inspect.\n');
+        if nargout==0, clear('hadProblem'), end
+        return
+    end
 
     % ------------
     % Text output:
@@ -268,8 +284,6 @@ case 'summary'
     xlabel('Operation ID','interpreter','none')
     ylabel(sprintf('Proportion of outputs (across %u time series)',size(TS_Quality,1)))
 
-otherwise
-    error('Unknown input option ''%s''',inspectWhat);
 end
 
 % Be nice (to the eyes):
@@ -320,7 +334,9 @@ function checkSize(A)
     % Checks size of a matrix, and sends a warning if too large
     if size(A,1)*size(A,2) > 100*9000
         fprintf('Attempting to plot each value in a large matrix (%ux%u)...\n',size(A,1),size(A,2))
-        input('[Press any key to continue (or cntrl-C to abort)]','s');
+        if askIfLarge
+            input('[Press any key to continue (or cntrl-C to abort)]','s');
+        end
     end
 end
 

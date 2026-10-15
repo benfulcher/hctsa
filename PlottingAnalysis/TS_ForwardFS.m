@@ -1,4 +1,4 @@
-function [ifeat,testStat,trainErr,testErr,testClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect,annotateParams)
+function [ifeat,testStat,trainErr,testErr,testClass] = TS_ForwardFS(whatData,iTrain,criterion,cvFolds,numFeatSelect,annotateParams,doPlot)
 % TS_ForwardFS  Greedy forward feature selection
 %
 % Uses the sequentialfs function from Matlab's Statistics Toolbox to select
@@ -29,7 +29,13 @@ function [ifeat,testStat,trainErr,testErr,testClass] = TS_ForwardFS(whatData,iTr
 % cvFolds: the number of cross-validation folds to use in the feature selection
 %           process
 % numFeatSelect: the total number of features to select
-% annotateParams: annotation parameters for the 2-d space
+% annotateParams: annotation parameters for the 2-d plot of the first two selected
+%           features, passed to TS_Plot2d (default: struct('n',6,'textAnnotation','Name'),
+%           which waits for you to click on the plot to pick 6 time series to
+%           annotate). Set to 0 (or false) for no annotation, or set the field
+%           userInput to false to annotate randomly chosen time series without
+%           waiting for user input.
+% doPlot: (logical) whether to plot the first two selected features (default: true)
 %
 %---OUTPUTS:
 % ifeat: indices of features selected, in the order selected.
@@ -88,8 +94,12 @@ if nargin < 5 || isempty(numFeatSelect)
     numFeatSelect = 2; % Stop after two features are selected
 end
 
-if nargin < 6
+if nargin < 6 || isempty(annotateParams)
     annotateParams = struct('n',6,'textAnnotation','Name');
+end
+
+if nargin < 7 || isempty(doPlot)
+    doPlot = true;
 end
 
 %-------------------------------------------------------------------------------
@@ -189,7 +199,7 @@ end
 %-------------------------------------------------------------------------------
 % Plot in a 2-D space
 %-------------------------------------------------------------------------------
-if numSelected > 1
+if doPlot && numSelected > 1
     % Set feature labels:
     featureLabels = cell(2,1);
     for i = 1:2

@@ -9,8 +9,14 @@ function f = TS_PlotLowDim(whatData,whatAlgorithm,showDist,annotateParams,cfnPar
 %                   also 'tSNE'.
 % showDist, whether to also plot marginal class distributions of each PC
 % annotateParams, the annotation parameters used when plotting the dataset using
-%                 TS_Plot2d. Can also specify an integer; will annotate this
-%                 many time series segments to the 2d scatter plot.
+%                 TS_Plot2d. By default, annotates 6 randomly chosen time series
+%                 (with their names), without waiting for user input.
+%                 Can also specify an integer, to annotate that many (randomly
+%                 chosen) time series segments to the 2d scatter plot.
+%                 Set to 0 (or false), or to a structure with field n = 0, to turn
+%                 off annotation. For a structure, userInput = true lets you click
+%                 on the plot to choose the points to annotate (the default when
+%                 userInput is not specified in a structure, cf. TS_Plot2d).
 % cfnParams, parameters for classification in 2-d space (cf., GiveMeDefaultClassificationParams)
 %
 %---OUTPUT:
@@ -60,7 +66,14 @@ if nargin < 4 || isempty(annotateParams)
     annotateParams = struct('n',6,'textAnnotation','Name','userInput',false);
 end
 if ~isstruct(annotateParams)
-    annotateParams = struct('n',annotateParams);
+    if isequal(annotateParams,false) || isequal(annotateParams,0)
+        annotateParams = struct('n',0); % no annotation
+    else
+        if isequal(annotateParams,true)
+            annotateParams = 6;
+        end
+        annotateParams = struct('n',annotateParams,'textAnnotation','Name','userInput',false);
+    end
 end
 
 %-------------------------------------------------------------------------------

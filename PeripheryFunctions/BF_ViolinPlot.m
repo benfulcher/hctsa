@@ -6,7 +6,23 @@ function [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,addMeans,doveTail,ma
 % addMeans, a flag for whether to add a strip for the mean of each group
 % doveTail, whether to show a kernel smoothed distributions
 % makeFigure, a flag to specify whether to generate a new figure to plot into
-% extraParams, a structure of additional custom parameters
+% extraParams, a structure of additional custom parameters, with optional fields:
+%       customSpot, the marker for the individual data points ('.' by default;
+%                   set to [] to plot no points)
+%       customOffset, an offset added to the position of every group (0 by default)
+%       offsetRange, the width of each group (0.5 by default)
+%       makeHorizontal, if true, plots the distributions horizontally (default: false)
+%       dontHitMe, if true, the data points do not respond to mouse clicks
+%                   (default: false)
+%       theColors, a cell of colors (one RGB row vector per group)
+%
+%---OUTPUTS:
+% ff, a cell (one element per group) of the kernel density at each point of xx,
+%       scaled to a maximum of one (empty for groups without data, or when doveTail is false)
+% xx, a cell (one element per group) of the points at which the density is evaluated
+% xScatter, yScatter, cells of the plotted coordinates of the data points of each
+%       group (the jitter is generated from a fixed random seed, without changing
+%       the global random number stream)
 %
 %---EXAMPLE USAGE:
 % dataCell = {randn(1000,1),randn(500,1)*2+1};
@@ -110,9 +126,17 @@ else
     % fprintf(1,'Using custom colors\n');
 end
 
+% Standardize numeric colors as row vectors:
+for i = 1:length(theColors)
+    if isnumeric(theColors{i})
+        theColors{i} = theColors{i}(:)';
+    end
+end
+
 %-------------------------------------------------------------------------------
-% Reset random number generator for reproducibility:
-rng('default');
+% Use a private random number stream, for reproducibility without affecting
+% the caller's random number generator:
+randStream = RandStream('twister','Seed',0);
 
 if makeFigure
     figure('color','w');
@@ -123,9 +147,9 @@ box('on');
 % ------------------------------------------------------------------------------
 % Add kernel distribution
 % ------------------------------------------------------------------------------
+ff = cell(numGroups,1);
+xx = cell(numGroups,1);
 if doveTail
-    ff = cell(numGroups,1);
-    xx = cell(numGroups,1);
     for i = 1:numGroups
         if isempty(dataCell{i}) || all(isnan(dataCell{i}))
             continue
@@ -172,17 +196,19 @@ yScatter = cell(numGroups,1);
 if ~isempty(customSpot)
     pHandles = cell(numGroups,1);
     for i = 1:numGroups
+        numPoints = length(dataCell{i});
         if doveTail
-            xRand = zeros(length(dataCell{i}),1);
-            for j = 1:length(dataCell{i})
-                try
-                    xRand(j) = (rand(1)*offsetRange - offsetRange/2)*ff{i}(find(xx{i} >= dataCell{i}(j),1));
-                catch
-                    % No density value for this point: leave its jitter at zero
-                end
+            % Jitter within the width of the density at each point:
+            xRand = zeros(numPoints,1);
+            jitter = rand(randStream,numPoints,1)*offsetRange - offsetRange/2;
+            if ~isempty(xx{i})
+                ind = discretize(dataCell{i}(:),[-Inf,xx{i}],'IncludedEdge','right');
+                hasDensity = ~isnan(ind); % no density value for NaNs: jitter stays zero
+                densityHeight = ff{i}(:);
+                xRand(hasDensity) = jitter(hasDensity).*densityHeight(ind(hasDensity));
             end
         else
-            xRand = rand([length(dataCell{i}),1])*offsetRange - offsetRange/2;
+            xRand = rand(randStream,numPoints,1)*offsetRange - offsetRange/2;
         end
         if makeHorizontal
             xScatter{i} = dataCell{i};
@@ -204,11 +230,10 @@ end
 % Add strips for means and stds:
 % ------------------------------------------------------------------------------
 brightenAmount = -0.5;
-if any(cellfun(@(x)any(isnan(x)),dataCell)), warning('NaNs in data'); end
 for i = 1:numGroups
-    try
+    if isnumeric(theColors{i})
         brightColor = brighten(theColors{i},brightenAmount);
-    catch
+    else
         brightColor = theColors{i};
     end
 

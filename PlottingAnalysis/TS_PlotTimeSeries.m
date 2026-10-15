@@ -7,13 +7,29 @@ function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOpt
 %
 % numPerGroup, If plotting groups, plots this many examples per group
 %
-% whatTimeSeries, Can provide indices to plot that subset, a keyword to plot
-%                   matches to the keyword, 'all' to plot all, or an empty vector
-%                   to plot group information assigned to TimeSeries.Group
+% whatTimeSeries, Can provide indices to plot that subset (rows of the time series
+%                   table, after any sorting by plotOptions.sortByLength), the name
+%                   of a group in TimeSeries.Group to plot that group, a keyword to
+%                   plot the time series matching the keyword, 'all' to plot all,
+%                   or an empty vector (or 'grouped') to plot group information
+%                   assigned to TimeSeries.Group
 %
 % maxLength, the maximum number of samples of each time series to plot
 %
-% plotOptions, additional plotting options as a structure
+% plotOptions, additional plotting options as a structure, with optional fields:
+%       displayTitles, whether to label each time series (default: true)
+%       howToFilter, how to choose numPerGroup time series from a group: 'evenly'
+%                   (default; evenly spaced through the ordering), 'firstcome' (the
+%                   first in order), or 'rand' (a random set)
+%       colorMap, a cell of colors, a matrix of colors (one row per group), or the
+%                   name of a color map (cf. BF_GetColorMap) (default: GiveMeColors)
+%       plotFreeForm, true (default): all time series in a single set of axes;
+%                   false: one subplot per time series
+%       LineWidth, line width of free-form plots (default: 1)
+%       newFigure, whether to plot in a new figure (default: true)
+%       sortByLength, whether to sort time series by length first (default: false)
+%       carpetPlot, whether to plot a grayscale image of the time series instead
+%                   (default: false)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -49,8 +65,8 @@ if nargin < 2 || isempty(numPerGroup)
     % Default: plot 10 time series per group
     numPerGroup = 10;
 end
-if numPerGroup==0
-    error('numPerGroup cannot be zero');
+if numPerGroup <= 0
+    error('numPerGroup must be positive');
 end
 
 % Can specify a reduced set of time series by keyword (or indices)
@@ -95,13 +111,13 @@ end
 if isstruct(plotOptions) && isfield(plotOptions,'plotFreeForm')
     plotFreeForm = plotOptions.plotFreeForm;
 else
-    plotFreeForm = true; % do a normal subplotted figure
+    plotFreeForm = true; % plot all time series in a single set of axes
 end
 % Specify line width for plotting
 if isstruct(plotOptions) && isfield(plotOptions,'LineWidth')
     lw = plotOptions.LineWidth;
 else
-    lw = 1; % do a normal subplotted figure
+    lw = 1; % line width
 end
 % Determine whether to create a new figure
 if isstruct(plotOptions) && isfield(plotOptions,'newFigure')
@@ -130,6 +146,9 @@ if istable(whatData)
 else
     TimeSeries = TS_GetFromData(whatData,'TimeSeries');
 end
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    TimeSeries.Group = removecats(TimeSeries.Group); % only count groups with members
+end
 if sortByLength
     TimeSeries = sortrows(TimeSeries,'Length','descend');
 end
@@ -143,18 +162,28 @@ if (isempty(whatTimeSeries) || strcmp(whatTimeSeries,'grouped')) && ismember('Gr
     classLabels = categories(TimeSeries.Group);
     numGroups = length(classLabels);
     fprintf(1,'Plotting from %u groups of time series from file.\n',numGroups);
-elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
+elseif isempty(whatTimeSeries) || (ischar(whatTimeSeries) && ismember(whatTimeSeries,{'all','grouped'}))
     % Nothing specified but no groups assigned, or specified 'all': plot from all time series
     groupIndices = {1:height(TimeSeries)};
     classLabels = {};
 elseif ischar(whatTimeSeries)
-    % Just plot the specified group
-    if ~ismember(whatTimeSeries,categories(TimeSeries.Group))
-        error('No group named ''%s'' found in TimeSeries.Group',whatTimeSeries);
+    if ismember('Group',TimeSeries.Properties.VariableNames) && ...
+                ismember(whatTimeSeries,categories(TimeSeries.Group))
+        % Just plot the specified group
+        groupIndices = {find(TimeSeries.Group==whatTimeSeries)};
+        classLabels = {whatTimeSeries};
+        fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
+    else
+        % Plot the time series with a matching keyword
+        Keywords = SUB_cell2cellcell(TimeSeries.Keywords);
+        isMatch = cellfun(@(x) ismember(whatTimeSeries,x),Keywords);
+        if ~any(isMatch)
+            error('No group or keyword named ''%s'' found',whatTimeSeries);
+        end
+        groupIndices = {find(isMatch)};
+        classLabels = {};
+        fprintf(1,'Plotting %u time series matching keyword ''%s''\n',length(groupIndices{1}),whatTimeSeries);
     end
-    groupIndices = {find(TimeSeries.Group==whatTimeSeries)};
-    classLabels = {whatTimeSeries};
-    fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
     groupIndices = {whatTimeSeries};
     classLabels = {};
@@ -262,9 +291,15 @@ if isnumeric(colorMap)
 elseif iscell(colorMap)
     % Specified a custom colormap as a cell of colors
     theColors = colorMap;
+elseif ischar(colorMap) && ~isempty(colorMap)
+    % Specified the name of a colormap
+    theColors = BF_GetColorMap(colorMap,numGroups,true);
 else
     % Get some colormap using GiveMeColors
     theColors = GiveMeColors(numGroups);
+end
+if numGroups > 1 && length(theColors) < numGroups
+    error('colorMap specifies %u colors but there are %u groups to plot',length(theColors),numGroups);
 end
 
 %-------------------------------------------------------------------------------
@@ -294,7 +329,11 @@ if plotFreeForm
             N = N0; % length isn't changing
         end
         xx = (1:N) / maxN;
-        xsc = yr(i) + 0.8*(x-min(x))/(max(x)-min(x)) * inc;
+        xRange = max(x) - min(x);
+        if xRange==0
+            xRange = 1; % a constant time series is plotted flat
+        end
+        xsc = yr(i) + 0.8*(x-min(x))/xRange * inc;
 
         if numGroups==1 && (length(theColors)==numToPlot)
             % Plot as per a set of colors provided:
@@ -328,8 +367,10 @@ if plotFreeForm
 
 else
     % NOT a 'free-form' plot:
+    axHandles = gobjects(numToPlot,1);
     for i = 1:numToPlot
         ax = subplot(numToPlot,1,i);
+        axHandles(i) = ax;
         fn = TimeSeries.Name{iPlot(i)}; % the filename
         kw = TimeSeries.Keywords{iPlot(i)}; % the keywords
         x = TimeSeries.Data{iPlot(i)};
@@ -377,8 +418,7 @@ else
 
     % Set all subplots to have the same x-axis limits
     for i = 1:numToPlot
-        ax = subplot(numToPlot,1,i);
-        ax.XLim = [1,max(Ls)];
+        axHandles(i).XLim = [1,max(Ls)];
     end
 end
 
