@@ -527,7 +527,6 @@ function dimdat = SUB_readTISEANout(s, maxm, blocker, nc)
 				tmp = textscan(ss{jj}, '%f%f%f');
 			end
 			if all(cellfun(@isempty, tmp))
-				% Ben Fulcher, 2015-03-06
 				% Sometimes a comment at the bottom of the output file
 				nn = nn(1:jj - 1, :);
 				break
@@ -706,7 +705,7 @@ function out = SUB_findmmin(ds)
 	% to minimize variance
 
 	l = length(ds);
-	gamma = 0.1; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+	gamma = 0.1; % regularization parameter, chosen ad hoc
 	dsraw = ds; % before normalization
 	ds = (ds - min(ds)) ./ (max(ds) - min(ds)); % rescale data to [0,1] so weights are consistent
 	stptr = 1:l - 1; % need at least two points
@@ -741,7 +740,7 @@ function results = SUB_getslopes(x, Y)
 	dx = log10(x(2)) - log10(x(1));
 	%         dx = x(2) - x(1);
 	ndim = size(Y, 1); % number of embeding dimensions
-	gamma = 2E-3; % regularizer, chosen 'empirically' (i.e., ad hoc)
+	gamma = 2E-3; % regularization parameter, chosen ad hoc
 	l = size(Y, 2) - 1; % number of distance/scaling points per dimension
 	stptr = 1:floor(l / 2) - 1; % must be in the first half
 	endptr = ceil(l / 2) + 1:l; % must be in second half

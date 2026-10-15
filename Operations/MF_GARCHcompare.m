@@ -59,11 +59,9 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % ---NOTES:
 % bestpLLF/bestqLLF select the order with the maximum log-likelihood, as the
 % best-fitting model has the highest log-likelihood (AIC and BIC are minimized).
-% (Selecting the minimum, as an earlier version did, almost always returned the
-% lowest-complexity corner of the (pr,qr) grid.) They are not registered in hctsa's
-% feature set: the models are nested, so their maximized likelihoods differ mostly at
-% the level of the optimizer's tolerance, and the selected orders change under tiny
-% perturbations of the series.
+% They are not registered in hctsa's feature set: the models are nested, so their
+% maximized likelihoods differ mostly at the level of the optimizer's tolerance, and
+% the selected orders change under tiny perturbations of the series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -151,7 +149,7 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % Will use the statistics to compare to features of the residuals after
 % modeling.
 
-% (Commented out as a historical marker: unused by any output; saves wasted compute.)
+% (Commented out: unused by any output.)
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level

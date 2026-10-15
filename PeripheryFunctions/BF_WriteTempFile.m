@@ -1,18 +1,17 @@
 function filePath = BF_WriteTempFile(dataVector,whatPrecision)
 % BF_WriteTempFile   Write a temporary file in the system temporary directory
 %
-% All ~26 TISEAN-based master operation instances for a given time series
+% All TISEAN-based master operation instances for a given time series
 % call this with the SAME z-scored data, x_z (computed once per time series
 % in TS_CalculateFeatureVector.m) -- so, absent caching, the identical vector
-% gets written to disk from scratch up to ~26 times per time series. A
+% would be written to disk from scratch many times per time series. A
 % byte-for-byte isequal check against the last-written vector is far cheaper
 % than a disk write, so the file is only rewritten when the incoming data
 % actually differs from what's already cached on disk; otherwise the existing
 % path is returned directly.
 %
-% Because of this, ownership of the file's lifetime moves here: callers no
-% longer delete their own input file (the operations that used to call
-% `delete(filePath)` on it no longer do so). Deletion is handled by an
+% Because of this, this function owns the file's lifetime: callers do not
+% delete their own input file. Deletion is handled by an
 % onCleanup object held in this function's persistent memory, which fires
 % (a) once the cached file is superseded by different data, (b) on an
 % explicit 'clear' call, and (c) automatically when MATLAB clears this

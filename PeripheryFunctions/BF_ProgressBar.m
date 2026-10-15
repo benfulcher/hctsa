@@ -14,9 +14,9 @@ function BF_ProgressBar(progressProp,PB_length,theChar,suffixText)
 %                     is left unpadded and may leave stray characters behind on
 %                     the next, shorter update.
 %
-% In a non-interactive (-batch) session, e.g. CI or a cluster job, the animated
-% bar is replaced by a plain line at each 10% step: its backspace-redraws can't
-% animate in a log file, and on GitHub Actions they swallow all later output.
+% In a non-interactive (-batch) session, the animated bar is replaced by a plain
+% line at each 10% step: its backspace-redraws can't animate in a log file, and
+% can swallow later output.
 
 %-------------------------------------------------------------------------------
 %% Initialization

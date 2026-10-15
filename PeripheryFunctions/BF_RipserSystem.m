@@ -3,9 +3,7 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 %
 % Sibling of BF_TiseanSystem.m for the ripser persistent-homology binary
 % (Toolboxes/ripser), with the same timeout-wrapping and exit-code
-% classification logic -- kept as a separate function rather than a shared
-% generic wrapper so that this addition doesn't touch BF_TiseanSystem.m, an
-% already-tested shared dependency of ~16 existing operations.
+% classification logic.
 %
 % A call that fails this way -- status 124 (this wrapper's own timeout),
 % 126/127 (the shell's reserved "found but not executable"/"command not
@@ -14,20 +12,20 @@ function [status, res] = BF_RipserSystem(ripserCommand, timeoutSecs)
 % crash), or an over-limit output capture (a runaway binary) -- errors
 % immediately rather than returning res to the caller.
 % Unlike BF_TiseanSystem's siblings, ripser has no legitimate nonzero-but-
-% successful exit path (checked against ripser.cpp: every non-help exit
-% point other than 0 is a genuine failure), so status==0 is required here
+% successful exit path (in ripser.cpp, every non-help exit point other
+% than 0 is a genuine failure), so status==0 is required here
 % rather than just excluding the shell-reserved codes -- a caller parsing
 % persistence intervals out of res could otherwise misinterpret partially
 % flushed output (e.g. from a crash mid-computation) as a complete (if
 % small) diagram.
 %
 %---INPUTS:
-% ripserCommand, the ripser command-line string to run (as previously passed
+% ripserCommand, the ripser command-line string to run (as would be passed
 %                 directly to system())
 % timeoutSecs [opt], wall-clock time limit in seconds (default: 600)
 %
 %---OUTPUTS:
-% status, always 0 (this function now errors on any nonzero status, so a
+% status, always 0 (this function errors on any nonzero status, so a
 %          caller only ever sees a successful run).
 % res, the captured stdout+stderr text.
 
@@ -60,10 +58,8 @@ if isempty(timeoutChecked)
     % 'timeout' vs 'gtimeout' matters on macOS).
     %
     % Probe by exit status of '<cmd> --version', with no shell redirection
-    % or builtins, so it works whichever shell MATLAB's system() invokes.
-    % The previous probe -- "command -v timeout >/dev/null 2>&1" -- silently
-    % fails under csh/tcsh (see BF_TiseanSystem.m), which made hctsa run
-    % ripser unbounded on those systems.
+    % or builtins, so it works whichever shell MATLAB's system() invokes
+    % (including csh/tcsh; see BF_TiseanSystem.m).
     [statusTimeout,~]  = system('timeout --version');
     [statusGtimeout,~] = system('gtimeout --version');
     if statusTimeout == 0
@@ -99,8 +95,7 @@ if clearLdLibraryPath
     % ("version `GLIBCXX_3.4.3x' not found") before it ever runs. Clearing
     % LD_LIBRARY_PATH just for this subprocess (not MATLAB's own process)
     % lets the dynamic linker fall back to the normal system search paths.
-    % Not needed on macOS, which uses DYLD_LIBRARY_PATH and doesn't hit
-    % this; confirmed unaffected in local testing.
+    % Not needed on macOS, which uses DYLD_LIBRARY_PATH and doesn't hit this.
     %
     % Set via setenv/getenv rather than shell syntax like 'VAR= cmd' -- that
     % inline-assignment form is sh/bash-only and errors under csh/tcsh

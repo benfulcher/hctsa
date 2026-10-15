@@ -88,10 +88,10 @@ end
 % matlab.addons.installedAddons and license('test',...) are read-only
 % queries whose answer can't change over the course of a single hctsa run
 % (unlike license('checkout',...) below, which actually reserves a license
-% seat -- a real side effect, so that one is left uncached/unchanged). Cache
-% them here since this function is called by ~42 operations, each of which
-% would otherwise repeat the same (surprisingly slow -- ~0.3s in profiling)
-% installedAddons query on every single call. installedAddOns itself doesn't
+% seat -- a real side effect, so that one is left uncached). Cache
+% them here since this function is called by many operations, each of which
+% would otherwise repeat the same (slow) installedAddons query on every
+% single call. installedAddOns itself doesn't
 % depend on theToolbox, so one cached copy covers every toolbox this
 % function is ever asked to check.
 persistent cachedInstalledAddOns cachedLicenseTestNames cachedLicenseTestResults

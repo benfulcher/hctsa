@@ -77,7 +77,7 @@ end
 
 % Take magnitudes of time-delayed versions of the time series. abs(y) is
 % cached (keyed on an exact, NaN-safe content match of y) since this
-% function is called ~31 times directly as separate master operations with
+% function is called many times directly as separate master operations with
 % different (alpha,beta,tau) on the same series (x_z), plus repeatedly from
 % CO_FZCGLSCF's internal loop over tau -- each call would otherwise
 % recompute abs(y) from scratch (see CO_AutoCorr.m for the same pattern and

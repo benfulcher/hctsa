@@ -57,16 +57,6 @@ function out = PP_SchreiberDenoise(y, m, d, numIter, neighborhoodStd)
 % 47, 2401 (1993).
 % D. Toker et al., "A simple method for detecting chaos in nature", Commun. Biol.
 % 3, 11 (2020).
-%
-% ---NOTES:
-% Redundancy check (on real-world series, m = 5, d = 1, v = 0.3, numIter in {1, 4}): all
-% fields stay well clear of the usual r >= 0.9 threshold except two borderline,
-% inconsistent-across-numIter cases: fracNoCorrection (r = 0.90 at numIter = 1
-% against NL_TISEAN_fnn's neighborhood-size fields, but 0.89 at numIter = 4) and
-% KDenoised (r = 0.90 at numIter = 1 against SP_Summaries' spectral log-log slope
-% fields, but 0.89 at numIter = 4). Both are sensible mechanistic overlaps (local
-% embedding-space density; broadband versus periodic structure) rather than
-% duplicates, and too marginal and inconsistent to drop.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

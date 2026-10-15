@@ -59,8 +59,7 @@ function out = SB_TransitionPAlphabet(y, numGroups, tau)
 % exponential fit (excluding the first alphabet size if there is a jump up):
 % trcov_jump
 % trcovfexp_a, trcovfexp_b, trcovfexp_r2, trcovfexp_adjr2, trcovfexp_rmse
-% Exponential fit to the standard deviation of the eigenvalues of T, std(eig(T))
-% (the maximum and minimum real eigenvalues of T are no longer fitted):
+% Exponential fit to the standard deviation of the eigenvalues of T, std(eig(T)):
 % stdeigfexp_a, stdeigfexp_b, stdeigfexp_r2, stdeigfexp_adjr2,
 %     stdeigfexp_rmse
 

@@ -26,8 +26,8 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 %       of the natural visibility graph may be slow). Only the degrees are
 %       computed, with no adjacency matrix stored, so memory is not a concern:
 %       the horizontal graph takes O(N) time and the natural graph typically
-%       well under O(N^2) (a smooth random walk of 20000 samples takes about
-%       0.5 s; a worst-case series, with no early stop in the sweep, takes O(N^2)).
+%       well under O(N^2) (a worst-case series, with no early stop in the sweep,
+%       takes O(N^2)).
 %
 % ---OUTPUTS:
 % modek, propmode: the most common degree, and the proportion of nodes that
@@ -128,9 +128,7 @@ if ischar(maxL) && strcmp(maxL, 'full')
 						 'visibility graph computation may be slow'], N, slowThreshold));
 	end
 elseif N > maxL % too long: crop
-	% ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
-	% could alter to take different subsets, or set a maximum distance range
-	% allowed to make a link (using sparse), etc.
+	% Reduce to the first maxL samples
 	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
 					 ' Analyzing the first %u samples'], N, maxL, maxL));
 	y = y(1:maxL);

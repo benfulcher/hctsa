@@ -94,16 +94,8 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % not predicted.
 %
 % 'arcrosspred': the level statistics (trace, mean, min, max, eigenvalue levels) of
-% the cross-prediction matrix correlated at |r| = 0.89-0.98 with this function's own
-% 'ar' fpe_mean/min/max fields on two collections of real-world series (150 series
-% each), so are not returned. The spread and off-diagonal statistics, which correlated
-% only at |r| = 0.4-0.88 with fpe_* and a_1_*, and 0.4-0.85 with SY_nstat_z's spread
-% statistics, are kept.
-%
-% The 'arma' registration (order = [2, 2], 25 uniform 10%-length segments) was
-% deregistered: its AR-driven fields correlated at |r| = 0.69-0.99 with
-% the much cheaper 'ar' registration, and the MA-driven fields (q_k_*) were noisy.
-% The 'ar', 'arsbc' and 'ss' registrations are unaffected.
+% the cross-prediction matrix are not returned (largely redundant with the 'ar'
+% fpe_* fields); only the spread and off-diagonal statistics are.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

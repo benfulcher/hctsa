@@ -43,13 +43,11 @@ function out = SC_HiguchiFD(y, kmax)
 % (NL_FractalDimensions, NL_Dimensions), which measure the geometry of a
 % time-delay-embedded attractor rather than the waveform of the raw series.
 %
-% kmax must be kept small and not scaled up with series length N. Tested against
-% known ground truth: for white noise (D = 2) and Brownian motion (D = 1.5) the
-% fitted dimension is robust to kmax across 8-200. But for a smooth periodic
-% signal (D about 1) the fit is essentially exact at kmax = 8 (D = 1.011) and
-% degrades badly as kmax grows relative to the signal's characteristic timescale
-% (D = 1.76 at kmax = 200, on a period-137 sinusoid): once the interleaving scale
-% exceeds roughly half the oscillation period, successive sampled points alias
+% kmax must be kept small and not scaled up with series length N. For noise-like
+% series the fitted dimension is fairly robust to kmax, but for a smooth periodic
+% signal (D about 1) the fit degrades as kmax grows relative to the signal's
+% characteristic timescale: once the interleaving scale exceeds roughly half the
+% oscillation period, successive sampled points alias
 % across cycles, inflating the apparent curve length at large k and biasing the
 % fitted slope upward. The default matches common practice in the Higuchi-FD
 % literature (a small, fixed kmax, typically about 8-16 regardless of N).

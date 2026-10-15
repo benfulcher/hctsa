@@ -144,23 +144,17 @@ end
 % Output statistics on the residuals, res
 % ------------------------------------------------------------------------------
 
-% Report the residuals through the shared contract, at the cheap 'core' level. This
-% replaces the hand-rolled meanerr, stderr, meanabserr, sws, swm, ac1, ac2, taures and
-% tauresrat, which are now meane, stde, meanabs, sws, swm, ac1, ac2 and taurat -- the same
-% quantities under the names the rest of the model-fitting family uses.
+% Report the residuals through the shared contract, at the cheap 'core' level, under
+% the names the rest of the model-fitting family uses.
 residOut = MF_ResidualAnalysis(res, y, 'core');
 fields = fieldnames(residOut);
 for k = 1:length(fields)
 	out.(fields{k}) = residOut.(fields{k});
 end
 
-% (Dropped: taures, the residual decorrelation time -- it correlates 0.90-0.99 with ac1.
-%  Its ratio form taurat, which does not, is retained via the shared contract above.)
-
-% Normality of the residuals, as the r-squared of a Gaussian fit to their distribution.
-% (Renamed from gofr2, which read as a goodness-of-fit measure for the *forecast*; it is
-% not -- it is a distributional statistic, so it sits alongside the contract's normksstat
-% rather than alongside stde.)
+% Normality of the residuals, as the r-squared of a Gaussian fit to their distribution
+% (a distributional statistic of the residuals, not a goodness-of-fit measure for the
+% forecast).
 tmp = DN_SimpleFit(res, 'gauss1', 0);
 if ~isstruct(tmp) && isnan(tmp) % fitting failed
 	out.normr2 = NaN;

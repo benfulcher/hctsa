@@ -17,10 +17,8 @@ function out = SY_StdNthDerChange(y, maxd)
 % successive differencing REDUCE std up to some order (removing trend or
 % nonstationary drift) before over-differencing increases it again: a classic
 % Box-Jenkins ARIMA-order-selection U-shape that a monotonic exponential cannot
-% represent (in a sample of 20 real EEG series, all 20 showed this interior
-% minimum, with a median exponential-fit r^2 of only 0.11). The minOrder,
-% minOrderInterp, minRatio, overDiffRatio, and isInterior outputs characterize this
-% directly, alongside the exponential fit. The exponential is fitted by least
+% represent. The minOrder, minOrderInterp, minRatio, overDiffRatio, and isInterior
+% outputs characterize this directly, alongside the exponential fit. The exponential is fitted by least
 % squares with BF_ExpFit (the global optimum over rates |b| <= 40/(maxd - 1), with no
 % starting point to choose); if it cannot be fitted (e.g., a constant curve), the
 % fexp_* outputs are NaN and the others are still returned.
@@ -91,15 +89,11 @@ if doPlot
 	plot(ms, 'o-k')
 end
 
-% Fit exponential growth/decay, f(n) = a*exp(b*n), by least squares. (A local
-% optimizer started from a fixed point, as used previously, could stop in a spurious
-% minimum with b around -9 and a negative R^2 for steeply increasing curves.)
+% Fit exponential growth/decay, f(n) = a*exp(b*n), by least squares.
 fExp = BF_ExpFit((1:maxd)', ms, false, 40);
 out.fexp_a = fExp.a;
 out.fexp_b = fExp.b; % this is important
 out.fexp_r2 = fExp.r2; % this is more important!
-% fexp_adjr2 dropped: near-duplicate of fexp_r2 (adjustment is for 2 free
-% parameters against maxd=10 data points, so it barely moves).
 out.fexp_rmse = fExp.rmse;
 
 % ------------------------------------------------------------------------------

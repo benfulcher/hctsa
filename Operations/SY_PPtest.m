@@ -116,8 +116,7 @@ if nout == 1
 	out.coeff1 = reg.coeff(1); % could be multiple, depending on the model
 	% Log-likelihood and the information criteria are extensive: they are sums
 	% over observations, so they grow in direct proportion to the time-series
-	% length regardless of how well the model fits (minBIC measured eta^2 = 0.973
-	% against N across series of different lengths). Reported per observation, which
+	% length regardless of how well the model fits. Reported per observation, which
 	% is the standard intensive form and the quantity model comparison actually
 	% depends on.
 	numObs = length(y);
@@ -128,9 +127,7 @@ if nout == 1
 	out.rmse = reg.RMSE;
 
 else
-	% Return statistics on the set of outputs. maxpValue/stdpValue dropped
-	% (r >= 0.98 with meanpValue on real-world series); maxstat/minstat dropped
-	% (r >= 0.97 with meanstat).
+	% Return statistics on the set of outputs.
 	out.minpValue = min(pValue);
 	out.meanpValue = mean(pValue);
 	imaxp = find(pValue == max(pValue), 1, 'first');
@@ -140,10 +137,8 @@ else
 
 	out.meanstat = mean(stat);
 
-	% Regression statistics: meanloglikelihood/minAIC/minHQC/minrmse/maxrmse
-	% dropped -- confirmed r >= 0.998 with minBIC (and with each other) on
-	% real-world series, matching this function's own longstanding comment that
-	% these are all highly correlated. Per observation -- see the note in
+	% Regression statistics: only minBIC is returned (the other regression
+	% statistics are highly correlated with it). Per observation -- see the note in
 	% the single-test branch above.
 	numObs = length(y);
 	out.minBIC = min(vertcat(reg.BIC)) / numObs;

@@ -172,11 +172,6 @@ end
 % ------------------------------------------------------------------------------
 %% WRITE OUTPUT
 % ------------------------------------------------------------------------------
-% Note: the 'lin' statistic (slope of a linear fit to the across-iteration
-% profile) is dropped throughout -- it correlates with 'trend' (sum of
-% differences across the same profile) at r=0.84-0.99 across all 7 measured
-% categories on real EEG data, since both are point-estimators of the same
-% underlying "is this short profile increasing" question.
 
 % 1) StatAv_5
 out.statav5_trend = stats(1, 1);

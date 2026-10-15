@@ -38,11 +38,6 @@ function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 % statav5_s, the same for the standard deviation of the local density.
 % If no point has any neighbor within r, a fixed set of values is returned (std,
 % median, mean, iqr, hist_ent = 0; mode_val = 1; mode = 0; the rest NaN).
-%
-% ---NOTES:
-% `max` is not computed: it was redundant with `mean` and `std` (|r| >= 0.9 with both,
-% on each of two collections of real-world series), at both registered radii (r = 0.1
-% and r = 1).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

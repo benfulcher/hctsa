@@ -82,16 +82,13 @@ if ismember(estMethod, {'kraskov1', 'kraskov2'})
 		miCalc.setProperty('k', extraParam); % 4th input specifies number of nearest neighbors for KSG estimator
 	else
 		miCalc.setProperty('k', '4'); % use 4 nearest neighbors for KSG estimator as default
-		% (empirically the best of k=2/3/4 on ground-truth AR(1) and periodic
-		% test signals -- lowest RMSE/variance, no bias cost -- and matches
-		% what every registered hctsa feature already hard-codes)
 	end
 end
 
 % Make deterministic if kraskov1 or 2 (which add a small amount of noise to the signal by default):
 if ~addNoise && ismember(estMethod, {'kraskov1', 'kraskov2'})
 	% No noise added inside JIDT. JIDT's own NOISE_LEVEL_TO_ADD draws from an
-	% internal Java RNG that cannot be seeded in the bundled build, which made
+	% internal Java RNG that cannot be seeded in the bundled build, which would make
 	% every Kraskov-based feature irreproducible on data with many repeated
 	% values. Tie-breaking jitter for such data is instead added by the caller,
 	% reproducibly, on the MATLAB side: see BF_TieBreakNoise.

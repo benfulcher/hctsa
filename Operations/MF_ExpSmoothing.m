@@ -157,8 +157,8 @@ if strcmp(alpha, 'best')
 	rkeep = ix(1:3); % fit on the 3 points closest to the minimum
 	p = polyfit(alphar(rkeep)', rmses(rkeep), 2);
 	% Slope of the parabola at the middle of the scan, a + b for a*alpha^2 + b*alpha + c.
-	% (Its vertex, -b/(2a), was reported as alphamin_1 before: a ratio that is unbounded
-	% when the parabola is nearly flat. Together with p1_1 and cup_1 the slope carries the
+	% (Its vertex, -b/(2a), is not reported: it is a ratio that is unbounded when the
+	% parabola is nearly flat. Together with p1_1 and cup_1 the slope carries the
 	% same information, vertex = 0.5 - slope/(2a), and stays finite and continuous.)
 	out.slope05_1 = p(1) + p(2);
 	out.p1_1 = abs(p(1)); % concavity

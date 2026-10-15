@@ -46,10 +46,10 @@ function out = SP_SinusoidFit(y, model)
 % fewer than 3K+1 samples for K sinusoids), NaN is returned instead of a structure.
 %
 % ---NOTES:
-% This function holds the time-series-model branch of the former DN_SimpleFit,
-% from which it was split because the distribution of values is unaffected by
-% temporal ordering, whereas these fits are not. r2 and adjr2 are not registered
-% for the sin1/sin2/sin3 mops (rmse is).
+% These time-series models are kept separate from DN_SimpleFit, which fits the
+% distribution of values: that distribution is unaffected by temporal ordering,
+% whereas these fits are not. r2 and adjr2 are not registered for the
+% sin1/sin2/sin3 mops (rmse is).
 % The sinusoid frequencies are bounded below by 1/(2N) cycles per sample, because
 % a sinusoid of lower frequency cannot be told apart from a constant plus a linear
 % trend, so that its amplitude and phase are not determined, and the best-fitting

@@ -3,14 +3,11 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %
 % Estimates D(q), the generalized dimension of the time-delay embedding as a
 % function of the order of the moment, from the distances of reference points to
-% their nearest neighbors. This operation previously used TSTOOL's 'fracdims',
-% whose actual computation (tstoolbox/@signal/fracdims.m is just a thin wrapper;
-% the real work is in the compiled mex-dev/GeneralizedDimensionEstimation/
-% gendimest.cpp, vendored in this repo under Toolboxes/OpenTSTOOL) turned out to
-% be a well-defined, published method rather than an undocumented black box,
-% "Generalized dimensions from near-neighbor information", W. van de Water and
-% P. Schram (Phys. Rev. A 37(8), 3118-3125, 1988; an earlier version of this text
-% wrote "Schram and van der Water"). It is reproduced exactly here in native MATLAB:
+% their nearest neighbors, using the method of W. van de Water and P. Schram,
+% "Generalized dimensions from near-neighbor information" (Phys. Rev. A 37(8),
+% 3118-3125, 1988), as implemented in TSTOOL's 'fracdims' (whose computation is in
+% the compiled mex-dev/GeneralizedDimensionEstimation/gendimest.cpp). It is
+% reproduced exactly here in native MATLAB:
 %
 % For each of Nref reference points, find the distances to its 1st..kmax-th
 % nearest neighbors (excluding a Theiler window of "past" samples). For
@@ -268,10 +265,7 @@ out.rangeq = range(q);
 out.meanq = mean(q);
 
 % ---Fit linear
-% q and Dq are both columns here (this used to rely on TSTOOL's spacing()
-% returning q as a row, transposing Dq to match; with q now a column too,
-% that stray transpose would turn "p_fit - Dq'" into an N-by-N broadcast
-% instead of an N-by-1 residual, so it's dropped):
+% q and Dq are both columns here (so the residual p_fit - Dq is N-by-1):
 p = polyfit(q, Dq, 1);
 p_fit = q * p(1) + p(2);
 res = p_fit - Dq;

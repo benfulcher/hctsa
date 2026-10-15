@@ -49,10 +49,8 @@ function out = CP_WaveletVarChg(y, wName, level, maxnchpts, minDelay)
 %       tau = 1 + 2*sum_{h=1..L} (1 - h/(L+1))*rho(h)^2 (at least 1),
 % multiplied by max(1, (kurtosis - 1)/2) for heavy tails (kurtosis 3 for
 % Gaussian data). Dividing the contrast by tau counts N/tau effective
-% observations. Calibrated by simulation (white, AR(1), fractional Gaussian and
-% Student-t noise, N = 500-5000, wavelets db3 and sym2 at levels 2-5): stationary
-% series give at least one change point about 4-5% of the time (at most 6% in
-% any process and length).
+% observations, so that stationary series (including autocorrelated and
+% heavy-tailed ones) only rarely yield a spurious change point.
 % The deeper the decomposition level, the fewer effective observations the
 % detail signal has (tau is about 2, 4, 8 and 15 at levels 2-5 for white noise),
 % so only larger variance changes are detected there.

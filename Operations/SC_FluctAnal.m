@@ -287,19 +287,13 @@ end
 % Determine the errors
 % ------------------------------------------------------------------------------
 % minPoints scales with numTimeScales rather than being a fixed constant: a
-% fixed small minPoints (e.g. 6) lets the search reach breakpoints right at the
-% edge of the domain, where a segment of only a handful of points can trivially
+% fixed small minPoints lets the search reach breakpoints right at the edge of
+% the domain, where a segment of only a handful of points can trivially
 % achieve near-zero fit error regardless of whether the series has any real
-% change in scaling behaviour. Confirmed empirically: for monofractal fGn (no
-% true crossover), the raw fit-error curve is monotonic across the *entire*
-% search domain, so the "best" split is always whichever end the search is
-% allowed to reach, not a genuine interior minimum. Requiring each segment to
-% span at least a quarter of the timescale range keeps the search away from
-% these degenerate edge solutions. The floor of 8 also guarantees
-% DoRobustLinearFit's own length>=8 requirement is always satisfied whenever a
-% fit is attempted here, so the search bound and the fit's minimum-length
-% requirement can no longer disagree (previously minPoints=6 could select a
-% 6- or 7-point segment that DoRobustLinearFit would then discard as NaN).
+% change in scaling behavior. Requiring each segment to span at least a
+% quarter of the timescale range keeps the search away from these degenerate
+% edge solutions. The floor of 8 also guarantees DoRobustLinearFit's own
+% length>=8 requirement is always satisfied whenever a fit is attempted here.
 sserr = nan(numTimeScales, 1); % don't choose the end points
 minPoints = max(8, round(0.25 * numTimeScales));
 if numTimeScales >= 2 * minPoints
@@ -313,11 +307,7 @@ if numTimeScales >= 2 * minPoints
 		p2 = polyfit(logtt(r2), logFF(r2), 1);
 		% Mean squared error, pooled across both segments and normalized by
 		% the total number of points sampled (numTimeScales), so that it is
-		% comparable to ssr1 and independent of tauStep. (This was
-		% previously a straight sum of L2 norms (unnormalized), which scales
-		% with sqrt(#points) and made the error roughly triple just from
-		% varying tauStep 20->200 on an identical series -- not a real effect,
-		% purely a units mismatch.)
+		% comparable to ssr1 and independent of tauStep.
 		e1 = polyval(p1, logtt(r1)) - logFF(r1);
 		e2 = polyval(p2, logtt(r2)) - logFF(r2);
 		sserr(i) = (sum(e1.^2) + sum(e2.^2)) / numTimeScales;

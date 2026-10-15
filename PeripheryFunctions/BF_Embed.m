@@ -120,9 +120,8 @@ else % use a routine to inform m
                 % using TISEAN's false_nearest code. escapeFactor=5 matches
                 % the false-neighbor escape-ratio threshold conventionally
                 % used for this kind of test (TISEAN's own internal default
-                % of 2.0 is considerably stricter and was found, in practice,
-                % to make the test look like it never converges even for
-                % textbook low-dimensional systems).
+                % of 2.0 is considerably stricter, and can make the test
+                % appear never to converge even for low-dimensional systems).
                 if length(m) == 1
                     th = 0.4;
                 else

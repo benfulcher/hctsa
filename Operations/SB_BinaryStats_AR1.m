@@ -46,23 +46,16 @@ function out = SB_BinaryStats_AR1(y, binaryMethod)
 %   E[proportion of series in 1-runs] = (1-p)/2  (by symmetry about the mean)
 %
 % Because these depend only on the *marginal* (pairwise) transition
-% probability, they hold up well empirically for real Gaussian AR(1)
-% processes even at high persistence:
-%   - 'mean': verified by simulation across phi = 0-0.95 (empirical-to-
-%     expected ratio within ~1% of 1 throughout).
-%   - 'diff': verified similarly across phi = -0.85-0.95 (ratio within
-%     ~0.2% of 1 throughout -- even tighter than 'mean', since
-%     differencing keeps the diff series' own lag-1 autocorrelation away
-%     from +-1 even as phi -> 1).
+% probability, they remain accurate for Gaussian AR(1) processes even at
+% high persistence.
 %
 % The same two-state-Markov assumption also yields closed forms for the
 % variance of run lengths and for low-order point probabilities (e.g.,
-% P(L=2)-P(L=1)), but these do NOT hold up empirically: simulation (for
-% 'mean') shows the std-ratio drifting from ~1.0 at phi=0 to ~1.7 at
-% phi=0.95, because the true sign sequence of a Gaussian AR(1) is a
-% hidden- rather than first-order Markov chain (a sign flip's probability
-% depends on the current value's magnitude, not just its sign, giving
-% real run lengths a heavier tail than the geometric model predicts). The
+% P(L=2)-P(L=1)), but these become inaccurate as persistence increases,
+% because the true sign sequence of a Gaussian AR(1) is a hidden- rather
+% than first-order Markov chain (a sign flip's probability depends on the
+% current value's magnitude, not just its sign, giving real run lengths a
+% heavier tail than the geometric model predicts). The
 % mean is robust to this mismatch; the variance and point probabilities
 % are not. For the same reason (and because it's an extreme-value
 % statistic besides), no closed form is attempted for the *longest* run

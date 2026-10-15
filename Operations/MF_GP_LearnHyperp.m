@@ -29,13 +29,7 @@ function hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, nfeva
 %
 % The pre-optimization hyperparameter initialization is data-informed,
 % component-by-component, for any covSum of covSEiso/covPeriodic/covRQiso/covNoise;
-% unrecognized components fall back to zero. (Data-informed initialization used to be
-% done only for the exact covSum {covSEiso,covNoise} pair; every other combination,
-% including covSEiso+covPeriodic+covNoise, started from all zeros. This stranded the
-% optimizer at a substantially worse local optimum: on real EEG data, refitting the
-% periodic combination from a data-informed start changed the negative log marginal
-% likelihood by 100s of units, and flipped the periodic-vs-SE-only "which fits better"
-% comparison from 2.6% of series to ~33% of series, a far more plausible rate.)
+% unrecognized components fall back to zero.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -79,12 +73,11 @@ if nargin < 5 || isempty(likFunc)
 end
 if nargin < 6 || isempty(infAlg)
 	% Inference algorithm:
-	% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+	% Exact Gaussian inference. (Not @infLaplace: with a Gaussian likelihood the
 	% Laplace approximation is exact but is computed by Newton iteration, and
 	% gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
-	% previous call's solution, so every fit depended on whatever series was
-	% fitted before it -- the same series gave outputs differing in the 4th digit
-	% from call to call once the optimizer amplified the difference.)
+	% previous call's solution, so each fit would depend on whatever series was
+	% fitted before it.)
 	infAlg = @infGaussLik;
 end
 if nargin < 7 || isempty(nfevals)
@@ -98,11 +91,8 @@ nhps = eval(s);
 
 % Initial values for covariance function:
 % Data-informed per-component initialization for any covSum of the component
-% covariance functions listed below. An all-zero start (the previous fallback
-% for anything other than the exact covSEiso+covNoise pair) was verified to
-% strand the optimizer at a substantially worse local optimum -- e.g. for
-% covSEiso+covPeriodic+covNoise, negative log marginal likelihood differed by
-% 100s of units between zero- and data-informed starts on real EEG data.
+% covariance functions listed below (an all-zero start can strand the optimizer
+% at a substantially worse local optimum).
 covFunc1 = covFunc{1};
 covFunc2 = covFunc{2};
 hyp.cov = zeros(nhps, 1);

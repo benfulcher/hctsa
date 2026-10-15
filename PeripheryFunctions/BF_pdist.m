@@ -6,7 +6,7 @@ function R = BF_pdist(dataMatrix,distMetric,toVector,opts,beSilent,minPropGood)
 % NaN-affected pair. For the correlation-based metrics (Pearson/Spearman/
 % corr/correlation/abscorr) this NaN fix-up is a single vectorized
 % corr(...,'Rows','pairwise') call covering every affected row at once
-% (verified to reproduce a naive per-pair loop exactly); Euclidean distance
+% (which reproduces a naive per-pair loop exactly); Euclidean distance
 % has no native pairwise-complete equivalent, so it still uses an explicit
 % per-pair loop.
 
@@ -119,9 +119,8 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
     if isCorrType && ~any(isnan(dataMatrix(:)))
         % Fast path: no NaNs anywhere, so there is nothing for the fixup
         % below to ever do -- skip pdist+squareform entirely (which carry
-        % nontrivial fixed overhead of their own even with nothing to fix:
-        % measured ~2x slower than going straight to corr() on a 500x1000
-        % matrix) and compute the full distance matrix in one vectorized call.
+        % nontrivial fixed overhead of their own even with nothing to fix)
+        % and compute the full distance matrix in one vectorized call.
         if ismember(distMetric,{'Spearman','abscorr'})
             corrType = 'Spearman'; % matches the 'Spearman' forced for abscorr below
         else
@@ -183,7 +182,7 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
 
         if ismember(distMetric,{'Euclidean','euclidean'})
             % No native pairwise-complete equivalent for this (overlap-rescaled)
-            % Euclidean distance, so fall back to the original per-pair loop:
+            % Euclidean distance, so fall back to an explicit per-pair loop:
             ij = (nanj >= nani); % only keep diagonal or upper diagonal entries
             nani = nani(ij);
             nanj = nanj(ij);
@@ -220,8 +219,7 @@ case {'euclidean','Euclidean','PearsonCorr','Pearson','Spearman','corr','correla
             % both use the same overlapping-good-values convention) rather than
             % looping pair-by-pair -- while still only touching the rows that
             % actually need it, keeping the fast path fast when few rows are
-            % NaN-affected (see PeripheryFunctions/BF_pdist.m investigation
-            % notes/commit message for benchmarks across NaN-density regimes).
+            % NaN-affected.
             if ismember(distMetric,{'PearsonCorr','Pearson'})
                 corrType = 'Pearson';
             else

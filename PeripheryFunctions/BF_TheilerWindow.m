@@ -20,7 +20,7 @@ function W = BF_TheilerWindow(y, spec, Nfrac)
 %                  autocorrelation function (see BF_GetTau); shorter and more
 %                  stable than the zero crossing, NaN if the ACF never falls to 1/e;
 %       an integer >= 0: a fixed number of samples;
-%       a number in (0,1): a proportion of Nfrac (legacy; this scales with the
+%       a number in (0,1): a proportion of Nfrac (this scales with the
 %                  length of the series).
 % Nfrac, [opt, default numel(y)] the length that a proportional window refers to
 %

@@ -141,8 +141,7 @@ end
 
 % -------------------------------------------------------------------------------
 % Return basic statistics on differences in distributions in different
-% segments of the time series. mediandiv/mindiv/maxdiv dropped: each
-% correlates r >= 0.95 with meandiv on a diverse set of real-world series.
+% segments of the time series.
 out.meandiv = mean(divs);
 out.stddiv = std(divs);
 

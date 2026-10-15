@@ -73,8 +73,7 @@ end
 % unchanged -- a subset is a faithful slice of the source, so whatever coding
 % the source uses for special/error cells (NaN from TS_Compute, or a legacy
 % literal 0) is carried across as-is. The returned TS_DataMat is NaN-ified at
-% the end for consistency with TS_LoadData (matching this function's historical
-% return behaviour).
+% the end for consistency with TS_LoadData.
 if isstruct(whatData)
     % Pre-loaded dataset (e.g. whatData = load('HCTSA.mat')):
     S = whatData;

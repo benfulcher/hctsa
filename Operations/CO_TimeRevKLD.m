@@ -41,11 +41,9 @@ function out = CO_TimeRevKLD(y, tau, m, k, theilerWin, maxN)
 %             function, or a number of samples (see BF_TheilerWindow). Default:
 %             {'ac', 1}. Narrowed to fit short series.
 % maxN, the maximum number of embedded points used. The k-NN searches are KD-tree
-%       based, not the O(N^2) cost of CO_JointNonGaussianity's skewness statistic
-%       (which needs this kind of cap): empirically, 100000 points takes ~0.3s for
-%       smooth data and ~1.6s even for adversarial duplicate-heavy data. A warning is
-%       issued whenever cropping actually happens. Default: 'full' (no cropping); set
-%       to an integer to cap runtime on unusually long series.
+%       based, so long series remain tractable. A warning is issued whenever cropping
+%       actually happens. Default: 'full' (no cropping); set to an integer to cap
+%       runtime on unusually long series.
 %
 % ---OUTPUTS:
 % raw, the k-NN estimate of KL(forward || reversed): a unitless departure-from-

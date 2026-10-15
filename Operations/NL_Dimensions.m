@@ -13,9 +13,7 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % estimates D2. Straight lines are fitted over all scales and over a scaling
 % range chosen by a penalized regression: its start is in the first half of
 % the scales and its end in the second half, chosen to minimize the mean
-% absolute residual minus 0.02 times the number of scales kept. This operation
-% previously used TSTOOL's 'dimensions'. The information dimension (D1) was
-% disabled in that version and has been removed.
+% absolute residual minus 0.02 times the number of scales kept.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -60,8 +58,7 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % maxEps = std(y)*sqrt(M).
 %
 % Code for estimating the best scaling range is embedding-agnostic (it only
-% consumes (logr, logN) / (logr, logC) matrices) and is unchanged from the
-% TSTOOL-based version.
+% consumes (logr, logN) / (logr, logC) matrices).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -124,8 +121,8 @@ if isnan(tau)
 end
 mopt = tm(2); % the resolved embedding dimension, possibly < 3
 
-% dimension curves are always computed for m = 1:M (M >= 3, matching the
-% original re-embed-at-3 behavior, since bc_logN(:,3) etc. are used below):
+% dimension curves are always computed for m = 1:M (M >= 3, since
+% bc_logN(:,3) etc. are used below):
 M = max(mopt, 3);
 
 filePath = BF_WriteTempFile(y);
@@ -183,21 +180,17 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2, for the correlation dimension (D2)
 % ------------------------------------------------------------------------------
-% "-M1,M" (a genuine range) rather than "-M<M>,<M>" works around a real bug
-% in this TISEAN build where a fixed single embedding dimension reports "0
+% "-M1,M" (a genuine range) rather than "-M<M>,<M>" works around a bug in
+% the bundled TISEAN where a fixed single embedding dimension reports "0
 % lines read" and produces no output (see NL_GPCorrSum.m):
-% Length scale, in standard deviations of y scaled by sqrt(M) (the same
-% embedding-dimension correction validated in NL_GPCorrSum.m -- a
-% pairwise distance in an M-dimensional embedding scales as std(y)*sqrt(M),
-% not std(y) alone). Unlike NL_GPCorrSum (which only ever needs one
-% target dimension and can tolerate an occasional honest NaN there), every
-% embedding dimension 1:M needs usable data here, and the highest dimension
-% M is by far the most likely to have zero pairs at TISEAN's own default
-% minimum epsilon (data interval/1000) -- confirmed empirically: for
-% structureless noise embedded at a representative M=7, TISEAN's own
-% default left 25/50 bins with zero pairs (i.e. ln(C(r)) = -Inf) at that
-% dimension, and even minEps = maxEps/100 or /30 still left 25 or 16/50
-% zero; minEps = maxEps/10 was the first tested ratio to leave zero:
+% Length scale, in standard deviations of y scaled by sqrt(M) (as in
+% NL_GPCorrSum.m -- a pairwise distance in an M-dimensional embedding
+% scales as std(y)*sqrt(M), not std(y) alone). Unlike NL_GPCorrSum (which
+% only ever needs one target dimension), every embedding dimension 1:M
+% needs usable data here, and the highest dimension M is the most likely
+% to have bins with zero pairs (ln(C(r)) = -Inf) at small radii, e.g. at
+% TISEAN's own default minimum epsilon (data interval/1000) for
+% structureless noise. The smallest radius is therefore set to maxEps/10:
 maxEps = std(y) * sqrt(M);
 minEps = maxEps / 10;
 [~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t0 -N0 -r%g -R%g -#%u %s', ...
@@ -251,7 +244,7 @@ end
 
 % A zero-pair bin (Cr = 0, so log(Cr) = -Inf) would silently poison every
 % downstream mean/min/range/polyfit statistic that touches it. The minEps
-% floor above was tuned to avoid this in practice (see comment there), but
+% floor above is set to avoid this in practice (see comment there), but
 % as a safety net for configurations it doesn't fully cover, treat a
 % residual non-finite value as an honest "not enough data to estimate a
 % correlation-dimension curve at every requested embedding dimension" and
@@ -358,11 +351,7 @@ function out = SUB_mch(logr, logN, prefix, out)
 	out.([prefix, '_meandiff']) = mean([mean(logN(:, 2)) - mean(logN(:, 1)), mean(logN(:, 3)) - mean(logN(:, 2))]);
 
 	% (v) slopes and goodness of fit across whole r range
-	% logr/logN are both columns here (this used to rely on TSTOOL's
-	% spacing() returning logr as a row, transposing logN(:,k) to match; with
-	% logr now a column too, that stray transpose inside subsublinfit turned
-	% "y - pfit" into an N-by-N broadcast instead of an N-by-1 residual, so
-	% it's dropped):
+	% logr/logN are both columns here (so the residual y - pfit is N-by-1):
 	[out.([prefix, '_lfitm1']), out.([prefix, '_lfitb1']), out.([prefix, '_lfitmeansqdev1'])] = subsublinfit(logr, logN(:, 1));
 	[out.([prefix, '_lfitm2']), out.([prefix, '_lfitb2']), out.([prefix, '_lfitmeansqdev2'])] = subsublinfit(logr, logN(:, 2));
 	[out.([prefix, '_lfitm3']), out.([prefix, '_lfitb3']), out.([prefix, '_lfitmeansqdev3'])] = subsublinfit(logr, logN(:, 3));
@@ -392,8 +381,7 @@ function out = SUB_ScalingRange(logr, logN, prefix, out)
 	mybad = zeros(length(stptr), length(endptr));
 	for i = 1:length(stptr)
 		for j = 1:length(endptr)
-			% logr/logN both columns here -- see SUB_mch's comment on the
-			% same stray-transpose issue:
+			% logr/logN both columns here (see SUB_mch):
 			mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 		end
 	end
@@ -449,8 +437,7 @@ function out = SUB_bestm(logr, logNN, prefix, out)
 		mybad = zeros(length(stptr), length(endptr));
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)
-				% logr/logN both columns here -- see SUB_mch's comment on the
-				% same stray-transpose issue:
+				% logr/logN both columns here (see SUB_mch):
 				mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 			end
 		end

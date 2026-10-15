@@ -60,29 +60,17 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %    A companion mop is registered at a deliberately under-embedded m = 2:
 %    self-intersections aren't purely artifacts to be unfolded away -- a curve's own shape
 %    in a *specific* low-dimensional projection can itself carry information a Takens-safe
-%    embedding discards. Verified directly: two-harmonic signals
-%    sin(t)+0.6*sin(2t+phi) with phi=0 vs phi=1.4 are indistinguishable by any phase-blind
-%    spectral feature (|FFT| depends only on harmonic amplitudes, not phi, by
-%    construction) but separate cleanly at m = 2 -- almost entirely as a difference in the
-%    single dominant loop's persistence, not its count, despite the naive expectation of a
-%    literal figure-eight (two independent 1-cycles); see the m = 3 default, where the gap
-%    collapses substantially, consistent with the effect being tied to the specific 2D
+%    embedding discards. For example, two-harmonic signals sin(t)+0.6*sin(2t+phi) with
+%    different phi are indistinguishable by any phase-blind spectral feature (|FFT| depends
+%    only on harmonic amplitudes, not phi, by construction) but can differ at m = 2 in the
+%    persistence of the single dominant loop -- an effect tied to the specific 2D
 %    projection rather than the intrinsic topology of the (here, truly 1-dimensional)
 %    attractor.
 %
-%    This m = 2 companion mop uses tau = 'periodWelch', not 'mi'. 'mi' was tried first and
-%    looked promising (maxPersistenceH1 0.35 vs 0.63, ~30 std devs apart across 30 reps)
-%    but turned out to be largely lucky, not principled: a tau sweep over the same
-%    construction showed the discrimination effect's sign/magnitude oscillates with the
-%    embedding delay (ratio ranged 0.12x-1.81x across integer tau), and 'mi' happened to
-%    land on the single best point in that sweep at only one of three sampling rates
-%    tested -- at the other two, it agreed with the (much worse-performing) 'ac'
-%    heuristic. A harmonic-ratio variant of the same construction (1:3 instead of 1:2)
-%    additionally showed the *sign* of the effect isn't stable across related constructions
-%    either. 'periodWelch' doesn't fix the sign-instability (nothing about tau selection
-%    can), but it does fix the sampling-rate sensitivity: it targets a fixed *fraction of
-%    the dominant period* (not an absolute index count) by normalizing against the series'
-%    own estimated dominant period, so the same relative embedding delay is used
+%    This m = 2 companion mop uses tau = 'periodWelch', not 'mi'. The m = 2 loop shape
+%    depends strongly on the embedding delay, and 'periodWelch' targets a fixed *fraction
+%    of the dominant period* (not an absolute index count) by normalizing against the
+%    series' own estimated dominant period, so the same relative embedding delay is used
 %    regardless of how finely the series happens to be sampled. (In the code the delay is
 %    max(1, round(period/5)) samples, one fifth of the period, falling back to 'mi' if no
 %    prominent spectral peak is found.) A fifth of a period is chosen because, for a
@@ -102,16 +90,8 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %    NL_RQA's maxN, which crops the raw series instead (RQA's per-pair cost is what forces
 %    that choice there; here the embedding itself is cheap and only the point count handed
 %    to ripser needs capping). With maxN = 'full', a warning is given above 4000 points,
-%    where cost is already into the tens of seconds and grows steeply from there --
-%    empirically, ~12000 points is enough to exceed BF_RipserSystem's own 600 s subprocess
-%    timeout outright.
-%
-% An earlier candidate field, a count of "significant" H1 intervals above a fixed
-% normalized-persistence threshold, was dropped after checking against real data: it
-% was 0 for 149/150 real EEG series -- real (noisy, imperfectly
-% periodic) data essentially never clears a fixed significance bar tuned by eye against a
-% clean sine wave, so the field carried almost no information. maxPersistenceH1 captures
-% the same underlying signal as a continuous quantity instead.
+%    beyond which cost grows steeply and can exceed BF_RipserSystem's own 600 s
+%    subprocess timeout.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -151,11 +131,8 @@ if nargin < 2 || isempty(tau)
     % is highly sensitive to this choice. A fixed tau=1 embedding of a
     % smooth periodic series is nearly collinear locally (adjacent samples
     % are highly correlated), producing a thin, elongated loop whose
-    % persistence is small relative to the cloud's overall diameter;
-    % validated directly (clean sine wave, tau=1): loop persistence only
-    % ~14% of the diameter, indistinguishable from noise. The same series
-    % with tau='mi' gives ~55% -- an order of magnitude cleaner separation
-    % from noise (~4%) and noisy/chaotic series (~1-6%).
+    % persistence is small relative to the cloud's overall diameter, making
+    % it hard to distinguish from noise.
     tau = 'mi';
 end
 if nargin < 3 || isempty(m)
@@ -165,9 +142,7 @@ if nargin < 4 || isempty(maxDim)
     maxDim = 1;
 end
 if nargin < 5 || isempty(maxN)
-    % Cost grows steeply with point-cloud size (measured on this machine, a
-    % noisy-periodic series capped to N points, dim<=1): ~0.14s at 500,
-    % ~0.56s at 1000, ~3.3s at 2000, ~15s at 4000. 1000 is a reasonable
+    % Cost grows steeply with point-cloud size; 1000 is a reasonable
     % default balance of signal quality vs. per-series cost at hctsa's scale.
     maxN = 1000;
 end
@@ -195,11 +170,6 @@ end
 if ischar(maxN) && strcmpi(maxN, 'full')
     slowThreshold = 4000;
     if Nemb > slowThreshold
-        % Empirically (not just extrapolated from the header's profile):
-        % 11994 points timed out BF_RipserSystem's own 600s subprocess cap
-        % outright, so cost at this scale is worse than the header profile's
-        % ~N^2.25 fit would suggest -- "tens of seconds" undersells it badly
-        % above ~5000-10000 points.
         warning(['%u embedded points exceeds %u with maxN=''full''; ripser cost ' ...
                  'grows steeply with point-cloud size (see the cost profile in the ' ...
                  'header comment) and may take minutes, or exceed ' ...
@@ -261,8 +231,7 @@ else
     % term must contribute 0 to the entropy sum by convention, but MATLAB's
     % 0*log(0) evaluates to NaN (an indeterminate form), silently corrupting
     % the whole sum. Drop zero-persistence entries before computing p so
-    % this can't happen (found via a clean periodic signal that produced
-    % exactly this case).
+    % this can't happen.
     pers1pos = pers1(pers1 > 0);
     p = pers1pos / sum(pers1pos);
     out.persistenceEntropyH1 = -sum(p .* log(p));
@@ -287,29 +256,13 @@ function tau = SUB_periodNormalizedTau(y)
     % resulting index-tau automatically scales with however finely the
     % series happens to be sampled.
     %
-    % Two failure modes ruled out during development, in order:
-    % (1) a plain single-FFT argmax period estimate locks onto low-frequency
-    %     trend/drift on real (broadband) data -- median "period" of 100+
-    %     samples on real test series, with some series
-    %     maxing out at half the series length (i.e., just the DC-adjacent
-    %     bin). Real time series rarely have one clean dominant sinusoid the
-    %     way a synthetic test construction does.
-    % (2) findpeaks on a single (non-averaged) periodogram fixes (1) but has
-    %     essentially zero specificity: it "finds" a locally-prominent peak
-    %     on 100% of pure-white-noise realizations tested, at every
-    %     prominence threshold tried, because periodogram bin-to-bin
-    %     variance alone produces apparent local peaks by chance.
-    % Welch's method (averaged periodogram over overlapping segments)
-    % suppresses that noise-driven variance directly. Validated on synthetic
-    % data: at MinPeakProminence=2 (log scale, ~7.4x), 0% false positives on
-    % near-unit-root AR(1) (trend, no periodicity), 10% on white noise,
-    % 100% true-positive rate with accurate period recovery on a sine wave
-    % even under heavy added noise. On real data (EEG and other series),
-    % a significant peak was found for ~80% of series, with resulting tau
-    % values comparable in scale to 'mi''s own (median ~8-12 vs 'mi''s
-    % median ~4-10) -- unlike the two ruled-out methods above, whose
-    % resulting tau values were wildly unstable (medians 20-90+, maxima in
-    % the hundreds to thousands).
+    % The period is the most prominent peak (MinPeakProminence = 2 on a log
+    % scale, ~7.4x) of a Welch spectrum (a periodogram averaged over
+    % overlapping segments). A plain single-FFT argmax tends to lock onto
+    % low-frequency trend/drift on real (broadband) data, and peak-finding
+    % on a single (non-averaged) periodogram finds apparent local peaks
+    % even in white noise, from its bin-to-bin variance; Welch averaging
+    % suppresses that noise-driven variance.
     minProm = 2.0;
 
     if numel(y) < 16
@@ -329,7 +282,7 @@ function tau = SUB_periodNormalizedTau(y)
     if isempty(locs)
         % No sufficiently prominent period found -- period-normalization
         % isn't meaningful without one; fall back to the general-purpose
-        % heuristic (about 20% of real series in validation).
+        % heuristic.
         tau = 'mi'; return
     end
     [~, best] = max(proms); % most prominent peak, not necessarily tallest

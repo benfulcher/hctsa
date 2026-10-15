@@ -27,8 +27,8 @@ function out = WL_Coeffs(y, wname, level)
 %
 % ---NOTES:
 % The mean, maximum and median of the detail coefficients are not returned, since
-% they duplicate WL_DWTCoeff's per-level stdd/noisestd fields (r > 0.98 on real
-% data); the decay-shape profile above is this function's distinct contribution.
+% they largely duplicate WL_DWTCoeff's per-level stdd/noisestd fields; the
+% decay-shape profile above is this function's distinct contribution.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -100,10 +100,7 @@ det_s = sort(abs(det), 'descend'); % sorted detail coefficient magnitudes
 
 % ------------------------------------------------------------------------------
 %% Return statistics
-% (mean/max/median of the detail coefficients are not returned here: they
-% duplicate WL_DWTCoeff's per-level stdd/noisestd fields, which correlate
-% r>0.98 with them on real data. WL_Coeffs' distinct contribution is the
-% decay-shape profile below.)
+% (see the header note on the detail-coefficient statistics not returned here)
 
 % Decay rate stats ('where below _ maximum' = 'wb_m')
 out.wb99m = findMyThreshold(0.99);

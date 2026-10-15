@@ -25,18 +25,14 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 %       for the first zero-crossing of the autocorrelation function, the floor of its
 %       first 1/e crossing, or the smaller of the first minimum of the Kraskov
 %       automutual information and the 'ac1e' delay (see BF_GetTau; default: 1).
-%       Across 134 chaotic flows with known maximal Lyapunov exponents (W. Gilpin's
-%       dysts, 30 samples per period), LE1 tracked the true exponent better
-%       with tau = 1 (Spearman 0.47) than with tau = 'ac' (0.37), and the
-%       Kaplan-Yorke dimension far better (0.36 vs 0.08).
 %
 % m, the embedding dimension, and hence the number of Lyapunov exponents
 %       estimated (default: 3 -- the minimum dimension in which a flow
 %       can be chaotic at all (Poincare-Bendixson), and, in practice,
 %       about the most that can be reliably resolved from typical
 %       finite real-world data regardless of the true attractor's
-%       dimension -- higher m both costs more and, per the note above,
-%       becomes progressively less reliable to estimate). Fixed (rather
+%       dimension -- higher m both costs more and becomes progressively
+%       less reliable to estimate). Fixed (rather
 %       than auto-determined per series, e.g. via false-nearest-
 %       neighbours, as NL_LargestLyap does for its own single-number
 %       output) so that LE1/LE2/LE3 mean the same thing, and are
@@ -49,9 +45,7 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 % maxN, the maximum number of samples to consider. Time series longer
 %       than this are cropped to their first maxN points (default:
 %       10000, cf. NL_RQA/NL_ZeroOneTest's maxN, same rationale -- cost
-%       scales with series length, roughly linearly to slightly
-%       superlinearly in practice; cost does not appreciably depend on
-%       m). Set to 'full' to disable cropping.
+%       scales with series length). Set to 'full' to disable cropping.
 %
 % theilerWin, Theiler window: neighbors closer in time than this are not used
 %       to estimate the local Jacobians ({'ac', k} for k times the first
@@ -69,8 +63,7 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 % delay fixed at 1, since the same constant sets the time step of the local
 % maps. The delay embedding is therefore built here and passed as m columns,
 % so that the maps still advance by one sample and the exponents are per
-% sample, while the embedding uses the intended delay tau. Previously the -d
-% passed to lyap_spec was silently ignored, i.e. tau = 1 always.)
+% sample, while the embedding uses the intended delay tau.)
 %
 % ---OUTPUTS:
 % LE1, LE2, LE3, the three Lyapunov exponents, in descending order (LE1
@@ -99,22 +92,17 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 % Ya.B. Pesin, "Characteristic Lyapunov exponents and smooth ergodic theory", Russ. Math. Surv. 32(4), 55-114 (1977) (equality of the two under conditions). DOI: 10.1070/RM1977v032n04ABEH001639
 %
 % ---NOTES:
-% A validated pathology and how it's handled: for series that
-% sit *exactly* on a low-dimensional manifold with no measurement noise
-% (e.g. a textbook periodic sine wave, or the logistic map, both tested
-% directly), embedding in m=3 dimensions over-embeds by one or two
-% spurious directions, and the local-Jacobian estimation becomes
+% A pathology and how it's handled: for series that sit *exactly* on a
+% low-dimensional manifold with no measurement noise (e.g. a periodic sine
+% wave, or the logistic map), embedding in m=3 dimensions over-embeds by
+% one or two spurious directions, and the local-Jacobian estimation becomes
 % ill-conditioned -- producing large, spurious *positive* exponents that
-% look like chaos but aren't (e.g. a clean sine wave gave LE1 = 0.46 at
-% m=3, vs. the correct near-zero pair obtained at m=2). This is very
-% unlikely to affect real (noisy) empirical data, but does bite on clean
-% synthetic benchmark series (of which hctsa's own test suites include a
-% few, e.g. dynamical-system-generated series). Since even a tiny amount
-% of noise resolves it (0.1% of the series' own std was already enough
-% to fix the sine-wave case above, giving LE1 = -0.0003), a fixed,
-% reproducibly-seeded dither at that level is added internally before
-% embedding -- negligible next to any real measurement noise, but enough
-% to break the exact degeneracy.
+% look like chaos but aren't. This is very unlikely to affect real (noisy)
+% empirical data, but does affect clean synthetic series (e.g.
+% dynamical-system-generated series). Since even a tiny amount of noise
+% resolves it, a fixed, reproducibly-seeded dither (0.1% of the series' own
+% std) is added internally before embedding -- negligible next to any real
+% measurement noise, but enough to break the exact degeneracy.
 %
 
 % ------------------------------------------------------------------------------
@@ -221,7 +209,7 @@ for j = 1:m
 end
 % Write to /tmp on unix (as BF_WriteTempFile does), not to TMPDIR: a scheduler's
 % per-job TMPDIR can contain characters that the shell running the TISEAN command
-% would expand (e.g., PBS array jobs' /var/tmp/pbs.<id>[<k>].<host> under csh)
+% would expand
 if isunix
     filePath = [tempname('/tmp') '.dat'];
 else

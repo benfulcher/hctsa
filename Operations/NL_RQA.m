@@ -55,11 +55,9 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 % distance matrix, and line-length statistics are computed directly from the resulting
 % (sparse) list of recurrent pairs, grouping by diagonal/column and looking for runs of
 % consecutive indices. This makes the neighbor search itself roughly linear in N, and
-% comfortably outperforms round-tripping through TISEAN's 'recurr' (which requires forming
-% a text file of every recurrent pair and re-parsing it back into MATLAB -- a benchmark on a
-% logistic-map series found the native approach 8-25x faster end-to-end, with the gap
-% widening at longer N, since TISEAN's ASCII pair-list I/O dominates over its C search
-% core). However, the number of recurrent pairs itself is intrinsically ~rr*N^2 (a property
+% avoids round-tripping through TISEAN's 'recurr' (which requires forming a text file of
+% every recurrent pair and re-parsing it back into MATLAB). However, the number of
+% recurrent pairs itself is intrinsically ~rr*N^2 (a property
 % of the definition of RQA at fixed recurrence rate, not of the search algorithm), so run
 % time still grows roughly quadratically with N at fixed rr -- hence the maxN cap above, in
 % the same spirit as the maxL cap in NW_VisibilityGraph.m.

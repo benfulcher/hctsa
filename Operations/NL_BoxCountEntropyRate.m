@@ -2,11 +2,10 @@ function out = NL_BoxCountEntropyRate(y, numBins, embedParams)
 % NL_BoxCountEntropyRate   How the box-counting (order-2 Renyi) entropy of a delay embedding grows with embedding dimension.
 %
 % Time-delay embeds the series in d = 1,...,m dimensions and partitions the
-% space into boxes of side epsilon, using TISEAN's 'boxcount' (this operation
-% previously used TSTOOL's 'corrdim'). With p_i the fraction of embedded points
-% in box i, boxcount gives the order-2 Renyi (collision) entropy
-% H(epsilon,d) = -log(sum_i p_i^2) for a sweep of numBins box sizes, from the
-% full range of the series downward, and the increment over the
+% space into boxes of side epsilon, using TISEAN's 'boxcount'. With p_i the
+% fraction of embedded points in box i, boxcount gives the order-2 Renyi
+% (collision) entropy H(epsilon,d) = -log(sum_i p_i^2) for a sweep of numBins box
+% sizes, from the full range of the series downward, and the increment over the
 % (d-1)-dimensional embedding, I(epsilon,d) = H(epsilon,d) - H(epsilon,d-1)
 % (defined for d = 2,...,m; at d = 1, boxcount reports H itself, which is not an
 % increment, so d = 1 is excluded from all summaries). The matrix I (length scales
@@ -16,8 +15,7 @@ function out = NL_BoxCountEntropyRate(y, numBins, embedParams)
 % ---INPUTS:
 % y, column vector of time series data
 % numBins, number of length-scale (epsilon) values in the box-counting sweep
-%          (default: 100). TSTOOL's "maximum number of partitions per axis" has no
-%          exact TISEAN equivalent; this is the closest analogue.
+%          (default: 100)
 % embedParams [opt], embedding parameters as {tau,m} in a 2-entry cell, a
 %          time delay, tau, and embedding dimension, m, as inputs to BF_Embed
 %          (tau can be a number of samples, 'ac', 'ac1e' or 'mi'; see BF_GetTau;
@@ -40,17 +38,15 @@ function out = NL_BoxCountEntropyRate(y, numBins, embedParams)
 % ---NOTES:
 % The increment I approaches the entropy rate of the process (the K2 entropy,
 % per delay step) rather than a slope against log(epsilon), so these features
-% are entropy-rate-like, not correlation dimensions. This function was previously
-% named NL_BoxCorrDim (kept as a deprecated wrapper), after the TSTOOL
-% correlation-dimension code it replaced.
+% are entropy-rate-like, not correlation dimensions. NL_BoxCorrDim is a deprecated
+% alias (wrapper) for this function.
 % hctsa registers meanr, medianr, minr and meanchr at r = 2, 3, 4, 6, 8, 11, 14,
 % 17, 20, 24, 28, 32, 36 of numBins = 50 (2 to 429 boxes per axis): coarse scales
 % change quickly with r and are sampled densely; neighboring finer scales are
 % nearly redundant; for flows (long delays) the informative scales lie beyond
 % r = 18; and beyond r = 36 the 5-dimensional embedding saturates (I = 0) for
-% series of a few thousand points. Minima over all length scales (formerly
-% mind<d>, minstretch) were removed: the coarsest scale is a single box, where
-% I = 0, so they were always 0.
+% series of a few thousand points. There are no minima over all length scales: the
+% coarsest scale is a single box, where I = 0, so they would always be 0.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

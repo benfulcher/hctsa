@@ -28,20 +28,16 @@ function out = EN_wentropy(y, waveletName, level)
 % ---NOTES:
 % The output is invariant to rescaling y, and is bounded in [0,1] (the value 1 is
 % reached when the energy is equal in all level + 1 bands). The normalizing
-% constant is log2(level + 1) (wentropy with 'Scaled' true, its default); this was
-% checked numerically against the entropy of the relative band energies.
+% constant is log2(level + 1) (wentropy with 'Scaled' true, its default).
 % level is fixed by default (rather than left to wentropy's automatic choice,
 % floor(log2(length(y)))) because the number of levels sets the normalizing
-% denominator, so letting it grow with length(y) introduced a strong length
+% denominator, so letting it grow with length(y) would introduce a strong length
 % dependence. With level fixed, the value for white noise is independent of length
 % (about 0.75, the entropy of the energy shares 1/2, 1/4, 1/8, 1/16, 1/32, 1/32
 % of white noise, divided by log2(6)); the value changes with length only for
 % series whose energy depends on length, e.g., a random walk, whose energy
 % concentrates in the smooth band as the series grows. level = 5 needs
 % length(y) >= ~64 for a non-degenerate MODWT decomposition.
-% The earlier implementation used the legacy wentropy(x,'shannon') cost-function
-% syntax on the raw values, which is only a valid entropy for x pre-normalized so
-% that sum(x.^2) = 1 and gave negative, scale-dependent values for z-scored input.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

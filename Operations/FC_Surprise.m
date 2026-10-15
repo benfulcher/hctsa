@@ -43,9 +43,8 @@ function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, n
 %          (i) 'quantile': an equiprobable alphabet by the value of each
 %                          time-series datapoint (default),
 %          (ii) 'diff': an equiprobable alphabet by the value of incremental
-%                       changes in the time-series values (previously called
-%                       'updown'; renamed since it is not a literal sign(diff)>0
-%                       split), and
+%                       changes in the time-series values (not a literal
+%                       sign(diff)>0 split; cf. SB_CoarseGrain's 'updown'), and
 %          (iii) 'embed2quadrants': 4-letter alphabet of the quadrant each data
 %                            point resides in a two-dimensional embedding space.
 %

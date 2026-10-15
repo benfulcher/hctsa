@@ -74,9 +74,6 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % are not predicted (the first n + steps - 1 for a model of order n); the statistics of a
 % segment use the samples predicted, and are NaN for a segment with fewer than 3 of them.
 % All outputs are NaN if the model cannot be fitted.
-% Redundant fields (mabserrs, and the medians of stde and meane) are not returned:
-% each correlated at |r| >= 0.9 with a retained field, on each of two collections of
-% real-world series and in all registered operations that use this function.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -193,15 +190,8 @@ switch subsetHow
 			% A pure fraction makes the test-segment length -- and with it
 			% the precision of every residual statistic below -- grow
 			% without bound as N grows, so results never converge to a
-			% fixed population value: verified this was the dominant
-			% driver of this operation's length-dependence (rank eta^2 vs
-			% N on a stationary AR(1) null, N=200..6400, fell from
-			% 0.39-0.94 to 0.01-0.21 across stde/stdrat/ac1/meane
-			% statistics once capped). Capping at 20 leaves N=200 (the smallest length tested,
-			% where 10% of the series
-			% is already <= 20) completely unchanged and only bites for
-			% longer series, where letting the segment keep growing was
-			% buying no real precision benefit anyway.
+			% fixed population value. The length is therefore capped at 20
+			% samples (and at least 10), so the cap only affects longer series.
 			l = max(min(20, floor(N * samplep(2))), 10);
 		else % specified an absolute interval
 			l = samplep(2);
@@ -284,10 +274,7 @@ for i = 1:numPred
 	% Guard against near-constant test segments: std(yTest) can land at
 	% floating-point noise (rather than a genuinely small but real value)
 	% when a short random/uniform segment happens to sit in a flat/clipped
-	% stretch of the input -- verified empirically (2500 segments across 100
-	% real series): the ratio's population is smooth from ~1e-3 upward, with
-	% a separate, disjoint cluster at <1e-15 coming from exactly-constant
-	% segments. Below that gap, std(yp)/std(yTest) is undefined rather
+	% stretch of the input. Then std(yp)/std(yTest) is undefined rather
 	% than just large, so exclude it instead of letting it dominate the
 	% mean/std/iqr summaries below.
 	if std(yTest) < 1e-6 * sigmaY
@@ -311,10 +298,6 @@ end
 % ------------------------------------------------------------------------------
 
 % RMS errors, rmserrs
-% (median dropped: r>=0.9 with stde_mean across all 4 registered mops, on
-% two collections of real-world series; mean absolute error, mabserrs, dropped
-% entirely: for these residuals r>=0.9 with the matching stde_* moment in
-% every case, so it added no dimension the RMS error didn't already carry)
 out.stde_mean = mean(rmserrs);
 out.stde_std = std(rmserrs);
 out.stde_iqr = iqr(rmserrs);
@@ -328,8 +311,6 @@ out.ac1_std = std(validAC1s);
 out.ac1_iqr = iqr(validAC1s);
 
 % Differences in mean between two series
-% (median dropped: r>=0.9 with meane_mean across all 4 registered mops, on
-% two collections of real-world series)
 out.meane_mean = mean(meandiffs);
 out.meane_std = std(meandiffs);
 out.meane_iqr = iqr(meandiffs);

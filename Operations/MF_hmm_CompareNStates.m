@@ -90,8 +90,7 @@ end
 if Ntrain >= N
 	% Every subsequent step evaluates the fitted models on a held-out test
 	% portion, so a training proportion that consumes the whole series leaves
-	% nothing to evaluate on (this used to leave yTest/Ntest undefined and
-	% error deeper in the loop):
+	% nothing to evaluate on:
 	error('trainp = %g leaves no test data for a series of length %u', trainp, N);
 end
 if Ntrain < 2

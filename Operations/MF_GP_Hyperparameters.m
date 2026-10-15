@@ -91,33 +91,13 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % term). See the NOTES of MF_GP_LearnHyperp.m for how the hyperparameters are
 % initialized.
 %
-% The "statistics on variance" block below uses the modern gp()/hyp-struct API rather
-% than the legacy gpml v3.2 gpr() function, whose hyperparameter-counting logic
-% assumes every covSum component is a plain string and so fails on
-% degree-parameterized components like {'covMaterniso',3}.
-%
 % Covariance functions: covSEiso (+ optional covPeriodic), covMaterniso(3)
 % [smoothness/roughness class, distinct from SE's infinite differentiability] and
-% covRQiso [scale-mixture of length-scales, for multi-scale structure]. The latter two
-% were validated on synthetic ground truth rather than a real-data correlation check
-% alone:
-%   - Matern: fit covMaterniso(3)+noise and covSEiso+noise to data generated
-%     from a genuinely rough (Matern d=1) process vs. a genuinely smooth (SE)
-%     process. The relative fit-quality advantage (mlik_SE - mlik_Matern)
-%     cleanly separated the two groups (t=4.88, p<4e-5, n=15 realizations
-%     each). On real EEG data, Matern(3) fits substantially and
-%     consistently better than SE (mlik advantage 170-565 nlZ units across
-%     15 series, no exceptions) -- a genuine, consistent finding that EEG is
-%     not well-described by SE's infinite-smoothness assumption.
-%   - Rational Quadratic: fit covRQiso+noise to data generated as a mixture
-%     of two SE processes at very different length-scales (genuinely
-%     multi-scale) vs. a single SE process (matched total variance). The
-%     fitted shape parameter alpha (logh3) cleanly separated the two groups
-%     (t=-3.56, p=0.0013, n=15 each; low alpha = heavier-tailed length-scale
-%     mixture = more multi-scale, alpha->inf recovers exact SE).
-% Each is registered as a single sampling-method variant ('first'), not replicated
-% across all three MF_GP_Hyperparameters sampling methods, to avoid redundant
-% registrations.
+% covRQiso [scale-mixture of length-scales, for multi-scale structure: for covRQiso,
+% a low shape parameter alpha (logh3) means a heavier-tailed length-scale mixture,
+% i.e., more multi-scale, and alpha->inf recovers exact SE]. The latter two are each
+% registered as a single sampling-method variant ('first'), not replicated across all
+% three MF_GP_Hyperparameters sampling methods, to avoid redundant registrations.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -181,7 +161,7 @@ if nargin < 4 || isempty(maxN)
 	% maxN = 0 --> include the whole thing
 end
 if ischar(maxN) && strcmpi(maxN, 'full')
-	maxN = 0; % 'full' is an alias for the pre-existing maxN=0 "no resampling" convention
+	maxN = 0; % 'full' is an alias for the maxN=0 "no resampling" convention
 end
 if (maxN > 0) && (maxN < 1)
 	% Specify a proportion of the time series length, N
@@ -225,13 +205,12 @@ if numDraws > 1 && maxN > 0 && N > maxN && ismember(resampleHow, {'random_i', 'r
 	return
 end
 
-% Inference algorithm -- use the Laplace approximation:
-% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Inference algorithm:
+% Exact Gaussian inference. (Not @infLaplace: with a Gaussian likelihood the
 % Laplace approximation is exact but is computed by Newton iteration, and
 % gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
-% previous call's solution, so every fit depended on whatever series was
-% fitted before it -- the same series gave outputs differing in the 4th digit
-% from call to call once the optimizer amplified the difference.)
+% previous call's solution, so each fit would depend on whatever series was
+% fitted before it.)
 infAlg = @infGaussLik;
 
 % ------------------------------------------------------------------------------
@@ -344,9 +323,6 @@ end
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
 % Output the log-hyperparameters.
-% (Dropped: h%u = exp(logh%u). Hyperparameters are positive, so exp is strictly monotone and
-%  the two are rank-identical by construction. Only one GP master operation ever registered
-%  the raw h%u alongside logh%u; the other four already used logh%u alone.)
 for i = 1:numHPs
 	% Set up structure output
 	out.(sprintf('logh%u', i)) = logHyper(i);
@@ -388,8 +364,6 @@ if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
 end
 
 % Root-mean-square error of the mean function, mu.
-% (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
-%  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
 out.stde = sqrt(mean((y - mu).^2));
 % Better to look at mean distance away in units of std
 out.meanabs_std = mean(abs((y - mu) ./ sqrt(S2)));
@@ -401,9 +375,6 @@ out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 % Statistics on variance:
 xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar); % evaluate at datapoints
-% (was gpr(logHyper,...), the legacy gpml v3.2 API -- broke for degree-
-% parameterized covariance components like {'covMaterniso',3}, since gpr's
-% own hyperparameter-counting logic assumes each component is a plain string)
 S = sqrt(S2); % standard deviation function (S2 is the variance)
 out.maxS = max(S); % maximum predictive standard deviation
 out.minS = min(S); % minimum predictive standard deviation

@@ -49,15 +49,15 @@ function out = WL_cwt(y, wname, maxScale)
 % The transform uses the legacy syntax cwt(y, scales, wname), which is the only form of
 % cwt that takes integer scales and a discrete or real wavelet name ('db3', 'morl'): the
 % current syntax is limited to the analytic wavelets 'morse', 'amor' and 'bump' on a
-% frequency grid of its own. In MATLAB R2026a (Wavelet Toolbox 26.1) the legacy syntax
-% is still accepted without a warning, and is equal to the textbook algorithm of
-% convolving y with the integrated, dilated wavelet (to machine precision).
+% frequency grid of its own. In recent MATLAB releases the legacy syntax is still
+% accepted without a warning, and is equal to the textbook algorithm of convolving y
+% with the integrated, dilated wavelet (to machine precision).
 %
 % The scaled power SC is normalized by the mean power over all coefficients (not by the
-% total energy, as it used to be), so that its distribution, and the statistics that
-% depend on it, do not depend on the number of coefficients (the series length). The
-% maximum-type statistics (maxonmeanSC, max_ssc) still grow slowly with length, as the
-% extreme of more samples does.
+% total energy), so that its distribution, and the statistics that depend on it, do
+% not depend on the number of coefficients (the series length). The maximum-type
+% statistics (maxonmeanSC, max_ssc) still grow slowly with length, as the extreme of
+% more samples does.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -113,13 +113,13 @@ coeffs = cwt(y, scales, wname);
 
 S = abs(coeffs .* coeffs); % power
 % Scaled power: each coefficient's power relative to the mean power over all
-% coefficients (so it has mean 1, whatever the length of the series). This used
-% to be the percentage of the total energy in each coefficient, 100*S/sum(S),
-% which has mean 100/numEntries and so shrinks, and whose sums over scales,
-% extremes and fitted parameters all drift, with the number of coefficients (the
-% series length). Dividing by the mean power instead keeps the shape of the
-% power distribution (how concentrated it is, in scales and in time) and
-% removes the dependence on how many coefficients there are.
+% coefficients (so it has mean 1, whatever the length of the series). The
+% percentage of the total energy in each coefficient, 100*S/sum(S), would instead
+% have mean 100/numEntries and so shrink, and its sums over scales, extremes and
+% fitted parameters would all drift, with the number of coefficients (the series
+% length). Dividing by the mean power keeps the shape of the power distribution
+% (how concentrated it is, in scales and in time) and removes the dependence on
+% how many coefficients there are.
 SC = S ./ mean(S(:));
 
 if doPlot
@@ -151,10 +151,10 @@ out.maxonmeanSC = max(SC(:)) / mean(SC(:));
 
 % Proportion of the total energy held by the coefficients whose power exceeds its
 % p-th percentile (i.e., the strongest (100-p)% of the coefficients; the sum of SC is
-% numEntries, so dividing by it gives a proportion of the energy). This replaces the
-% energy held by coefficients exceeding a fraction p of the *maximum*, which depends
-% on the extreme value of the coefficients and so falls steadily as the series (and
-% the number of coefficients) gets longer, even for white noise.
+% numEntries, so dividing by it gives a proportion of the energy). A threshold at a
+% fraction p of the *maximum* would instead depend on the extreme value of the
+% coefficients, and so fall steadily as the series (and the number of coefficients)
+% gets longer, even for white noise.
 SCsorted = sort(SC(:), 'descend');
 poverfn = @(p) sum(SCsorted(1:max(1, floor((100 - p) / 100 * numEntries)))) / numEntries;
 out.pover99 = poverfn(99);
@@ -236,9 +236,6 @@ out.std_ssc = std(SSC);
 %% Stationarity
 % ------------------------------------------------------------------------------
 % 2-way split of the scale-power surface, collapsed across scales.
-% (A 5-way split was also tried here but dropped: on real data its three
-% summary stats correlated r>0.98 with their 2-way counterparts, adding
-% negligible information for 5x the fields.)
 SC_1 = SC(:, 1:floor(N / 2)); % collapse across scales, first half
 SC_2 = SC(:, floor(N / 2) + 1:end); % collapse across scales, second half
 

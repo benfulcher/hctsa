@@ -48,15 +48,6 @@ function out = SP_PhaseAmpCoupling(y, nBands, maxN, nPhaseBins)
 % A. B. L. Tort, R. Komorowski, H. Eichenbaum and N. Kopell, "Measuring phase-amplitude
 % coupling between neuronal oscillations of different frequencies", J. Neurophysiol.
 % 104(2), 1195-1210 (2010). DOI: 10.1152/jn.00106.2010
-%
-% ---NOTES:
-% maxMI was chosen over the mean or standard deviation of MI across pairs after
-% checking all three on real-world series: meanMI and stdMI were near-duplicates of
-% maxMI (r = 0.96 and r = 0.99) and mechanically diluted by nBands (doubling
-% nBands from 5 to 10 roughly halved meanMI, while maxMI barely moved, x0.97),
-% making maxMI the only one whose meaning does not depend on this parameter.
-% entropyMI carries genuinely separate information from maxMI (r = 0.08-0.23 on
-% real-world series).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

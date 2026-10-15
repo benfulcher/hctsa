@@ -35,9 +35,8 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % double sum: for correlated jointly-Gaussian points, the third moment of their
 % Mahalanobis inner product is not zero, so nearby, strongly autocorrelated pairs bias
 % the raw statistic away from zero even under true joint Gaussianity. This removes most,
-% but not all, of the bias (e.g., at m=7 on an AR(1) process, ~0.18 -> ~0.07); the
-% residual is the classical small-sample bias of whitening with the sample covariance of
-% the points being tested.
+% but not all, of the bias; the residual is the classical small-sample bias of whitening
+% with the sample covariance of the points being tested.
 %
 % ---INPUTS:
 % y, the input time series
@@ -51,11 +50,9 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 %             zero-crossing of the autocorrelation function, or a number of samples (see
 %             BF_TheilerWindow). Default: {'ac', 1}.
 % maxN, the maximum number of embedded points used for the skewness statistic (default:
-%       10000; 'full' to disable). A legacy cap, from when the skewness double sum was
-%       evaluated through an N x N Gram matrix (O(N^2)); it is now evaluated exactly
-%       through the third-moment tensor in O(N d^3), so the cap is kept only so that
-%       values are unchanged from earlier computations. The mean, covariance, kurtosis and
-%       KS statistic always use the full embedded series.
+%       10000; 'full' to disable): only the first maxN embedded points enter the skewness
+%       double sum. The mean, covariance, kurtosis and KS statistic always use the full
+%       embedded series.
 %
 % ---OUTPUTS:
 % mardiaSkew, Mardia's raw multivariate skewness (Theiler-windowed),
@@ -74,10 +71,10 @@ function out = CO_JointNonGaussianity(y, tau, m, theilerWin, maxN)
 % Only raw statistics are returned, not p-values. Mardia's classical asymptotic null
 % distributions assume the N embedded points are iid draws, but consecutive embedded
 % vectors overlap in m-1 coordinates and are strongly autocorrelated, which inflates the
-% naive test statistics (empirically up to ~30% false positives at a nominal 5% level on
-% a linear-Gaussian AR(1) process, worse at higher m). This is also why CO_trev/CO_TC3
-% report raw statistics. For significance testing, compare to the distribution over
-% surrogates (cf. SD_SurrogateTest, SD_MakeSurrogates).
+% naive test statistics (giving excess false positives even for a linear-Gaussian
+% process). This is also why CO_trev/CO_TC3 report raw statistics. For significance
+% testing, compare to the distribution over surrogates (cf. SD_SurrogateTest,
+% SD_MakeSurrogates).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -186,15 +183,13 @@ mycdf = [x1, chi2cdf(x1, d)];
 %% Mardia's multivariate skewness
 % ------------------------------------------------------------------------------
 % b_{1,d} = mean over pairs (i,j) of (x_i' x_j)^3 for whitened x. Rather than
-% forming the N x N Gram matrix (O(N^2) time and memory, which is what the
-% maxN cap was guarding), use the identity
+% forming the N x N Gram matrix (O(N^2) time and memory), use the identity
 %   sum_{i,j} (x_i' x_j)^3 = sum_{a,b,c} ( sum_i x_ia x_ib x_ic )^2 = ||M||^2,
 % where M is the d x d x d third-moment tensor -- O(N d^3) -- and then
 % subtract the O(N w) contribution of the pairs inside the Theiler band
 % |i - j| <= w, which the mean excludes. Identical result, no N^2 term.
 if ~(ischar(maxN) && strcmp(maxN, 'full')) && Nemb > maxN
-    % (kept for backwards compatibility of values with earlier computations;
-    % no longer needed for cost)
+    % use only the first maxN embedded points
     Xskew = X(:, 1:maxN);
 else
     Xskew = X;

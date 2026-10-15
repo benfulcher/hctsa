@@ -61,10 +61,8 @@ function out = WL_fBM(y)
 BF_CheckToolbox('wavelet_toolbox');
 
 % Parameter estimation of fractional Brownian motion
-% wfbmesti expects an fBm path, not its increments. Simulated fGn with known H
-% (N = 1000, 30 series each at H = 0.2, 0.35, 0.5, 0.65, 0.8, 0.95) gives
-% H_deriv2 of -0.24, -0.11, 0.01, 0.12, 0.23, 0.34 when passed directly, but
-% 0.19, 0.35, 0.51, 0.66, 0.80, 0.94 when its cumulative sum is passed.
+% wfbmesti expects an fBm path, not its increments, so the cumulative sum of y is
+% passed (passing the increments directly gives strongly biased estimates of H).
 hest = wfbmesti(cumsum(y));
 out.H_deriv2 = hest(1); % second-order discrete-derivative estimate
 out.H_deriv2Wavelet = hest(2); % second-order discrete derivative, wavelet (sym5) version

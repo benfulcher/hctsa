@@ -47,7 +47,7 @@ function out = SC_MFDFA(y, scaleRange, qRange, order)
 % spectrumAsymmetry, the width to the left of the peak divided by the width to the
 %       right, (alpha0 - alphaMin) / (alphaMax - alpha0)
 % (The raw generalized Hurst exponent h(q) is not otherwise reported: it is
-% redundant, r >= 0.9, with these spectrum quantities.)
+% largely redundant with these spectrum quantities.)
 % A scalar NaN is returned if the series or scale range cannot support the
 % analysis.
 %
@@ -221,17 +221,9 @@ else
 end
 
 % NOTE: the rest of the raw generalized Hurst exponent h(q) -- its
-% q=qMin/qMax endpoints and its range/trend/std across q -- is NOT reported
-% here. Verified on two independent collections of real-world series (r>=0.95 on
-% BOTH, the bar for confirmed redundancy) that h(qMin) duplicates alphaMax,
-% h(qMax) duplicates alphaMin, and h(q)'s range/trend/std across q all
-% mutually duplicate alphaWidth (hqTrend is in fact a deterministic
-% rescaling of hqRange, since qRange is fixed). h2 survives this bar --
-% its only >=0.95-on-both link is to the now-dropped h(qMax), and it is
-% NOT >=0.95 against alphaMin/alphaMax/alphaWidth/alpha0 on both datasets --
-% so it is kept. The alpha/f(alpha) spectrum is the standard reporting
-% convention in the multifractal literature, so it is kept in preference to
-% h(qMin)/h(qMax)/hqRange/hqTrend/hqStd specifically.
+% q=qMin/qMax endpoints and its range/trend/std across q -- is not reported
+% here (see header note); the alpha/f(alpha) spectrum, the standard reporting
+% convention in the multifractal literature, is reported instead.
 
 % Singularity spectrum, alpha/f(alpha):
 out.alphaMin = min(alpha);

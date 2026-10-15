@@ -23,14 +23,12 @@ function out = SB_BinaryGapHomogeneity(x, gapWhat)
 % change on both sides).
 %
 % ---NOTES:
-% This is NOT the longest run of consecutive 1s or 0s, despite this operation's
-% former name ('SB_BinaryStretch', with outputs 'lseq1'/'lseq0'), which claimed to
-% measure exactly that and did not: verified against a brute-force longest-run
-% calculation, the two disagree on 171 of 200 random series, and this quantity is
-% 0 whenever the longest run touches either end of the series (blocks at the
-% boundaries are not counted, since they are not bracketed by a change on both
-% sides). For true run lengths, use SB_BinaryStats, whose longstretch0/longstretch1
-% (and meanstretch/stdstretch) fields were verified exact against brute force.
+% This is NOT the longest run of consecutive 1s or 0s: the two generally differ,
+% and this quantity is 0 whenever the longest run touches either end of the
+% series (blocks at the boundaries are not counted, since they are not bracketed
+% by a change on both sides). For true run lengths, use SB_BinaryStats, whose
+% longstretch0/longstretch1 (and meanstretch/stdstretch) fields measure them
+% exactly.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

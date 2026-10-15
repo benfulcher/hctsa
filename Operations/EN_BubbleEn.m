@@ -46,8 +46,7 @@ function out = EN_BubbleEn(y, m, tau)
 % (m-1)*tau samples, so for a slowly decorrelating series (a large delay) there are
 % few runs and the value is noisy. hctsa uses 'mi', which is rarely NaN: it falls
 % back on the first automutual-information minimum when the autocorrelation function
-% never decays to 1/e, and it was the least variable across repeats for slow
-% stochastic series. The 'ac1e' delay is NaN when the autocorrelation function never
+% never decays to 1/e. The 'ac1e' delay is NaN when the autocorrelation function never
 % decays to 1/e (as for many random walks) or the runs are too few, and the first
 % zero crossing ('ac') is less stable still: it is absent for many slow series, and
 % for periodic series the runs then sample only a few periods, so values leave the

@@ -55,23 +55,20 @@ function out = SP_Cepstrum(y, maxPeriod, minPeriod)
 % stdCeps, the standard deviation of the cepstrum over the search range (not
 %         registered as a feature)
 %
-% ---NOTES: What this does and does not detect (validated on synthetic signals):
+% ---NOTES: What this does and does not detect:
 % Because it detects a *comb*, this operation responds to harmonic
 % richness, not to periodicity as such -- which is what makes it
 % complementary to time-domain periodicity operations rather than a
 % duplicate of them:
 %   - A pure sinusoid, however strongly periodic, has no harmonics and
-%     hence no comb: it scores at the noise floor here (CPP ~ 0.05
-%     against a white-noise null of ~0.025), while a time-domain
-%     autocorrelation would flag it very strongly.
+%     hence no comb: it scores near the noise floor here, while a
+%     time-domain autocorrelation would flag it very strongly.
 %   - Detecting a fundamental requires enough harmonics spread across
-%     the band. A period of 64 samples with only 5 harmonics (which
-%     span just the lowest 8% of the spectrum) is missed; the same
-%     period with 10 or more harmonics is recovered exactly. CPP rises
-%     monotonically with the number of comb teeth.
-%   - Failure is quiet rather than confidently wrong: in the missed case
-%     above, CPP stays near the null (0.064, against 0.10-0.18 for
-%     successfully-detected combs), so a weak CPP correctly indicates
+%     the band: a fundamental with only a few harmonics, confined to the
+%     low-frequency end of the spectrum, can be missed. CPP grows with
+%     the number of comb teeth.
+%   - Failure is quiet rather than confidently wrong: when a comb is
+%     missed, CPP stays near its null level, so a weak CPP indicates
 %     'no comb found' rather than endorsing a spurious period. The
 %     `period` output is only meaningful when CPP/peakRatio indicate a
 %     genuine peak.
@@ -92,20 +89,10 @@ function out = SP_Cepstrum(y, maxPeriod, minPeriod)
 %
 % Of these, period/CPP/peakRatio/rahmonicRatio/meanCeps are registered as
 % hctsa features. `peak` and `stdCeps` are computed (CPP and peakRatio
-% are derived from them) but not registered: checked across 1000 real
-% series, raw `peak` is a near-duplicate of CPP (R^2 = 0.98) and the
-% baseline-subtracted CPP is both the standard published formulation and
-% the better-behaved one, since it does not simply track the cepstrum's
-% overall scale; `stdCeps` is likewise largely redundant with CPP
-% (R^2 = 0.74) and is the most ad hoc quantity of the set, its real role
-% being as the normalizer inside peakRatio.
-%
-% On novelty: across the same 1000 series these fields reach a maximum
-% R^2 of only 0.52 against all ~7700 other hctsa features, and 0.20
-% against the ~690 periodicity/autocorrelation-adjacent features
-% specifically -- i.e. harmonic-comb structure really was not being
-% captured elsewhere in the library. rahmonicRatio is the most
-% independent single feature found (max R^2 0.04 against anything).
+% are derived from them) but not registered: raw `peak` is largely
+% redundant with CPP, the standard published formulation, which does not
+% simply track the cepstrum's overall scale; `stdCeps` serves mainly as
+% the normalizer inside peakRatio.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

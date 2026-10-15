@@ -80,8 +80,8 @@ out.s2 = s2 ./ max(s2); % normalized
 sd = NormedSingleCurveLengthWindowed(x, windowLength, shiftLength, maxLag, 1, degree);
 out.sd = sd ./ max(sd); % normalized
 
-% Compare the normalized curves (the original code compared the unnormalized
-% ones, which makes L scale with the amplitude of the data):
+% Compare the normalized curves (comparing the unnormalized ones would make L
+% scale with the amplitude of the data):
 out.L = sqrt(mean((out.s2 - out.sd).^2));
 
 % -------------------------------------------------------------------------------

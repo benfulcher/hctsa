@@ -40,18 +40,6 @@ function out = CO_Oversampling(y)
 % ---REFERENCES:
 % Toker et al., "A simple method for detecting chaos in nature", Commun. Biol. 3, 11
 % (2020). DOI: 10.1038/s42003-019-0715-9
-%
-% ---NOTES:
-% Redundancy check (on real-world series): eta correlates r=0.955 with the existing
-% SY_RangeEvolve.totnuq (both driven by how coarsely a series sets new range
-% records -- exactly what oversampling produces) and etaRobust correlates
-% r=0.972 with plain eta itself (the outlier-robustness case is real but rare in
-% practice on typical data). Both were kept anyway: eta is the literal statistic
-% from the source paper with a specific methodological role (a validity
-% precondition for NL_ZeroOneTest), and etaRobust guards against the
-% single-outlier failure mode even though it rarely differs from eta in practice.
-% numHalvings and etaAfterDownsampling are not redundant with anything existing
-% (max |r| = 0.82, 0.75 respectively).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -135,9 +135,8 @@ out.propCase2_all = SUB_propCase2Pooled(casePos, caseNeg);
 % ------------------------------------------------------------------------------
 %% Distribution shape
 % ------------------------------------------------------------------------------
-% (The 90th percentile is omitted: across two independent redundancy-check
-% datasets it landed exactly on the pi/2 flat-fall spike every time, since
-% most series have >=10% flat falls -- it carries no information.)
+% (The 90th percentile is not returned: whenever at least 10% of falls are
+% flat it equals pi/2, the flat-fall angle.)
 if length(allAngles) >= 2
 	out.q10_all = quantile(allAngles, 0.1);
 else

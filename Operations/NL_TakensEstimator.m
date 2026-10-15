@@ -6,15 +6,12 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %   D_T = 1 / mean( ln(eup / r_ij) ),
 % the mean taken over all pairs (i,j) of delay vectors with max-norm distance r_ij < eup,
 % excluding pairs closer in time than the Theiler window, past, and exact duplicate
-% vectors. Computed natively (KD-tree range search at the one radius needed). This
-% replaced running TISEAN's d2 (correlation sums over every dimension 1:m and every
-% radius, all reference points) followed by c2t, and reading one number off the result --
-% the same estimator, since c2t's D_T(r) = C(r) / int_0^r C(r')/r' dr' reduces to the
-% expression above, but c2t evaluates it from d2's logarithmically-binned correlation sum
-% at the first bin above eup, whereas here it is evaluated exactly at eup from the pair
-% distances themselves; values therefore differ slightly from the TISEAN-based
-% implementation (which itself was not numerically identical to the TSTOOL
-% takens_estimator used before that). Kantz & Schreiber's recommendation of half a
+% vectors. Computed natively (KD-tree range search at the one radius needed). This is
+% the same estimator as TISEAN's d2 followed by c2t, since c2t's
+% D_T(r) = C(r) / int_0^r C(r')/r' dr' reduces to the expression above, but c2t
+% evaluates it from d2's logarithmically-binned correlation sum at the first bin above
+% eup, whereas here it is evaluated exactly at eup from the pair distances themselves,
+% so values differ slightly. Kantz & Schreiber's recommendation of half a
 % standard deviation for the length scale is used the same way in NL_d2.m's takens05.
 %
 % ---INPUTS:
@@ -22,7 +19,7 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 % Nref, the number of reference points (the first Nref delay vectors; -1 uses all points;
 %       default: -1)
 % rad, the upper length scale to read off the dimension estimate, in standard deviations of
-%      y (cf. TSTOOL's rad, a proportion of attractor size; default: 0.05)
+%      y (default: 0.05)
 % past, the Theiler window: {'ac', k} for k times the first zero-crossing of the
 %       autocorrelation function, or a number of samples (see BF_TheilerWindow; default:
 %       {'ac', 1})
@@ -45,11 +42,7 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %
 % ---NOTES:
 % For high embedding dimensions of noise-like series no pair may fall within eup at all,
-% giving NaN (~1/3 of real-world series for the m = 8 and m = 10 variants); the
-% TISEAN-based implementation returned a constant 14.3 in that situation -- 1/ln of d2's
-% radius-bin ratio, i.e. every pair in a single bin -- which was an artifact, not an
-% estimate. Where both are defined they agree to ~2% (median), Spearman 0.95-0.99 across
-% real-world series.
+% giving NaN.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -131,7 +124,7 @@ if isscalar(Y) && isnan(Y)
 end
 Nemb = size(Y, 1);
 
-% Reference points: the first Nref delay vectors (as TISEAN's d2 -N did), or all:
+% Reference points: the first Nref delay vectors (as with TISEAN's d2 -N), or all:
 if Nref == -1 || Nref >= Nemb
 	refIdx = (1:Nemb)';
 else
@@ -171,11 +164,7 @@ if numPairs == 0
 end
 % (No minimum pair count beyond that. Note that for high embedding
 % dimensions of noise-like series no pair may fall within eup at all, giving
-% NaN here (~1/3 of real-world series for the m = 8 and m = 10 variants);
-% the TISEAN-based implementation returned a constant 14.3 in that situation
-% -- 1/ln of d2's radius-bin ratio, i.e. every pair in a single bin -- which
-% was an artifact, not an estimate. Where both are defined they agree to
-% ~2% (median), Spearman 0.95-0.99 across real-world series.)
+% NaN here.)
 
 out = numPairs / sumLog; % Takens' estimator: 1 / mean(ln(eup/r))
 

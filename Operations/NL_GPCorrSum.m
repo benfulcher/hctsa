@@ -3,12 +3,10 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 %
 % Computes the correlation sum, C(epsilon), the fraction of pairs of
 % time-delay-embedded points closer than epsilon, by the Grassberger-Procaccia
-% algorithm. It uses TISEAN's d2 (rather than TSTOOL's corrsum/corrsum2, which
-% this operation used previously). d2's raw correlation-sum output (its .c2
+% algorithm. It uses TISEAN's d2, whose raw correlation-sum output (its .c2
 % file, also used by NL_d2.m) gives (r, C(r)) pairs directly; only doTwo = 1 (the
 % corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
-% (corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent and was
-% never used by any of this operation's own mop-file entries. For a
+% (TSTOOL corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent. For a
 % low-dimensional attractor, ln C rises linearly with ln(epsilon), with a slope
 % equal to the correlation dimension. The outputs summarize the range of
 % ln(epsilon) and ln C(epsilon), and iteratively re-weighted least squares
@@ -161,32 +159,21 @@ else
 	NrefTISEAN = Nref;
 end
 
-% Maximum search radius, in standard deviations of y (matching the
-% convention already established for NL_TakensEstimator.m and
-% NL_d2.m's takens05, citing Kantz & Schreiber -- TSTOOL's own r was
-% instead a proportion of "attractor size", equivalent in spirit but not
-% numerically identical), scaled by sqrt(m): a pairwise Euclidean distance
-% in an m-dimensional embedding of (roughly independent) per-coordinate
-% scale std(y) itself scales as std(y)*sqrt(m), not std(y) alone. Without
-% this correction, small r requests at higher embedding dimensions can ask
-% for a radius smaller than the closest pairs of points in the actual
-% reconstructed phase space, leaving every bin with zero pairs (confirmed
-% empirically: for m=7 noise, the smallest radius with any pairs at all
-% was ~2.6% away from r*std(y)*sqrt(m), vs. 2.6x too large for r*std(y)
-% alone). d2's minimum epsilon is left at its own default (max data
-% interval/1000): tightening it in proportion to maxEps was tried and
-% found to shrink the useful (non-zero, non-saturated) part of the range
-% rather than help. A handful of bins with too few points to fit is
-% handled by the "not enough points" check below, same as this operation
-% has always done for degenerate cases -- much rarer now, but not
-% entirely eliminated: a small requested r can still legitimately fall
-% below the closest-pair distance for a genuinely high-dimensional,
-% unstructured series (verified: this remains possible for structureless
-% noise embedded at a high FNN-selected m, but not for real
-% low-dimensional structure, e.g. a chaotic logistic map continues to
-% give a sensible estimate at the same small r). In that regime a NaN
-% output is an honest "no reliable low-dimensional scaling could be
-% detected at this length scale", not a computation failure to paper over.
+% Maximum search radius, in standard deviations of y (the convention of
+% NL_TakensEstimator.m and NL_d2.m's takens05, following Kantz & Schreiber),
+% scaled by sqrt(m): a pairwise Euclidean distance in an m-dimensional
+% embedding of (roughly independent) per-coordinate scale std(y) itself
+% scales as std(y)*sqrt(m), not std(y) alone. Without this correction, small
+% r requests at higher embedding dimensions can ask for a radius smaller than
+% the closest pairs of points in the actual reconstructed phase space,
+% leaving every bin with zero pairs. d2's minimum epsilon is left at its own
+% default (max data interval/1000). Bins with too few points to fit are
+% handled by the "not enough points" check below: a small requested r can
+% still legitimately fall below the closest-pair distance for a genuinely
+% high-dimensional, unstructured series (e.g., noise embedded at a high
+% FNN-selected m). In that regime a NaN output is an honest "no reliable
+% low-dimensional scaling could be detected at this length scale", not a
+% computation failure to paper over.
 maxEps = r * std(y) * sqrt(m);
 
 % ------------------------------------------------------------------------------
@@ -194,9 +181,9 @@ maxEps = r * std(y) * sqrt(m);
 % ------------------------------------------------------------------------------
 % d2 over embedding dimensions 1:m (only the m-th is used below). Note:
 % "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
-% a bug in this TISEAN build where it reports "0 lines read" and produces no
+% a bug in the bundled TISEAN where it reports "0 lines read" and produces no
 % output at all; "-M1,<m>" (a genuine range, as NL_d2.m and
-% NL_TakensEstimator.m already use) works correctly, so that's used
+% NL_TakensEstimator.m also use) works correctly, so that's used
 % here too and the dimension-m block is picked out afterwards.
 [~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
 						  tau, m, thwin, maxEps, NrefTISEAN, nbins, filePath));
@@ -247,9 +234,8 @@ if isempty(rc)
 	out = NaN; return
 end
 
-% The .c2 file stores raw r (log-spaced, not pre-logged -- confirmed by the
-% consecutive ratios of column 1 being ~constant, i.e. geometric, whereas
-% ln(r) would be arithmetic/evenly-spaced) and raw C(r) (not ln(C(r))):
+% The .c2 file stores raw r (log-spaced, not pre-logged) and raw C(r)
+% (not ln(C(r))):
 lnr = log(rc(:, 1));
 lnCr = log(rc(:, 2));
 
@@ -304,11 +290,8 @@ if enoughpoints
 	fit_lnCr = a(2) * lnr + a(1);
 	if doPlot, hold on; plot(lnr, fit_lnCr, 'r'); hold off; end
 
-	% Compute residuals (lnCr and fit_lnCr are both column vectors here; a
-	% stray transpose on this line -- present in the original TSTOOL-based
-	% version of this operation too -- turned this into an N-by-N matrix
-	% via implicit broadcasting instead of an N-by-1 residual vector,
-	% making robfitresmeanabs/robfitresmeansq vectors instead of scalars):
+	% Compute residuals (lnCr and fit_lnCr are both column vectors here, so
+	% res is an N-by-1 residual vector):
 	res = lnCr - fit_lnCr;
 
 	out.robfitresmeanabs = mean(abs(res));

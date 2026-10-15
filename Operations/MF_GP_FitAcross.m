@@ -111,12 +111,11 @@ nhps = eval(s);
 hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
 meanFunc = {'meanZero'}; hyp.mean = []; % Mean function (mean zero process):
 likFunc = @likGauss; hyp.lik = log(0.1); % Likelihood (Gaussian):
-% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Exact Gaussian inference. (Not @infLaplace: with a Gaussian likelihood the
 % Laplace approximation is exact but is computed by Newton iteration, and
 % gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
-% previous call's solution, so every fit depended on whatever series was
-% fitted before it -- the same series gave outputs differing in the 4th digit
-% from call to call once the optimizer amplified the difference.)
+% previous call's solution, so each fit would depend on whatever series was
+% fitted before it.)
 infAlg = @infGaussLik;
 nfevals = -50; % number of function evaluations (with negative)
 
@@ -157,8 +156,6 @@ end
 % ------------------------------------------------------------------------------
 S = sqrt(S2); % standard deviation function, S
 % Root-mean-square error of the mean function, mu.
-% (Note: this was previously mean(sqrt((y(ts)-mu).^2)), which cancels pointwise to
-%  mean(abs(y(ts)-mu)) -- a mean absolute error, not an RMSE.)
 out.stde = sqrt(mean((y(ts) - mu).^2));
 out.meanabs_std = mean(abs(y(ts) - mu) ./ S);
 out.stdmu = std(mu);

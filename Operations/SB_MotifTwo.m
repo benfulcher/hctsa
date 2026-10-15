@@ -291,10 +291,8 @@ function h = f_entropy(p, numSamples, wordLength, alphabetSize, fixedMarginals)
 	% wordLength*(alphabetSize-1), since each of the wordLength positions then has
 	% a (near-)fixed marginal. For words of length 1 that leaves df = 0, which is
 	% correct -- a median split puts exactly half the points either side, so the
-	% plug-in entropy is exactly log 2 with no sampling variation to bias-correct.
-	% Applying the textbook correction there turned SB_MotifTwo_median_h from a
-	% constant into a pure function of N (eta^2 against length 0.000 -> 1.000).
-	% See SB_MotifThree for the measured change by word length.
+	% plug-in entropy is exactly log 2 with no sampling variation to bias-correct
+	% (the textbook correction would instead add a term that depends only on N).
 	r = (p > 0);
 	h = -sum(p(r) .* log(p(r)));
 	if nargin > 3 && numSamples > 0

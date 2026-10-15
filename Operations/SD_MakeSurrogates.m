@@ -197,21 +197,14 @@ function xNew = SUB_RandomPhase(x, fc, u)
 	% Random-phase-Fourier-transform surrogate of column vector x, with the
 	% uniform random numbers u (one per free bin, in (0,1)) setting the phases.
 	%
-	% Preserves the magnitude spectrum exactly (reusing abs(fft(x)) as-is,
-	% rather than manually re-assembling it from a half-spectrum slice --
-	% that reassembly is what broke for row-vector input in an earlier
-	% version of this code, since flipud() silently no-ops on a row
-	% vector instead of reversing it) and randomizes every phase except
-	% the DC and (for even N) Nyquist bins, which are preserved rather
-	% than zeroed: for a real signal both are necessarily exactly 0 or pi,
-	% and forcing them to 0 (as an earlier version did for the DC bin)
-	% flips the sign of the surrogate's mean whenever x has a negative
-	% mean. Randomized phases are mirrored (negated) onto the
-	% conjugate-symmetric half of the spectrum so the result is real by
-	% construction for any N, even or odd -- no truncation of x is needed
-	% either way (an earlier version dropped the last sample for odd N,
-	% then mismatched the FFT/IFFT lengths, distorting the magnitude
-	% spectrum it was supposed to preserve).
+	% Preserves the magnitude spectrum exactly (reusing abs(fft(x)) as-is)
+	% and randomizes every phase except the DC and (for even N) Nyquist
+	% bins, which are preserved rather than zeroed: for a real signal both
+	% are necessarily exactly 0 or pi, and forcing them to 0 would flip the
+	% sign of the surrogate's mean whenever x has a negative mean.
+	% Randomized phases are mirrored (negated) onto the conjugate-symmetric
+	% half of the spectrum so the result is real by construction for any N,
+	% even or odd -- no truncation of x is needed either way.
 	%
 	% If fc (a bin count) is given, phases up to and including bin fc are
 	% also preserved rather than randomized -- a truncated Fourier

@@ -188,8 +188,8 @@ else
 	tisean_command = sprintf('false_nearest -d%u -m1 -M1,%u -t%u -f%g -V0 %s', tau, maxm, theilerWin, escapeFactor, filePath);
 end
 % BF_TiseanSystem already error()s if false_nearest couldn't be run at all
-% (not installed, or hung and hit its own timeout guard -- verified this
-% binary can block indefinitely on a missing/unreadable input file rather
+% (not installed, or hung and hit its own timeout guard -- this binary
+% can block indefinitely on a missing/unreadable input file rather
 % than erroring); any status it returns here means the binary ran to
 % completion, whether cleanly or with its own terse refusal (see below).
 [~, res] = BF_TiseanSystem(tisean_command);

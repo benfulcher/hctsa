@@ -96,12 +96,12 @@ end
 % method. Cache the last few computed ACFs (keyed on an exact, NaN-safe
 % content match of y) so repeated calls for the same series across different
 % operations can skip recomputing the FFT entirely. A miss falls through to
-% exactly the same computation as before, so this cannot change behavior --
-% only whether the result was already sitting in the cache. Each parfor
-% worker has its own independent copy of this cache (persistent variables are
-% per-process), so this is a purely opportunistic speed-up: worst case (no
-% hits) is identical to today, best case skips redundant FFTs across
-% operations that reuse the same series.
+% the full computation, so the cache cannot change results -- only whether
+% the result was already sitting in the cache. Each parfor worker has its own
+% independent copy of this cache (persistent variables are per-process), so
+% this is a purely opportunistic speed-up: worst case (no hits) costs the same
+% as no cache, best case skips redundant FFTs across operations that reuse
+% the same series.
 persistent cacheY cacheACF
 maxCacheEntries = 4;
 if isempty(cacheY)

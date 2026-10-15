@@ -106,11 +106,6 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 % themselves only weakly determined by the data (the likelihood is nearly flat in
 % that direction).
 %
-% Only the P = 1, Q = 1 registration remains. The P = 1, Q = 2 registration was
-% dropped as almost entirely redundant with it (r = 0.9-1.0 across nearly every
-% output field, on two collections of real-world series). MF_GARCHcompare, which
-% varies P and Q over a grid, is unaffected.
-%
 % persistence and uncondVar are standard GARCH diagnostics (persistence near 1
 % signals near-integrated, IGARCH-like volatility clustering). uncondVar is set to
 % NaN near the boundary because the model's value is numerically meaningless there.
@@ -120,9 +115,7 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 % The modelType and innovationDist arguments, and the leverage, leverageerr and
 % distDoF outputs, cover asymmetric volatility response and fat-tailed innovations.
 % Registered variants: MF_GARCHfit_ar_P1_Q1_gjr and MF_GARCHfit_ar_P1_Q1_t each
-% change one thing from the P1_Q1 baseline. 'egarch' is supported but not registered
-% (its ARCH coefficient hit an apparent boundary of 1.0 in 2 of 3 real fits,
-% unexplained).
+% change one thing from the P1_Q1 baseline. 'egarch' is supported but not registered.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -234,8 +227,7 @@ N = length(y);
 %       departure from randomness hypothesis test
 [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 
-% (Commented out as a historical marker: unused by any output; saves wasted compute,
-%  as in MF_GARCHcompare.)
+% (Commented out: unused by any output, as in MF_GARCHcompare.)
 % (iii) Correlation in time series: autocorrelation
 % [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
 % [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
@@ -303,9 +295,6 @@ end
 for i = 1:P
 	if isprop(Gfit, 'GARCH') && length(Gfit.GARCH) >= i
 		out.(sprintf('GARCH_%u', i)) = Gfit.GARCH{i};
-		% New (in this way shit) format means that this no longer works for
-		% custom GARCH models (you can no longer index a particular
-		% error) ///
 		if Gfit.GARCH{i} == 0
 			% no fit at this lag, even though it was specified
 			out.(sprintf('GARCHerr_%u', i)) = NaN; % first is the constant
@@ -363,8 +352,8 @@ out.summaryexitflag = info.exitflag; % whether the fit worked ok.
 
 nparams = sum(any(estParamCov)); % number of parameters
 % (Not registered as a feature: for a fixed P/Q/AR order, this is a structural property of
-%  the model specification, not of the data, so it is constant across series -- confirmed
-%  on both validation datasets. Still computed here for the AIC/BIC below.)
+%  the model specification, not of the data, so it is constant across series. Still
+%  computed here for the AIC/BIC below.)
 
 % use aicbic function
 [AIC, BIC] = aicbic(LLF, nparams, N); % aic and bic of fit
@@ -376,28 +365,22 @@ out.bic = BIC / N;
 % close to 1 indicates near-integrated (IGARCH-like) volatility clustering;
 % >= 1 would mean no finite unconditional variance exists. In practice the
 % estimate() optimizer enforces a stationarity constraint with a small
-% internal tolerance, so near-boundary fits land just under 1 (observed
-% exactly 0.9999998 on real data) rather than at/over it -- uncondVar is
-% NaN'd out here rather than only guarding on persistence>=1, since a
-% denominator that small makes the value numerically meaningless (dominated
-% by the optimizer's boundary tolerance, not the data) well before
-% persistence formally reaches 1.
+% internal tolerance, so near-boundary fits land just under 1 rather than
+% at/over it -- uncondVar is NaN'd out here rather than only guarding on
+% persistence>=1, since a denominator that small makes the value numerically
+% meaningless (dominated by the optimizer's boundary tolerance, not the data)
+% well before persistence formally reaches 1.
 %
 % For asymmetric (gjr) models, persistence isn't just GARCH+ARCH: the
 % leverage term only applies on negative shocks, so under the fitted
 % (symmetric, zero-mean) innovation distribution it contributes on average
 % half the time -- persistence = GARCH+ARCH+Leverage/2 (Glosten-Jagannathan-
-% Runkle 1993). Confirmed empirically: this matches the model object's own
-% UnconditionalVariance property almost exactly (to ~4 sig figs) across 5
-% real series, whereas omitting the Leverage/2 term gives nonsense,
-% including NEGATIVE "variances" on 2/5 series. uncondVar itself is read
-% directly from Gfit.UnconditionalVariance (native to garch/gjr/egarch
-% objects) rather than hand-derived, to avoid this class of formula bug --
-% still requires the persistence-based NaN guard above near the boundary,
-% since the native property blows up there too, not just a hand-rolled one.
+% Runkle 1993). uncondVar itself is read directly from
+% Gfit.UnconditionalVariance (native to garch/gjr/egarch objects) rather than
+% hand-derived; it still requires the persistence-based NaN guard above near
+% the boundary, since the native property blows up there too.
 % egarch's log-variance recursion doesn't reduce to a simple coefficient
-% sum, so persistence/uncondVar are left NaN there (egarch is unregistered
-% currently anyway).
+% sum, so persistence/uncondVar are left NaN there.
 switch modelType
 case 'garch'
 	out.persistence = sum(cellfun(@(c) c, Gfit.GARCH)) + sum(cellfun(@(c) c, Gfit.ARCH));
@@ -480,8 +463,7 @@ out.maxlbqpval_stde2 = max(lbq_pValue_stde2);
 % [PACF,Lags_pacf,bounds_pacf] = parcorr(e,20,[],[]);
 
 % Use MF_ResidualAnalysis on the standardized innovations
-% 1) Get statistics on the standardized innovations, prefixed zres_ (the old stde_
-%    prefix produced field names like stde_stde)
+% 1) Get statistics on the standardized innovations, prefixed zres_
 residout = MF_ResidualAnalysis(stde, y, 'full');
 
 % convert these to local outputs in quick loop

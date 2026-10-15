@@ -25,7 +25,7 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %     more reliable for this observable than the Süveges (2007) likelihood
 %     estimator, particularly near near-periodic (sticky) poles.
 %
-% This differs from hctsa's existing attractor-dimension operations
+% This differs from hctsa's other attractor-dimension operations
 % (NL_Dimensions' box-counting/correlation-sum dimension;
 % NL_FractalDimensions' nearest-neighbour-moment generalized dimensions):
 % those pool all pairwise distances/neighbour ranks into one global
@@ -56,9 +56,9 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 %         steps ahead to check for a further exceedance before counting a
 %         given exceedance as "isolated" (default: 5, following Caby et al.)
 % maxN, maximum number of samples to consider. Defaults to 'full' (no
-%       cropping) -- cost is O(nPoles*Nemb) and measured flat at ~0.3-0.4s
-%       from N=10000 to N=20000, cheap enough not to crop by default; a
-%       warning is given above N = 50000 if it is ever set explicitly.
+%       cropping) -- cost is O(nPoles*Nemb), cheap enough not to crop by
+%       default; a warning is given above N = 50000 if it is ever set
+%       explicitly.
 %       Set to a number to crop longer series to their first maxN points.
 % randomSeed, ignored: the poles are spread evenly over the orbit (a deterministic
 %             low-discrepancy subset of the embedded points), not drawn at random. Kept
@@ -92,9 +92,6 @@ function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ra
 % D. Faranda, J.M. Freitas, P. Guiraud and S. Vaienti, "Sampling local properties of
 % attractors via extreme value theory", Chaos Solitons Fractals 74, 55-66 (2015)
 % (arXiv:1407.0412, July 2014; Propositions 1 and 2). DOI: 10.1016/j.chaos.2015.01.016
-% (The "Faranda, Freitas, Guiraud & Vaienti (2014), Props 1-2" of earlier versions of
-% this docstring was matched to this paper by authors, year and the existence of its
-% Propositions 1 and 2; the proposition contents were not compared.)
 %
 % Th. Caby, D. Faranda, S. Vaienti and P. Yiou, "On the computation of the extremal
 % index for time series", J. Stat. Phys. 179(5-6), 1666-1697 (2019) (Eqs 19/21).

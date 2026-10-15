@@ -164,15 +164,13 @@ end
 % iid standard normals E[max] ~ sqrt(2*log(w)). With howToWindow = 'n' the
 % window is windowLength = floor(N/n), so that expectation -- and every location
 % statistic derived from it -- grows with the time-series length rather than
-% with any property of the data (measured: meanmax rises 0.59 -> 2.33 across
-% N = 100..3200 for n = 50, a factor of 4).
+% with any property of the data.
 %
 % Dividing by the expected maximum of windowLength standard normals expresses
 % these on a scale-free footing: "how extreme are the local extremes, relative
-% to Gaussian expectation for a window this long". That removes the length
-% dependence entirely (ratio 3.96 -> 1.00 for n50, 2.45 -> 1.00 for n25) and
-% leaves the fixed-window 'l' variants unchanged up to a constant, since
-% windowLength does not vary with N there.
+% to Gaussian expectation for a window this long". That removes this length
+% dependence and leaves the fixed-window 'l' variants unchanged up to a
+% constant, since windowLength does not vary with N there.
 %
 % Blom's approximation for the expected largest order statistic:
 expMax = norminv((windowLength - 0.375) / (windowLength + 0.25));
@@ -192,11 +190,8 @@ out.medianabsmin = median(absLocMin) / expMax;
 out.medianext = median(locExt) / expMax;
 % The std fields are NOT normalized by expMax: the spread of a maximum *shrinks*
 % as the window grows (SD[max_w] ~ 1/sqrt(2*log(w))), so dividing by expMax
-% would steepen their drift rather than remove it. Normalizing instead by the
-% Gumbel asymptotic for SD[max_w] was tried and made things worse at small
-% windows (ratio 0.56 -> 1.36 for n50), because the 'n' variants reach window
-% lengths of only 2-8 samples at short N, where the asymptotic does not hold.
-% These remain length-sensitive for the 'n' parameterizations.
+% would steepen their drift rather than remove it. These remain length-sensitive
+% for the 'n' parameterizations.
 out.stdmax = std(locMax);
 out.stdmin = std(locMin);
 out.stdext = std(locExt);
@@ -205,8 +200,7 @@ out.meanabsext = mean(absLocExt) / expMax;
 out.medianabsext = median(absLocExt) / expMax;
 % Not normalized by expMax: this is a *difference* between two extremes of
 % similar magnitude, so it does not carry the expMax scale and dividing by it
-% over-corrects (measured: eta^2 rose from 0.82 to 0.97 for n50 when it was
-% included in the normalization).
+% over-corrects.
 out.diffmaxabsmin = sum(abs(locMax - absLocMin)) / numWindows;
 out.uord = sum(sign(locExt)) / numWindows; % whether extreme events are more up or down
 out.maxmaxmed = max(locMax) / median(locMax);

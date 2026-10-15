@@ -122,8 +122,6 @@ end
 %% Basic stats?
 % ------------------------------------------------------------------------------
 % on raw values
-% std_p/std_n dropped: r=0.98 with CO_PosNegAsymmetry's volPos/volNeg on
-% real EEG data, which measures regime-conditional volatility more directly.
 out.mean_p = mean(angles{1});
 out.median_p = median(angles{1});
 
@@ -248,9 +246,6 @@ end
 % StatAv2
 [statav_m, statav_s] = SUB_statav(zallAngles, 2);
 out.statav2_all_m = statav_m;
-% statav2_all_s/statav3_all_s/statav4_all_s dropped: mutually r=0.97-0.98
-% with statav5_all_s (and each other) on real EEG data, so only one
-% representative of the StatAv-spread-of-all-angles family is kept.
 
 % StatAv3
 [statav_m, statav_s] = SUB_statav(zallAngles, 3);
@@ -266,10 +261,6 @@ out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
 %% correlations?
-% Note: ac2_p/ac2_n/ac2_all dropped (r=0.96-0.99 with the corresponding
-% ac1_*), and tau_all/ac1_all dropped (each r=0.95-0.97 with its own p/n
-% split) -- keeping the p/n split (rather than the pooled 'all') preserves
-% the asymmetry signal that's the actual point of this feature.
 if ~isempty(zangles{1});
 	out.tau_p = CO_FirstCrossing(zangles{1}, 'ac', 0, 'continuous');
 	out.ac1_p = CO_AutoCorr(zangles{1}, 1, 'Fourier');

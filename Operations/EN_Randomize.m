@@ -267,9 +267,8 @@ function out = CalculateStats(y, y_rand)
 	% 2-bit LZ complexity:
 	% LZcomplex = EN_LZComplexity(y,3);
 
-	% Normalized permutation entropy, PermEn(3,1) (replaced SampEn(2,0.15),
-	% whose O(N^2) cost at each of the 20 randomization stages was ~75% of
-	% this operation's time on long series; PermEn is O(N)):
+	% Normalized permutation entropy, PermEn(3,1) (O(N), so cheap to compute
+	% at each of the 20 randomization stages):
 	permEnStruct = EN_PermEn(y_rand, 3, 1);
 	permen3_1 = permEnStruct.normPermEn;
 
@@ -295,8 +294,8 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 	% Fits an exponential to the data vector across data points r
 
 	% The fittype objects are built once and reused across calls (parsing the
-	% model string was ~25% of each fit's cost, for ten fits per call of
-	% this operation); the start point is passed to fit() instead:
+	% model string is costly, and there are ten fits per call of this
+	% operation); the start point is passed to fit() instead:
 	persistent fExp fExpOffset
 	if isempty(fExp)
 		fExp = fittype('a*exp(b*x)');

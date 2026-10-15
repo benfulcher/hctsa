@@ -9,8 +9,8 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % (excluding a Theiler window of "past" samples either side), and the time offset, T, of
 % each neighbor from the reference point is recorded. The histogram of these offsets over
 % the numLags lags beyond the Theiler window, T = past+1, ..., past+numLags (the "return-time
-% profile"), is analyzed. This follows TSTOOL's 'return_time' (which hctsa previously
-% called), with one change: each lag's count is divided by its expected count if neighbors
+% profile"), is analyzed. This follows TSTOOL's 'return_time', with one change: each
+% lag's count is divided by its expected count if neighbors
 % were placed at random among the valid (Theiler-excluded) candidates, rather than TSTOOL's
 % 2*NNR*(N - T), so that the histogram is ~1 at every lag for an uncorrelated process at
 % any series length (TSTOOL's normalization scaled as 1/N). Values above 1 mark lags at

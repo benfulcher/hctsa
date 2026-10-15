@@ -47,9 +47,7 @@ function out = NL_PoincareSection(y, ref, embedParams)
 % TISEAN: https://www.pks.mpg.de/tisean/
 %
 % ---NOTES:
-% This operation previously used TSTOOL's 'poincare', which cut a hyperplane orthogonal to
-% the local tangent vector at a chosen reference point in the time series -- a construction
-% TISEAN has no equivalent for. 'ref' is repurposed here to instead pick which of the two
+% TISEAN's 'poincare' has no reference-point concept: 'ref' instead picks which of the two
 % possible crossing directions to use.
 %
 % Another thing that could be cool to do is to analyze variation in the plots as ref

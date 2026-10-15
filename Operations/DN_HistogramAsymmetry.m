@@ -106,8 +106,7 @@ binCentersNeg = mean([binEdgesNeg(1:end - 1); binEdgesNeg(2:end)]);
 % Asymmetry about the mean, as a PROPORTION of the non-zero values (matching the
 % denominator modeProbPos/modeProbNeg below already use). A raw count difference is
 % extensive -- it grows with the time-series length rather than describing the
-% distribution: measured on real-world series, |densityDiff| had Spearman rho = 0.45
-% with series length (values ranged to +/-9070), which normalizing removes (-0.08).
+% distribution.
 out.densityDiff = (sum(y > 0) - sum(y < 0)) / NnonZero;
 out.modeProbPos = max(pPos);
 out.modeProbNeg = max(pNeg);

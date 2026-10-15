@@ -38,9 +38,8 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %                 Gaussian estimate of the automutual information (a function of the
 %                 autocorrelation only, which the surrogates preserve; see NOTES); one-sided
 %           (default: 'amikraskov1')
-%           The earlier names 'ami1' and 'fmmi' (which both meant the Gaussian estimate)
-%           are still accepted as 'amigaussian1' and 'fmmigaussian', with a one-time
-%           warning.
+%           The deprecated names 'ami1' and 'fmmi' (both the Gaussian estimate) are
+%           accepted as 'amigaussian1' and 'fmmigaussian', with a one-time warning.
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 % ---OUTPUTS: for each requested test statistic s (amikraskov for 'amikraskov1',
@@ -131,7 +130,7 @@ if ischar(theTestStat)
 	theTestStat = {theTestStat};
 end
 
-% Earlier names for the (Gaussian-estimate) statistics, which did not say so:
+% Deprecated names for the (Gaussian-estimate) statistics:
 persistent hasWarnedOldNames
 oldNames = {'ami1', 'fmmi'};
 newNames = {'amigaussian1', 'fmmigaussian'};

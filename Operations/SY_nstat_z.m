@@ -133,14 +133,12 @@ minNeighbors = 30; % minimum number of neighbors for fit (TISEAN's -k default)
 % is already a neighbor of every other point, so no further growth can ever
 % produce more candidates. If the (clength-incStep-pstart) available
 % candidates minus that exclusion window is still short of minNeighbors,
-% nstat_z can never succeed for that point and loops forever: a real bug in
-% nstat_z's own upfront sanity check, which never accounts for this
-% exclusion window at all (see nstat_z.c's check just before its main
-% loop). The condition below is the exact (not heuristic) worst-case bound
-% for this to be guaranteed safe, derived from and confirmed against
-% nstat_z's source (patched separately to fail fast rather than hang, but
-% this check avoids relying on that fix and also avoids discarding
-% otherwise-computable feature values to an overly conservative margin).
+% nstat_z can never succeed for that point and would loop forever: nstat_z's
+% own upfront sanity check does not account for this exclusion window (see
+% nstat_z.c's check just before its main loop). The condition below is the
+% exact (not heuristic) worst-case bound for this to be guaranteed safe,
+% derived from nstat_z's source, so no otherwise-computable feature values are
+% discarded by an overly conservative margin.
 pstart = (m - 1) * tau;
 minSafeClength = minNeighbors + 3 * incStep + 2 * pstart - 1;
 if clength < minSafeClength

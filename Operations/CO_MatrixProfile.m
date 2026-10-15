@@ -24,8 +24,7 @@ function out = CO_MatrixProfile(y, m, maxN)
 % y, the input time series (z-scored in hctsa)
 % m, the window length in samples; or {'ac', k} for k times the first zero-crossing of
 %    the autocorrelation function (at least 10 samples). Default: {'ac', 8}. Longer
-%    windows give more reliable estimates of the nearest-neighbour statistics
-%    (test-retest across processes: 0.93-0.96 at k = 8 vs 0.73-0.84 at k = 4), at the
+%    windows give more reliable estimates of the nearest-neighbour statistics, at the
 %    cost of needing longer series.
 % maxN, crops time series longer than this to their first maxN samples (or 'full' to
 %       use every sample). Default: 5000.

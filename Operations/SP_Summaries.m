@@ -69,8 +69,7 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % Cumulative power:
 % wq_5, wq_10, wq_25, wq_50, wq_75, wq_90, wq_95, wq_99: frequency quantiles of the
 % power spectrum, wq_p being the (angular) frequency below which p% of the power lies.
-% wq_50 is the median frequency. (These were previously named wmax_p, and wq_50 was
-% named 'centroid'.)
+% wq_50 is the median frequency.
 %
 % Power-weighted moments of frequency:
 % specCentroid, specSpread, specSkew, specKurt: mean, standard deviation, skewness
@@ -142,27 +141,10 @@ function out = SP_Summaries(y, psdMeth, windowType, nf, doLogAbs)
 % than reflecting the spectrum's broader shape. Each of these has a
 % log-domain companion (logac1/logac2/logtau, logq25/logmedian/logq75,
 % logmom3, logstatav2_s/logstatav5_s) that applies the same statistic to
-% logS instead: empirically validated to capture genuinely different
-% information (|r| < 0.8 against the linear counterpart on two
-% independent real datasets, mostly 0.2-0.5) rather than being a
-% near-duplicate.
+% logS instead (tests showed the two versions are not redundant).
 %
-% Two families originally had both a linear and log-domain version --
-% crossing counts (ncross) and the per-band mean-stationarity measures
-% (statav2_m/statav5_m) -- but were cut back to log-only after a
-% broader check: correlating every candidate against all ~7300 other
-% hctsa features (not just a hand-picked "trivial" set) on 1000 real
-% series showed the *linear* versions consistently had the lowest
-% correlation with anything else in hctsa (R^2 ~ 0.1-0.3, vs ~0.2-0.6 for
-% their log counterparts, which tended to land near existing
-% autocorrelation/model-fit features -- i.e. real structure). Low
-% redundancy with existing features is necessary but not sufficient for
-% a feature to be useful (it's equally consistent with "just noise"), so
-% this was a judgment call, not a statistical proof -- made here in
-% favor of dropping the linear versions, consistent with them not having
-% been observed to be useful in practice. ncross_f*/statav2_m/statav5_m
-% are therefore no longer computed at all; only their logS counterparts
-% remain.
+% The crossing counts (ncross_log_*) and the per-band mean-stationarity
+% measures (logstatav2_m/logstatav5_m) are computed on logS only.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -241,30 +223,22 @@ if ismember(psdMeth, {'periodogram', 'welch'})
 	% the whole series (as used below for periodogram, a genuine
 	% single-segment, whole-series estimate) would silently collapse Welch's
 	% method to a single "segment" with no averaging at all, making it
-	% numerically near-indistinguishable from an unwindowed periodogram (a bug in earlier
-	% versions: on a diverse set of real-world series the un-fixed version had r=1.000
-	% with the 'fft' method's output across 97.6% of fields). noverlap
-	% of window length) below.
+	% numerically near-indistinguishable from an unwindowed periodogram. noverlap
+	% is left at pwelch's default (50% of window length) below.
 	if strcmp(psdMeth, 'welch')
-		% winLength used to be Ny/4, which keeps the segment COUNT fixed
-		% (~4, ~7 with 50% overlap) but lets the segment LENGTH -- and with
-		% it the intrinsic frequency resolution and smoothing bandwidth --
-		% grow without bound as the series lengthens. That defeats the
-		% actual convergence guarantee of Welch's method (per-bin variance
-		% should shrink as more segments are averaged over a *fixed*
-		% resolution) and was the direct cause of several fields drifting
-		% with N: verified with an AR(2) resonance of known -3dB width
-		% (0.42 rad/sample) that the old scheme's measured maxWidth decayed
-		% monotonically and without bound (0.23 -> 0.008 rad/sample, N =
-		% 200 -> 6400, a 30x error at the largest length, actively getting
-		% worse with more data) while capping winLength at a fixed absolute
-		% length converges instead (0.15-0.20 across the same range).
+		% winLength is capped at a fixed absolute length rather than scaling
+		% with Ny. A window of Ny/4 would keep the segment COUNT fixed (~4,
+		% ~7 with 50% overlap) but let the segment LENGTH -- and with it the
+		% intrinsic frequency resolution and smoothing bandwidth -- grow
+		% without bound as the series lengthens. That defeats the
+		% convergence guarantee of Welch's method (per-bin variance should
+		% shrink as more segments are averaged over a *fixed* resolution)
+		% and makes fields such as maxWidth drift with N.
 		% 256 matches both scipy.signal.welch's and pwelch's own default
 		% segment length (see the nfft note below), so above Ny ~ 1024 this
-		% now behaves like a textbook Welch estimate: resolution fixed,
-		% more segments averaged as N grows, variance shrinks with N.
-		% Below that it is unchanged from before (round(Ny/4) is smaller
-		% than 256), so short-series values are untouched.
+		% behaves like a textbook Welch estimate: resolution fixed, more
+		% segments averaged as N grows, variance shrinks with N. Below that
+		% the window is round(Ny/4) (with a floor of 16 samples).
 		winLength = max(min(256, round(Ny / 4)), 16);
 	else
 		winLength = Ny;
@@ -314,7 +288,7 @@ switch psdMeth
 		% is zero up to floating-point rounding, so S(1) is not a spectral
 		% estimate but the square of a ~1e-14 rounding residual (~1e-31), and
 		% log(S(1)) ~ -70 +/- a few, varying from series to series at random.
-		% Left in, that single bin dominated every log-domain statistic of this
+		% Left in, that single bin would dominate every log-domain statistic of this
 		% estimate: std(logS), its skewness and autocorrelation, the
 		% semilog fit, and min(logS) -- making the range-relative crossing
 		% counts identically 1 for every series. (The windowed/Welch estimates
@@ -325,22 +299,16 @@ switch psdMeth
 	case 'welch'
 		% Welch power spectral density estimate:
 		Fs = 1; % sampling frequency
-		% nfft used to be tied to Ny (2^nextpow2(Ny), same as the 'fft'
-		% branch above), independently of winLength -- so even after
-		% capping winLength, the frequency GRID kept getting finer with N
-		% while the actual smoothing bandwidth (set by winLength) stayed
-		% fixed. That mismatch showed up as its own N-dependence in
-		% bin-lag statistics (ac1/ac2/logac1/logac2, which correlate
-		% adjacent *bins*, not a physical frequency lag) and inflated
-		% several bin-count sums (spect_shann_ent, the poly/saturating
-		% cumsum fits) that are supposed to describe the spectrum's shape,
-		% not its number of samples -- verified: e.g. fpolysat_a's eta^2
-		% against length dropped from 0.98 to 0.06 once nfft stopped
-		% growing with Ny. Passing [] lets pwelch fall back to its own
-		% documented default (max(256, 2^nextpow2(winLength)) --
-		% confirmed empirically), i.e. resolution set by the window, not
-		% the series -- the textbook convention this file's manual
-		% override had been silently bypassing.
+		% nfft is not tied to Ny (as in the 'fft' branch above): a frequency
+		% GRID that kept getting finer with N while the actual smoothing
+		% bandwidth (set by winLength) stayed fixed would introduce its own
+		% N-dependence in bin-lag statistics (ac1/ac2/logac1/logac2, which
+		% correlate adjacent *bins*, not a physical frequency lag) and in
+		% bin-count sums (spect_shann_ent, the poly/saturating cumsum fits)
+		% that are supposed to describe the spectrum's shape, not its number
+		% of samples. Passing [] lets pwelch fall back to its own documented
+		% default (max(256, 2^nextpow2(winLength))), i.e. resolution set by
+		% the window, not the series -- the textbook convention.
 		[S, f] = pwelch(y, window, [], [], Fs);
 		w = 2 * pi * f'; % angular frequency
 		S = S / (2 * pi); % adjust so that area remains normalized in angular frequency space
@@ -394,13 +362,6 @@ out.maxw = w(i_maxS);
 
 % Half-power (-3 dB) bandwidth of the dominant peak: the frequency interval
 % around the maximum over which the spectrum stays above half its peak value.
-%
-% This previously thresholded against out.maxS itself. Since maxS *is* the
-% maximum, every neighbouring bin satisfies S < maxS, so the search always
-% terminated on the immediately adjacent bins and the field was identically
-% 2*dw = 4*pi/nfft -- a pure function of the transform length carrying no
-% information about the data (verified against an AR(2) resonance of known
-% intrinsic width, where it still returned exactly 2*dw at every N).
 halfPower = out.maxS / 2;
 iUpper = i_maxS + find(S(i_maxS + 1:end) < halfPower, 1, 'first');
 if isempty(iUpper) % never drops below half power above the peak
@@ -414,23 +375,21 @@ out.maxWidth = w(iUpper) - w(iLower);
 
 % Characterize all peaks using findpeaks function, run on logS rather than S:
 % a linear-scale power spectrum is typically extremely heavy-tailed (a single
-% dominant peak can be >100x the mean level -- cf. the SP_Summaries curation
-% notes), so prominence-based peak detection on raw S systematically buries
+% dominant peak can be >100x the mean level -- cf. the notes in the header),
+% so prominence-based peak detection on raw S systematically buries
 % smaller-but-genuine peaks (e.g. harmonics) under the dominant one, and
 % findpeaks' fixed prominence thresholds below are only meaningfully
 % calibrated on the log scale. This also matches Matlab's own convention:
 % periodogram/pwelch plot in dB (log power) by default, not linear power.
 %
-% These prominence thresholds are calibrated specifically for a
-% Welch-smoothed logS (i.e. psdMeth = 'welch'): a raw single-segment
-% periodogram/fft estimate is a statistically inconsistent spectral
-% estimator (per-bin variance doesn't shrink with more data), so its
-% logS has a much noisier, less-calibrated peak structure -- validated via
-% a white-noise null model (Welch-smoothed: 99th-percentile max spurious
-% log-prominence ~3.5 across series lengths 500-10000; unsmoothed: ~12,
-% overlapping real harmonic peaks almost entirely). For 'fft'/'periodogram',
-% these fields are therefore left uncalibrated (computed for code-path
-% uniformity only) and are deliberately NOT registered as hctsa features
+% These prominence thresholds are set, relative to the spurious peaks of
+% white noise, specifically for a Welch-smoothed logS (i.e. psdMeth =
+% 'welch'): a raw single-segment periodogram/fft estimate is a
+% statistically inconsistent spectral estimator (per-bin variance doesn't
+% shrink with more data), so its logS has a much noisier peak structure,
+% with spurious peaks as prominent as genuine harmonic peaks. For
+% 'fft'/'periodogram', these fields are therefore computed for code-path
+% uniformity only and are deliberately NOT registered as hctsa features
 % for those two psdMeth variants -- only for 'welch'.
 minDist_w = 0.02;
 ptsPerw = length(S) / pi;
@@ -440,29 +399,21 @@ minPkDist = ceil(minDist_w * ptsPerw);
 % fields below: peak *detection* and prominence are done on logS (see
 % above), but height x width only means 'power' on the linear spectrum
 % (log heights are mostly negative, so the log-domain product is not a
-% power and made numPeaks_50power identically 1 on every series):
+% power and would make numPeaks_50power identically 1 on every series):
 pkHeightLin = S(pkLoc);
 pkWidth = pkWidth / ptsPerw;
 pkLoc = pkLoc / ptsPerw;
 
 % Characterize mean peak prominence (thresholds in log-power units; see note above)
 %
-% numPeaks and numPeaks_overmean are computed (numPeaks is needed below) but are
-% deliberately NOT registered as hctsa features, for the same reason the
-% fft/periodogram peak fields above are not: they apply no prominence threshold,
-% so they count noise-floor ripple and therefore measure spectral resolution
-% rather than the data. On white noise numPeaks runs 16 -> 105 across
-% N = 200..6400, and numPeaks_overmean returns essentially identical values for
-% white noise (7 -> 53) and for a clear 3-tone signal (6 -> 43) -- i.e. no
-% discriminative content. Normalizing by the number of resolvable peak slots
-% does not fix this (0.12 -> 0.69 over the same range). The prominence-
-% thresholded counts below are the calibrated, length-stable versions:
-% numPromPeaks_3 returns exactly 0 for white noise and exactly 3 for the 3-tone
-% signal at every length tested.
+% The total number of peaks, numPeaks, is not returned as an output: it applies no
+% prominence threshold, so it counts noise-floor ripple and therefore measures
+% spectral resolution rather than the data. The prominence-thresholded counts below
+% are stable with series length.
 numPeaks = length(pkHeight); % local only: needed for the peakPower_* fields below, not itself an output
-out.numPromPeaks_3 = sum(pkProm > 3); % number of peaks with log-prominence of at least 3 (~90-95th pctile of the white-noise null)
-out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with log-prominence of at least 5 (clearly above the null's observed max of ~3.8)
-out.numPromPeaks_8 = sum(pkProm > 8); % number of peaks with log-prominence of at least 8 (matches the weakest peak in a validated harmonic-series test signal)
+out.numPromPeaks_3 = sum(pkProm > 3); % number of peaks with log-prominence of at least 3
+out.numPromPeaks_5 = sum(pkProm > 5); % number of peaks with log-prominence of at least 5
+out.numPromPeaks_8 = sum(pkProm > 8); % number of peaks with log-prominence of at least 8
 out.meanProm_5 = mean(pkProm(pkProm > 5)); % mean peak prominence of those with log-prominence of at least 5
 
 out.meanPeakWidth_prom5 = mean(pkWidth(pkProm > 5)); % mean peak width of peaks with log-prominence of at least 5
@@ -494,9 +445,8 @@ out.logiqr = iqr(logS);
 out.q25 = quantile(S, 0.25);
 out.median = median(S);
 out.q75 = quantile(S, 0.75);
-% Log-domain quantiles: q25/median/q75 above only have a linear version,
-% even though the iqr computed from them already has a logiqr companion
-% -- add the missing log-domain counterparts for consistency.
+% Log-domain quantiles: counterparts of q25/median/q75 above (as logiqr is of
+% iqr).
 out.logq25 = quantile(logS, 0.25);
 out.logmedian = median(logS);
 out.logq75 = quantile(logS, 0.75);
@@ -515,10 +465,8 @@ out.ac2 = autoCorrs_S(2);
 % CO_FirstCrossing returns a lag measured in *bins*, not physical
 % frequency -- and the number of bins (NFFT) scales with the input
 % series length N, independent of any real spectral structure. Left
-% unconverted, tau is partly just re-deriving N (checked empirically:
-% R^2 = 0.70 against hctsa's own `length` feature across 1000 real
-% series, by far the single biggest external correlate found). Multiply
-% by dw (the bin spacing in angular frequency) to convert to a genuine,
+% unconverted, tau is partly just re-deriving N. Multiply by dw (the bin
+% spacing in angular frequency) to convert to a genuine,
 % resolution-independent physical unit: doubling NFFT halves dw but
 % doubles the bin-count of any fixed physical correlation width, so the
 % product is invariant to N, leaving only the spectrum's actual
@@ -564,8 +512,7 @@ out.wq_99 = f_quantile_w(0.99);
 % frequency-summarizing families above and the moments of S computed
 % earlier, in a way the naming can obscure:
 %   - `wq_50` above is the *median* frequency (where csS reaches 50%),
-%     NOT the power-weighted mean frequency computed here. (It was
-%     previously named `centroid`, a misnomer.)
+%     NOT the power-weighted mean frequency computed here.
 %   - `mom3` (skewness of S) summarizes the distribution of power
 %     *values*, which is entirely order-agnostic in frequency: shuffle
 %     the spectrum bin-for-bin and mom3 is unchanged. It says nothing
@@ -583,21 +530,11 @@ out.wq_99 = f_quantile_w(0.99);
 % summarized, and logS is negative wherever S < 1, so log-weighting
 % would produce meaningless (signed) 'weights'.
 %
-% On redundancy: checked on 1000 real series, the two low-order moments
-% are substantially re-descriptions of the wq_* quantiles already
-% computed above -- specCentroid vs wq_75 R^2 = 0.91 (and vs the
-% median frequency `wq_50`, 0.88), specSpread vs the 10-90% width
-% w10_90 R^2 = 0.92. That is unsurprising (a mean tracks a median, a
-% standard deviation tracks an inter-quantile width). They are kept and
-% registered anyway, deliberately: specCentroid and specSpread are the
-% textbook spectral centroid and bandwidth (the MPEG-7 audio
-% descriptors), so they are far easier to interpret and to motivate
-% theoretically than the quantile-width proxies that happen to correlate
-% with them -- worth a little redundancy. specSkew and specKurt are
-% additionally non-redundant on the numbers: worst-case R^2 of 0.20 and
-% 0.08 against any of those quantiles, since they respond to
-% far-out-in-frequency tail power the quantiles are by construction
-% insensitive to.
+% The two low-order moments largely track the wq_* quantiles computed above
+% (a mean tracks a median, a standard deviation tracks an inter-quantile
+% width), but specCentroid and specSpread are the textbook spectral centroid
+% and bandwidth (the MPEG-7 audio descriptors), and so are easier to
+% interpret than the quantiles.
 Spos = max(S, 0); % guard against any tiny negative values from the estimator
 sumS = sum(Spos);
 if sumS > 0
@@ -727,8 +664,8 @@ out.statav2_s = std(std(split)) / std(S);
 % swamps std(mean(split))/std(std(split)) on the raw linear spectrum, so
 % this is essentially "which band has the peak" rather than a nuanced
 % measure of stationarity across the spectrum's shape. (The mean-based
-% version, statav2_m, was dropped entirely -- see the note at the top of
-% this file.)
+% version is computed on logS only -- see the note at the top of this
+% file.)
 splitLog = buffer(logS, floor(N / 2));
 if size(splitLog, 2) > 2, splitLog = splitLog(:, 1:2); end
 out.logstatav2_m = std(mean(splitLog)) / std(logS);
@@ -759,17 +696,13 @@ out.logstatav5_s = std(std(splitLog)) / std(logS);
 % ------------------------------------------------------------------------------
 % A threshold that's a fixed fraction of max(S) sits far above the noise
 % floor whenever there's one dominant peak (the same heavy-tailed-
-% spectrum problem that motivated moving peak detection to logS), so
-% crossing counts on the raw linear spectrum end up governed almost
-% entirely by the shape immediately around that one peak -- and,
-% checked empirically against ~7300 other hctsa features on 1000 real
-% series, ended up the least redundant with anything else in hctsa of
-% any candidate checked (R^2 ~ 0.1-0.3), consistent with that being
-% noise rather than novel structure. Dropped in favor of the logS-only
-% version below, where differences correspond to power *ratios* (dB), so
-% a threshold set as a fraction of the full [min(logS), max(logS)] range
-% is a genuinely relative "how far up from the noise floor" level, not
-% just "how close to the single biggest value":
+% spectrum problem that motivates detecting peaks on logS), so crossing
+% counts on the raw linear spectrum end up governed almost entirely by
+% the shape immediately around that one peak. Crossings are therefore
+% counted on logS only, where differences correspond to power *ratios*
+% (dB), so a threshold set as a fraction of the full [min(logS),
+% max(logS)] range is a genuinely relative "how far up from the noise
+% floor" level, not just "how close to the single biggest value":
 logRange = max(logS) - min(logS);
 ncrossfn_rel_log = @(f) sum(BF_SignChange(logS - (min(logS) + f * logRange)));
 
@@ -788,10 +721,6 @@ function out = giveMeRobustStats(xData, yData, textID, out, whichStats)
 	% between xData and yData.
 	%
 	% whichStats selects which of the six available statistics to emit.
-	% It exists because the full set was previously emitted for every fit
-	% range, but only a subset of those were ever registered as hctsa
-	% features -- for the 'lf' and 'mf' ranges only the gradient was --
-	% leaving 14 fields computed and returned but never used by anything.
 
 	% Perform the fit:
 	[a, stats] = robustfit(xData, yData);

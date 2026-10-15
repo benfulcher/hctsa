@@ -56,7 +56,7 @@ function out = EN_PermEn(y, m, tau)
 % its pattern distribution is computed from the same runs without re-embedding.
 % ordAsym is a distance between two empirical distributions and so is above zero
 % even for a time-reversible series; for white noise the amount is about
-% 0.55*sqrt(m!/Nx) for Nx runs (checked for m = 3, 4 and 5 and 500 to 2000 samples).
+% 0.55*sqrt(m!/Nx) for Nx runs.
 % The Land-Elias version is adapted from
 % http://people.ece.cornell.edu/land/PROJECTS/Complexity/ (logisticPE.m).
 

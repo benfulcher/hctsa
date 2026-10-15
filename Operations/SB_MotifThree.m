@@ -290,13 +290,6 @@ function h = f_entropy(p, numSamples, wordLength, alphabetSize)
 	% words of length 1 that leaves df = 0 exactly -- the plug-in is already
 	% exact, since a quantile split puts a fixed count in each bin with no
 	% sampling variation at all.
-	%
-	% Using the textbook df instead turned SB_MotifTwo_median_h (structurally
-	% constant at log 2) into a pure function of N: eta^2 against length went
-	% from 0.000 to 1.000. Measured mean change in eta^2 by word length was
-	% +0.425 (L=1), -0.033 (L=2), -0.256 (L=3), -0.349 (L=4), i.e. the
-	% correction only pays for itself once the alphabet is large enough for the
-	% bias to dominate the field's genuine variation.
 	r = (p > 0);
 	h = -sum(p(r) .* log(p(r)));
 	if nargin > 3 && numSamples > 0
