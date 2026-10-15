@@ -21,7 +21,7 @@ function out = CO_FallingSticks(y)
 % see.
 %
 % Adapted from a Python 'FALLstick' reference implementation by Eugene Chon
-% <eugenechon04@gmail.com>.
+% (@EugeneChon04, https://github.com/EugeneChon04; <eugenechon04@gmail.com>).
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored: the sign split is around the
