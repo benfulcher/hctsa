@@ -61,6 +61,9 @@ if ~ismember('Group',TimeSeries.Properties.VariableNames) || all(isundefined(Tim
     return
 end
 
+% Only classes with members count:
+TimeSeries.Group = removecats(TimeSeries.Group);
+
 % Number of classes to classify
 % (Assume every class is represented in the data):
 params.classLabels = categories(TimeSeries.Group);

@@ -5,7 +5,9 @@ function TS_ReIndex(whatData,tsOrOps,overRide)
 % whatData, the hctsa dataset to work with (default: 'norm', cf. TS_LoadData)
 % tsOrOps, whether to re-index TimeSeries IDs (specify 'ts') or
 %           Operation IDs (specify 'ops'), or both (specify 'both': default).
-% overRide, don't check with the user to re-index
+% overRide, don't check with the user to re-index (default: false, which asks for
+%           confirmation for each of the indices to be re-indexed; answering
+%           anything other than 'y' leaves the file unchanged)
 %
 %---EXAMPLE USAGE:
 % Reset index of TimeSeries in HCTSA_N.mat:
@@ -71,7 +73,8 @@ if strcmp(tsOrOps,'ts') || strcmp(tsOrOps,'both')
     if ~overRide
         doContinue = input(sprintf('Be careful -- if you press ''y'', the old index system for TimeSeries in %s will be wiped...',dataFile),'s');
         if ~strcmp(doContinue,'y')
-            fprintf(1,'Didn''t think so! Better to be save than sorry\n');
+            fprintf(1,'Didn''t think so! Better to be safe than sorry. Nothing was changed.\n');
+            return
         end
     end
     TimeSeries.ID = (1:numTimeSeries)';
@@ -85,7 +88,8 @@ if strcmp(tsOrOps,'ops') || strcmp(tsOrOps,'both')
     if ~overRide
         doContinue = input(sprintf('Be careful -- if you press ''y'', the old index system for Operations in %s will be wiped...',dataFile),'s');
         if ~strcmp(doContinue,'y')
-            fprintf(1,'Didn''t think so! Better to be save than sorry\n');
+            fprintf(1,'Didn''t think so! Better to be safe than sorry. Nothing was changed.\n');
+            return
         end
     end
     Operations.ID = (1:numOperations)';

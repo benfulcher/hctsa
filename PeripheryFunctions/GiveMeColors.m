@@ -2,7 +2,13 @@ function colorCell = GiveMeColors(numColors)
 % GiveMeColors outputs a cell of colors for the specified number of colors
 %
 % Relies on the BF_GetColorMap function to pull out the appropriate colorbrewer
-% colormaps
+% colormaps (qualitative palettes for up to 21 colors, then the jet colormap).
+%
+%---INPUT:
+% numColors, the number of colors (groups) required
+%
+%---OUTPUT:
+% colorCell, a numColors x 1 cell of RGB triplets
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -36,24 +42,23 @@ function colorCell = GiveMeColors(numColors)
 if numColors == 1
     colorCell = {[0,0,0]}; % Just use black...
 elseif numColors==4
-    colorCell = BF_GetColorMap('set2',numColors,true); % set1, accent, set2
+    colorCell = BF_GetColorMap('set2',numColors,true);
 elseif numColors <= 5
-    % colorCell = BF_GetColorMap('set1',5,1);
-    colorCell = BF_GetColorMap('set1',numColors,true); % set1, accent, set2
-    % colorCell = BF_GetColorMap('set2',5,1);
-    % if numColors==2, colorCell = colorCell([2,4]); end
-elseif numColors < 10
-    colorCell = BF_GetColorMap('dark2',numColors,true);
+    colorCell = BF_GetColorMap('set1',numColors,true);
+elseif numColors <= 8
+    colorCell = BF_GetColorMap('dark2',numColors,true); % dark2 has 8 colors
+elseif numColors == 9
+    colorCell = BF_GetColorMap('set1',numColors,true); % set1 has 9 colors
 elseif numColors <= 12
-    colorCell = BF_GetColorMap('set3',numColors,true);
-elseif numColors <= 22
-    colorCell = [BF_GetColorMap('set1',ceil(numColors/2),true);...
-                 BF_GetColorMap('set3',ceil(numColors/2),true)];
-    colorCell = colorCell(1:numColors);
-elseif numColors <= 50
-    colorCell = num2cell(jet(numColors),2);
+    colorCell = BF_GetColorMap('set3',numColors,true); % set3 has 12 colors
+elseif numColors <= 21
+    % Combine set1 (up to 9 colors) and set3 (up to 12 colors):
+    numSet1 = min(ceil(numColors/2),9);
+    colorCell = [BF_GetColorMap('set1',numSet1,true);...
+                 BF_GetColorMap('set3',numColors-numSet1,true)];
 else
-    error('There aren''t enough colors in the rainbow to plot this many groups!')
+    % Too many for distinct qualitative colors: sample the jet colormap
+    colorCell = num2cell(jet(numColors),2);
 end
 
 end

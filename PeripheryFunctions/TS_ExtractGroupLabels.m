@@ -4,7 +4,16 @@ function [timeSeriesGroup,classLabels,groupLabelsInteger,numGroups] = TS_Extract
 % TimeSeries, the input TimeSeries table in HCTSA format.
 %
 %---OUTPUT:
+% timeSeriesGroup, a categorical vector of group labels, one per time series
+%                   (categories with no members are removed).
+% classLabels, a cell of the names of the classes that have at least one member.
+% groupLabelsInteger, a vector of integer class indices (indexing classLabels),
+%                   with 0 for any time series that has no label.
+% numGroups, the number of classes.
 %
+% If the time series have not been labeled (no Group variable, or every label is
+% undefined), all time series are assigned to a single class, 'allData'.
+% So a single class called 'allData' means no labels were assigned.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -44,18 +53,11 @@ else
     timeSeriesGroup = categorical(timeSeriesGroup);
 end
 
+% Only keep classes that have members, so that every caller sees occupied classes:
+timeSeriesGroup = removecats(timeSeriesGroup);
 classLabels = categories(timeSeriesGroup);
-groupLabelsInteger = arrayfun(@(x) findMe(x,classLabels),timeSeriesGroup);
+groupLabelsInteger = double(timeSeriesGroup); % NaN for undefined
+groupLabelsInteger(isnan(groupLabelsInteger)) = 0;
 numGroups = length(classLabels);
-
-%-------------------------------------------------------------------------------
-function index = findMe(thisClass,myCategories)
-    % Return the integer category index in myCategories for thisClass (1, 2, 3, ...),
-    % or 0 if no match exists.
-    index = find(myCategories==thisClass);
-    if isempty(index)
-        index = 0;
-    end
-end
 
 end
