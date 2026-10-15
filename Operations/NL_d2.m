@@ -182,7 +182,7 @@ if isempty(res) || ~isempty(regexp(res, 'command not found', 'once')) % nothing 
 	else
 		error('Call to TISEAN function ''d2'' failed: %s', res)
 	end
-elseif strfind(res, 'dyld: Library not loaded')
+elseif contains(res, 'dyld: Library not loaded')
 	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
 end
 
@@ -228,7 +228,7 @@ end
 [~, res] = BF_TiseanSystem(sprintf('c2g %s.c2', filePath));
 % output is in res -- check it
 s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('writing to stdout', s);
+wi = find(strncmp(s, 'writing to stdout', 17));
 s = s(wi + 1:end);
 if isempty(s) % TISEAN did produce valid output
 	delete([filePath, '.c2']); delete([filePath, '.d2']); delete([filePath, '.h2']) % just in case these files were generated...
@@ -257,7 +257,7 @@ end
 [~, res] = BF_TiseanSystem(sprintf('c2t %s.c2', filePath));
 % output is in res
 s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('writing to stdout', s);
+wi = find(strncmp(s, 'writing to stdout', 17));
 s = s(wi + 1:end);
 c2tdat = SUB_readTISEANout(s, maxm, '#m=', 2);
 delete([filePath '.c2']);
@@ -360,12 +360,12 @@ d2dat_M_frs = d2dat_M(mminfulcherd2.ri1:end, :);
 % find scaling region across m for a saturated range m.
 scd2 = findscalingr(d2dat_M_frs);
 
-if isempty(scd2.ri1);
+if isempty(scd2.ri1)
 	out.d2_logminscr = NaN;
 else
 	out.d2_logminscr = log(d2dat_v(scd2.ri1));
 end
-if isempty(scd2.ri2);
+if isempty(scd2.ri2)
 	out.d2_logmaxscr = NaN;
 else
 	out.d2_logmaxscr = log(d2dat_v(scd2.ri2));
@@ -510,7 +510,7 @@ function dimdat = SUB_readTISEANout(s, maxm, blocker, nc)
 	% blocker the string distinguishing sections of output
 	% nc number of columns in string
 
-	w = strmatch(blocker, s);
+	w = find(strncmp(s, blocker, length(blocker)));
 	if length(w) ~= maxm
 		error('error reading TISEAN output');
 	end

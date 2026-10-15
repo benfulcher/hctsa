@@ -90,7 +90,7 @@ IIDs = logical(IIDs);
 % ------------------------------------------------------------------------------
 [h, pValue, stat, ~, ratio] = vratiotest(y, 'period', periods, 'IID', IIDs);
 
-if length(h) == 1
+if isscalar(h)
 	% Summarize the single test performed
 	out.pValue = pValue;
 	out.stat = stat;

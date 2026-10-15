@@ -103,7 +103,7 @@ case {'corr_fast','abscorr_fast'}
     % the mean of overlapping good values, but it's a start, and a good approximation
     % for a small proportion of NaNs.
     % Ben Fulcher, 2014-06-26
-    if ~beSilent,
+    if ~beSilent
         fprintf(1,'Using BF_NaNCov to approximate correlations between %u objects...',size(dataMatrix,1));
     end
     tic

@@ -148,7 +148,7 @@ fclose(fid);
 delete(outFilePath);
 fileLines = fileLines{1};
 
-w = strmatch('#component', fileLines);
+w = find(strncmp(fileLines, '#component', 10));
 if length(w) ~= M
 	error('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
 end
@@ -213,7 +213,7 @@ fclose(fid);
 delete([filePath '.c2']);
 fileLines = fileLines{1};
 
-w = strmatch('#dim=', fileLines);
+w = find(strncmp(fileLines, '#dim=', 5));
 if length(w) ~= M
 	error('TISEAN function ''d2'' returned an unexpected number of data blocks.');
 end
@@ -429,7 +429,7 @@ function out = SUB_bestm(logr, logNN, prefix, out)
 
 	store_scalingexps = zeros(size(logNN, 2), 1);
 	store_meansqres = zeros(size(logNN, 2), 1);
-	for k = 1:size(logNN, 2);
+	for k = 1:size(logNN, 2)
 		logN = logNN(:, k); % take this element
 
 		l = length(logr);

@@ -144,7 +144,6 @@ if nargin < 7
 end
 
 % ------------------------------------------------------------------------------
-N = length(x); % length of the time series
 doPlot = false; % plot relevant outputs to figure
 
 % -------------------------------------------------------------------------------
@@ -213,7 +212,7 @@ for i = 1:ntau
 			y_dt = iqr(y_buff);
 		case 'dfa'
 			tt = (1:tau)'; % faux time range
-			for j = 1:size(y_buff, 2);
+			for j = 1:size(y_buff, 2)
 				% fit a polynomial of order k in each subsegment
 				p = polyfit(tt, y_buff(:, j), k);
 				% remove the trend, store back in y_buff
@@ -230,7 +229,7 @@ for i = 1:ntau
 			y_dt = range(y_buff);
 		case 'rsrangefit' % polynomial fit (order k) rather than endpoints fit: (~DFA)
 			tt = (1:tau)'; % faux time range
-			for j = 1:size(y_buff, 2);
+			for j = 1:size(y_buff, 2)
 				% fit a polynomial of order k in each subsegment
 				p = polyfit(tt, y_buff(:, j), k);
 				% remove the trend, store back in y_buff

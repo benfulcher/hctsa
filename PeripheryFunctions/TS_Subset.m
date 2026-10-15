@@ -77,7 +77,6 @@ end
 if isstruct(whatData)
     % Pre-loaded dataset (e.g. whatData = load('HCTSA.mat')):
     S = whatData;
-    whatDataFile = '';
     if doSave && nargin < 5
         error(['TS_Subset: provide an outputFileName when subsetting a ' ...
                'pre-loaded struct with doSave=true.']);

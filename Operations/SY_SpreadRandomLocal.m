@@ -102,10 +102,6 @@ if isnan(l) || l > 0.9 * N % operation is not suitable -- time series is too sho
 	return % NaN means not suitable
 end
 
-if nargin < 4
-	randomSeed = []; % (not used)
-end
-
 % ------------------------------------------------------------------------------
 % numSegs segments, each of length segl data points
 
@@ -148,7 +144,7 @@ if doPlot
 	figure('color', 'w');
 	subplot(2, 1, 1); hold on;
 	plot(y, 'k');
-	plot(ists, y(ists), '.r');
+	plot(istarts, y(istarts), '.r');
 	title('time series')
 	subplot(2, 1, 2); plot(qs(:, 1), 'b'); title('local means')
 end

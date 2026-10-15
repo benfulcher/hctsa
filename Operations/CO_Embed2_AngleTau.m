@@ -56,7 +56,7 @@ tauRange = (1:1:maxTau);
 numTau = length(tauRange);
 
 % Ensure y is a column vector
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y';
 end
 

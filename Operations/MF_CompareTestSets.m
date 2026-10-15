@@ -216,7 +216,7 @@ switch subsetHow
 		r(:, 2) = spts + l - 1;
 
 	case 'uniform'
-		if length(samplep) == 1 % size will depend on number of unique subsegments
+		if isscalar(samplep) % size will depend on number of unique subsegments
 			spts = round(linspace(0, N, numPred + 1)); % numPred+1 boundaries = numPred portions
 			r(:, 1) = spts(1:numPred) + 1;
 			r(:, 2) = spts(2:end);

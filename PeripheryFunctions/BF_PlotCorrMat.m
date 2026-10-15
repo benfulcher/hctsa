@@ -54,7 +54,7 @@ end
 
 % Open a new figure window:
 if makeFigure
-    f = figure('color','w');
+    figure('color','w');
 end
 
 % Plot the image:
@@ -75,17 +75,17 @@ end
 switch rangeHow
 case 'positive'
     maxDev = max(D_corr(:));
-    caxis([0,maxDev])
+    clim([0,maxDev])
     colormap(BF_GetColorMap('greenblue',9,0))
 case 'balanced'
     maxDev = max(abs(D_corr(:)));
-    caxis([-maxDev,maxDev])
+    clim([-maxDev,maxDev])
     colormap([flipud(BF_GetColorMap('blues',9,0));[1,1,1],;BF_GetColorMap('reds',9,0)])
 case 'n1to1'
-    caxis([-1,1])
+    clim([-1,1])
     colormap([flipud(BF_GetColorMap('blues',9,0));BF_GetColorMap('reds',9,0)])
 case '0to1' % assume 0-1 range (a normalized distance metric)
-    caxis([0,1])
+    clim([0,1])
     colormap([1,1,1;BF_GetColorMap('reds',9,0)])
 case 'auto'
     colormap(flipud(gray(64)))

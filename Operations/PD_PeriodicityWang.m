@@ -142,7 +142,7 @@ for k = 1:numThresholds
 		ipeak = peaks(i); % acf lag at which there is a peak
 		thepeak = acf(ipeak); % acf at the peak
 		ftrough = find(troughs < ipeak, 1, 'last');
-		if isempty(ftrough);
+		if isempty(ftrough)
 			continue;
 		end
 		itrough = troughs(ftrough); % acf lag at which there is a trough (the first one preceeding the peak)

@@ -157,7 +157,7 @@ end
 % on raw outputs
 % difference between the histogram of the positive (negative) set and its mirror image
 % about zero (the bins are symmetric about zero):
-if ~isempty(angles{1});
+if ~isempty(angles{1})
 	px1 = histcounts(angles{1}, binEdges, 'Normalization', 'probability');
 	out.symks_p = 0.5 * sum(abs(px1 - fliplr(px1)));
 	out.ratmean_p = mean(angles{1}(angles{1} > 0)) / mean(angles{1}(angles{1} < 0));
@@ -189,7 +189,7 @@ zallAngles = zscore(allAngles);
 % if size(ap_buff_2,2)>2,ap_buff_2 = ap_buff_2(:,1:2);end % lose last point
 
 % There are positive angles
-if ~isempty(zangles{1});
+if ~isempty(zangles{1})
 	% StatAv2
 	[statav_m, statav_s] = SUB_statav(zangles{1}, 2);
 	out.statav2_p_m = statav_m;
@@ -218,7 +218,7 @@ else
 end
 
 % There are negative angles
-if ~isempty(zangles{2});
+if ~isempty(zangles{2})
 	% StatAv2
 	[statav_m, statav_s] = SUB_statav(zangles{2}, 2);
 	out.statav2_n_m = statav_m;
@@ -248,15 +248,15 @@ end
 % All angles:
 
 % StatAv2
-[statav_m, statav_s] = SUB_statav(zallAngles, 2);
+[statav_m, ~] = SUB_statav(zallAngles, 2);
 out.statav2_all_m = statav_m;
 
 % StatAv3
-[statav_m, statav_s] = SUB_statav(zallAngles, 3);
+[statav_m, ~] = SUB_statav(zallAngles, 3);
 out.statav3_all_m = statav_m;
 
 % StatAv4
-[statav_m, statav_s] = SUB_statav(zallAngles, 4);
+[statav_m, ~] = SUB_statav(zallAngles, 4);
 out.statav4_all_m = statav_m;
 
 % StatAv5
@@ -273,14 +273,14 @@ out.statav5_all_s = statav_s;
 % corresponding ac1_*; nor are tau_all and ac1_all, which are largely redundant with
 % their p/n counterparts. Keeping the p/n split, rather than the pooled 'all',
 % preserves the asymmetry signal that is the point of this feature.)
-if ~isempty(zangles{1});
+if ~isempty(zangles{1})
 	out.tau_p = CO_FirstCrossing(zangles{1}, 'ac', 0, 'continuous');
 	out.ac1_p = CO_AutoCorr(zangles{1}, 1, 'Fourier');
 else
 	out.tau_p = NaN; out.ac1_p = NaN;
 end
 
-if ~isempty(zangles{2});
+if ~isempty(zangles{2})
 	out.tau_n = CO_FirstCrossing(zangles{2}, 'ac', 0, 'continuous');
 	out.ac1_n = CO_AutoCorr(zangles{2}, 1, 'Fourier');
 else
@@ -291,7 +291,7 @@ end
 %% What does the distribution look like?
 % ------------------------------------------------------------------------------
 % Some quantiles and moments
-if ~isempty(zangles{1});
+if ~isempty(zangles{1})
 	out.q1_p = quantile(zangles{1}, 0.01);
 	out.q10_p = quantile(zangles{1}, 0.1);
 	out.q90_p = quantile(zangles{1}, 0.9);
@@ -304,7 +304,7 @@ else
 	out.skewness_p = NaN; out.kurtosis_p = NaN;
 end
 
-if ~isempty(zangles{2});
+if ~isempty(zangles{2})
 	out.q1_n = quantile(zangles{2}, 0.01);
 	out.q10_n = quantile(zangles{2}, 0.1);
 	out.q90_n = quantile(zangles{2}, 0.9);

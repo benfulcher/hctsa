@@ -290,7 +290,7 @@ out.meanNormCDF = mean(probs);
 
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData, yData)
-	if size(xData, 1) ~= size(yData, 1);
+	if size(xData, 1) ~= size(yData, 1)
 		yData = yData';
 	end
 	p = polyfit(xData, yData, 1);

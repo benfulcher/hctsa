@@ -88,7 +88,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 		tau = floor(length(y) / 10);
 	end
 end
-if strcmp(tau, 'tau'),
+if strcmp(tau, 'tau')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)
 		out = NaN; return
@@ -99,7 +99,7 @@ if strcmp(tau, 'tau'),
 end
 
 % Ensure that y is a column vector
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y';
 end
 

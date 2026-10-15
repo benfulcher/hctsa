@@ -125,14 +125,13 @@ if ischar(maxN) && strcmp(maxN, 'full')
     % No cropping -- but flag potentially slow computations for very long series:
     slowThreshold = 20000;
     if N > slowThreshold
-        warning(sprintf(['Time series (%u samples) exceeds %u with maxN=''full''; ' ...
-                         'RQA computation may be slow (recurrent pairs grow as rr*N^2)'], N, slowThreshold));
+        warning(['Time series (%u samples) exceeds %u with maxN=''full''; ' ...
+                 'RQA computation may be slow (recurrent pairs grow as rr*N^2)'], N, slowThreshold);
     end
 elseif N > maxN
-    warning(sprintf(['Time series (%u > %u) is too long for RQA at this recurrence rate...' ...
-                     ' Analyzing the first %u samples'], N, maxN, maxN));
+    warning(['Time series (%u > %u) is too long for RQA at this recurrence rate...' ...
+             ' Analyzing the first %u samples'], N, maxN, maxN);
     y = y(1:maxN);
-    N = length(y);
 end
 
 % ------------------------------------------------------------------------------

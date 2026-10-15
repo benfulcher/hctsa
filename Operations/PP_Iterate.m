@@ -124,7 +124,7 @@ for q = 1:length(nRange)
 		case 'spline' % Spline detrend
 			nknots = n; % progressively make more knots
 			intp = 4; % cubic interpolants
-			spline = spap2(nknots, intp, [1:N]', y); % just a single middle knot with cubic interpolants
+			spline = spap2(nknots, intp, (1:N)', y); % just a single middle knot with cubic interpolants
 			y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
 			y_d = y - y_spl';
 
@@ -162,7 +162,7 @@ end
 % ------------------------------------------------------------------------------
 
 stats = zeros(10, 3);
-for t = 1:10;
+for t = 1:10
 	if any(~isfinite(outmat(:, t)))
 		if ~(strcmp(dtMeth, 'diff') && t > 7) % expected that these won't work
 			fprintf(1, '%u is a bad statistic\n', t)
@@ -314,7 +314,7 @@ function g = doYourTestThing(f)
 	end
 
 	% Pick the maximum difference
-	[c, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
+	[~, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
 
 	% t-statistic at this point
 	tstat = abs((mbfatd(ind, 1) - mbfatd(ind, 2)) / sqrt(mbfatd(ind, 3)^2 + mbfatd(ind, 4)^2));
@@ -322,7 +322,7 @@ function g = doYourTestThing(f)
 
 	% (3) is it linear?
 	try
-		[cfun, gof] = fit((1:length(f))', f, 'poly1');
+		[cfun, ~] = fit((1:length(f))', f, 'poly1');
 		% The gradient of the line
 		g(3) = cfun.p1;
 	catch emsg

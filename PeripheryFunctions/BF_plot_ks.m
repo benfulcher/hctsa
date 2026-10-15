@@ -55,10 +55,8 @@ numPoints = 1000; % points for the ks density
 %-------------------------------------------------------------------------------
 % Estimate a probability density:
 %-------------------------------------------------------------------------------
-if all(dataVector-dataVector(1)<10*eps); % ~ constant data vector
+if all(dataVector-dataVector(1)<10*eps) % ~ constant data vector
     warning('Constant data')
-    x = dataVector(1);
-    f = 1;
 end
 
 [f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),...

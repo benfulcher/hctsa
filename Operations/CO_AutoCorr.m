@@ -182,7 +182,7 @@ switch whatMethod
 		% ------------------------------------------------------------------------------
 		% Estimate mean and standard deviation from each portion of the time series
 
-		if length(tau) == 1
+		if isscalar(tau)
 			% Output a single value at the given time-lag:
 
 			if any(isnan(y))

@@ -141,7 +141,7 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y'; % ensure a column vector input
 end
 % Make sure that y is indeed zscored
@@ -149,7 +149,7 @@ if ~BF_iszscored(y)
 	warning('The input time series is not, but should be z-scored')
 end
 
-if nargin < 2 || isempty(covFunc),
+if nargin < 2 || isempty(covFunc)
 	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
 	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
@@ -344,8 +344,8 @@ if doPlot
 	S2p = S2;
 
 	figure('color', 'w');
-	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
-	fill([xstar; flipdim(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
+	f = [mu + 2 * sqrt(S2p); flip(mu - 2 * sqrt(S2p), 1)];
+	fill([xstar; flip(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
 	hold on;
 	plot(xstar, mu, 'k-', 'LineWidth', 2); % mean function
 	plot(t, y, '.-k'); % original data
@@ -363,7 +363,7 @@ out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y) / length(t);
 [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
 % [mu, S2] = gpr(logHyper, covFunc, t, y, t); % evaluate at datapoints
 
-if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
+if std(mu) < 0.01 % hasn't fit the time series well at all -- too constant
 	fprintf(1, 'This time series is not suited to Gaussian Process fitting\n');
 	out = NaN; return
 end

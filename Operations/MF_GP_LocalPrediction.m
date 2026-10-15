@@ -136,7 +136,7 @@ N = length(y); % time-series length
 if size(y, 2) > size(y, 1)
 	y = y'; % ensure a column vector input
 end
-if nargin < 2 || isempty(covFunc),
+if nargin < 2 || isempty(covFunc)
 	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
 	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end

@@ -329,7 +329,7 @@ function gm = GMM2FromLabels(Y, labels, regVal)
 	% Sigma and meanLogLik (the mean log-likelihood per point of the final fit), or
 	% empty if a group has no more than m points or a covariance is not positive
 	% definite.
-	[n, m] = size(Y);
+	[~, m] = size(Y);
 	groups = {~labels, labels};
 	if min(cellfun(@nnz, groups)) <= m
 		gm = []; return

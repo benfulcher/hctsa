@@ -128,7 +128,6 @@ end
 % Preliminaries
 % ------------------------------------------------------------------------------
 
-doPlot = false; % Don't plot to screen by default:
 N = length(y); % length of the time series
 
 % Set up the points through the randomization process at which the
@@ -139,7 +138,7 @@ numCalcs = randp_max / rand_inc; % number of calculations required
 calc_ints = floor(randp_max * N / numCalcs);
 if calc_ints == 0, calc_ints = 1; end % round up for short time series
 calc_pts = (0:calc_ints:randp_max * N);
-if calc_pts(end) ~= randp_max * N;
+if calc_pts(end) ~= randp_max * N
 	calc_pts = [calc_pts, randp_max * N];
 end
 numCalcs = length(calc_pts); % some rounding issues inevitable
@@ -196,11 +195,6 @@ end
 end
 stats = mean(statsAll, 3, 'omitnan'); % average over the repeats
 % fprintf(1,'Randomization took %s',BF_TheTime(toc(randTimer)));
-
-if doPlot
-	f = figure('color', 'w'); box('on');
-	plot(stats, '.-');
-end
 
 % ------------------------------------------------------------------------------
 %% Fit exponentials to outputs:
@@ -303,10 +297,8 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 	end
 	if addOffset
 		f = fExpOffset;
-		f_x = @(c, x) c.a * exp(c.b * x) + c.c;
 	else
 		f = fExp;
-		f_x = @(c, x) c.a * exp(c.b * x);
 	end
 	try
 		[c, gof] = fit(r, dataVector, f, 'StartPoint', startPoint);
@@ -318,12 +310,6 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 			c = struct('a', NaN, 'b', NaN);
 		end
 		gof = struct('rsquare', NaN, 'rmse', NaN);
-	end
-	if doPlot;
-		figure('color', 'w'); hold on;
-		plot(r, dataVector, 'x-k');
-		xr = linspace(min(r), max(r), 100);
-		plot(xr, f_x(c, xr))
 	end
 end
 % -------------------------------------------------------------------------------

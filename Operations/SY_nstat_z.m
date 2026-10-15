@@ -157,7 +157,7 @@ if isempty(res), error('Call to TISEAN function ''nstat_z'' failed.'), end
 %% Read the output from TISEAN
 % ------------------------------------------------------------------------------
 s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('Writing to stdout', s);
+wi = find(strncmp(s, 'Writing to stdout', length('Writing to stdout')));
 if isempty(wi)
 	error('TISEAN routine ''nstat_z'' returned unexpected output...');
 end

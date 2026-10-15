@@ -1,4 +1,4 @@
-function BF_RecolorDendrogram(h_dend);
+function BF_RecolorDendrogram(h_dend)
 % BF_RecolorDendrogram     Recolor a dendrogram using hctsa default colors
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -41,11 +41,11 @@ function out = NL_BoxCountEntropyRate(y, numBins, embedParams)
 % are entropy-rate-like, not correlation dimensions. NL_BoxCorrDim is a deprecated
 % alias (wrapper) for this function.
 % hctsa registers meanr, medianr, minr and meanchr at r = 2, 3, 4, 6, 8, 11, 14,
-% 17, 20, 24, 28, 32, 36 of numBins = 50 (2 to 429 boxes per axis): coarse scales
-% change quickly with r and are sampled densely; neighboring finer scales are
-% nearly redundant; for flows (long delays) the informative scales lie beyond
-% r = 18; and beyond r = 36 the 5-dimensional embedding saturates (I = 0) for
-% series of a few thousand points. There are no minima over all length scales: the
+% 17, 20, 24, 28, 32, 36 of numBins = 50 (2 to 429 boxes per axis). Testing
+% indicated that coarse scales change quickly with r (so they are sampled densely),
+% that neighboring finer scales are nearly redundant, that for flows (long delays)
+% the informative scales lie beyond r = 18, and that beyond r = 36 the
+% 5-dimensional embedding saturates (I = 0) for series of a few thousand points. There are no minima over all length scales: the
 % coarsest scale is a single box, where I = 0, so they would always be 0.
 
 % ------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ delete(outFilePath);
 fileLines = fileLines{1};
 
 % One '#component = 1 embedding = <d>' block per embedding dimension d = 1:mMax:
-w = strmatch('#component', fileLines);
+w = find(strncmp(fileLines, '#component', 10));
 if length(w) ~= mMax
 	% Data-dependent: TISEAN couldn't produce output at every requested embedding
 	% dimension for this series (e.g. too short relative to mMax/tau).

@@ -88,8 +88,6 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-N = length(y); % length of the input time series
-
 % Number of nearest neighbours, NNR (a proportion is resolved after embedding)
 if nargin < 2 || isempty(NNR)
 	NNR = 0.01;

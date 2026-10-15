@@ -179,7 +179,7 @@ residstats = MF_ResidualAnalysis(res, y, 'full');
 
 % Convert output of residual analysis to local outputs in quick loop
 fields = fieldnames(residstats);
-for k = 1:length(fields);
+for k = 1:length(fields)
 	out.(fields{k}) = residstats.(fields{k});
 end
 

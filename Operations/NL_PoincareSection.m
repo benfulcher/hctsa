@@ -229,7 +229,7 @@ for i = 1:length(numPartitions)
 
 	out.(sprintf('maxpbox%u', numPartitions(i))) = max(pbox(:));
 	out.(sprintf('minpbox%u', numPartitions(i))) = min(pbox(:));
-	out.(sprintf('zerospbox%u', numPartitions(i))) = sum(pbox(:) == 0);
+	out.(sprintf('zerospbox%u', numPartitions(i))) = nnz(pbox(:) == 0);
 	out.(sprintf('meanpbox%u', numPartitions(i))) = mean(pbox(:));
 	out.(sprintf('rangepbox%u', numPartitions(i))) = range(pbox(:));
 	% Box-occupancy entropy, Miller-Madow corrected: the plug-in estimator

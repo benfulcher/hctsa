@@ -107,9 +107,7 @@ warning('on', 'econ:pptest:LeftTailStatTooSmall')
 % ------------------------------------------------------------------------------
 %% Get outputs
 % ------------------------------------------------------------------------------
-nout = length(h);
-
-if nout == 1
+if isscalar(h)
 	% Just return the results from this single test
 	out.pvalue = pValue;
 	out.stat = stat;

@@ -103,7 +103,7 @@ if N < 100
 	out = NaN; return
 end
 % Also freezes on constant data
-if length(unique(y)) == 1
+if isscalar(unique(y))
 	out = NaN; return
 end
 
@@ -179,7 +179,7 @@ tic
 if isempty(res)
 	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
 	error('Call to TISEAN method ''c1'' failed.');
-elseif strfind(res, 'dyld: Library not loaded')
+elseif contains(res, 'dyld: Library not loaded')
 	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
 elseif TISEANVerbose()
 	fprintf(1, 'TISEAN function ''c1'' took %s.\n', BF_TheTime(toc, 1));
@@ -330,7 +330,7 @@ function dimdat = SUB_readTISEANout(s, blocker, nc)
 	%                 end
 	%            end
 	%         end
-	w = strmatch(blocker, s);
+	w = find(strncmp(s, blocker, length(blocker)));
 	%         if length(w)~=maxm
 	%             disp('error reading TISEAN output'); return
 	%         end

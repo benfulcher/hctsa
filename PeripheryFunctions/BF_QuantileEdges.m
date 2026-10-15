@@ -48,7 +48,7 @@ function edges = BF_QuantileEdges(y, numBins)
 
 y = y(~isnan(y));
 edges = unique(quantile(y, linspace(0, 1, numBins + 1)));
-if length(edges) == 1 % constant data: one bin of unit width
+if isscalar(edges) % constant data: one bin of unit width
 	edges = edges + [-0.5, 0.5];
 	return
 end

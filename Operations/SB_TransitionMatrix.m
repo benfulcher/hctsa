@@ -283,7 +283,7 @@ Hmarginal = -sum(rowSums(rowSums > 0) .* log(rowSums(rowSums > 0)));
 % -(Mjoint - Mmarginal)/(2n) -- a pure function of the number of transitions,
 % and hence of time-series length. Adding it back removes the leading 1/n term.
 numTransitions = N - 1; % T was normalized by N-1 above
-Mjoint = sum(T(:) > 0);
+Mjoint = nnz(T(:) > 0);
 Mmarginal = sum(rowSums > 0);
 out.transEntropy = Hjoint - Hmarginal + (Mjoint - Mmarginal) / (2 * numTransitions);
 

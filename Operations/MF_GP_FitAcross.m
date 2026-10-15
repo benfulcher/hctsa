@@ -77,7 +77,7 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % ------------------------------------------------------------------------------
 %% Check inputs
 % ------------------------------------------------------------------------------
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y'; % make sure a column vector
 end
 

@@ -124,13 +124,13 @@ if ischar(maxL) && strcmp(maxL, 'full')
 	% No cropping -- but flag potentially slow computations for very long series:
 	slowThreshold = 50000;
 	if N > slowThreshold && strcmp(meth, 'norm')
-		warning(sprintf(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
-						 'visibility graph computation may be slow'], N, slowThreshold));
+		warning(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
+				 'visibility graph computation may be slow'], N, slowThreshold);
 	end
 elseif N > maxL % too long: crop
 	% Reduce to the first maxL samples
-	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
-					 ' Analyzing the first %u samples'], N, maxL, maxL));
+	warning(['Time series (%u > %u) is too long for visibility graph...' ...
+			 ' Analyzing the first %u samples'], N, maxL, maxL);
 	y = y(1:maxL);
 	N = length(y); % new time-series length
 end

@@ -187,15 +187,14 @@ sListFull = unique(round(linspace(minScale, maxScale, numIncrements)));
 fqs = zeros(length(sListFull) * length(qList), 3);
 rowIdx = 0;
 
-timer = tic;
 for s = sListFull
 
 	if doOverlap
-		vec = [0:s - 1];
-		ind = [1:slength - s + 1]';
+		vec = 0:s - 1;
+		ind = (1:slength - s + 1)';
 		coordinates = bsxfun(@plus, vec, ind);
 	else
-		ind2 = [1:size(prof, 1)];
+		ind2 = 1:size(prof, 1);
 		coordinates = reshape(ind2(1:(size(prof, 1) - mod(size(prof, 1), s))), s, (size(prof, 1) - mod(size(prof, 1), s)) / s)';
 	end
 
@@ -210,7 +209,7 @@ for s = sListFull
 	% quirk (values stay in the same order either way, so this is a pure
 	% shape fix, not a data change).
 	segments = reshape(prof(coordinates), size(coordinates));
-	xbase = [1:1:s];
+	xbase = 1:1:s;
 	% Preallocate f2nis instead of growing it with f2nis(end+1) per segment:
 	numSegments = size(segments, 1);
 	f2nis = zeros(1, numSegments);
@@ -242,7 +241,6 @@ for s = sListFull
 		end
 	end
 end
-% fprintf(1,'Detrended fluctuations computed in %s\n',BF_TheTime(toc(timer)));
 
 fqsll = [fqs(:, 1) fqs(:, 2) log(fqs(:, 2)) log(fqs(:, 3))];
 
@@ -319,7 +317,7 @@ if doPlot
 	hqsplot = surf(sListScaled, qList, hqs);
 	colormap(jet);
 	colorbar;
-	caxis([0, hLim]);
+	clim([0, hLim]);
 	set(gca, 'YDir', 'reverse');
 	view(-62, 50);
 	axis([sListScaled(1), sListScaled(end), qMin, qMax, 0, hLim]);
@@ -374,7 +372,7 @@ out.stdStdHurstScale = std(stdS); % will be large if variance changes alot with 
 
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData, yData)
-	if size(xData, 1) ~= size(yData, 1);
+	if size(xData, 1) ~= size(yData, 1)
 		yData = yData';
 	end
 	p = polyfit(xData, yData, 1);

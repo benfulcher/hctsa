@@ -211,7 +211,7 @@ fileLines = fileLines{1};
 
 % First line is a '#center=' header (not per-dimension); the rest is one
 % '#dim=' block per embedding dimension 1:m -- take the last one (m):
-w = strmatch('#dim=', fileLines);
+w = find(strncmp(fileLines, '#dim=', 5));
 if length(w) ~= m
 	error('TISEAN function ''d2'' returned an unexpected number of data blocks.');
 end

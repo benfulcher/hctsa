@@ -125,7 +125,7 @@ if strcmp(tau, 'ac') % determine tau from first zero of autocorrelation
 end
 
 nfeat = 6; % the number of features calculated at each point
-if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
+if isscalar(numGroups) && (length(tau) > 1) % vary tau
 	if numGroups < 2; return; end % need more than 2 groups
 	taur = tau; % the tau range
 	store = zeros(length(taur), nfeat);
@@ -139,7 +139,7 @@ if (length(numGroups) == 1) && (length(tau) > 1) % vary tau
 
 	error('This setting kind of doesn''t work yet. Sorry.')
 
-elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
+elseif isscalar(tau) && (length(numGroups) > 1) % vary numGroups
 	if min(numGroups) < 2; error('Need more than 2 groups'); end % need more than 2 groups, always
 	numGroupsRange = numGroups; % the numGroups range (numGroups is an input vector)
 	store = zeros(length(numGroupsRange), nfeat);
@@ -221,8 +221,10 @@ elseif (length(tau) == 1) && (length(numGroups) > 1) % vary numGroups
 	% 5) trace of covariance matrix
 	% check jump:
 	out.trcov_jump = store(2, 5) - store(1, 5);
-	if store(2, 5) > store(1, 5); r1 = 2:length(numGroupsRange); % jump
-	else r1 = 1:length(numGroupsRange);
+	if store(2, 5) > store(1, 5)
+		r1 = 2:length(numGroupsRange); % jump
+	else
+		r1 = 1:length(numGroupsRange);
 	end
 	% fit exponential decay to range without possible first jump
 	fExp = BF_ExpFit(numGroupsRange(r1), store(r1, 5), false);

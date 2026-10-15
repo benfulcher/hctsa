@@ -194,21 +194,15 @@ end
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
-% Save the original, unprocessed time series
-y0 = y;
-
 y = BF_Whiten(y, preproc, beVocal, randomSeed);
 
 y = zscore(y); % z-score the time series (after whitening)
 
 % Length of the (potentially whitened) time series, y
-% Note that this could be different to the original, y0 (if choose a differencing, e.g.)
+% Note that this could be different to the original (if choose a differencing, e.g.)
 N = length(y);
 
 % Now have the preprocessed time series saved over y.
-% The original, unprocessed time series is retained in y0.
-% (Note that y=y0 is possible; when all preprocessings are found to be
-%   worse at the given criterion).
 
 % ------------------------------------------------------------------------------
 %% (2) Data pre-estimation
@@ -223,13 +217,13 @@ N = length(y);
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
+[~, Engle_pValue_y, ~, ~] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
+[~, lbq_pValue_y2, ~, ~] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
 
 % (Commented out: unused by any output, as in MF_GARCHcompare.)
 % (iii) Correlation in time series: autocorrelation
@@ -405,7 +399,7 @@ end
 %% Sigmas, the time series of conditional variances
 % ------------------------------------------------------------------------------
 % Estimate it:
-[sigmas, logL] = infer(Gfit, y);
+[sigmas, ~] = infer(Gfit, y);
 % For a time series with strong ARCH/GARCH effects, this will fluctuate;
 % otherwise will be quite flat...
 out.maxsigma = max(sigmas);
@@ -424,13 +418,13 @@ stde2 = stde.^2;
 % (i) Engle's ARCH test
 %       look at autoregressive lags 1:20
 %       use the 10% significance level
-[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
+[~, Engle_pValue_stde, ~, ~] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
 
 % (ii) Ljung-Box Q-test
 %       look at autocorrelation at lags 1:20
 %       use the 10% significance level
 %       departure from randomness hypothesis test
-[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
+[~, lbq_pValue_stde2, ~, ~] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
 
 % Ok, so now we've corrected for GARCH effects, how does this 'improve' the
 % randomness/correlation in our signal. If the signal is much less
@@ -473,7 +467,7 @@ residout = MF_ResidualAnalysis(stde, y, 'full');
 
 % convert these to local outputs in quick loop
 fields = fieldnames(residout);
-for k = 1:length(fields);
+for k = 1:length(fields)
 	out.(sprintf('zres_%s', fields{k})) = residout.(fields{k});
 end
 

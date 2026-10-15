@@ -155,7 +155,7 @@ switch theTest
 		x1 = sort(unique(round(x * 1E6) / 1E6)); % unique values to 6 places
 		if x1(1) > min(x), x1 = [min(x); x1]; end
 		if x1(end) < max(x), x1 = [x1; max(x)]; end
-		if size(x1, 1) < size(x1, 2);
+		if size(x1, 1) < size(x1, 2)
 			x1 = x1';
 		end
 		switch theDistn

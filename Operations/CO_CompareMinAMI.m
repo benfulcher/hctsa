@@ -58,7 +58,7 @@ function out = CO_CompareMinAMI(y, binMethod, numBins)
 %% Check inputs and set defaults:
 % ------------------------------------------------------------------------------
 % Default number of bins
-if nargin < 3,
+if nargin < 3
 	numBins = 10;
 end
 % ------------------------------------------------------------------------------

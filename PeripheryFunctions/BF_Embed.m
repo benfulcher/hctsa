@@ -58,10 +58,6 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,randomSeed,beVocal)
 N = length(y); % length of the input time series, y
 
 % ---[[NOTE: other input checking done later, below]]---
-% randomSeed: how to treat the randomization
-if nargin < 5
-    randomSeed = []; % default
-end
 if nargin < 6
     beVocal = false; % by default, do not display information about the embedding
 end
@@ -122,7 +118,7 @@ else % use a routine to inform m
                 % used for this kind of test (TISEAN's own internal default
                 % of 2.0 is considerably stricter, and can make the test
                 % appear never to converge even for low-dimensional systems).
-                if length(m) == 1
+                if isscalar(m)
                     th = 0.4;
                 else
                     th = m{2};
@@ -135,7 +131,7 @@ else % use a routine to inform m
                 % Uses Michael Small's fnn code. Not used by any operation in
                 % the current hctsa feature set (standardized on 'fnn'
                 % above), but kept available as an alternative.
-                if length(m) == 1
+                if isscalar(m)
                     th = 0.01;
                 else
                     th = m{2};

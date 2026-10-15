@@ -138,7 +138,7 @@ if isempty(linkThresh)
     linkThresh = 1;
 else
     Ath = cell(length(linkThresh),1);
-    for i = 1:length(linkThresh);
+    for i = 1:length(linkThresh)
         if thresholdByProportion
             if i==1
                 Ath{i} = (A >= quantile(A(:),linkThresh(i))); % threshold

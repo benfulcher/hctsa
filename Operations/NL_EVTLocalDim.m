@@ -168,7 +168,6 @@ if ischar(maxN) && strcmp(maxN, 'full')
 elseif N > maxN
     warning('Time series (%u samples) exceeds maxN = %u; analyzing the first %u samples', N, maxN, maxN);
     y = y(1:maxN);
-    N = length(y);
 end
 
 % ------------------------------------------------------------------------------

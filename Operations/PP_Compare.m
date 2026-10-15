@@ -117,7 +117,7 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isnan(str2doub
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
 
-	[cfun, gof] = fit(r, y, detrndmeth);
+	[cfun, ~] = fit(r, y, detrndmeth);
 	y_fit = feval(cfun, r);
 	y_d = y - y_fit;
 

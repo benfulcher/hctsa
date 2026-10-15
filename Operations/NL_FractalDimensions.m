@@ -169,7 +169,7 @@ if isscalar(Y) && isnan(Y) % embedding failed
 	warning('Embedding of the %u-sample time series failed', N)
 	out = NaN; return
 end
-[N_embed, m] = size(Y);
+[N_embed, ~] = size(Y);
 
 if kmax >= N_embed
 	% Analogous to TSTOOL's own "too many neighbors ... requested" failure:

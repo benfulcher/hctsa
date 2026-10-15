@@ -67,7 +67,7 @@ if nargin < 2
 	chooseBest = ''; % just return all the time series in structure yp.
 end
 
-if nargin < 3 || isempty(order);
+if nargin < 3 || isempty(order)
 	order = 2; % extra parameter for some chooseBest settings.
 end
 
@@ -196,8 +196,7 @@ switch chooseBest
 		% order = 2; % should be set from inputs/defaults
 		rmserrs = zeros(nfields, 1);
 
-		for i = 1:nfields; % each preprocessing performed
-			data = [];
+		for i = 1:nfields % each preprocessing performed
 			data = yp.(fields{i});
 			data = zscore(data);
 
@@ -211,7 +210,7 @@ switch chooseBest
 
 		% Now choose the one with the *most* error (!) -- i.e., the AR
 		% model finds it hardest to fit
-		if any(rmserrs > rmserrs(1) * (1 + beatThis));
+		if any(rmserrs > rmserrs(1) * (1 + beatThis))
 			best = fields{rmserrs == max(rmserrs)};
 		else
 			best = 'nothing';
@@ -220,7 +219,6 @@ switch chooseBest
 	case 'ac' % picks the *lowest* tau-step autocorrelated result
 		acs = zeros(nfields, 1);
 		for i = 1:nfields
-			data = [];
 			data = yp.(fields{i}); % dynamic field referencing
 			% eval(['data = yp.' fields{i} ';']);
 			data = zscore(data); % unnecessary for AC

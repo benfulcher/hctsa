@@ -197,7 +197,7 @@ if minNotMax
 			% already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
 			out = 1;
 			return
-		elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)); % minimum at previous i
+		elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)) % minimum at previous i
 			out = i - 1; % I found the first minimum!
 			return
 		end
@@ -218,7 +218,7 @@ else
 		end
 
 		% We're at a local maximum:
-		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % maximum at previous i
+		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)) % maximum at previous i
 			out = i - 1; % I found the first maximum!
 			return
 		end

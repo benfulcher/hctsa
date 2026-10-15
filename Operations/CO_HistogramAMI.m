@@ -162,7 +162,7 @@ for i = 1:length(tau)
 	amis(i) = amis(i) - (Mxy - Mx - My + 1) / (2 * nSamples);
 end
 
-if length(tau) == 1
+if isscalar(tau)
 	out = amis;
 else
 	for i = 1:length(tau)

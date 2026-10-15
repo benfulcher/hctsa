@@ -75,9 +75,10 @@ if doPlot
 		f = polyval(cf, x);
 		errs(i) = sum((y' - f).^2);
 	end
-	f = figure('color', 'w'); hold on;
-	plot(f, 'k')
-	plot(errs);
+	figure('color', 'w'); hold on;
+	plot(errs, 'o-k');
+	xlabel('polynomial order')
+	ylabel('sum of squared errors')
 end
 
 end

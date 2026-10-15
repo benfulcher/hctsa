@@ -151,7 +151,6 @@ elseif Nemb > maxN
     warning(['Cropping to the first %u of %u embedded points ' ...
              '(runtime cap; raise maxN or use ''full'' to disable)'], maxN, Nemb);
     Y = Y(1:maxN, :);
-    Nemb = maxN;
 end
 
 % ------------------------------------------------------------------------------

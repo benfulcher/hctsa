@@ -144,7 +144,7 @@ end
 if maxtstep < 1 && maxtstep > 0
 	maxtstep = round(N * maxtstep); % specify a proportion of time series length
 end
-if maxtstep < 10;
+if maxtstep < 10
 	maxtstep = 10; % minimum prediction length; for output stats purposes...
 end
 if maxtstep > floor(0.5 * N)

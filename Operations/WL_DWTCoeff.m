@@ -94,32 +94,31 @@ else
 	[c, l] = wavedec(y, level, wname);
 end
 
-%% Expand DWT coefficients for visualization
-% nbcol = 64; % color discretization steps
-%
-% cfd = zeros(level,N); % detail coefficients
-% for k = 1:level
-%     d = detcoef(c,l,k);
-%     d = d(:)';
-%     d = d(ones(1,2^k),:);
-%     cfd(k,:) = wkeep1(d(:)',N);
-% end
-%
-% cfd =  cfd(:);
-% I = find(abs(cfd)<sqrt(eps));
-% cfd(I) = zeros(size(I));
-% cfd = reshape(cfd,level,N);
-% cfd = wcodemat(cfd,nbcol,'row');
-
 % -------------------------------------------------------------------------------
 %% Plotting
 % -------------------------------------------------------------------------------
 if doPlot
+	% Expand DWT coefficients for visualization
+	nbcol = 64; % color discretization steps
+	nLev = min(level, maxLevelAllowed); % levels actually decomposed
+	cfd = zeros(nLev, N); % detail coefficients
+	for k = 1:nLev
+		d = detcoef(c, l, k);
+		d = d(:)';
+		d = d(ones(1, 2^k), :);
+		cfd(k, :) = wkeep1(d(:)', N);
+	end
+	cfd = cfd(:);
+	I = find(abs(cfd) < sqrt(eps));
+	cfd(I) = zeros(size(I));
+	cfd = reshape(cfd, nLev, N);
+	cfd = wcodemat(cfd, nbcol, 'row');
+
 	figure('color', 'w'); box('on');
 	colormap(pink(nbcol));
 	image(cfd);
-	tics = 1:level;
-	labs = int2str((1:level)');
+	tics = 1:nLev;
+	labs = int2str((1:nLev)');
 	set(gca, 'YTicklabelMode', 'manual', 'Ydir', 'normal', 'Box', 'On', 'Ytick', tics, 'YTickLabel', labs);
 	title('Discrete Wavelet Transform, Absolute Coefficients.');
 	xlabel('Time (or Space)')

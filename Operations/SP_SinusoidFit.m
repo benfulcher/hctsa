@@ -121,7 +121,7 @@ else
 	BF_CheckToolbox('curve_fitting_toolbox');
 	t = (1:N)'; % Time variable for equal sampling of the univariate time series
 	try
-		[cfun, gof, output] = fit(t, y, model); % fit the model
+		[~, gof, output] = fit(t, y, model); % fit the model
 	catch emsg % this model can't even be fitted OR license problem
 		if strcmp(emsg.message, 'NaN computed by model function.') || strcmp(emsg.message, 'Inf computed by model function.')
 			fprintf(1, 'The model %s failed for this data -- returning NaNs for all fitting outputs\n', model);

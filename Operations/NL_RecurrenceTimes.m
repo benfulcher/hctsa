@@ -128,10 +128,9 @@ end
 if ischar(maxN) && strcmp(maxN, 'full')
     % no cropping
 elseif N > maxN
-    warning(sprintf(['Time series (%u > %u) is too long for recurrence-time ' ...
-                     'analysis at this recurrence rate. Analyzing the first %u samples'], N, maxN, maxN));
+    warning(['Time series (%u > %u) is too long for recurrence-time ' ...
+             'analysis at this recurrence rate. Analyzing the first %u samples'], N, maxN, maxN);
     y = y(1:maxN);
-    N = length(y);
 end
 
 % ------------------------------------------------------------------------------

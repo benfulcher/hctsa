@@ -108,7 +108,6 @@ function out = MF_arfit(y, pmin, pmax, selector)
 if size(y, 2) > size(y, 1)
 	y = y'; % needs to be a column vector
 end
-N = length(y); % time series length
 
 if nargin < 2 || isempty(pmin)
 	pmin = 1;
@@ -203,7 +202,7 @@ out.popt_sbc = find(SBC == min(SBC), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC));
+if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC))
 	meanaround = mean(abs([SBC(out.popt_sbc - 1), SBC(out.popt_sbc + 1)]));
 elseif out.popt_sbc == 1
 	meanaround = abs(SBC(out.popt_sbc + 1)); % just the next value
@@ -228,7 +227,7 @@ out.popt_fpe = find(FPE == min(FPE), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if out.popt_fpe > 1 && out.popt_fpe < length(FPE);
+if out.popt_fpe > 1 && out.popt_fpe < length(FPE)
 	meanaround = mean(abs([FPE(out.popt_fpe - 1), FPE(out.popt_fpe + 1)]));
 elseif out.popt_fpe == 1
 	meanaround = abs(FPE(out.popt_fpe + 1)); % just the next value

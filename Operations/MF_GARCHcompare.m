@@ -126,8 +126,6 @@ end
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
-y0 = y; % the original, unprocessed time series
-
 y = BF_Whiten(y, preProc, 0, randomSeed); % Use a basic preprocessing to whiten the time series
 
 % ------------------------------------------------------------------------------
@@ -137,9 +135,6 @@ y = zscore(y); % make sure the (whitened) time series is z-scored
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.
-% The original, unprocessed time series is retained in y0.
-% (Note that y=y0 is possible; when all preprocessings are found to be
-%   worse at the given criterion).
 
 %% (2) Data pre-estimation
 % Aim is to return some statistics indicating the suitability of this class
@@ -199,7 +194,7 @@ for i = 1:np
 		GModel.Constant = NaN;
 
 		% (ii) fit the model
-		[Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
+		[Gfit, estParamCov, LLF, ~] = estimate(GModel, y, 'Display', 'off');
 		% [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
 
 		numParams = sum(any(estParamCov)); % number of parameters
@@ -225,13 +220,13 @@ for i = 1:np
 		%    summaries are less meaningful; should be with respect to the
 		%    original time series
 		innovations = (y - Gfit.Offset); % residuals (departures from mean process)
-		[sigmas, logL] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
+		[sigmas, ~] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
 		stde = innovations ./ sqrt(sigmas); % standardized residuals
 		stde2 = stde.^2; % squared
 
 		% (i) Engle's ARCH test
 		%       look at autoregressive lags 1:20
-		[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
+		[~, Engle_pValue_stde, ~, ~] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
 
 		meanarchps(i, j) = mean(Engle_pValue_stde);
 		maxarchps(i, j) = max(Engle_pValue_stde);
@@ -240,7 +235,7 @@ for i = 1:np
 		%       look at autocorrelation at lags 1:20
 		%       use the 10% significance level
 		%       departure from randomness hypothesis test
-		[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
+		[~, lbq_pValue_stde2, ~, ~] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
 
 		meanlbqps(i, j) = mean(lbq_pValue_stde2);
 		maxlbqps(i, j) = max(lbq_pValue_stde2);

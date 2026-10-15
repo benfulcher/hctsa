@@ -208,7 +208,7 @@ switch subsetHow
 		r(:, 2) = spts + l - 1;
 
 	case 'uniform'
-		if length(samplep) == 1 % size will depend on number of unique subsegments
+		if isscalar(samplep) % size will depend on number of unique subsegments
 			spts = round(linspace(0, N, numPred + 1)); % numPred+1 boundaries = numPred portions
 			r(:, 1) = spts(1:numPred) + 1;
 			r(:, 2) = spts(2:end);
@@ -250,7 +250,7 @@ switch model
 			% p = 1-10
 			% Enforce zero mean level. This could be relaxed.
 			try
-				[west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
+				[~, Aest, ~, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
 			catch emsg
 				if contains(emsg.message, 'too short') % (ARFIT_arfit: 'Time series (N = %u) too short.')
 					fprintf(1, 'Time Series is too short for ARFIT\n');
