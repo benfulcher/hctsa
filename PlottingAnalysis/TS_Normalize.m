@@ -1,9 +1,20 @@
-function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA,classVarFilter,keepCalcTime)
+function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA,varargin)
 % TS_Normalize  Trims and normalizes data from an hctsa analysis.
 %
 % Reads in data from HCTSA.mat, writes a trimmed, normalized version to HCTSA_N.mat
 % For many normalization settings, each feature is normalized to the unit interval
 % for the purposes of visualization and clustering.
+%
+% Time series with too few good values are removed (using each time series' own
+% values). The features are then filtered and normalized (BF_FitTransform):
+% by default, this is fitted on all time series; with 'trainIDs', it is fitted
+% on those time series only and applied unchanged to all of them, so that the
+% other time series can be used as an unseen test set.
+%
+%---USAGE:
+% TS_Normalize('mixedSigmoid',[0.70,1]);
+% TS_Normalize('mixedSigmoid',[0.70,1],'HCTSA.mat',false,false);
+% TS_Normalize('mixedSigmoid',[0.70,1],'HCTSA.mat','trainIDs',trainIDs);
 %
 %---INPUTS:
 % normFunction: String specifying how to normalize the data: 'none' (no
@@ -25,15 +36,23 @@ function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA
 %
 % keepCalcTime: whether to keep TS_CalcTime. Default: false.
 %
+% (name-value option, after the inputs above):
+% 'trainIDs': IDs of the time series to fit the feature filter and normalization
+%             on (e.g., a training set). It is then applied to all time series.
+%             Default: [] (all time series).
+%
 %---OUTPUT:
 % outputFileName, the file the trimmed, normalized data is saved to (the input
 %       filename with _N appended). Its normalizationInfo structure records the
-%       settings (normFunction, filterOptions, codeToRun) and, in featureParams,
-%       a table with a row for each feature kept (ID and Name, matching
-%       Operations) with the parameters of its normalizing transformation, fitted
-%       on all time series kept (cf. the normParams output of BF_NormalizeMatrix).
+%       settings (normFunction, filterOptions, classVarFilter, codeToRun) and, in
+%       featureParams, a table with a row for each feature kept (ID and Name,
+%       matching Operations) with the parameters of its normalizing
+%       transformation (cf. the normParams output of BF_NormalizeMatrix).
 %       These parameters are used by TS_Predict to normalize new data in the
-%       same way as the training data.
+%       same way as the training data. trainIDs lists the IDs of the time series
+%       the filter and parameters were fitted on (all time series kept, by
+%       default), and transform is the fitted transformation (the output of
+%       BF_FitTransform, which can be applied to other data by BF_ApplyTransform).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -82,14 +101,30 @@ if nargin < 3 || isempty(fileName_HCTSA)
     fileName_HCTSA = 'HCTSA.mat';
 end
 
-if nargin < 4
+% Optional inputs classVarFilter and keepCalcTime, followed by name-value options:
+isName = cellfun(@(x) ischar(x) || isstring(x),varargin);
+firstName = find(isName,1);
+if isempty(firstName)
+    firstName = length(varargin) + 1;
+end
+if firstName > 3
+    error('Too many inputs before the name-value options');
+end
+if firstName > 1 && ~isempty(varargin{1})
+    classVarFilter = varargin{1};
+else
     classVarFilter = false; % don't filter on individual class variance > 0 by default
 end
-
-if nargin < 5
+if firstName > 2 && ~isempty(varargin{2})
+    keepCalcTime = varargin{2};
+else
     % Save space in normalized dataset
     keepCalcTime = false;
 end
+inputP = inputParser;
+addParameter(inputP,'trainIDs',[],@(x) isempty(x) || isnumeric(x));
+parse(inputP,varargin{firstName:end});
+trainIDs = inputP.Results.trainIDs;
 
 % --------------------------------------------------------------------------
 %% Read data from local files
@@ -146,155 +181,51 @@ if any(~keepRows)
     end
 end
 
-% Filter operations (columns)
-keepCols = filterNaNs(TS_DataMat',filterOptions(2),'operations');
-if any(~keepCols)
-    TS_DataMat = TS_DataMat(:,keepCols);
-    TS_Quality = TS_Quality(:,keepCols);
-    Operations = Operations(keepCols,:);
-    if keepCalcTime
-        TS_CalcTime = TS_CalcTime(:,keepCols);
-    end
-end
-
-% --------------------------------------------------------------------------
-%% Filter out operations that are constant across the time-series dataset
-%% And time series with constant feature vectors
-% --------------------------------------------------------------------------
-if size(TS_DataMat,1) > 1 % otherwise just a single time series remains and all will be constant!
-    bad_op = (std(TS_DataMat,0,'omitnan') < 10*eps);
-
-    if all(bad_op)
-        error('All %u operations produced constant outputs on the %u time series?!',...
-                            length(bad_op),size(TS_DataMat,1))
-    elseif any(bad_op)
-        fprintf(1,'Removed %u operations with near-constant outputs: from %u to %u.\n',...
-                         sum(bad_op),length(bad_op),sum(~bad_op));
-        TS_DataMat = TS_DataMat(:,~bad_op);
-        TS_Quality = TS_Quality(:,~bad_op);
-        Operations = Operations(~bad_op,:);
-        if keepCalcTime
-            TS_CalcTime = TS_CalcTime(:,~bad_op);
-        end
-    else
-        fprintf(1,'No operations had near-constant outputs on the dataset\n');
-    end
-end
-
 %-------------------------------------------------------------------------------
-% Filter on class variance
+%% Time series used to fit the feature filter and normalization
 %-------------------------------------------------------------------------------
-if classVarFilter
-    if ~ismember('Group',TimeSeries.Properties.VariableNames)
-        fprintf(1,'Group labels not assigned to time series, so cannot filter on class variance\n');
-    end
-    classNames = categories(TimeSeries.Group);
-    numClasses = length(classNames);
-    classVars = zeros(numClasses,size(TS_DataMat,2));
-    for i = 1:numClasses
-        classVars(i,:) = std(TS_DataMat(TimeSeries.Group==classNames{i},:),0,'omitnan');
-    end
-    zeroClassVar = any(classVars < 10*eps,1);
-    if all(zeroClassVar)
-        error('All %u operations produced near-constant class-wise outputs?!',...
-                            length(zeroClassVar),size(TS_DataMat,1))
-    elseif any(zeroClassVar)
-        fprintf(1,'Removed %u operations with near-constant class-wise outputs: from %u to %u.\n',...
-                     sum(zeroClassVar),length(zeroClassVar),sum(~zeroClassVar));
-        TS_DataMat = TS_DataMat(:,~zeroClassVar);
-        TS_Quality = TS_Quality(:,~zeroClassVar);
-        Operations = Operations(~zeroClassVar,:);
-        if keepCalcTime
-            TS_CalcTime = TS_CalcTime(:,~zeroClassVar);
-        end
-    end
-end
-
-%-------------------------------------------------------------------------------
-%% Update the labels after filtering
-%-------------------------------------------------------------------------------
-% At this point, you could check to see if any master operations are no longer
-% pointed to and recalibrate the indexing, but I'm not going to bother.
-
 if height(TimeSeries)==1
     % When there is only a single time series, it doesn't actually make sense to normalize
     error('Only a single time series remains in the dataset -- normalization cannot be applied');
 end
-
-numBadEntries = sum(isnan(TS_DataMat(:)));
-percBadEntries = numBadEntries/length(TS_DataMat(:))*100;
-if numBadEntries==0
-    fprintf(1,'\n(post-filtering): No special-valued entries in the %ux%u data matrix!\n', ...
-                size(TS_DataMat,1),size(TS_DataMat,2));
+if isempty(trainIDs)
+    isTrain = true(height(TimeSeries),1);
 else
-    fprintf(1,'\n(post-filtering): %u special-valued entries (%4.2f%%) remain in the %ux%u data matrix.\n',...
-                numBadEntries,percBadEntries,size(TS_DataMat,1),size(TS_DataMat,2));
-
-    percGoodCols = mean(~isnan(TS_DataMat),1)*100;
-    percGoodRows = mean(~isnan(TS_DataMat),2)*100;
-    fprintf(1,'(post-filtering): Time series vary from %.2f--%.2f%% good values.\n',...
-                                min(percGoodRows),max(percGoodRows));
-    fprintf(1,'(post-filtering): Features vary from %.2f--%.2f%% good values.\n',...
-                                min(percGoodCols),max(percGoodCols));
+    isTrain = ismember(TimeSeries.ID,trainIDs);
+    isRemoved = ~ismember(trainIDs,TimeSeries.ID);
+    if any(isRemoved)
+        warning('%u of the %u trainIDs are not among the time series kept (not in the data, or removed by filtering)',...
+                        sum(isRemoved),length(trainIDs));
+    end
+    fprintf(1,['Fitting the feature filter and normalization on %u training time series' ...
+                ' (and applying it to all %u time series)\n'],sum(isTrain),height(TimeSeries));
 end
-fprintf(1,'\n');
 
 % --------------------------------------------------------------------------
-%% Filtering done, now apply the normalizing transformation
+%% Filter and normalize the features (operations)
 % --------------------------------------------------------------------------
-
-if ismember(normFunction,{'nothing','none'})
-    fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
-    featureParams = table();
+% Removes features with too few good values, constant features, (if
+% classVarFilter) features constant within a class, and features that are all-NaN
+% or constant after normalization; all fitted on the training time series only.
+if classVarFilter && ~ismember('Group',TimeSeries.Properties.VariableNames)
+    error('Group labels not assigned to time series, so cannot filter on class variance');
+end
+normSpec = struct('normFunction',normFunction,'filterOptions',filterOptions,...
+                        'classVarFilter',classVarFilter);
+if classVarFilter
+    yTrain = TimeSeries.Group(isTrain);
 else
-    fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
-                            height(TimeSeries),height(Operations));
-    [TS_DataMat,normParams] = BF_NormalizeMatrix(TS_DataMat,normFunction);
-    featureParams = normParams.featureParams; % fitted parameters (one row per feature)
-    fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))));
+    yTrain = [];
 end
+transform = BF_FitTransform(TS_DataMat(isTrain,:),normSpec,Operations,yTrain,true);
+TS_DataMat = BF_ApplyTransform(TS_DataMat,transform,Operations);
 
-% --------------------------------------------------------------------------
-%% Remove bad entries
-% --------------------------------------------------------------------------
-% Bad entries after normalizing can be due to feature vectors that are
-% constant after e.g., the sigmoid transform -- a bit of a weird thing to do if
-% pre-filtering by percentage...
-
-nanCol = (mean(isnan(TS_DataMat))==1);
-if all(nanCol) % all columns are NaNs
-    error('After normalization, all columns were bad-values... :(');
-elseif any(nanCol) % there are columns that are all NaNs
-    TS_DataMat = TS_DataMat(:,~nanCol);
-    TS_Quality = TS_Quality(:,~nanCol);
-    Operations = Operations(~nanCol,:);
-    if ~isempty(featureParams)
-        featureParams = featureParams(~nanCol,:);
-    end
-    if keepCalcTime
-        TS_CalcTime = TS_CalcTime(:,~nanCol);
-    end
-    fprintf(1,'We just removed %u all-NaN columns introduced from %s normalization.\n',...
-                        sum(nanCol),normFunction);
-end
-
-% --------------------------------------------------------------------------
-%% Make sure the operations are still good
-% --------------------------------------------------------------------------
-% Check again for ~constant columns after normalization
-kc = (std(TS_DataMat,0,'omitnan') < 10*eps);
-if any(kc)
-    TS_DataMat = TS_DataMat(:,~kc);
-    TS_Quality = TS_Quality(:,~kc);
-    Operations = Operations(~kc,:);
-    if ~isempty(featureParams)
-        featureParams = featureParams(~kc,:);
-    end
-    if keepCalcTime
-        TS_CalcTime = TS_CalcTime(:,~kc);
-    end
-    fprintf(1,'%u operations had near-constant outputs after filtering: from %u to %u.\n', ...
-                    sum(kc),length(kc),sum(~kc));
+% Keep the features of the transformation:
+[~,keepCols] = ismember(transform.featureParams.ID,Operations.ID);
+TS_Quality = TS_Quality(:,keepCols);
+Operations = Operations(keepCols,:);
+if keepCalcTime
+    TS_CalcTime = TS_CalcTime(:,keepCols);
 end
 
 numBadEntries = sum(isnan(TS_DataMat(:)));
@@ -323,15 +254,14 @@ op_clust = struct('distanceMetric','none','Dij',[],...
 % At the moment, only saves the first two arguments
 codeToRun = sprintf('TS_Normalize(''%s'',[%f,%f])',normFunction, ...
                                         filterOptions(1),filterOptions(2));
-% Store the features kept, with the parameters of their normalizing transformation:
-if isempty(featureParams)
-    featureParams = Operations(:,{'ID','Name'});
-else
-    featureParams = [Operations(:,{'ID','Name'}),featureParams];
-end
+% Store the features kept, with the parameters of their normalizing transformation,
+% and the time series these were fitted on:
 normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
                                     filterOptions,'codeToRun',codeToRun,...
-                                    'featureParams',featureParams);
+                                    'featureParams',transform.featureParams,...
+                                    'classVarFilter',classVarFilter,...
+                                    'trainIDs',TimeSeries.ID(isTrain),...
+                                    'transform',transform);
 
 outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
