@@ -1,4 +1,4 @@
-function out = NL_DelayTime(y, maxDelay, past, randomSeed)
+function out = NL_DelayTime(y, maxDelay, past, ~)
 % NL_DelayTime   How quickly points that start with nearly equal values drift apart, over a range of delays.
 %
 % Optimal delay time using the method of Parlitz and Wichard, as in TSTOOL's
@@ -139,11 +139,6 @@ past = BF_TheilerWindow(y, past);
 if isnan(past) % the autocorrelation function never crosses zero
 	warning('No autocorrelation zero-crossing to set the Theiler window')
 	out = NaN; return
-end
-
-% randomSeed: how to treat the randomization
-if nargin < 4
-	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------

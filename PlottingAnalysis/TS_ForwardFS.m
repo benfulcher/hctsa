@@ -84,10 +84,16 @@ if nargin < 6
     annotateParams = struct('n',6,'textAnnotation','Name');
 end
 
+% Outputs not (yet) computed by this function are returned empty:
+testStat = [];
+trainErr = [];
+testErr = [];
+testClass = [];
+
 %-------------------------------------------------------------------------------
 %% Load the data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Retrieve group names also:
 classLabels = categories(TimeSeries.Group);

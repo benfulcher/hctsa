@@ -123,7 +123,7 @@ S = abs(coeffs .* coeffs); % power
 SC = S ./ mean(S(:));
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	subplot(3, 1, 1)
 	plot(y);
 	subplot(3, 1, 2:3);
@@ -167,7 +167,7 @@ out.pover80 = poverfn(80);
 % Fit using Statistics Toolbox
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	ksdensity(SC(:));
 end
 

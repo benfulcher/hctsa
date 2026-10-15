@@ -150,7 +150,7 @@ x = v(:, 1);
 y = v(:, 2);
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(x, y, '.k'); axis equal
 end
 

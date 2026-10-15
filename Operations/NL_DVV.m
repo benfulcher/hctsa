@@ -202,30 +202,30 @@ end
 % ------------------------------------------------------------------------------
 % Run DVV on input data:
 % ------------------------------------------------------------------------------
-if beVocal, fprintf(1, 'dvv on data...'); end
+if beVocal, fprintf(1, 'dvv on data...'); end %#ok<UNRCH>
 dvv_data = DVV_dvv(x, m, numDVs, nd, Ntv, tau, refs(:, 1));
-if beVocal, fprintf(1, ' Done.\n'); end
+if beVocal, fprintf(1, ' Done.\n'); end %#ok<UNRCH>
 
 % ------------------------------------------------------------------------------
 % Generate surrogate data and run DVV on the surrogates
 % ------------------------------------------------------------------------------
-if beVocal, fprintf(1, 'Generating %u surrogates...', numSurr); end
+if beVocal, fprintf(1, 'Generating %u surrogates...', numSurr); end %#ok<UNRCH>
 x_surr = DVV_surrogate(x, numSurr, perms);
-if beVocal, fprintf(1, ' Done.\n'); end
+if beVocal, fprintf(1, ' Done.\n'); end %#ok<UNRCH>
 
-if beVocal, fprintf(1, 'Computing dvv for surrogates...'); end
+if beVocal, fprintf(1, 'Computing dvv for surrogates...'); end %#ok<UNRCH>
 dvv_surr = zeros(Ntv, 2, numSurr);
 for i = 1:numSurr
 	dvv_surr(:, :, i) = DVV_dvv(x_surr(:, i), m, numDVs, nd, Ntv, tau, refs(:, i + 1));
 end
 mean_dvv_surr = mean(dvv_surr, 3);
-if beVocal, fprintf(1, ' Done.\n'); end
+if beVocal, fprintf(1, ' Done.\n'); end %#ok<UNRCH>
 
 % ------------------------------------------------------------------------------
 % Plotting:
 % ------------------------------------------------------------------------------
 if doPlot
-	f = figure('color', 'w'); box('on');
+	f = figure('color', 'w'); box('on'); %#ok<UNRCH>
 	subplot(1, 2, 1); hold on
 	plot(dvv_data(:, 1), dvv_data(:, 2), '.-k')
 	plot(mean_dvv_surr(:, 1), mean_dvv_surr(:, 2), '.-r')

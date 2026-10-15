@@ -107,11 +107,11 @@ deltat = params(3); % time step
 % Specify the potential function
 switch whatPotential
 	case 'sine'
-		V = @(x) -cos(x / alpha);
+		V = @(x) -cos(x / alpha); %#ok<NASGU>
 		F = @(x) -sin(x / alpha) / alpha; % F = -dV/dx
 	case 'dblwell'
 		F = @(x) -x.^3 + alpha^2 * x; % the double well function (the force from a double well potential)
-		V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2;
+		V = @(x) x.^4 / 4 - alpha^2 * x.^2 / 2; %#ok<NASGU>
 	otherwise
 		error('Unknown potential function ''%s'' specified', whatPotential);
 end
@@ -125,7 +125,7 @@ for i = 2:N
 end
 
 if doPlot
-	switch whatPotential
+	switch whatPotential %#ok<UNRCH>
 		case 'dblwell'
 			figure('color', 'w'); hold on;
 			plot(-100:0.1:100, F(-100:0.1:100), 'k') % plot the potential

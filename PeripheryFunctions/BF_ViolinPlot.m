@@ -177,6 +177,8 @@ if ~isempty(customSpot)
             for j = 1:length(dataCell{i})
                 try
                     xRand(j) = (rand(1)*offsetRange - offsetRange/2)*ff{i}(find(xx{i} >= dataCell{i}(j),1));
+                catch
+                    % No density value for this point: leave its jitter at zero
                 end
             end
         else

@@ -108,7 +108,7 @@ end
 allAngles = vertcat(angles{:});
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	% A few options of what to plot:
 	hold off; plot(angles{1}, '.k'); hold on
 	plot(angles{2}, '.r'); hold off;

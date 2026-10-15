@@ -1,4 +1,4 @@
-function [masterOutput, masterTime, errorMsg] = TS_ComputeMasterLoop(x,x_z,masterFn,masterCode,masterID,numMasterOps,howVocal,theTsID,iterNum,beVerbose)
+function [masterOutput, masterTime, errorMsg] = TS_ComputeMasterLoop(x,x_z,masterFn,masterCode,masterID,numMasterOps,howVocal,theTsID,iterNum,beVerbose) %#ok<INUSD>
 % TS_ComputeMasterLoop     Used in a loop by TS_Compute to evaluate a given master function.
 %
 % masterFn is a function handle, precompiled once from masterCode (see
@@ -62,6 +62,7 @@ try
     % point of view and carries negligible overhead (~10us, measured) next to
     % typical feature computation times.
     prevWarnState = warning('off','backtrace'); % keep captured warnings free of clickable stack-trace clutter
+    % (x, x_z and masterFn are referenced only inside this evalc string)
     capturedText = evalc('masterOutput = masterFn(x,x_z);');
     warning(prevWarnState);
 	masterTime = toc(masterTimer);

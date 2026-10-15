@@ -1,4 +1,4 @@
-function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
+function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % NL_LargestLyap   How quickly initially-close points on the delay-embedded trajectory diverge, as an estimate of the largest Lyapunov exponent.
 %
 % Rosenstein-style estimate of the largest Lyapunov exponent using TISEAN's
@@ -119,15 +119,9 @@ doPlot = 0; % whether to plot outputs to a figure
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
-% (1) Nref: number of randomly-chosen reference points. Not used
-% (TISEAN's lyap_r always uses every valid point as a reference -- see
-% header comment); kept and validated only for call-signature compatibility.
-if nargin < 2 || isempty(Nref)
-	Nref = 0.5; % use half the length of the time series
-end
-if Nref < 1 && Nref > 0
-	Nref = round(N * Nref); % specify a proportion of time series length
-end
+% (1) Nref, the number of randomly-chosen reference points, is not used (TISEAN's
+% lyap_r always uses every valid point as a reference -- see header comment);
+% the input is kept only for call-signature compatibility.
 
 % (2) maxtstep: maximum prediction length
 if nargin < 3 || isempty(maxtstep)
@@ -177,12 +171,9 @@ if maxtstep + 2 * past > N / 2
 	out = NaN; return
 end
 
-% (4) Number of nearest neighbours. Not used (TISEAN's lyap_r always
-% uses exactly one nearest neighbor -- see header comment); kept only for
-% call-signature compatibility.
-if nargin < 5 || isempty(NNR)
-	NNR = 3;
-end
+% (4) NNR, the number of nearest neighbours, is not used (TISEAN's lyap_r always
+% uses exactly one nearest neighbor -- see header comment); the input is kept
+% only for call-signature compatibility.
 
 % (5) Embedding parameters, embedParams
 if nargin < 6 || isempty(embedParams)
@@ -254,7 +245,7 @@ end
 p = p - p(1);
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on');
 	plot(t, p, '.-k')
 end
@@ -416,7 +407,7 @@ out.expfit_adjr2 = fExp.adjr2;
 out.expfit_rmse = fExp.rmse;
 
 if doPlot
-	hold('on')
+	hold('on') %#ok<UNRCH>
 	plot(t, fExp.a * (1 - exp(fExp.b * t)), ':r');
 	hold('off')
 end

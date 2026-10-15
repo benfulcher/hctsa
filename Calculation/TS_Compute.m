@@ -217,7 +217,7 @@ end
 
 %-------------------------------------------------------------------------------
 fprintf(1,'[%s]: Extracting %u features from each of %u time series.\n',...
-                    datestr(now),numOps,numTimeSeries);
+                    timeStamp(),numOps,numTimeSeries);
 
 
 % The times vector stores the time taken for each time series to have its
@@ -382,7 +382,7 @@ else
             fprintf(1,'- - - - - - - Time series %u / %u: %s - - - - -\n',i,numTimeSeries,TimeSeries.Name{tsInd});
         case 'full'
             fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-            fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
+            fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',timeStamp());
             fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
         end
 
@@ -470,7 +470,7 @@ if strcmp(howVocal,'fast')
 else
     fprintf(1,'!! !! !! !! !! !! Calculation completed !! !! !! !! !!\n');
     fprintf(1,'[%s]: Calculations complete in a total of %s.\n',...
-                        datestr(now),timeString);
+                        timeStamp(),timeString);
 end
 
 % Save back to local files (if results were computed):
@@ -498,8 +498,14 @@ function saveSeconds = saveResults(customFile,TS_DataMat,TS_CalcTime,TS_Quality,
     save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
     saveSeconds = toc(saveTimer);
     if isAutosave
-        fprintf(1,'[%s] Autosaved progress to %s (%s).\n',datestr(now),customFile,BF_TheTime(saveSeconds));
+        fprintf(1,'[%s] Autosaved progress to %s (%s).\n',timeStamp(),customFile,BF_TheTime(saveSeconds));
     else
         fprintf(1,' Saved in %s.\n',BF_TheTime(saveSeconds));
     end
+end
+
+%===============================================================================
+function ts = timeStamp()
+    % The current date and time as text, e.g., '15-Oct-2026 14:03:22'
+    ts = char(datetime('now','Format','dd-MMM-yyyy HH:mm:ss'));
 end

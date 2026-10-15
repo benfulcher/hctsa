@@ -99,7 +99,8 @@ end
 % -------------------------------------------------------------------------------
 if doPlot
 	% Expand DWT coefficients for visualization
-	nbcol = 64; % color discretization steps
+	% Color discretization steps:
+	nbcol = 64; %#ok<UNRCH>
 	nLev = min(level, maxLevelAllowed); % levels actually decomposed
 	cfd = zeros(nLev, N); % detail coefficients
 	for k = 1:nLev

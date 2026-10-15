@@ -144,7 +144,7 @@ out.absR = abs(R(2, 1)); % absolute value of correlation coefficient
 out.density = length(M1) / (range(M1) * range(M2)); % density of points in M1--M2 space: (number of windows) / (bounding-box area)
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(M1, M2, '.k');
 end
 

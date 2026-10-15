@@ -28,12 +28,12 @@ try
     if iscell(masterOutput) % there was an error evaluating this master operation:
         % fprintf(1,'***Error evaluating master operation %s\n',masterLabel)
         opOutput = 0; % Output = 0
-		opQuality = 1; % fatal error QualityCode -- this should not have happened
+        opQuality = 1; % fatal error QualityCode -- this should not have happened
         opTime = NaN; % don't worry about calculation time for errors
 
     elseif ~isstruct(masterOutput)
-        if isnan(masterOutput); % output from Master was a NaN
-    		opOutput = NaN; % all structure elements set to NaN
+        if isnan(masterOutput) % output from Master was a NaN
+            opOutput = NaN; % all structure elements set to NaN
             opQuality = NaN; % quality will be set later
             opTime = NaN; % calculation times also set to NaN
         else % A single output -- retrieve it
@@ -48,7 +48,7 @@ try
             end
         end
 
-	else % Master code returned a structure: retrieve the required element from the master structure:
+    else % Master code returned a structure: retrieve the required element from the master structure:
         % First isolate the field after the '.': theField
         [~, theField] = strtok(operationCode,'.');
         theField = theField(2:end);
@@ -58,16 +58,16 @@ try
             opQuality = 6; % label indicates empty
             opTime = NaN;
         else
-    		opQuality = 0; % No evaluation error, quality = 0 means good.
+            opQuality = 0; % No evaluation error, quality = 0 means good.
             opTime = masterCalcTime;
         end
-	end
+    end
 
 catch emsg
     fprintf(1,'-----Error linking to master operation %s by %s\n',masterLabel,operationCode);
     fprintf(1,'%s\n',emsg.message);
     opOutput = 0; % Output = 0
-	opQuality = 7; % fatal error QualityCode -- something of a different error, though...
+    opQuality = 7; % fatal error QualityCode -- something of a different error, though...
     opTime = NaN; % don't worry about calculation time for errors
 end
 

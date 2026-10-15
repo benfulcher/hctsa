@@ -1,4 +1,4 @@
-function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
+function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, ~)
 % NL_RQA   Recurrence quantification analysis (RQA) of the delay-embedded series.
 %
 % Embeds the time series in an m-dimensional delay space and computes standard recurrence
@@ -116,9 +116,6 @@ if nargin < 7 || isempty(vmin)
 end
 if nargin < 8 || isempty(maxN)
     maxN = 10000; % crops time series longer than this maximum length
-end
-if nargin < 9 || isempty(randomSeed)
-    randomSeed = 'default'; % (not used)
 end
 
 if ischar(maxN) && strcmp(maxN, 'full')

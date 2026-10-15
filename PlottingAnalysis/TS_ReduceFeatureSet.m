@@ -41,7 +41,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Load in data:
-[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
+[TS_DataMat,~,Operations] = TS_LoadData(whatData);
 
 % Compute correlation distances between all pairs of features on the data:
 if useSpearman
@@ -51,7 +51,7 @@ else
 end
 
 % Cluster down with abscorr linkage clustering:
-[distMat_cl,cluster_Groupi,ord,handles] = BF_ClusterDown(rawDistVec,...
+[~,cluster_Groupi] = BF_ClusterDown(rawDistVec,...
                 'clusterThreshold',distThreshold,...
                 'whatDistance','abscorr',...
                 'linkageMeth','complete');

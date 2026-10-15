@@ -224,7 +224,7 @@ if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
 end
 
 if doPlot
-	f = figure('color', 'w'); box('on'); hold on
+	f = figure('color', 'w'); box('on'); hold on %#ok<UNRCH>
 	plot(pNN, 'o-k'); plot(nHoodSize2, 'o-r')
 	legend('pNN', 'mean squared size of neighbourhood')
 	xlabel('Embedding dimension');

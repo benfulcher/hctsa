@@ -125,7 +125,7 @@ end
 % Check group information
 %-------------------------------------------------------------------------------
 if ismember('Group',TimeSeries.Properties.VariableNames)
-    [timeSeriesGroups,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
+    [timeSeriesGroups,~,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 else
 	timeSeriesGroups = [];
 end
@@ -200,7 +200,7 @@ end
 % --------------------------------------------------------------------------
 if numGroups <= 1
     numColorMapGrads = 8; % number of gradations in each set of colourmap
-    if strcmp(customColorMap,'redyellowblue');
+    if strcmp(customColorMap,'redyellowblue')
         customColorMap = flipud(BF_GetColorMap('redyellowblue',numColorMapGrads,0));
     else
         customColorMap = gray(numColorMapGrads);
@@ -212,16 +212,17 @@ else
 	% Use the same colors as GiveMeColors, but add brightness gradations to indicate magnitude
     numColorMapGrads = 20; % number of brightness gradations in each set of colourmap
     colormapBase = GiveMeColors(numGroups);
-    customColorMap = [];
+    brightenedMaps = cell(numGroups,1);
     for i = 1:numGroups
-        customColorMap = [customColorMap; BF_MakeBrightenedColorMap(colormapBase{i},numColorMapGrads)];
+        brightenedMaps{i} = BF_MakeBrightenedColorMap(colormapBase{i},numColorMapGrads);
     end
+    customColorMap = vertcat(brightenedMaps{:});
 end
 
 %-------------------------------------------------------------------------------
 % Plotting
 %-------------------------------------------------------------------------------
-f = figure('color','w');
+figure('color','w');
 
 if addTimeSeries
     %  First make an additional plot to include time-series subsegments
@@ -253,7 +254,6 @@ if addTimeSeries
 
     ax2 = subplot(1,5,2:5);
     hold(ax2,'on');
-    ax.Box = 'on';
 
     linkaxes([ax1,ax2],'y');
 end

@@ -280,22 +280,21 @@ if plotFreeForm
     yr = linspace(1,0,numToPlot+1);
     inc = abs(yr(2)-yr(1)); % size of increment
     yr = yr(2:end);
-    ls = zeros(numToPlot,1); % lengths of each time series
 
     pHandles = zeros(numToPlot,1); % keep plot handles
-	for i = 1:numToPlot
+    for i = 1:numToPlot
         x = TimeSeries.Data{iPlot(i)};
-	    N0 = length(x);
-		if ~isempty(maxN) && (N0 > maxN)
-			% Specified a maximum length of time series to plot
+        N0 = length(x);
+        if ~isempty(maxN) && (N0 > maxN)
+            % Specified a maximum length of time series to plot
             sti = 1; % randi(N0-maxN,1);
-			x = x(sti:sti+maxN-1); % subset random segment
+            x = x(sti:sti+maxN-1); % subset random segment
             N = length(x);
         else
             N = N0; % length isn't changing
         end
-		xx = (1:N) / maxN;
-		xsc = yr(i) + 0.8*(x-min(x))/(max(x)-min(x)) * inc;
+        xx = (1:N) / maxN;
+        xsc = yr(i) + 0.8*(x-min(x))/(max(x)-min(x)) * inc;
 
         if numGroups==1 && (length(theColors)==numToPlot)
             % Plot as per a set of colors provided:
@@ -306,12 +305,12 @@ if plotFreeForm
         pHandles(i) = plot(xx,xsc,'-','color',colorNow,'LineWidth',lw);
 
         % Annotate text labels
-		if displayTitles
-			theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries.ID(iPlot(i)),...
-                        TimeSeries.Name{iPlot(i)},TimeSeries.Keywords{iPlot(i)},N0);
-			text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
-	    end
-	end
+        if displayTitles
+            theTit = sprintf('{%u} %s [%s] (%u)',TimeSeries.ID(iPlot(i)),...
+                    TimeSeries.Name{iPlot(i)},TimeSeries.Keywords{iPlot(i)},N0);
+            text(0.01,yr(i)+0.9*inc,theTit,'interpreter','none','FontSize',8)
+        end
+    end
 
     % Legend:
     if ~isempty(classLabels)
@@ -330,53 +329,53 @@ if plotFreeForm
 else
     % NOT a 'free-form' plot:
     for i = 1:numToPlot
-	    ax = subplot(numToPlot,1,i)
-	    fn = TimeSeries.Name{iPlot(i)}; % the filename
-	    kw = TimeSeries.Keywords{iPlot(i)}; % the keywords
-	    x = TimeSeries.Data{iPlot(i)};
-	    N = length(x);
+        ax = subplot(numToPlot,1,i);
+        fn = TimeSeries.Name{iPlot(i)}; % the filename
+        kw = TimeSeries.Keywords{iPlot(i)}; % the keywords
+        x = TimeSeries.Data{iPlot(i)};
+        N = length(x);
 
-	    % Prepare text for the title
-		if displayTitles
-			startBit = sprintf('{%u} %s [%s]',TimeSeries.ID(iPlot(i)),fn,kw);
-	    end
+        % Prepare text for the title
+        if displayTitles
+            startBit = sprintf('{%u} %s [%s]',TimeSeries.ID(iPlot(i)),fn,kw);
+        end
 
-	    % Plot the time series
-	    if isempty(maxLength)
-	        % no maximum length specified: plot the whole time series
-	        plot(x,'-','color',theColors{classes(i)})
-	        Ls(i) = N;
-	        if displayTitles
-	            title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
-	        end
-	    else
-	        % Specified a maximum length of time series to plot: maxLength
-	        if N <= maxLength
-	            plot(x,'-','color',theColors{classes(i)});
-	            Ls(i) = N;
-	            if displayTitles
-	                title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
-	            end
-	        else
-	            sti = randi(N-maxLength,1);
-	            plot(x(sti:sti+maxLength),'-','color',theColors{classes(i)}) % plot a random maxLength-length portion of the time series
-	            Ls(i) = maxLength;
-	            if displayTitles
-	                title(sprintf('%s (%u :: %u-%u)',startBit,N,sti,sti+maxLength),...
+        % Plot the time series
+        if isempty(maxLength)
+            % no maximum length specified: plot the whole time series
+            plot(x,'-','color',theColors{classes(i)})
+            Ls(i) = N;
+            if displayTitles
+                title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
+            end
+        else
+            % Specified a maximum length of time series to plot: maxLength
+            if N <= maxLength
+                plot(x,'-','color',theColors{classes(i)});
+                Ls(i) = N;
+                if displayTitles
+                    title(sprintf('%s (%u)',startBit,N),'interpreter','none','FontSize',8);
+                end
+            else
+                sti = randi(N-maxLength,1);
+                plot(x(sti:sti+maxLength),'-','color',theColors{classes(i)}) % plot a random maxLength-length portion of the time series
+                Ls(i) = maxLength;
+                if displayTitles
+                    title(sprintf('%s (%u :: %u-%u)',startBit,N,sti,sti+maxLength),...
                                 'interpreter','none','FontSize',8);
-	            end
-	        end
-	    end
-	    ax.YTickLabel = '';
+                end
+            end
+        end
+        ax.YTickLabel = '';
         if i~=numToPlot
-	        ax.XTickLabel = '';
+            ax.XTickLabel = '';
             ax.FontSize = 8; % put the ticks for the last time series
         else % label the axis
             ax.XLabel = 'Time (samples)';
         end
-	end
+    end
 
-	% Set all subplots to have the same x-axis limits
+    % Set all subplots to have the same x-axis limits
     for i = 1:numToPlot
         ax = subplot(numToPlot,1,i);
         ax.XLim = [1,max(Ls)];

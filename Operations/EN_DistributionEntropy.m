@@ -112,7 +112,7 @@ switch histOrKS
 		binEdges = BF_HistEdges(y, numBins); % explicit edges, whether a number of bins or a rule
 		px = histcounts(y, binEdges, 'Normalization', 'probability');
 		% Compute bin centers:
-		xr = mean([binEdges(1:end - 1); binEdges(2:end)]);
+		xr = mean([binEdges(1:end - 1); binEdges(2:end)]); %#ok<NASGU>
 		% Compute bin widths:
 		binWidths = diff(binEdges);
 
@@ -160,7 +160,7 @@ switch histOrKS
 end
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(xr, px, 'k')
 end
 

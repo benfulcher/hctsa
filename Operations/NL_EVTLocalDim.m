@@ -1,4 +1,4 @@
-function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, randomSeed)
+function out = NL_EVTLocalDim(y, tau, m, q, theilerWin, nPoles, mOrder, maxN, ~)
 % NL_EVTLocalDim   The local dimension and persistence of the reconstructed attractor, from extreme-value statistics of close returns.
 %
 % Time-delay embeds the series and, for a sample of reference points
@@ -155,9 +155,6 @@ if nargin < 7 || isempty(mOrder)
 end
 if nargin < 8 || isempty(maxN)
     maxN = 'full';
-end
-if nargin < 9 || isempty(randomSeed)
-    randomSeed = 'default';
 end
 
 if ischar(maxN) && strcmp(maxN, 'full')

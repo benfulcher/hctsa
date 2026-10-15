@@ -225,7 +225,7 @@ if all(isnan(sampEns))
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	subplot(2, 1, 1);
 	plot(y);
 	subplot(2, 1, 2);

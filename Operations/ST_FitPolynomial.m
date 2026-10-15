@@ -67,7 +67,7 @@ out = sqrt(mean((y - f).^2)); % RMS error of fit
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-	n = 10;
+	n = 10; %#ok<UNRCH>
 	errs = zeros(n, 1);
 	x = 1:length(y);
 	for i = 1:n

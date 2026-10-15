@@ -246,9 +246,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
             % A constant series guarantees some special-valued (quality>0) cells
             % under catch22; the rest exercise ordinary values:
             rng(42);
-            timeSeriesData = {randn(200,1); 2.5*ones(150,1); cumsum(randn(300,1)); sin((1:250)'/3)}; %#ok<NASGU>
-            labels = {'rand_ts';'constant_ts';'randomwalk_ts';'sine_ts'}; %#ok<NASGU>
-            keywords = {'a';'b';'c';'d'}; %#ok<NASGU>
+            timeSeriesData = {randn(200,1); 2.5*ones(150,1); cumsum(randn(300,1)); sin((1:250)'/3)};
+            labels = {'rand_ts';'constant_ts';'randomwalk_ts';'sine_ts'};
+            keywords = {'a';'b';'c';'d'};
             save(inpFile,'timeSeriesData','labels','keywords');
 
             for f = {singleFile, splitFile}
@@ -288,9 +288,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
             rng(11);
             timeSeriesData = {randn(200,1); cumsum(randn(250,1)); sin((1:220)'/4); ...
-                randn(180,1); 3*ones(160,1); abs(randn(240,1))}; %#ok<NASGU>
-            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'}; %#ok<NASGU>
-            keywords = repmat({'k'},6,1); %#ok<NASGU>
+                randn(180,1); 3*ones(160,1); abs(randn(240,1))};
+            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'};
+            keywords = repmat({'k'},6,1);
             save(inpFile,'timeSeriesData','labels','keywords');
 
             for f = {offFile, onFile}
@@ -336,9 +336,9 @@ classdef BasicPipelineTests < matlab.unittest.TestCase
 
             rng(7);
             timeSeriesData = {randn(200,1); 2.5*ones(150,1); cumsum(randn(300,1)); ...
-                sin((1:250)'/3); randn(180,1)+1; abs(randn(220,1))}; %#ok<NASGU>
-            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'}; %#ok<NASGU>
-            keywords = repmat({'k'},6,1); %#ok<NASGU>
+                sin((1:250)'/3); randn(180,1)+1; abs(randn(220,1))};
+            labels = {'ts1';'ts2';'ts3';'ts4';'ts5';'ts6'};
+            keywords = repmat({'k'},6,1);
             save(inpFile,'timeSeriesData','labels','keywords');
 
             for f = {serialFile, seriesFile, aliasFile}

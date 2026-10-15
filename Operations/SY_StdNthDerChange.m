@@ -85,7 +85,7 @@ for i = 1:maxd
 end
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(ms, 'o-k')
 end
 

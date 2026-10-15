@@ -99,7 +99,7 @@ for i = 1:length(trainLengthRange)
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	plot(stats_st, 'k')
 end
 

@@ -68,7 +68,7 @@ cums = cummax(y(:)) - cummin(y(:));
 % cums = cums/range(y);
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(cums);
 end
 

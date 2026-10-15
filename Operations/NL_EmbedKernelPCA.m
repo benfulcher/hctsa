@@ -227,8 +227,8 @@ function stats = SUB_spectrumstats(perc, m)
 	% Compute the same battery of eigenvalue-spectrum statistics as
 	% NL_EmbedPCA, from a normalized (sums to 1), descending spectrum perc.
 
-	for i = 1:m
-		stats.(sprintf('perc_%u', i)) = perc(i);
+	for j = 1:m
+		stats.(sprintf('perc_%u', j)) = perc(j);
 	end
 
 	% Spread statistics are taken over the leading m components only. The

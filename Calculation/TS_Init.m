@@ -57,7 +57,7 @@ if nargin < 3
         beVocal = [true,false,false]; % by default helps you just for the time series input file you provided
     end
 end
-if length(beVocal)==1
+if isscalar(beVocal)
     beVocal = repmat(beVocal,1,3);
 end
 if nargin < 4

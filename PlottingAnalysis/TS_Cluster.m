@@ -66,7 +66,7 @@ end
 
 % argument 5, doSave, set defaults later
 if nargin >= 5
-    if length(doSave)==1
+    if isscalar(doSave)
         doSave = ones(2,1)*doSave;
         warning('doSave has two components: for (i) time series and (ii) operations. Applying the same setting to both.');
     end
@@ -86,7 +86,7 @@ if strcmp(theFile,'norm')
 end
 
 % Check that the file exists:
-if ~exist(theFile,'file');
+if ~exist(theFile,'file')
     error('%s not found.',theFile);
 end
 fileVarsStruct = whos('-file',theFile);

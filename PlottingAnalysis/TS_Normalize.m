@@ -81,7 +81,7 @@ end
 % --------------------------------------------------------------------------
 
 % Load data:
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(fileName_HCTSA);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(fileName_HCTSA);
 TS_Quality = TS_GetFromData(fileName_HCTSA,'TS_Quality');
 MasterOperations = TS_GetFromData(fileName_HCTSA,'MasterOperations');
 
@@ -105,7 +105,7 @@ gitInfo = TS_GetFromData(fileName_HCTSA,'gitInfo');
 TS_DataMat(~isfinite(TS_DataMat)) = NaN; % Convert all nonfinite values to NaNs for consistency
 % Need to also incorporate knowledge of bad entries in TS_Quality and filter these out:
 TS_DataMat(TS_Quality > 0) = NaN;
-numSpecialValues = sum(TS_Quality(:) > 0);
+numSpecialValues = nnz(TS_Quality > 0);
 fprintf(1,'\nThere are %u special values in the data matrix.\n',numSpecialValues);
 percGoodRows = mean(~isnan(TS_DataMat),2)*100;
 percGoodCols = mean(~isnan(TS_DataMat),1)*100;

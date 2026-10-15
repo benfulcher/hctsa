@@ -113,7 +113,7 @@ end
 %% Do the progessive processing with running statistical evaluation
 % ------------------------------------------------------------------------------
 if doPlot
-	f = figure('color', 'w'); box('on'); hold on
+	f = figure('color', 'w'); box('on'); hold on %#ok<UNRCH>
 	h1 = plot(y, 'k');
 end
 
@@ -149,7 +149,7 @@ for q = 1:length(nRange)
 	end
 	outmat(q, :) = doYourCalcThing(y, y_d);
 	if doPlot
-		if q == 1
+		if q == 1 %#ok<UNRCH>
 			h2 = plot(y_d, 'r');
 		else
 			h2.YData = (y_d);

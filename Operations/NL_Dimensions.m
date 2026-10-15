@@ -256,7 +256,7 @@ if any(~isfinite(bc_logN(:))) || any(~isfinite(co_logC(:)))
 end
 
 if doPlot
-	plot(bc_logr, bc_logN, 'o-')
+	plot(bc_logr, bc_logN, 'o-') %#ok<UNRCH>
 	input('BC')
 	plot(co_logr, co_logC, 'o-')
 	input('CO')

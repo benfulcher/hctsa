@@ -126,7 +126,7 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 %% Load the data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 %-------------------------------------------------------------------------------
 %% Checks
@@ -134,7 +134,7 @@ clear('inputP');
 % Does the grouping information exist?:
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
+[~,classLabels,~,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
@@ -515,7 +515,7 @@ if ismember('dendrogram',whatPlots)
     f = figure('color','w');
 
     if doVertical
-        f.Position(3:4) = [950,750];
+        f.Position(3:4) = [950,750]; %#ok<UNRCH>
     else
         f.Position(3:4) = [750,950];
     end
@@ -525,7 +525,7 @@ if ismember('dendrogram',whatPlots)
     ord = BF_LinkageOrdering(distVec,links);
     if doVertical
         h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord,...
-                    'ColorThreshold',colorThreshold);
+                    'ColorThreshold',colorThreshold); %#ok<UNRCH>
     else
         h_dend = dendrogram(links,0,'Orientation','top','Reorder',ord,...
                     'ColorThreshold',colorThreshold);
@@ -542,7 +542,8 @@ if ismember('dendrogram',whatPlots)
     ax = gca();
     ax.TickLabelInterpreter = 'none';
     if doVertical
-        ax.YDir = 'reverse'; % needs to be reversed to match the imagesc plot (if 'cluster' is selected)
+        % The y-axis needs to be reversed to match the imagesc plot (if 'cluster' is selected):
+        ax.YDir = 'reverse'; %#ok<UNRCH>
         ax.YTick = 1:numTopFeatures;
         ax.YTickLabel = topFeatureLabelsFull(ord);
         xlabel(sprintf('%s distance',distanceMetric));
@@ -671,7 +672,7 @@ function accuracy = fn_nearestMedianClassify(XTrain,yTrain,XTest,yTest,classLabe
     accuracy = 100*mean(yPredict(:)==yTest(:));
 end
 %-------------------------------------------------------------------------------
-function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
+function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,~)
     % Return a test statistic for each feature:
     % (captured up-front: bare nargout isn't allowed anywhere in a file
     % that contains a parfor-loop, see note above numInputArgs)
@@ -701,7 +702,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         testStatChunks = cell(numChunks,1);
         MdlChunks = cell(numChunks,1);
         parfor c = 1:numChunks
-            chunkFeatureIDs = (chunkEdges(c) + 1):chunkEdges(c + 1);
+            chunkFeatureIDs = (chunkEdges(c) + 1):chunkEdges(c + 1); %#ok<PFBNS>
             localStat = zeros(length(chunkFeatureIDs),1);
             localMdl = cell(length(chunkFeatureIDs),1);
             for kk = 1:length(chunkFeatureIDs)
@@ -709,7 +710,7 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
                 try
                     if numOutArgsGiveMeStats == 2
                         % This is slower for the fast-linear classifier (but returns a model)
-                        [localStat(kk),localMdl{kk}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+                        [localStat(kk),localMdl{kk}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels); %#ok<PFBNS>
                     else
                         localStat(kk) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
                     end
@@ -725,7 +726,6 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
             Mdl = vertcat(MdlChunks{:});
         end
     else
-        loopTimer = tic;
         BF_ProgressBar('new')
         for k = 1:numFeatures
             try

@@ -134,7 +134,7 @@ if strcmp(covFunc1, 'covSum')
 			pos = pos + 3;
 		case 'covNoise'
 			hyp.cov(pos) = log(0.1);             % noise magnitude
-			noisePos = [noisePos, pos];
+			noisePos = [noisePos, pos]; %#ok<AGROW>
 			pos = pos + 1;
 		otherwise
 			pos = pos + 1; % unrecognized component: leave at zero

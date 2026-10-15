@@ -235,7 +235,7 @@ end
 % -------------------------------------------------------------------------------
 % Plot computed change points onto the time series:
 if doPlot
-	f = figure('color', 'w');
+	f = figure('color', 'w'); %#ok<UNRCH>
 	hold('on')
 	plot(y, 'k')
 	plot(chpts, y(chpts), 'or')

@@ -69,9 +69,9 @@ case {'mi-gaussian','mi'}
                     'mutual information, now named ''mi-gaussian''.']);
     end
     if ~isempty(opts)
-        numBins = opts; % (only used by the commented-out histogram estimator below)
+        numBins = opts; %#ok<NASGU> (only used by the commented-out histogram estimator below)
     else
-        numBins = 10;
+        numBins = 10; %#ok<NASGU>
     end
 
     goodies = ~isnan(dataMatrix); % now we can deal with NaNs into design matrix

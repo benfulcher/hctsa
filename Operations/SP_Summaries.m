@@ -332,7 +332,7 @@ if size(w, 1) > size(w, 2)
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	plot(w, S, '.-k'); % plot the spectrum
 	% Area under S should sum to 1 if a power spectral density estimate:
 	title(sprintf('Area under psd curve = %.1f (= %.1f)', sum(S * (w(2) - w(1))), var(y)));

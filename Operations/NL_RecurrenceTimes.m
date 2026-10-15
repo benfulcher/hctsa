@@ -1,4 +1,4 @@
-function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, randomSeed)
+function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, ~)
 % NL_RecurrenceTimes   Recurrence-time statistics from a recurrence plot.
 %
 % Embeds the time series in an m-dimensional delay space and characterizes the *white*
@@ -121,9 +121,6 @@ end
 if nargin < 7 || isempty(maxN)
     maxN = 10000;
 end
-if nargin < 8 || isempty(randomSeed)
-    randomSeed = 'default'; % (not used)
-end
 
 if ischar(maxN) && strcmp(maxN, 'full')
     % no cropping
@@ -236,10 +233,10 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
         nbrsR = nbrs(nbrs > j); % neighbors after j
         % band edges act as recurrent points, so lines start at the edge of the band:
         if j - theilerWinAbs >= 1
-            nbrsL = [nbrsL; j - theilerWinAbs];
+            nbrsL = [nbrsL; j - theilerWinAbs]; %#ok<AGROW>
         end
         if j + theilerWinAbs <= NsegEmb
-            nbrsR = [j + theilerWinAbs; nbrsR];
+            nbrsR = [j + theilerWinAbs; nbrsR]; %#ok<AGROW>
         end
         % White vertical line lengths: the number of NON-recurrent points
         % between successive recurrent points in this column of the

@@ -92,7 +92,7 @@ for i = 1:numSegs
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	plot(dns, 'k')
 end
 
@@ -108,7 +108,7 @@ switch eachOrPar
 			divs(i) = 0.5 * sum(abs(dns(:, i) - pardn')); % each is just divergence to parent
 		end
 		if doPlot
-			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off
+			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off %#ok<UNRCH>
 		end
 	case 'each'
 		% Compares each subdistribtuion to the parent (full signal) distribution

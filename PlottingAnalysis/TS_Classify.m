@@ -92,11 +92,11 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 %% Load in data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
+[~,classLabels] = TS_ExtractGroupLabels(TimeSeries);
 
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
@@ -153,7 +153,7 @@ else
             accuracyBit = sprintf('%.3f +/- %.3f%s',mean(meanAcc),std(meanAcc),cfnParams.whatLossUnits);
         end
     end
-    fprintf(1,['\n%s %s (%u-class) using %s classification with %u features:\n%s\n'],...
+    fprintf(1,'\n%s %s (%u-class) using %s classification with %u features:\n%s\n',...
             whatStat,cfnParams.whatLoss,cfnParams.numClasses,...
             cfnParams.whatClassifier,numFeatures,accuracyBit);
     if cfnParams.computePerFold
@@ -192,7 +192,7 @@ if numNulls > 0
             assert(cfnParams.computePerFold == false);
             tsGroup = TimeSeries.Group; % set up for parfor
             parfor i = 1:numNulls
-                shuffledLabels = tsGroup(randperm(height(TimeSeries)));
+                shuffledLabels = tsGroup(randperm(height(TimeSeries))); %#ok<PFBNS>
                 nullStats(i) = ComputeCVAccuracies(TS_DataMat,shuffledLabels,cfnParams,true);
             end
         else
@@ -293,14 +293,14 @@ if doPlot
         % Prefer the confusionchart to plotconfusion?
         if exist('confusionchart','file') ~= 0
             % Requires Matlab 2020 (Stats/ML Toolbox):
-            f_confusion = figure('color','w');
+            figure('color','w');
             confusionchart(realLabels,predictLabels);
             title(titleText)
             % Wish I could set the interpreter to 'none', but the confusionchart
             % title text doesn't seem to have this option... :-/
         else
             % Requires the Deep Learning Toolbox:
-            f_confusion = figure('color','w');
+            figure('color','w');
             plotconfusion(realLabels,predictLabels);
             % Fix axis labels:
             ax = gca;

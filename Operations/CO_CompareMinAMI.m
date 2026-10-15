@@ -92,7 +92,7 @@ end
 
 % Plot:
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(numBins, amiMins, 'o-k');
 end
 

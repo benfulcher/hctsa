@@ -169,7 +169,7 @@ if any(isnan(acf))
 end
 
 if doPlot
-	f = figure('color', 'w'); hold on
+	f = figure('color', 'w'); hold on %#ok<UNRCH>
 	plot(acf, 'o-k')
 	plot([1, length(acf)], th * ones(2, 1), '--k')
 	plot([1, length(acf)], -th * ones(2, 1), '--k')
@@ -261,6 +261,8 @@ if strcmp(stopWhen, 'posDrown') & (Nac >= minPointsToFitExp)
 	try
 		[c, gof] = fit((0:Nac - 1)', acf, f);
 		fitSuccess = true;
+	catch
+		% the exponential fit failed: leave fitSuccess false (the outputs are NaN)
 	end
 end
 if fitSuccess % Fit was successful

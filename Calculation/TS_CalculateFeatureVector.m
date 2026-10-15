@@ -417,7 +417,7 @@ numSpecial = sum(calcQuality > 1);
 switch howVocal
 case 'full'
     fprintf(1,'********************************************************************\n');
-    fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',datestr(now));
+    fprintf(1,'; ; ; : : : : ; ; ; ;   %s    ; ; ; ; : : : ; ; ;\n',char(datetime('now','Format','dd-MMM-yyyy HH:mm:ss')));
     fprintf(1,'Calculation complete for %s (ts_id = %u, N = %u)\n', ...
                         tsStruct.Name,tsStruct.ID,tsStruct.Length);
     fprintf(1,'%u real-valued outputs, %u errors, %u special-valued outputs stored.\n',...

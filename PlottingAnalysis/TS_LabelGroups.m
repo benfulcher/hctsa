@@ -174,7 +174,7 @@ if any(unlabeled)
         %             TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
         % end
     else
-        reply = input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
+        input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
                                     sum(unlabeled),length(unlabeled)));
         if ischar(whatData) && strcmp(theFile,'HCTSA_N.mat')
             warning('If data are already normalized, feature distributions will change after removing data; and normalizations may no longer be valid')

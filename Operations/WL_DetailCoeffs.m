@@ -120,7 +120,7 @@ end
 %% Plot the bad boy
 % ------------------------------------------------------------------------------
 if doPlot
-	subplot(5, 1, 1:2); title('signal')
+	subplot(5, 1, 1:2); title('signal') %#ok<UNRCH>
 	plot(y);
 	subplot(5, 1, 3); title('means');
 	plot(means)

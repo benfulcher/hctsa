@@ -230,7 +230,7 @@ for k = 1:length(fields)
 end
 
 if doPlot
-	figure('color', 'w'); box('on')
+	figure('color', 'w'); box('on') %#ok<UNRCH>
 	t = 1:length(yp);
 	plot(t, xp, 'b', t, yp, 'k');
 	legend('Obs', 'Fit');

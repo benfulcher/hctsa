@@ -98,17 +98,11 @@ if strcmp(theDelimiter,',')
     % warning(['The comma-delimited Keywords variable may cause trouble for ',...
         % 'the comma-delimited %s file: quoting strings should help'],fileName);
 else
-    doQuoteStrings = false;
+    doQuoteStrings = false; %#ok<UNRCH>
 end
 
 % We don't want the data to be written out in this info file:
-v = version;
-if str2double(v(1:3)) < 9.4
-    % 2017 or older MATLAB version
-    TimeSeries(:,'Data') = [];
-else
-    TimeSeries = removevars(TimeSeries,{'Data'});
-end
+TimeSeries = removevars(TimeSeries,{'Data'});
 writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
                 'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
 fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);

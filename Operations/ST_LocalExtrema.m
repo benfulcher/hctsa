@@ -146,7 +146,7 @@ locExt(exti) = locMin(exti); % local extrema (furthest from mean; either maxs or
 absLocExt = abs(locExt); % the magnitude of the most extreme events in each window
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	hold('on');
 	plot(locMax);
 	plot(absLocExt, '--g');

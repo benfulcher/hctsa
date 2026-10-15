@@ -208,7 +208,7 @@ sst = sum((amis - mean(amis)).^2);
 if sum(amis > 0) < 2 || sst == 0
 	out.fitexpa = NaN; out.fitexpb = NaN; out.fitexpr2 = NaN;
 	out.fitexpadjr2 = NaN; out.fitexprmse = NaN;
-	expfit = NaN(size(x));
+	expfit = NaN(size(x)); %#ok<NASGU>
 else
 	w = max(amis, 0).^2;
 	logAmis = log(max(amis, realmin));
@@ -236,7 +236,7 @@ out.linfit_mse = mean((linfit' - amis).^2);
 % -------------------------------------------------------------------------------
 % Plot output:
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	cc = BF_GetColorMap('set1', 2, 1);
 	% figure('color','w');
 	hold on; box('on')

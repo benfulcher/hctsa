@@ -248,7 +248,7 @@ end
 % Plot the results in a figure:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(q, Dq, 'o-k');
 end
 

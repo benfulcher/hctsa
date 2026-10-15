@@ -119,7 +119,7 @@ per = 1 ./ f;
 stdc = wnoisest(c, l, scales);
 
 if doplot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(stdc, 'k') % plot them
 end
 

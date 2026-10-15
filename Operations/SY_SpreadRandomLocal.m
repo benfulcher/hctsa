@@ -1,4 +1,4 @@
-function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
+function out = SY_SpreadRandomLocal(y, l, numSegs, ~)
 % SY_SpreadRandomLocal   How local statistics vary across many overlapping segments of the series.
 %
 % numSegs time-series segments of length l are selected from the time series (with
@@ -141,7 +141,7 @@ end
 % Plot some output?:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	subplot(2, 1, 1); hold on;
 	plot(y, 'k');
 	plot(istarts, y(istarts), '.r');

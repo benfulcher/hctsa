@@ -307,6 +307,7 @@ out.bestqBIC = qr(b);
 % have negligible effect -- we want to quantify this.
 
 out.Ks_vary_p = mean(std(Ks,0,'omitnan'),'omitnan'); % mean variation along p direction
-out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); % mean variation along q direction
+% mean variation along q direction:
+out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); %#ok<UDIM>
 
 end

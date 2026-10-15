@@ -50,28 +50,22 @@ else
 end
 
 if nargin < 3 || isempty(surr)
-    sumString = [];
-    if iscellstr(s)
-        for i = 1:length(s)
-            sumString = [sumString, s{i}, d];
-        end
-    elseif isnumeric(s)
-        for i = 1:length(s)
-            sumString = [sumString, num2str(s(i)), d];
-        end
+    surr = [];
+end
+
+% Each element of s becomes surr + element + surr + delimiter:
+numElements = length(s);
+pieces = cell(1,numElements);
+if iscellstr(s) || isstring(s)
+    for i = 1:numElements
+        pieces{i} = [surr, s{i}, surr, d];
     end
-else
-    sumString = [];
-    if iscellstr(s)
-        for i = 1:length(s)
-            sumString = [sumString, surr, s{i}, surr, d];
-        end
-    elseif isnumeric(s)
-        for i = 1:length(s)
-            sumString = [sumString, surr, num2str(s(i)), surr, d];
-        end
+elseif isnumeric(s)
+    for i = 1:numElements
+        pieces{i} = [surr, num2str(s(i)), surr, d];
     end
 end
+sumString = [pieces{:}];
 
 out = sumString(1:end-length(d));
 

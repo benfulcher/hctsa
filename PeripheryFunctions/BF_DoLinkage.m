@@ -63,9 +63,6 @@ if ismember(whatDistance,{'abscorr','abscorr_ii'})
     distVec = 1 - abs(1 - distVec);
 end
 
-% We need the matrix form also:
-distMat = squareform(distVec);
-
 %-------------------------------------------------------------------------------
 %% Do the linkage clustering:
 %-------------------------------------------------------------------------------

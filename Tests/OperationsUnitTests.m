@@ -16,7 +16,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
         end
 
-        function clearSharedCaches(testCase)
+        function clearSharedCaches(~)
             % CO_AutoCorr.m and CO_FirstMin.m cache their results across
             % calls (persistent variables) to avoid redundant recomputation
             % across operations. Clear them here so tests are hermetic and

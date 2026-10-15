@@ -1,4 +1,4 @@
-function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, numIters, randomSeed)
+function out = FC_Surprise(y, whatPrior, memory, numGroups, coarseGrainMethod, numIters, ~)
 % FC_Surprise   How surprising each next symbol is, given the recent past.
 %
 % Coarse-grains the time series into a sequence of symbols from a small alphabet,

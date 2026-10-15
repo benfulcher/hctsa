@@ -107,7 +107,7 @@ switch surrMethod
 		% Surrogates maintain linear correlations in the data, but any
 		% nonlinear structure is destroyed by the phase randomization
 		if beVocal
-			fprintf(1, 'Constructing %u surrogates using the Random Phase Method\n', numSurrs)
+			fprintf(1, 'Constructing %u surrogates using the Random Phase Method\n', numSurrs) %#ok<UNRCH>
 			fprintf(1, ['Linear correlations are maintained but nonlinear structure will be ' ...
 						'destroyed by the phase randomization\n'])
 		end
@@ -120,7 +120,7 @@ switch surrMethod
 	case 'AAFT'
 		if beVocal
 			fprintf(1, ['Constructing %u surrogates using the Amplitude Adjusted Fourier '...
-						'Transform (AAFT) Method\n'], numSurrs)
+						'Transform (AAFT) Method\n'], numSurrs) %#ok<UNRCH>
 			fprintf(1, ['Linear correlations are maintained but nonlinear structure will be destroyed ' ...
 						'by the phase randomization. Amplitude Distribution is approximately maintained\n'])
 		end
@@ -149,7 +149,7 @@ switch surrMethod
 	case 'TFT'
 		if beVocal
 			fprintf(1, ['Constructing %u surrogates using the Truncated Fourier '...
-						'Transform (TFT) Method.\n'], numSurrs)
+						'Transform (TFT) Method.\n'], numSurrs) %#ok<UNRCH>
 			fprintf(1, ['Low Frequency phases are preserved, and high frequency phases will be ' ...
 						'randomized. A way of dealing with non-stationarity.\n'])
 		end
@@ -173,7 +173,7 @@ switch surrMethod
 		% all temporal structure (not just nonlinear structure, unlike
 		% RP/AAFT/TFT which preserve the linear/amplitude properties).
 		if beVocal
-			fprintf(1, 'Constructing %u surrogates using random permutation\n', numSurrs)
+			fprintf(1, 'Constructing %u surrogates using random permutation\n', numSurrs) %#ok<UNRCH>
 		end
 
 		[~, perms] = sort(reshape(BF_Random(N * numSurrs, seed), N, numSurrs));
@@ -187,7 +187,7 @@ end
 
 % Cute farewell message
 if beVocal
-	fprintf(1, 'Generated %u %s surrogates in %s.\n', numSurrs, surrMethod, BF_TheTime(toc, 1))
+	fprintf(1, 'Generated %u %s surrogates in %s.\n', numSurrs, surrMethod, BF_TheTime(toc, 1)) %#ok<UNRCH>
 end
 
 end

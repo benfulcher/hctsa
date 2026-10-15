@@ -131,7 +131,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 N = length(m);
 
 if doPlot % plot the recurrence space:
-	plot(m(:, 1), m(:, 2), '.');
+	plot(m(:, 1), m(:, 2), '.'); %#ok<UNRCH>
 end
 
 %% Start the analysis
@@ -207,7 +207,7 @@ out.mode = binCentres(mix);
 out.hist_ent = sum(binP(binP > 0) .* log(binP(binP > 0)));
 
 if doPlot
-	bar(binCentres, binP);
+	bar(binCentres, binP); %#ok<UNRCH>
 end
 
 % --- Stationarity measure for fifths of the time series

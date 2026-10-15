@@ -266,7 +266,7 @@ out = DoRobustLinearFit(out, logtt, logFF, 1:numTimeScales, '');
 
 % PLOT THIS?:
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(logtt, logFF, 'o-k');
 	title(out.alpha)
 end
@@ -347,7 +347,7 @@ else
 end
 
 if doPlot
-	subplot(3, 1, 1)
+	subplot(3, 1, 1) %#ok<UNRCH>
 	plot(y)
 	subplot(3, 1, 2)
 	plot(logtt(r1), logFF(r1), 'o-b')

@@ -329,7 +329,7 @@ for i = 1:numPreds
 
 	% Plot
 	if doPlot
-		if strcmp(pmode, 'frombefore')
+		if strcmp(pmode, 'frombefore') %#ok<UNRCH>
 			plot(tt, yt, '.-k');
 			hold on;
 			plot(ts, ys, '.-b');

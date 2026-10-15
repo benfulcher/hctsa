@@ -160,7 +160,7 @@ end
 
 % Contains ldr as rows for embedding dimensions 1:m as columns;
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(rs, 'k');
 end
 

@@ -305,7 +305,7 @@ sListScaled = sList * 3; % Not completely on top of the algorithm, but for some 
 % ------------------------------------------------------------------------------
 
 if doPlot
-	if max(max(hqs)) < 1.5
+	if max(max(hqs)) < 1.5 %#ok<UNRCH>
 		hLim = 1.5;
 	elseif max(max(hqs)) < 2.5
 		hLim = 2.5;

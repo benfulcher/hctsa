@@ -269,7 +269,7 @@ if any(ismember(whatPlots,'scatter'))
         h{j}.UserData.hRaw = plot(xData,yData,'.k','MarkerSize',4,'Visible','off');
         h{j}.UserData.hRank = plot(xDataRanks,yDataRanks,'.b','MarkerSize',4,'Visible','off');
         if doRank
-            h{j}.UserData.hRank.Visible = 'on';
+            h{j}.UserData.hRank.Visible = 'on'; %#ok<UNRCH>
         else
             h{j}.UserData.hRaw.Visible = 'on';
         end
@@ -311,7 +311,7 @@ if any(ismember('matrix',whatPlots))
         labels{i} = sprintf('[%u] %s',dataTable_clust.ID(i),dataTable_clust.Name{i});
     end
 
-    f = figure('color','w');
+    figure('color','w');
 
     switch tsOrOps
     case 'ts'
@@ -348,7 +348,7 @@ if any(ismember('matrix',whatPlots))
     imagesc(Dij_clust)
 
     % Get group labeling if possible (time series):
-    [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
+    [~,~,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
 
     % Add class labels as rectangles along the edge…
     if numClasses > 1
@@ -356,10 +356,10 @@ if any(ismember('matrix',whatPlots))
         imagesc(0,1,dRescale(groupLabelsInteger))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
         colormap([BF_GetColorMap('dark2',numClasses,0);BF_GetColorMap('redyellowblue',8,0)]);
-        caxis([dLims(1)-diff(dLims)*numClasses/8,dLims(2)])
+        clim([dLims(1)-diff(dLims)*numClasses/8,dLims(2)])
     else
         colormap(BF_GetColorMap('redyellowblue',8,0));
-        caxis([min(Dij(Dij>0)),max(Dij(:))])
+        clim([min(Dij(Dij>0)),max(Dij(:))])
     end
 
     % Black rectangles over NaNs:
@@ -463,7 +463,7 @@ end
 
 
 %-------------------------------------------------------------------------------
-function swapRanked(hObject,eventData)
+function swapRanked(hObject,~)
     % Swap between raw and ranked values for a scatter plot
     if hObject.UserData.doRank
         hObject.UserData.hRaw.Visible = 'on';

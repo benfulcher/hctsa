@@ -87,7 +87,7 @@ case {'full','all'}
 
     % Plot:
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
 
     % Give uncalculated entries the label 8
@@ -117,7 +117,7 @@ case 'reduced'
 
     % Plot:
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
 
     % Give uncalculated entries the label 8
@@ -172,7 +172,7 @@ case 'master'
     % Plotting:
     % ------------
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
     imagesc(qualities(:,hadProblem));
 
@@ -267,7 +267,7 @@ end
 
 % Be nice (to the eyes):
 if nargout==0
-    clear('all')
+    clear('hadProblem')
 end
 
 % ------------------------------------------------------------------------------
@@ -298,7 +298,7 @@ function formatYAxisColorBar(doYaxis,offSet)
     maxShow = max(labelsExist); % maximum quality label to plot
 
     cb = colorbar(ax);
-    caxis([-0.5+offSet,maxShow+0.5+offSet]);
+    clim([-0.5+offSet,maxShow+0.5+offSet]);
     cb.Ticks = (0+offSet:1:maxShow+offSet);
     cb.TickLabels = allLabels(1:maxShow+1);
 

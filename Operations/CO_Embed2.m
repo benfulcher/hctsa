@@ -108,7 +108,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 N = size(m, 1); % number of points in the recurrence space
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(m(:, 1), m(:, 2), '.');
 end
 
@@ -118,7 +118,8 @@ end
 theta = diff(m(:, 2)) ./ diff(m(:, 1));
 theta = atan(theta); % measured as deviation from the horizontal
 
-if doPlot, [f, xi] = BF_KSDensity(theta); plot(xi, f); end % can plot distribution of angles
+% Can plot the distribution of angles:
+if doPlot, [f, xi] = BF_KSDensity(theta); plot(xi, f); end %#ok<UNRCH>
 out.theta_ac1 = CO_AutoCorr(theta, 1, 'Fourier');
 out.theta_ac2 = CO_AutoCorr(theta, 2, 'Fourier');
 out.theta_ac3 = CO_AutoCorr(theta, 3, 'Fourier');

@@ -177,7 +177,7 @@ if doViolin
         [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,false,true,false,extraParams);
 
         % Add lines denoting each annotated time-series in the distribution:
-        if ~doInspect & annotateParams.showGlobalDist
+        if ~doInspect && annotateParams.showGlobalDist
             for i = 1:annotateParams.n
                 ri = find(xx{1} >= dataVector(highlightInd(i)),1);
                 groupColor = myColors{1 + groupLabelsInteger(highlightInd(i))};
@@ -326,7 +326,7 @@ end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function annotateFigure_Callback(hObject,eventData)
+function annotateFigure_Callback(hObject,~)
     % Bits and pieces from BF_AnnotatePoints(lowDimComponents,TimeSeries,annotateParams);
 
     % Get the coordinates of the current cursor position

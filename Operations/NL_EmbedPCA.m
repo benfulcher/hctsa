@@ -103,7 +103,7 @@ end
 perc = latent / sum(latent); % proportion of variance explained
 
 if doPlot
-	figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]);
+	figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]); %#ok<UNRCH>
 end
 
 % -------------------------------------------------------------------------------

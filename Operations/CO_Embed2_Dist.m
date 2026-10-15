@@ -103,7 +103,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 % Plot the embedding:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on'); hold('on')
 	plot(m(:, 1), m(:, 2), '.');
 	plot(m(1:min(200, end), 1), m(1:min(200, end), 2), 'k');

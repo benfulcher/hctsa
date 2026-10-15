@@ -57,11 +57,10 @@ end
 %-------------------------------------------------------------------------------
 % Load in data:
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,dataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 TellMeAboutLabeling(TimeSeries);
 
 % Set classification parameters if needed:

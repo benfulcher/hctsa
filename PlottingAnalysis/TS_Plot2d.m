@@ -158,7 +158,7 @@ if showDistr
 end
 hold('on');
 
-if isfield(annotateParams,'theMarkerSize');
+if isfield(annotateParams,'theMarkerSize')
     theMarkerSize = annotateParams.theMarkerSize; % specify custom marker size
 else
     theMarkerSize = 12; % Marker size for '.'
@@ -232,7 +232,7 @@ if numClasses > 1 && ~isempty(fields(cfnParams))
         else
             for i = 1:numClasses
                 isMostProbable = (predLabels==classLabels{i});
-                if ~all(isMostProbable==isMostProbable(1));
+                if ~all(isMostProbable==isMostProbable(1))
                     contour(x1Grid,x2Grid,reshape(isMostProbable,size(x1Grid)),...
                             [0.5 0.5],'-','LineWidth',2,'color',groupColors{i});
                 end
@@ -273,9 +273,9 @@ function labelAxes(didClassify)
     % Label Axes
     if didClassify
         labelText = cell(2,1);
-        for i = 1:2
-            labelText{i} = sprintf('%s (acc = %.2f %%)',featureLabels{i}, ...
-                                    round(classRate(i,1)));
+        for k = 1:2
+            labelText{k} = sprintf('%s (acc = %.2f %%)',featureLabels{k}, ...
+                                    round(classRate(k,1)));
         end
     else
         labelText = featureLabels;

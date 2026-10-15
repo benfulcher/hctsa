@@ -286,7 +286,7 @@ thr = thr(1:numValid);
 %% Plot output
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	hold('on')
 	plot(thr, msDt(:, 1), '.-k');
 	plot(thr, msDt(:, 2), '.-b');
@@ -370,7 +370,7 @@ out.stdrflr2 = fLin.r2;
 out.stdrflrmse = fLin.rmse;
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	errorbar(thr, msDt(:, 1), msDt(:, 2), 'k');
 end
 

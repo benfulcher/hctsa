@@ -95,12 +95,13 @@ numThresholds = length(ths); % the number of thresholds
 
 numPolyPieces = 2; % number of polynomial pieces in the spline
 splineOrder = 4; % order of the spline
-y_or = y; % the original (pre-detrended) series, kept for plotting
+% The original (pre-detrended) series, kept for plotting:
+y_or = y; %#ok<NASGU>
 spline = spap2(numPolyPieces, splineOrder, 1:N, y); % just a single middle knot with cubic interpolants
 y_spl = fnval(spline, 1:N); % evaluated at the 1:N time intervals
 y = y - y_spl';
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on');
 	plot(y_or, 'k'); hold('on');
 	plot(y, 'r'); hold('off')
@@ -115,7 +116,7 @@ for i = 1:acmax % i is the \tau, the AC lag
 	acf(i) = mean(y(1:N - i) .* y(i + 1:N));
 end
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(acf, 'k')
 	title('Autocorrelation')
 end

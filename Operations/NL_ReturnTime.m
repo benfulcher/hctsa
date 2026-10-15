@@ -191,7 +191,7 @@ expected = cw(N_embed - lags) + (cw(end) - cw(lags)); % forward + backward partn
 Trett = counts ./ expected;
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(lags, Trett, 'k')
 	xlabel('Lag, T'); ylabel('Neighbors relative to chance')
 end
@@ -243,7 +243,7 @@ for i = 1:numBins
 	cglav(i) = sum(pTrett(inds(i) + 1:inds(i + 1)));
 end
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on');
 	plot(cglav, 'k')
 end
@@ -257,7 +257,7 @@ out.pzeroscgdist = sum(cglav == 0) / numBins;
 binEdges = BF_HistEdges(Trett, 'sqrt'); % ceil(sqrt(n)) equal-width bins spanning the values
 nhist = histcounts(Trett, binEdges, 'Normalization', 'probability');
 if doPlot
-	binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]);
+	binCenters = mean([binEdges(1:end - 1); binEdges(2:end)]); %#ok<UNRCH>
 	figure('color', 'w');
 	plot(binCenters, nhist, 'o-k')
 end

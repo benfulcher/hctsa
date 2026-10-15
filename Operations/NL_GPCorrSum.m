@@ -241,7 +241,7 @@ lnr = log(rc(:, 1));
 lnCr = log(rc(:, 2));
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(lnr, lnCr, '.-k');
 end
 
@@ -289,7 +289,7 @@ if enoughpoints
 	out.robfit_sea2 = stats.se(2);
 
 	fit_lnCr = a(2) * lnr + a(1);
-	if doPlot, hold on; plot(lnr, fit_lnCr, 'r'); hold off; end
+	if doPlot, hold on; plot(lnr, fit_lnCr, 'r'); hold off; end %#ok<UNRCH>
 
 	% Compute residuals (lnCr and fit_lnCr are both column vectors here, so
 	% res is an N-by-1 residual vector):
