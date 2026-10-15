@@ -107,6 +107,11 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 [distVec,links,distVec0,numItems] = BF_DoLinkage(distMat,whatDistance,linkageMeth);
 
+% Use the square matrix form of the distances from here on:
+if any(size(distMat)==1)
+    distMat = squareform(distMat);
+end
+
 % ------------------------------------------------------------------------------
 %% Compute dendrogram
 % ------------------------------------------------------------------------------

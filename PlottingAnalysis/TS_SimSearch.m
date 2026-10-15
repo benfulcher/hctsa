@@ -12,11 +12,14 @@ function TS_SimSearch(varargin)
 %               (*) 'matrix' plots a pairwise similarity matrix
 %               (*) 'scatter' plots scatter plots of outputs between target and neighbors
 %               (*) 'network', a network visualization of neighbors
+% whatDistMetric, the distance metric used to find neighbors (when distances are
+%               not stored in the data): 'Euclidean' (default for time series),
+%               'Spearman' (default for operations), 'Pearson', or 'corr'
 %
 %---EXAMPLE USAGE:
 % Find neighbors of time series (ID = 30), and visualize as a similarity matrix
 % and network plot:
-% TS_SimSearch(30,'whatPlots',{'matrix','network'})
+% TS_SimSearch('targetID',30,'whatPlots',{'matrix','network'})
 
 %-------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -74,7 +77,7 @@ addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
 % whatDistMetric
 default_whatDistMetric = '';
-check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
+check_whatDistMetric = @(x) ischar(x) && (isempty(x) || ismember(x,{'Euclidean','Spearman','Pearson','corr'}));
 addParameter(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
 
 %-------------------------------------------------------------------------------
@@ -226,11 +229,15 @@ if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
         Dij = Dij(neighborInd,neighborInd)/sqrt(size(TS_DataMat,2)+1);
     else
         % Recompute distances:
+        pdistMetric = whatDistMetric;
+        if strcmp(pdistMetric,'Pearson')
+            pdistMetric = 'correlation';
+        end
         switch tsOrOps
         case 'ts'
-            Dij = squareform(pdist(TS_DataMat(neighborInd,:),whatDistMetric)/sqrt(size(TS_DataMat,2)+1));
+            Dij = squareform(pdist(TS_DataMat(neighborInd,:),pdistMetric)/sqrt(size(TS_DataMat,2)+1));
         case 'ops'
-            Dij = 1 - abs(squareform(1 - pdist(TS_DataMat(neighborInd,:),whatDistMetric)));
+            Dij = 1 - abs(squareform(1 - pdist(TS_DataMat(neighborInd,:),pdistMetric)));
         end
     end
 end
@@ -429,7 +436,7 @@ if any(ismember(whatPlots,'network'))
     if numNeighbors > numNetwork
         warning('Displaying a maximum of %u neighbors for the network visualization',numNetwork)
     end
-    numNetwork = min(numNeighbors,numNetwork); % number neighbours for network
+    numNetwork = min(numNeighbors,numNetwork) + 1; % number of nodes: the target and its neighbors
 
     % Define the adjacency matrix, A (target node is 1)
     A = 1 - Dij(1:numNetwork,1:numNetwork);
@@ -439,9 +446,12 @@ if any(ismember(whatPlots,'network'))
 
     % Assign group labels (or just distinguish the target)
     if ismember('Group',dataTable.Properties.VariableNames)
-        nodeLabels = dataTable.Group;
+        % Integer group labels, with the target as its own group:
+        [~,~,nodeLabels] = TS_ExtractGroupLabels(dataTable);
         nodeLabels = nodeLabels(dix(1:numNetwork));
         nodeLabels(1) = max(nodeLabels) + 1;
+        % Relabel as 1,2,...,numGroups for the network visualization:
+        [~,~,nodeLabels] = unique(nodeLabels);
     else
         nodeLabels = 2*ones(numNetwork,1);
         nodeLabels(1) = 1;

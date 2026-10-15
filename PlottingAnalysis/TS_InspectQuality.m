@@ -19,6 +19,10 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %
 % customFile: run on a custom HCTSA file (HCTSA.mat by default), can also be
 %             strings like 'raw' or 'norm' (cf. TS_LoadData)
+%
+%---OUTPUTS:
+% hadProblem: a logical vector indicating which operations (or, for 'master',
+%             which master operations) have some special-valued outputs
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -89,6 +93,9 @@ case {'full','all'}
     % Get handles for figure (f) and axes (ax):
     figure('color','w');
     ax = gca;
+
+    % Operations with some special values:
+    hadProblem = (mean(TS_Quality,1,'omitnan') > 0);
 
     % Give uncalculated entries the label 8
     TS_Quality(isnan(TS_Quality)) = 8;
@@ -178,7 +185,7 @@ case 'master'
 
     colormap([0.1686,0.5137,0.7294; 0.8431,0.0980,0.1098]);
 
-    ax.YTick = 1:8;
+    ax.YTick = 1:7;
     qLabels = {'error','NaN','Inf','-Inf','complex','empty','link error'};
     ax.YTickLabel = qLabels;
 
