@@ -17,13 +17,32 @@ function [meanAcc,nullStats,jointClassifier] = TS_Classify(whatData,cfnParams,nu
 % doPlot [true], whether to plot outputs (including confusion matrix)
 % seedReset, input to BF_ResetSeed, specifying whether (and how) to reset the
 %               random seed (for reproducible results from cross-validation)
-
+% overwrite [false], whether to overwrite an existing cfnParams.classifierFilename
+%
+%---SAVING A CLASSIFIER:
+% If cfnParams.classifierFilename is set, a classifier is trained on all the
+% data (no cross-validation) and saved to that file (replacing it if overwrite
+% is true; an existing file gives an error otherwise), for use by TS_Predict.
+% The file contains jointClassifier, classes (the class labels), and cfnParams.
 %
 %---OUTPUTS:
 % (to commandline) output on classification performance on the dataset using the feature set.
 % - meanAcc, the performance metric across repeats of cross-validation
 % - nullStats, the performance metric across randomizations of the data labels
-% - jointClassifier, details of the saved all-features classifier
+% - jointClassifier, the saved all-features classifier ([] if none is saved),
+%       a structure with fields:
+%       Mdl: the classification model, trained on all the data
+%       Operation: the features used (ID and Name), in the order of the model's columns
+%       classLabels: the class labels
+%       Accuracy: in-sample performance of Mdl (cfnParams.whatLoss)
+%       CVAccuracy: cross-validated performance (mean across folds and repeats;
+%                   NaN if cfnParams.numFolds = 0)
+%       CVAccuracyFolds: performance in each test fold (numFolds x numRepeats; empty
+%                   unless cfnParams.computePerFold and cfnParams.numFolds > 0)
+%       whatLoss, whatLossUnits, whatClassifier, numFolds, numRepeats: from cfnParams
+%       normalizationInfo: how the data were normalized (from TS_Normalize), with
+%                   featureParams restricted to the features of the model, in
+%                   the same order ([] for data that were not normalized)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -81,12 +100,18 @@ default_doPlot = true;
 check_doPlot = @(x) islogical(x);
 addParameter(inputP,'doPlot',default_doPlot,check_doPlot);
 
+% overwrite: whether to overwrite an existing classifier file
+default_overwrite = false;
+check_overwrite = @(x) islogical(x) || isnumeric(x);
+addParameter(inputP,'overwrite',default_overwrite,check_overwrite);
+
 % Parse input arguments:
 parse(inputP,varargin{:});
 simpleNull = inputP.Results.simpleNull;
 doParallel = inputP.Results.doParallel;
 seedReset = inputP.Results.seedReset;
 doPlot = inputP.Results.doPlot;
+overwrite = inputP.Results.overwrite;
 clear('inputP');
 
 %-------------------------------------------------------------------------------
@@ -107,6 +132,13 @@ if nargin < 2 || (isstruct(cfnParams) && isempty(fields(cfnParams))) || isempty(
 end
 TellMeAboutClassification(cfnParams);
 
+% Check whether the classifier can be saved before doing any work:
+doSaveClassifier = isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilename);
+if doSaveClassifier && ~overwrite && exist(cfnParams.classifierFilename,'file')
+    error(['Classifier file ''%s'' already exists: set ''overwrite'' to true to replace it,' ...
+                ' or set a different cfnParams.classifierFilename'],cfnParams.classifierFilename);
+end
+
 % Filter down a reduced feature set if required:
 [TS_DataMat,Operations] = FilterFeatures(TS_DataMat,Operations,cfnParams);
 numFeatures = height(Operations);
@@ -119,11 +151,10 @@ BF_ResetSeed(seedReset);
 fprintf(1,'Resetting random seed for reproducibility\n');
 
 % Fit the classification model to the dataset and evaluate performance:
-if cfnParams.computePerFold
-    [meanAcc,stdAcc,inSampleAccStd,~,CVMdl] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams,false);
-else
-    [meanAcc,stdAcc,~,~,CVMdl] = ComputeCVAccuracies(TS_DataMat,TimeSeries.Group,cfnParams,false);
-end
+[meanAcc,stdAcc,inSampleAccStd,allFoldData,CVMdl] = ComputeCVAccuracies(TS_DataMat,...
+                                        TimeSeries.Group,cfnParams,false);
+% Whether results are available for each fold:
+perFold = cfnParams.computePerFold && (cfnParams.numFolds > 0);
 
 %-------------------------------------------------------------------------------
 %% Display results to command line
@@ -228,7 +259,7 @@ if numNulls > 0
         h = histogram(nullStats);
         h.FaceColor = ones(1,3)*0.5;
         xline(mean(meanAcc),'r','LineWidth',2)
-        if cfnParams.computePerFold
+        if perFold
             xline(mean(inSampleAccStd(:,1)),'--r');
         end
         xlabel(sprintf('%s (%s)',cfnParams.whatLoss,cfnParams.whatLossUnits))
@@ -240,7 +271,7 @@ if numNulls > 0
             legendEntries = {sprintf('Model-based (shuffled input label) null (%u)',numNulls),...
                                     'Real labels (out-of-sample)'};
         end
-        if cfnParams.computePerFold
+        if perFold
             legendEntries{3} = 'Real labels (in-sample)';
         end
         legend(legendEntries)
@@ -316,28 +347,39 @@ end
 %-------------------------------------------------------------------------------
 %% Save trained classifier
 %-------------------------------------------------------------------------------
-% E.g., for loading in later for classifying a new dataset
+% E.g., for loading in later for classifying a new dataset (cf. TS_Predict)
 jointClassifier = []; % no classifier is trained unless a filename is specified
-if ~isempty(cfnParams.classifierFilename)
-    warning('Saving classifier is not yet supported.')
-    [Acc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
-                                            TimeSeries.Group,cfnParams);
+if doSaveClassifier
+    % Train the classifier on all the data (no cross-validation):
+    cfnParamsAll = cfnParams;
+    cfnParamsAll.numFolds = 0;
+    [inSampleAcc,Mdl] = GiveMeCfn(TS_DataMat,TimeSeries.Group,TS_DataMat,...
+                                            TimeSeries.Group,cfnParamsAll);
+
+    jointClassifier = struct();
+    jointClassifier.Mdl = Mdl;
     jointClassifier.Operation.ID = Operations.ID;
     jointClassifier.Operation.Name = Operations.Name;
-    jointClassifier.CVAccuracy = mean(meanAcc);
-    jointClassifier.Accuracy = Acc;
-    jointClassifier.Mdl = Mdl;
+    jointClassifier.classLabels = classLabels;
+    jointClassifier.Accuracy = inSampleAcc;
+    if cfnParams.numFolds > 0
+        jointClassifier.CVAccuracy = mean(meanAcc);
+    else
+        jointClassifier.CVAccuracy = NaN;
+    end
+    if perFold
+        jointClassifier.CVAccuracyFolds = reshape(allFoldData(:,2,:),cfnParams.numFolds,cfnParams.numRepeats);
+    else
+        jointClassifier.CVAccuracyFolds = [];
+    end
     jointClassifier.whatLoss = cfnParams.whatLoss;
-    jointClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
+    jointClassifier.whatLossUnits = cfnParams.whatLossUnits;
+    jointClassifier.whatClassifier = cfnParams.whatClassifier;
+    jointClassifier.numFolds = cfnParams.numFolds;
+    jointClassifier.numRepeats = cfnParams.numRepeats;
+    jointClassifier.normalizationInfo = ModelNormalizationInfo(TS_GetFromData(whatData,'normalizationInfo'),Operations);
     classes = classLabels;
 
-    if exist(cfnParams.classifierFilename,'file')
-        out = input(sprintf(['File %s already exists -- continuing will overwrite the file.'...
-                  '\n[Press ''y'' to continue] '],cfnParams.classifierFilename), 's');
-        if ~strcmp(out,'y')
-            return;
-        end
-    end
     save(cfnParams.classifierFilename,'jointClassifier','classes','cfnParams','-v7.3');
     fprintf('Saved trained classifier to ''%s''.\n',cfnParams.classifierFilename);
 end
@@ -345,6 +387,32 @@ end
 % Save my sensitive eyes an overload:
 if nargout==0
     clear('meanAcc','nullStats','jointClassifier')
+end
+
+%-------------------------------------------------------------------------------
+function normInfo = ModelNormalizationInfo(normInfo,Operations)
+    % Normalization information for the features of the model (in its column order)
+    if isempty(normInfo)
+        % The data were not normalized (e.g., loaded from HCTSA.mat)
+        normInfo = [];
+        return
+    end
+    if ~isfield(normInfo,'featureParams')
+        if ~ismember(normInfo.normFunction,{'none','nothing'})
+            warning(['The data were normalized by a version of TS_Normalize that does not store' ...
+                    ' the normalization parameters, so TS_Predict cannot use this classifier.' ...
+                    ' Re-run TS_Normalize and TS_Classify to save a usable classifier.'])
+        end
+        return
+    end
+    [hasParams,ind] = ismember(Operations.ID,normInfo.featureParams.ID);
+    if ~all(hasParams) || ~isequal(normInfo.featureParams.Name(ind),Operations.Name)
+        warning(['The normalization parameters stored with the data do not match its features,' ...
+                ' so TS_Predict cannot use this classifier.'])
+        normInfo = rmfield(normInfo,'featureParams');
+    else
+        normInfo.featureParams = normInfo.featureParams(ind,:);
+    end
 end
 
 end

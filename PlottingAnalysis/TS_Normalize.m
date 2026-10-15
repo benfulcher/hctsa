@@ -6,19 +6,34 @@ function outputFileName = TS_Normalize(normFunction,filterOptions,fileName_HCTSA
 % for the purposes of visualization and clustering.
 %
 %---INPUTS:
-% normFunction: String specifying how to normalize the data.
+% normFunction: String specifying how to normalize the data: 'none' (no
+%               normalization), or a normalization method of BF_NormalizeMatrix
+%               (e.g., 'mixedSigmoid', 'scaledRobustSigmoid', 'zscore', 'maxmin').
+%               Default: 'mixedSigmoid'.
 %
 % filterOptions: Vector specifying thresholds for the minimum proportion of good
 %                values required in a given row or column, in the form of a 2-vector:
 %                [row proportion, column proportion]. If one of the filterOptions
 %                is set to 1, will have no bad values in your matrix.
+%                Default: [0.70,1].
 %
 % fileName_HCTSA: Custom hctsa data to import. Default: loaded from 'HCTSA.mat'.
 %
 % classVarFilter: whether to filter on zero variance of any given class (which
 %                 can cause problems for many classification algorithms).
+%                 Default: false.
 %
-% keepCalcTime: whether to keep TS_CalcTime
+% keepCalcTime: whether to keep TS_CalcTime. Default: false.
+%
+%---OUTPUT:
+% outputFileName, the file the trimmed, normalized data is saved to (the input
+%       filename with _N appended). Its normalizationInfo structure records the
+%       settings (normFunction, filterOptions, codeToRun) and, in featureParams,
+%       a table with a row for each feature kept (ID and Name, matching
+%       Operations) with the parameters of its normalizing transformation, fitted
+%       on all time series kept (cf. the normParams output of BF_NormalizeMatrix).
+%       These parameters are used by TS_Predict to normalize new data in the
+%       same way as the training data.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -230,10 +245,12 @@ fprintf(1,'\n');
 
 if ismember(normFunction,{'nothing','none'})
     fprintf(1,'You specified ''%s'', so NO NORMALIZING IS ACTUALLY BEING DONE!!!\n',normFunction);
+    featureParams = table();
 else
     fprintf(1,'Normalizing a %u x %u object. Please be patient...\n',...
                             height(TimeSeries),height(Operations));
-    TS_DataMat = BF_NormalizeMatrix(TS_DataMat,normFunction);
+    [TS_DataMat,normParams] = BF_NormalizeMatrix(TS_DataMat,normFunction);
+    featureParams = normParams.featureParams; % fitted parameters (one row per feature)
     fprintf(1,'Normalized! The data matrix contains %u special-valued elements.\n',sum(isnan(TS_DataMat(:))));
 end
 
@@ -251,6 +268,9 @@ elseif any(nanCol) % there are columns that are all NaNs
     TS_DataMat = TS_DataMat(:,~nanCol);
     TS_Quality = TS_Quality(:,~nanCol);
     Operations = Operations(~nanCol,:);
+    if ~isempty(featureParams)
+        featureParams = featureParams(~nanCol,:);
+    end
     if keepCalcTime
         TS_CalcTime = TS_CalcTime(:,~nanCol);
     end
@@ -267,6 +287,9 @@ if any(kc)
     TS_DataMat = TS_DataMat(:,~kc);
     TS_Quality = TS_Quality(:,~kc);
     Operations = Operations(~kc,:);
+    if ~isempty(featureParams)
+        featureParams = featureParams(~kc,:);
+    end
     if keepCalcTime
         TS_CalcTime = TS_CalcTime(:,~kc);
     end
@@ -300,8 +323,15 @@ op_clust = struct('distanceMetric','none','Dij',[],...
 % At the moment, only saves the first two arguments
 codeToRun = sprintf('TS_Normalize(''%s'',[%f,%f])',normFunction, ...
                                         filterOptions(1),filterOptions(2));
+% Store the features kept, with the parameters of their normalizing transformation:
+if isempty(featureParams)
+    featureParams = Operations(:,{'ID','Name'});
+else
+    featureParams = [Operations(:,{'ID','Name'}),featureParams];
+end
 normalizationInfo = struct('normFunction',normFunction,'filterOptions', ...
-                                    filterOptions,'codeToRun',codeToRun);
+                                    filterOptions,'codeToRun',codeToRun,...
+                                    'featureParams',featureParams);
 
 outputFileName = [fileName_HCTSA(1:end-4),'_N.mat'];
 
@@ -327,7 +357,7 @@ function keepInd = filterNaNs(XMat,nan_thresh,objectName)
     % Returns an index of rows of XMat with at least nan_thresh good values.
 
     if nan_thresh == 0
-        keepInd = true(size(XMat,1));
+        keepInd = true(size(XMat,1),1);
         return
     else
         propNaN = mean(isnan(XMat),2); % proportion of NaNs across rows
