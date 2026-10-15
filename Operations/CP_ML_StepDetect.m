@@ -58,7 +58,8 @@ function out = CP_ML_StepDetect(y, method, params)
 % Kalafut and Visscher, "An objective, model-independent method for detection of
 % non-uniform steps in noisy signals", Comp. Phys. Comm. 179, 716-723 (2008).
 %
-% S.-J. Kim et al., "l_1 Trend Filtering", SIAM Review 51, 339 (2009).
+% S.-J. Kim, K. Koh, S. Boyd, D. Gorinevsky, "l_1 Trend Filtering", SIAM Review 51, 339 (2009).
+% DOI: 10.1137/070690274
 %
 % Software available at: http://www.maxlittle.net/software/index.php
 

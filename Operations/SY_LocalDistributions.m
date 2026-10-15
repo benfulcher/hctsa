@@ -111,7 +111,7 @@ switch eachOrPar
 			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off %#ok<UNRCH>
 		end
 	case 'each'
-		% Compares each subdistribtuion to the parent (full signal) distribution
+		% Compares each subdistribution to every other subdistribution
 		if numSegs == 2 % output is just an integer: only two distributions to compare
 			out = 0.5 * sum(abs(dns(:, 1) - dns(:, 2)));
 			return

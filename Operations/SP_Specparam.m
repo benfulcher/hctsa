@@ -65,8 +65,9 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 %           (log10 power)
 % maxPeakBW, the width (standard deviation, in log10 frequency) of the tallest peak
 % totalPeakPower, the sum of the heights of all peaks (log10 power)
-% periodicFraction, sum(peaks^2) / sum((logS - mean(logS))^2): the share of the
-%           variation of the log10 spectrum accounted for by the periodic component
+% periodicFraction, sum(peaks^2) / sum((logS - mean(logS))^2): the squared size of
+%           the periodic component relative to the variation of the log10 spectrum
+%           about its mean (not bounded above by 1, and not a fraction of power)
 % modelR2, modelMAE, the R^2 and mean absolute error of the combined
 %           (aperiodic + periodic) fit to the log10 spectrum
 % (maxPeakFreq, maxPeakPower and maxPeakBW are NaN if no peaks are found.)

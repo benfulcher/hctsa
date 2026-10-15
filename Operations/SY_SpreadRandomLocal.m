@@ -152,7 +152,7 @@ end
 % ------------------------------------------------------------------------------
 % Take mean and standard deviation of this set of local time-series statistics:
 % ------------------------------------------------------------------------------
-% Can think of this as a big bootstrapped distribution of the timeseries at
+% Can think of this as a distribution of local statistics of the timeseries at
 % a scale given by the length l
 
 fs = zeros(numFeat, 2);

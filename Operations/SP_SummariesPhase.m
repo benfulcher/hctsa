@@ -13,7 +13,8 @@ function out = SP_SummariesPhase(y)
 %
 % The FFT is of the mean-subtracted series, zero-padded to a power of 2, with the
 % phase referenced to the centre of the series. Phases are weighted by their bin's
-% magnitude throughout (a standard approach in circular statistics for data of
+% magnitude throughout, except in magPhaseCorr, an unweighted correlation across
+% bins (weighting is a standard approach in circular statistics for data of
 % uneven reliability): a single pure tone concentrates essentially all energy in
 % 1-2 bins, and every other bin's phase is set by numerical noise and must not
 % swamp an unweighted average. The DC and Nyquist bins (both purely real, phase
@@ -161,7 +162,7 @@ resid = phUnwrap - X * beta;
 out.phaseLinearity = sqrt(sum(wgt .* resid.^2)) / sqrt(length(ww));
 
 % ------------------------------------------------------------------------------
-%% Magnitude-phase correlation
+%% Magnitude-phase correlation (unweighted)
 % ------------------------------------------------------------------------------
 out.magPhaseCorr = corr(mag, ph);
 

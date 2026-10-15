@@ -1,9 +1,10 @@
 function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
-% NL_DVV   How well nearby delay vectors predict the next value, compared with surrogates.
+% NL_DVV   How well nearby delay vectors predict their target value, compared with surrogates.
 %
 % Delay vector variance (DVV) method for real and complex signals, using the
 % original code of the DVV toolbox (below). A delay vector is a run of m
-% consecutive values and its target is the value that follows. For each of
+% values (spaced tau apart) and its target is the value tau samples after the
+% last of them. For each of
 % numDVs randomly chosen reference vectors, the variance of the targets of all
 % delay vectors within a distance rd of the reference is found (only if at
 % least 30 vectors lie within rd). The mean of these variances over the

@@ -55,9 +55,9 @@ function out = DN_OutlierInclude(y, thresholdHow, inc, fixedThresh)
 %       of the median time of the events (-1 to 1)
 % mrm, mrmd, mrstd: mean, median and standard deviation, across thresholds, of
 %       the mean time of the events (-1 to 1)
-% xcmerr1, xcmerrn1: cross-correlation (xcorr with 'coeff' normalization)
-%       between the mean gap and its standard error across thresholds, at lags
-%       +1 and -1
+% xcmerr1, xcmerrn1: cross-correlation (xcorr with 'coeff' normalization, so the
+%       means are not removed) between the mean gap and its standard error across
+%       thresholds, at lags +1 and -1
 % stdrfexpb, stdrfexpr2, stdrfexprmse: the rate and fit quality of an exponential
 %       fit to std(times)/sqrt(their number) vs. th
 % stdrfla, stdrflb, stdrflr2, stdrflrmse: the same for a linear fit

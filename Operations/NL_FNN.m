@@ -53,8 +53,9 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % firstunder09, firstunder08, firstunder07, firstunder06, firstunder05,
 %             firstunder04, firstunder03, firstunder02, firstunder01,
 %             firstunder005: the first embedding dimension at which the fraction
-%             of false nearest neighbors is below 90%, 80%, ..., 10%, 5% (maxm + 1
-%             if it never is)
+%             of false nearest neighbors is below 90%, 80%, ..., 10%, 5% (one more
+%             than the largest dimension computed, maxm + 1 unless TISEAN stopped
+%             early, if it never is)
 % max1stepchange: the largest absolute change in the fraction between
 %             consecutive embedding dimensions
 % mdrop: the mean change in the fraction per added dimension

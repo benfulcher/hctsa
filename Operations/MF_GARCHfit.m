@@ -12,10 +12,11 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 % (4) Post-estimation, involving statistics on the residuals and the standardized
 %           residuals.
 %
-% The preprocessing is BF_Whiten: the series is detrended and, for preproc = 'ar',
+% The preprocessing is BF_Whiten: for preproc = 'ar', the series is detrended and
 % replaced by the preprocessing (from PP_PreProcess) that maximizes whiteness under an
-% AR(2) model, if one improves on the original series by more than 5%. The result is
-% then z-scored, so the model is of the variance around a zero mean.
+% AR(2) model, if one improves on the detrended series by more than 5%; for preproc =
+% 'none' the series is left as it is (not detrended). The result is then z-scored, so
+% the model is of the variance around a zero mean.
 %
 % Uses functions from MATLAB's Econometrics Toolbox: garch, gjr, egarch, estimate,
 % infer, archtest, lbqtest, autocorr, parcorr, aicbic.

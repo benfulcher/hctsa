@@ -47,8 +47,9 @@ function out = SC_FluctAnal(x, q, wtf, tauStep, k, lag, logInc)
 %
 % ---OUTPUTS: statistics of a robust linear fit of log F(tau) against log tau, and
 % of fitting two straight lines to the same data, with the split point chosen to
-% minimize the combined fitting error (each line spans at least a quarter of the
-% timescales, and at least 8):
+% minimize the combined error of two least-squares lines (each line spans at least
+% a quarter of the timescales, and at least 8; the lines reported are then fitted
+% robustly):
 % linfitint, alpha, se1, se2, ssr, resac1: the intercept, slope (the scaling
 %       exponent alpha), standard errors of the intercept and the slope, mean
 %       squared residual, and lag-1 autocorrelation of the residuals, of the
@@ -158,7 +159,7 @@ end
 N = length(y); % length of the integrated series (shorter than x if a lag is used)
 
 % -------------------------------------------------------------------------------
-% Perform scaling over a range of tau, up to a fifth the time-series length
+% Perform scaling over a range of tau, up to half the time-series length
 % -------------------------------------------------------------------------------
 % Peng (1995) suggests 5:N/4 for DFA
 % Caccia suggested from 10 to (N-1)/2...

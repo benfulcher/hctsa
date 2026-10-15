@@ -15,9 +15,11 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 %
 % ---INPUTS:
 % y, column vector of time-series data
-% Nref, number of (randomly-chosen) reference points (-1: use all points,
-%       if a decimal, then use this fraction of the time series length;
-%       default: 500)
+% Nref, maximum number of pairs of points counted at each length scale (TISEAN's
+%       d2 -N), not a number of reference points: a length scale that has this
+%       many pairs (at the largest embedding dimension) is no longer updated
+%       (-1: count all pairs; if a decimal, then use this fraction of the time
+%       series length; default: 500)
 % r, maximum search radius, in units of std(y)*sqrt(m) where m is the embedding
 %    dimension (default: 0.05)
 % thwin, Theiler window of samples to exclude before and after each reference

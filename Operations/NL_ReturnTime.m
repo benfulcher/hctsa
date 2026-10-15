@@ -40,10 +40,11 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % max, std, iqr, the maximum, standard deviation and interquartile range of the profile
 % pzeros, the proportion of lags with no neighbors
 % pg05, the proportion of lags at which the profile exceeds half its maximum
-% meanpeaksep, maxpeaksep, minpeaksep, rangepeaksep, stdpeaksep, statistics of the spacings
-%      between successive crossings of half the maximum, as a proportion of the number of
-%      lags (stdpeaksep is divided by the square root of the number of lags instead; all
-%      are NaN with fewer than 3 crossings)
+% meanpeaksep, maxpeaksep, minpeaksep, rangepeaksep, stdpeaksep, statistics of the intervals
+%      between successive crossings of half the maximum (which are alternately the widths of
+%      peaks and the gaps between them, those shorter than 0.4 of the longest interval being
+%      dropped), as a proportion of the number of lags (stdpeaksep is divided by the square
+%      root of the number of lags instead; all are NaN with fewer than 3 crossings)
 % statrtys, statrtym, the ratio of the standard deviation (statrtys) or mean (statrtym) of
 %      the profile over the first half of the lags to that over the second half
 % hhist, the entropy of the profile as a distribution over lags

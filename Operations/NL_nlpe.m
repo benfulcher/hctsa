@@ -2,11 +2,12 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % NL_nlpe   Normalized drop-one-out constant interpolation nonlinear prediction error.
 %
 % Computes the nlpe for a time-delay embedded time series using Michael Small's code, nlpe
-% (renamed MS_nlpe here). The series is embedded in de dimensions with delay tau. The
-% one-step-ahead value following each embedded state is predicted by the value that
-% followed its nearest neighbor outside the Theiler window ("drop-one-out", constant
-% interpolation). The prediction errors (prediction minus data) are summarized using
-% MF_ResidualAnalysis.
+% (MS_nlpe, in Toolboxes/Michael_Small; adapted here to return the prediction residuals and
+% to exclude neighbors inside a Theiler window). The series is embedded in de dimensions
+% with delay tau. The one-step-ahead value following each embedded state is predicted by
+% the value that followed its nearest neighbor outside the Theiler window ("drop-one-out",
+% constant interpolation). The prediction errors (prediction minus data) are summarized
+% using MF_ResidualAnalysis.
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored)

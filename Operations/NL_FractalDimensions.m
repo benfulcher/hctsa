@@ -23,8 +23,10 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % measured moments M(kmin:kmax) under a robust (log(1+0.5*e^2)) error,
 % found via nested 1-D minimization (MATLAB's fminbnd stands in directly
 % for the original's hand-rolled Brent's-method minimizer -- the same
-% algorithm). Finally q(gamma) = 1 - gamma/D(gamma). The outputs summarize D
-% and q across the moments, and a straight-line fit of D against q.
+% algorithm). The error has a fixed width (1) in the units of the moments, so
+% D(gamma) depends on the scale of the series. Finally q(gamma) = 1 - gamma/D(gamma).
+% The outputs summarize D and q across the moments, and a straight-line fit of
+% D against q.
 %
 % ---INPUTS:
 % y, column vector of time series data

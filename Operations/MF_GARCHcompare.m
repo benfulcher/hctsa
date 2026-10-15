@@ -10,16 +10,18 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % Uses the following functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
 % garch, estimate, infer, aicbic.
 %
-% This operation focuses on the GARCH/variance component. It therefore detrends the
-% time series, optionally pre-whitens it (BF_Whiten), and z-scores it, so that a
-% constant-mean process is assumed.
+% This operation focuses on the GARCH/variance component. It therefore optionally
+% pre-whitens the time series (BF_Whiten, which detrends it first) and z-scores it,
+% so that a constant-mean process is assumed.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% preProc, a preprocessing to apply (after detrending):
-%           (i) 'none': no preprocessing is performed (default),
-%           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness.
+% preProc, a preprocessing to apply:
+%           (i) 'none': no preprocessing is performed, and the series is not
+%               detrended (default),
+%           (ii) 'ar': detrends the series, then performs a preprocessing that
+%               maximizes AR(2) whiteness.
 %
 % pr, a vector of model orders, p, to compare (default 1:3)
 %

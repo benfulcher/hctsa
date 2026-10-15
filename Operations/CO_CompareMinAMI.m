@@ -3,7 +3,9 @@ function out = CO_CompareMinAMI(y, binMethod, numBins)
 %
 % Finds the first minimum of the automutual information (AMI), as estimated by
 % CO_HistogramAMI, for each number of histogram bins in numBins, up to a maximum
-% lag of round(N/2) (set to this maximum if no minimum is found). The function
+% lag of round(N/2) (set to this maximum if no minimum is found). The first
+% minimum is taken to be the lag at the first change in the sign of the slope of
+% the AMI, so it is a local maximum if the AMI first rises. The function
 % returns statistics on the resulting set of first-minimum lags, which measure how
 % sensitive the AMI timescale is to the coarse-graining of the time series.
 %

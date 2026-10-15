@@ -68,7 +68,7 @@ rmserrpsegs = zeros(Llambdar, 1);
 
 for i = 1:length(lambdar)
 	lambda = lambdar(i);
-	% Run the (stochastic) step detection algorithm:
+	% Run the step detection algorithm:
 	outi = CP_ML_StepDetect(y, 'l1pwc', lambda);
 	nsegs(i) = outi.nsegments;
 	rmserrs(i) = outi.rmsoff;

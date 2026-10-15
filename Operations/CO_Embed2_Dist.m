@@ -129,6 +129,7 @@ out.d_std = std(d); % Standard deviation of distances
 out.d_iqr = iqr(d); % Interquartile range of distances
 out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
+% (d_cv is mean over standard deviation: the reciprocal of the coefficient of variation)
 out.d_cv = mean(d) / std(d); % Coefficient of variation of distances
 
 % ------------------------------------------------------------------------------

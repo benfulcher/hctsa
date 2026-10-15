@@ -32,7 +32,8 @@ function out = SP_SinusoidFit(y, model)
 %       (vi) 'fourier3': a Fourier series with three terms
 %
 % ---OUTPUTS: a structure containing
-% r2, the R^2 of the fit
+% r2, the R^2 of the fit, relative to the mean of the series. The sinK models have
+%         no intercept (constant) term, so r2 can be negative for them
 % adjr2, the degrees-of-freedom-adjusted R^2
 % rmse, the root mean square error of the fit (the residual sum of squares divided
 %         by the degrees of freedom of the error, as in the Curve Fitting Toolbox)
