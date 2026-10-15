@@ -302,8 +302,8 @@ DN_CustomSkewness(x_z,'bowley')	        DN_CustomSkewness_bowley
 DN_CustomSkewness(x,'pearsonMode')	    DN_CustomSkewness_pearson_mode
 DN_CV(x,1)	DN_CV_1
 DN_CV(x,2)	DN_CV_2
-DN_FitKernelSmooth(x,'numcross',[0.05,0.1,0.2,0.3,0.4,0.5],'area',[0.05,0.1,0.2,0.3,0.4,0.5],'arclength',[0.1,0.5,1,2])	DN_FitKernelSmoothraw
-DN_FitKernelSmooth(x_z)	DN_FitKernelSmoothzscore
+DN_FitKernelSmooth(x)	DN_FitKernelSmoothraw
+DN_FitKernelSmooth(x_z,'area',[0.05,0.1,0.2,0.3],'arclength',[0.5,2])	DN_FitKernelSmoothzscore
 DN_HistogramAsymmetry(x_z,11,false) DN_HistogramAsymmetry_11
 DN_HistogramMode(x_z,5,true,false)	DN_HistogramMode_5
 DN_HistogramMode(x_z,10,true,false)	DN_HistogramMode_10

@@ -41,6 +41,8 @@ function out = PP_SchreiberDenoise(y, m, d, numIter, neighborhoodStd)
 % fracNoCorrection, the fraction of points with a neighbor count of 1, that is, with
 %       no neighbors besides themselves, so that no correction was possible there
 %       (diagnoses whether neighborhoodStd was too small for these data)
+% (meanNeighbors and fracNoCorrection are over the points that have a full embedding
+% vector, samples (m-1)*d+1 to N; the first (m-1)*d samples are never corrected)
 % KDenoised, the statistic K of the 0-1 test for chaos (NL_ZeroOneTest) computed
 %       on the denoised series. The point of denoising first in the source
 %       pipeline is to make the 0-1 test more reliable on noisy data, since
@@ -171,6 +173,9 @@ cc = corrcoef(y, yDenoised);
 out.corrOrigDenoised = cc(1, 2);
 out.ac1Change = CO_AutoCorr(yDenoised, 1, 'Fourier') - CO_AutoCorr(y, 1, 'Fourier');
 
+% (over the points with a full embedding vector: the first (m-1)*d samples have no
+% embedding vector, are never corrected, and nrlazy reports a count of 1 for them)
+numNeighbors = numNeighbors((m - 1) * d + 1:end);
 out.meanNeighbors = mean(numNeighbors);
 out.fracNoCorrection = mean(numNeighbors == 1);
 

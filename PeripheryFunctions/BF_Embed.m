@@ -13,7 +13,9 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,~,beVocal)
 %       'ac1e'); see BF_GetTau.
 %
 % m, the embedding dimension. Must be a cell specifying method and parameters,
-%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1...
+%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1: the first
+%    dimension (up to 10) at which the fraction of false nearest neighbors (NL_FNN)
+%    is below 0.1; the dimension is at most 10, the largest dimension tested...
 %
 % justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
 %           actual embedding (default = 0, i.e., do the embedding).

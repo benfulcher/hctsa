@@ -1500,9 +1500,15 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(outSq.dispEn, -sum(pSq.*log(pSq)), 'AbsTol', 1e-12);
             testCase.verifyEqual(outSq.dispEn, log(2), 'AbsTol', 1e-6);
 
+            % A constant series (exactly, or up to rounding) is a single
+            % pattern: zero entropy
+            outC = EN_DispEn(ones(500,1));
+            testCase.verifyEqual([outC.dispEn, outC.normDispEn, outC.fDispEn, outC.normFDispEn], ...
+                zeros(1,4), 'A constant series has zero dispersion entropy.');
+            outC = EN_DispEn(0.3 + [0; 1e-17; 0; 5.5e-17; 0; 0]);
+            testCase.verifyEqual(outC.dispEn, 0);
+
             % Data-dependent failures return NaN rather than erroring:
-            testCase.verifyTrue(isnan(EN_DispEn(ones(500,1))), ...
-                'A constant series should give NaN, not an error.');
             testCase.verifyTrue(isnan(EN_DispEn(randn(5,1))), ...
                 'A too-short series should give NaN, not an error.');
 

@@ -12,14 +12,16 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % ---INPUTS:
 % y, the input time series (should be z-scored)
 % de, the embedding dimension (can be an integer, or 'fnn' to select as the point where the
-%     proportion of false nearest neighbors falls below 5% using NL_FNN; default: 3)
+%     proportion of false nearest neighbors falls below 5% using NL_FNN, at most 10,
+%     the largest dimension tested; default: 3)
 % tau, the time-delay (can be an integer, 'ac' for the first zero-crossing of the ACF,
 %      'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller of the
 %      first minimum of the Kraskov automutual information and the 'ac1e' delay; see
 %      BF_GetTau; default: 1)
 % maxN, the maximum time-series length to analyze; longer series are cropped to their first
 %       maxN points (default: 5000, due to memory constraints with longer time series). Set
-%       to 'full' to disable, with a warning above 20000 points.
+%       to 'full' to disable, with a warning above 20000 points. The time delay, the Theiler
+%       window and an 'fnn' embedding dimension are all computed from the cropped series.
 % theilerWin, Theiler window: the prediction for each point uses its nearest neighbor
 %       outside this window in time ({'ac', k} for k times the first zero-crossing of the
 %       autocorrelation function, or a number of samples; see BF_TheilerWindow; default:
@@ -94,26 +96,6 @@ if nargin < 2 || isempty(de)
 	de = 3;
 end
 
-% Time-delay, tau
-if nargin < 3 || isempty(tau)
-	tau = 1;
-end
-if ischar(tau) && strcmp(tau, 'ac1e')
-	% Adaptive delay: see BF_GetTau
-	tau = BF_GetTau(y, tau);
-	if isnan(tau)
-		out = NaN; return
-	end
-end
-if strcmp(tau, 'ac')
-	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
-elseif strcmp(tau, 'mi')
-	tau = BF_GetTau(y, 'mi');
-end
-if isnan(tau)
-	out = NaN; return
-end
-
 if nargin < 4 || isempty(maxN)
 	% Set a maximum time-series length to analyze, due to memory constraints
 	% with longer time series
@@ -138,6 +120,26 @@ elseif N > maxN
 end
 if N < 20 % Short time series cause problems:
 	fprintf(1, 'Time series (N = %u) is too short.\n', length(y));
+	out = NaN; return
+end
+
+% Time-delay, tau (from the series analyzed, i.e., after any maxN crop)
+if nargin < 3 || isempty(tau)
+	tau = 1;
+end
+if ischar(tau) && strcmp(tau, 'ac1e')
+	% Adaptive delay: see BF_GetTau
+	tau = BF_GetTau(y, tau);
+	if isnan(tau)
+		out = NaN; return
+	end
+end
+if strcmp(tau, 'ac')
+	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
+elseif strcmp(tau, 'mi')
+	tau = BF_GetTau(y, 'mi');
+end
+if isnan(tau)
 	out = NaN; return
 end
 

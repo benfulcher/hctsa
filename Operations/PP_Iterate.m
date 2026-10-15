@@ -42,7 +42,9 @@ function out = PP_Iterate(y, dtMeth)
 % normdiff_trend, normdiff_jump: the distance between the original and
 %       processed series, norm(y - y_processed) / N
 % (The last three statistics need the processed series to be as long as the
-% original, so they are NaN for 'diff'.)
+% original, so they are NaN for 'diff'.) All outputs are NaN if, at any strength,
+% the processed series has no variation beyond numerical error (a variance at most
+% 1e-10 times that of the original), as its statistics are then undefined.
 %
 % ---NOTES:
 % Requires the Curve Fitting Toolbox.
@@ -229,6 +231,11 @@ out.normdiff_jump = stats(10, 2);
 %% TESTS:
 % ------------------------------------------------------------------------------
 function f = doYourCalcThing(y, y_d)
+	% A processed series with negligible variance relative to the original (at most
+	% 1e-10 of it) is numerical error of the processing: its statistics are undefined
+	if var(y_d) <= 1e-10 * var(y)
+		f = NaN(10, 1); return
+	end
 	y = zscore(y);
 	y_d = zscore(y_d);
 

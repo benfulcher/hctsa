@@ -18,7 +18,10 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %
 % All persistence values are divided by a Rips filtration threshold (the largest pairwise
 % distance in a 300-point subsample of the cloud), so they are comparable in scale across
-% input series. Infinite (essential) intervals are dropped. The output is NaN if the
+% input series. The filtration stops at this threshold, so an interval still alive there
+% is counted as dying at the threshold, i.e., with persistence (threshold - birth)/threshold,
+% except for the single essential H0 interval (the connected component that never dies),
+% which is dropped. The output is NaN if the
 % embedding fails, has fewer than 20 points, or is degenerate (e.g., a constant series).
 %
 % ---INPUTS:
@@ -35,12 +38,13 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %
 % ---OUTPUTS:
 % maxPersistenceH1, persistence of the most persistent loop (H1 interval)
-% totalPersistenceH1, total persistence of all (finite) loops
+% totalPersistenceH1, total persistence of all loops
 % persistenceEntropyH1, Shannon entropy of the distribution of loop persistences (low
 %                       when one dominant loop, high when many comparable ones; 0 if
-%                       there are no finite H1 intervals)
-% totalPersistenceH0, total persistence of the (finite) H0 intervals, capturing the
-%                     clustering structure of the point cloud at small scales
+%                       there are no H1 intervals)
+% totalPersistenceH0, total persistence of the H0 intervals (other than the essential
+%                     one), capturing the clustering structure of the point cloud at
+%                     small scales
 %
 % ---REFERENCES:
 % U. Bauer, "Ripser: efficient computation of Vietoris-Rips persistence barcodes",
@@ -218,8 +222,8 @@ H0 = SUB_parseDim(res, 0);
 %% Summarize the H1 (loop) persistence diagram
 % ------------------------------------------------------------------------------
 if ~isempty(H1)
-    pers1 = H1(:, 2) - H1(:, 1);
-    pers1 = pers1(isfinite(pers1)) / threshold; % normalize; drop essential class(es)
+    % (a loop still alive at the threshold dies there)
+    pers1 = (min(H1(:, 2), threshold) - H1(:, 1)) / threshold; % normalize
 else
     pers1 = [];
 end
@@ -246,8 +250,11 @@ end
 %% H0 summary (clustering structure of the point cloud)
 % ------------------------------------------------------------------------------
 if ~isempty(H0)
-    pers0 = H0(:, 2) - H0(:, 1);
-    pers0 = pers0(isfinite(pers0)) / threshold;
+    % Drop the single essential class (the component that never dies); any other
+    % component still alive at the threshold dies there
+    iEssential = find(~isfinite(H0(:, 2)), 1, 'first');
+    H0(iEssential, :) = [];
+    pers0 = (min(H0(:, 2), threshold) - H0(:, 1)) / threshold;
 else
     pers0 = [];
 end

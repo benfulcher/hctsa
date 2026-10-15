@@ -29,7 +29,10 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 %             BF_TheilerWindow; default: {'ac',1})
 % justBest, if 1 just outputs a scalar estimate of embedding dimension: the first
 %           dimension at which the fraction of false nearest neighbors is below
-%           bestp (default: 1)
+%           bestp; if it never is, one more than the largest dimension computed when
+%           TISEAN stopped early (no neighbors left within its search range at the
+%           next dimension), and maxm otherwise: the dimension is never larger than
+%           maxm (default: 1)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %        dimension (default: 0.4)
 % escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
@@ -236,7 +239,8 @@ end
 % ------------------------------------------------------------------------------
 if justBest
 	% We just want a scalar to choose the embedding with
-	out = firstunderf(bestp, mDim, pNN);
+	% (capped at maxm, the largest dimension tested: never below bestp up to maxm gives maxm)
+	out = min(firstunderf(bestp, mDim, pNN), maxm);
 	return
 end
 

@@ -60,8 +60,11 @@ function out = PP_Compare(y, detrndmeth)
 %       against the best-fitting normal (DN_CompareKSFit)
 % olbt_m2, olbt_m5, the mean after trimming the 2% and 5% most extreme values at
 %       each end (DN_OutlierTest)
-% A scalar NaN is returned if the processed series is identically zero (or, for
-% 'logr' and 'boxcox', if the data are not all positive).
+% A scalar NaN is returned if the processed series has no variation beyond numerical
+% error: a variance at most 1e-10 times that of the series it was computed from (the
+% log of the series for 'logr'; for 'boxcox', only a constant result), as for the
+% residual of an exact fit. NaN is also returned for 'logr' and 'boxcox' if the data are
+% not all positive.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -102,6 +105,7 @@ end
 % Preparation
 N = length(y); % time-series length
 r = (1:N)'; % the time-range over which to fit
+yRef = y; % the series the processing acts on (its variance is the reference below)
 
 % -------------------------------------------------------------------------------
 %% APPLY PREPROCESSINGS
@@ -181,7 +185,9 @@ elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9), 'resample_')
 
 	% 8) Log Returns
 elseif strcmp(detrndmeth, 'logr')
-	if all(y > 0), y_d = diff(log(y));
+	if all(y > 0)
+		yRef = log(y);
+		y_d = diff(yRef);
 	else
 		out = NaN;
 		return % return all NaNs
@@ -192,7 +198,9 @@ elseif strcmp(detrndmeth, 'boxcox')
 	% Requires a financial toolbox to run boxcox, check one is available:
 	BF_CheckToolbox('financial_toolbox');
 
-	if all(y > 0), y_d = boxcox(y);
+	if all(y > 0)
+		y_d = boxcox(y);
+		yRef = y_d; % a transformation, not a residual: only a constant result is degenerate
 	else
 		out = NaN;
 		return % return all NaNs
@@ -203,7 +211,11 @@ end
 
 % -------------------------------------------------------------------------------
 %% Quick check that outputs are meaningful
-if all(y_d == 0)
+% A processed series whose variance is negligible relative to that of the series it was
+% computed from (below 1e-10 of it, i.e., a standard deviation below 1e-5 of it) is
+% numerical error of the processing (e.g., the residual of an exact fit, which is only as
+% small as the fit's tolerance allows), so its statistics are not meaningful
+if var(y_d) <= 1e-10 * var(yRef)
 	out = NaN;
 	return
 end

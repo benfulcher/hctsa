@@ -39,6 +39,8 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %       series)
 % takens05mmin_ri, takens05mmin_goodness, takens05mmin_stabled, takens05mmin_linrmserr:
 %       m_min, goodness, stabled and linrmserr of Takens' estimates over m
+%       (all ten takens05 outputs are NaN if the estimate is undefined at any embedding
+%       dimension, i.e., the correlation sum has no length scale above 0.5 there)
 % bend2_mindim, bend2_maxdim, bend2_meandim: the minimum, maximum and mean, across
 %       embedding dimensions, of the correlation dimension estimate (mean local slope of
 %       the correlation sum, over the best scaling range for each embedding dimension)
@@ -300,20 +302,35 @@ delete([filePath '.h2']); % delete the file
 % (for z-scored time series, std = 1...; in units of this)
 % Kantz & Shreiber recommend taking at half the std of the signal
 takens05 = SUB_takens(c2tdat, 0.5);
-out.takens05_mean = mean(takens05);
-out.takens05_median = median(takens05);
-out.takens05_max = max(takens05);
-out.takens05_min = min(takens05);
-out.takens05_std = std(takens05);
-out.takens05_iqr = iqr(takens05);
+if any(isnan(takens05))
+	% The estimate is undefined at some embedding dimension (no length scale above 0.5),
+	% so statistics across dimensions are undefined (not computed over a subset)
+	out.takens05_mean = NaN;
+	out.takens05_median = NaN;
+	out.takens05_max = NaN;
+	out.takens05_min = NaN;
+	out.takens05_std = NaN;
+	out.takens05_iqr = NaN;
+	out.takens05mmin_ri = NaN;
+	out.takens05mmin_goodness = NaN;
+	out.takens05mmin_stabled = NaN;
+	out.takens05mmin_linrmserr = NaN;
+else
+	out.takens05_mean = mean(takens05);
+	out.takens05_median = median(takens05);
+	out.takens05_max = max(takens05);
+	out.takens05_min = min(takens05);
+	out.takens05_std = std(takens05);
+	out.takens05_iqr = iqr(takens05);
 
-% Find outliers as means of inferring m_min
-% looking for approaching a constant for m>m_min
-mmintakens05 = SUB_findmmin(takens05);
-out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
-out.takens05mmin_goodness = mmintakens05.goodness;
-out.takens05mmin_stabled = mmintakens05.stabled;
-out.takens05mmin_linrmserr = mmintakens05.linrmserr;
+	% Find outliers as means of inferring m_min
+	% looking for approaching a constant for m>m_min
+	mmintakens05 = SUB_findmmin(takens05);
+	out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
+	out.takens05mmin_goodness = mmintakens05.goodness;
+	out.takens05mmin_stabled = mmintakens05.stabled;
+	out.takens05mmin_linrmserr = mmintakens05.linrmserr;
+end
 
 % ------------------------------------------------------------------------------
 %% (2) D2, local slopes of correlation integral

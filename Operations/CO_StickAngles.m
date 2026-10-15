@@ -6,10 +6,15 @@ function out = CO_StickAngles(y)
 % and those below it a negative set. Within each set, the angle between successive
 % sticks is atan of the slope from one stick's tip to the next: (y(next) - y(this))
 % divided by the number of samples between them. Statistics are returned on the
-% positive angles (_p), the negative angles (_n), and all of them (_all): location,
-% spread and shape, differences between the positive and negative sets, symmetry,
-% stationarity, autocorrelation, and quantiles. The tau, ac1, quantile and statav
-% outputs use the angle sequences standardized to zero mean and unit variance.
+% positive angles (_p), the negative angles (_n), and all of them (_all, and the
+% outputs with no suffix): location, spread and shape, differences between the
+% positive and negative sets, symmetry, stationarity, autocorrelation, and quantiles.
+% The tau, ac1, quantile and statav outputs use the angle sequences standardized to
+% zero mean and unit variance. The set of all angles is the positive set's sequence
+% followed by the negative set's: its distributional statistics (std, mean, median,
+% quantiles, skewness, kurtosis) do not depend on that order, but its statav outputs
+% do, and compare the positive with the negative set (and, for more than two parts,
+% parts within each set) rather than segments in time.
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored, so that the sign split is about the
@@ -34,7 +39,7 @@ function out = CO_StickAngles(y)
 %       statav3_all_m, statav4_all_m, statav5_all_m, statav5_all_s, the standard
 %       deviation across 2, 3, 4 or 5 equal parts of the sequence of the mean (_m) or
 %       the standard deviation (_s) of the angles, divided by their overall standard
-%       deviation,
+%       deviation (for _all, parts of the positive-then-negative sequence; see above),
 % tau_p, tau_n, the first zero-crossing of the autocorrelation function of the
 %       positive or negative set's angle sequence (interpolated),
 % ac1_p, ac1_n, the lag-1 autocorrelation of those sequences,
