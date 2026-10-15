@@ -5,8 +5,8 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % preprocessed versions of it, and returns the in-sample root-mean-square (RMS)
 % one-step prediction error for each preprocessed version as a ratio of the RMS
 % prediction error for the original series. Every version is z-scored before the
-% model is fitted. The AR model is fitted using the functions ar and pe from the
-% System Identification Toolbox.
+% model is fitted. The AR model is fitted by forward-backward least squares
+% (BF_ARfb).
 %
 % The preprocessed versions come from PP_PreProcess, and only one representative of
 % each family of closely related transformations is fitted:
@@ -35,9 +35,6 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % stderat_d1, stderat_d2, stderat_p1_20, stderat_p2_5, stderat_rmgd
 % A ratio above 1 means the preprocessing left the series harder to predict, as
 % when it removes a trend or slow dynamics that the model had been exploiting.
-%
-% ---NOTES:
-% Requires the System Identification Toolbox.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -92,63 +89,35 @@ end
 yp = PP_PreProcess(y, '', [], [], false, randomSeed); % doSpectral = false: spectral versions are never used here
 % Returns a structure, yp, with a range of time series in it, each a different
 % transformation of the original, y.
-%% ____________________FIT MODEL TO A CURATED SUBSET:_______________________ %%
-
+% ------------------------------------------------------------------------------
+%% Fit the model to a curated subset
+% ------------------------------------------------------------------------------
 % 'nothing' must stay first (it's the ratio denominator below); the rest are
 % the 5 family representatives (see header note).
 fields = {'nothing', 'd1', 'd2', 'p1_20', 'p2_5', 'rmgd'};
 numFields = length(fields);
-% statstore = struct('fpes',{});
+rmsErr = zeros(numFields, 1);
 
 for i = 1:numFields
-	% for each preprocessing, fit the model
-	data = yp.(fields{i});
-	% data is the current preprocessed data
-
-	switch model % SO MANY OPTIONS! ;-)
+	data = zscore(yp.(fields{i})); % z-score each preprocessed version
+	switch model
 		case 'ar'
-			%% Check that a System Identification Toolbox license is available
-			BF_CheckToolbox('identification_toolbox');
-
-			data = zscore(data); % zscore the data from this preprocessing
-			m = ar(data, order); % fit the model
-
-			% Get statistics on fit
-			%     () FPE
-			statstore.fpe(i) = m.EstimationInfo.FPE;
-			%     () in-sample prediction error
-			e = pe(m, data);
-			statstore.rmserr(i) = sqrt(mean(e.^2));
-			statstore.mabserr(i) = mean(abs(e));
-			statstore.ac1(i) = CO_AutoCorr(e, 1, 'Fourier');
-
+			% In-sample one-step prediction errors of an AR model fitted by forward-backward
+			% least squares: the forward residuals, with zero error for the first 'order'
+			% samples (which have no full set of past values)
+			[~, ~, loss] = BF_ARfb(data, order);
+			N = length(data);
+			rmsErr(i) = sqrt(loss * (N - order) / N);
 		otherwise
 			error('Unknown model ''%s''', model);
 	end
 end
 
 % ------------------------------------------------------------------------------
-%% Return statistics on statistics
+%% Ratio of the RMS error for each preprocessed version to the original series
 % ------------------------------------------------------------------------------
-% actually often as you make more stationary and remove trends it becomes
-% harder to predict because these trends are very easy to predict, and
-% making the series whiter will obviously decrease its predictability.
-
-% (1) ratio of fpe of preprocessed to unprocessed time series
-% I think just this is ok.
-% for i=2:numFields
-%     eval(['out.fperat_' fields{i} ' = ' num2str(statstore.fpe(i)/statstore.fpe(1)) ';']);
-% end
-
-% No, I'll just do in-sample rms error, for a single model no point fpeing
 for i = 2:numFields
-	out.(sprintf('stderat_%s', fields{i})) = statstore.rmserr(i) / statstore.rmserr(1);
+	out.(sprintf('stderat_%s', fields{i})) = rmsErr(i) / rmsErr(1);
 end
-% In fact, greater error in this case means a better detrending in some
-% sense -- it's remobed more of the 'obvious' linear structure (assuming
-% that's the aim).
-
-% could also return statistics on other things like prediction error, but
-% not alot of point, I think.
 
 end

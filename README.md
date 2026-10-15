@@ -79,7 +79,9 @@ A license for commercial use is available from [Engine Analytics](http://www.eng
 Many features in _hctsa_ rely on external packages (provided for convenience in the `Toolboxes` directory, which each have their own associated license, outlined below) and [Matlab Add-On Toolboxes](https://au.mathworks.com/products.html).
 Note that, in the case that some of them are unavailable, _hctsa_ can still be used, but only a reduced set of time-series features will be computed.
 
-**Matlab Add-On Toolboxes**: Statistics and Machine Learning, Signal Processing, Curve Fitting, System Identification, Wavelet, and Econometrics.
+**Matlab version**: R2022a or later.
+
+**Matlab Add-On Toolboxes**: Statistics and Machine Learning, Signal Processing, Curve Fitting, Wavelet, and Econometrics.
 
 **External Packages (provided):**
 - [_TISEAN_ package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
