@@ -1,7 +1,8 @@
 function out = CO_AutoCorrX2Shape(y, maxLag)
-% CO_AutoCorrX2Shape   Shape of the time-irreversibility (leverage-type) lag profile.
+% CO_AutoCorrX2Shape   Shape of the time-irreversibility profile of correlations between a series and its square.
 %
-% CO_AutoCorrX2 computes two asymmetric, 'leverage'-type lag-profiles:
+% CO_AutoCorrX2 computes two asymmetric lag profiles, each correlating the series with
+% its square:
 %
 %   forward(tau):  <x_t.x_{t+tau}^2>   (signed value now, energy later)
 %   backward(tau): <x_t^2.x_{t+tau}>   (energy now, signed value later)
@@ -14,12 +15,9 @@ function out = CO_AutoCorrX2Shape(y, maxLag)
 %
 % This function characterizes the SHAPE of diff(tau) across lags 1, ..., maxLag:
 % its size, decay, smoothness, extrema and sign changes, mirroring how
-% CO_AutoCorrShape characterizes the shape of the ordinary ACF. (An earlier version
-% characterized the forward and backward profiles' shapes separately, but on 300
-% real time series their shape descriptors were
-% correlated at r=0.84-0.97 with each other, since both profiles inherit most of
-% their shape from the ordinary linear correlation. The difference profile
-% cancels that shared component.)
+% CO_AutoCorrShape characterizes the shape of the ordinary ACF. The forward and
+% backward profiles each inherit most of their shape from the ordinary linear
+% correlation; their difference cancels that shared component.
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored: zero mean, unit variance)
