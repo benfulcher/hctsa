@@ -1,5 +1,20 @@
 function nullStats = GiveMeSimpleNullStats(groupLabels,numNulls,cfnParams,meanOverFolds)
-% Returns simple permutation-based null samples
+% GiveMeSimpleNullStats  Simple permutation-based null samples of a loss
+%
+% Each null sample is the loss (cfnParams.whatLoss) of a random shuffle of the labels
+% (with the true class frequencies) taken as the prediction, evaluated on the test
+% sets of one stratified cross-validation partition into cfnParams.numFolds folds
+% (a new partition for every null sample). It uses the global random number
+% generator.
+%
+%---INPUTS:
+% groupLabels, the (categorical) class label of each time series
+% numNulls, the number of null samples to generate
+% cfnParams, classification settings (needs numFolds (at least 2), whatLoss, classLabels)
+% meanOverFolds, whether to average the loss over folds (default: true)
+%
+%---OUTPUT:
+% nullStats, numNulls x 1 (meanOverFolds = true) or numNulls x numFolds
 %-------------------------------------------------------------------------------
 
 % Check inputs and set defaults:
@@ -8,6 +23,10 @@ if nargin < 4
 end
 
 %-------------------------------------------------------------------------------
+if cfnParams.numFolds < 2
+    error('The null requires cross-validation with at least 2 folds (cfnParams.numFolds = %u)',...
+                        cfnParams.numFolds);
+end
 numDataSamples = length(groupLabels);
 
 if meanOverFolds
@@ -19,7 +38,7 @@ end
 for i = 1:numNulls
     shuffledLabels = groupLabels(randperm(numDataSamples));
 
-    % One repeat of 10-fold cross validation using the shuffled labels:
+    % One repeat of cross validation using the shuffled labels:
     cvFolds = cvpartition(groupLabels,'KFold',cfnParams.numFolds,'Stratify',true);
     nullAcc_k = zeros(cfnParams.numFolds,1);
     for k = 1:cfnParams.numFolds
