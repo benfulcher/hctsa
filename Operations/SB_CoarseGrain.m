@@ -6,7 +6,8 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 %       (i) 'quantile': an equiprobable alphabet by the value of each point
 %       (ii) 'diff': as 'quantile', but applied to the increments diff(y) --
 %            an equiprobable alphabet by the *value* of each increment, NOT
-%            a literal sign(diff)>0 split (that's 'updown', below).
+%            a literal sign(diff)>0 split (that's 'updown', below). This
+%            method was named 'updown' in earlier hctsa versions.
 %       (iii) 'updown': a true binary up/down split by the raw sign of each
 %            increment (diff(y) > 0), i.e. numGroups is required to be 2 --
 %            unlike every other method here, this is NOT equiprobable, and

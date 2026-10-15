@@ -62,7 +62,7 @@ out.meanYC = mean(yC);
 %% Ordinary least-squares linear fit to the cumsum
 %-------------------------------------------------------------------------------
 coeffsOLS = polyfit(t, yC, 1);
-out.gradient = coeffsOLS(1);
+out.gradient = coeffsOLS(1); % closely related to std(yC); kept as the interpretable one
 out.intercept = coeffsOLS(2);
 residOLS = yC - polyval(coeffsOLS, t);
 
@@ -115,6 +115,13 @@ end
 %% wandering grows/shrinks systematically across the series, e.g. for a
 %% gradually ramping variance. t = Np is excluded: bridge(Np) = 0 exactly by
 %% construction, and nullVar(Np) = 0, giving an uninformative 0/0.
+%%
+%% A companion mean-level statistic (mean(stdResid)) and a differenced-AC1
+%% statistic were considered and not included: the mean level responds to genuine
+%% mean drift as well as to variance change, and is masked for localized bursts
+%% (the global var(p) in the denominator absorbs part of the anomaly it is meant
+%% to detect), while the differenced-AC1 statistic did not distinguish burst-type
+%% from ramp-type variance structure.
 %-------------------------------------------------------------------------------
 varP = var(p);
 if varP > 0 && Np > 21

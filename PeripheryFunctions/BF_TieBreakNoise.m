@@ -13,6 +13,9 @@ function y = BF_TieBreakNoise(y, seed)
 % property, which cannot be seeded in the bundled JIDT build), so that the same
 % input always yields the same jittered output in any MATLAB release and in Python,
 % and nothing about the caller's global random state is consumed or disturbed.
+% (A deterministic low-discrepancy sequence in place of random noise was rejected:
+% its regular lattice structure biases the Kraskov estimates of tied series, which
+% random noise does not.)
 %
 %---INPUTS:
 % y, the input vector (or matrix; the repeat test and noise scale use all elements)

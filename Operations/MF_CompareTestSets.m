@@ -74,6 +74,8 @@ function out = MF_CompareTestSets(y, theModel, ord, subsetHow, samplep, steps, r
 % are not predicted (the first n + steps - 1 for a model of order n); the statistics of a
 % segment use the samples predicted, and are NaN for a segment with fewer than 3 of them.
 % All outputs are NaN if the model cannot be fitted.
+% Redundant fields (mabserrs, and the medians of stde and meane) are not returned:
+% each is largely redundant with a retained field.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -298,6 +300,9 @@ end
 % ------------------------------------------------------------------------------
 
 % RMS errors, rmserrs
+% (The median is not returned, being largely redundant with the mean; the mean
+%  absolute error, mabserrs, is not returned at all, since it adds no dimension
+%  beyond the RMS error.)
 out.stde_mean = mean(rmserrs);
 out.stde_std = std(rmserrs);
 out.stde_iqr = iqr(rmserrs);
@@ -311,6 +316,7 @@ out.ac1_std = std(validAC1s);
 out.ac1_iqr = iqr(validAC1s);
 
 % Differences in mean between two series
+% (The median is not returned, being largely redundant with the mean.)
 out.meane_mean = mean(meandiffs);
 out.meane_std = std(meandiffs);
 out.meane_iqr = iqr(meandiffs);

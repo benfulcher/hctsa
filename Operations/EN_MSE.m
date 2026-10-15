@@ -87,6 +87,14 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % MSE (pooling raw match counts across offsets before the log, per Wu et al. 2014) is
 % theoretically marginally better, but needs the raw A/B match counts that the fast
 % compiled sampen_mex path does not expose.
+%
+% Registered summaries: for the dispersion setting, only meanDispEn, minDispEn and
+% stdDispEn are registered as features; the remaining summaries were less reliable
+% across independent realizations of the same process. For the sample entropy setting,
+% maxSampEn is not registered (largely redundant with meanSampEn, which is essentially
+% Costa's "Complexity Index"), whereas maxScale (the location of the peak, distinct
+% from its height) is. meanch is also not registered: slope and slopeSE summarize the
+% same trend more completely, using all valid scales at once.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

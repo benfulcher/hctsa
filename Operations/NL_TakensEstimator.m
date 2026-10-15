@@ -42,7 +42,7 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %
 % ---NOTES:
 % For high embedding dimensions of noise-like series no pair may fall within eup at all,
-% giving NaN.
+% giving NaN (no estimate can be made; a constant would be an artifact, not an estimate).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

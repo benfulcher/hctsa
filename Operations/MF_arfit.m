@@ -176,6 +176,8 @@ out.meanA = mean(Aest);
 out.stdA = std(Aest);
 out.sumA = sum(Aest);
 out.rmsA = sqrt(sum(Aest.^2));
+% (The sum of squares, sum(Aest.^2), is not returned: rmsA is its square root, a
+%  strictly monotone transform, so the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 % (3) Noise covariance matrix, Cest
@@ -248,6 +250,8 @@ out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 out.res_siglev = siglev;
 
 % (2) Residual diagnostics, through the shared contract at the cheap 'core' level.
+% (The normalized lag-1 autocorrelation, ac1n, is not returned: it is largely recoverable
+%  from the other fields.)
 residOut = MF_ResidualAnalysis(-res, y, 'core'); % ARFIT_arres returns data minus fit; the contract is prediction minus data
 fields = fieldnames(residOut);
 for k = 1:length(fields)

@@ -16,7 +16,8 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 % process with the same power spectrum. The ratios are not a stand-alone
 % nonlinearity test, however: they also rise with linear autocorrelation, so a
 % smooth linear process can look more 'nonlinear' than a chaotic map. Compare
-% against surrogates (cf. SD_SurrogateTest) to isolate nonlinearity.
+% against surrogates (cf. SD_SurrogateTest) to isolate nonlinearity. std_ratio does not
+% separate nonlinear from linear series consistently.
 %
 % ---INPUTS:
 % y, the input time series

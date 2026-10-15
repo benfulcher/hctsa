@@ -13,7 +13,8 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % estimates D2. Straight lines are fitted over all scales and over a scaling
 % range chosen by a penalized regression: its start is in the first half of
 % the scales and its end in the second half, chosen to minimize the mean
-% absolute residual minus 0.02 times the number of scales kept.
+% absolute residual minus 0.02 times the number of scales kept. The information
+% dimension (D1) is not computed.
 %
 % ---INPUTS:
 % y, column vector of time series data

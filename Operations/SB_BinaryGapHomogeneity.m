@@ -23,6 +23,7 @@ function out = SB_BinaryGapHomogeneity(x, gapWhat)
 % change on both sides).
 %
 % ---NOTES:
+% (This operation was named SB_BinaryStretch in earlier hctsa versions.)
 % This is NOT the longest run of consecutive 1s or 0s: the two generally differ,
 % and this quantity is 0 whenever the longest run touches either end of the
 % series (blocks at the boundaries are not counted, since they are not bracketed

@@ -98,6 +98,10 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 %       by the Schwarz Bayesian criterion, and its criterion value
 %
 % ---NOTES:
+% Only the P = 1, Q = 1 registration is kept: tests showed that P = 1, Q = 2 was almost
+% entirely redundant with it. MF_GARCHcompare, which varies P and Q over a grid, is
+% unaffected.
+%
 % Not registered in hctsa's feature set: summaryexitflag (the exit flag of the
 % optimizer, not a property of the series), constant (redundant with persistence),
 % and constanterr and GARCHerr_1 (standard errors of coefficients that are not
@@ -375,7 +379,8 @@ out.bic = BIC / N;
 % leverage term only applies on negative shocks, so under the fitted
 % (symmetric, zero-mean) innovation distribution it contributes on average
 % half the time -- persistence = GARCH+ARCH+Leverage/2 (Glosten-Jagannathan-
-% Runkle 1993). uncondVar itself is read directly from
+% Runkle 1993); omitting the Leverage/2 term gives wrong (even negative) variances.
+% uncondVar itself is read directly from
 % Gfit.UnconditionalVariance (native to garch/gjr/egarch objects) rather than
 % hand-derived; it still requires the persistence-based NaN guard above near
 % the boundary, since the native property blows up there too.

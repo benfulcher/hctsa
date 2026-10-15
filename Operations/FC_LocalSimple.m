@@ -152,6 +152,9 @@ for k = 1:length(fields)
 	out.(fields{k}) = residOut.(fields{k});
 end
 
+% (taures, the residual decorrelation time, is not returned: it is largely redundant
+%  with ac1. Its ratio form taurat, which is not, is retained via the shared contract
+%  above.)
 % Normality of the residuals, as the r-squared of a Gaussian fit to their distribution
 % (a distributional statistic of the residuals, not a goodness-of-fit measure for the
 % forecast).

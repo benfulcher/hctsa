@@ -25,6 +25,8 @@ function out = NL_LyapSpec(y, tauMethod, m, kNN, maxN, theilerWin, randomSeed)
 %       for the first zero-crossing of the autocorrelation function, the floor of its
 %       first 1/e crossing, or the smaller of the first minimum of the Kraskov
 %       automutual information and the 'ac1e' delay (see BF_GetTau; default: 1).
+%       The default tau = 1 tracks the known exponents of chaotic flows (and the
+%       Kaplan-Yorke dimension, especially) better than tau = 'ac'.
 %
 % m, the embedding dimension, and hence the number of Lyapunov exponents
 %       estimated (default: 3 -- the minimum dimension in which a flow

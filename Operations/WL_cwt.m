@@ -235,7 +235,9 @@ out.std_ssc = std(SSC);
 % ------------------------------------------------------------------------------
 %% Stationarity
 % ------------------------------------------------------------------------------
-% 2-way split of the scale-power surface, collapsed across scales.
+% 2-way split of the scale-power surface, collapsed across scales. (A finer 5-way
+% split is not computed: its summary statistics were largely redundant with those
+% of the 2-way split.)
 SC_1 = SC(:, 1:floor(N / 2)); % collapse across scales, first half
 SC_2 = SC(:, floor(N / 2) + 1:end); % collapse across scales, second half
 

@@ -46,8 +46,9 @@ function out = SC_MFDFA(y, scaleRange, qRange, order)
 % alpha0, the alpha at the peak of the spectrum (the dominant exponent)
 % spectrumAsymmetry, the width to the left of the peak divided by the width to the
 %       right, (alpha0 - alphaMin) / (alphaMax - alpha0)
-% (The raw generalized Hurst exponent h(q) is not otherwise reported: it is
-% largely redundant with these spectrum quantities.)
+% (The raw generalized Hurst exponent h(q) is not otherwise reported: its q-range
+% endpoints and its range, trend and spread across q are largely redundant with
+% these spectrum quantities, whereas h2 is not, and is kept.)
 % A scalar NaN is returned if the series or scale range cannot support the
 % analysis.
 %

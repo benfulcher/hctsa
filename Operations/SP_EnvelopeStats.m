@@ -85,6 +85,11 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 % sinusoid in noise, a random walk) gives a band of the 2-bin minimum, so dom_tau
 % then grows in proportion to N. For broadband noise the band is a large part of
 % the spectrum, so dom_tau is only a few samples.
+%
+% Two further candidates are not returned, as largely redundant with existing
+% fields: the lag-1 envelope autocorrelation (with the 1/e timescale) and the
+% instantaneous-frequency spread relative to its median (with
+% SP_PhaseFluctuationScaling's meanFreq).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

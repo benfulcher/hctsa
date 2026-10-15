@@ -7,7 +7,9 @@ function out = PP_Iterate(y, dtMeth)
 % statistic's profile across the strengths is then z-scored and summarized by
 % a trend (the sum of its successive differences, i.e., last minus first value)
 % and a jump (the largest t-statistic for a step change in the mean, over all
-% split points).
+% split points). (The slope of a linear fit to the profile is not returned: it is
+% largely redundant with the trend, since both estimate whether the short profile
+% is increasing.)
 %
 % ---INPUTS:
 % y, the input time series

@@ -32,7 +32,8 @@ function out = ST_PeakIntervals(y, minProm)
 %
 % ---NOTES:
 % For a z-scored pure sinusoid the mean prominence is 2*sqrt(2) = 2.83 and
-% cvInt is 0.
+% cvInt is 0. The peak rate (peaks per sample) is not returned, as it is largely
+% redundant with existing features (zero-crossing and local-difference measures).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

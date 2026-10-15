@@ -128,6 +128,10 @@ out.median_p = median(angles{1});
 out.mean_n = mean(angles{2});
 out.median_n = median(angles{2});
 
+% (std_p and std_n are not returned: they are largely redundant with
+% CO_PosNegAsymmetry's volPos and volNeg, which measure regime-conditional volatility
+% more directly.)
+
 out.std = std(allAngles);
 out.mean = mean(allAngles);
 out.median = median(allAngles);
@@ -260,7 +264,15 @@ out.statav4_all_m = statav_m;
 out.statav5_all_m = statav_m;
 out.statav5_all_s = statav_s;
 
+% (statav2_all_s, statav3_all_s and statav4_all_s are not returned: they are largely
+% redundant with statav5_all_s and with each other, so only one representative of the
+% StatAv spread-of-all-angles family is kept.)
+
 %% correlations?
+% (ac2_p, ac2_n and ac2_all are not returned, as they are largely redundant with the
+% corresponding ac1_*; nor are tau_all and ac1_all, which are largely redundant with
+% their p/n counterparts. Keeping the p/n split, rather than the pooled 'all',
+% preserves the asymmetry signal that is the point of this feature.)
 if ~isempty(zangles{1});
 	out.tau_p = CO_FirstCrossing(zangles{1}, 'ac', 0, 'continuous');
 	out.ac1_p = CO_AutoCorr(zangles{1}, 1, 'Fourier');

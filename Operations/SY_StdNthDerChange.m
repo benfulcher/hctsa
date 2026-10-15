@@ -94,6 +94,8 @@ fExp = BF_ExpFit((1:maxd)', ms, false, 40);
 out.fexp_a = fExp.a;
 out.fexp_b = fExp.b; % this is important
 out.fexp_r2 = fExp.r2; % this is more important!
+% (fexp_adjr2 is not returned: it is nearly identical to fexp_r2, since the adjustment
+% is for only 2 free parameters.)
 out.fexp_rmse = fExp.rmse;
 
 % ------------------------------------------------------------------------------

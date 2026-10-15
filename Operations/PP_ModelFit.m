@@ -18,7 +18,9 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 %            detrending)
 %     rmgd: the values replaced by Gaussian values of the same rank (rank mapping
 %            to a Gaussian distribution)
-% (The spectral-filtering versions that PP_PreProcess can also return are not computed.)
+% (The spectral-filtering versions that PP_PreProcess can also return are not computed.
+% The peak-removal version 'peaks_08' is also omitted, being largely redundant with
+% 'd2', the more standard and interpretable second-differencing transformation.)
 %
 % ---INPUTS:
 % y, the input time series

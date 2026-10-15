@@ -141,7 +141,8 @@ end
 
 % -------------------------------------------------------------------------------
 % Return basic statistics on differences in distributions in different
-% segments of the time series.
+% segments of the time series. Only meandiv and stddiv are returned: mediandiv,
+% mindiv, and maxdiv are largely redundant with meandiv.
 out.meandiv = mean(divs);
 out.stddiv = std(divs);
 

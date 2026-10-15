@@ -48,6 +48,10 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 % their standardized size and their windowed statistics are rounding noise. Then only
 % meane, meanabs and stde (which have meaningful limiting values) are returned, and all
 % other fields are NaN.
+%
+% No spectral fields are returned (this also keeps the function free of toolbox
+% dependencies): they were largely predictable from the autocorrelation fields, as
+% expected since the autocorrelation function and the power spectrum are Fourier duals.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -143,7 +147,8 @@ out.ac3 = autoCorrResid(3);
 % Proportion of the autocorrelation function within the significance band:
 out.propbth = sum(abs(autoCorrResid) < 2.6 / sqrtN) / maxLag;
 
-% Residual decorrelation time relative to that of the data:
+% Residual decorrelation time relative to that of the data (this carries information
+% that is not recoverable from the autocorrelations):
 if isempty(y)
 	out.taurat = NaN;
 else

@@ -167,7 +167,8 @@ end
 % r requests at higher embedding dimensions can ask for a radius smaller than
 % the closest pairs of points in the actual reconstructed phase space,
 % leaving every bin with zero pairs. d2's minimum epsilon is left at its own
-% default (max data interval/1000). Bins with too few points to fit are
+% default (max data interval/1000): tightening it in proportion to maxEps shrinks the
+% useful (non-zero, non-saturated) part of the range rather than helping. Bins with too few points to fit are
 % handled by the "not enough points" check below: a small requested r can
 % still legitimately fall below the closest-pair distance for a genuinely
 % high-dimensional, unstructured series (e.g., noise embedded at a high

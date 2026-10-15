@@ -42,7 +42,8 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 %              (the two fits share one point)
 % slope_diff, slope_short - slope_long
 % meanFreq, the mean rotation frequency of the isolated dominant component, in
-%              cycles per sample
+%              cycles per sample (partly redundant with the SP_Summaries_*_maxw
+%              fields; kept as a free byproduct)
 %
 % ---REFERENCES:
 % K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal analysis of

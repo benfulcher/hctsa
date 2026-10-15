@@ -95,7 +95,10 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % [smoothness/roughness class, distinct from SE's infinite differentiability] and
 % covRQiso [scale-mixture of length-scales, for multi-scale structure: for covRQiso,
 % a low shape parameter alpha (logh3) means a heavier-tailed length-scale mixture,
-% i.e., more multi-scale, and alpha->inf recovers exact SE]. The latter two are each
+% i.e., more multi-scale, and alpha->inf recovers exact SE]. Tests on synthetic data
+% showed that the fit-quality advantage of covMaterniso(3) over covSEiso separates
+% rough from smooth processes, and that the covRQiso shape parameter separates
+% multi-scale from single-scale ones. The latter two are each
 % registered as a single sampling-method variant ('first'), not replicated across all
 % three MF_GP_Hyperparameters sampling methods, to avoid redundant registrations.
 
@@ -327,6 +330,8 @@ for i = 1:numHPs
 	% Set up structure output
 	out.(sprintf('logh%u', i)) = logHyper(i);
 end
+% (h%u = exp(logh%u) is not returned: hyperparameters are positive, so exp is strictly
+%  monotone and the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 %% For Plotting
@@ -373,6 +378,9 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
 % Statistics on variance:
+% (This uses the modern gp()/hyp-struct API rather than the legacy gpml v3.2 gpr(),
+%  whose hyperparameter counting fails for degree-parameterized covariance components
+%  such as {'covMaterniso',3}.)
 xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar); % evaluate at datapoints
 S = sqrt(S2); % standard deviation function (S2 is the variance)

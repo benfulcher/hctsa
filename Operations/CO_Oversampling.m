@@ -37,6 +37,15 @@ function out = CO_Oversampling(y)
 %       unless the series was too short to fully correct).
 % All four are NaN if the series has fewer than 10 points or is constant.
 %
+% ---NOTES:
+% eta is partly redundant with SY_RangeEvolve's totnuq (both reflect how coarsely a
+% series sets new range records), and etaRobust is largely redundant with eta (the
+% outlier-robust case is real but rare on typical data). Both are kept anyway: eta
+% is the literal statistic from the source paper, with a specific methodological role
+% (a validity precondition for NL_ZeroOneTest), and etaRobust guards against the
+% single-outlier failure mode. numHalvings and etaAfterDownsampling are not redundant
+% with existing features.
+%
 % ---REFERENCES:
 % Toker et al., "A simple method for detecting chaos in nature", Commun. Biol. 3, 11
 % (2020). DOI: 10.1038/s42003-019-0715-9

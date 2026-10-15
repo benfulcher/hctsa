@@ -78,6 +78,12 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
 % converging, a known property of vanilla IAAFT). See DVV_surrogate.m's own
 % docstring for details of the fix.
 %
+% Several surrogate-comparison fields (e.g., rmsDiffSurr, meanDiffSurr, meanNormCDF,
+% numZeroCrossings) separate chaotic generators from linear-stochastic controls, with
+% the sign the method predicts (real data sits below the surrogate ensemble for
+% deterministic systems), and are not simply redundant with CO_TC3, CO_trev,
+% SD_Surrogates or SD_SurrogateTest.
+%
 % Two fields are computed but not registered as features:
 % - trendDataSurr: tests showed it did not separate deterministic from
 %   linear-stochastic series.

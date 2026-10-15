@@ -92,6 +92,13 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 %   * totalPeakPower largely duplicates maxPeakPower (they coincide exactly
 %     whenever only one peak is found), with numPeaks already carrying the
 %     'how many' information.
+%
+% apExponent overlaps with SP_Summaries' linfitloglog_all_a2 (the slope of a
+% straight-line fit to the log-log spectrum), but is the better-motivated
+% estimator of that quantity, being peak-corrected and fitted to a
+% segment-averaged spectrum. Counting peaks relative to a fitted aperiodic
+% background (periodicFraction, numPeaks) is a different quantity from counting
+% them by absolute prominence, as SP_Summaries does.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

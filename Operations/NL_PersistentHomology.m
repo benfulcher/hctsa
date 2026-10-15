@@ -92,6 +92,11 @@ function out = NL_PersistentHomology(y, tau, m, maxDim, maxN)
 %    to ripser needs capping). With maxN = 'full', a warning is given above 4000 points,
 %    beyond which cost grows steeply and can exceed BF_RipserSystem's own 600 s
 %    subprocess timeout.
+%
+% A count of "significant" H1 intervals above a fixed normalized-persistence threshold is
+% not returned: real (noisy, imperfectly periodic) data essentially never clears a fixed
+% significance bar, so such a field carried almost no information. maxPersistenceH1
+% captures the same underlying signal as a continuous quantity instead.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

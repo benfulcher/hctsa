@@ -96,6 +96,10 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % 'arcrosspred': the level statistics (trace, mean, min, max, eigenvalue levels) of
 % the cross-prediction matrix are not returned (largely redundant with the 'ar'
 % fpe_* fields); only the spread and off-diagonal statistics are.
+%
+% The 'arma' registration (order = [2, 2]) is not registered: its AR-driven fields were
+% largely redundant with the much cheaper 'ar' registration, and its MA-driven fields
+% (q_k_*) were noisy. The 'ar', 'arsbc' and 'ss' registrations are unaffected.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

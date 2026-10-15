@@ -26,6 +26,10 @@ function out = WL_wpdBestTree(y, wname, maxlevel)
 % stdDepth, the spread of terminal-node depths (near zero if the best basis ends up
 %        uniform-depth; large if the partition is very uneven)
 % entropy, the Shannon entropy of the energy distribution across terminal nodes
+%
+% ---NOTES:
+% The energy fraction in the single most energetic leaf is not returned, as it is
+% largely redundant with entropy.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

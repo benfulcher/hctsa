@@ -35,9 +35,12 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       (default: {'ac1e',30}). The series must span maxtstep + 2*past <= N/2
 %       samples. With {'ac1e', k}, a longer horizon is capped to fit, and the
 %       output is NaN only if fewer than max(10, 3 'ac1e' times) remain; with
-%       {'ac', k} or a number of samples, the output is NaN instead. The
-%       'ac1e' default stays defined for finely sampled series, where the
-%       zero crossing of the autocorrelation function can be long.
+%       {'ac', k} or a number of samples, the output is NaN instead (capping a
+%       zero-crossing horizon degraded the relationship of the slopes to known
+%       exponents on chaotic flows). The 'ac1e' default tracks known exponents
+%       about as well as {'ac', 20} and, unlike it, stays defined for finely
+%       sampled series, where the zero crossing of the autocorrelation function
+%       can be long.
 % past, the Theiler window: {'ac1e', k} or {'ac', k} as for maxtstep, or a number
 %       of samples (see BF_TheilerWindow; default: {'ac1e',1})
 % NNR, number of nearest neighbours. Accepted so that existing calls still
@@ -167,7 +170,9 @@ if capHorizon && maxtstep + 2 * past > floor(N / 2)
 end
 if maxtstep + 2 * past > N / 2
 	% Too few correlation times in the series to follow neighbor divergence
-	% (lyap_r also becomes very slow as maxtstep + past approaches N), so NaN
+	% (lyap_r also becomes very slow as maxtstep + past approaches N). Shortening
+	% maxtstep to fit was found to destroy the relationship of the slope fields to
+	% known exponents, so NaN
 	warning('Time series too short (N = %u) for maxtstep = %u with Theiler window %u', N, maxtstep, past);
 	out = NaN; return
 end

@@ -127,7 +127,9 @@ if nout == 1
 	out.rmse = reg.RMSE;
 
 else
-	% Return statistics on the set of outputs.
+	% Return statistics on the set of outputs. Only the minimum and mean p-value
+	% and the mean statistic are returned: the maximum and standard deviation of the
+	% p-values and the maximum and minimum statistic are largely redundant with them.
 	out.minpValue = min(pValue);
 	out.meanpValue = mean(pValue);
 	imaxp = find(pValue == max(pValue), 1, 'first');
