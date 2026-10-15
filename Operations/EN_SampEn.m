@@ -57,9 +57,10 @@ function out = EN_SampEn(y, M, r, preProcessHow)
 % DOI: 10.1152/ajpheart.00561.2010
 %
 % ---NOTES:
-% When runs of m values match but none still match when extended by one more value
-% (A = 0, B > 0), sampenm would be infinite; it is set to -log(1/B), the value for
-% a single extended match. When no runs of m values match (B = 0), sampenm is NaN.
+% sampenm is NaN when runs of m values match but none still match when extended
+% by one more value (A = 0, B > 0; for sampen0, when no two values are within r):
+% the estimate is then infinite, so the data cannot support it at this m, r and
+% length. It is also NaN when no runs of m values match (B = 0).
 %
 % The code comments cite the quadratic sample entropy only as "Lake (2006)" and
 % COSEn as "Lake and Moorman, 2011"; the full references above were matched to

@@ -4,19 +4,23 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % At each scale s the time series is coarse-grained by averaging over
 % non-overlapping windows of s samples (scale 1 is the original series), and the
 % entropy of the coarse-grained series is computed: by default the sample entropy,
-% SampEn(m,r) (EN_SampEn), as in the multiscale entropy of Costa et al. Scales are
-% handled as Composite Multiscale Entropy: the value at scale s is the mean over
-% all s possible starting offsets of the windows, instead of just offset 0 (see
-% NOTES). Scales for which the coarse-grained series has fewer than 20 samples are
-% skipped. The entropy is also summarized across scales (extremes and where they
-% occur, mean, spread, trend).
+% SampEn(m,r) (EN_SampEn), as in the multiscale entropy of Costa et al. All s
+% possible starting offsets of the windows are used, instead of just offset 0 (see
+% NOTES). The sample entropy at scale s is the refined composite multiscale
+% entropy (RCMSE) of Wu et al. (2014): the template matches of length m and m+1 are
+% counted for each of the s coarse-grained series (as in EN_SampEn), and the value
+% is -log of the summed matches of length m+1 over the summed matches of length m.
+% Offsets for which the coarse-grained series has fewer than 20 samples are
+% skipped, and a scale with no remaining offsets, or with no matches, is NaN. The
+% entropy is also summarized across scales (extremes and where they occur, mean,
+% spread, trend).
 %
 % ---INPUTS:
 % y, the input time series
 % scaleRange, a vector of scales (default: 1:10)
 % m, the embedding dimension (length of sequence to match) (default: 2)
-% r, the similarity threshold for matching, passed to EN_SampEn as an absolute
-%    value, so it is not rescaled with the scale (default: 0.15). It is a fraction
+% r, the similarity threshold for matching, an absolute value, so it is not
+%    rescaled with the scale (default: 0.15). It is a fraction
 %    of the standard deviation of the input if y is z-scored (as in hctsa).
 % preProcessHow, how to preprocess the data before coarse-graining (default: do
 %    not). The preprocessed series (BF_PreProcess) is z-scored. Options include
@@ -44,6 +48,7 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 %     sampen_s8, sampen_s9, sampen_s10 [dispen_s1, ... or fdispen_s1, ...], the
 %     entropy at each scale in scaleRange (named by the scale; these names are for
 %     the default scaleRange)
+% The following summaries across scales are NaN if the entropy at any scale is NaN:
 % maxSampEn [maxDispEn, maxFDispEn], the maximum entropy across scales
 % maxScale, the scale at which the maximum occurs
 % minSampEn [minDispEn, minFDispEn], the minimum entropy across scales
@@ -55,7 +60,7 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 %     across scales (stdSampEn/meanSampEn)
 % meanch, the mean change in entropy from one scale to the next
 % slope, the slope of a robust linear fit (robustfit) of entropy against scale
-%     (NaN unless at least 4 scales have valid values)
+%     (NaN for fewer than 3 scales)
 % slopeSE, the standard error of that slope
 % A scalar NaN is returned instead if no scale has enough samples.
 %
@@ -67,6 +72,15 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % Original C implementation and docs here:
 % http://physionet.org/physiotools/mse/tutorial/node3.html
 %
+% S.-D. Wu, C.-W. Wu, S.-G. Lin, C.-C. Wang and K.-Y. Lee, "Time Series Analysis
+% Using Composite Multiscale Entropy", Entropy 15(3), 1069-1084 (2013).
+% DOI: 10.3390/e15031069
+%
+% S.-D. Wu, C.-W. Wu, S.-G. Lin, K.-Y. Lee and C.-K. Peng, "Analysis of complex
+% time series using refined composite multiscale entropy", Physics Letters A 378,
+% 1369-1374 (2014), Eq. (8).
+% DOI: 10.1016/j.physleta.2014.03.034
+%
 % ---NOTES:
 % The dispersion setting estimates a similar quantity to SampEn, but more precisely
 % and much faster. The advantage reverses only under extreme quantization (very few
@@ -75,18 +89,15 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 %
 % Composite coarse-graining: the classic Costa coarse-graining at scale s uses a
 % single, arbitrary non-overlapping partition of the series starting at the first
-% sample, but s-1 other equally valid partitions exist (starting at offsets 1,...,s-1),
-% and which one is used has no scientific meaning. For short series, the single-offset
-% SampEn at large scales can depend strongly on this arbitrary starting offset, which
-% contaminates every derived summary field (maxSampEn/maxScale/meanSampEn/cvSampEn).
-% This function therefore implements Composite Multiscale Entropy (CMSE): "A Study of
-% Multiscale Entropy on Sample Entropy...", or more directly, "The direction of the
-% study on complexity", Wu, Wu, Chen, Liu, Sun, Yang, Peng, Entropy 15(3):1069-1084
-% (2013) -- averaging SampEn across all s possible coarse-graining offsets at each
-% scale (with mean(...,'omitnan')), rather than using only offset 0. Refined Composite
-% MSE (pooling raw match counts across offsets before the log, per Wu et al. 2014) is
-% theoretically marginally better, but needs the raw A/B match counts that the fast
-% compiled sampen_mex path does not expose.
+% sample, but s-1 other equally valid partitions exist (starting at offsets
+% 1,...,s-1), and which one is used has no scientific meaning. For short series,
+% the single-offset SampEn at large scales can depend strongly on this arbitrary
+% offset. All s offsets are therefore used. For the sample entropy, the match
+% counts are pooled across offsets before the log (refined composite MSE, Wu et
+% al. 2014), so the value is defined even if some offsets have no matches of length
+% m+1 (for which their own SampEn is undefined). For the dispersion
+% settings, the value at scale s is the mean over the offsets (composite MSE, Wu et
+% al. 2013).
 %
 % Registered summaries: for the dispersion setting, only meanDispEn, minDispEn and
 % stdDispEn are registered as features; the remaining summaries were less reliable
@@ -94,7 +105,7 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % maxSampEn is not registered (largely redundant with meanSampEn, which is essentially
 % Costa's "Complexity Index"), whereas maxScale (the location of the peak, distinct
 % from its height) is. meanch is also not registered: slope and slopeSE summarize the
-% same trend more completely, using all valid scales at once.
+% same trend more completely, using all scales at once.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -176,37 +187,47 @@ if ~isempty(preProcessHow)
 end
 
 % -------------------------------------------------------------------------------
-% Composite coarse-graining and sample entropy across scales:
+% Coarse-graining and entropy across scales:
 % -------------------------------------------------------------------------------
-% cf. Eq. (16) in Costa et al. (2005) for the coarse-graining operation itself;
-% averaged here across all `scale` possible non-overlapping starting offsets
-% (Composite Multiscale Entropy, Wu et al. 2013) rather than just offset 0 --
-% see NOTES above.
-sampEns = zeros(numScales, 1);
+% cf. Eq. (16) in Costa et al. (2005) for the coarse-graining at offset 0; here all
+% `scale` possible non-overlapping starting offsets are used (see NOTES above).
+sampEns = nan(numScales, 1);
 for si = 1:numScales
 	scale = scaleRange(si);
-	offsetSampEns = nan(scale, 1);
-	for off = 0:scale - 1
-		y_buffer = BF_MakeBuffer(y(off + 1:end), scale);
-		y_cg = mean(y_buffer, 2);
-		if length(y_cg) >= minTSLength
-			switch whatEntropy
-				case 'sampen'
-					sampEnStruct = EN_SampEn(y_cg, m, r);
-					offsetSampEns(off + 1) = sampEnStruct.(sprintf('sampen%u', m));
-				otherwise % 'dispen' / 'fdispen'
+	switch whatEntropy
+		case 'sampen'
+			% Refined composite multiscale entropy (Wu et al., 2014): pool the
+			% template-match counts over the offsets before taking the log:
+			numMatchesM1 = 0; % matches at length m+1
+			numMatchesM = 0; % matches at length m
+			for off = 0:scale - 1
+				y_cg = mean(BF_MakeBuffer(y(off + 1:end), scale), 2);
+				if length(y_cg) >= minTSLength
+					[~, countA, countB] = sampen_mex(y_cg', m + 1, r);
+					numMatchesM1 = numMatchesM1 + countA(m + 1);
+					numMatchesM = numMatchesM + countB(m + 1);
+				end
+			end
+			if numMatchesM1 > 0 && numMatchesM > 0
+				sampEns(si) = -log(numMatchesM1 / numMatchesM);
+			end
+		otherwise % 'dispen' / 'fdispen': mean over offsets (composite)
+			offsetEns = nan(scale, 1);
+			for off = 0:scale - 1
+				y_cg = mean(BF_MakeBuffer(y(off + 1:end), scale), 2);
+				if length(y_cg) >= minTSLength
 					dispEnStruct = EN_DispEn(y_cg, m, numClasses, 1);
 					if isstruct(dispEnStruct)
 						if strcmp(whatEntropy, 'dispen')
-							offsetSampEns(off + 1) = dispEnStruct.normDispEn;
+							offsetEns(off + 1) = dispEnStruct.normDispEn;
 						else
-							offsetSampEns(off + 1) = dispEnStruct.normFDispEn;
+							offsetEns(off + 1) = dispEnStruct.normFDispEn;
 						end
 					end
+				end
 			end
-		end
+			sampEns(si) = mean(offsetEns, 'omitnan');
 	end
-	sampEns(si) = mean(offsetSampEns,'omitnan');
 end
 
 % -------------------------------------------------------------------------------
@@ -238,29 +259,36 @@ for i = 1:numScales
 end
 
 % -------------------------------------------------------------------------------
-% Summary statistics of the variation:
+% Summary statistics of the variation across scales (NaN if any scale is NaN):
 % -------------------------------------------------------------------------------
+summaryFields = {['max' enName], 'maxScale', ['min' enName], 'minScale', ...
+				['mean' enName], ['std' enName], ['cv' enName], 'meanch', 'slope', 'slopeSE'};
+if any(isnan(sampEns))
+	for i = 1:length(summaryFields)
+		out.(summaryFields{i}) = NaN;
+	end
+	return
+end
+
 % Maximum, and where it occurred
-% (max and min ignore NaNs by default)
 [out.(['max' enName]), maxInd] = max(sampEns);
 out.maxScale = scaleRange(maxInd);
 % Minimum, and where it occurred
 [out.(['min' enName]), minInd] = min(sampEns);
 out.minScale = scaleRange(minInd);
 % Mean, std, coefficient of variation:
-out.(['mean' enName]) = mean(sampEns,'omitnan');
-out.(['std' enName]) = std(sampEns,0,'omitnan');
+out.(['mean' enName]) = mean(sampEns);
+out.(['std' enName]) = std(sampEns);
 out.(['cv' enName]) = out.(['std' enName]) / out.(['mean' enName]);
 % Mean change across the range of scales:
-out.meanch = mean(diff(sampEns),'omitnan');
+out.meanch = mean(diff(sampEns));
 
-% Trend across scales: robust linear fit of SampEn vs. scale (a more
+% Trend across scales: robust linear fit of the entropy vs. scale (a more
 % principled alternative to meanch's raw adjacent-scale averaging -- uses
-% all valid scales at once, and comes with its own standard error).
-scaleCol = scaleRange(:);
-goodScales = ~isnan(sampEns);
-if sum(goodScales) >= 4
-	[linfit, linstats] = robustfit(scaleCol(goodScales), sampEns(goodScales));
+% all scales at once, and comes with its own standard error). A robust fit needs
+% more points than its two coefficients:
+if numScales > 2
+	[linfit, linstats] = robustfit(scaleRange(:), sampEns);
 	out.slope = linfit(2);
 	out.slopeSE = linstats.se(2);
 else
