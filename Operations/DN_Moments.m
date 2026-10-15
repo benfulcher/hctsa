@@ -21,6 +21,10 @@ function out = DN_Moments(y, theMom, doNormalize)
 % The moment function averages over N values, but std normalizes by N - 1, so
 % for short series the standardized moments are slightly smaller than the
 % textbook ones.
+%
+% Before v3.0.0, the normalization was by std(y) regardless of theMom; that
+% coincides with the standardized moment only for unit-variance input. Use
+% doNormalize = false for the raw central moment.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

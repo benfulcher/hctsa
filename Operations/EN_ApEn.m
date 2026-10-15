@@ -32,7 +32,6 @@ function out = EN_ApEn(y, mnom, rth, tau)
 %
 % ---NOTES:
 % For more information, cf. http://physionet.org/physiotools/ApEn/
-% I have no record of where this code was derived from :-/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

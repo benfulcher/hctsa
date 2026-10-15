@@ -649,9 +649,6 @@ warning('on', 'stats:robustfit:RankDeficient')
 % ------------------------------------------------------------------------------
 %% Power in specific frequency bands
 % ------------------------------------------------------------------------------
-% *** DO THIS BY BUFFER COMMAND: AND WHILE AT IT LOOK AT STATIONARITY OF
-% POWER SPECTRUM....
-
 % 2 bands
 split = buffer(S, floor(N / 2));
 if size(split, 2) > 2, split = split(:, 1:2); end

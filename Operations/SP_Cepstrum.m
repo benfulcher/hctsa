@@ -93,6 +93,10 @@ function out = SP_Cepstrum(y, maxPeriod, minPeriod)
 % redundant with CPP, the standard published formulation, which does not
 % simply track the cepstrum's overall scale; `stdCeps` serves mainly as
 % the normalizer inside peakRatio.
+%
+% The registered fields capture harmonic-comb structure (a fundamental together
+% with its harmonics) that is not otherwise captured by hctsa's periodicity and
+% autocorrelation features; rahmonicRatio is the most distinct of them.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
