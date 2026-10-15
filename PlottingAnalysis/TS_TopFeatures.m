@@ -183,8 +183,12 @@ end
 % Set up the test statistic computation and relevant description text:
 switch whatTestStat
     case 'classification'
-        % Set up the loss function for a classifier-based metric:
-        fn_testStat = GiveMeFunctionHandle(cfnParams);
+        % Set up the loss function for a classifier-based metric. Each feature is
+        % scored in-sample (trained and tested on the same data, as below), so
+        % no cross-validation is used here, whatever cfnParams.numFolds is:
+        cfnParamsInSample = cfnParams;
+        cfnParamsInSample.numFolds = 0;
+        fn_testStat = GiveMeFunctionHandle(cfnParamsInSample);
         chanceLevel = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
         testStatText = sprintf('%s %s',cfnParams.classifierText,cfnParams.whatLoss);
         statUnit = cfnParams.whatLossUnits;
@@ -471,7 +475,7 @@ if ismember('datamatrix',whatPlots)
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat),:));
-    TS_PlotDataMatrix(dataLocal,'colorGroups',true,'groupReorder',true);
+    TS_PlotDataMatrix('whatData',dataLocal,'colorGroups',true,'groupReorder',true);
 end
 
 %-------------------------------------------------------------------------------
@@ -576,27 +580,26 @@ if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilen
     theTopFeatureIndex = ifeat(1);
     topFeatureValues = TS_DataMat(:,theTopFeatureIndex);
 
+    % Cross-validated accuracy of the top feature (if cfnParams.numFolds > 0):
+    if cfnParams.numFolds > 0
+        cvAccuracy = ComputeCVAccuracies(topFeatureValues,TimeSeries.Group,cfnParams);
+    else
+        % CV was never done
+        cvAccuracy = NaN;
+    end
+
     % Build in-sample classifier (no CV):
-    numFoldsAbove = cfnParams.numFolds;
     cfnParams.numFolds = 0;
 
     % Train a classification model on the top feature:
-    GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbose)
-    [bestTestStat,bestMdl,whatTestStat] = GiveMeCfn(topFeatureValues,TimeSeries.Group,...
-                                                    topFeatureValues,TimeSeries.Group,...
-                                                    cfnParams);
+    [bestTestStat,bestMdl] = GiveMeCfn(topFeatureValues,TimeSeries.Group,...
+                                        topFeatureValues,TimeSeries.Group,cfnParams);
 
     % Prepare the featureClassifier structure:
     featureClassifier.Operation.ID = Operations.ID(theTopFeatureIndex); % Sorted list of top operations
     featureClassifier.Operation.Name = Operations.Name{theTopFeatureIndex}; % Sorted list of top operations
     featureClassifier.Mdl = bestMdl; % sorted feature models
-    if numFoldsAbove > 0
-        % From sorted accuracy of models
-        featureClassifier.CVAccuracy = testStat_sort(1);
-    else
-        % CV was never done
-        featureClassifier.CVAccuracy = NaN;
-    end
+    featureClassifier.CVAccuracy = cvAccuracy;
     featureClassifier.Accuracy = bestTestStat;
     featureClassifier.whatTestStat = whatTestStat;
     featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');

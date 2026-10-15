@@ -149,10 +149,10 @@ elseif isempty(whatTimeSeries) || strcmp(whatTimeSeries,'all')
     classLabels = {};
 elseif ischar(whatTimeSeries)
     % Just plot the specified group
-    % First load group names:
-    classLabels = TS_GetFromData(dataSource,'classLabels');
-    a = strcmp(whatTimeSeries,classLabels);
-    groupIndices = {find(TimeSeries.Group==find(a))};
+    if ~ismember(whatTimeSeries,categories(TimeSeries.Group))
+        error('No group named ''%s'' found in TimeSeries.Group',whatTimeSeries);
+    end
+    groupIndices = {find(TimeSeries.Group==whatTimeSeries)};
     classLabels = {whatTimeSeries};
     fprintf(1,'Plotting %u time series matching group name ''%s''\n',length(groupIndices{1}),whatTimeSeries);
 else % Provided a custom range as a vector
@@ -219,7 +219,7 @@ end
 
 % Set default for max length if unspecified (as max length of time series)
 if isempty(maxLength)
-    ls = TimeSeries.Length(iPlot(i));
+    ls = TimeSeries.Length(iPlot);
     maxN = max(ls); % maximum length of all time series to plot
 else
     maxN = maxLength;
@@ -244,7 +244,7 @@ if carpetPlot
     % Add filenames to axes:
     if displayTitles
         ax = gca;
-        fn = TimeSeries.Name{iPlot}; % the name of the time series
+        fn = TimeSeries.Name(iPlot); % the names of the time series
         ax.YTick = 1:numToPlot;
         ax.YTickLabel = fn;
         ax.TickLabelInterpreter = 'none';
@@ -258,7 +258,7 @@ end
 %-------------------------------------------------------------------------------
 if isnumeric(colorMap)
     % Specified a custom colormap as a matrix
-    theColors = mat2cell(colorMap);
+    theColors = num2cell(colorMap,2); % one RGB row per color
 elseif iscell(colorMap)
     % Specified a custom colormap as a cell of colors
     theColors = colorMap;
@@ -358,10 +358,10 @@ else
                 end
             else
                 sti = randi(N-maxLength,1);
-                plot(x(sti:sti+maxLength),'-','color',theColors{classes(i)}) % plot a random maxLength-length portion of the time series
+                plot(x(sti:sti+maxLength-1),'-','color',theColors{classes(i)}) % plot a random maxLength-length portion of the time series
                 Ls(i) = maxLength;
                 if displayTitles
-                    title(sprintf('%s (%u :: %u-%u)',startBit,N,sti,sti+maxLength),...
+                    title(sprintf('%s (%u :: %u-%u)',startBit,N,sti,sti+maxLength-1),...
                                 'interpreter','none','FontSize',8);
                 end
             end
@@ -371,7 +371,7 @@ else
             ax.XTickLabel = '';
             ax.FontSize = 8; % put the ticks for the last time series
         else % label the axis
-            ax.XLabel = 'Time (samples)';
+            ax.XLabel.String = 'Time (samples)';
         end
     end
 
