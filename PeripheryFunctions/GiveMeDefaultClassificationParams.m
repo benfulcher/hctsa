@@ -91,9 +91,8 @@ end
 %% Cross Validation
 %-------------------------------------------------------------------------------
 
-% Number of folds (set to 0 for no CV)
+% Number of folds (set to 0 for no CV): 10, or fewer for small classes (HowManyFolds)
 params.numFolds = HowManyFolds(TimeSeries.Group,numClasses);
-params.numFolds = 10;
 
 % Whether to output information about each fold (including training set errors),
 % or just average over folds

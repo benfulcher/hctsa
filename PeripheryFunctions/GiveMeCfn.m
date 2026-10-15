@@ -74,11 +74,14 @@ if strcmp(cfnParams.whatClassifier,'fast-linear')
             'DiscrimType','linear','KFold',cfnParams.numFolds);
         end
     else
-        if nargout == 1
+        if nargout == 1 && ~cfnParams.doReweight
             % It's faster to use classify if we only want the accuracy
             accuracy = BF_LossFunction(yTest,classify(XTest,XTrain,yTrain,'linear','empirical'),...
                             cfnParams.whatLoss,cfnParams.classLabels);
             return;
+        elseif cfnParams.doReweight
+            Mdl = fitcdiscr(XTrain,yTrain,'Prior','empirical',...
+                'DiscrimType','linear','Weights',InverseProbWeight(yTrain));
         else
             Mdl = fitcdiscr(XTrain,yTrain,'Prior','empirical');
         end
@@ -105,10 +108,20 @@ else
                 Mdl = fitctree(XTrain,yTrain);
             end
         case {'linear','linclass'}
-            if cfnParams.numFolds > 0
-                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',cfnParams.numFolds);
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on',...
+                                'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on',...
+                                'Weights',InverseProbWeight(yTrain));
+                end
             else
-                Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
+                if cfnParams.numFolds > 0
+                    Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on','KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitcdiscr(XTrain,yTrain,'FillCoeffs','off','SaveMemory','on');
+                end
             end
         case 'logistic'
             if cfnParams.doReweight
@@ -183,10 +196,18 @@ else
                 end
             end
         case 'diaglinear'
-            if cfnParams.numFolds > 0
-                Mdl = fitcnb(XTrain,yTrain,'KFold',cfnParams.numFolds);
+            if cfnParams.doReweight
+                if cfnParams.numFolds > 0
+                    Mdl = fitcnb(XTrain,yTrain,'Weights',InverseProbWeight(yTrain),'KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitcnb(XTrain,yTrain,'Weights',InverseProbWeight(yTrain));
+                end
             else
-                Mdl = fitcnb(XTrain,yTrain);
+                if cfnParams.numFolds > 0
+                    Mdl = fitcnb(XTrain,yTrain,'KFold',cfnParams.numFolds);
+                else
+                    Mdl = fitcnb(XTrain,yTrain);
+                end
             end
         otherwise
             error('Unknown classifier: ''%s''',cfnParams.whatClassifier);
