@@ -40,7 +40,7 @@ function out = EN_RandomizeOrdinal(y, tau)
 % halftime, the randomization time t/N at which the permutation entropy of the
 %    expected pattern distribution is halfway to its fully randomized value (NaN
 %    if the original series has the same pattern entropy as its fully randomized
-%    version, so that nothing decays)
+%    version, to within rounding error, so that nothing decays)
 % normPermEn0, the normalized PermEn(3,tau) of the original series
 % normPermEnRep1, the normalized permutation entropy of the expected pattern
 %    distribution when one sample of each window (chosen at random) is replaced by
@@ -124,7 +124,7 @@ out.normPermEnInf = H(S(subsetSize == 0, :));
 % ------------------------------------------------------------------------------
 H0 = out.normPermEn0;
 Hinf = out.normPermEnInf;
-if abs(Hinf - H0) < 1e-12
+if abs(Hinf - H0) <= 8 * eps
 	out.halftime = NaN;
 	return
 end

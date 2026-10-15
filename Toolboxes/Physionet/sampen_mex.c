@@ -288,8 +288,11 @@ void sampen(double *y, int M, double r, int n, double *sampEnt)
 	p[m] = A[m] / B[m - 1];
 	if (p[m] == 0)
     {
-        sampEnt[m] = 0;
-        /* printf("No matches! SampEn((%d,%g,%d) = Inf!\n", m, r, n); */
+        /* Matches at length m but none at length m+1 (A = 0, B > 0): the
+           estimate is infinite in the limit, so use the finite convention of
+           one match, -log(1/B) (Richman and Moorman, 2000). When there are no
+           matches at length m, p is NaN and so is sampEnt. */
+        sampEnt[m] = -log(1.0 / B[m - 1]);
     }
 	else
     {

@@ -4,18 +4,20 @@ function out = WL_modwtvar(y, wname, level)
 % Decomposes the time series into octave-scale bands using the maximal overlap
 % discrete wavelet transform (MODWT) and computes summary statistics on how
 % variance is distributed across scales. Unlike the standard (decimated) DWT used
-% elsewhere in this codebase, the MODWT is shift-invariant and its associated
-% variance estimator (modwtvar) is unbiased and accounts for boundary-affected
-% coefficients at each level, which is the standard approach for a scale-wise
-% variance decomposition (Percival and Walden, 2000).
+% elsewhere in this codebase, the MODWT is shift-invariant and its variance
+% estimator uses only the coefficients unaffected by the boundary at each level
+% (Percival and Walden, 2000): the mean square of the unaffected coefficients of
+% each detail level, and the variance about the mean of those of the scaling band.
 %
 % ---INPUTS:
 % y, the input time series
 % wname, the mother wavelet, e.g., 'db3', 'sym2' (see Wavelet Toolbox
 %        Documentation; default: 'db3')
 % level, the level of wavelet decomposition (can be set to 'max' for the maximum
-%        level supported by the series length, floor(log2(N)); default: 5). A
-%        level that is too large is reduced to the maximum.
+%        level supported by the series length and wavelet,
+%        floor(log2((N - 1)/(L - 1) + 1)) with L the filter length; default: 5). A
+%        level that is too large is reduced to the maximum, so that every level, and
+%        the scaling band, has at least one coefficient unaffected by the boundary.
 %
 % ---OUTPUTS:
 % scalingFrac, the fraction of variance in the lowest-frequency (scaling/trend)
@@ -79,7 +81,11 @@ if nargin < 3 || isempty(level)
 	level = 5; % level of wavelet decomposition
 end
 
-maxLevelAllowed = floor(log2(N));
+% Deepest level whose scale has at least one boundary-unaffected coefficient, so that
+% every retained level (and the scaling band) has an unbiased variance estimate:
+% (2^j - 1)(L - 1) + 1 <= N, with L the wavelet filter length
+filtLen = numel(wfilters(wname));
+maxLevelAllowed = floor(log2((N - 1) / (filtLen - 1) + 1));
 if strcmp(level, 'max')
 	level = maxLevelAllowed;
 end
@@ -95,13 +101,22 @@ end
 % ------------------------------------------------------------------------------
 %% MODWT and its unbiased multiscale variance decomposition
 % ------------------------------------------------------------------------------
-w = modwt(y, wname, level);
-wvar = modwtvar(w, wname); % nominally length level+1: levels 1..level (detail), then scaling/trend
-% modwtvar silently drops levels whose unbiased estimate has no
-% boundary-unaffected coefficients left (short series relative to the
-% wavelet filter length), so wvar can be shorter than level+1 -- always
-% work from its actual length rather than the requested level.
-numLevelsReturned = numel(wvar) - 1; % number of detail levels actually returned
+w = modwt(y, wname, level); % (level+1) x N: levels 1..level (detail), then scaling/trend
+
+% Unbiased variance by level (Percival and Walden, 2000): level j has
+% L_j = (2^j - 1)(L - 1) + 1 filter taps, so its last M_j = N - L_j + 1 coefficients
+% are unaffected by the boundary. Wavelet filters sum to zero, so detail coefficients
+% have zero mean and the estimator is their mean square. The scaling coefficients carry
+% the mean of the series, which is not variance, so it is removed for that band.
+wvar = zeros(1, level + 1);
+for j = 1:level
+	Lj = (2^j - 1) * (filtLen - 1) + 1;
+	Mj = N - Lj + 1; % at least 1, by the cap on the level
+	wvar(j) = mean(w(j, N - Mj + 1:end).^2);
+end
+Mj = N - ((2^level - 1) * (filtLen - 1) + 1) + 1;
+wvar(level + 1) = var(w(level + 1, N - Mj + 1:end), 1);
+numLevelsReturned = level; % number of detail levels
 
 % ------------------------------------------------------------------------------
 %% Return statistics
