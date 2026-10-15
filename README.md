@@ -19,8 +19,7 @@ It extracts thousands of time-series features from a collection of univariate ti
 
 __Feel free to [email me](mailto:ben.d.fulcher@gmail.com) for advice on applications__ of _hctsa_ :nerd_face:
 
-> :snake: **Python:** active development is transitioning to [_pyhctsa_](https://github.com/DynamicsAndNeuralSystems/pyhctsa), a native Python implementation of the _hctsa_ feature library.
-> _hctsa_ remains maintained and will continue to be developed, but most new development will happen in _pyhctsa_.
+> :snake: **Python:** future development of the _hctsa_ feature library is planned to happen in [_pyhctsa_](https://github.com/DynamicsAndNeuralSystems/pyhctsa), a native Python implementation that reproduces the _hctsa_ v3.0.0 feature set.
 
 ## Installation and quick start :arrow_down:
 
