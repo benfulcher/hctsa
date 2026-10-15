@@ -83,11 +83,11 @@ if size(v2,2) > size(v2,1), v2 = v2'; end
 % Create histograms:
 % (i) in v1
 edgesi = SUB_GiveMeEdges(r1,v1,numBins);
-[ni, bini] = histc(v1, edgesi);
+[ni, bini] = SUB_HistC(v1, edgesi);
 
 % (ii) in v2
 edgesj = SUB_GiveMeEdges(r2,v2,numBins);
-[nj, binj] = histc(v2, edgesj);
+[nj, binj] = SUB_HistC(v2, edgesj);
 
 % ------------------------------------------------------------------------------
 %% Create a joint histogram:
@@ -127,6 +127,17 @@ else
 end
 
 % ------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+function [counts, binIdx] = SUB_HistC(x, edges)
+    % Bin x into the bins edges(k) <= x < edges(k+1), with values equal to the
+    % final edge excluded (as histc did; histcounts would put them in the last bin).
+    % Returns a column of counts (one per bin) and the bin index of each x (0 if none).
+    [counts, ~, binIdx] = histcounts(x, edges);
+    onFinalEdge = (x == edges(end));
+    binIdx(onFinalEdge) = 0;
+    counts(end) = counts(end) - nnz(onFinalEdge);
+    counts = counts(:);
+end
 % ------------------------------------------------------------------------------
 function edges = SUB_GiveMeEdges(r,v,nbins)
     if ischar(r) && strcmp(r,'range')

@@ -258,7 +258,7 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
 
     T_MRT = mean(w);
     uniqueW = unique(w);
-    counts = histc(w, uniqueW);
+    counts = histcounts(w, [uniqueW(:)', Inf]); % (the number of times each unique value occurs)
     % Normalized to a probability mass (fraction of all pooled
     % recurrence-time samples falling at the modal value), not the paper's
     % raw count -- the raw count scales directly with how many samples

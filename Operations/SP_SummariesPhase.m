@@ -139,8 +139,8 @@ out.R = abs(Rvec);
 % ------------------------------------------------------------------------------
 nBins = 20;
 edges = linspace(-pi, pi, nBins + 1);
-[~, binIdx] = histc(ph, edges);
-binIdx(binIdx == 0) = 1; binIdx(binIdx > nBins) = nBins; % guard the (rare) ph == pi edge case
+[~, ~, binIdx] = histcounts(ph, edges); % (the last bin includes ph == pi)
+binIdx(binIdx == 0) = 1; % guard against NaN phases
 pBin = accumarray(binIdx, wgt, [nBins, 1]);
 pBin_nz = pBin(pBin > 0);
 out.phEnt = -sum(pBin_nz .* log(pBin_nz)) / log(nBins);

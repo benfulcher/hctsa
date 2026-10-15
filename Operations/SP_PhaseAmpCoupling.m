@@ -161,8 +161,7 @@ for i = 1:nBands - 1
         k = k + 1;
         phi = phaseBand{i};
         A = ampBand{j};
-        [~, binIdx] = histc(phi, phaseEdges);
-        binIdx(binIdx == nPhaseBins + 1) = nPhaseBins; % phi == pi edge case
+        [~, ~, binIdx] = histcounts(phi, phaseEdges); % (the last bin includes phi == pi)
         meanAmp = accumarray(binIdx, A, [nPhaseBins, 1], @mean, 0);
         p = meanAmp / sum(meanAmp);
         p = p(p > 0);

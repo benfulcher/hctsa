@@ -95,8 +95,24 @@ else
     filePath = tempname;
 end
 
-% Write the file:
-dlmwrite(filePath,dataVector,'precision',whatPrecision);
+% Write the file: one row per line, comma-delimited, each value written with
+% whatPrecision significant digits ('%.17g' by default). This is written with
+% fprintf because writematrix cannot be told to write more than 15 significant
+% digits, which would lose the exactness described above:
+if ischar(whatPrecision)
+    numFormat = whatPrecision; % a custom format string
+else
+    numFormat = ['%.' num2str(whatPrecision) 'g'];
+end
+fid = fopen(filePath,'wt');
+if fid < 0
+    error('Could not open temporary file %s for writing',filePath);
+end
+if ~isempty(dataVector)
+    rowFormat = [repmat([numFormat ','],1,size(dataVector,2)-1), numFormat, '\n'];
+    fprintf(fid,rowFormat,dataVector.');
+end
+fclose(fid);
 
 cachedData = dataVector;
 cachedPrecision = whatPrecision;

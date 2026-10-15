@@ -239,7 +239,7 @@ if fileInfo.bytes == 0
 	out = NaN; return
 end
 
-v = dlmread(outFilePath);
+v = readmatrix(outFilePath, 'FileType', 'text', 'NumHeaderLines', 0);
 delete(outFilePath);
 t = v(:, 1);
 p = v(:, 2);
