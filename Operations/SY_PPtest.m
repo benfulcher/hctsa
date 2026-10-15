@@ -34,7 +34,9 @@ function out = SY_PPtest(y, lags, model, testStatistic)
 %       clamp and the first lag is returned.
 % meanstat: the mean test statistic across the tests
 % minBIC: the minimum, across the tests, of the Bayesian information criterion of
-%       the test regression, per observation
+%       the test regression, per observation (the regression does not depend on
+%       the lag, which only enters the variance correction of the statistic, so
+%       this is the BIC of that one regression)
 % For a single lag:
 % pvalue, stat: the p-value and test statistic
 % coeff1: the first regression coefficient
