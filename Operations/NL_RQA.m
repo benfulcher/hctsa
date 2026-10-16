@@ -12,8 +12,9 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, ~)
 % y, scalar time series as a column vector
 % tau, time delay for the embedding (can be 'ac', 'ac1e', or 'mi', cf. BF_Embed and
 %    BF_GetTau; default: 1)
-% m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
-%    neighbors (cf. BF_Embed; default: 3)
+% m, embedding dimension: a positive integer, or 'fnn' or {'fnn',th} to choose it by
+%    false nearest neighbors at threshold th, at most floor(2*log10(N)) for the N
+%    samples analyzed (cf. BF_Embed; default: 3)
 % theilerWin, Theiler window excluding temporally-correlated neighbors from the main
 %             diagonal: {'ac', k} for k times the first zero-crossing of the
 %             autocorrelation function, or a number of samples (see BF_TheilerWindow;

@@ -22,8 +22,10 @@ function out = NL_Dimensions(y, numBins, embedParams)
 %          for d2) in each sweep (default: 50)
 % embedParams, embedding parameters to feed BF_Embed() for embedding the
 %          signal, in the form {tau,m} (tau can be a number of samples, 'ac',
-%          'ac1e' or 'mi'; see BF_GetTau; default: {'ac','fnn'}; hctsa uses
-%          {'ac1e','fnn'})
+%          'ac1e' or 'mi'; see BF_GetTau; m a number of dimensions, or 'fnn' or
+%          {'fnn',th} for false nearest neighbors at threshold th, at most
+%          floor(2*log10(N)): see BF_Embed; default: {'ac','fnn'}; hctsa uses
+%          {'ac1e',{'fnn',0.05}})
 %
 % ---OUTPUTS: statistics of the curves, in two families with prefix bc_ (box
 % counting, ln N(epsilon)) or co_ (correlation sum, ln C(r)). In the names, k is

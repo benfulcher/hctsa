@@ -11,13 +11,18 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 %
 % ---INPUTS:
 % y, the input time series (should be z-scored)
-% de, the embedding dimension (can be an integer, or 'fnn' to select it by false nearest
-%     neighbors using NL_FNN with dimensions 1 to 10 and a threshold of 0.05: the smallest
-%     dimension not ruled out, i.e. the first dimension at which the proportion of false
-%     nearest neighbors falls below 5% on at least 60 points, or at which too few points
-%     found a neighbor to decide, or else one more than the largest dimension TISEAN
-%     computed (11 when all ten were computed); a lower bound unless the proportion fell
-%     below 5%; default: 3)
+% de, the embedding dimension: an integer, or {'fnn',th} (or 'fnn', with th = 0.05) to
+%     choose it by false nearest neighbors at threshold th, limited by the length of the
+%     series analyzed: de = min(m_fnn, floor(2*log10(N))), with N the length after any
+%     maxN crop. m_fnn is the smallest dimension not ruled out by NL_FNN (dimensions 1 to
+%     10, a Theiler window of one autocorrelation time, escape factor 5): the first
+%     dimension at which the proportion of false nearest neighbors is below th on at least
+%     ceil(3/th) points, or at which too few points found a neighbor to decide, or else one
+%     more than the largest dimension TISEAN computed (11 when all ten were computed); a
+%     lower bound unless the proportion fell below th. The limit floor(2*log10(N)) is the
+%     largest dimension N points can resolve (Eckmann & Ruelle 1992; see BF_Embed): in more
+%     dimensions typical points have no neighbor within a tenth of the diameter of the set
+%     (at most 4, 5, 6, 7 dimensions for N = 250, 500, 1000, 5000). Default: 3.
 % tau, the time-delay (can be an integer, 'ac' for the first zero-crossing of the ACF,
 %      'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller of the
 %      first minimum of the Kraskov automutual information and the 'ac1e' delay; see
@@ -25,7 +30,8 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % maxN, the maximum time-series length to analyze; longer series are cropped to their first
 %       maxN points (default: 5000, due to memory constraints with longer time series). Set
 %       to 'full' to disable, with a warning above 20000 points. The time delay, the Theiler
-%       window and an 'fnn' embedding dimension are all computed from the cropped series.
+%       window and an 'fnn' embedding dimension (and its limit) are all computed from the
+%       cropped series.
 % theilerWin, Theiler window: the prediction for each point uses its nearest neighbor
 %       outside this window in time ({'ac', k} for k times the first zero-crossing of the
 %       autocorrelation function, or a number of samples; see BF_TheilerWindow; default:
@@ -53,6 +59,9 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % ---REFERENCES:
 % M. Small, "Applied Nonlinear Time Series Analysis: Applications in Physics, Physiology,
 % and Finance", World Scientific, Nonlinear Science Series A, Vol. 52 (2005).
+% J.-P. Eckmann and D. Ruelle, "Fundamental limitations for estimating dimensions and
+% Lyapunov exponents in dynamical systems", Physica D 56(2-3), 185-187 (1992).
+% DOI: 10.1016/0167-2789(92)90023-g
 %
 % ---NOTES:
 % Michael Small's Matlab code is available at http://small.eie.polyu.edu.hk/matlab/
@@ -150,14 +159,25 @@ end
 % -------------------------------------------------------------------------------
 % Do false nearest neighbours to compute an appropriate embedding dimension, if needed
 % (escapeFactor=5 matches the convention used elsewhere for this test):
-if strcmp(de, 'fnn')
-	de = NL_FNN(y, tau, 10, {'ac', 1}, 1, 0.05, 5);
+if ischar(de) || iscell(de)
+	if ~iscell(de), de = {de}; end
+	if ~strcmp(de{1}, 'fnn')
+		error('Invalid embedding dimension specification for NL_nlpe.')
+	end
+	if isscalar(de)
+		th = 0.05;
+	else
+		th = de{2};
+	end
+	de = NL_FNN(y, tau, 10, {'ac', 1}, 1, th, 5);
 	if isnan(de)
 		% NL_FNN already signals a data-dependent embedding-dimension failure
 		% (e.g. series too short for the requested tau) via NaN; propagate it
 		% here rather than passing a NaN de into MS_nlpe below.
 		out = NaN; return
 	end
+	% No more dimensions than the N analyzed points can resolve (Eckmann & Ruelle 1992)
+	de = min(de, max(1, floor(2*log10(N))));
 end
 
 % -------------------------------------------------------------------------------

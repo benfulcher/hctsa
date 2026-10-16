@@ -69,12 +69,49 @@ classdef Robust_fnnTests < matlab.unittest.TestCase
             tc.verifyEqual(m, M(firstLow,1));
             % 0.05 is the default threshold
             tc.verifyEqual(NL_FNN(x, 1, 10, 1, 1, [], 5), m);
-            % firstunder* use the same points and never decrease as the threshold falls
+            % dim* use the same points and never decrease as the threshold falls
             f = NL_FNN(x, 1, 10, 1, 0, [], 5);
-            fu = [f.firstunder09, f.firstunder08, f.firstunder07, f.firstunder06, f.firstunder05, ...
-                f.firstunder04, f.firstunder03, f.firstunder02, f.firstunder01, f.firstunder005];
+            fu = [f.dim09, f.dim08, f.dim07, f.dim06, f.dim05, f.dim04, f.dim03, f.dim02, f.dim01, f.dim005];
             tc.verifyTrue(all(diff(fu) >= 0));
-            tc.verifyEqual(f.firstunder005, m);
+            tc.verifyEqual(f.dim005, m);
+        end
+
+        function embeddingDimensionLimitedByLength(tc)
+            % When 'fnn' chooses the dimension for another algorithm (BF_Embed,
+            % NL_nlpe), it is at most floor(2*log10(N)); NL_FNN itself is not capped.
+            for N = [250, 1000]
+                rng(1, 'twister'); x = randn(N, 1);
+                p = BF_Embed(x, 1, {'fnn', 0.05}, true);
+                tc.verifyEqual(p(2), min(NL_FNN(x, 1, 10, {'ac', 1}, 1, 0.05, 5), floor(2*log10(N))));
+                tc.verifyEqual(BF_Embed(x, 1, 'fnn', true), p); % 0.05 is the default
+                % smoothed noise: the fraction never falls below 0.05, with many points
+                % behind it, so the FNN answer exceeds the limit and the limit binds
+                rng(2, 'twister'); z = filter(ones(20,1)/20, 1, randn(N + 100, 1)); z = z(101:end);
+                mFNN = NL_FNN(z, 1, 10, {'ac', 1}, 1, 0.05, 5);
+                tc.verifyGreaterThan(mFNN, floor(2*log10(N)));
+                p = BF_Embed(z, 1, {'fnn', 0.05}, true);
+                tc.verifyEqual(p(2), floor(2*log10(N)));
+            end
+        end
+
+        function fnnThresholdSyntaxInOperations(tc)
+            % {'fnn',th} as m (NL_RQA) and inside {tau, m} (NL_Dimensions-style
+            % embedding parameters) is the same as 'fnn' at 0.05
+            rng(3, 'twister'); x = randn(600, 1);
+            tc.verifyEqual(NL_RQA(x, 'mi', {'fnn', 0.05}), NL_RQA(x, 'mi', 'fnn'));
+            tc.verifyEqual(NL_LocalDensity(x, 5, {'ac', 1}, {'ac1e', {'fnn', 0.05}}), ...
+                NL_LocalDensity(x, 5, {'ac', 1}, {'ac1e', 'fnn'}));
+            tc.verifyEqual(NL_nlpe(x, {'fnn', 0.05}, 'mi'), NL_nlpe(x, 'fnn', 'mi'));
+        end
+
+        function nlpeLimitUsesTheCroppedLength(tc)
+            % NL_nlpe crops to maxN samples first; the limit on an 'fnn' dimension is
+            % floor(2*log10(maxN)), not that of the full series
+            rng(2, 'twister'); z = filter(ones(20,1)/20, 1, randn(6100, 1)); z = zscore(z(101:end));
+            tc.verifyGreaterThan(NL_FNN(z(1:1000), 1, 10, {'ac', 1}, 1, 0.05, 5), 6);
+            a = NL_nlpe(z, {'fnn', 0.05}, 1, 1000);
+            tc.verifyEqual(a, NL_nlpe(z, 6, 1, 1000));
+            tc.verifyNotEqual(a.meanabs, getfield(NL_nlpe(z, 7, 1, 1000), 'meanabs'));
         end
 
         function lorenzDimensionUnaffectedByTheCountRule(tc)

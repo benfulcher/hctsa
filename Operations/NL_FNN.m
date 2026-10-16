@@ -45,8 +45,9 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 %           (maxm + 1 when every dimension up to maxm was computed; one more than
 %           the last when TISEAN stopped early, having no neighbors left within
 %           its search range). Unless the fraction fell below bestp, the value is
-%           a lower bound: every smaller dimension was tested and ruled out
-%           (default: 1)
+%           a lower bound: every smaller dimension was tested and ruled out. It is
+%           not limited by the length of the series (BF_Embed's 'fnn', which chooses
+%           the dimension for another algorithm, is) (default: 1)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
 %        dimension (default: 0.05)
 % escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
@@ -67,13 +68,15 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % minpfnn, meanpfnn, stdpfnn: minimum, mean and standard deviation of the
 %             fraction of false nearest neighbors across dimensions
 % maxnHood2, meannHood2: maximum and mean of nHood2 across dimensions
-% firstunder09, firstunder08, firstunder07, firstunder06, firstunder05,
-%             firstunder04, firstunder03, firstunder02, firstunder01,
-%             firstunder005: the smallest embedding dimension not ruled out at a
-%             threshold of 90%, 80%, ..., 10%, 5%, as for justBest, except that all
-%             ten take a fraction as deciding only when it rests on enough points
-%             for the smallest threshold, 5% (60 points), so that they use the same
-%             dimensions and never decrease as the threshold rises
+% dim09, dim08, dim07, dim06, dim05, dim04, dim03, dim02, dim01, dim005: the
+%             embedding-dimension estimate by false nearest neighbors at a threshold
+%             p of 0.9, 0.8, ..., 0.1, 0.05: the smallest dimension not ruled out,
+%             where a dimension is ruled out if its fraction of false nearest
+%             neighbors is >= p and rests on at least ceil(3/0.05) = 60 points (one
+%             minimum count for all ten, so they use the same dimensions and never
+%             decrease as p falls). If no dimension up to maxm qualifies, the value is
+%             one more than the last dimension tested, a lower bound. Not limited by
+%             the length of the series (unlike BF_Embed's 'fnn').
 % max1stepchange: the largest absolute change in the fraction between
 %             consecutive embedding dimensions
 % mdrop: the mean change in the fraction per added dimension
@@ -292,16 +295,16 @@ out.meannHood2 = mean(nHoodSize2); % mean
 % all ten (that of the smallest threshold, 0.05), so a dimension either decides
 % at every threshold or at none:
 minCount = ceil(3/0.05);
-out.firstunder09 = firstunderf(0.9, mDim, pNN, nPoints, minCount);   % 90%
-out.firstunder08 = firstunderf(0.8, mDim, pNN, nPoints, minCount);   % 80%
-out.firstunder07 = firstunderf(0.7, mDim, pNN, nPoints, minCount);   % 70%
-out.firstunder06 = firstunderf(0.6, mDim, pNN, nPoints, minCount);   % 60%
-out.firstunder05 = firstunderf(0.5, mDim, pNN, nPoints, minCount);   % 50%
-out.firstunder04 = firstunderf(0.4, mDim, pNN, nPoints, minCount);   % 40%
-out.firstunder03 = firstunderf(0.3, mDim, pNN, nPoints, minCount);   % 30%
-out.firstunder02 = firstunderf(0.2, mDim, pNN, nPoints, minCount);   % 20%
-out.firstunder01 = firstunderf(0.1, mDim, pNN, nPoints, minCount);   % 10%
-out.firstunder005 = firstunderf(0.05, mDim, pNN, nPoints, minCount); % 5%
+out.dim09 = firstunderf(0.9, mDim, pNN, nPoints, minCount);   % 90%
+out.dim08 = firstunderf(0.8, mDim, pNN, nPoints, minCount);   % 80%
+out.dim07 = firstunderf(0.7, mDim, pNN, nPoints, minCount);   % 70%
+out.dim06 = firstunderf(0.6, mDim, pNN, nPoints, minCount);   % 60%
+out.dim05 = firstunderf(0.5, mDim, pNN, nPoints, minCount);   % 50%
+out.dim04 = firstunderf(0.4, mDim, pNN, nPoints, minCount);   % 40%
+out.dim03 = firstunderf(0.3, mDim, pNN, nPoints, minCount);   % 30%
+out.dim02 = firstunderf(0.2, mDim, pNN, nPoints, minCount);   % 20%
+out.dim01 = firstunderf(0.1, mDim, pNN, nPoints, minCount);   % 10%
+out.dim005 = firstunderf(0.05, mDim, pNN, nPoints, minCount); % 5%
 
 % Maximum step-wise change across p
 out.max1stepchange = max(abs(diff(pNN)));

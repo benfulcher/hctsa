@@ -12,15 +12,23 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,~,beVocal)
 %       smaller of the first minimum of the Kraskov automutual information and
 %       'ac1e'); see BF_GetTau.
 %
-% m, the embedding dimension. Must be a cell specifying method and parameters,
-%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1 ('fnn' alone uses
-%    0.05): the smallest dimension not ruled out by false nearest neighbors
-%    (NL_FNN, dimensions 1 to 10), i.e., the first dimension at which the
-%    fraction of false nearest neighbors is below 0.1 on at least ceil(3/0.1)
-%    points, or at which too few points found a neighbor for the fraction to
-%    decide, or else one more than the largest dimension TISEAN computed (11 when
-%    all ten were computed). Unless the fraction fell below the threshold, the
-%    dimension is a lower bound: all smaller dimensions were ruled out...
+% m, the embedding dimension: a positive integer, or a cell specifying a method
+%    and its parameters. {'fnn',th} (or 'fnn', with th = 0.05) chooses it by false
+%    nearest neighbors at threshold th, limited by the length of the series:
+%    m = min(m_fnn, floor(2*log10(N))), where N = length(y).
+%    m_fnn is the smallest dimension not ruled out by false nearest neighbors
+%    (NL_FNN with dimensions 1 to 10, a Theiler window of one autocorrelation time
+%    and an escape factor of 5): the first dimension at which the fraction of
+%    false nearest neighbors is below th on at least ceil(3/th) points, or at
+%    which too few points found a neighbor for the fraction to decide, or else
+%    one more than the largest dimension TISEAN computed (11 when all ten were
+%    computed); unless the fraction fell below th it is a lower bound.
+%    The limit floor(2*log10(N)) is the largest dimension N points can resolve:
+%    a set of dimension d needs about N^2*rho^d >> 1 pairs within a fraction rho
+%    = 0.1 of its diameter, so d < 2*log10(N) (Eckmann & Ruelle 1992); in more
+%    dimensions typical points have no neighbor at that scale, and estimators
+%    that use neighbors or pair counts are not supported by the data.
+%    E.g., N = 250, 500, 1000, 5000 give at most 4, 5, 6, 7 dimensions.
 %
 % justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
 %           actual embedding (default = 0, i.e., do the embedding).
@@ -32,6 +40,11 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,~,beVocal)
 %
 %---OUTPUT:
 % A matrix of width m containing the vectors in the new embedding space...
+%
+%---REFERENCE:
+% J.-P. Eckmann and D. Ruelle, "Fundamental limitations for estimating
+% dimensions and Lyapunov exponents in dynamical systems", Physica D 56(2-3),
+% 185-187 (1992). DOI: 10.1016/0167-2789(92)90023-g
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -132,7 +145,12 @@ else % use a routine to inform m
                 end
                 escapeFactor = 5;
                 m = NL_FNN(y,tau,10,{'ac',1},1,th,escapeFactor);
-                ssm = sprintf('by TISEAN false_nearest code with a Theiler window of one autocorrelation time and threshold %f to m = %u',th,m);
+                % No more dimensions than the N points can resolve (Eckmann & Ruelle 1992)
+                if ~isnan(m)
+                    m = min(m, max(1, floor(2*log10(length(y)))));
+                end
+                ssm = sprintf(['by TISEAN false_nearest code with a Theiler window of one autocorrelation ' ...
+                    'time and threshold %f, at most floor(2*log10(N)), to m = %u'],th,m);
 
             case 'fnnsmall'
                 % Uses Michael Small's fnn code. Not used by any operation in

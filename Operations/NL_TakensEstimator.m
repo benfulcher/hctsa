@@ -25,7 +25,9 @@ function out = NL_TakensEstimator(y, Nref, rad, past, embedParams, randomSeed)
 %       {'ac', 1})
 % embedParams, the embedding parameters for BF_Embed, in the form {tau,m}, where tau
 %              is a number of samples or 'ac', 'ac1e' or 'mi' (see BF_GetTau) and m
-%              is a number of dimensions or 'fnn' (default: {'ac','fnn'})
+%              is a number of dimensions, or 'fnn' or {'fnn',th} (false nearest
+%              neighbors at threshold th, at most floor(2*log10(N)); see BF_Embed)
+%              (default: {'ac','fnn'})
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed (relevant if
 %             an embedding-dimension method requiring randomization is used)
 %

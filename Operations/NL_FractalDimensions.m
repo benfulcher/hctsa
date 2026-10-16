@@ -47,8 +47,9 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %              (first zero-crossing of the autocorrelation function), 'ac1e' (floor
 %              of its first 1/e crossing) or 'mi' (the smaller of the first minimum
 %              of the Kraskov automutual information and the 'ac1e' delay; see
-%              BF_GetTau); m is a number of dimensions or 'fnn' (chosen by false
-%              nearest neighbors). Default: {'ac','fnn'}
+%              BF_GetTau); m is a number of dimensions, or 'fnn' or {'fnn',th}
+%              (chosen by false nearest neighbors at threshold th, at most
+%              floor(2*log10(N)); see BF_Embed). Default: {'ac','fnn'}
 % randomSeed [opt], not used by the choice of reference points, which is deterministic;
 %             passed on to the embedding (BF_Embed). Defaults to 'default'.
 %

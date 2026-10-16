@@ -32,7 +32,8 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
 %              tau and m can be characters specifying a given automatic method
 %              of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) and/or m
-%              ('fnn') (see BF_Embed; default: {'ac','fnn'})
+%              ('fnn' or {'fnn',th}: false nearest neighbors at threshold th, at
+%              most floor(2*log10(N))) (see BF_Embed; default: {'ac','fnn'})
 %
 % ---OUTPUTS: statistics of the log local density series (output names use 'den'):
 % minden, maxden, iqrden, rangeden, stdden, meanden, medianden: minimum, maximum,

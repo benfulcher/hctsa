@@ -49,7 +49,8 @@ function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % embedParams, input to BF_Embed, how to time-delay-embed the time series, in
 %              the form {tau,m}, where string specifiers can indicate standard
 %              methods of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) or
-%              m ('fnn') (default: {'ac','fnn'})
+%              m ('fnn' or {'fnn',th}: false nearest neighbors at threshold th, at
+%              most floor(2*log10(N)); see BF_Embed) (default: {'ac','fnn'})
 %
 % ---OUTPUTS: statistics of the divergence curve p(t):
 % p1, p2, p3, p4, p5: p at steps 0 to 4 (p1 = 0 by construction)

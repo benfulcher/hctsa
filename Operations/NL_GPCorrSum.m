@@ -28,7 +28,9 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % nbins, number of radii (log-spaced) at which the correlation sum is found
 %        (default: 20)
 % embedParams, embedding parameters to feed BF_Embed.m for embedding the
-%              signal in the form {tau,m} (default: {'ac','fnn'})
+%              signal in the form {tau,m}; m can be 'fnn' or {'fnn',th} (false
+%              nearest neighbors at threshold th, at most floor(2*log10(N)); see
+%              BF_Embed) (default: {'ac','fnn'})
 % doTwo, only 1 (the default) is supported
 %
 % ---OUTPUTS: only radii with a finite ln C(epsilon) are used.
