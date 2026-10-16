@@ -21,6 +21,9 @@
 /*Changes:
   12/10/05: It's multivariate now
   12/16/05: Scaled <eps> and sigma(eps)
+  hctsa: a fifth output column, the number of points that found a neighbor
+         within the search range at that dimension (the denominator of the
+         fraction of false nearest neighbors)
 */
 
 #include <stdio.h>
@@ -313,13 +316,13 @@ int main(int argc,char **argv)
     aveps *= (1./(double)donesofar);
     vareps *= (1./(double)donesofar);
     if (stdo) {
-      fprintf(stdout,"%u %e %e %e\n",dim+1,(double)toolarge/(double)donesofar,
-	      aveps*inter,sqrt(vareps)*inter);
+      fprintf(stdout,"%u %e %e %e %lu\n",dim+1,(double)toolarge/(double)donesofar,
+	      aveps*inter,sqrt(vareps)*inter,donesofar);
       fflush(stdout);
     }
     else {
-      fprintf(file,"%u %e %e %e\n",dim+1,(double)toolarge/(double)donesofar,
-	      aveps*inter,sqrt(vareps)*inter);
+      fprintf(file,"%u %e %e %e %lu\n",dim+1,(double)toolarge/(double)donesofar,
+	      aveps*inter,sqrt(vareps)*inter,donesofar);
       fflush(file);
     }
   }

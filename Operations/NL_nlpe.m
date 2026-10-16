@@ -12,10 +12,12 @@ function out = NL_nlpe(y, de, tau, maxN, theilerWin)
 % ---INPUTS:
 % y, the input time series (should be z-scored)
 % de, the embedding dimension (can be an integer, or 'fnn' to select it by false nearest
-%     neighbors using NL_FNN with dimensions 1 to 10: the first dimension at which the
-%     proportion of false nearest neighbors falls below 5%, or, if it never does, one more
-%     than the largest dimension TISEAN computed (11 when all ten were computed), a lower
-%     bound on the dimension; default: 3)
+%     neighbors using NL_FNN with dimensions 1 to 10 and a threshold of 0.05: the smallest
+%     dimension not ruled out, i.e. the first dimension at which the proportion of false
+%     nearest neighbors falls below 5% on at least 60 points, or at which too few points
+%     found a neighbor to decide, or else one more than the largest dimension TISEAN
+%     computed (11 when all ten were computed); a lower bound unless the proportion fell
+%     below 5%; default: 3)
 % tau, the time-delay (can be an integer, 'ac' for the first zero-crossing of the ACF,
 %      'ac1e' for the floor of its first 1/e crossing, or 'mi' for the smaller of the
 %      first minimum of the Kraskov automutual information and the 'ac1e' delay; see

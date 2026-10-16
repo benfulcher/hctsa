@@ -51,6 +51,38 @@ classdef Robust_fnnTests < matlab.unittest.TestCase
             tc.verifyEqual(fd.pfnn_3, f1.pfnn_3, 'AbsTol', 0.01);
             tc.verifyEqual(fd.pfnn_1, f1.pfnn_1, 'AbsTol', 0.01);
         end
+
+        function dimensionNeedsEnoughPointsBehindTheFraction(tc)
+            % White noise: the points that find a neighbor within TISEAN's search
+            % range dwindle with the dimension, and the last fractions rest on a
+            % handful of points (often exactly 0). Such a fraction cannot rule a
+            % dimension in or out, so the dimension is the first one with fewer
+            % than ceil(3/0.05) = 60 points (a lower bound), not a "converged" one.
+            rng(1, 'twister'); x = randn(1000, 1);
+            M = tiseanFNN(x, 1, 10, 1); % dimension, fraction, number of points
+            tc.verifyEqual(size(M, 2), 3);
+            tc.verifyTrue(all(M(:,3) >= 1) && all(M(:,3) <= numel(x)));
+            firstLow = find(M(:,3) < 60, 1);
+            tc.verifyNotEmpty(firstLow);
+            tc.verifyTrue(all(M(1:firstLow-1,2) >= 0.05));
+            m = NL_FNN(x, 1, 10, 1, 1, 0.05, 5);
+            tc.verifyEqual(m, M(firstLow,1));
+            % 0.05 is the default threshold
+            tc.verifyEqual(NL_FNN(x, 1, 10, 1, 1, [], 5), m);
+            % firstunder* use the same points and never decrease as the threshold falls
+            f = NL_FNN(x, 1, 10, 1, 0, [], 5);
+            fu = [f.firstunder09, f.firstunder08, f.firstunder07, f.firstunder06, f.firstunder05, ...
+                f.firstunder04, f.firstunder03, f.firstunder02, f.firstunder01, f.firstunder005];
+            tc.verifyTrue(all(diff(fu) >= 0));
+            tc.verifyEqual(f.firstunder005, m);
+        end
+
+        function lorenzDimensionUnaffectedByTheCountRule(tc)
+            % A low-dimensional flow keeps many points with neighbors at every
+            % dimension, so the count rule changes nothing: 3 at 0.05.
+            x = lorenzX(3000);
+            tc.verifyEqual(NL_FNN(x(1:5:end), 1, 10, {'ac', 1}, 1, 0.05, 5), 3);
+        end
     end
 end
 
@@ -73,10 +105,11 @@ function s = rk4(f, s, h)
 end
 
 function M = tiseanFNN(y, d, maxm, theiler)
-    % run false_nearest directly; columns: dimension, fraction false
+    % run false_nearest directly; columns: dimension, fraction false, and the
+    % number of points behind the fraction
     f = BF_WriteTempFile(y);
     if isempty(d), dopt = ''; else, dopt = sprintf('-d%u ', d); end
     [~, res] = BF_TiseanSystem(sprintf('false_nearest %s-m1 -M1,%u -t%u -f5 -V0 %s', dopt, maxm, theiler, f));
-    c = textscan(res, '%f%f%f%f');
-    M = [c{1}, c{2}];
+    c = textscan(res, '%f%f%f%f%f');
+    M = [c{1}, c{2}, c{5}];
 end

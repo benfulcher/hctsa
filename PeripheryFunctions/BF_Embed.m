@@ -13,12 +13,14 @@ function y_embed = BF_Embed(y,tau,m,justGiveMeParams,~,beVocal)
 %       'ac1e'); see BF_GetTau.
 %
 % m, the embedding dimension. Must be a cell specifying method and parameters,
-%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1: the smallest
-%    dimension not ruled out by false nearest neighbors (NL_FNN, dimensions 1 to
-%    10), i.e., the first dimension at which the fraction of false nearest
-%    neighbors is below 0.1, or, if it never is, one more than the largest
-%    dimension TISEAN computed (11 when all ten were computed). In that case the
-%    dimension is a lower bound: all smaller dimensions failed the criterion...
+%    e.g., {'fnn',0.1} does fnn method using a threshold of 0.1 ('fnn' alone uses
+%    0.05): the smallest dimension not ruled out by false nearest neighbors
+%    (NL_FNN, dimensions 1 to 10), i.e., the first dimension at which the
+%    fraction of false nearest neighbors is below 0.1 on at least ceil(3/0.1)
+%    points, or at which too few points found a neighbor for the fraction to
+%    decide, or else one more than the largest dimension TISEAN computed (11 when
+%    all ten were computed). Unless the fraction fell below the threshold, the
+%    dimension is a lower bound: all smaller dimensions were ruled out...
 %
 % justGiveMeParams [opt], if true returns a vector of [tau,m] rather than doing any
 %           actual embedding (default = 0, i.e., do the embedding).
@@ -124,7 +126,7 @@ else % use a routine to inform m
                 % of 2.0 is considerably stricter, and can make the test
                 % appear never to converge even for low-dimensional systems).
                 if isscalar(m)
-                    th = 0.4;
+                    th = 0.05;
                 else
                     th = m{2};
                 end

@@ -11,7 +11,16 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % their original distance. For a deterministic system the fraction of false
 % neighbors falls toward 0 once the embedding dimension is large enough; for
 % noise it stays high. Neighbors farther apart than the standard deviation of
-% the data divided by the escape factor are skipped.
+% the data divided by the escape factor are skipped, so the fraction rests only
+% on the points that found a neighbor within that range (TISEAN stops at the
+% first dimension where none does); at high dimensions these can be few.
+%
+% A dimension is ruled out at a threshold p when its fraction is at least p and
+% rests on at least ceil(3/p) points (60 at p = 0.05). With fewer points even a
+% fraction of zero does not show that the true fraction is below p: if none of
+% n points has a false neighbor, the one-sided 95% upper confidence bound on the
+% true fraction is 1 - 0.05^(1/n), about 3/n. Such a dimension is neither
+% accepted nor ruled out.
 %
 % The TISEAN routines are run in the command line using 'system' commands in
 % MATLAB, and require that TISEAN is installed and compiled, and able to be
@@ -28,16 +37,18 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 %             of the autocorrelation function, or a number of samples (see
 %             BF_TheilerWindow; default: {'ac',1})
 % justBest, if 1 just outputs a scalar estimate of embedding dimension: the
-%           smallest dimension not ruled out by the test. This is the first
-%           dimension at which the fraction of false nearest neighbors is below
-%           bestp; if it never is, it is one more than the largest dimension
-%           TISEAN computed (maxm + 1 when every dimension up to maxm was computed;
-%           one more than the last when TISEAN stopped early, having no neighbors
-%           left within its search range). In that non-converged case the value
-%           is a lower bound: every dimension below it was tested and failed the
-%           criterion (default: 1)
+%           smallest dimension not ruled out by the test (see above). This is the
+%           first dimension at which the fraction of false nearest neighbors is
+%           below bestp on at least ceil(3/bestp) points, or at which too few
+%           points found a neighbor for the fraction to decide; if neither
+%           happens, it is one more than the largest dimension TISEAN computed
+%           (maxm + 1 when every dimension up to maxm was computed; one more than
+%           the last when TISEAN stopped early, having no neighbors left within
+%           its search range). Unless the fraction fell below bestp, the value is
+%           a lower bound: every smaller dimension was tested and ruled out
+%           (default: 1)
 % bestp, only used if justBest==1 -- the fnn threshold for picking an embedding
-%        dimension (default: 0.4)
+%        dimension (default: 0.05)
 % escapeFactor [opt], the neighbor-distance escape factor (TISEAN's '-f',
 %                its R_tol-like false-neighbor threshold: a candidate neighbor
 %                is "false" if its distance grows by more than this factor
@@ -58,10 +69,11 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % maxnHood2, meannHood2: maximum and mean of nHood2 across dimensions
 % firstunder09, firstunder08, firstunder07, firstunder06, firstunder05,
 %             firstunder04, firstunder03, firstunder02, firstunder01,
-%             firstunder005: the first embedding dimension at which the fraction
-%             of false nearest neighbors is below 90%, 80%, ..., 10%, 5% (one more
-%             than the largest dimension computed, maxm + 1 unless TISEAN stopped
-%             early, if it never is)
+%             firstunder005: the smallest embedding dimension not ruled out at a
+%             threshold of 90%, 80%, ..., 10%, 5%, as for justBest, except that all
+%             ten take a fraction as deciding only when it rests on enough points
+%             for the smallest threshold, 5% (60 points), so that they use the same
+%             dimensions and never decrease as the threshold rises
 % max1stepchange: the largest absolute change in the fraction between
 %             consecutive embedding dimensions
 % mdrop: the mean change in the fraction per added dimension
@@ -168,8 +180,8 @@ if nargin < 5 || isempty(justBest)
 end
 
 % How to return the best embedding dimension:
-if nargin < 6
-	bestp = 0.4; % stop when under 40% false nearest neighbors
+if nargin < 6 || isempty(bestp)
+	bestp = 0.05; % stop when under 5% false nearest neighbors
 end
 
 % Escape factor (TISEAN's '-f'; omitted here to preserve false_nearest's own
@@ -217,12 +229,20 @@ if isempty(res)
 	warning('No output from TISEAN routine false_nearest on the data');
 	out = NaN; return
 end
-data = textscan(res, '%u%f%f%f');
+firstFields = strsplit(strtrim(strtok(res, newline)));
+if ~isnan(str2double(firstFields{1})) && numel(firstFields) < 5
+	% A false_nearest binary built before the fifth output column (the number of
+	% points behind each fraction) was added: a code/installation problem, not data
+	error(['The TISEAN false_nearest binary does not report the number of points ' ...
+		'behind each fraction; recompile TISEAN (Toolboxes/compile_tisean.m).'])
+end
+data = textscan(res, '%u%f%f%f%f');
 
 mDim = double(data{1}); % embedding dimension
 pNN = data{2}; % fraction of false nearest neighbors
 % nHoodSize = data{3}; % average size of the neighbourhood
 nHoodSize2 = data{4}; % average squared size of the neighbourhood
+nPoints = data{5}; % number of points that found a neighbor (denominator of pNN)
 
 % Check that some data exists:
 if isempty(mDim) || isempty(pNN) || isempty(nHoodSize2)
@@ -242,8 +262,8 @@ end
 % ------------------------------------------------------------------------------
 if justBest
 	% We just want a scalar to choose the embedding with: the smallest dimension
-	% not ruled out (a lower bound if the fraction never falls below bestp)
-	out = firstunderf(bestp, mDim, pNN);
+	% not ruled out (a lower bound unless the fraction falls below bestp)
+	out = firstunderf(bestp, mDim, pNN, nPoints, ceil(3/bestp));
 	return
 end
 
@@ -268,17 +288,20 @@ out.stdpfnn = std(pNN); % standard deviation
 out.maxnHood2 = max(nHoodSize2); % maximum
 out.meannHood2 = mean(nHoodSize2); % mean
 
-% Find embedding dimension for the first time p goes under x%
-out.firstunder09 = firstunderf(0.9, mDim, pNN);   % 90%
-out.firstunder08 = firstunderf(0.8, mDim, pNN);   % 80%
-out.firstunder07 = firstunderf(0.7, mDim, pNN);   % 70%
-out.firstunder06 = firstunderf(0.6, mDim, pNN);   % 60%
-out.firstunder05 = firstunderf(0.5, mDim, pNN);   % 50%
-out.firstunder04 = firstunderf(0.4, mDim, pNN);   % 40%
-out.firstunder03 = firstunderf(0.3, mDim, pNN);   % 30%
-out.firstunder02 = firstunderf(0.2, mDim, pNN);   % 20%
-out.firstunder01 = firstunderf(0.1, mDim, pNN);   % 10%
-out.firstunder005 = firstunderf(0.05, mDim, pNN); % 5%
+% Smallest dimension not ruled out at each threshold, with one minimum count for
+% all ten (that of the smallest threshold, 0.05), so a dimension either decides
+% at every threshold or at none:
+minCount = ceil(3/0.05);
+out.firstunder09 = firstunderf(0.9, mDim, pNN, nPoints, minCount);   % 90%
+out.firstunder08 = firstunderf(0.8, mDim, pNN, nPoints, minCount);   % 80%
+out.firstunder07 = firstunderf(0.7, mDim, pNN, nPoints, minCount);   % 70%
+out.firstunder06 = firstunderf(0.6, mDim, pNN, nPoints, minCount);   % 60%
+out.firstunder05 = firstunderf(0.5, mDim, pNN, nPoints, minCount);   % 50%
+out.firstunder04 = firstunderf(0.4, mDim, pNN, nPoints, minCount);   % 40%
+out.firstunder03 = firstunderf(0.3, mDim, pNN, nPoints, minCount);   % 30%
+out.firstunder02 = firstunderf(0.2, mDim, pNN, nPoints, minCount);   % 20%
+out.firstunder01 = firstunderf(0.1, mDim, pNN, nPoints, minCount);   % 10%
+out.firstunder005 = firstunderf(0.05, mDim, pNN, nPoints, minCount); % 5%
 
 % Maximum step-wise change across p
 out.max1stepchange = max(abs(diff(pNN)));
@@ -289,9 +312,11 @@ out.mdrop = mean(diff(pNN));
 out.pdrop = -mean(sign(diff(pNN)));
 
 % ------------------------------------------------------------------------------
-function firsti = firstunderf(x, m, p)
-	%% Find m for the first time p goes under x%
-	firsti = m(find(p < x, 1, 'first'));
+function firsti = firstunderf(x, m, p, n, minCount)
+	%% Smallest dimension not ruled out at threshold x: the first whose fraction p is
+	% below x on at least minCount points, or rests on fewer points than that (and so
+	% cannot be ruled out); one more than the largest dimension if every one is ruled out
+	firsti = m(find(p < x | n < minCount, 1, 'first'));
 	if isempty(firsti)
 		firsti = m(length(m)) + 1;
 	end
