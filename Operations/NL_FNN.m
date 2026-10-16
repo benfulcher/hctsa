@@ -15,6 +15,16 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % on the points that found a neighbor within that range (TISEAN stops at the
 % first dimension where none does); at high dimensions these can be few.
 %
+% Exact ties (repeated values, e.g., quantized data or periodic orbits) are
+% resolved so that the result does not depend on rounding or on the order in
+% which neighbors are searched: distances (in the data rescaled to [0,1]) within
+% 1e-12 of each other count as equal, a pair closer than that is a repeated
+% point and not a neighbor, a neighbor is false if the extra coordinate separates
+% the pair by more than escapeFactor times their distance plus 1e-12, and when
+% several neighbors are equally near, a point contributes the fraction of them
+% that are false (the expected outcome of choosing one at random). Where the
+% nearest neighbor is unique this is the test as published (Hegger et al. 1999).
+%
 % A dimension is ruled out at a threshold p when its fraction is at least p and
 % rests on at least ceil(3/p) points (60 at p = 0.05). With fewer points even a
 % fraction of zero does not show that the true fraction is below p: if none of
@@ -86,6 +96,7 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % ---REFERENCES:
 % R. Hegger, H. Kantz and T. Schreiber, "Practical implementation of nonlinear
 % time series methods: The TISEAN package", Chaos 9(2), 413 (1999).
+% DOI: 10.1063/1.166424
 %
 % ---NOTES:
 % TISEAN is available at
@@ -93,10 +104,11 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 % false_nearest documentation at
 % http://www.mpipks-dresden.mpg.de/~tisean/TISEAN_2.1/docs/docs_c/false_nearest.html
 %
-% The bundled false_nearest.c differs from TISEAN 3.0.1 in one respect: for a
+% The bundled false_nearest.c differs from TISEAN 3.0.1 in three respects: for a
 % scalar series, the delay (-d) sets the lag between embedding coordinates
 % (TISEAN 3.0.1 used a lag of one sample whatever the delay, applying -d only
-% to the number of points used).
+% to the number of points used); a fifth output column gives the number of
+% points behind each fraction; and exact ties are resolved as described above.
 %
 % The fourth column of TISEAN's output (nHood2) is the square root of the mean
 % squared nearest-neighbor distance.

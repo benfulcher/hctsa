@@ -120,6 +120,19 @@ classdef Robust_fnnTests < matlab.unittest.TestCase
             x = lorenzX(3000);
             tc.verifyEqual(NL_FNN(x(1:5:end), 1, 10, {'ac', 1}, 1, 0.05, 5), 3);
         end
+
+        function tiesDoNotDependOnRounding(tc)
+            % An integer-valued series has many exactly tied distances. Its
+            % affine transforms and its negation embed identically up to rounding,
+            % so the false-neighbor curve and the point counts must be identical.
+            rng(1, 'twister');
+            y = round(5*filter(1, [1, -0.8], randn(2000, 1)));
+            M = tiseanFNN(y, 1, 6, 10);
+            Ma = tiseanFNN(3.7*y - 12, 1, 6, 10);
+            Mn = tiseanFNN(-y, 1, 6, 10);
+            tc.verifyEqual(Ma, M, 'AbsTol', 0);
+            tc.verifyEqual(Mn, M, 'AbsTol', 0);
+        end
     end
 end
 
