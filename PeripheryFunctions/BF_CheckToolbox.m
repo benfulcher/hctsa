@@ -51,31 +51,42 @@ end
 
 %-------------------------------------------------------------------------------
 %% Get a more interpretable string for user feedback: theName
-%% (and for testing against text in matlab.addons.installedAddons)
+%% (the product name that ver reports), and the toolbox's folder: theFolder
 %-------------------------------------------------------------------------------
 switch theToolbox
 case 'statistics_toolbox'
     theName = 'Statistics and Machine Learning Toolbox';
+    theFolder = 'stats';
 case 'curve_fitting_toolbox'
     theName = 'Curve Fitting Toolbox';
+    theFolder = 'curvefit';
 case 'signal_toolbox'
     theName = 'Signal Processing Toolbox';
+    theFolder = 'signal';
 case 'identification_toolbox'
     theName = 'System Identification Toolbox';
+    theFolder = 'ident';
 case 'wavelet_toolbox'
     theName = 'Wavelet Toolbox';
+    theFolder = 'wavelet';
 case 'econometrics_toolbox'
     theName = 'Econometrics Toolbox';
+    theFolder = 'econ';
 case 'robust_toolbox'
     theName = 'Robust Control Toolbox';
+    theFolder = 'robust';
 case 'financial_toolbox'
     theName = 'Financial Toolbox';
+    theFolder = 'finance';
 case 'database_toolbox'
     theName = 'Database Toolbox';
+    theFolder = 'database';
 case 'parallel_computing_toolbox'
     theName = 'Parallel Computing Toolbox';
+    theFolder = 'parallel';
 case 'distrib_computing_toolbox'
     theName = 'Parallel Computing Toolbox';
+    theFolder = 'parallel';
 otherwise
     error('Unknown toolbox ''%s''.\n',theToolbox);
 end
@@ -85,38 +96,44 @@ end
 %-------------------------------------------------------------------------------
 % 1. Check the toolbox exists in the current Matlab environment:
 %
-% matlab.addons.installedAddons and license('test',...) are read-only
-% queries whose answer can't change over the course of a single hctsa run
-% (unlike license('checkout',...) below, which actually reserves a license
-% seat -- a real side effect, so that one is left uncached/unchanged). Cache
-% them here since this function is called by ~42 operations, each of which
-% would otherwise repeat the same (surprisingly slow -- ~0.3s in profiling)
-% installedAddons query on every single call. installedAddOns itself doesn't
-% depend on theToolbox, so one cached copy covers every toolbox this
-% function is ever asked to check.
-persistent cachedInstalledAddOns cachedLicenseTestNames cachedLicenseTestResults
-if isempty(cachedLicenseTestNames)
-    cachedLicenseTestNames = {};
-    cachedLicenseTestResults = [];
+% Installation is checked with ver(theFolder), which reads the toolbox's
+% Contents.m from the Matlab path, matching the product name. It is not checked
+% with matlab.addons.installedAddons, which can return an empty or incomplete
+% list in a newly started Matlab session: on a fresh 48-worker parallel pool
+% (NCI Gadi, R2025a), 44/48 workers got an empty list 2s after starting while
+% ver, exist and license all answered correctly, and an incomplete list (once
+% cached) failed every later call for the missing toolboxes on that worker.
+%
+% Both checks are read-only queries whose answer can't change during a session
+% (unlike license('checkout',...) below, which reserves a license seat -- a real
+% side effect, so that one is left uncached), so each toolbox's result is cached
+% here: this function is called by ~42 operations.
+persistent cachedKeys cachedResults
+if isempty(cachedKeys)
+    cachedKeys = {};
+    cachedResults = false(0);
+end
+if doInstallCheck
+    cacheKey = ['installed:',theToolbox];
+else
+    cacheKey = ['licensed:',theToolbox];
 end
 
 outFlag = false;
-if doInstallCheck
-    if isempty(cachedInstalledAddOns)
-        cachedInstalledAddOns = matlab.addons.installedAddons;
-    end
-    % have toolbox installed
-    haveToolbox = any(ismember(cachedInstalledAddOns.Name,theName));
-else
-    % have toolbox license
-    idx = find(strcmp(theToolbox,cachedLicenseTestNames),1);
-    if isempty(idx)
-        haveToolbox = license('test',theToolbox);
-        cachedLicenseTestNames{end+1} = theToolbox;
-        cachedLicenseTestResults(end+1) = haveToolbox;
+idx = find(strcmp(cacheKey,cachedKeys),1);
+if isempty(idx)
+    if doInstallCheck
+        % have toolbox installed
+        v = ver(theFolder);
+        haveToolbox = any(strcmp({v.Name},theName));
     else
-        haveToolbox = cachedLicenseTestResults(idx);
+        % have toolbox license
+        haveToolbox = logical(license('test',theToolbox));
     end
+    cachedKeys{end+1} = cacheKey;
+    cachedResults(end+1) = haveToolbox;
+else
+    haveToolbox = cachedResults(idx);
 end
 if infoMode
     % Just checking availability for info (e.g., during installation)
@@ -128,7 +145,11 @@ if infoMode
 else
     % Want to use (and checkout) a license
     if ~haveToolbox
-        error('This function requires %s but you don''t have it installed.',theName);
+        if doInstallCheck
+            error('This function requires %s but you don''t have it installed.',theName);
+        else
+            error('This function requires %s but no license for it was found.',theName);
+        end
     end
 
     % 2. Check to see if there's an available license for this toolbox:
