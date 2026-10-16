@@ -2,16 +2,16 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % NL_GPCorrSum   How the number of close pairs of points in the delay embedding grows with distance (the correlation sum and its scaling).
 %
 % Computes the correlation sum, C(epsilon), the fraction of pairs of
-% time-delay-embedded points closer than epsilon, by the Grassberger-Procaccia
-% algorithm. It uses TISEAN's d2, whose raw correlation-sum output (its .c2
-% file, also used by NL_d2.m) gives (r, C(r)) pairs directly; only doTwo = 1 (the
-% corrsum-equivalent binning, log-spaced radii) is supported -- doTwo = 2
-% (TSTOOL corrsum2's fixed-pairs-per-bin binning) has no TISEAN equivalent. For a
-% low-dimensional attractor, ln C rises linearly with ln(epsilon), with a slope
-% equal to the correlation dimension. The outputs summarize the range of
-% ln(epsilon) and ln C(epsilon), and iteratively re-weighted least squares
-% linear fits to the log-log plot using the robustfit function in MATLAB's
-% Statistics Toolbox.
+% time-delay-embedded points closer than epsilon (in the max norm, as d2 measures
+% distances), by the Grassberger-Procaccia algorithm. It uses TISEAN's d2, whose
+% raw correlation-sum output (its .c2 file, also used by NL_d2.m) gives (r, C(r))
+% pairs directly; only doTwo = 1 (the corrsum-equivalent binning, log-spaced radii)
+% is supported -- doTwo = 2 (TSTOOL corrsum2's fixed-pairs-per-bin binning) has no
+% TISEAN equivalent. For a low-dimensional attractor, ln C rises linearly with
+% ln(epsilon), with a slope equal to the correlation dimension. The outputs
+% summarize the range of ln(epsilon) and ln C(epsilon), and iteratively re-weighted
+% least squares linear fits to the log-log plot using the robustfit function in
+% MATLAB's Statistics Toolbox.
 %
 % ---INPUTS:
 % y, column vector of time-series data
@@ -21,7 +21,9 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 %       (-1: count all pairs; if a decimal, then use this fraction of the time
 %       series length; default: 500)
 % r, maximum search radius, in units of std(y)*sqrt(m) where m is the embedding
-%    dimension (default: 0.05)
+%    dimension (default: 0.05). The factor sqrt(m) is a convention: under the max
+%    norm the share of pairs within a fixed radius falls roughly geometrically with
+%    m, and the growing radius keeps the scanned range populated with pairs.
 % thwin, Theiler window of samples to exclude before and after each reference
 %        index: {'ac', k} for k times the first zero-crossing of the autocorrelation
 %        function, or a number of samples (see BF_TheilerWindow; default: {'ac',1})
@@ -40,11 +42,13 @@ function out = NL_GPCorrSum(y, Nref, r, thwin, nbins, embedParams, doTwo)
 % robfit_a1, robfit_a2: intercept and slope of a robust linear fit of ln C against
 %        ln(epsilon) (the slope estimates the correlation dimension)
 % robfit_sigrat: ratio of the ordinary least-squares to the robust estimate of the
-%        residual standard deviation
+%        residual standard deviation (NaN if the robust estimate is at floating-point
+%        round-off: at most 10*N*eps times the root-mean-square of ln C, N radii)
 % robfit_s: the robust estimate of the residual standard deviation
 % robfit_sea1, robfit_sea2: standard errors of the intercept and the slope
 % robfitresmeanabs, robfitresmeansq: mean absolute and mean squared residual
-% robfitresac1: lag-1 autocorrelation of the residuals
+% robfitresac1: lag-1 autocorrelation of the residuals (NaN if their standard deviation
+%        is at floating-point round-off, as for robfit_sigrat)
 %
 % ---REFERENCES:
 % P. Grassberger and I. Procaccia, "Characterization of Strange Attractors",
@@ -163,22 +167,19 @@ else
 	NrefTISEAN = Nref;
 end
 
-% Maximum search radius, in standard deviations of y (the convention of
-% NL_TakensEstimator.m and NL_d2.m's takens05, following Kantz & Schreiber),
-% scaled by sqrt(m): a pairwise Euclidean distance in an m-dimensional
-% embedding of (roughly independent) per-coordinate scale std(y) itself
-% scales as std(y)*sqrt(m), not std(y) alone. Without this correction, small
-% r requests at higher embedding dimensions can ask for a radius smaller than
-% the closest pairs of points in the actual reconstructed phase space,
-% leaving every bin with zero pairs. d2's minimum epsilon is left at its own
-% default (max data interval/1000): tightening it in proportion to maxEps shrinks the
-% useful (non-zero, non-saturated) part of the range rather than helping. Bins with too few points to fit are
-% handled by the "not enough points" check below: a small requested r can
-% still legitimately fall below the closest-pair distance for a genuinely
-% high-dimensional, unstructured series (e.g., noise embedded at a high
-% FNN-selected m). In that regime a NaN output is an honest "no reliable
-% low-dimensional scaling could be detected at this length scale", not a
-% computation failure to paper over.
+% Maximum search radius: r standard deviations of y, times sqrt(m). d2 measures
+% distances with the max norm (the largest coordinate difference), under which the
+% share of pairs within a fixed radius falls roughly geometrically with m (as
+% (r/sqrt(pi))^m for a noise-like series), so a fixed small radius leaves the top of
+% the scanned range with few or no pairs at higher embedding dimensions. The factor
+% sqrt(m) is a convention, not derived from the norm: it lets the radius grow with m
+% so that the scanned range stays populated (with r = 0.5, the fraction of pairs
+% within the top radius stays between about 0.04 and 0.4 for typical series at their
+% 'fnn' dimensions, whereas a fixed radius of 0.1 standard deviations leaves many
+% noise-like series with too few radii holding pairs to fit). d2's minimum epsilon
+% is left at its own default (max data interval/1000). Fewer than three radii with
+% pairs (possible for noise-like series at small r) leave nothing to fit, and the
+% fit outputs are NaN.
 maxEps = r * std(y) * sqrt(m);
 
 % ------------------------------------------------------------------------------
@@ -187,8 +188,8 @@ maxEps = r * std(y) * sqrt(m);
 % d2 over embedding dimensions 1:m (only the m-th is used below). Note:
 % "-M<m>,<m>" (i.e. asking for a single, fixed embedding dimension) triggers
 % a bug in the bundled TISEAN where it reports "0 lines read" and produces no
-% output at all; "-M1,<m>" (a genuine range, as NL_d2.m and
-% NL_TakensEstimator.m also use) works correctly, so that's used
+% output at all; "-M1,<m>" (a genuine range, as NL_d2.m also uses) works
+% correctly, so that's used
 % here too and the dimension-m block is picked out afterwards.
 [~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
 						  tau, m, thwin, maxEps, NrefTISEAN, nbins, filePath));
@@ -287,7 +288,16 @@ end
 if enoughpoints
 	out.robfit_a1 = a(1);
 	out.robfit_a2 = a(2);
-	out.robfit_sigrat = stats.ols_s / stats.robust_s;
+	% Residuals at floating-point round-off (a standard deviation of at most 10*N*eps
+	% times the root-mean-square of the fitted ln C, as in BF_ResidualStats) carry no
+	% information, so the ratio of residual scales and the residual autocorrelation are
+	% NaN for them rather than ratios of rounding noise:
+	roundOff = 10 * numel(lnCr) * eps * sqrt(mean(lnCr.^2));
+	if stats.robust_s <= roundOff
+		out.robfit_sigrat = NaN;
+	else
+		out.robfit_sigrat = stats.ols_s / stats.robust_s;
+	end
 	out.robfit_s = stats.s;
 	out.robfit_sea1 = stats.se(1);
 	out.robfit_sea2 = stats.se(2);
@@ -301,7 +311,11 @@ if enoughpoints
 
 	out.robfitresmeanabs = mean(abs(res));
 	out.robfitresmeansq = mean(res.^2);
-	out.robfitresac1 = CO_AutoCorr(res, 1, 'Fourier');
+	if std(res) <= roundOff
+		out.robfitresac1 = NaN;
+	else
+		out.robfitresac1 = CO_AutoCorr(res, 1, 'Fourier');
+	end
 else
 	out.robfit_a1 = NaN;
 	out.robfit_a2 = NaN;

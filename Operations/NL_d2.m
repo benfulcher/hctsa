@@ -6,10 +6,12 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 % embedding dimensions m = 1, ..., maxm. Our code uses the outputs from this algorithm to
 % return a set of informative features about the results.
 %
-% Takens' estimator is computed for the correlation dimension, as well as related statistics,
-% including other dimension estimates by finding appropriate scaling ranges, and searching
-% for a flat region in the output of TISEAN's h2 algorithm, which indicates
-% determinism/deterministic chaos.
+% Takens' estimator is computed for the correlation dimension, at a fixed upper length scale
+% of 0.5 standard deviations (the estimator is a reasonable dimension estimate when
+% evaluated at the upper end of the scaling range; Hegger, Kantz & Schreiber 1999), as well
+% as related statistics, including other dimension estimates by finding appropriate scaling
+% ranges, and searching for a flat region in the output of TISEAN's h2 algorithm, which
+% indicates determinism/deterministic chaos.
 %
 % To find a suitable scaling range, a penalized regression procedure is used to determine an
 % optimal scaling range that simultaneously spans the greatest range of scales and shows the
@@ -75,7 +77,7 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %
 % ---REFERENCES:
 % Hegger, Kantz, Schreiber, "Practical implementation of nonlinear time series methods: The
-% TISEAN package", Chaos 9(2) 413 (1999).
+% TISEAN package", Chaos 9(2) 413-435 (1999). DOI: 10.1063/1.166424
 % Theiler, "Spurious dimension from correlation algorithms applied to limited time-series
 % data", Phys. Rev. A, 34(3) 2427 (1986).
 % Kantz and Schreiber, "Nonlinear Time Series Analysis", Cambridge University Press (2004).
@@ -298,9 +300,8 @@ delete([filePath '.h2']); % delete the file
 % ------------------------------------------------------------------------------
 %% (1) TAKENS ESTIMATOR
 % ------------------------------------------------------------------------------
-% correlation dimension at upper length scale of eup
-% (for z-scored time series, std = 1...; in units of this)
-% Kantz & Shreiber recommend taking at half the std of the signal
+% correlation dimension at an upper length scale of 0.5 (standard deviations of the
+% z-scored series), a fixed scale that is the same for every embedding dimension
 takens05 = SUB_takens(c2tdat, 0.5);
 if any(isnan(takens05))
 	% The estimate is undefined at some embedding dimension (no length scale above 0.5),

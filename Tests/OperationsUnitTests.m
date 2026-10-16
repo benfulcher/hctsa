@@ -899,22 +899,17 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % NL_TakensEstimator (now via TISEAN d2/c2t, no TSTOOL dependency)
+        % NL_TakensEstimator (length scale enclosing a fraction of the pairs)
         %-------------------------------------------------------------
         function test_NL_TakensEstimator_DiscriminatesDimension(testCase)
-            % NL_TakensEstimator used to depend on TSTOOL's
-            % signal/takens_estimator; it now uses TISEAN's d2 and c2t
-            % (already relied on by NL_d2.m) instead. Confirm the
-            % replacement still does its actual job: high-dimensional
-            % (structureless) noise embedded at m should give a dimension
-            % estimate close to m, while a logistic map (a classic 1-D
-            % chaotic system, known correlation dimension ~1) should give an
+            % Structureless noise embedded at m should give a dimension estimate close
+            % to m, while a logistic map (correlation dimension ~1) should give an
             % estimate close to 1, clearly distinguishing it from noise.
             rng(41);
             yNoise = randn(2000,1);
-            outNoise = NL_TakensEstimator(yNoise,-1,0.05,1,{1,3});
-            testCase.verifyGreaterThan(outNoise, 2, ...
-                'Structureless noise embedded at m=3 should have a dimension estimate well above 1.');
+            outNoise = NL_TakensEstimator(yNoise,-1,0.01,1,{1,3});
+            testCase.verifyEqual(outNoise, 3, 'AbsTol', 0.3, ...
+                'Structureless noise embedded at m=3 should have a dimension estimate near 3.');
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -922,11 +917,59 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TakensEstimator(yChaotic,-1,0.05,1,{1,3});
+            outChaotic = NL_TakensEstimator(yChaotic,-1,0.01,1,{1,3});
             testCase.verifyLessThan(outChaotic, 1.5, ...
                 'The logistic map''s known correlation dimension (~1) should give a low estimate.');
             testCase.verifyLessThan(outChaotic, outNoise, ...
                 'The logistic map should have a clearly lower dimension estimate than structureless noise.');
+        end
+
+        function test_NL_TakensEstimator_DegenerateCases(testCase)
+            % Quantized values and coinciding delay vectors give estimates; too few
+            % pairs, fewer than three distinct distances, or a constant series give NaN.
+            t = (1:400)';
+            x = sin(0.3*t) + 0.5*cos(1.7*t).^3 + 0.2*sin(0.011*t.^1.5) + 0.4*sin(0.77*t.^1.1);
+            x = (x - mean(x))/std(x);
+            v = NL_TakensEstimator(x,-1,0.01,{'ac',1},{3,3});
+            testCase.verifyEqual(v, 2.86282933331, 'AbsTol', 1e-9);
+            q = round(x/0.25)*0.25; q = (q - mean(q))/std(q);
+            testCase.verifyEqual(NL_TakensEstimator(q,-1,0.01,{'ac',1},{3,3}), 1.70646837008, 'AbsTol', 1e-9);
+            z = max(x - 0.5, 0); z = (z - mean(z))/std(z);
+            testCase.verifyEqual(NL_TakensEstimator(z,-1,0.01,{'ac',1},{2,3}), 1.10192541585, 'AbsTol', 1e-9);
+            testCase.verifyTrue(isnan(NL_TakensEstimator(x(1:60),-1,0.01,{'ac',1},{3,3})));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(sign(x),-1,0.01,{'ac',1},{1,2})));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(ones(100,1),-1,0.01,2,{1,2})));
+        end
+
+        function test_NL_TakensEstimator_ShiftScaleReflection(testCase)
+            % The tolerance is relative to the range: y, 3.7*y - 12 and -y give the same
+            % estimate (the same values as pyhctsa's takens_estimator).
+            t = (1:1500)';
+            ints = floor(6*mod(t*0.6180339887498949, 1)) + floor(3*mod(t*0.41421356, 1));
+            lg = zeros(1500, 1); lg(1) = 0.3;
+            for k = 2:1500
+                lg(k) = 3.84*lg(k-1)*(1 - lg(k-1)); % a transient converging to a period-3 orbit
+            end
+            F = {@(v) v, @(v) 3.7*v - 12, @(v) -v};
+            for f = 1:3
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(ints)),-1,0.01,{'ac',1},{1,3}), ...
+                    1.552890298234, 'AbsTol', 1e-9);
+                % distances near 1e-12 of the range carry relative round-off of about 1e-4,
+                % which leaves a difference of order 1e-5 under the affine map
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(lg)),-1,0.01,{'ac',1},{1,3}), ...
+                    0.225759457779, 'AbsTol', 5e-5);
+            end
+            testCase.verifyEqual(NL_TakensEstimator(zscore(-lg),-1,0.01,{'ac',1},{1,3}), ...
+                0.225759457779, 'AbsTol', 1e-9);
+        end
+
+        function test_NL_GPCorrSum_RoundOffRatios(testCase)
+            % An exactly periodic series: residuals at round-off give NaN, not a ratio of
+            % rounding noise.
+            tab = sin(2*pi*(0:6)'/7 + 0.3);
+            y = zscore(tab(mod(0:999, 7) + 1));
+            out = NL_GPCorrSum(y,-1,0.5,{'ac',1},20,{'ac',{'fnn',0.05}},1);
+            testCase.verifyTrue(isnan(out.robfit_sigrat) && isnan(out.robfitresac1));
         end
 
         %-------------------------------------------------------------
