@@ -55,8 +55,9 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 % dpowerk_r2, dpowerk_adjr2, dpowerk_rmse, dpowerk_resAC1, dpowerk_resAC2,
 % dpowerk_resrunsz: the same, for a power law fitted to the distribution of degrees
 %       (for each of the three fits, NaN if the degrees take no more distinct values
-%       than the fit has parameters: 3 for the Gaussian, 2 for the others; also NaN
-%       if the fit is exact, which leaves no meaningful residuals)
+%       than the fit has parameters: 3 for the Gaussian, 2 for the others; the three
+%       residual statistics are also NaN if the residuals have no variation beyond
+%       floating-point round-off, as for an exact fit: BF_ResidualStats)
 % gaussnlogL, expnlogL: the mean negative log-likelihood per node of a Gaussian
 %       and of an exponential distribution fitted to the degrees
 % evparam1, evparam2, evnlogL: the location and scale parameters of an
@@ -256,7 +257,7 @@ for i = 1:length(fitModels)
 		r2 = 1 - sse/sstot;
 		adjr2 = 1 - (1 - r2)*(length(kVals) - 1)/dfe;
 		rmse = sqrt(sse/dfe) * std(k); % in density units of the standardized degrees
-		[resAC1, resAC2, resrunsz] = BF_ResidualStats(res, sstot);
+		[resAC1, resAC2, resrunsz] = BF_ResidualStats(res, kProb);
 	end
 	out.([fitName '_r2']) = r2; % rsquared
 	out.([fitName '_adjr2']) = adjr2; % degrees of freedom-adjusted rsquared

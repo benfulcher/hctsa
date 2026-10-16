@@ -41,9 +41,11 @@ classdef Robust_fits_bTests < matlab.unittest.TestCase
             [yfit2, f2] = BF_FitSinusoids(y + 1e-9*std(y)*randn(N, 1), 3);
             testCase.verifyEqual(f1, f2, 'AbsTol', 1e-6);
             testCase.verifyEqual(yfit1, yfit2, 'AbsTol', 1e-6);
-            % frequencies stay in the allowed range even for a trend
+            % frequencies stay in the allowed range (at least one full cycle) even for a trend
             [~, ftr] = BF_FitSinusoids((1:N)' + randn(N, 1), 1);
-            testCase.verifyGreaterThanOrEqual(ftr, 1/(2*N) - 1e-12);
+            testCase.verifyGreaterThanOrEqual(ftr, 1/N - 1e-12);
+            [~, ftr] = BF_FitSinusoids((1:N)' + randn(N, 1), 1, true);
+            testCase.verifyGreaterThanOrEqual(ftr, 1/N - 1e-12);
         end
 
         function test_SP_SinusoidFit_OutputsAndNaN(testCase)
@@ -122,6 +124,75 @@ classdef Robust_fits_bTests < matlab.unittest.TestCase
             testCase.verifyTrue(isfield(w, 'res_runsz') && isfinite(w.res_runsz));
             out = PP_Compare(x, 'sin1');
             testCase.verifyTrue(isstruct(out) && isfinite(out.gauss1_kd_resrunsz));
+        end
+
+        function test_BF_FitSinusoids_ExactSumReachesRoundoff(testCase)
+            t = (1:1000)';
+            y = 2 + sin(2*pi*0.0711*t) + 0.5*cos(2*pi*0.21*t + 1);
+            [yfit, f] = BF_FitSinusoids(y, 2, true);
+            testCase.verifyEqual(f, [0.0711; 0.21], 'RelTol', 1e-12);
+            testCase.verifyLessThanOrEqual(std(y - yfit), 1000*eps*sqrt(mean(y.^2)));
+        end
+
+        function test_BF_ResidualStats_RoundoffOnly(testCase)
+            % an exact fit leaves round-off: no residual statistics; the quantization noise
+            % left by an exact fit to 24-bit data is genuine
+            t = (1:1000)';
+            s = sin(2*pi*0.0523*t + 0.3);
+            out = SP_SinusoidFit(s, 'sin1');
+            testCase.verifyTrue(isnan(out.resAC1) && isnan(out.resAC2) && isnan(out.resrunsz));
+            q = 2^23;
+            out = SP_SinusoidFit(round(s*q)/q, 'sin1');
+            testCase.verifyTrue(isfinite(out.resAC1) && isfinite(out.resAC2) && isfinite(out.resrunsz));
+            [a1, ~, ~] = BF_ResidualStats(1e-9*randn(120, 1), 1e7*ones(120, 1));
+            testCase.verifyTrue(isnan(a1));
+            [a1, ~, rz] = BF_ResidualStats(1e-9*randn(120, 1), ones(120, 1));
+            testCase.verifyTrue(isfinite(a1) && isfinite(rz));
+        end
+
+        function test_PP_Compare_RoundoffIsNaN(testCase)
+            % the processed series is floating-point round-off (an exact fit, the
+            % differences of a polynomial, a constant): no statistics
+            t = (1:1000)'; u = 2*t/1000 - 1;
+            s = 2 + sin(2*pi*0.0523*t + 0.3); % not a whole number of periods
+            cubic = 2 + polyval([1, -2, 0.5, 1], u);
+            cases = {s, 'sin1'; s, 'sin2'; 1e3 + sin(2*pi*t/3), 'sin1'; 2 + 0.37*t, 'poly1'; ...
+                cubic, 'poly3'; cubic, 'poly9'; cubic, 'spline24'; 1e3 + 0.37*t, 'diff1'; ...
+                2 + polyval([1, -2, 0.5], u), 'diff2'; 7.3*ones(500, 1), 'medianf3'};
+            for i = 1:size(cases, 1)
+                out = PP_Compare(cases{i, 1}, cases{i, 2});
+                testCase.verifyTrue(~isstruct(out) && isnan(out), cases{i, 2});
+            end
+            quad = 2 + polyval([1, -2, 0.5], u);
+            out = PP_Iterate(quad, 'diff'); % the second differences are constant
+            testCase.verifyTrue(all(isnan(cell2mat(struct2cell(out)))));
+        end
+
+        function test_PP_Compare_SmallGenuineResidualIsComputed(testCase)
+            rng(42);
+            t = (1:1000)'; u = 2*t/1000 - 1;
+            s = sin(2*pi*0.0523*t + 0.3);
+            cubic = 2 + polyval([1, -2, 0.5, 1], u);
+            white = randn(1000, 1);
+            colored = filter(1, [1, -0.9], randn(1000, 1));
+            noises = {white/std(white), colored/std(colored)};
+            for n = 1:2
+                for level = [1e-2, 1e-4, 1e-6]
+                    e = level*noises{n};
+                    testCase.verifyTrue(all(isfinite(cell2mat(struct2cell(PP_Compare(2 + s + e, 'sin1'))))));
+                    testCase.verifyTrue(all(isfinite(cell2mat(struct2cell(PP_Compare(cubic + e, 'poly3'))))));
+                    testCase.verifyTrue(all(isfinite(cell2mat(struct2cell(PP_Compare(cubic + e, 'spline24'))))));
+                end
+            end
+            % the quantization noise left by an exact fit is genuine
+            for bits = [16, 24]
+                q = 2^(bits - 1);
+                out = PP_Compare(2 + round(s*q)/q, 'sin1');
+                testCase.verifyTrue(all(isfinite(cell2mat(struct2cell(out)))));
+            end
+            quad = 2 + polyval([1, -2, 0.5], u);
+            out = PP_Iterate(quad + 1e-6*white, 'diff');
+            testCase.verifyTrue(isfinite(out.statav5_trend) && isfinite(out.ol_jump));
         end
 
     end

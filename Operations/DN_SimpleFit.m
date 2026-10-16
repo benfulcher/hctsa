@@ -42,6 +42,8 @@ function out = DN_SimpleFit(x, dmodel, numBins)
 % resrunsz, the signed z-statistic of a runs test on the residuals, in order of
 %       increasing value (BF_RunsZ): negative when the residuals have fewer runs
 %       about their median than expected for a random order
+% (resAC1, resAC2 and resrunsz are NaN if the residuals have no variation beyond
+% floating-point round-off, as for an exact fit: BF_ResidualStats)
 %
 % ---NOTES:
 % Fits of time-series models (sinusoids or Fourier series) against time have
@@ -169,6 +171,6 @@ out.adjr2 = adjr2; % degrees of freedom-adjusted rsquared (not currently registe
 out.rmse = rmse * std(x);
 
 % Remaining structure in the residuals, in order of increasing value:
-[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, sstot);
+[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, dny);
 
 end

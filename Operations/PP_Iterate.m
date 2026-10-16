@@ -43,8 +43,10 @@ function out = PP_Iterate(y, dtMeth)
 %       processed series, norm(y - y_processed) / N
 % (The last three statistics need the processed series to be as long as the
 % original, so they are NaN for 'diff'.) All outputs are NaN if, at any strength,
-% the processed series has no variation beyond numerical error (a variance at most
-% 1e-10 times that of the original), as its statistics are then undefined.
+% the processed series has no variation beyond floating-point round-off (a standard
+% deviation of at most 10*N*eps times the root-mean-square of the original, a bound
+% on the rounding error of the processing; as in PP_Compare), as statistics of
+% round-off are not meaningful. Small but genuine variation is computed.
 %
 % ---NOTES:
 % Requires the Curve Fitting Toolbox.
@@ -231,9 +233,10 @@ out.normdiff_jump = stats(10, 2);
 %% TESTS:
 % ------------------------------------------------------------------------------
 function f = doYourCalcThing(y, y_d)
-	% A processed series with negligible variance relative to the original (at most
-	% 1e-10 of it) is numerical error of the processing: its statistics are undefined
-	if var(y_d) <= 1e-10 * var(y)
+	% A processed series whose variation is within the rounding error of the processing
+	% (sums of up to N terms, relative to the magnitude of the values; see PP_Compare) is
+	% round-off: its statistics are not meaningful
+	if std(y_d) <= 10 * length(y) * eps * sqrt(mean(y.^2))
 		f = NaN(10, 1); return
 	end
 	y = zscore(y);

@@ -1,4 +1,4 @@
-function [ac1, ac2, runsz] = BF_ResidualStats(res, sstot)
+function [ac1, ac2, runsz] = BF_ResidualStats(res, y)
 % BF_ResidualStats   Statistics of the residuals of a fit, for remaining structure.
 %
 % Summarizes what a fitted model leaves unexplained, from the autocorrelation of the
@@ -6,15 +6,20 @@ function [ac1, ac2, runsz] = BF_ResidualStats(res, sstot)
 % them (BF_RunsZ). The residuals are taken in the order given (time order, or order
 % of increasing value of the fitted variable).
 %
-% A fit that is exact (the residual sum of squares is below 1e-12 of the total sum
-% of squares) leaves only numerical error in the residuals, whose autocorrelation and
-% runs are arbitrary and differ between implementations: all three outputs are then
-% NaN instead of being computed from that noise.
+% All three outputs are NaN if the residuals have no variation beyond floating-point
+% round-off, as for an exact fit: the autocorrelation and runs of round-off are not
+% meaningful (and differ between implementations). The criterion is a standard
+% deviation of the residuals of at most 10*N*eps times the root-mean-square of the
+% fitted data (N values), a bound on the rounding error of a fit to them: a fitted
+% value accumulates rounding over sums of up to N terms (at most about N*eps/2 of the
+% magnitude of the data), and a sinusoid evaluated at times up to N has a phase
+% rounding error of up to about 1.5*pi*N*eps (see PP_Compare). Small but genuine
+% residuals, such as the quantization noise left by an exact fit to 24-bit data, are
+% computed.
 %
 % ---INPUTS:
 % res, the residuals (column vector)
-% sstot, the total sum of squares of the fitted data about its mean, which sets the
-%       scale against which the residuals are judged to be negligible
+% y, the fitted data (column vector), whose magnitude sets the round-off scale
 %
 % ---OUTPUTS:
 % ac1, ac2, the autocorrelation of the residuals at lags 1 and 2
@@ -49,8 +54,8 @@ function [ac1, ac2, runsz] = BF_ResidualStats(res, sstot)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
-if sum(res.^2) <= 1e-12 * sstot
-	% exact fit: nothing but numerical error is left
+if std(res) <= 10 * length(res) * eps * sqrt(mean(y.^2))
+	% nothing but round-off is left (an exact fit)
 	ac1 = NaN; ac2 = NaN; runsz = NaN;
 	return
 end
