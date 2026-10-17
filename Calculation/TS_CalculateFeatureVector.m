@@ -1,4 +1,4 @@
-function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,howVocal,beVerbose)
+function [featureVector,calcTimes,calcQuality,masterErrors] = TS_CalculateFeatureVector(tsStruct,doParallel,Operations,MasterOperations,codeSpecial,howVocal,beVerbose)
 % TS_CalculateFeatureVector	Compute a feature vector from an input time series
 %
 %---INPUTS:
@@ -35,6 +35,10 @@ function [featureVector,calcTimes,calcQuality] = TS_CalculateFeatureVector(tsStr
 %               features sharing a master operation repeat the same time:
 %               sum(calcTimes) overcounts the total (see TS_TotalCalcTime).
 % calcQuality, quality labels of each calculation (e.g., coding for NaNs, Infs, etc.)
+% masterErrors, an n-by-2 cell array with the code string and the error message of
+%               each of the n master operations that threw an error (empty when
+%               none did). Lets a caller whose workers' text output is not
+%               visible (TS_Compute's 'series' parallelism) report what went wrong.
 %
 %---USAGE:
 % Quickly compute a feature vector of a 500-long random time-series using the
@@ -192,6 +196,7 @@ end
 featureVector = zeros(numCalc,1); % Output of each operation
 calcQuality = zeros(numCalc,1); % Quality of output from each operation
 calcTimes = nan(numCalc,1); % Calculation time for each operation
+masterErrors = cell(0,2); % {master code string, error message} for each master operation that errored
 
 % --------------------------------------------------------------------------
 %% Pre-Processing
@@ -294,6 +299,9 @@ else
         BF_ProgressBar('close');
     end
 end
+
+erroredInd = find(~cellfun(@isempty,MasterErrorMsg_tmp));
+masterErrors = [par_MasterOpCodeCalc(erroredInd),MasterErrorMsg_tmp(erroredInd)];
 
 % When errors were suppressed above to avoid interrupting the progress bar
 % (howVocal=='minimal' and ~beVerbose -- see TS_ComputeMasterLoop.m), report

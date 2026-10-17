@@ -109,12 +109,26 @@ if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH','');
 end
 
-[status, res] = system(fullCommand);
+% Output taken through a file rather than system()'s own capture, which can lose
+% the end of a call's output to the next call (see BF_SystemCaptured.m). A failed
+% launch (shell or loader trouble under load) is repeated before being reported:
+for attempt = 1:3
+    [status, res, gotMarker] = BF_SystemCaptured(fullCommand);
+    if gotMarker && ~any(status == [126, 127]) && status >= 0 && ~(status > 128 && status < 193)
+        break
+    end
+    if attempt < 3, pause(0.2*attempt + 0.3*rand); end
+end
 
 if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH', oldLdLibraryPath);
 end
 
+if ~gotMarker
+    error('BF_RipserSystem:ripserFailed', ...
+        'ripser command did not report an exit status (the shell running it died or could not write its output file).\nCommand: %s\nOutput: %s', ...
+        ripserCommand, res);
+end
 if status ~= 0
     switch status
         case 124

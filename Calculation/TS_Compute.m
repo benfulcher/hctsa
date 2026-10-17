@@ -282,7 +282,7 @@ if doParallelSeries
 
         blockData = TimeSeries.Data(blockRows); % raw time-series vectors only
 
-        fv = cell(nBlock,1); ct = cell(nBlock,1); cq = cell(nBlock,1);
+        fv = cell(nBlock,1); ct = cell(nBlock,1); cq = cell(nBlock,1); me = cell(nBlock,1);
         elapsed = zeros(nBlock,1);
         failMsg = repmat({''},nBlock,1);
 
@@ -293,7 +293,7 @@ if doParallelSeries
             end
             seriesTimer = tic;
             try
-                [fv{k},ct{k},cq{k}] = TS_CalculateFeatureVector(blockData{k},false,...
+                [fv{k},ct{k},cq{k},me{k}] = TS_CalculateFeatureVector(blockData{k},false,...
                         opsConstant.Value(toCalc_k,:),mopsConstant.Value,true,'fast',beVerbose);
             catch ME
                 failMsg{k} = ME.message;
@@ -313,6 +313,13 @@ if doParallelSeries
             toCalc_k = blockToCalc(k,:);
             if ~any(toCalc_k)
                 continue
+            end
+            % A worker's own text output never reaches the client, so report any
+            % master-operation errors here (their entries are stored as TS_Quality = 1):
+            for ee = 1:size(me{k},1)
+                fprintf(1,'[%s]: Error evaluating %s on time series %u / %u (%s): %s\n',...
+                    timeStamp(),me{k}{ee,1},blockPos(k),numTimeSeries,TimeSeries.Name{blockRows(k)},...
+                    strrep(strtrim(me{k}{ee,2}),newline,' | '));
             end
             TS_DataMat(blockRows(k),toCalc_k)  = fv{k};
             TS_CalcTime(blockRows(k),toCalc_k) = ct{k};

@@ -37,6 +37,15 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % terse refusal, e.g. false_nearest's exit 54 for "too large" -- see
 % NL_FNN.m) and is passed through for the caller to interpret.
 %
+% The command's output is NOT taken from system()'s own captured output. On
+% Linux, under load (e.g. many parallel pool workers on one node), MATLAB's
+% system() can return before it has read all of the child's output, and deliver
+% the remainder as the start of the NEXT system() call's output in the same
+% process. A TISEAN call then returns truncated output (a missing final block,
+% which parses without complaint, or an error), and the call after it gets a
+% stray numeric tail in front of its own output. The output is therefore
+% collected through a file and checked for completeness: see BF_SystemCaptured.m.
+%
 %---INPUTS:
 % tiseanCommand, the TISEAN command-line string to run (as would be
 %                 passed directly to system())
@@ -128,10 +137,37 @@ if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH','');
 end
 
-[status, res] = system(fullCommand);
+% A TISEAN call can fail to start, or be killed, for reasons unrelated to the
+% data: the shell or the dynamic loader failing transiently under load (status
+% 126/127 or a negative status for a command that is installed, or the
+% executable, its libraries or its input file briefly unreadable on a busy
+% network filesystem), the process being killed by a signal (status 129-192,
+% e.g. 137 = SIGKILL from the memory cgroup, 139 = SIGSEGV), a non-zero exit
+% that printed nothing at all, or the exit marker (see the header) being absent.
+% Such a call is repeated a few times, after a short randomized pause, before it
+% is reported as a failure: re-running a deterministic TISEAN binary on the same
+% input file either gives the same answer or fixes the glitch, so a retry cannot
+% change any value. Statuses the binaries choose themselves (e.g. 54, 50: 50-99,
+% see tisean_cec.h) and the wrapper's own timeout (124) are never retried.
+maxAttempts = 3;
+for attempt = 1:maxAttempts
+    [status, res, gotMarker] = BF_SystemCaptured(fullCommand);
+    isTransient = ~gotMarker || any(status == [126, 127]) || status < 0 || (status > 128 && status < 193) ...
+        || (status ~= 0 && isempty(strtrim(res)) && ~(status >= 50 && status <= 99)); % exit with no message at all
+    if ~isTransient || attempt == maxAttempts
+        break
+    end
+    pause(0.2*attempt + 0.3*rand);
+end
 
 if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH', oldLdLibraryPath);
+end
+
+if ~gotMarker
+    error('BF_TiseanSystem:tiseanFailed', ...
+        ['TISEAN command did not report an exit status (the shell running it died or could not write its output file; ' ...
+         '%d attempt(s)).\nCommand: %s\nOutput: %s'], attempt, tiseanCommand, res);
 end
 
 % See the header comment: any of these three means TISEAN never produced a
@@ -147,8 +183,17 @@ if any(status == [124, 126, 127])
             reason = 'not found on the system path -- is TISEAN installed and compiled? (see install.m)';
     end
     error('BF_TiseanSystem:tiseanFailed', ...
-        'TISEAN command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
-        reason, tiseanCommand, res);
+        'TISEAN command could not be completed (%s; exit status %d after %d attempt(s)).\nCommand: %s\nOutput: %s', ...
+        reason, status, attempt, tiseanCommand, res);
+end
+
+% A call that was still killed by a signal after the retries is passed on to the
+% caller exactly as before (same status and output, so no feature value changes),
+% but with a warning rather than silently:
+if status > 128 && status < 193
+    warning('BF_TiseanSystem:tiseanKilled', ...
+        'TISEAN command was terminated by a signal (exit status %d, %d attempt(s)): %s', ...
+        status, attempt, tiseanCommand);
 end
 
 % Belt-and-braces guard against a runaway binary -- one that streams console
