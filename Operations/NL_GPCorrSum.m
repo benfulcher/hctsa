@@ -191,7 +191,8 @@ maxEps = r * std(y) * sqrt(m);
 % output at all; "-M1,<m>" (a genuine range, as NL_d2.m also uses) works
 % correctly, so that's used
 % here too and the dimension-m block is picked out afterwards.
-[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -R%g -N%u -#%u %s', ...
+% (the maximum radius is passed at full precision, as the radii are derived from it)
+[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -R%.17g -N%u -#%u %s', ...
 						  tau, m, thwin, maxEps, NrefTISEAN, nbins, filePath));
 if exist([filePath '.stat'], 'file'), delete([filePath '.stat']); end
 if exist([filePath '.d2'], 'file'), delete([filePath '.d2']); end

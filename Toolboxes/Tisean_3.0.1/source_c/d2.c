@@ -515,7 +515,7 @@ int main(int argc,char **argv)
 	for (j=0;j<HOWOFTEN;j++) {
 	  eps /= epsfactor;
 	  if (norm[j] > 0.0)
-	    fprintf(fout,"%e %e\n",eps,found[i][j]/norm[j]);
+	    fprintf(fout,"%.17g %.17g\n",eps,found[i][j]/norm[j]);
 	}
 	fprintf(fout,"\n\n");
       }
@@ -529,7 +529,7 @@ int main(int argc,char **argv)
       for (j=0;j<HOWOFTEN;j++) {
 	eps /= epsfactor;
 	if (found[0][j] > 0.0)
-	  fprintf(fout,"%e %e\n",eps,-log(found[0][j]/norm[j]));
+	  fprintf(fout,"%.17g %.17g\n",eps,-log(found[0][j]/norm[j]));
       }
       fprintf(fout,"\n\n");
       for (i=1;i<DIM*EMBED;i++) {
@@ -538,7 +538,7 @@ int main(int argc,char **argv)
 	for (j=0;j<HOWOFTEN;j++) {
 	  eps /= epsfactor;
 	  if ((found[i-1][j] > 0.0) && (found[i][j] > 0.0))
-	    fprintf(fout,"%e %e\n",eps,log(found[i-1][j]/found[i][j]));
+	    fprintf(fout,"%.17g %.17g\n",eps,log(found[i-1][j]/found[i][j]));
 	}
 	fprintf(fout,"\n\n");
       }
@@ -553,7 +553,7 @@ int main(int argc,char **argv)
 	for (j=1;j<HOWOFTEN;j++) {
 	  eps /= epsfactor;
 	  if ((found[i][j] > 0.0) && (found[i][j-1] > 0.0))
-	    fprintf(fout,"%e %e\n",eps,log(found[i][j-1]/found[i][j]
+	    fprintf(fout,"%.17g %.17g\n",eps,log(found[i][j-1]/found[i][j]
 					   /norm[j-1]*norm[j])/lnfac);
 	}
 	fprintf(fout,"\n\n");
