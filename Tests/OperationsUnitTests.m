@@ -932,8 +932,9 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             x = (x - mean(x))/std(x);
             v = NL_TakensEstimator(x,-1,0.01,{'ac',1},{3,3});
             testCase.verifyEqual(v, 2.86282933331, 'AbsTol', 1e-9);
+            % quantized to steps of 0.25: too discrete at the length scale
             q = round(x/0.25)*0.25; q = (q - mean(q))/std(q);
-            testCase.verifyEqual(NL_TakensEstimator(q,-1,0.01,{'ac',1},{3,3}), 1.70646837008, 'AbsTol', 1e-9);
+            testCase.verifyTrue(isnan(NL_TakensEstimator(q,-1,0.01,{'ac',1},{3,3})));
             z = max(x - 0.5, 0); z = (z - mean(z))/std(z);
             testCase.verifyEqual(NL_TakensEstimator(z,-1,0.01,{'ac',1},{2,3}), 1.10192541585, 'AbsTol', 1e-9);
             testCase.verifyTrue(isnan(NL_TakensEstimator(x(1:60),-1,0.01,{'ac',1},{3,3})));
@@ -942,25 +943,36 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         function test_NL_TakensEstimator_ShiftScaleReflection(testCase)
-            % The tolerance is relative to the range: y, 3.7*y - 12 and -y give the same
-            % estimate (the same values as pyhctsa's takens_estimator).
-            t = (1:1500)';
-            ints = floor(6*mod(t*0.6180339887498949, 1)) + floor(3*mod(t*0.41421356, 1));
+            % The tolerances are relative to the data: y, 3.7*y - 12 and -y give the same
+            % output (the same values as pyhctsa's takens_estimator).
             lg = zeros(1500, 1); lg(1) = 0.3;
+            ch = zeros(1500, 1); ch(1) = 0.3141;
             for k = 2:1500
                 lg(k) = 3.84*lg(k-1)*(1 - lg(k-1)); % a transient converging to a period-3 orbit
+                ch(k) = 3.9*ch(k-1)*(1 - ch(k-1));
             end
+            int12 = round(4095*ch); % a chaotic series quantized to 12 bits
             F = {@(v) v, @(v) 3.7*v - 12, @(v) -v};
             for f = 1:3
-                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(ints)),-1,0.01,{'ac',1},{1,3}), ...
-                    1.552890298234, 'AbsTol', 1e-9);
-                % distances near 1e-12 of the range carry relative round-off of about 1e-4,
-                % which leaves a difference of order 1e-5 under the affine map
-                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(lg)),-1,0.01,{'ac',1},{1,3}), ...
-                    0.225759457779, 'AbsTol', 5e-5);
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(int12)),-1,0.01,{'ac',1},{1,3}), ...
+                    1.002896002752, 'AbsTol', 1e-9);
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(int12)),-1,0.01,{'ac',1},{1,2}), ...
+                    1.019092095706, 'AbsTol', 1e-9);
+                % the period-3 orbit: too few distinct distances below the length scale
+                testCase.verifyTrue(isnan(NL_TakensEstimator(zscore(F{f}(lg)),-1,0.01,{'ac',1},{1,3})));
             end
-            testCase.verifyEqual(NL_TakensEstimator(zscore(-lg),-1,0.01,{'ac',1},{1,3}), ...
-                0.225759457779, 'AbsTol', 1e-9);
+        end
+
+        function test_NL_TakensEstimator_AboveEmbeddingDimension(testCase)
+            % A random walk (with chaotic increments) whose 'ac' delay and Theiler window are
+            % about a third of the series: the estimate at m = 3 would be 9.4, so NaN.
+            x = zeros(2000, 1); x(1) = 0.3141;
+            for k = 2:2000
+                x(k) = 4*x(k-1)*(1 - x(k-1));
+            end
+            y = zscore(cumsum(x - 0.5));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(y,-1,0.01,{'ac',1},{'ac',3})));
+            testCase.verifyEqual(NL_TakensEstimator(y,-1,0.01,{'ac',1},{1,3}), 1.93575005343, 'AbsTol', 1e-9);
         end
 
         function test_NL_GPCorrSum_RoundOffRatios(testCase)

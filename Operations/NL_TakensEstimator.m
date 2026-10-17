@@ -22,22 +22,29 @@ function out = NL_TakensEstimator(y, Nref, c0, past, embedParams, randomSeed)
 % at small scales.
 %
 % Details:
-% - Distances that differ by at most tol = 1e-12*(max(y) - min(y)) are equal (they are
-%   merged into one level after sorting, not snapped to a grid), and pairs of delay vectors
-%   closer than tol are repeated points: they carry no length-scale information, and a
-%   positive fraction of them makes the estimator inconsistent (Borovkova et al. 1999), so
-%   they are left out. Pairs within tol of eup lie at it and are not among the pairs below
-%   it. The tolerance is relative to the range, so shifting, rescaling or reflecting y
-%   leaves the output unchanged, apart from distances within round-off of tol.
-% - Quantized values: if all differences between distinct values of y are within 1% of
-%   integer multiples of a common step q (the smallest difference divided by the smallest
-%   k = 1, ..., 100 that fits, well above tol; q is then fitted to the differences by least
-%   squares), distances are rounded to multiples of q, since finer differences are not
-%   resolved by the data. This also covers quantized data stored with rounding, whose
-%   distances would otherwise form near-equal clusters.
-% - If fewer than two distinct distances lie below eup (values on a lattice coarser than the
-%   c0 quantile), eup is raised to the next distance present until two do: a scaling
-%   exponent needs at least two resolved length scales.
+% - Pairs of delay vectors closer than tol = 1e-12*(max(y) - min(y)) are repeated points:
+%   they carry no length-scale information, and a positive fraction of them makes the
+%   estimator inconsistent (Borovkova et al. 1999), so they are left out.
+% - Distances closer than tol are equal. If the values of y lie on a lattice, i.e., all
+%   differences between distinct values are within 1% of integer multiples of a common step
+%   q (the smallest difference divided by the smallest k = 1, ..., 100 that fits, well above
+%   tol, with q fitted to the differences by least squares; quantized data, also when stored
+%   with rounding), distances closer than q/2 are equal, since finer differences are not
+%   resolved by the data. Equal distances are merged into levels after sorting (not snapped
+%   to a grid), each level taking its smallest value; pairs at the level of eup lie at eup.
+%   The tolerances are relative to the data, so shifting, rescaling or reflecting y leaves
+%   the output unchanged, apart from distances within round-off of tol.
+% - The output is NaN if fewer than 3 distinct distances lie below eup: the data then do
+%   not resolve the length scale (eup lies within two resolution steps of the smallest
+%   distance), and the estimate is set by the lattice of the values rather than by the
+%   dynamics.
+% - The output is NaN if the estimate exceeds 2*m for an m-dimensional embedding: a set with
+%   a scaling region below eup has a dimension of at most m, and finite-sample and
+%   finite-scale effects keep estimates for sets with a scaling region well below 2*m.
+%   Larger values arise when the correlation sum rises much faster than r^m below eup, as
+%   when the pairs outside the Theiler window are all far apart (a Theiler window that is
+%   a large fraction of a nonstationary series), so there is no scaling region at that
+%   scale.
 % - The output is NaN if c0 times the number of pairs that are not repeated points is
 %   below 33, the smallest number of pairs for which the 95% sampling interval of the
 %   estimate (for independent pairs) spans less than a factor of two.
@@ -64,7 +71,8 @@ function out = NL_TakensEstimator(y, Nref, c0, past, embedParams, randomSeed)
 % ---OUTPUTS:
 % A scalar: the estimate of the correlation dimension (NaN if the series is constant or
 % cannot be embedded, the Theiler window cannot be set, c0 times the number of pairs that
-% are not repeated points is below 33, or fewer than three distinct pair distances exist).
+% are not repeated points is below 33, fewer than 3 distinct distances lie below eup, or
+% the estimate exceeds twice the embedding dimension; see Details).
 %
 % ---REFERENCES:
 % F. Takens, "On the numerical determination of the dimension of an attractor", in
@@ -168,8 +176,7 @@ else
 	nRef = Nref;
 end
 
-% Distances within tol = 1e-12 of the range of y are equal (merged after sorting, not
-% snapped to a grid), and pairs closer than tol are repeated points, left out
+% Pairs closer than tol = 1e-12 of the range of y are repeated points, left out
 span = max(y) - min(y); % no max-norm distance exceeds the range of y
 if ~(span > 0)
 	out = NaN; return % constant series
@@ -177,8 +184,8 @@ end
 tol = 1e-12 * span;
 % Quantized values: if the differences between distinct values are all within 1% of
 % integer multiples of a common step q (the smallest difference divided by the smallest
-% k = 1, ..., 100 that fits, well above tol), distances are rounded to multiples of the
-% least-squares q
+% k = 1, ..., 100 that fits, well above tol), distances closer than q/2 are not resolved
+% by the data
 gaps = diff(unique(y(:)));
 gaps = gaps(gaps > tol);
 if isempty(gaps)
@@ -194,6 +201,7 @@ for k = 1:100
 		break
 	end
 end
+mergeTol = max(tol, q/2); % distances closer than this are equal
 
 % ------------------------------------------------------------------------------
 %% Pass 1: histogram of the distances, to locate the c0 quantile
@@ -202,7 +210,7 @@ numBins = 200;
 edges = tol * logspace(0, log10(2*span/tol + 1), numBins + 1);
 counts = zeros(1, numBins);
 for c = 1:SUB_chunkSize(Nemb):nRef
-	d = SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, q, tol, Inf);
+	d = SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, tol, Inf);
 	counts = counts + histcounts(d, edges);
 end
 numPos = sum(counts); % pairs that are not repeated points
@@ -213,33 +221,24 @@ if K < minPairs
 end
 
 % ------------------------------------------------------------------------------
-%% Pass 2: collect the distances below a bin edge beyond the quantile (further if needed)
+%% Pass 2: collect the distances below the bin edge beyond the quantile
 % ------------------------------------------------------------------------------
 b = find(cumsum(counts) >= K, 1, 'first');
-while true
-	rMax = edges(b + 1);
-	p = [];
-	for c = 1:SUB_chunkSize(Nemb):nRef
-		p = [p; SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, q, tol, rMax)]; %#ok<AGROW>
-	end
-	p = sort(p);
-	if numel(p) >= K
-		% Merge distances within tol into levels (each takes its smallest value)
-		level = [0; cumsum(diff(p) > tol)];
-		value = p([true; diff(level) > 0]);
-		% eup is the level of the K-th distance, raised to a later level until at least
-		% two levels lie below it (every distance below that level has been collected)
-		k = max(level(K), 2);
-		if k < numel(value)
-			break
-		end
-	end
-	nextBin = find(counts(b+1:end) > 0, 1); % the next bin holding any distances
-	if isempty(nextBin)
-		warning('Fewer than three distinct pair distances');
-		out = NaN; return
-	end
-	b = b + nextBin;
+rMax = edges(b + 1);
+p = [];
+for c = 1:SUB_chunkSize(Nemb):nRef
+	p = [p; SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, tol, rMax)]; %#ok<AGROW>
+end
+p = sort(p);
+
+% Merge distances closer than mergeTol into levels (each takes its smallest value); eup
+% is the level of the K-th distance
+level = [0; cumsum(diff(p) > mergeTol)];
+value = p([true; diff(level) > 0]);
+k = level(K); % the number of levels below eup
+if k < 3
+	warning('Fewer than 3 distinct pair distances below the upper length scale');
+	out = NaN; return % the data are too discrete at this scale
 end
 
 % ------------------------------------------------------------------------------
@@ -248,6 +247,11 @@ end
 eup = value(k + 1); % (levels are numbered from 0)
 r = value(level(level < k) + 1); % the pairs below eup, at the values of their levels
 out = (numel(r) - 1) / sum(log(eup ./ r));
+m = size(Y, 2);
+if out > 2*m
+	warning('Dimension estimate %g exceeds twice the embedding dimension %u', out, m);
+	out = NaN; % no scaling region at this scale
+end
 
 end
 % ------------------------------------------------------------------------------
@@ -256,9 +260,9 @@ function s = SUB_chunkSize(Nemb)
 	s = max(1, floor(2.5e6 / Nemb));
 end
 % ------------------------------------------------------------------------------
-function d = SUB_distances(Y, i1, i2, past, q, tol, rMax)
-	% Max-norm distances (rounded to multiples of q for quantized values) above tol and
-	% below rMax between reference points i1:i2 and the delay vectors j > i + past
+function d = SUB_distances(Y, i1, i2, past, tol, rMax)
+	% Max-norm distances above tol and below rMax between reference points i1:i2 and
+	% the delay vectors j > i + past
 	Nemb = size(Y, 1);
 	j1 = i1 + past + 1;
 	if j1 > Nemb
@@ -269,9 +273,6 @@ function d = SUB_distances(Y, i1, i2, past, q, tol, rMax)
 	D = abs(Y(ii, 1) - Y(jj, 1)');
 	for k = 2:size(Y, 2)
 		D = max(D, abs(Y(ii, k) - Y(jj, k)'));
-	end
-	if q > 0
-		D = q * floor(D / q + 0.5);
 	end
 	keep = (jj > ii + past) & (D > tol) & (D < rMax);
 	d = D(keep);
