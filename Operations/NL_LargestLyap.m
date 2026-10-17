@@ -23,6 +23,17 @@ function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % all of the "proportion of max" statistics that follow (which assume p rises
 % from ~0) are meaningful.
 %
+% hctsa's copy of lyap_r compares distances with a tolerance of 1e-12 (of the
+% range of the data), so that the result depends neither on rounding nor on the
+% order in which neighbors are searched: a point closer than that to the
+% reference point is the same state visited again, not a neighbor; when several
+% points are equally near (within the tolerance), each contributes its
+% log-distance curve with weight one over their number (the expected curve for a
+% random choice among them); and a pair that merges (comes within the tolerance)
+% within the maxtstep steps is left out at every step, so that every step
+% averages over the same pairs. With a unique nearest neighbor and no merging, as
+% for continuously distributed data, this is the published method.
+%
 % ---INPUTS:
 % y, the time series to analyze
 % Nref, number of randomly-chosen reference points (-1 == all). Accepted so
@@ -44,8 +55,9 @@ function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % past, the Theiler window: {'ac1e', k} or {'ac', k} as for maxtstep, or a number
 %       of samples (see BF_TheilerWindow; default: {'ac1e',1})
 % NNR, number of nearest neighbours. Accepted so that existing calls still
-%      work, but has no effect on the computation: 'lyap_r' always uses exactly
-%      one nearest neighbor per reference point.
+%      work, but has no effect on the computation: 'lyap_r' uses the nearest
+%      neighbor of each reference point (all of them, averaged, when several are
+%      equally near).
 % embedParams, input to BF_Embed, how to time-delay-embed the time series, in
 %              the form {tau,m}, where string specifiers can indicate standard
 %              methods of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) or
@@ -65,7 +77,8 @@ function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 %       of the fit varied for the best scaling range: the mean absolute residual,
 %       root-mean-square residual, slope, intercept and the minimum value of the
 %       penalized error (mean absolute residual minus 0.006 times the number of
-%       points)
+%       points); NaN if p reaches 95% of its maximum within three steps, or never
+%       rises above its value at t = 0
 % ve_meanabsres, ve_rmsres, ve_gradient, ve_intercept, ve_minbad: the same, with
 %       only the end of the fit varied (the fit starts at the beginning of p)
 % vse_gradient_pertau, ve_gradient_pertau: the two slopes (exponents per sample)
@@ -83,7 +96,7 @@ function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % 16(3), 285 (1985).
 % M. T. Rosenstein, J. J. Collins and C. J. De Luca, "A practical method for
 % calculating largest Lyapunov exponents from small data sets", Physica D
-% 65(1-2), 117 (1993).
+% 65(1-2), 117 (1993). DOI: 10.1016/0167-2789(93)90009-P
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -307,8 +320,9 @@ if isempty(out.to05max), out.to05max = NaN; end
 % fit from zero to 95% of maximum...
 imax = find(p > 0.95 * max(p), 1, 'first');
 
-if imax <= 3
-	% not a suitable range for finding scaling
+if isempty(imax) || imax <= 3
+	% not a suitable range for finding scaling (or, if p never rises above
+	% its value at t = 0, as for neighbors that converge, no rise to fit)
 	% return NaNs for these
 	out.vse_meanabsres = NaN;
 	out.vse_rmsres = NaN;

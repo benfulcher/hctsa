@@ -5743,3 +5743,9 @@ NL_GPCorrSum2_n1_01_ac1_40_ac_fnn005_robfitresmeansq,,deregistered: Spearman 0.9
 NL_GPCorrSum2_n1_01_ac1_40_ac_fnn005_minlnr,,deregistered: Spearman 0.99-1.00 with NL_GPCorrSum2_n1_05_ac1_20_ac_fnn005_minlnr (the smallest radius with any pair does not depend on the maximum radius)
 NL_GPCorrSum2_n1_05_ac1_20_ac_fnn005_robfit_sea1,,deregistered: Spearman 0.99 with NL_GPCorrSum2_n1_05_ac1_20_ac_fnn005_robfit_s
 NL_GPCorrSum2_n1_05_ac1_20_ac_fnn005_robfitresmeanabs,,deregistered: Spearman 0.97 with NL_GPCorrSum2_n1_05_ac1_20_ac_fnn005_robfit_s
+NL_ReturnTime_005_100_ac1_500_1_3_statrtys,NL_ReturnTime_005_100_ac1_500_1_3_fracsdrt,"bounded form: the first half's share of the standard deviation, a/(a+b), in place of the ratio a/b (no near-zero denominator)"
+NL_ReturnTime_005_100_ac1_500_1_3_statrtym,NL_ReturnTime_005_100_ac1_500_1_3_fracmeanrt,"bounded form: the first half's share of the mean, a/(a+b), in place of the ratio a/b (no near-zero denominator)"
+NL_ReturnTime_002_100_ac1_500_1_8_statrtys,NL_ReturnTime_002_100_ac1_500_1_8_fracsdrt,"bounded form: the first half's share of the standard deviation, a/(a+b), in place of the ratio a/b (no near-zero denominator)"
+NL_ReturnTime_002_100_ac1_500_1_8_statrtym,NL_ReturnTime_002_100_ac1_500_1_8_fracmeanrt,"bounded form: the first half's share of the mean, a/(a+b), in place of the ratio a/b (no near-zero denominator)"
+NL_ReturnTime_002_100_ac1_500_ac_3_statrtys,NL_ReturnTime_002_100_ac1_500_ac_3_fracsdrt,"bounded form: the first half's share of the standard deviation, a/(a+b), in place of the ratio a/b (no near-zero denominator)"
+NL_ReturnTime_002_100_ac1_500_ac_3_statrtym,NL_ReturnTime_002_100_ac1_500_ac_3_fracmeanrt,"bounded form: the first half's share of the mean, a/(a+b), in place of the ratio a/b (no near-zero denominator)"

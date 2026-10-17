@@ -28,6 +28,13 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % The outputs summarize D and q across the moments, and a straight-line fit of
 % D against q.
 %
+% D(gamma) is identified only where the error has a minimum inside the search
+% interval for D, and the moments are not zero: a minimum at either end of the
+% interval (for instance at the upper end when the moments do not grow with k,
+% as on a periodic orbit) is no estimate, nor is a fit to moments that are zero
+% (to within 1e-12 of the range of y; every kth neighbor coincides with its
+% reference point, so the error is flat in D), and the outputs are then NaN.
+%
 % ---INPUTS:
 % y, column vector of time series data
 % kmin, minimum number of neighbours for each reference point
@@ -58,6 +65,7 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % maxq, rangeq, meanq: maximum, range and mean of q across the moments
 % linfit_a, linfit_b: slope and intercept of a linear fit of D against q
 % linfit_rmsqres: root-mean-square residual of that fit
+% All are NaN if D is not identified at every moment order.
 %
 % ---REFERENCES:
 % W. van de Water and P. Schram, "Generalized dimensions from near-neighbor
@@ -197,6 +205,7 @@ R = length(refIdx);
 % ------------------------------------------------------------------------------
 kFetch = min(N_embed - 1, kmax + 2 * past + 5);
 [idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);
+tol = 1e-12 * (max(y) - min(y)); % distances below this are zero up to rounding
 
 distances = zeros(R, kmax); % distances(i,k) = i-th reference point's distance to its k-th nearest neighbor
 for ii = 1:R
@@ -240,10 +249,17 @@ for gi = 1:numGammas
 		mom = mean(distances.^g, 1).^(1 / g);
 	end
 
+	if any(mom(kmin:kmax) <= tol)
+		out = NaN; return % zero moments: the error is flat in D
+	end
 	DMin = max(0.05, -g / kmin);
 	DMax = 128;
 	errFcn = @(D) SUB_DimError(D, g, kmin, kmax, mom, innerOpts);
 	Dq(gi) = fminbnd(errFcn, DMin, DMax, outerOpts);
+	if min(Dq(gi) - DMin, DMax - Dq(gi)) <= 10 * outerOpts.TolX
+		% (the minimum lies at an end of the search interval: D is not identified)
+		out = NaN; return
+	end
 	q(gi) = 1 - g / Dq(gi);
 end
 

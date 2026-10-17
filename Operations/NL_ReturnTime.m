@@ -18,6 +18,13 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 % related to the tau-recurrence rate of recurrence quantification analysis, with
 % neighborhoods holding a fixed proportion of points rather than having a fixed radius.
 %
+% The neighborhood of a reference point is the ball out to its NNR-th nearest neighbor,
+% boundary included, with distances that differ by at most 1e-12 of the range of y treated
+% as equal: so the neighborhood, and the profile, do not depend on rounding or on the order
+% in which neighbors are found. With exactly repeated delay vectors (quantized data,
+% periodic orbits) a neighborhood can hold more than NNR points, and the expected count
+% uses the number it holds.
+%
 % (For the distribution of *first* return times to a neighborhood, see NL_RecurrenceTimes.)
 %
 % ---INPUTS:
@@ -45,8 +52,11 @@ function out = NL_ReturnTime(y, NNR, numLags, past, Nref, embedParams)
 %      peaks and the gaps between them, those shorter than 0.4 of the longest interval being
 %      dropped), as a proportion of the number of lags (stdpeaksep is divided by the square
 %      root of the number of lags instead; all are NaN with fewer than 3 crossings)
-% statrtys, statrtym, the ratio of the standard deviation (statrtys) or mean (statrtym) of
-%      the profile over the first half of the lags to that over the second half
+% fracsdrt, fracmeanrt, the share of the first half of the lags in the standard deviation
+%      (fracsdrt) or mean (fracmeanrt) of the profile: a/(a + b), with a and b the statistic
+%      over the first and second halves. This lies in [0,1]: 0.5 when the halves match and 1
+%      when all the variation (or mass) is at short lags; NaN if both halves are constant
+%      (or empty)
 % hhist, the entropy of the profile as a distribution over lags
 % hcgdist, rangecgdist, pzeroscgdist, the entropy, range and proportion of zeros of the
 %      profile after summing it into 20 equal bins of lags (as a distribution over bins)
@@ -156,6 +166,7 @@ end
 % At most 2*past + 1 points (the reference point itself included) fall within
 % the Theiler window, so NNR + 2*past + 1 neighbors always hold NNR valid ones
 K = min(N_embed, NNR + 2 * past + 1);
+tol = 1e-12 * (max(y) - min(y)); % distances closer than this are equal
 r2 = NaN(N_embed, 1); % squared radius (NaN for non-reference points)
 chunkSize = max(1, floor(2e6 / K)); % bound the memory of the neighbor lists
 for c = 1:chunkSize:length(refIdx)
@@ -163,9 +174,23 @@ for c = 1:chunkSize:length(refIdx)
 	[idx, dist] = knnsearch(Y, Y(theRefs, :), 'K', K);
 	isValid = abs(idx - theRefs) > past;
 	[~, whichCol] = max(cumsum(isValid, 2) >= NNR, [], 2);
-	% (slightly inflated so the NNR-th neighbor itself survives the round trip
-	% through knnsearch's square root)
-	r2(theRefs) = dist(sub2ind(size(dist), (1:length(theRefs))', whichCol)).^2 * (1 + 1e-9);
+	% (the boundary is included, with the tolerance, so that every point at the
+	% NNR-th neighbor's distance is in, whatever the arithmetic path to it)
+	r2(theRefs) = (dist(sub2ind(size(dist), (1:length(theRefs))', whichCol)) + tol).^2;
+end
+
+% The number of valid (Theiler-excluded) points in each neighborhood: NNR, or
+% more where points tie with the NNR-th neighbor
+nNear = zeros(N_embed, 1);
+chunkSize = max(1, floor(2e6 / N_embed));
+for c = 1:chunkSize:length(refIdx)
+	theRefs = refIdx(c:min(c + chunkSize - 1, length(refIdx)))';
+	D2 = zeros(N_embed, length(theRefs));
+	for j = 1:size(Y, 2)
+		D2 = D2 + (Y(:, j) - Y(theRefs, j)').^2;
+	end
+	inBall = (D2 <= r2(theRefs)') & (abs((1:N_embed)' - theRefs) > past);
+	nNear(theRefs) = sum(inBall, 1);
 end
 
 % ------------------------------------------------------------------------------
@@ -181,12 +206,13 @@ for k = 1:numLags
 	counts(k) = sum(sum((Y(fwd + T, :) - Y(fwd, :)).^2, 2) <= r2(fwd)) ...
 			+ sum(sum((Y(bwd - T, :) - Y(bwd, :)).^2, 2) <= r2(bwd));
 end
-% By chance, a given valid candidate is one of reference i's NNR neighbors with
-% probability NNR/V_i, where V_i is the number of points outside i's Theiler window
+% By chance, a given valid candidate is one of the n_i points in reference i's
+% neighborhood with probability n_i/V_i, where V_i is the number of points outside
+% i's Theiler window
 i = (1:N_embed)';
 V = N_embed - (min(i - 1, past) + min(N_embed - i, past) + 1);
 w = zeros(N_embed, 1);
-w(refIdx) = NNR ./ V(refIdx);
+w(refIdx) = nNear(refIdx) ./ V(refIdx);
 cw = cumsum(w);
 expected = cw(N_embed - lags) + (cw(end) - cw(lags)); % forward + backward partners
 Trett = counts ./ expected;
@@ -226,9 +252,23 @@ else
 	out.stdpeaksep = NaN;
 end
 
-% short lags compared to long lags:
-out.statrtys = std(Trett(1:floor(end / 2))) / std(Trett(floor(end / 2) + 1:end));
-out.statrtym = mean(Trett(1:floor(end / 2))) / mean(Trett(floor(end / 2) + 1:end));
+% short lags compared to long lags, as the first half's share of each statistic
+% (bounded, and defined unless both halves are constant, or empty):
+tolTrett = 1e-12 * max(Trett);
+sdShort = std(Trett(1:floor(end / 2)));
+sdLong = std(Trett(floor(end / 2) + 1:end));
+meanShort = mean(Trett(1:floor(end / 2)));
+meanLong = mean(Trett(floor(end / 2) + 1:end));
+if sdShort + sdLong > tolTrett
+	out.fracsdrt = sdShort / (sdShort + sdLong);
+else
+	out.fracsdrt = NaN;
+end
+if meanShort + meanLong > tolTrett
+	out.fracmeanrt = meanShort / (meanShort + meanLong);
+else
+	out.fracmeanrt = NaN;
+end
 
 % entropy of the histogram, as a distribution over lags:
 pTrett = Trett / sum(Trett);

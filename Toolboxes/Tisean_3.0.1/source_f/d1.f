@@ -23,9 +23,17 @@ c
 c   d1 with finite sample correction following Grassberger
 c   subroutine for c1
 c
+c   hctsa: a center that coincides with its k-th neighbor (to within tol,
+c   1e-12 of the range of the data) is a repeated point: at least the mass
+c   of the points sits on it, and its log distance is minus infinity. The
+c   mean log distance over the centers is then not finite, so the mass is
+c   skipped (as when no neighbors are found). (Flooring the distance at a
+c   tiny value instead would let such centers dominate the mean and the
+c   local slopes.)
+c
 c===========================================================================
       subroutine d1(nmax,mmax,nxx,y,id,m,ncmin,pr,pln,eln,nmin,kmax)
-      parameter(im=100,ii=100000000,nx=100000,tiny=1e-20) 
+      parameter(im=100,ii=100000000,nx=100000) 
       dimension y(nxx,mmax),jh(0:im*im),ju(nx),d(nx),jpntr(nx),
      .   nlist(nx),nwork(nx)
       external rand
@@ -84,6 +92,14 @@ c     there are only nvalid embedded points to use as centers
 c     number of centers: each contributes exactly one log distance below
 c     (this used to divide by ncmin-(mt-1)*id, inflating the mean log
 c     radius by ncmin/(ncmin-(mt-1)*id) and biasing every dimension low)
+c     points closer than tol are repeated points (1e-12 of the range)
+      ymin=y(1,1)
+      ymax=y(1,1)
+      do 15 is=1,mmax
+         do 15 i=1,nmax
+            ymin=min(ymin,y(i,is))
+ 15         ymax=max(ymax,y(i,is))
+      tol=1e-12*(ymax-ymin)
       nused=iu
       eln=0
       nsweep=0
@@ -113,7 +129,12 @@ c     radius by ncmin/(ncmin-(mt-1)*id) and biasing every dimension low)
             ju(iunp)=n
          else
             e=which(nf,d,k,nwork)
-            eln=eln+log(max(e,tiny))
+c           a repeated point: no finite mean log distance at this mass
+            if(e.le.tol) then
+               pln=pr
+               return
+            endif
+            eln=eln+log(e)
          endif
  30      continue
       iu=iunp

@@ -60,8 +60,13 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % valid range. Stock TISEAN also divides the summed log radii by Nref - (m-1)*tau rather than
 % by the number of reference points used, which inflates the mean log radius and biases the
 % dimension estimates low (more so with fewer reference points, higher m and longer delays);
-% the patched c1 divides by the number of reference points used. Recompile TISEAN
-% (compile_tisean) after updating.
+% the patched c1 divides by the number of reference points used. A reference point that
+% coincides with its k-th neighbor (to within 1e-12 of the range of the data; c1 works in
+% single precision, so in practice to single precision) is a repeated point: at least that
+% mass of the points sits on it, and its log distance is minus infinity. The mean log
+% distance at that mass is then not finite, so the patched c1 skips the mass (with no masses
+% left, there is no scaling range and the output is NaN, as for a periodic orbit). Recompile
+% TISEAN (compile_tisean) after updating.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -102,33 +102,37 @@ rd = avg-nd*variance + (2*nd*variance*n)/(Ntv-1);
 % Creates sets of DV's, for each ref element of subset and value rd, which have norms closer than distance rd to ref
 % (hctsa modification: the original looped over every (rd, reference) pair
 % with a find() and a var() over the selected targets. Equivalent here:
-% for each reference, sort its distances once and read the variance of
-% the targets within each rd off cumulative sums. The set around a reference
-% excludes the reference vector itself (at distance 0, so in every set with
-% rd >= 0); the original instead excluded the target with raw index k, the loop
-% counter rather than ref(k).)
+% for each reference, sort its distances once; the set within each rd is then
+% a leading run of the sorted targets, whatever the order among equal
+% distances. The set around a reference excludes the reference vector itself;
+% the original instead excluded the target with raw index k, the loop counter
+% rather than ref(k).)
+% (hctsa modification: the variance of each set is computed in two passes,
+% the mean and then the mean squared deviation from it (Chan, Golub and
+% LeVeque, Am. Stat. 37, 242 (1983)), which cannot be negative and is exactly
+% 0 for equal targets. A variance below tol^2, with tol = 1e-12 of the range of
+% x, is that of targets equal up to rounding, and is 0.)
+tol = 1e-12 * (max(x) - min(x));
 tot = zeros(1, Ntv);
 count = zeros(1, Ntv);
 rdRow = rd(:)';
 for k = 1:Nsub
     [ds, o] = sort(d(:,k));
-    xs = x(o + m*tau);
-    S1 = cumsum(xs);
-    S2 = cumsum(xs.^2);
+    notSelf = (o ~= ref(k) - m*tau); % (the reference vector itself)
+    ds = ds(notSelf);
+    xs = x(o(notSelf) + m*tau);
     c = sum(ds <= rdRow, 1); % number of targets within each rd (1 x Ntv)
-    s1 = zeros(1, Ntv); s2 = zeros(1, Ntv);
-    s1(c > 0) = S1(c(c > 0)); s2(c > 0) = S2(c(c > 0));
-    % Exclude the reference vector itself (distance 0, so within every rd >= 0):
-    isIn = rdRow >= 0;
-    c(isIn) = c(isIn) - 1;
-    s1(isIn) = s1(isIn) - x(ref(k));
-    s2(isIn) = s2(isIn) - x(ref(k))^2;
     % Only those variance values are considered for which the corresponding
     % sets have atleast 30 DVs
-    ok = (c >= 30) & (rdRow > 0);
-    v = (s2(ok) - s1(ok).^2 ./ c(ok)) ./ (c(ok) - 1); % sample variance of x over the set
-    tot(ok) = tot(ok) + v;
-    count(ok) = count(ok) + 1;
+    ok = find((c >= 30) & (rdRow > 0));
+    for j = ok
+        v = var(xs(1:c(j))); % sample variance of x over the set (two passes)
+        if v <= tol^2
+            v = 0;
+        end
+        tot(j) = tot(j) + v;
+        count(j) = count(j) + 1;
+    end
 end
 y = nan(Ntv, 1);
 y(count > 0) = (tot(count > 0) ./ (count(count > 0) * var(x)))';

@@ -51,15 +51,24 @@ function out = NL_DVV(x, m, numDVs, nd, Ntv, numSurr, randomSeed, tau)
 % meanDiffTrendSurr, trendSurr minus trend
 % meanNormCDF, mean over distances of the Gaussian cumulative probability of the
 %           data curve value, given the mean and standard deviation across the
-%           surrogates
+%           surrogates (over the distances at which the surrogate values differ;
+%           NaN if they never do)
 % dataSurrCorr, trendDataSurr: correlation between the data curve and the mean
 %           surrogate curve, and slope of the mean surrogate curve against the
-%           data curve (computed but not registered as features; see below)
+%           data curve (NaN if the data curve is constant; computed but not
+%           registered as features; see below)
+%
+% The target variance of a set is computed in two passes (mean, then mean squared
+% deviation), so it is never negative; a variance below the square of 1e-12 of the
+% range of x comes from targets that are equal up to rounding, and is 0.
 %
 % ---REFERENCES:
 % T. Gautama, D.P. Mandic and M.M. Van Hulle, "The delay vector variance method for
 % detecting determinism and nonlinearity in time series", Physica D 190(3-4),
 % 167-176 (2004). DOI: 10.1016/j.physd.2003.11.001
+% T.F. Chan, G.H. Golub and R.J. LeVeque, "Algorithms for computing the sample
+% variance: analysis and recommendations", Am. Stat. 37(3), 242-247 (1983) (the
+% two-pass variance). DOI: 10.1080/00031305.1983.10483115
 %
 % ---NOTES:
 % The random choices (the reference delay vectors and the starting permutation of
@@ -249,6 +258,10 @@ end
 
 dvv_data_notNaN = dvv_data(~isnan(dvv_data(:, 2)), :);
 
+% Target variances are 0 below the square of 1e-12 of the range of x (see
+% DVV_dvv), which on the normalized scale of the curves is:
+tolV = (1e-12 * range(x))^2 / var(x);
+
 % Is there a trend in the data?
 out.trend = GiveMeGradient(dvv_data_notNaN(:, 1), dvv_data_notNaN(:, 2));
 
@@ -269,7 +282,11 @@ out.rmsDiffSurr = sqrt(mean((dvv_data(notNaN, 2) - mean_dvv_surr(notNaN, 2)).^2)
 out.meanDiffSurr = mean(dvv_data(notNaN, 2) - mean_dvv_surr(notNaN, 2));
 
 % What's the correlation between the original and surrogate DVV values
-out.dataSurrCorr = corr(dvv_data(notNaN, 2), mean_dvv_surr(notNaN, 2));
+if range(dvv_data(notNaN, 2)) <= tolV
+	out.dataSurrCorr = NaN; % a constant data curve has no correlation
+else
+	out.dataSurrCorr = corr(dvv_data(notNaN, 2), mean_dvv_surr(notNaN, 2));
+end
 
 % Trend in DVV scatter plot
 out.trendDataSurr = GiveMeGradient(dvv_data(notNaN, 2), mean_dvv_surr(notNaN, 2));
@@ -281,18 +298,27 @@ out.numZeroCrossings = sum(BF_SignChange(dvv_data(notNaN, 2) - mean_dvv_surr(not
 out.trendSurr = GiveMeGradient(mean_dvv_surr(notNaN, 1), mean_dvv_surr(notNaN, 2));
 out.meanDiffTrendSurr = out.trendSurr - out.trend;
 
-% Mean probability assuming Gaussian distribution of test stat for surrogates:
-probs = zeros(sum(notNaN), 1);
+% Mean probability assuming Gaussian distribution of test stat for surrogates,
+% over the distances at which the surrogates spread (a Gaussian of zero width
+% gives no probability):
+probs = NaN(sum(notNaN), 1);
 fnotNaN = find(notNaN);
 for i = 1:sum(notNaN)
-	probs(i) = normcdf(dvv_data(fnotNaN(i), 2), mean(dvv_surr(fnotNaN(i), 2, :)), std(dvv_surr(fnotNaN(i), 2, :)));
+	sdSurr = std(dvv_surr(fnotNaN(i), 2, :));
+	if sdSurr > tolV
+		probs(i) = normcdf(dvv_data(fnotNaN(i), 2), mean(dvv_surr(fnotNaN(i), 2, :)), sdSurr);
+	end
 end
-out.meanNormCDF = mean(probs);
+out.meanNormCDF = mean(probs, 'omitnan'); % (NaN if the surrogates never spread)
 
 % ------------------------------------------------------------------------------
 function m = GiveMeGradient(xData, yData)
 	if size(xData, 1) ~= size(yData, 1)
 		yData = yData';
+	end
+	if range(xData) <= tolV
+		m = NaN; % no spread in the regressor: the slope is undefined
+		return
 	end
 	p = polyfit(xData, yData, 1);
 	m = p(1);
