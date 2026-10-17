@@ -5,9 +5,13 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % A zero-mean GP with a Gaussian likelihood is fitted using the covariance
 % function covFunc, e.g., (i) a sum of squared exponential and noise terms, or
 % (ii) a sum of squared exponential, periodic, and noise terms. The log
-% hyperparameters are found by maximizing the marginal likelihood (at most 50
-% function evaluations, with the noise standard deviation bounded below by 1% of
-% that of the data), starting from a data-informed initial guess. Goodness of
+% hyperparameters are found by maximizing the marginal likelihood to convergence, with
+% the noise standard deviation bounded below by 1% of that of the data and the length scales
+% between the sampling interval and the span of the series (see MF_GP_LearnHyperp). The
+% length scales are the fitted values when the fitted model beats its white-noise special case in a
+% likelihood-ratio test. Otherwise they are not identified, and are reported as the sampling
+% interval, the bound the data allow (periods and shape parameters are then NaN). The other outputs
+% are always reported, and approach those of white noise as the structure vanishes. Goodness of
 % fit is summarized by the per-point negative log marginal likelihood, the error of the fitted mean, and
 % the GP's predictive standard deviation.
 %
@@ -17,8 +21,7 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % the fit is repeated for numDraws different random samples and the outputs are
 % averaged over them).
 % Times are the sample indices (squishorsquash = 1), so length scales and periods
-% are in samples of the cut series. The output is NaN if the fit fails or if the
-% fitted mean is nearly constant (standard deviation below 0.01).
+% are in samples of the cut series. The output is NaN if the fit fails.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
@@ -53,7 +56,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %
 % numDraws, the number of independent random samples to fit, for the settings of
 %             resampleHow that involve random number generation (default: 20). The
-%             outputs are the means over the draws that gave a valid fit: a single
+%             outputs are the means over the draws that gave a valid fit (the output is NaN if
+%             fewer than half did): a single
 %             random sample of a few tens of points is dominated by which points
 %             happened to be drawn, but the average over draws is not.
 %
@@ -64,14 +68,17 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       covPeriodic: [log length scale, log period, log amplitude];
 %       covMaterniso(3): [log length scale, log amplitude];
 %       covRQiso: [log length scale, log amplitude, log shape parameter alpha];
-%       covNoise: [log noise standard deviation].
+%       covNoise: [log of the standard deviation of the observation noise: the covNoise term and the
+%       likelihood noise together, see MF_GP_LearnHyperp].
 % nlml: the negative log marginal likelihood of the fitted model, divided by the number
 %       of points it was fitted to (so that it does not depend on the series length)
-% stde: root-mean-square error of the GP mean at the sampled times
+% stde: root-mean-square error of the posterior mean of the smooth (latent) function at the
+%       sampled times (the noise is not part of the function, so the mean does not reproduce it)
 % meanabs_std: mean absolute error of the GP mean, in units of the GP's
 %       predictive standard deviation at each sampled time
-% std_mu_data: standard deviation of the GP mean at the sampled times (if not close
-%       to one, the GP has not followed the z-scored data)
+% std_mu_data: standard deviation of the GP mean at the sampled times (it is near 0 when the
+%       smooth component is negligible, and near the standard deviation of the data when the GP
+%       follows the series)
 % std_S_data: standard deviation of the GP's predictive standard deviation at the
 %       sampled times (informative only for irregularly sampled times, as with
 %       'random_i': for evenly spaced times the predictive standard deviation is
@@ -315,7 +322,7 @@ likFunc = @likGauss; hyp.lik = log(0.1);
 numfevals = -50; % (specified as the negative)
 
 try
-	hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
+	[hyp, hasStructure, shapePos, shapeBound, latent] = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp, true);
 catch emsg
 	out = NaN;
 	return
@@ -327,6 +334,14 @@ end
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
+% (The noise is reported as the total standard deviation of the observation noise, the covNoise term and
+%  the likelihood noise together. Predictions are made with the latent-function model, in which all
+%  noise is observation noise: see MF_GP_LearnHyperp.)
+logHyper(latent.noisePos) = latent.hyp.lik;
+hyp = latent.hyp; covFunc = latent.covFunc;
+if ~hasStructure
+	logHyper(shapePos) = shapeBound; % length scales are not identified without correlation structure: report the bound
+end
 % Output the log-hyperparameters.
 for i = 1:numHPs
 	% Set up structure output
@@ -365,10 +380,6 @@ out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y) / length(t);
 [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
 % [mu, S2] = gpr(logHyper, covFunc, t, y, t); % evaluate at datapoints
 
-if std(mu) < 0.01 % hasn't fit the time series well at all -- too constant
-	fprintf(1, 'This time series is not suited to Gaussian Process fitting\n');
-	out = NaN; return
-end
 
 % Root-mean-square error of the mean function, mu.
 out.stde = sqrt(mean((y - mu).^2));
