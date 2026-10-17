@@ -34,15 +34,25 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 % each embedding dimension is roughly constant, found by a penalized search; "goodness" is
 % a standard deviation of rescaled values minus a penalty times the length of the stretch,
 % so lower is better; "stabled" is the mean of the quantity from m_min upward; "linrmserr"
-% is the RMS error of a straight-line fit of the rescaled quantity against m.)
+% is the RMS error of a straight-line fit of the rescaled quantity against m. All four are
+% NaN when the quantity is the same at every m, to within round-off, since it cannot then
+% be rescaled.)
 % takens05_mean, takens05_median, takens05_max, takens05_min, takens05_std, takens05_iqr:
 %       statistics, across embedding dimensions, of Takens' estimator of the correlation
 %       dimension at the first length scale above 0.5 (standard deviations of a z-scored
-%       series)
+%       series), over the dimensions m = 1, ..., m_v at which it rests on at least 33 pairs
+%       of delay vectors within that scale (the number of pairs falls with m; m_v is the
+%       last such dimension, and stops before any estimate above 2*m). With fewer pairs the
+%       estimate is set by a handful of pairs in the few occupied radii of the correlation
+%       sum and is not a dimension estimate (33 is the smallest number of pairs for which
+%       the 95% sampling interval of Takens' estimator, for independent pairs, spans less
+%       than a factor of two). An estimate above 2*m is not a dimension estimate either: a
+%       set with a scaling region below the length scale has a dimension of at most m, and
+%       larger values arise when the correlation sum rises much faster than r^m, as in
+%       nonstationary series.
 % takens05mmin_ri, takens05mmin_goodness, takens05mmin_stabled, takens05mmin_linrmserr:
-%       m_min, goodness, stabled and linrmserr of Takens' estimates over m
-%       (all ten takens05 outputs are NaN if the estimate is undefined at any embedding
-%       dimension, i.e., the correlation sum has no length scale above 0.5 there)
+%       m_min, goodness, stabled and linrmserr of Takens' estimates over m = 1, ..., m_v
+%       (all ten takens05 outputs are NaN if fewer than two dimensions qualify)
 % bend2_mindim, bend2_maxdim, bend2_meandim: the minimum, maximum and mean, across
 %       embedding dimensions, of the correlation dimension estimate (mean local slope of
 %       the correlation sum, over the best scaling range for each embedding dimension)
@@ -200,32 +210,22 @@ if ~exist([filePath '.c2'], 'file') || ~exist([filePath '.d2'], 'file') || ~exis
 	error([filePath, '.c2/.d2/.h2 not generated?']);
 end
 
+% The correlation sums (.c2), for the number of pairs behind Takens' estimator below:
+fid_c2 = fopen([filePath '.c2']);
+s = textscan(fid_c2, '%[^\n]');
+fclose(fid_c2);
+try
+	c2dat = SUB_readTISEANout(s{1}, maxm, '#dim=', 2);
+catch
+	c2dat = cell(maxm, 1); % unreadable: no pair counts, so no Takens statistics
+end
+
 % this creates files in the local directory:
 %  * extension .c2: This file contains the correlation sums for all treated length scales and embedding dimensions.
 %  * extension .d2: This file contains the local slopes of the logarithm of the correlation sum, the correlation dimension.
 %  * extension .h2: This file contains the correlation entropies.
 
-%% Retreve output from file
-
-% % (1) --------- C2 -----------
-% fid_c2 = fopen([filePath '.c2']);
-% s = textscan(fid_c2,'%[^\n]');
-% if isempty(s)
-%     disp(['Error reading TISEAN output file ' filePath '.c2'])
-%     fclose(fid_c2); % close the file
-%     delete([filePath '.c2']) % delete this file
-%     delete([filePath '.d2']) % delete this file
-%     delete([filePath '.h2']) % delete this file
-%     return;
-% end
-% s = s{1};
-% w = zeros(maxm+1,1);
-% c2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
-% fclose(fid_c2); % close the file
-%
-% % c2dat now contains the correlation sums (second column)
-% % as a function of the length scale epsilon (first column) for
-% % the different embedding dimension (cell components 1--10)
+%% Retrieve output from file
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
@@ -302,10 +302,20 @@ delete([filePath '.h2']); % delete the file
 % ------------------------------------------------------------------------------
 % correlation dimension at an upper length scale of 0.5 (standard deviations of the
 % z-scored series), a fixed scale that is the same for every embedding dimension
-takens05 = SUB_takens(c2tdat, 0.5);
-if any(isnan(takens05))
-	% The estimate is undefined at some embedding dimension (no length scale above 0.5),
-	% so statistics across dimensions are undefined (not computed over a subset)
+% Only embedding dimensions whose estimate rests on at least 33 pairs of delay vectors
+% within that length scale enter the statistics (with fewer, the estimate is dominated by a
+% handful of pairs in the few occupied radii, and is not a dimension estimate): the
+% dimensions m = 1, ..., m_v up to the first one without an estimate on 33 pairs (the count
+% falls with m) or with an estimate above 2*m (see above)
+numEmb = N - (maxm - 1) * tau;
+numPairs = max(0, (numEmb - theilerWin - 1) * (numEmb - theilerWin) / 2);
+[takens05all, takens05count] = SUB_takens(c2tdat, 0.5, c2dat, numPairs);
+isOK = ~isnan(takens05all) & (takens05count >= 33) & (takens05all(:) <= 2*(1:numel(takens05all))');
+m_v = find(~isOK, 1, 'first') - 1;
+if isempty(m_v), m_v = maxm; end
+takens05 = takens05all(1:m_v);
+if m_v < 2
+	% Fewer than two embedding dimensions with an estimate: no statistics across them
 	out.takens05_mean = NaN;
 	out.takens05_median = NaN;
 	out.takens05_max = NaN;
@@ -327,7 +337,11 @@ else
 	% Find outliers as means of inferring m_min
 	% looking for approaching a constant for m>m_min
 	mmintakens05 = SUB_findmmin(takens05);
-	out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
+	if isempty(mmintakens05.ri1) % constant estimates: no minimum dimension can be picked out
+		out.takens05mmin_ri = NaN;
+	else
+		out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
+	end
 	out.takens05mmin_goodness = mmintakens05.goodness;
 	out.takens05mmin_stabled = mmintakens05.stabled;
 	out.takens05mmin_linrmserr = mmintakens05.linrmserr;
@@ -559,21 +573,24 @@ end
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-function takensp = SUB_takens(dat, eup)
+function [takensp, countp] = SUB_takens(dat, eup, c2dat, numPairs)
 	% dat is takens estimator data, cell with a component corresponding to each
 	% embedding dimension
 	% eup is the cutoff length scale
-	% returns a vector containing the dimension estimate at eup with
-	% each element corresponding to an embedding dimension m up to the
-	% maximum
+	% returns a vector containing the dimension estimate at the first length scale
+	% above eup for each embedding dimension up to the maximum, and the number of
+	% pairs within that length scale (its correlation sum times the number of pairs)
 	mmax = length(dat);
-	takensp = zeros(mmax, 1);
+	takensp = NaN(mmax, 1);
+	countp = zeros(mmax, 1);
 	for ii = 1:mmax
 		theindex = find(dat{ii}(:, 1) > eup, 1, 'first');
 		if ~isempty(theindex)
 			takensp(ii) = dat{ii}(theindex, 2);
-		else
-			takensp(ii) = NaN;
+			if ~isempty(c2dat{ii})
+				[~, jj] = min(abs(log(c2dat{ii}(:, 1)) - log(dat{ii}(theindex, 1))));
+				countp(ii) = c2dat{ii}(jj, 2) * numPairs;
+			end
 		end
 	end
 
@@ -725,7 +742,14 @@ function out = SUB_findmmin(ds)
 	l = length(ds);
 	gamma = 0.1; % regularization parameter, chosen ad hoc
 	dsraw = ds; % before normalization
-	ds = (ds - min(ds)) ./ (max(ds) - min(ds)); % rescale data to [0,1] so weights are consistent
+	if max(ds) - min(ds) <= 1e-12 * max(abs(ds))
+		% values equal to within round-off are a constant curve, which cannot be rescaled to
+		% [0,1] (rescaling the round-off differences would give arbitrary values): NaN, as for
+		% exactly equal values
+		ds = NaN(size(ds));
+	else
+		ds = (ds - min(ds)) ./ (max(ds) - min(ds)); % rescale data to [0,1] so weights are consistent
+	end
 	stptr = 1:l - 1; % need at least two points
 	mybad = zeros(length(stptr), 1);
 	for ii = 1:length(stptr)

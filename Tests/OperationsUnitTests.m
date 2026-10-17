@@ -984,6 +984,16 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyTrue(isnan(out.robfit_sigrat) && isnan(out.robfitresac1));
         end
 
+        function test_NL_d2_TakensNeedsPairs(testCase)
+            % White noise, N = 1000: at m = 8-10 the length scale 0.5 holds fewer than 10
+            % pairs, whose estimates (14-33) are not dimension estimates; the takens05
+            % statistics stop at m = 7 (56 pairs, estimate 8.3).
+            rng(0);
+            out = NL_d2(zscore(randn(1000, 1)), 1, 10, {'ac', 1});
+            testCase.verifyLessThan(out.takens05_max, 10);
+            testCase.verifyGreaterThan(out.takens05_max, 4);
+        end
+
         %-------------------------------------------------------------
         % NL_PersistentHomology (ripser-based TDA on a delay embedding)
         %-------------------------------------------------------------
