@@ -141,6 +141,34 @@ classdef Robust_garchTests < matlab.unittest.TestCase
             testCase.verifyEqual([w.bestpAIC, w.bestqAIC, w.bestpBIC, w.bestqBIC], [0 0 0 0]);
         end
 
+        function floorGivesNaNForLikelihoodAndVariancePath(testCase)
+            % A flow with long near-zero stretches: the Gaussian likelihood has no maximum and the
+            % constant sits at its floor, so what depends on the likelihood or the variance path is NaN
+            testCase.verifyTrue(BF_GARCHFit('atfloor', [1e-6; 0.1; 0.8]));
+            testCase.verifyTrue(BF_GARCHFit('atfloor', [1.005e-6; 0.1; 0.8]));
+            testCase.verifyFalse(BF_GARCHFit('atfloor', [1.02e-6; 0.1; 0.8]));
+            dt = 0.2; n = 5000; tt = (0:dt:n*dt + 300)';
+            opts = odeset('RelTol', 1e-9, 'AbsTol', 1e-9);
+            [~, s] = ode45(@(t, s) [-s(2) - s(3); s(1) + 0.2*s(2); 0.2 + s(3)*(s(1) - 5.5)], tt, [1 1 0], opts);
+            z = s(end-n+1:end, 3);
+            out = MF_GARCHfit(z, 'ar', 1, 1);
+            testCase.verifyEqual(out.hasStructure, 1);
+            for f = {'LLF', 'aic', 'bic', 'constant', 'maxsigma', 'minsigma', 'uncondVar', 'zres_meanabs', ...
+                        'engle_pval_stde_5', 'ARCHerr_1'}
+                testCase.verifyTrue(isnan(out.(f{1})), f{1});
+            end
+            for f = {'ARCH_1', 'GARCH_1', 'persistence', 'offset'}
+                testCase.verifyTrue(isfinite(out.(f{1})), f{1});
+            end
+            cmp = MF_GARCHcompare(z, 'ar', 1:3, 1:3);
+            for f = {'maxLLF', 'bestpBIC', 'bestqAIC', 'minK', 'max_meanarchps', 'Ks_vary_p'}
+                testCase.verifyTrue(isnan(cmp.(f{1})), f{1});
+            end
+            y = Robust_garchTests.simulate(1000, 0.1, 0.12, 0.8, 7);
+            testCase.verifyTrue(isfinite(MF_GARCHfit(y, 'none', 1, 1).LLF));
+            testCase.verifyTrue(isfinite(MF_GARCHcompare(y, 'none', 1:3, 1:3).maxLLF));
+        end
+
         function pvalueTestsMatchEconometricsToolbox(testCase)
             testCase.assumeTrue(license('test', 'econometrics_toolbox') == 1);
             rng(2); x = randn(300, 1) .* (1 + 0.5*sin((1:300)'/20));

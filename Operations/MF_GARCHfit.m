@@ -131,16 +131,19 @@ function out = MF_GARCHfit(y, preproc, P, Q, randomSeed, modelType, innovationDi
 % Bounds. The constant of the variance equation is bounded below by 1e-6 (the variance of
 % 0.1% of a standard deviation), and persistence above by 0.9999. For series with long
 % stretches of (near) zero values (such as digital silence) the Gaussian likelihood has no
-% maximum, because the variance can shrink without limit where the series is zero, so their
-% log-likelihood and conditional variance depend on the lower bound of the constant; the
-% coefficients are much less affected.
+% maximum, because the variance can shrink without limit where the series is zero; the fit
+% then sits at the bound (the constant within 1% of it). In that case LLF, aic and bic are NaN
+% and, if the variance model is reported, so is everything computed from the conditional
+% variance: the constant, the standard errors, uncondVar, the sigma summaries and the
+% statistics of the standardized residuals. The coefficients, persistence, leverage and
+% distDoF are still reported.
 %
 % Glosten, Jagannathan and Runkle's result for gjr: the leverage term acts on negative
 % shocks only, so persistence = GARCH + ARCH + leverage/2. The leverage coefficient may be
 % negative (down to -ARCH), so its sign is informative.
 %
 % Registered in hctsa's feature set: GARCH_1, ARCH_1, persistence, LLF, maxsigma, minsigma,
-% engle_mean_diff_p, engle_max_diff_p, diff_ac1, engle_pval_stde_5, lbq_pval_stde_1, ac1_stde2,
+% engle_mean_diff_p, engle_max_diff_p, diff_ac1, engle_pval_stde_5,
 % zres_meanabs, zres_maxonstd, zres_normksstat and zres_sws; and leverage for 'gjr' and
 % distDoF for 't'. The other outputs are returned for inspection: the standard errors depend on
 % the coefficients and the kurtosis rather than the structure and are invalid at a bound of the
@@ -426,5 +429,24 @@ end
 
 out.ac1_stde2 = CO_AutoCorr(stde2, 1, 'Fourier');
 out.diff_ac1 = CO_AutoCorr(y.^2, 1, 'Fourier') - CO_AutoCorr(stde2, 1, 'Fourier');
+
+% ------------------------------------------------------------------------------
+%% A fit with the variance constant at its floor has no likelihood maximum
+% ------------------------------------------------------------------------------
+% What depends on the likelihood or on the variance path is then not a property of the series
+if BF_GARCHFit('atfloor', alt.theta)
+	out.LLF = NaN;
+	out.aic = NaN;
+	out.bic = NaN;
+	if hasStructure
+		keepFields = {'hasStructure', 'offset', 'leverage', 'distDoF', 'persistence', 'summaryexitflag'};
+		fields = fieldnames(out);
+		for k = 1:length(fields)
+			if ~ismember(fields{k}, keepFields) && isempty(regexp(fields{k}, '^(GARCH|ARCH)_', 'once'))
+				out.(fields{k}) = NaN;
+			end
+		end
+	end
+end
 
 end

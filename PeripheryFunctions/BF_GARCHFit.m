@@ -58,6 +58,12 @@ function varargout = BF_GARCHFit(action, varargin)
 %       series of 100 to 10000 samples exceed 4 (about 5% exceed 6 for GJR).
 % errors = BF_GARCHFit('errors', theta, D, spec)
 %       standard errors from the outer product of the per-observation scores
+% atFloor = BF_GARCHFit('atfloor', theta)
+%       whether the variance constant of a fit sits at its lower bound, 1e-6, within 1%. The
+%       Gaussian likelihood of a series with long stretches of (near) zero values has no
+%       maximum (the variance can shrink without limit where the series is zero), so a fit
+%       at the floor has a likelihood and a variance path that depend on the bound rather
+%       than on the data
 % tailLR = BF_GARCHFit('taillr')
 %       the critical value of the likelihood-ratio test of Student-t against Gaussian
 %       innovations: 2.7055, the 5% point of the 50:50 mixture of chi-squared(0) and
@@ -120,6 +126,8 @@ case 'errors'
     varargout{1} = opgErrors(varargin{:});
 case 'taillr'
     varargout{1} = 2.7055;
+case 'atfloor'
+    varargout{1} = varargin{1}(1) <= 1e-6 * (1 + 0.01);
 case 'spec'
     varargout{1} = makeSpec(varargin{:});
 otherwise

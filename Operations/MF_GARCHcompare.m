@@ -67,8 +67,14 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % (orders 0 and 0), which is chosen when the GARCH models do not improve on it enough to
 % pay for their parameters; ties go to the smaller model.
 %
-% Registered in hctsa's feature set: maxLLF, bestpAIC, bestqAIC, bestpBIC, bestqBIC,
-% min_meanarchps and max_meanarchps. The constant terms (minK, maxK, meanK) follow from the
+% A model fitted with its variance constant at the floor of 1e-6 (within 1%; see MF_GARCHfit)
+% has no likelihood maximum. A summary that such a model determines is then NaN: the minimum
+% or maximum over the models if that model attains it, the mean if any model is at the
+% floor, the orders chosen by AIC or BIC if the chosen model is; the constant and the
+% residual statistics only when the variance model is reported (hasStructure is 1).
+%
+% Registered in hctsa's feature set: maxLLF, bestpAIC, bestqAIC, bestpBIC, bestqBIC
+% and max_meanarchps. The constant terms (minK, maxK, meanK) follow from the
 % persistence, and the other summaries repeat these (FeatureSets/renamed_operations.csv gives
 % the reason for each).
 
@@ -194,6 +200,7 @@ meanarchps = NaN(np, nq); % mean over 20 lags from Engle's ARCH test on standard
 maxarchps = NaN(np, nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
 meanlbqps = NaN(np, nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
 maxlbqps = NaN(np, nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+floorML = false(np, nq); % whether the fit has its variance constant at the floor
 
 for i = 1:np
 	for j = 1:nq
@@ -208,6 +215,7 @@ for i = 1:np
 		else
 			fit = nullFit;
 		end
+		floorML(i, j) = BF_GARCHFit('atfloor', ml.theta);
 		LLFs(i, j) = ml.llf;
 		AICs(i, j) = -2*ml.llf + 2*ml.k;
 		BICs(i, j) = -2*ml.llf + ml.k*log(N);
@@ -237,31 +245,24 @@ BICn = BICs / N;
 
 out.hasStructure = double(hasStructure);
 
+% A model with its variance constant at the floor has no likelihood maximum: a summary that
+% it determines is NaN. The constant and the residual statistics come from the variance
+% model only if it is reported.
+floorVar = floorML & hasStructure;
+
 % 'whole things'
-out.minLLF = min(LLFn(:));
-out.maxLLF = max(LLFn(:));
-out.meanLLF = mean(LLFn(:),'omitnan');
-out.minBIC = min(BICn(:));
-out.maxBIC = max(BICn(:));
-out.meanBIC = mean(BICn(:),'omitnan');
-out.minAIC = min(AICn(:));
-out.maxAIC = max(AICn(:));
-out.meanAIC = mean(AICn(:),'omitnan');
-out.minK = min(Ks(:));
-out.maxK = max(Ks(:));
-out.meanK = mean(Ks(:),'omitnan');
-out.min_meanarchps = min(meanarchps(:));
-out.max_meanarchps = max(meanarchps(:));
-out.mean_meanarchps = mean(meanarchps(:),'omitnan');
-out.min_maxarchps = min(maxarchps(:));
-out.max_maxarchps = max(maxarchps(:));
-out.mean_maxarchps = mean(maxarchps(:),'omitnan');
-out.min_meanlbqps = min(meanlbqps(:));
-out.max_meanlbqps = max(meanlbqps(:));
-out.mean_meanlbqps = mean(meanlbqps(:),'omitnan');
-out.min_maxlbqps = min(maxlbqps(:));
-out.max_maxlbqps = max(maxlbqps(:));
-out.mean_maxlbqps = mean(maxlbqps(:),'omitnan');
+sets = {'LLF', LLFn, floorML; 'BIC', BICn, floorML; 'AIC', AICn, floorML; 'K', Ks, floorVar};
+for k = 1:size(sets, 1)
+	out.(['min' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'min');
+	out.(['max' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'max');
+	out.(['mean' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'mean');
+end
+sets = {'meanarchps', meanarchps; 'maxarchps', maxarchps; 'meanlbqps', meanlbqps; 'maxlbqps', maxlbqps};
+for k = 1:size(sets, 1)
+	out.(['min_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'min');
+	out.(['max_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'max');
+	out.(['mean_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'mean');
+end
 
 % 'bests' (orders): among the grid and the constant-variance model (orders 0, 0), which
 % is chosen when the models do not improve on it enough to pay for their parameters.
@@ -272,13 +273,16 @@ critNames = {'AIC', 'BIC'};
 critValues = {AICs, BICs};
 critNull = [nullAIC, nullBIC];
 for c = 1:2
-	best = critNull(c); bp = 0; bq = 0;
+	best = critNull(c); bp = 0; bq = 0; bad = false;
 	for j = 1:nq
 		for i = 1:np
 			if critValues{c}(i, j) < best
-				best = critValues{c}(i, j); bp = pr(i); bq = qr(j);
+				best = critValues{c}(i, j); bp = pr(i); bq = qr(j); bad = floorML(i, j);
 			end
 		end
+	end
+	if bad
+		bp = NaN; bq = NaN;
 	end
 	out.(['bestp' critNames{c}]) = bp;
 	out.(['bestq' critNames{c}]) = bq;
@@ -291,5 +295,34 @@ end
 out.Ks_vary_p = mean(std(Ks,0,'omitnan'),'omitnan'); % mean variation along p direction
 % mean variation along q direction:
 out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); %#ok<UDIM>
+if any(floorVar(:))
+	out.Ks_vary_p = NaN;
+	out.Ks_vary_q = NaN;
+end
 
+end
+
+% ------------------------------------------------------------------------------
+function v = floorSummary(values, flags, kind)
+% The minimum, maximum or mean over the models; NaN if a model at the floor determines it
+% (for the mean: any model at the floor)
+ok = ~isnan(values);
+if ~any(ok(:))
+	v = NaN;
+	return
+end
+switch kind
+case 'mean'
+	if any(flags(ok))
+		v = NaN;
+	else
+		v = mean(values(ok));
+	end
+case 'min'
+	[v, idx] = min(values(:));
+	if flags(idx), v = NaN; end
+case 'max'
+	[v, idx] = max(values(:));
+	if flags(idx), v = NaN; end
+end
 end
