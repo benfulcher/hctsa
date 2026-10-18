@@ -400,7 +400,6 @@ DN_Spread(x,'mead')			DN_Spread_mead
 DN_Spread(x,'std')			DN_Spread_std
 DN_TailIndex(x_z,0.05)	DN_TailIndex_5
 DN_TailIndex(x_z,0.10)	DN_TailIndex_10
-DN_TrimmedMean(x,1)		DN_TrimmedMean_1
 DN_TrimmedMean(x,5)		DN_TrimmedMean_5
 DN_TrimmedMean(x,10)	DN_TrimmedMean_10
 DN_TrimmedMean(x,25)	DN_TrimmedMean_25
@@ -651,8 +650,6 @@ EN_Shannon(x_z,2,3)	EN_Shannon_2_3
 EN_Shannon(x_z,2,5)	EN_Shannon_2_5
 EN_Shannon(x_z,2:10,2)	EN_Shannon_2t10_2
 EN_Shannon(x_z,2:10,3)	EN_Shannon_2t10_3
-EN_Shannon(x_z,3,2)	EN_Shannon_3_2
-EN_Shannon(x_z,3,3)	EN_Shannon_3_3
 EN_DispEn(x_z,2,6,'ac')	EN_DispEn_2_6_ac
 EN_DispEn(x_z,2,3,'ac')	EN_DispEn_2_3_ac
 EN_DispEn(x_z,3,4,'ac')	EN_DispEn_3_4_ac
@@ -844,7 +841,6 @@ ST_PeakIntervals(x_z,0.5)	ST_PeakIntervals_05
 ST_PeakIntervals(x_z,1)	ST_PeakIntervals_1
 ST_PeakIntervals(x_z,2)	ST_PeakIntervals_2
 ST_SimpleStats(x_z,'pmcross')	ST_SimpleStats_pmcross
-ST_SimpleStats(x_z,'zcross')	ST_SimpleStats_zcross
 SY_StatAv(x_z,'len',50)	StatAvl50
 SY_StatAv(x_z,'len',250)	StatAvl250
 SY_DriftingAutoCorr(x_z,1)	SY_DriftingAutoCorr_1
@@ -907,7 +903,6 @@ SY_SlowFeatureAnalysis(x_z,20)	SY_SlowFeatureAnalysis_20
 SY_SpreadRandomLocal(x_z,100,100,'default')	SY_SpreadRandomLocal_100_100
 SY_SpreadRandomLocal(x_z,'ac2',100,'default')	SY_SpreadRandomLocal_ac2_100
 SY_SpreadRandomLocal(x_z,'ac5',100,'default')	SY_SpreadRandomLocal_ac5_100
-SY_StdNthDer(x_z,1)	SY_StdNthDer_1
 SY_StdNthDerChange(x_z)	SY_StdNthDerChange
 SY_nstat_z(x_z,4,{1,3})	SY_nstat_z_4_1_3
 SY_nstat_z(x_z,5,{1,3})	SY_nstat_z_5_1_3
