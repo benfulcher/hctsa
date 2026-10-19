@@ -21,7 +21,7 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion
 %       of the time-series length (default: 0.02)
 % Nref, the number of reference points; between 0 and 1 for a proportion of the time-series
-%       length (default: 0.5). It is limited to between 500 (if N > 500) and 2500: fewer
+%       length (default: 0.5). It is limited to between 500 (if N > 500) and 1000: fewer
 %       centers make the best-scaling-range outputs depend on which points are the centers.
 %       The centers are spread evenly over the series (a fixed, deterministic choice).
 %
@@ -157,7 +157,7 @@ if (Nref > 0) && (Nref <= 1)
 end
 
 Nrefmin = 500; % can't have fewer than 500 reference points (fewer gives unstable scaling ranges)
-Nrefmax = 2500; % for time reasons, don't use more than 2500 reference points
+Nrefmax = 1000; % for time reasons, don't use more than 1000 reference points
 
 if Nref > Nrefmax
 	Nref = Nrefmax;
