@@ -74,7 +74,7 @@ h0 = fGrid(2) - fGrid(1);
 f = zeros(0, 1);
 for k = 1:K
 	Q = SUB_Basis(f, t, withConstant);
-	[~, ix] = min(SUB_RSS(y, Q, fGrid, t));
+	[~, ix] = min(SUB_RSSGrid(y, Q, fGrid(1), h0, length(fGrid)));
 	f = [f; fGrid(ix)]; %#ok<AGROW>
 
 	% Refine each frequency in turn (the others held fixed) by zooming local grids
@@ -212,6 +212,41 @@ function rss = SUB_RSS(y, Q, fc, t)
 		gain(ok) = (rs(ok).^2.*cc(ok) - 2*rs(ok).*rc(ok).*sc(ok) + rc(ok).^2.*ss(ok)) ./ dt(ok);
 		rss(ix) = rss(ix) - gain;
 	end
+end
+
+
+function rss = SUB_RSSGrid(y, Q, f1, h, M)
+	% SUB_RSS on the equispaced grid f1 + h*(0:M-1), from discrete-time Fourier transforms
+	% evaluated by the chirp z-transform: O(N log N) rather than O(N*M)
+	% (nested function: names are distinct from the parent's, whose workspace it shares)
+	nG = length(y);
+	rG = y - Q*(Q'*y);
+	Z = SUB_DTFTGrid([rG, Q], f1, h, M); % sum_t x(t)*exp(-2i*pi*f*t), one column per signal
+	g2 = SUB_DTFTGrid(ones(nG, 1), 2*f1, 2*h, M); % sum_t exp(-4i*pi*f*t)
+	rcG = real(Z(:, 1)); rsG = -imag(Z(:, 1)); % C'*r and S'*r (r is orthogonal to Q)
+	QC = real(Z(:, 2:end)); QS = -imag(Z(:, 2:end)); % rows: (Q'*C)' and (Q'*S)'
+	ssG = nG/2 - real(g2)/2 - sum(QS.^2, 2); % |S - Q*Q'*S|^2
+	ccG = nG/2 + real(g2)/2 - sum(QC.^2, 2);
+	scG = -imag(g2)/2 - sum(QS.*QC, 2);
+	dtG = ssG.*ccG - scG.^2;
+	okG = ssG > 1e-6*nG & ccG > 1e-6*nG & dtG > 1e-8*ssG.*ccG; % skip candidates in the span of Q
+	gainG = zeros(M, 1);
+	gainG(okG) = (rsG(okG).^2.*ccG(okG) - 2*rsG(okG).*rcG(okG).*scG(okG) + rcG(okG).^2.*ssG(okG)) ./ dtG(okG);
+	rss = rG'*rG - gainG;
+end
+
+function Z = SUB_DTFTGrid(X, f1, h, M)
+	% Z(m+1,:) = sum_t X(t,:)*exp(-2i*pi*(f1 + h*m)*t) for t = 1..n, m = 0..M-1 (Bluestein:
+	% m*t = (m^2 + t^2 - (m - t)^2)/2 turns the sum into a convolution)
+	nX = size(X, 1);
+	tX = (1:nX)';
+	mX = (0:M-1)';
+	lagX = (-nX:M-1)'; % lags m - t
+	chirpX = @(q) exp(1i*pi*h*mod(q.^2, 2/h)); % exp(i*pi*h*q^2), with the phase reduced
+	aX = X .* exp(-2i*pi*f1*tX) .* conj(chirpX(tX));
+	nFFT = 2^nextpow2(nX + length(lagX));
+	cX = ifft(fft(aX, nFFT) .* fft(chirpX(lagX), nFFT));
+	Z = conj(chirpX(mX)) .* cX(mX + nX, :);
 end
 
 end

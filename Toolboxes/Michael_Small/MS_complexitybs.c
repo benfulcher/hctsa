@@ -18,7 +18,7 @@
 #include <math.h>
 
 void complexity(double data[], const int length, double *cmp);
-bool issubstring(unsigned short s[], const int ns,const int nq);
+int findsubstring(unsigned short s[], const int ns, const int nq, const int i0);
 int compare(const void *arg1, const void *arg2);
 
 void complexity(double	*data,
@@ -32,7 +32,7 @@ void complexity(double	*data,
 	int i,j,pc=0,nc=0;
 	float mean=0,min=0,max=0;
 	unsigned long int c=1;
-	int ns,nq,k,bins;
+	int ns,nq,k,bins,i0=0,m;
 
 	/*allocate memory for symbol sequence*/
 	s = (unsigned short *) calloc(length,sizeof(unsigned short));	
@@ -51,10 +51,13 @@ void complexity(double	*data,
 	k=2;	
 	while (k<length)
 	{
-		if (issubstring(s,ns,nq))
+		m = findsubstring(s,ns,nq,i0);
+		if (m>=0)
 		{
-		  /* Q is a substring of SQpi */
+		  /* Q is a substring of SQpi; any match of the extended Q also matches Q, so the
+		   * search for it can resume at this match */
 			nq++;
+			i0 = m;
 		}
 		else
 		{
@@ -62,6 +65,7 @@ void complexity(double	*data,
 		  c++; 
 		  ns=ns+nq;
 		  nq=1;
+		  i0=0;
 		}
 		k++;
 	}
@@ -82,39 +86,22 @@ int compare(const void *arg1, const void *arg2)
   return( *(int *)arg1 - *(int *)arg2 );
 }
 
-bool issubstring(unsigned short s[], const int ns, const int nq)
-     /* determine if Q is a substring of SQpi.*/
+int findsubstring(unsigned short s[], const int ns, const int nq, const int i0)
+     /* first start i >= i0 (i < ns) at which Q = s[ns..ns+nq-1] occurs in SQpi, or -1 */
 {
 	int k,i;
-	bool same;
 	/* SQpi = s[0..ns+nq-2] (S concatenated with Q, less Q's last symbol), so a
-	 * length-nq window can start anywhere from i=0 up to i=ns-1 inclusive
-	 * (window [i, i+nq-1] must fit within SQpi, i.e. i+nq-1 <= ns+nq-2, i.e.
-	 * i <= ns-1). The original bound here, i<=(ns-nq), was tighter than this
-	 * whenever nq>1: it restricted the search to strictly within S, never
-	 * allowing Q to match against the part of itself already matched so far.
-	 * That silently implemented a different (self-overlap-forbidden) measure
-	 * than the SQpi-referential Kaspar-Schuster (1987) complexity this
-	 * function's own comment describes, which systematically overcounted
-	 * phrases (and so overstated complexity) for periodic/self-similar
-	 * sequences -- e.g. 20 periods of '01' (n=40) gave c=5 instead of the
-	 * correct c=2. Verified against an independent reference implementation
-	 * of the SQpi-self-referential algorithm and the classic Kaspar & Schuster
-	 * (1987) worked example ("1001111011000010", c=6). */
-	for (i=0; i<ns; i++)
+	 * length-nq window can start anywhere from i=0 up to i=ns-1: Q may match
+	 * against the part of itself already matched, as in the self-referential
+	 * Kaspar-Schuster (1987) complexity (a bound of i<=ns-nq overcounts phrases
+	 * of periodic sequences: 20 periods of '01' would give c=5, not c=2). */
+	for (i=i0; i<ns; i++)
 	{
-		same=1;
-		for (k=0; k<nq; k++)
-		{
-			if (s[i+k]!=s[ns+k])
-				same=0;
-		}
-		if (same)
-		{
-		  return(1);
-		}
+		for (k=0; k<nq && s[i+k]==s[ns+k]; k++);
+		if (k==nq)
+			return(i);
 	}
-	return(0);
+	return(-1);
 }
 
 void mexFunction( int nlhs, mxArray *plhs[], 

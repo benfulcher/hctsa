@@ -173,8 +173,7 @@ end
 K = exp(-sqDist / medSqDist);
 
 % Center the kernel matrix in feature space:
-oneN = ones(N, N) / N;
-Kc = K - oneN*K - K*oneN + oneN*K*oneN;
+Kc = K - mean(K, 1) - mean(K, 2) + mean(K(:));
 Kc = (Kc + Kc') / 2; % symmetrize away numerical asymmetry
 
 % Eigendecomposition (Kc is symmetric; eigenvalues of the centered kernel

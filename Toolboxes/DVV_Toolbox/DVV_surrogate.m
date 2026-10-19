@@ -112,6 +112,7 @@ if (isreal(X))
 
         % Initializations
         r_prev = X_random;
+        F_prev = fft(r_prev); % (spectrum of r_prev; the previous iteration's fft(r) is reused)
         MSE = Inf; MSE_prev = 0; % ensures the loop body always runs at least once
         bestMSE = Inf;
         bestR = r_prev;
@@ -123,7 +124,7 @@ if (isreal(X))
             MSE_prev = MSE;
 
             % Amplitude spectrum matching
-            ang_r_prev = angle(fft(r_prev));
+            ang_r_prev = angle(F_prev);
             % (ifft of the conjugate-symmetric spectrum is real up to rounding error (~1e-16
             % imaginary parts); take the real part, since sort on a complex vector would
             % rank by magnitude rather than by value)
@@ -134,7 +135,8 @@ if (isreal(X))
             r(Ind,:) = X_sorted;
 
             % Convergence Metric calculation
-            MSE = mean(abs(X_amp - abs(fft(r))));
+            F_prev = fft(r);
+            MSE = mean(abs(X_amp - abs(F_prev)));
             if MSE < bestMSE
                 bestMSE = MSE;
                 bestR = r;

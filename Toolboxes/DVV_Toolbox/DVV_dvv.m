@@ -116,23 +116,38 @@ tol = 1e-12 * (max(x) - min(x));
 tot = zeros(1, Ntv);
 count = zeros(1, Ntv);
 rdRow = rd(:)';
+% (hctsa modification: the variance of each leading run of sorted targets comes
+% from prefix sums of the mean-shifted targets, and the counts within each rd
+% from one histogram of the sorted distances. Prefix sums lose accuracy when a
+% set's variance is small relative to the spread of x, so below 1e-4 of the
+% mean square of the shifted x (error ~1e-12 relative) the two-pass var() is
+% used, as before; this also keeps the tol clamp exact.)
+xc = x - mean(x);
+vSmall = 1e-4 * mean(xc.^2);
+rdUp = rdRow + eps(rdRow); % next double above rd (rd > 0 where used): ds <= rd  <=>  ds < rdUp
 for k = 1:Nsub
     [ds, o] = sort(d(:,k));
     notSelf = (o ~= ref(k) - m*tau); % (the reference vector itself)
     ds = ds(notSelf);
     xs = x(o(notSelf) + m*tau);
-    c = sum(ds <= rdRow, 1); % number of targets within each rd (1 x Ntv)
+    % number of targets within each rd (1 x Ntv), counting ds <= rd
+    c = cumsum(histcounts(ds, [-Inf, rdUp, Inf]));
+    c = c(1:Ntv);
     % Only those variance values are considered for which the corresponding
     % sets have atleast 30 DVs
     ok = find((c >= 30) & (rdRow > 0));
-    for j = ok
-        v = var(xs(1:c(j))); % sample variance of x over the set (two passes)
-        if v <= tol^2
-            v = 0;
-        end
-        tot(j) = tot(j) + v;
-        count(j) = count(j) + 1;
+    if isempty(ok), continue; end
+    xk = xc(o(notSelf) + m*tau);
+    cn = c(ok)';
+    cs1 = cumsum(xk(1:max(cn)));
+    cs2 = cumsum(xk(1:max(cn)).^2);
+    vv = ((cs2(cn) - cs1(cn).^2 ./ cn) ./ (cn - 1))';
+    for jj = find(~(vv >= vSmall)) % small or NaN: two-pass
+        vv(jj) = var(xs(1:cn(jj)));
     end
+    vv(vv <= tol^2) = 0;
+    tot(ok) = tot(ok) + vv;
+    count(ok) = count(ok) + 1;
 end
 y = nan(Ntv, 1);
 y(count > 0) = (tot(count > 0) ./ (count(count > 0) * var(x)))';

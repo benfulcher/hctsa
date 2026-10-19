@@ -350,12 +350,23 @@ else
 	l = imax; % = length(t_scal)
 	stptr = 1:floor(l / 2) - 1; % start point must be in the first half (not necessarily, but for here)
 	endptr = ceil(l / 2) + 1:l; % end point must be in second half (not necessarily, but for here)
+	% Badness (as lfitbadness) of the least-squares line over every window t_scal(stptr(i):endptr(j)).
+	% The line for all windows ending at each endptr(j) comes from prefix sums of (centered) t and p;
+	% the mean absolute residual is then summed over the rows of each window at once:
+	gamma = 0.006; % (as lfitbadness)
+	tc = t_scal - mean(t_scal);
+	pc = p_scal - mean(p_scal);
+	cT = [0, cumsum(tc)']; cP = [0, cumsum(pc)']; cTT = [0, cumsum(tc'.^2)]; cTP = [0, cumsum(tc'.*pc')]; % (rows)
 	mybad = zeros(length(stptr), length(endptr));
 	for i = 1:length(stptr)
-		for j = 1:length(endptr)
-			% t_scal/p_scal are both columns here (so the residual is N-by-1):
-			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j)));
-		end
+		nw = endptr - stptr(i) + 1; % window lengths
+		sT = cT(endptr + 1) - cT(stptr(i)); sP = cP(endptr + 1) - cP(stptr(i));
+		sTT = cTT(endptr + 1) - cTT(stptr(i)); sTP = cTP(endptr + 1) - cTP(stptr(i));
+		slope = (nw.*sTP - sT.*sP) ./ (nw.*sTT - sT.^2);
+		icpt = (sP - slope.*sT) ./ nw;
+		rows = (stptr(i):endptr(end))';
+		absres = abs(icpt + slope.*tc(rows) - pc(rows)) .* (rows <= endptr);
+		mybad(i, :) = sum(absres, 1) ./ nw - gamma*nw;
 	end
 	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 

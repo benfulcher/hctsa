@@ -204,32 +204,57 @@ end
 mergeTol = max(tol, q/2); % distances closer than this are equal
 
 % ------------------------------------------------------------------------------
-%% Pass 1: histogram of the distances, to locate the c0 quantile
+%% One pass: count the pairs, and collect the distances below a guessed radius
 % ------------------------------------------------------------------------------
+% The c0 quantile is located on a histogram of all distances, but only the distances
+% below the quantile are needed: collect those below a guessed radius (a bin edge) with
+% the count of all pairs, then recover the histogram below the guess from the collected
+% distances. If the guess is too small (fewer than K collected), double it and repeat.
 numBins = 200;
 edges = tol * logspace(0, log10(2*span/tol + 1), numBins + 1);
-counts = zeros(1, numBins);
-for c = 1:SUB_chunkSize(Nemb):nRef
-	d = SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, tol, Inf);
-	counts = counts + histcounts(d, edges);
+% Guess from the distances between a subsample of reference points and all others
+sub = unique(round(linspace(1, nRef, min(nRef, 20))));
+ps = [];
+for c = sub
+	ps = [ps; SUB_distances(Y, c, c, past, tol, Inf)]; %#ok<AGROW>
 end
-numPos = sum(counts); % pairs that are not repeated points
-K = ceil(c0 * numPos); % the c0 quantile is the K-th smallest distance
-if K < minPairs
-	warning('Too few pairs (%u below the %g quantile) to estimate a dimension', K, c0);
-	out = NaN; return
+if isempty(ps)
+	rGuess = Inf;
+else
+	ps = sort(ps);
+	rGuess = 2*ps(min(numel(ps), ceil(2*c0*numel(ps))));
 end
-
-% ------------------------------------------------------------------------------
-%% Pass 2: collect the distances below the bin edge beyond the quantile
-% ------------------------------------------------------------------------------
+while true
+	g = find(edges >= rGuess, 1, 'first'); % guess radius: a bin edge
+	if isempty(g) || g > numBins
+		g = numBins + 1;
+	end
+	rGuess = edges(g);
+	numPos = 0;
+	p = [];
+	for c = 1:SUB_chunkSize(Nemb):nRef
+		[d, nP] = SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, tol, rGuess);
+		numPos = numPos + nP;
+		p = [p; d]; %#ok<AGROW>
+	end
+	K = ceil(c0 * numPos); % the c0 quantile is the K-th smallest distance
+	if K < minPairs
+		warning('Too few pairs (%u below the %g quantile) to estimate a dimension', K, c0);
+		out = NaN; return
+	end
+	if g == numBins + 1 || numel(p) >= K
+		break
+	end
+	rGuess = 2*rGuess;
+end
+if g == numBins + 1 % all distances collected (rGuess = edges(end) exceeds all of them)
+	counts = histcounts(p, edges);
+else
+	counts = histcounts(p, edges(1:g)); % bins below the guess, complete
+end
 b = find(cumsum(counts) >= K, 1, 'first');
 rMax = edges(b + 1);
-p = [];
-for c = 1:SUB_chunkSize(Nemb):nRef
-	p = [p; SUB_distances(Y, c, min(c + SUB_chunkSize(Nemb) - 1, nRef), past, tol, rMax)]; %#ok<AGROW>
-end
-p = sort(p);
+p = sort(p(p < rMax));
 
 % Merge distances closer than mergeTol into levels (each takes its smallest value); eup
 % is the level of the K-th distance
@@ -260,13 +285,13 @@ function s = SUB_chunkSize(Nemb)
 	s = max(1, floor(2.5e6 / Nemb));
 end
 % ------------------------------------------------------------------------------
-function d = SUB_distances(Y, i1, i2, past, tol, rMax)
+function [d, nPos] = SUB_distances(Y, i1, i2, past, tol, rMax)
 	% Max-norm distances above tol and below rMax between reference points i1:i2 and
-	% the delay vectors j > i + past
+	% the delay vectors j > i + past, and the number of those above tol
 	Nemb = size(Y, 1);
 	j1 = i1 + past + 1;
 	if j1 > Nemb
-		d = zeros(0, 1); return
+		d = zeros(0, 1); nPos = 0; return
 	end
 	ii = (i1:i2)';
 	jj = j1:Nemb;
@@ -274,6 +299,7 @@ function d = SUB_distances(Y, i1, i2, past, tol, rMax)
 	for k = 2:size(Y, 2)
 		D = max(D, abs(Y(ii, k) - Y(jj, k)'));
 	end
-	keep = (jj > ii + past) & (D > tol) & (D < rMax);
-	d = D(keep);
+	pos = (jj > ii + past) & (D > tol);
+	nPos = nnz(pos);
+	d = D(pos & (D < rMax)); d = d(:);
 end

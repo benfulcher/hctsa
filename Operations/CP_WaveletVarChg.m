@@ -162,26 +162,27 @@ function [J, segEnds] = VarianceSegmentations(x, K, d)
 	d = max(floor(d), 1);
 	x = x - mean(x);
 	cs = [0; cumsum(x.^2)];
-	% F(m+1, e+1): minimal contrast of the first e samples in m segments
-	F = Inf(K + 2, N + 1);
+	% F(e+1, m+1): minimal contrast of the first e samples in m segments (stored with
+	% segments along columns so that the minimum over start points runs down contiguous memory)
+	F = Inf(N + 1, K + 2);
 	F(1, 1) = 0;
-	back = zeros(K + 2, N + 1);
+	back = zeros(N + 1, K + 2);
 	for e = d:N
 		sMax = e - d; % (the last segment has at least d samples)
-		s = 0:sMax;
+		s = (0:sMax)';
 		n = e - s;
-		c = n .* log(max(cs(e + 1) - cs(s + 1)', 0) ./ n);
-		cand = F(1:K + 1, 1:sMax + 1) + c;
+		c = n .* log(max(cs(e + 1) - cs(s + 1), 0) ./ n);
+		cand = F(1:sMax + 1, 1:K + 1) + c;
 		if any(c == -Inf) % (a zero-variance segment: Inf + -Inf counts as infeasible)
 			cand(isnan(cand)) = Inf;
 		end
-		[F(2:end, e + 1), idx] = min(cand, [], 2);
-		back(2:end, e + 1) = idx - 1;
+		[F(e + 1, 2:end), idx] = min(cand, [], 1);
+		back(e + 1, 2:end) = idx - 1;
 	end
 	J = Inf(K + 1, 1);
 	segEnds = zeros(K + 1, K + 1);
 	for k = 0:K
-		J(k + 1) = F(k + 2, N + 1);
+		J(k + 1) = F(N + 1, k + 2);
 		if ~isfinite(J(k + 1))
 			continue
 		end
@@ -189,7 +190,7 @@ function [J, segEnds] = VarianceSegmentations(x, K, d)
 		ends = zeros(1, k + 1);
 		for mm = k + 1:-1:1
 			ends(mm) = e;
-			e = back(mm + 1, e + 1);
+			e = back(e + 1, mm + 1);
 		end
 		segEnds(k + 1, 1:k + 1) = ends;
 	end
