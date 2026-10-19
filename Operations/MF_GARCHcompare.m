@@ -139,8 +139,8 @@ qr = sort(qr(:)');
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
-y = BF_Whiten(y, preProc, 0, randomSeed); % Use a basic preprocessing to whiten the time series
-y = zscore(y); % make sure the (whitened) time series is z-scored
+% (whitened and z-scored; shared with MF_GARCHfit on the same series: BF_GARCHCache)
+[y, D] = BF_GARCHCache('prep', y, preProc, randomSeed);
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.
@@ -148,7 +148,6 @@ N = length(y); % could be different to original (e.g., if chose a differencing a
 % ------------------------------------------------------------------------------
 %% (2) Fit the GARCH(p,q) models
 % ------------------------------------------------------------------------------
-D = BF_GARCHFit('data', y);
 nullFit = BF_GARCHFit('null', D, false); % constant variance
 
 np = length(pr);
@@ -168,7 +167,12 @@ for i = 1:np
 			if i > 1 && ~isempty(fits{i-1, j})
 				warm(:, end+1) = BF_GARCHFit('embed', fits{i-1, j}.theta, fits{i-1, j}.spec, S);
 			end
-			fits{i, j} = BF_GARCHFit('mle', D, p, q, false, false, warm, (i == 1 && j == 1));
+			if i == 1 && j == 1
+				% (the Gaussian GARCH(1,1) fit from the grid starts, as in MF_GARCHfit)
+				fits{i, j} = BF_GARCHCache('gauss', y, D, p, q, false);
+			else
+				fits{i, j} = BF_GARCHFit('mle', D, p, q, false, false, warm, false);
+			end
 		catch
 			if beVocal
 				fprintf(1, 'Bad fit at p = %u, q = %u\n', p, q);

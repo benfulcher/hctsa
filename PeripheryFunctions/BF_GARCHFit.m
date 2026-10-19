@@ -315,11 +315,18 @@ H = 0.5 * (H + H');
 end
 
 % ------------------------------------------------------------------------------
-function [phi, g, s] = barrier(theta, D, S, mu)
+function [phi, g, s] = barrier(theta, D, S, mu, wantGrad)
+% (wantGrad false: the value only, as needed in the line search)
+if nargin < 5, wantGrad = true; end
 s = S.c - S.A * theta;
 g = [];
 if any(s <= 0)
     phi = Inf;
+    return
+end
+if ~wantGrad
+    f = nll(theta, D, S, false, false);
+    phi = f - mu * sum(log(s));
     return
 end
 [f, gf] = nll(theta, D, S, true, false);
@@ -357,7 +364,7 @@ for mu = mus
         end
         ok = false;
         for ls = 1:60
-            if barrier(theta + a * step, D, S, mu) <= phi - 1e-4 * a * dec
+            if barrier(theta + a * step, D, S, mu, false) <= phi - 1e-4 * a * dec
                 ok = true;
                 break
             end

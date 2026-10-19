@@ -229,9 +229,8 @@ isT = strcmp(innovationDist, 't');
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
-y = BF_Whiten(y, preproc, beVocal, randomSeed);
-
-y = zscore(y); % z-score the time series (after whitening)
+% (shared with the other fits of the same series: BF_GARCHCache)
+[y, D] = BF_GARCHCache('prep', y, preproc, randomSeed); % whitened, then z-scored
 
 % Length of the (potentially whitened) time series, y
 % Note that this could be different to the original (if choose a differencing, e.g.)
@@ -244,17 +243,14 @@ N = length(y);
 % ------------------------------------------------------------------------------
 % Statistics to compare to those of the residuals after modeling:
 % (i) Engle's ARCH test, lags 1:20
-Engle_pValue_y = BF_ARCHTest(y, 20);
-
 % (ii) Ljung-Box Q-test of the squared series, lags 1:20
-lbq_pValue_y2 = BF_LjungBoxTest(y.^2, 20);
+[Engle_pValue_y, lbq_pValue_y2] = BF_GARCHCache('tests', y);
 
 % ------------------------------------------------------------------------------
 %% (3) Fit the model
 % ------------------------------------------------------------------------------
 try
-	D = BF_GARCHFit('data', y);
-	gauss = BF_GARCHFit('mle', D, P, Q, isGJR, false);
+	gauss = BF_GARCHCache('gauss', y, D, P, Q, isGJR);
 	nullG = BF_GARCHFit('null', D, false);
 	if isT
 		sT = BF_GARCHFit('spec', D, P, Q, isGJR, true);
