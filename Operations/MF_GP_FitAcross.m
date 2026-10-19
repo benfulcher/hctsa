@@ -11,7 +11,7 @@ function out = MF_GP_FitAcross(y, covFunc, npoints)
 % the prediction error, the predictive mean and standard deviation, the per-point
 % negative log marginal likelihood, and the fitted hyperparameters. If the series is longer than 2000
 % samples, predictions are made at 2000 evenly spaced times. A NaN is returned if the
-% fit fails. If the training points show no correlation structure (the fitted model does not beat
+% fit fails, or if the training values are constant to within round-off. If the training points show no correlation structure (the fitted model does not beat
 % its white-noise special case in a likelihood-ratio test), the length scale (logh1, h_lonN) is not
 % identified, and is reported as the spacing of the training points, the bound the data allow; the
 % other outputs approach those of white noise.
@@ -100,6 +100,13 @@ end
 N = length(y); % time-series length
 tt = floor(linspace(1, N, npoints))'; % time range (training)
 yt = y(tt);
+
+% The training values are constant to within round-off: there is nothing for a Gaussian
+% process to describe, and the fit has no scale to work with (as in MF_GP_Hyperparameters)
+if std(yt) <= 10 * N * eps * sqrt(mean(yt.^2))
+	out = NaN;
+	return
+end
 
 % ------------------------------------------------------------------------------
 %% Optimize the GP parameters for the chosen covariance function

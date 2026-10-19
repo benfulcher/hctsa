@@ -21,7 +21,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % the fit is repeated for numDraws different random samples and the outputs are
 % averaged over them).
 % Times are the sample indices (squishorsquash = 1), so length scales and periods
-% are in samples of the cut series. The output is NaN if the fit fails.
+% are in samples of the cut series. The output is NaN if the fit fails, or if the values
+% fitted are constant to within round-off.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
@@ -192,6 +193,8 @@ if nargin < 7 || isempty(numDraws)
 	numDraws = 20;
 end
 
+Nin = N; % length of the input series (N can change when the series is cut below)
+
 % ------------------------------------------------------------------------------
 %% Random samples: average the fit over several independent draws
 % ------------------------------------------------------------------------------
@@ -297,6 +300,16 @@ elseif (maxN > 0) && (N > maxN)
 	end
 else
 	t = SUB_settimeindex(N, squishorsquash); % set time index
+end
+
+% The values fitted are constant to within round-off (e.g., a flat stretch at the start of
+% the series for 'first'): there is nothing for a Gaussian process to describe, and the
+% fit has no scale to work with (its noise floor is set relative to std(y)). As in
+% PP_Compare, the bound is the rounding error of the processing (resampling sums up to
+% Nin terms), relative to the root-mean-square of the values fitted.
+if std(y) <= 10 * Nin * eps * sqrt(mean(y.^2))
+	out = NaN;
+	return
 end
 
 % ------------------------------------------------------------------------------
