@@ -660,7 +660,7 @@ EN_DispEn(x_z,4,3,'ac1e')	EN_DispEn_4_3_ac1e
 EN_DispEn(x_z,4,3,1)	EN_DispEn_4_3_1
 NL_BoxCountEntropyRate(x_z,50,{'ac1e',5})	NL_BoxCountEntropyRate_50_ac1e_5
 NL_DelayTime(x_z,{'ac',10},{'ac',1},'default')	NL_DelayTime_ac10_ac1
-NL_Dimensions(x_z,50,{'ac1e',{'fnn',0.05}})	NL_Dimensions_50_ac1e_fnn005
+NL_Dimensions(x_z,50,{'ac1e',{'fnn',0.05}},{'ac',1})	NL_Dimensions_50_ac1e_fnn005_ac1
 NL_DVV(x_z,3,100,2,50,10,'default')       NL_DVV_3_100_2_50_10_default
 NL_DVV(x_z,3,100,2,50,10,'default','ac1e')	NL_DVV_3_100_2_50_10_default_ac1e
 NL_EmbedCluster(x_z,1,2,'full')	NL_EmbedCluster_1_2_full
