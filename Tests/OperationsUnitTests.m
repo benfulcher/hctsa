@@ -744,10 +744,9 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         % BF_CheckToolbox caching
         %-------------------------------------------------------------
         function test_BF_CheckToolbox_CachingDoesNotChangeResult(testCase)
-            % BF_CheckToolbox caches the installed-addons list and
+            % BF_CheckToolbox caches its per-toolbox ver(...) install check and
             % license('test',...) results (both read-only queries that can't
-            % change during a single MATLAB session), since profiling showed
-            % installedAddons alone costs ~0.3s per call and this function is
+            % change during a single MATLAB session), since this function is
             % called by ~42 operations. Confirm interleaved/repeated calls
             % (which exercise the cache) give results consistent with fresh
             % queries to the underlying Matlab functions, for both the
@@ -755,10 +754,12 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             % particular toolbox is absent (environment-independent).
             toolboxes = {'curve_fitting_toolbox','statistics_toolbox','curve_fitting_toolbox'};
             names = {'Curve Fitting Toolbox','Statistics and Machine Learning Toolbox','Curve Fitting Toolbox'};
+            folders = {'curvefit','stats','curvefit'};
 
             for k = 1:numel(toolboxes)
                 [outFlag,theName] = BF_CheckToolbox(toolboxes{k},true,true);
-                expectedInstalled = any(ismember(matlab.addons.installedAddons().Name, names{k}));
+                v = ver(folders{k});
+                expectedInstalled = any(strcmp({v.Name}, names{k}));
                 testCase.verifyEqual(theName, names{k});
                 testCase.verifyEqual(outFlag, ~expectedInstalled, ...
                     sprintf('Mismatch for toolbox %s at call %d',toolboxes{k},k));
