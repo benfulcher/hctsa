@@ -1,9 +1,9 @@
-function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
+function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed, numDraws)
 % CO_AddNoise   How the automutual information of the series falls as noise is added.
 %
 % Adds independent Gaussian noise of standard deviation eta to the (z-scored)
 % series, for 50 noise levels evenly spaced from eta = 0 to eta = 3, and measures
-% the automutual information (AMI) at lag tau at each level, averaged over 10
+% the automutual information (AMI) at lag tau at each level, averaged over numDraws
 % independent noise draws per level (so that the curve reflects the series rather
 % than one particular noise realization). The AMI falls as the noise swamps the
 % signal; the outputs describe the resulting curve of AMI against eta, including a
@@ -35,6 +35,8 @@ function out = CO_AddNoise(y, tau, amiMethod, extraParam, randomSeed)
 %       Kraskov methods (IN_AutoMutualInfo)
 % randomSeed, the seed of the noise (a number, passed to BF_Random; 'default' or
 %       empty is 0). The noise is the same in every release of MATLAB and in Python.
+% numDraws, the number of independent noise draws averaged at each noise level
+%       (default 10); fewer draws are cheaper but make the curve noisier
 %
 % ---OUTPUTS: statistics of the AMI as a function of noise level (50 levels):
 % pdec, the proportion of steps on which the AMI decreases
@@ -127,6 +129,9 @@ end
 if nargin < 5 || isempty(randomSeed) || ischar(randomSeed)
 	randomSeed = 0; % 'default'
 end
+if nargin < 6 || isempty(numDraws)
+	numDraws = 10; % independent noise vectors to average over at each level
+end
 
 % -------------------------------------------------------------------------------
 %% Preliminaries
@@ -135,7 +140,6 @@ end
 % Set up noise range:
 numLevels = 50;
 noiseRange = linspace(0, 3, numLevels); % compare properties across this noise range
-numDraws = 10; % independent noise vectors to average over at each level
 
 % ------------------------------------------------------------------------------
 %% Compute the automutual information across a range of noise levels

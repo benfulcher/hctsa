@@ -70,11 +70,11 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % The Gaussian estimate of the automutual information ('amigaussian1', 'fmmigaussian')
 % is a function of the autocorrelation only, which random-phase surrogates preserve,
 % so its test cannot detect anything: the p-values are close to uniform for every
-% series. hctsa therefore uses the Kraskov estimate ('amikraskov1', 'fmmikraskov'),
-% which also sees nonlinear dependence. The Gaussian versions remain callable but
-% are not registered. The Kraskov estimates are slower: 'fmmikraskov' searches the
-% Kraskov automutual information function lag by lag for its first minimum, for the
-% series and for every surrogate.
+% series. hctsa therefore uses the Kraskov estimate ('amikraskov1'), which also sees
+% nonlinear dependence. The Gaussian versions remain callable but are not registered.
+% 'fmmikraskov' is callable but not registered either: it searches the Kraskov
+% automutual information function lag by lag for its first minimum, for the series
+% and for every surrogate, which is costly on slowly decorrelating series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
