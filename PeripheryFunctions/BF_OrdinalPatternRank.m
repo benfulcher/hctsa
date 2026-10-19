@@ -6,10 +6,8 @@ function permIdx = BF_OrdinalPatternRank(x)
 % its m coordinates. The mapping is each pattern's Lehmer code -- the
 % factorial-number-system encoding of the sort-order permutation -- computed
 % fully vectorized across all Nx rows at once, with the only loop running
-% over m (not Nx). This is ~100-200x faster in benchmarking than the
-% previous per-row sort + sprintf + containers.Map lookup used at each of
-% this function's call sites, since m is small (an embedding order) while
-% Nx can be very large (e.g., every window in SY_SlidingWindow).
+% over m (not Nx). This is efficient since m is small (an embedding order)
+% while Nx can be very large (e.g., every window in SY_SlidingWindow).
 %
 % Row order need not match perms(1:m)'s row order -- callers that need a
 % specific labeling should not rely on this function's index values having

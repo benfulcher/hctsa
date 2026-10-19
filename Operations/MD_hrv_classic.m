@@ -51,10 +51,10 @@ function out = MD_hrv_classic(y)
 % 48(11), 1342 (2001).
 %
 % ---NOTES:
-% The original pnn5 to pnn40 used fixed thresholds of x/1000 on the z-scored series
-% (0.005 to 0.04 standard deviations), so for most series they were close to 1 and
-% almost constant across series. The pnnrel* measures replace them (pnn5 -> pnnrel025,
-% pnn10 -> pnnrel05, pnn20 -> pnnrel1, pnn30 -> pnnrel2, pnn40 -> pnnrel3).
+% Fixed thresholds of x/1000 (x = 5 to 40) on a z-scored series are only 0.005 to 0.04
+% standard deviations, giving proportions close to 1 for most series and almost
+% constant across series; the pnnrel* thresholds are instead relative to the spread
+% of the increments.
 %
 % Code is heavily derived from that provided by Max A. Little:
 % http://www.maxlittle.net/

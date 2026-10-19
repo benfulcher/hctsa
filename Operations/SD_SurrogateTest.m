@@ -26,6 +26,10 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %           (i) 'amikraskov1': the automutual information at lag 1, estimated with the
 %                 Kraskov nearest-neighbor estimator (IN_AutoMutualInfo, 'kraskov1'); tested
 %                 one-sided (surrogates should have lower values)
+%           (i') 'amikraskovmi': as (i), but at the lag BF_GetTau(x,'mi') of the original
+%                 series (the same lag for the series and every surrogate), which also
+%                 detects nonlinear dependence that builds up over several steps, e.g., in
+%                 oversampled flows; one-sided
 %           (ii) 'fmmikraskov': the first minimum of the Kraskov automutual information
 %                 function (as CO_FirstMin(y,'mi-kraskov1')); tested one-sided
 %           (iii) 'o3': a third-order statistic, the mean cubed increment at lag 1; tested
@@ -38,16 +42,15 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 %                 Gaussian estimate of the automutual information (a function of the
 %                 autocorrelation only, which the surrogates preserve; see NOTES); one-sided
 %           (default: 'amikraskov1')
-%           The earlier names 'ami1' and 'fmmi' (which both meant the Gaussian estimate)
-%           are still accepted as 'amigaussian1' and 'fmmigaussian', with a one-time
-%           warning.
+%           The deprecated names 'ami1' and 'fmmi' (both the Gaussian estimate) are
+%           accepted as 'amigaussian1' and 'fmmigaussian', with a one-time warning.
 % randomSeed, whether (and how) to reset the random seed, using BF_ResetSeed
 %
 % ---OUTPUTS: for each requested test statistic s (amikraskov for 'amikraskov1',
-% fmmikraskov for 'fmmikraskov', amigaussian for 'amigaussian1', fmmigaussian for
+% amikraskovmi for 'amikraskovmi', fmmikraskov for 'fmmikraskov', amigaussian for 'amigaussian1', fmmigaussian for
 % 'fmmigaussian', o3, tc3, nlpe, fnn),
 % three fields named with the prefix s_ (e.g., amikraskov_zscore, amikraskov_mediqr,
-% amikraskov_prank, and likewise fmmikraskov_, o3_, tc3_, amigaussian_, fmmigaussian_,
+% amikraskov_prank, and likewise amikraskovmi_, fmmikraskov_, o3_, tc3_, amigaussian_, fmmigaussian_,
 % nlpe_ and fnn_):
 % s_zscore, the z-statistic of the series' value against the Gaussian distribution fitted
 %      to the surrogates' values (NaN if all surrogates have the same value)
@@ -71,11 +74,11 @@ function out = SD_SurrogateTest(x, surrMeth, numSurrs, extrap, theTestStat, rand
 % The Gaussian estimate of the automutual information ('amigaussian1', 'fmmigaussian')
 % is a function of the autocorrelation only, which random-phase surrogates preserve,
 % so its test cannot detect anything: the p-values are close to uniform for every
-% series. hctsa therefore uses the Kraskov estimate ('amikraskov1', 'fmmikraskov'),
-% which also sees nonlinear dependence. The Gaussian versions remain callable but
-% are not registered. The Kraskov estimates are slower: 'fmmikraskov' searches the
-% Kraskov automutual information function lag by lag for its first minimum, for the
-% series and for every surrogate.
+% series. hctsa therefore uses the Kraskov estimate ('amikraskov1'), which also sees
+% nonlinear dependence. The Gaussian versions remain callable but are not registered.
+% 'fmmikraskov' is callable but not registered either: it searches the Kraskov
+% automutual information function lag by lag for its first minimum, for the series
+% and for every surrogate, which is costly on slowly decorrelating series.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -131,7 +134,7 @@ if ischar(theTestStat)
 	theTestStat = {theTestStat};
 end
 
-% Earlier names for the (Gaussian-estimate) statistics, which did not say so:
+% Deprecated names for the (Gaussian-estimate) statistics:
 persistent hasWarnedOldNames
 oldNames = {'ami1', 'fmmi'};
 newNames = {'amigaussian1', 'fmmigaussian'};
@@ -168,16 +171,36 @@ if ismember('amikraskov1', theTestStat)
 	% Investigate the Kraskov AMI(1) of surrogates compared to that of the signal itself.
 	% Unlike the Gaussian estimate (a function of the autocorrelation, which random-phase
 	% surrogates preserve), it responds to nonlinear dependence between x(t) and x(t+1).
-	AMIx = IN_AutoMutualInfo(x, 1, 'kraskov1', '4');
-	AMIsurr = zeros(numSurrs, 1);
-	for i = 1:numSurrs
-		AMIsurr(i) = IN_AutoMutualInfo(z(:, i), 1, 'kraskov1', '4');
-	end
+	[AMIx1, AMIsurr1] = SUB_kraskovAMIs(1);
 	% Surrogates should have lower AMI than the original signal
-	someStats = SDgivemestats(AMIx, AMIsurr, 'right');
+	someStats = SDgivemestats(AMIx1, AMIsurr1, 'right');
 	fnames = fieldnames(someStats);
 	for i = 1:length(fnames)
 		out.(sprintf('amikraskov_%s', fnames{i})) = someStats.(fnames{i});
+	end
+end
+
+if ismember('amikraskovmi', theTestStat)
+	% As above, at a lag set from the original series and used for every surrogate.
+	% BF_GetTau 'mi' is at most the ACF 1/e delay, a property the surrogates share, so the
+	% choice of lag does not favor the series over its surrogates (unlike, e.g., the
+	% series' own first AMI minimum, which would select a lag where its AMI is low).
+	tauMI = BF_GetTau(x, 'mi');
+	if isnan(tauMI)
+		for fn = {'zscore', 'mediqr', 'prank'}
+			out.(sprintf('amikraskovmi_%s', fn{1})) = NaN;
+		end
+	else
+		if tauMI == 1 && ismember('amikraskov1', theTestStat)
+			AMIx = AMIx1; AMIsurr = AMIsurr1; % (already computed)
+		else
+			[AMIx, AMIsurr] = SUB_kraskovAMIs(tauMI);
+		end
+		someStats = SDgivemestats(AMIx, AMIsurr, 'right');
+		fnames = fieldnames(someStats);
+		for i = 1:length(fnames)
+			out.(sprintf('amikraskovmi_%s', fnames{i})) = someStats.(fnames{i});
+		end
 	end
 end
 
@@ -325,6 +348,16 @@ if ismember('fnn', theTestStat)
 	fnames = fieldnames(someStats);
 	for i = 1:length(fnames)
 		out.(sprintf('fnn_%s', fnames{i})) = someStats.(fnames{i});
+	end
+end
+
+% ------------------------------------------------------------------------------
+function [amiSeries, amiSurrs] = SUB_kraskovAMIs(lagK)
+	% Kraskov (k = 4) automutual information at lag lagK of the series and of each surrogate
+	amiSeries = IN_AutoMutualInfo(x, lagK, 'kraskov1', '4');
+	amiSurrs = zeros(numSurrs, 1);
+	for iSurr = 1:numSurrs
+		amiSurrs(iSurr) = IN_AutoMutualInfo(z(:, iSurr), lagK, 'kraskov1', '4');
 	end
 end
 

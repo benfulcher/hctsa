@@ -63,11 +63,11 @@ if ~any(idMatch)
     error('ts_id %u not found in data source',whatID);
 end
 TimeSeries = TimeSeries(idMatch,:);
-TS_DataMat = TS_DataMat(idMatch,:)';
+TS_DataMat = TS_DataMat(idMatch,:)'; % (column vectors, one entry per operation)
 TS_Quality = TS_Quality(idMatch,:)';
 
-f = figure('color','w');
-plot(TimeSeries.Data,'k')
+figure('color','w');
+plot(TimeSeries.Data{1},'k')
 title(TimeSeries.Name,'interpreter','none')
 
 %-------------------------------------------------------------------------------
@@ -75,6 +75,8 @@ title(TimeSeries.Name,'interpreter','none')
 %-------------------------------------------------------------------------------
 [featureVector,~,calcQuality] = TS_CalculateFeatureVector(TimeSeries,...
                                     doParallel,Operations,MasterOperations,true,true);
+featureVector = featureVector(:);
+calcQuality = calcQuality(:);
 
 %-------------------------------------------------------------------------------
 % Compare output
@@ -95,14 +97,13 @@ if any(misMatch)
             TS_Quality(fmisMatch(i)),calcQuality(fmisMatch(i)));
     end
 else
-    fprintf(1,'All quality codes still match...! :)\n',sum(misMatch));
+    fprintf(1,'All quality codes still match...! :)\n');
 end
 
 % first real outputs:
 didWork = (calcQuality == 0);
-matchMargin = (featureVector - TS_DataMat);
 matchMarginProp = (featureVector - TS_DataMat)./TS_DataMat;
-noMatch = ((abs(matchMarginProp) > 0.1) & didWork); % more than 0.1% different
+noMatch = ((abs(matchMarginProp) > 0.1) & didWork); % more than 10% different
 
 % ------------
 % Text output:
@@ -113,7 +114,7 @@ dataStruct.Operations = Operations;
 dataStruct.TimeSeries = [];
 dataStruct.TS_DataMat = [];
 stochasticIDs = TS_GetIDs('stochastic',dataStruct,'ops');
-isStochastic = ismember(Operations.ID,stochasticIDs)';
+isStochastic = ismember(Operations.ID,stochasticIDs);
 
 for j = 1:2
     if j==1

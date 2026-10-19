@@ -75,7 +75,7 @@ out.meanYC22 = mean(yC(floor(N / 2) + 1:end));
 
 % ------------------------------------------------------------------------------
 function [m, b] = LinearFit(xData, yData)
-	if size(xData, 1) ~= size(yData, 1);
+	if size(xData, 1) ~= size(yData, 1)
 		yData = yData';
 	end
 	coeff = polyfit(xData, yData, 1);

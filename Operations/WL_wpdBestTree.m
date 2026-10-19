@@ -10,8 +10,7 @@ function out = WL_wpdBestTree(y, wname, maxlevel)
 % coarse nodes, while regions with concentrated structure get split down to fine
 % resolution. The statistics here summarize the shape of that adaptively-chosen
 % partition and how energy is spread across it, rather than reporting fixed-band
-% energies (which were checked against this dataset and found largely redundant
-% with existing spectral/wavelet features).
+% energies (which are largely redundant with existing spectral/wavelet features).
 %
 % ---INPUTS:
 % y, the input time series
@@ -29,11 +28,8 @@ function out = WL_wpdBestTree(y, wname, maxlevel)
 % entropy, the Shannon entropy of the energy distribution across terminal nodes
 %
 % ---NOTES:
-% A sixth candidate statistic, the energy fraction in the single most energetic leaf,
-% was checked and dropped: it correlated r = -0.92 to -0.97 with entropy across two
-% independent validation datasets, essentially the same information restated, unlike
-% numLeaves/meanDepth/stdDepth, whose mutual correlations turned out to be
-% dataset-dependent rather than a fixed mathematical relationship.
+% The energy fraction in the single most energetic leaf is not returned, as it is
+% largely redundant with entropy.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

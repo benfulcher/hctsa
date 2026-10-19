@@ -207,7 +207,7 @@ if isempty(out.whereen4), out.whereen4 = NaN; end
 %% Plotting
 % ------------------------------------------------------------------------------
 if doPlot
-	plot(v);
+	plot(v); %#ok<UNRCH>
 	plot(stdfromi, 'r');
 end
 

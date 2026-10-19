@@ -150,7 +150,7 @@ out.stdincircle = std([out.incircle_01, out.incircle_02, out.incircle_05 ...
 					   out.incircle_1, out.incircle_2, out.incircle_3]);
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(xt, xtp, '.k');
 	hold on
 	r = (xtp.^2 + xt.^2 < 0.2);

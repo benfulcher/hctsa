@@ -1,8 +1,8 @@
-function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
+function out = NL_LargestLyap(y, ~, maxtstep, past, ~, embedParams)
 % NL_LargestLyap   How quickly initially-close points on the delay-embedded trajectory diverge, as an estimate of the largest Lyapunov exponent.
 %
 % Rosenstein-style estimate of the largest Lyapunov exponent using TISEAN's
-% 'lyap_r' (this operation previously used TSTOOL's 'largelyap'). The series is
+% 'lyap_r'. The series is
 % embedded in m dimensions. For each embedded point, the nearest neighbor outside
 % a Theiler window (past) is found and the distance between the two is tracked
 % as both move forward t = 0,...,maxtstep steps. The divergence curve
@@ -15,19 +15,29 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % the range as possible while also achieving the best possible linear fit) and
 % an exponential fit.
 %
-% Both lyap_r and TSTOOL's largelyap track the divergence of each point's single
-% nearest neighbor forward in time -- the Rosenstein/Wolf-style construction --
-% unlike TISEAN's other Lyapunov tool, 'lyap_k' (Kantz method), which instead
-% averages over all neighbors within a range of epsilon-radius neighborhoods.
-% Unlike TSTOOL's largelyap, which anchored its output so p(1) = 0, TISEAN's
-% lyap_r returns the raw (unanchored) log-divergence; p is re-anchored to
-% p(1) = 0 here so that all of the "proportion of max" statistics that follow
-% (which assume p rises from ~0) keep working.
+% lyap_r tracks the divergence of each point's single nearest neighbor forward
+% in time -- the Rosenstein/Wolf-style construction -- unlike TISEAN's other
+% Lyapunov tool, 'lyap_k' (Kantz method), which instead averages over all
+% neighbors within a range of epsilon-radius neighborhoods. lyap_r returns the
+% raw (unanchored) log-divergence; p is re-anchored to p(1) = 0 here so that
+% all of the "proportion of max" statistics that follow (which assume p rises
+% from ~0) are meaningful.
+%
+% hctsa's copy of lyap_r compares distances with a tolerance of 1e-12 (of the
+% range of the data), so that the result depends neither on rounding nor on the
+% order in which neighbors are searched: a point closer than that to the
+% reference point is the same state visited again, not a neighbor; when several
+% points are equally near (within the tolerance), each contributes its
+% log-distance curve with weight one over their number (the expected curve for a
+% random choice among them); and a pair that merges (comes within the tolerance)
+% within the maxtstep steps is left out at every step, so that every step
+% averages over the same pairs. With a unique nearest neighbor and no merging, as
+% for continuously distributed data, this is the published method.
 %
 % ---INPUTS:
 % y, the time series to analyze
-% Nref, number of randomly-chosen reference points (-1 == all). Accepted for
-%       backwards compatibility but no longer affects the computation:
+% Nref, number of randomly-chosen reference points (-1 == all). Accepted so
+%       that existing calls still work, but has no effect on the computation:
 %       'lyap_r' has no equivalent and always uses every valid point as a
 %       reference.
 % maxtstep, maximum prediction length: {'ac1e', k} for k times the floor of the
@@ -37,20 +47,22 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       samples. With {'ac1e', k}, a longer horizon is capped to fit, and the
 %       output is NaN only if fewer than max(10, 3 'ac1e' times) remain; with
 %       {'ac', k} or a number of samples, the output is NaN instead (capping a
-%       zero-crossing horizon lost the correlation of the slopes with known
-%       exponents on chaotic flows). {'ac1e', 30} tracked the known exponents of 58
-%       dysts flows as well as {'ac', 20} did (Spearman 0.79 vs 0.80 for
-%       ve_gradient at N = 1000), and stays defined for finely sampled series,
-%       where the zero crossing is long and {'ac', 20} gave NaN for most.
+%       zero-crossing horizon degraded the relationship of the slopes to known
+%       exponents on chaotic flows). The 'ac1e' default tracks known exponents
+%       about as well as {'ac', 20} and, unlike it, stays defined for finely
+%       sampled series, where the zero crossing of the autocorrelation function
+%       can be long.
 % past, the Theiler window: {'ac1e', k} or {'ac', k} as for maxtstep, or a number
 %       of samples (see BF_TheilerWindow; default: {'ac1e',1})
-% NNR, number of nearest neighbours. Accepted for backwards compatibility but no
-%      longer affects the computation: 'lyap_r' always uses exactly one nearest
-%      neighbor per reference point.
+% NNR, number of nearest neighbours. Accepted so that existing calls still
+%      work, but has no effect on the computation: 'lyap_r' uses the nearest
+%      neighbor of each reference point (all of them, averaged, when several are
+%      equally near).
 % embedParams, input to BF_Embed, how to time-delay-embed the time series, in
 %              the form {tau,m}, where string specifiers can indicate standard
 %              methods of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) or
-%              m ('fnn') (default: {'ac','fnn'})
+%              m ('fnn' or {'fnn',th}: false nearest neighbors at threshold th, at
+%              most floor(2*log10(N)); see BF_Embed) (default: {'ac','fnn'})
 %
 % ---OUTPUTS: statistics of the divergence curve p(t):
 % p1, p2, p3, p4, p5: p at steps 0 to 4 (p1 = 0 by construction)
@@ -65,15 +77,14 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 %       of the fit varied for the best scaling range: the mean absolute residual,
 %       root-mean-square residual, slope, intercept and the minimum value of the
 %       penalized error (mean absolute residual minus 0.006 times the number of
-%       points)
+%       points); NaN if p reaches 95% of its maximum within three steps, or never
+%       rises above its value at t = 0
 % ve_meanabsres, ve_rmsres, ve_gradient, ve_intercept, ve_minbad: the same, with
 %       only the end of the fit varied (the fit starts at the beginning of p)
 % vse_gradient_pertau, ve_gradient_pertau: the two slopes (exponents per sample)
 %       multiplied by the (continuous) first 1/e crossing time of the
 %       autocorrelation function, i.e. exponents per correlation time. The
-%       per-sample slopes scale with the sampling rate; these much less (Lorenz
-%       and Rossler flows sampled at 1x to 8x: spread 1.1-2x at N = 5000 and
-%       1.2-3.7x at N = 1000, against 4-16x for the per-sample slopes).
+%       per-sample slopes scale with the sampling rate; these much less.
 % expfit_a, expfit_b, expfit_r2, expfit_adjr2, expfit_rmse: the parameters a and
 %       b of a least-squares fit p(t) = a*(1 - exp(b*t)) to the whole curve, with
 %       its R^2, adjusted R^2 and root-mean-square error. The fit is the global
@@ -85,7 +96,7 @@ function out = NL_LargestLyap(y, Nref, maxtstep, past, NNR, embedParams)
 % 16(3), 285 (1985).
 % M. T. Rosenstein, J. J. Collins and C. J. De Luca, "A practical method for
 % calculating largest Lyapunov exponents from small data sets", Physica D
-% 65(1-2), 117 (1993).
+% 65(1-2), 117 (1993). DOI: 10.1016/0167-2789(93)90009-P
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -122,15 +133,9 @@ doPlot = 0; % whether to plot outputs to a figure
 % ------------------------------------------------------------------------------
 N = length(y); % length of time series
 
-% (1) Nref: number of randomly-chosen reference points. No longer used
-% (TISEAN's lyap_r always uses every valid point as a reference -- see
-% header comment); kept and validated only for call-signature compatibility.
-if nargin < 2 || isempty(Nref)
-	Nref = 0.5; % use half the length of the time series
-end
-if Nref < 1 && Nref > 0
-	Nref = round(N * Nref); % specify a proportion of time series length
-end
+% (1) Nref, the number of randomly-chosen reference points, is not used (TISEAN's
+% lyap_r always uses every valid point as a reference -- see header comment);
+% the input is kept only for call-signature compatibility.
 
 % (2) maxtstep: maximum prediction length
 if nargin < 3 || isempty(maxtstep)
@@ -147,7 +152,7 @@ end
 if maxtstep < 1 && maxtstep > 0
 	maxtstep = round(N * maxtstep); % specify a proportion of time series length
 end
-if maxtstep < 10;
+if maxtstep < 10
 	maxtstep = 10; % minimum prediction length; for output stats purposes...
 end
 if maxtstep > floor(0.5 * N)
@@ -174,18 +179,15 @@ end
 if maxtstep + 2 * past > N / 2
 	% Too few correlation times in the series to follow neighbor divergence
 	% (lyap_r also becomes very slow as maxtstep + past approaches N). Shortening
-	% maxtstep to fit was tested instead: below ~20 autocorrelation times the
-	% slope fields lost all correlation with known exponents (dysts flows), so NaN
+	% maxtstep to fit was found to destroy the relationship of the slope fields to
+	% known exponents, so NaN
 	warning('Time series too short (N = %u) for maxtstep = %u with Theiler window %u', N, maxtstep, past);
 	out = NaN; return
 end
 
-% (4) Number of nearest neighbours. No longer used (TISEAN's lyap_r always
-% uses exactly one nearest neighbor -- see header comment); kept only for
-% call-signature compatibility.
-if nargin < 5 || isempty(NNR)
-	NNR = 3;
-end
+% (4) NNR, the number of nearest neighbours, is not used (TISEAN's lyap_r always
+% uses exactly one nearest neighbor -- see header comment); the input is kept
+% only for call-signature compatibility.
 
 % (5) Embedding parameters, embedParams
 if nargin < 6 || isempty(embedParams)
@@ -242,7 +244,7 @@ if fileInfo.bytes == 0
 	out = NaN; return
 end
 
-v = dlmread(outFilePath);
+v = readmatrix(outFilePath, 'FileType', 'text', 'NumHeaderLines', 0);
 delete(outFilePath);
 t = v(:, 1);
 p = v(:, 2);
@@ -252,12 +254,12 @@ if length(p) < 6
 	out = NaN; return
 end
 
-% Re-anchor to p(1) = 0, matching TSTOOL's largelyap convention (see header
-% comment) so the "proportion of max" statistics below keep working as before:
+% Re-anchor to p(1) = 0 (see header comment) so the "proportion of max"
+% statistics below are meaningful:
 p = p - p(1);
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on');
 	plot(t, p, '.-k')
 end
@@ -318,8 +320,9 @@ if isempty(out.to05max), out.to05max = NaN; end
 % fit from zero to 95% of maximum...
 imax = find(p > 0.95 * max(p), 1, 'first');
 
-if imax <= 3
-	% not a suitable range for finding scaling
+if isempty(imax) || imax <= 3
+	% not a suitable range for finding scaling (or, if p never rises above
+	% its value at t = 0, as for neighbors that converge, no rise to fit)
 	% return NaNs for these
 	out.vse_meanabsres = NaN;
 	out.vse_rmsres = NaN;
@@ -347,16 +350,23 @@ else
 	l = imax; % = length(t_scal)
 	stptr = 1:floor(l / 2) - 1; % start point must be in the first half (not necessarily, but for here)
 	endptr = ceil(l / 2) + 1:l; % end point must be in second half (not necessarily, but for here)
+	% Badness (as lfitbadness) of the least-squares line over every window t_scal(stptr(i):endptr(j)).
+	% The line for all windows ending at each endptr(j) comes from prefix sums of (centered) t and p;
+	% the mean absolute residual is then summed over the rows of each window at once:
+	gamma = 0.006; % (as lfitbadness)
+	tc = t_scal - mean(t_scal);
+	pc = p_scal - mean(p_scal);
+	cT = [0, cumsum(tc)']; cP = [0, cumsum(pc)']; cTT = [0, cumsum(tc'.^2)]; cTP = [0, cumsum(tc'.*pc')]; % (rows)
 	mybad = zeros(length(stptr), length(endptr));
 	for i = 1:length(stptr)
-		for j = 1:length(endptr)
-			% t_scal/p_scal are both columns here (this used to rely on
-			% TSTOOL's spacing() returning t as a row, transposing p_scal to
-			% match; with t now a column too, that stray transpose inside
-			% lfitbadness turned "pfit - y" into an N-by-N broadcast instead
-			% of an N-by-1 residual, so it's dropped):
-			mybad(i, j) = lfitbadness(t_scal(stptr(i):endptr(j)), p_scal(stptr(i):endptr(j)));
-		end
+		nw = endptr - stptr(i) + 1; % window lengths
+		sT = cT(endptr + 1) - cT(stptr(i)); sP = cP(endptr + 1) - cP(stptr(i));
+		sTT = cTT(endptr + 1) - cTT(stptr(i)); sTP = cTP(endptr + 1) - cTP(stptr(i));
+		slope = (nw.*sTP - sT.*sP) ./ (nw.*sTT - sT.^2);
+		icpt = (sP - slope.*sT) ./ nw;
+		rows = (stptr(i):endptr(end))';
+		absres = abs(icpt + slope.*tc(rows) - pc(rows)) .* (rows <= endptr);
+		mybad(i, :) = sum(absres, 1) ./ nw - gamma*nw;
 	end
 	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
 
@@ -423,7 +433,7 @@ out.expfit_adjr2 = fExp.adjr2;
 out.expfit_rmse = fExp.rmse;
 
 if doPlot
-	hold('on')
+	hold('on') %#ok<UNRCH>
 	plot(t, fExp.a * (1 - exp(fExp.b * t)), ':r');
 	hold('off')
 end

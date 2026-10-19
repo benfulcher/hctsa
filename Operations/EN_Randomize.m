@@ -128,7 +128,6 @@ end
 % Preliminaries
 % ------------------------------------------------------------------------------
 
-doPlot = false; % Don't plot to screen by default:
 N = length(y); % length of the time series
 
 % Set up the points through the randomization process at which the
@@ -139,7 +138,7 @@ numCalcs = randp_max / rand_inc; % number of calculations required
 calc_ints = floor(randp_max * N / numCalcs);
 if calc_ints == 0, calc_ints = 1; end % round up for short time series
 calc_pts = (0:calc_ints:randp_max * N);
-if calc_pts(end) ~= randp_max * N;
+if calc_pts(end) ~= randp_max * N
 	calc_pts = [calc_pts, randp_max * N];
 end
 numCalcs = length(calc_pts); % some rounding issues inevitable
@@ -196,11 +195,6 @@ end
 end
 stats = mean(statsAll, 3, 'omitnan'); % average over the repeats
 % fprintf(1,'Randomization took %s',BF_TheTime(toc(randTimer)));
-
-if doPlot
-	f = figure('color', 'w'); box('on');
-	plot(stats, '.-');
-end
 
 % ------------------------------------------------------------------------------
 %% Fit exponentials to outputs:
@@ -267,9 +261,8 @@ function out = CalculateStats(y, y_rand)
 	% 2-bit LZ complexity:
 	% LZcomplex = EN_LZComplexity(y,3);
 
-	% Normalized permutation entropy, PermEn(3,1) (replaced SampEn(2,0.15),
-	% whose O(N^2) cost at each of the 20 randomization stages was ~75% of
-	% this operation's time on long series; PermEn is O(N)):
+	% Normalized permutation entropy, PermEn(3,1) (O(N), so cheap to compute
+	% at each of the 20 randomization stages):
 	permEnStruct = EN_PermEn(y_rand, 3, 1);
 	permen3_1 = permEnStruct.normPermEn;
 
@@ -295,8 +288,8 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 	% Fits an exponential to the data vector across data points r
 
 	% The fittype objects are built once and reused across calls (parsing the
-	% model string was ~25% of each fit's cost, for ten fits per call of
-	% this operation); the start point is passed to fit() instead:
+	% model string is costly, and there are ten fits per call of this
+	% operation); the start point is passed to fit() instead:
 	persistent fExp fExpOffset
 	if isempty(fExp)
 		fExp = fittype('a*exp(b*x)');
@@ -304,10 +297,8 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 	end
 	if addOffset
 		f = fExpOffset;
-		f_x = @(c, x) c.a * exp(c.b * x) + c.c;
 	else
 		f = fExp;
-		f_x = @(c, x) c.a * exp(c.b * x);
 	end
 	try
 		[c, gof] = fit(r, dataVector, f, 'StartPoint', startPoint);
@@ -319,12 +310,6 @@ function [c, gof] = f_fix_exp(r, dataVector, startPoint, addOffset)
 			c = struct('a', NaN, 'b', NaN);
 		end
 		gof = struct('rsquare', NaN, 'rmse', NaN);
-	end
-	if doPlot;
-		figure('color', 'w'); hold on;
-		plot(r, dataVector, 'x-k');
-		xr = linspace(min(r), max(r), 100);
-		plot(xr, f_x(c, xr))
 	end
 end
 % -------------------------------------------------------------------------------

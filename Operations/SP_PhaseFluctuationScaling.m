@@ -42,8 +42,8 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 %              (the two fits share one point)
 % slope_diff, slope_short - slope_long
 % meanFreq, the mean rotation frequency of the isolated dominant component, in
-%              cycles per sample (correlates r = 0.90 with the SP_Summaries_*_maxw
-%              fields on real EEG data; kept as a free byproduct)
+%              cycles per sample (partly redundant with the SP_Summaries_*_maxw
+%              fields; kept as a free byproduct)
 %
 % ---REFERENCES:
 % K. Gupta, A. Prasad, H.P. Singh, R. Ramaswamy, "Analytical signal analysis of
@@ -56,9 +56,9 @@ function out = SP_PhaseFluctuationScaling(y, halfWidthFrac, numWindows, maxN)
 % band (a coherence length of ~N/(2*halfWidthBins) samples), it is smooth
 % at short lags for ANY input, so mean(|dphi(t+w) - dphi(t)|) grows
 % linearly with w there -- the trivial derivative regime -- and
-% slope_short is ~1 regardless of dynamics: 0.93-1.00 for 90% of the
-% real-world series (and 0.92 for a clean periodic signal, not ~0).
-% slope_diff is consequently just 1 - slope_long (r = -0.98). The
+% slope_short is ~1 regardless of dynamics (even for a clean periodic
+% signal, rather than ~0). slope_diff is consequently essentially just
+% 1 - slope_long. The
 % informative quantity is slope_long alone: near 0 where the phase
 % fluctuation saturates (periodic, SNA-like), and positive where it keeps
 % growing (chaotic, noisy). slope_short and slope_diff are still computed

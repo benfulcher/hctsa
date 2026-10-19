@@ -102,32 +102,51 @@ rd = avg-nd*variance + (2*nd*variance*n)/(Ntv-1);
 % Creates sets of DV's, for each ref element of subset and value rd, which have norms closer than distance rd to ref
 % (hctsa modification: the original looped over every (rd, reference) pair
 % with a find() and a var() over the selected targets. Equivalent here:
-% for each reference, sort its distances once and read the variance of
-% the targets within each rd off cumulative sums. The set around a reference
-% excludes the reference vector itself (at distance 0, so in every set with
-% rd >= 0); the original instead excluded the target with raw index k, the loop
-% counter rather than ref(k).)
+% for each reference, sort its distances once; the set within each rd is then
+% a leading run of the sorted targets, whatever the order among equal
+% distances. The set around a reference excludes the reference vector itself;
+% the original instead excluded the target with raw index k, the loop counter
+% rather than ref(k).)
+% (hctsa modification: the variance of each set is computed in two passes,
+% the mean and then the mean squared deviation from it (Chan, Golub and
+% LeVeque, Am. Stat. 37, 242 (1983)), which cannot be negative and is exactly
+% 0 for equal targets. A variance below tol^2, with tol = 1e-12 of the range of
+% x, is that of targets equal up to rounding, and is 0.)
+tol = 1e-12 * (max(x) - min(x));
 tot = zeros(1, Ntv);
 count = zeros(1, Ntv);
 rdRow = rd(:)';
+% (hctsa modification: the variance of each leading run of sorted targets comes
+% from prefix sums of the mean-shifted targets, and the counts within each rd
+% from one histogram of the sorted distances. Prefix sums lose accuracy when a
+% set's variance is small relative to the spread of x, so below 1e-4 of the
+% mean square of the shifted x (error ~1e-12 relative) the two-pass var() is
+% used, as before; this also keeps the tol clamp exact.)
+xc = x - mean(x);
+vSmall = 1e-4 * mean(xc.^2);
+rdUp = rdRow + eps(rdRow); % next double above rd (rd > 0 where used): ds <= rd  <=>  ds < rdUp
 for k = 1:Nsub
     [ds, o] = sort(d(:,k));
-    xs = x(o + m*tau);
-    S1 = cumsum(xs);
-    S2 = cumsum(xs.^2);
-    c = sum(ds <= rdRow, 1); % number of targets within each rd (1 x Ntv)
-    s1 = zeros(1, Ntv); s2 = zeros(1, Ntv);
-    s1(c > 0) = S1(c(c > 0)); s2(c > 0) = S2(c(c > 0));
-    % Exclude the reference vector itself (distance 0, so within every rd >= 0):
-    isIn = rdRow >= 0;
-    c(isIn) = c(isIn) - 1;
-    s1(isIn) = s1(isIn) - x(ref(k));
-    s2(isIn) = s2(isIn) - x(ref(k))^2;
+    notSelf = (o ~= ref(k) - m*tau); % (the reference vector itself)
+    ds = ds(notSelf);
+    xs = x(o(notSelf) + m*tau);
+    % number of targets within each rd (1 x Ntv), counting ds <= rd
+    c = cumsum(histcounts(ds, [-Inf, rdUp, Inf]));
+    c = c(1:Ntv);
     % Only those variance values are considered for which the corresponding
     % sets have atleast 30 DVs
-    ok = (c >= 30) & (rdRow > 0);
-    v = (s2(ok) - s1(ok).^2 ./ c(ok)) ./ (c(ok) - 1); % sample variance of x over the set
-    tot(ok) = tot(ok) + v;
+    ok = find((c >= 30) & (rdRow > 0));
+    if isempty(ok), continue; end
+    xk = xc(o(notSelf) + m*tau);
+    cn = c(ok)';
+    cs1 = cumsum(xk(1:max(cn)));
+    cs2 = cumsum(xk(1:max(cn)).^2);
+    vv = ((cs2(cn) - cs1(cn).^2 ./ cn) ./ (cn - 1))';
+    for jj = find(~(vv >= vSmall)) % small or NaN: two-pass
+        vv(jj) = var(xs(1:cn(jj)));
+    end
+    vv(vv <= tol^2) = 0;
+    tot(ok) = tot(ok) + vv;
     count(ok) = count(ok) + 1;
 end
 y = nan(Ntv, 1);

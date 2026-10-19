@@ -3,14 +3,14 @@ function out = DN_Moments(y, theMom, doNormalize)
 %
 % The central moment of order theMom of the values, ignoring their order in
 % time, using the moment function from MATLAB's Statistics Toolbox. By
-% default it is standardized by std(y)^theMom to give a scale-invariant
+% default it is standardized by std(y,1)^theMom to give a scale-invariant
 % quantity: theMom = 3 is then the skewness and theMom = 4 the kurtosis (3 for
 % a Gaussian).
 %
 % ---INPUTS:
 % y, the input data vector
 % theMom, the order of the moment to calculate (a scalar)
-% doNormalize, whether to normalize by std(y)^theMom, giving the
+% doNormalize, whether to normalize by std(y,1)^theMom, giving the
 %       scale-invariant standardized moment (true, the default), or to return
 %       the raw, unnormalized central moment (false)
 %
@@ -18,17 +18,10 @@ function out = DN_Moments(y, theMom, doNormalize)
 % a scalar: the standardized or raw central moment of order theMom.
 %
 % ---NOTES:
-% Earlier versions always divided by std(y)^1 regardless of theMom,
-% which is neither the raw central moment nor a scale-invariant standardized
-% moment: it has no statistical meaning beyond the special case where y is
-% already unit-variance (where it coincides with the standardized moment,
-% since std(y)^1 = std(y)^theMom = 1). Any code relying on that specific
-% (unintended) behavior on non-unit-variance input should now pass
-% doNormalize = false and account for the change.
-%
-% The moment function averages over N values, but std normalizes by N - 1, so
-% for short series the standardized moments are slightly smaller than the
-% textbook ones.
+% The normalization uses the population standard deviation (divisor N, as in the
+% moment function), so theMom = 3 and theMom = 4 equal MATLAB's skewness and
+% kurtosis (with their default flag). Use doNormalize = false for the raw
+% central moment.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -64,7 +57,7 @@ if nargin < 3 || isempty(doNormalize)
 end
 
 if doNormalize
-    out = moment(y, theMom) / std(y)^theMom; % scale-invariant standardized moment
+    out = moment(y, theMom) / std(y, 1)^theMom; % scale-invariant standardized moment
 else
     out = moment(y, theMom); % raw central moment
 end

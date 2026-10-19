@@ -2,7 +2,10 @@ function [Mu, Cov, P, Pi, LL] = ZG_hmm_fit(X, K, cyc, rhos, floorFrac)
 % Deterministic fit of a Gaussian-emission hidden Markov model to a scalar time series
 %
 % Runs the Baum-Welch fit of ZG_hmm from six fixed starting points and returns the
-% fit with the highest final log likelihood on the data X. The starts have a shared
+% fit with the highest log likelihood on the data X. Each fit is scored by the log
+% likelihood of X under its returned parameters (ZG_hmm_cl): the log likelihoods that
+% ZG_hmm records are computed in each cycle's E step, before that cycle's M step, so
+% they belong to the previous parameters. The starts have a shared
 % variance equal to the variance of X, equal initial-state probabilities, and a
 % transition matrix with probability rho of staying in a state (and (1-rho)/(K-1) of
 % moving to each other one), for each rho in rhos, and two placements of the K state
@@ -16,7 +19,8 @@ function [Mu, Cov, P, Pi, LL] = ZG_hmm_fit(X, K, cyc, rhos, floorFrac)
 % rhos - the probabilities of staying in a state (default [0.9, 0.5, 0.99])
 % floorFrac - the variance floor, as a proportion of the variance of X (default 0.01)
 %
-% Mu, Cov, P, Pi, LL - as for ZG_hmm
+% Mu, Cov, P, Pi - as for ZG_hmm
+% LL - the log likelihood of X under the returned parameters (Mu, Cov, P, Pi)
 %
 % Reproducible: no random numbers are used.
 
@@ -45,8 +49,13 @@ for r = 1:2 * length(rhos)
 	end
 	[Mu_r, Cov_r, P_r, Pi_r, LL_r] = ZG_hmm(X, N, K, cyc, [], init, floorFrac * v);
 	% (a fit with a non-finite log likelihood or parameters is discarded)
-	if all(isfinite([Mu_r(:); Cov_r; P_r(:); Pi_r(:); LL_r(end)])) && LL_r(end) > bestLL
-		bestLL = LL_r(end);
+	if ~all(isfinite([Mu_r(:); Cov_r; P_r(:); Pi_r(:); LL_r(end)]))
+		continue
+	end
+	% Score the fit by the log likelihood of X under its returned parameters
+	LL_r = ZG_hmm_cl(X, N, K, Mu_r, Cov_r, P_r, Pi_r);
+	if isfinite(LL_r) && LL_r > bestLL
+		bestLL = LL_r;
 		Mu = Mu_r; Cov = Cov_r; P = P_r; Pi = Pi_r; LL = LL_r;
 	end
 end

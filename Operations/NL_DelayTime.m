@@ -1,4 +1,4 @@
-function out = NL_DelayTime(y, maxDelay, past, randomSeed)
+function out = NL_DelayTime(y, maxDelay, past, ~)
 % NL_DelayTime   How quickly points that start with nearly equal values drift apart, over a range of delays.
 %
 % Optimal delay time using the method of Parlitz and Wichard, as in TSTOOL's
@@ -17,7 +17,8 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % y, column vector of time series data
 % maxDelay, maximum value of the delay to consider: {'ac', k} for k times the
 %           first zero-crossing of the autocorrelation function, or a number
-%           of samples (or, legacy, a proportion of the time-series length);
+%           of samples (or a value in (0,1), read as a proportion of the
+%           time-series length);
 %           at least 10, and shortened to fit series shorter than 2*maxDelay
 %           (default: {'ac',10})
 % past, Theiler window: value-neighbors closer in time than this are not used
@@ -43,18 +44,14 @@ function out = NL_DelayTime(y, maxDelay, past, randomSeed)
 % found in Crossref, arXiv or a web search.
 %
 % ---NOTES:
-% Computed natively in MATLAB. TSTOOL's own 'delaytime' code
-% (tstoolbox/@signal/delaytime.m, vendored in this repo under
-% Toolboxes/OpenTSTOOL) turned out to be pure MATLAB itself -- no compiled
-% TSTOOL binary/mex involved at all -- so its exact algorithm (still
-% undocumented/uncredited beyond "method of Parlitz and Wichard", per
-% TSTOOL's own comments) is reproduced here directly, rather than
-% approximated.
+% Computed natively in MATLAB. TSTOOL's 'delaytime' (tstoolbox/@signal/delaytime.m)
+% is itself pure MATLAB, so its algorithm (undocumented beyond "method of Parlitz
+% and Wichard", per TSTOOL's own comments) is reproduced here directly, rather
+% than approximated.
 %
-% Two bugs fixed relative to TSTOOL's own source's search for the
-% nearest-by-value neighbor *above* the reference rank
-% ("post = index(find(abs(index(ref+1:end)-actual) > past))"), confirmed
-% directly with a concrete worked example before fixing:
+% Two bugs are corrected relative to TSTOOL's search for the nearest-by-value
+% neighbor *above* the reference rank
+% ("post = index(find(abs(index(ref+1:end)-actual) > past))"):
 % (1) it applies find() to the subarray index(ref+1:end) but then indexes
 %     back into the *full* index array with the resulting (subarray-
 %     relative) positions without adding ref back on -- so it actually
@@ -142,11 +139,6 @@ past = BF_TheilerWindow(y, past);
 if isnan(past) % the autocorrelation function never crosses zero
 	warning('No autocorrelation zero-crossing to set the Theiler window')
 	out = NaN; return
-end
-
-% randomSeed: how to treat the randomization
-if nargin < 4
-	randomSeed = [];
 end
 
 % ------------------------------------------------------------------------------

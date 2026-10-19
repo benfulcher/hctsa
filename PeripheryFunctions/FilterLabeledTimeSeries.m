@@ -1,5 +1,17 @@
 function [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries)
+% FilterLabeledTimeSeries   Keep only the time series that have a group label
 %
+%---INPUTS:
+% TS_DataMat, the time series x features data matrix
+% TimeSeries, the TimeSeries table, including a categorical Group variable
+%               (assigned using TS_LabelGroups)
+%
+%---OUTPUTS:
+% TS_DataMat, TimeSeries: the rows corresponding to labeled time series only,
+%               with any group categories that have no remaining members removed
+%
+% An error is thrown if the time series have not been labeled, or if no time series
+% have a label.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -33,10 +45,15 @@ if isnumeric(TimeSeries.Group)
                     ' Please re-run TS_LabelGroups on your hctsa dataset.']);
 end
 isLabeled = ~isundefined(TimeSeries.Group);
+if ~any(isLabeled)
+    error('None of the time series have group labels. Please run TS_LabelGroups on your hctsa dataset.');
+end
 if any(~isLabeled)
     TimeSeries = TimeSeries(isLabeled,:);
     TS_DataMat = TS_DataMat(isLabeled,:);
     fprintf(1,'Only considering the %u time series that have labels.\n',sum(isLabeled));
 end
+% Remove any group categories that have no members:
+TimeSeries.Group = removecats(TimeSeries.Group);
 
 end

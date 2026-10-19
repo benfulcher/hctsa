@@ -11,18 +11,12 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 % linear PCA's in absolute terms (its RBF feature space is far higher-
 % dimensional than the embedding itself), so the kernel-to-linear ratios
 % (top2_ratio, nto80_ratio, nto50_ratio) are below 1 (top2) or at least 1 (nto*)
-% for every series. Tested on simulations (N = 1000, 12 realizations each), the
-% ratios are nearer 1 for series on a curved low-dimensional manifold than for
-% the linear (Gaussian) process with the same power spectrum: for the logistic
-% map and Henon map, top2_ratio is 0.77 and 0.73 against 0.52 and 0.50 for
-% their phase-randomized surrogates (tau = 'ac', m = 3), and nto80_ratio is 1.4
-% and 1.3 against 2.8 and 2.7. The signal is weaker for the Lorenz system and
-% absent for a Roessler oscillator, which is close to linear at this sampling.
-% The ratios are not a stand-alone nonlinearity test, however: they also rise
-% with linear autocorrelation (top2_ratio is about 0.52 for white noise and
-% AR(1) with phi = 0.5, but 0.61-0.71 for AR(1) with phi = 0.99), so a smooth
-% linear process can look more 'nonlinear' than a chaotic map. Compare against
-% surrogates (cf. SD_SurrogateTest) to isolate nonlinearity. std_ratio did not
+% for every series. The ratios tend to be nearer 1 for series on a curved
+% low-dimensional manifold (e.g., a chaotic map) than for a linear (Gaussian)
+% process with the same power spectrum. The ratios are not a stand-alone
+% nonlinearity test, however: they also rise with linear autocorrelation, so a
+% smooth linear process can look more 'nonlinear' than a chaotic map. Compare
+% against surrogates (cf. SD_SurrogateTest) to isolate nonlinearity. std_ratio does not
 % separate nonlinear from linear series consistently.
 %
 % ---INPUTS:
@@ -35,12 +29,11 @@ function out = NL_EmbedKernelPCA(y, tau, m, maxN)
 % maxN, the maximum number of embedded points used to form the N x N kernel
 %       matrix, whose eigendecomposition costs O(N^3). Longer embeddings are
 %       reduced to their first maxN points (default: 2000, i.e., a ~30MB
-%       kernel matrix, well under a second to eigendecompose; a warning is
-%       issued whenever this cropping actually happens, since the spectrum
-%       estimate is still noisy at this size and keeps sharpening with more
-%       -- this is a memory/time cap, not a convergence point). Can be set
-%       to 'full' to disable, with a second warning above 5000 points,
-%       where the eigendecomposition starts to take several seconds.
+%       kernel matrix; a warning is issued whenever this cropping actually
+%       happens, since the spectrum estimate is still noisy at this size and
+%       keeps sharpening with more -- this is a memory/time cap, not a
+%       convergence point). Can be set to 'full' to disable, with a second
+%       warning above 5000 points, where the eigendecomposition becomes slow.
 %
 % ---OUTPUTS: statistics of the normalized kernel PCA spectrum (the proportion
 % of variance in feature space explained by each kernel principal component,
@@ -180,8 +173,7 @@ end
 K = exp(-sqDist / medSqDist);
 
 % Center the kernel matrix in feature space:
-oneN = ones(N, N) / N;
-Kc = K - oneN*K - K*oneN + oneN*K*oneN;
+Kc = K - mean(K, 1) - mean(K, 2) + mean(K(:));
 Kc = (Kc + Kc') / 2; % symmetrize away numerical asymmetry
 
 % Eigendecomposition (Kc is symmetric; eigenvalues of the centered kernel
@@ -221,9 +213,7 @@ end
 % attractor), kernel PCA still finds much more compact structure than it
 % does for a linear/stochastic process at the same bandwidth, so these
 % ratios sit closer to 1 (top2_ratio, nto50_ratio) for nonlinear systems
-% and further from 1 for linear/noise ones (empirically confirmed here on
-% AR(1)/white noise vs. the logistic map/Lorenz system: top2_ratio ~0.48-
-% 0.53 for the former, ~0.75-0.77 for the latter).
+% and further from 1 for linear/noise ones.
 out.top2_ratio = statsKern.top2 / statsLin.top2;
 out.top2_diff = statsKern.top2 - statsLin.top2;
 out.nto80_ratio = statsKern.nto80 / statsLin.nto80;
@@ -236,14 +226,13 @@ function stats = SUB_spectrumstats(perc, m)
 	% Compute the same battery of eigenvalue-spectrum statistics as
 	% NL_EmbedPCA, from a normalized (sums to 1), descending spectrum perc.
 
-	for i = 1:m
-		stats.(sprintf('perc_%u', i)) = perc(i);
+	for j = 1:m
+		stats.(sprintf('perc_%u', j)) = perc(j);
 	end
 
 	% Spread statistics are taken over the leading m components only. The
 	% linear spectrum has exactly m entries, but the kernel spectrum has one
-	% per embedded point, N: taken over all N, its std scales as ~1/sqrt(N)
-	% (verified: 3.3x change from N = 200 to 2000 on the same AR(1) process),
+	% per embedded point, N: taken over all N, its std scales as ~1/sqrt(N),
 	% and its ratio to an m-entry linear std is then just noise. Restricting
 	% both to their top m makes the two directly comparable.
 	percTop = perc(1:m);

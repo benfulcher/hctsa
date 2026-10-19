@@ -91,7 +91,7 @@ for i = 1:length(trainLengthRange)
 			outtmp = FC_LocalSimple(y, 'median', trainLengthRange(i));
 			% median needs more tweaking
 	end
-	stats_st(i, 1) = outtmp.stde; % (FC_LocalSimple.stderr was renamed to stde)
+	stats_st(i, 1) = outtmp.stde;
 	stats_st(i, 2) = outtmp.sws;
 	stats_st(i, 3) = outtmp.swm;
 	stats_st(i, 4) = outtmp.ac1;
@@ -99,7 +99,7 @@ for i = 1:length(trainLengthRange)
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	plot(stats_st, 'k')
 end
 

@@ -35,6 +35,10 @@ function numFolds = HowManyFolds(groupLabels,numClasses)
 % this program. If not, see <http://www.gnu.org/licenses/>.
 % ------------------------------------------------------------------------------
 
+if iscategorical(groupLabels)
+    groupLabels = removecats(groupLabels); % only classes with members count
+end
+
 if nargin < 2
     if iscategorical(groupLabels)
         numClasses = length(categories(groupLabels));

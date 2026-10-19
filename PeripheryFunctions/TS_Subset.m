@@ -13,7 +13,9 @@ function [TS_DataMat,TimeSeries,Operations] = TS_Subset(whatData,ts_ids_keep,op_
 % outputFileName, the filename to save the hctsa subset (if doSave==1).
 %
 %---OUTPUTS:
-% TS_DataMat, TimeSeries, Operations: the subset of the hctsa dataset.
+% TS_DataMat, TimeSeries, Operations: the subset of the hctsa dataset (group labels
+% are kept, without any categories that have no members in the subset).
+% An error is thrown if none of the specified IDs are in the dataset.
 % (if doSave==true): the full subset of the hctsa dataset saved to file.
 %
 %---EXAMPLE USAGE:
@@ -73,12 +75,10 @@ end
 % unchanged -- a subset is a faithful slice of the source, so whatever coding
 % the source uses for special/error cells (NaN from TS_Compute, or a legacy
 % literal 0) is carried across as-is. The returned TS_DataMat is NaN-ified at
-% the end for consistency with TS_LoadData (matching this function's historical
-% return behaviour).
+% the end for consistency with TS_LoadData.
 if isstruct(whatData)
     % Pre-loaded dataset (e.g. whatData = load('HCTSA.mat')):
     S = whatData;
-    whatDataFile = '';
     if doSave && nargin < 5
         error(['TS_Subset: provide an outputFileName when subsetting a ' ...
                'pre-loaded struct with doSave=true.']);
@@ -135,6 +135,13 @@ i_keep.TimeSeries = MatchMe(S.TimeSeries.ID,ts_ids_keep);
 %--Match to Operation IDs:
 i_keep.Operations = MatchMe(S.Operations.ID,op_ids_keep);
 
+if ~any(i_keep.TimeSeries)
+    error('None of the specified time series IDs were found in the dataset');
+end
+if ~any(i_keep.Operations)
+    error('None of the specified operation IDs were found in the dataset');
+end
+
 TimeSeries = S.TimeSeries(i_keep.TimeSeries,:);
 Operations = S.Operations(i_keep.Operations,:);
 
@@ -149,10 +156,10 @@ TS_DataMat = S.TS_DataMat; % raw: special/error cells carried through unchanged
 fprintf('The hctsa dataset now contains %u -> %u time series and %u -> %u operations.\n',...
             numTimeSeries,height(TimeSeries),numOperations,height(Operations))
 
-% Remove group information because this will no longer be valid for sure
-if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames)
-    TimeSeries(:,'Group') = [];
-    fprintf('Warning: group information removed -- regenerate for subset data using TS_LabelGroups\n')
+% Keep group labels, but drop any group categories that no longer have members:
+if ~isempty(ts_ids_keep) && ismember('Group',TimeSeries.Properties.VariableNames) && ...
+                                                iscategorical(TimeSeries.Group)
+    TimeSeries.Group = removecats(TimeSeries.Group);
 end
 
 if doSave

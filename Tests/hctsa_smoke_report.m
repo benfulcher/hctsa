@@ -42,7 +42,7 @@ for i = 1:numSeries
     fprintf(1, '[%u/%u] %s (N = %u)...', i, numSeries, names{i}, length(series{i}));
     tic
     [D(i,:), T(i,:), Q(i,:)] = TS_CalculateFeatureVector(series{i}, false, Operations, MasterOperations, true, 'fast');
-    fprintf(1, ' %.1f s, %u errors.\n', toc, sum(Q(i,:) == 1));
+    fprintf(1, ' %.1f s, %u errors.\n', toc, nnz(Q(i,:) == 1));
 end
 codeOf = @(mid) MasterOperations.Code{MasterOperations.ID == mid};
 

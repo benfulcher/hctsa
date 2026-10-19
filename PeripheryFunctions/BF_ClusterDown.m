@@ -11,12 +11,14 @@ function [distMat_cl,cluster_Groupi,ord,handles] = BF_ClusterDown(distMat,vararg
 % 'objectLabels', labels for axes
 % 'whatDistance', the type of distance metric used:
 %        (i) 'corr' (default): provide 1-R, where R is correlation coefficient
-%        (ii) 'abscorr': provide correlation distances, 1-R, but clustering is
-%                        done on abscorr distances (sign of R is ignored), and
+%                        (also 'corr_fast'); clustering is done on these distances, and
 %                        correlations, R, are plotted
+%        (ii) 'abscorr': provide correlation distances, 1-R, but clustering is
+%                        done on abscorr distances, 1-|R| (sign of R is ignored), and
+%                        absolute correlations, |R|, are plotted
 %        (iii) 'abscorr_ii': provide correlation distances, 1-R, but clustering
 %                        is done on abscorr distances (sign of R is ignored), and
-%                        absolute correlations, |R|, are plotted
+%                        correlations, R, are plotted
 %        (iv) 'general': provide any distance matrix, plots the distance matrix
 % 'linkageMeth', the linkage method to use (for Matlab's linkage function)
 %
@@ -107,6 +109,11 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 [distVec,links,distVec0,numItems] = BF_DoLinkage(distMat,whatDistance,linkageMeth);
 
+% Use the square matrix form of the distances from here on:
+if any(size(distMat)==1)
+    distMat = squareform(distMat);
+end
+
 % ------------------------------------------------------------------------------
 %% Compute dendrogram
 % ------------------------------------------------------------------------------
@@ -141,8 +148,13 @@ cluster_Groupi = cell(numClusters,1);
 for j = 1:numClusters
     cluster_Groupi{j} = find(T==j);
     if sum(T==j) > 1
-        % Sort by increasing sum of distances to other members of the cluster
-        [~,ix] = sort(sum(distMat(cluster_Groupi{j},cluster_Groupi{j})),'ascend');
+        % Sort by increasing sum of distances to other members of the cluster,
+        % using the distances that were clustered on (|R| for the abscorr options)
+        distMembers = distMat(cluster_Groupi{j},cluster_Groupi{j});
+        if ismember(whatDistance,{'abscorr','abscorr_ii'})
+            distMembers = 1 - abs(1 - distMembers);
+        end
+        [~,ix] = sort(sum(distMembers),'ascend');
         cluster_Groupi{j} = cluster_Groupi{j}(ix);
     end
 end
@@ -219,10 +231,10 @@ ax2.XTick = [];
 % Add a color bar:
 cB = colorbar('southoutside');
 switch whatDistance
-case {'corr','abscorr_ii'}
-    cB.Label.String = 'Spearman correlation, \rho';
+case {'corr','abscorr_ii','corr_fast'}
+    cB.Label.String = 'Correlation, \rho';
 case 'abscorr'
-    cB.Label.String = 'Magnitude of Spearman correlation, |\rho|';
+    cB.Label.String = 'Magnitude of correlation, |\rho|';
 case 'general'
     cB.Label.String = 'distance';
 end

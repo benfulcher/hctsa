@@ -147,10 +147,10 @@ for i = 1:length(tau)
 	% (Mxy - Mx - My + 1)/(2n) nats, where the M are the numbers of *occupied*
 	% joint and marginal bins and n is the sample size. For 10 bins that is
 	% about 81/(2n): +0.41 nats at n=100 against +0.013 at n=3200. Since the
-	% true AMI of an independent series is zero, the whole measured value was
-	% this bias, decaying as 1/n -- i.e. the field tracked time-series length
-	% rather than any property of the data. Subtracting the correction removes
-	% the leading 1/n term.
+	% true AMI of an independent series is zero, the whole uncorrected value is
+	% this bias, decaying as 1/n -- i.e., it tracks time-series length rather
+	% than any property of the data. Subtracting the correction removes the
+	% leading 1/n term.
 	%
 	% The result is deliberately not clamped at zero: for genuinely independent
 	% data the corrected estimate should scatter symmetrically about 0, whereas
@@ -162,7 +162,7 @@ for i = 1:length(tau)
 	amis(i) = amis(i) - (Mxy - Mx - My + 1) / (2 * nSamples);
 end
 
-if length(tau) == 1
+if isscalar(tau)
 	out = amis;
 else
 	for i = 1:length(tau)

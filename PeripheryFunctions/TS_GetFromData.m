@@ -6,11 +6,17 @@ function result = TS_GetFromData(dataSource,dataField)
 % dataSource: either a .mat filename or a structure generated from loading an
 %               HCTSA file, e.g.,
 %               dataSource = load('HCTSA.mat');
+%               (the shorthands 'raw', 'loc', 'norm', and 'cl' are also accepted,
+%               cf. TS_LoadData)
 % dataField: the variable to extract
 %
 %---OUTPUTS:
 % result: the variable extracted from either the file or structure (depending
-%           on the type of dataSource)
+%           on the type of dataSource). Empty if the variable is not present.
+%           An error is thrown if the file does not exist.
+%
+% The placeholder returned by TS_LoadData for structure inputs,
+% '--INPUT_STRUCTURE--', has no file to read from and always gives empty.
 %
 %---EXAMPLE USAGE:
 % MasterOperations = TS_GetFromData('HCTSA_EEGDataset.mat','MasterOperations');
@@ -63,20 +69,22 @@ elseif ischar(dataSource)
         dataSource = 'HCTSA_N.mat';
     end
 
-    try
-        loadAgain = load(dataSource,dataField);
-        result = loadAgain.(dataField);
-    catch
+    if strcmp(dataSource,'--INPUT_STRUCTURE--')
+        % Name given by TS_LoadData to a pre-loaded structure: nothing to read
         result = [];
+    else
+        if ~exist(dataSource,'file')
+            error('%s not found',dataSource);
+        end
+        % Only load the variable if it is in the file (avoids load's warning)
+        fileVarsStruct = whos('-file',dataSource);
+        if ismember(dataField,{fileVarsStruct.name})
+            loadAgain = load(dataSource,dataField);
+            result = loadAgain.(dataField);
+        else
+            result = [];
+        end
     end
-    % fileVarsStruct = whos('-file',dataSource);
-    % fileVars = {fileVarsStruct.name};
-    % if ismember(dataField,fileVars)
-    %     loadAgain = load(dataSource,dataField);
-    %     result = loadAgain.(dataField);
-    % else
-    %     result = [];
-    % end
 else
     error('Unknown data source type: %s',class(dataSource));
 end

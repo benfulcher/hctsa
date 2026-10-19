@@ -72,8 +72,7 @@ if nargin < 2 || isempty(segmentHow)
 	segmentHow = 'num'; % a specified number of segments
 end
 % (l's default must be set BEFORE the 'num' branch below converts it to a segment
-% length -- that branch reads l, so with nargin < 3 it previously errored on an
-% undefined variable rather than using the documented default.)
+% length, since that branch reads l.)
 if nargin < 3 || isempty(l)
 	switch segmentHow
 		case 'num'

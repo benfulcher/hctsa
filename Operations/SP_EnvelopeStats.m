@@ -22,11 +22,11 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 %
 % Baseline for Gaussian noise: the analytic signal of a stationary Gaussian
 % process is complex Gaussian, so its envelope is Rayleigh distributed:
-% CV = sqrt(4/pi - 1) = 0.5227, skewness 0.6311, kurtosis 3.2451 (checked
-% numerically on white noise for the full-band fields; the full-band skewness is
-% not returned, as it is redundant with the kurtosis). Values of the CV below
-% this indicate an envelope steadier than noise (e.g., a sinusoid in noise follows
-% a Rice distribution), and above it an envelope more modulated than noise.
+% CV = sqrt(4/pi - 1) = 0.5227, skewness 0.6311, kurtosis 3.2451 (the full-band
+% skewness is not returned: it is largely redundant with the kurtosis). Values of
+% the CV below this indicate an envelope steadier than noise (e.g., a sinusoid in
+% noise follows a Rice distribution), and above it an envelope more modulated than
+% noise.
 %
 % To limit edge effects (the FFT filter is circular, so the series ends wrap
 % around), trimFrac of the samples are dropped from each end of the envelope and
@@ -81,17 +81,15 @@ function out = SP_EnvelopeStats(y, powerFrac, trimFrac)
 % The dominant band is the narrowest window around the largest periodogram peak
 % holding half the power (by default), so for a narrowband oscillation it follows the
 % width of the spectral peak and dom_tau and dom_ifspread scale with the
-% sampling rate like full_tau (decimating by 2 and 4 gave dom_tau ratios of
-% about 1/2 and 1/4 and dom_ifspread ratios of 2 and 4, in simulation). A peak
-% narrower than the frequency resolution (a sinusoid in noise, a random walk)
-% gives a band of the 2-bin minimum, so dom_tau then grows in proportion to N. For
-% broadband noise the band is a large part of the spectrum, so dom_tau is only a few
-% samples.
+% sampling rate like full_tau. A peak narrower than the frequency resolution (a
+% sinusoid in noise, a random walk) gives a band of the 2-bin minimum, so dom_tau
+% then grows in proportion to N. For broadband noise the band is a large part of
+% the spectrum, so dom_tau is only a few samples.
 %
-% Also computed during development but not kept, as redundant: the lag-1
-% envelope autocorrelation (r = 0.95 with the 1/e timescale for the full band;
-% near 1 for every series for a narrow band), and the instantaneous-frequency
-% spread relative to its median (r = 0.92 with SP_PhaseFluctuationScaling's meanFreq).
+% Two further candidates are not returned, as largely redundant with existing
+% fields: the lag-1 envelope autocorrelation (with the 1/e timescale) and the
+% instantaneous-frequency spread relative to its median (with
+% SP_PhaseFluctuationScaling's meanFreq).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -16,7 +16,7 @@ function p = MD_PolVar(x, d, D)
 %
 % Although the original measure used raw thresholds, d, on RR interval sequences
 % (measured in milliseconds), this code can be applied to general z-scored time
-% series. So now d is not the time difference in milliseconds, but in units of
+% series. So here d is not the time difference in milliseconds, but in units of
 % std.
 %
 % The measure was originally applied to sequences of RR intervals and this code

@@ -1,4 +1,4 @@
-function out = NL_Dimensions(y, numBins, embedParams)
+function out = NL_Dimensions(y, numBins, embedParams, thwin)
 % NL_Dimensions   Box-counting and correlation dimension of the delay embedding, from straight-line fits to log-log curves.
 %
 % Estimates the box-counting (D0) and correlation (D2) dimension of a
@@ -8,14 +8,14 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % gives ln N(epsilon), the log of the number of boxes of side epsilon that
 % contain points. For D2, TISEAN's 'd2' (the Grassberger-Procaccia pair-counting
 % correlation sum) gives ln C(r), the log of the fraction of pairs of embedded
-% points closer than r. Each is computed at numBins scales. The slope of
+% points closer than r (pairs closer in time than the Theiler window, thwin, are
+% not counted). Each is computed at numBins scales. The slope of
 % ln N against ln(epsilon) estimates -D0 and the slope of ln C against ln(r)
 % estimates D2. Straight lines are fitted over all scales and over a scaling
 % range chosen by a penalized regression: its start is in the first half of
 % the scales and its end in the second half, chosen to minimize the mean
-% absolute residual minus 0.02 times the number of scales kept. This operation
-% previously used TSTOOL's 'dimensions'. The information dimension (D1) was
-% disabled in that version and has been removed.
+% absolute residual minus 0.02 times the number of scales kept. The information
+% dimension (D1) is not computed.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -23,8 +23,14 @@ function out = NL_Dimensions(y, numBins, embedParams)
 %          for d2) in each sweep (default: 50)
 % embedParams, embedding parameters to feed BF_Embed() for embedding the
 %          signal, in the form {tau,m} (tau can be a number of samples, 'ac',
-%          'ac1e' or 'mi'; see BF_GetTau; default: {'ac','fnn'}; hctsa uses
-%          {'ac1e','fnn'})
+%          'ac1e' or 'mi'; see BF_GetTau; m a number of dimensions, or 'fnn' or
+%          {'fnn',th} for false nearest neighbors at threshold th, at most
+%          floor(2*log10(N)): see BF_Embed; default: {'ac','fnn'}; hctsa uses
+%          {'ac1e',{'fnn',0.05}})
+% thwin, Theiler window for the correlation sum: pairs of embedded points at most
+%          this many samples apart are not counted, {'ac', k} for k times the first
+%          zero-crossing of the autocorrelation function, or a number of samples
+%          (see BF_TheilerWindow; default: {'ac',1})
 %
 % ---OUTPUTS: statistics of the curves, in two families with prefix bc_ (box
 % counting, ln N(epsilon)) or co_ (correlation sum, ln C(r)). In the names, k is
@@ -60,8 +66,7 @@ function out = NL_Dimensions(y, numBins, embedParams)
 % maxEps = std(y)*sqrt(M).
 %
 % Code for estimating the best scaling range is embedding-agnostic (it only
-% consumes (logr, logN) / (logr, logC) matrices) and is unchanged from the
-% TSTOOL-based version.
+% consumes (logr, logN) / (logr, logC) matrices).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -113,6 +118,16 @@ else
 	end
 end
 
+% (3) Theiler window for the correlation sum, thwin
+if nargin < 4 || isempty(thwin)
+	thwin = {'ac', 1};
+end
+thwin = BF_TheilerWindow(y, thwin);
+if isnan(thwin) % the autocorrelation function never crosses zero
+	warning('No autocorrelation zero-crossing to set the Theiler window')
+	out = NaN; return
+end
+
 % ------------------------------------------------------------------------------
 %% Resolve the embedding parameters (tau, m)
 % ------------------------------------------------------------------------------
@@ -124,8 +139,8 @@ if isnan(tau)
 end
 mopt = tm(2); % the resolved embedding dimension, possibly < 3
 
-% dimension curves are always computed for m = 1:M (M >= 3, matching the
-% original re-embed-at-3 behavior, since bc_logN(:,3) etc. are used below):
+% dimension curves are always computed for m = 1:M (M >= 3, since
+% bc_logN(:,3) etc. are used below):
 M = max(mopt, 3);
 
 filePath = BF_WriteTempFile(y);
@@ -150,7 +165,7 @@ fclose(fid);
 delete(outFilePath);
 fileLines = fileLines{1};
 
-w = strmatch('#component', fileLines);
+w = find(strncmp(fileLines, '#component', 10));
 if length(w) ~= M
 	error('TISEAN function ''boxcount'' returned an unexpected number of data blocks.');
 end
@@ -183,25 +198,21 @@ end
 % ------------------------------------------------------------------------------
 %% Run the TISEAN code, d2, for the correlation dimension (D2)
 % ------------------------------------------------------------------------------
-% "-M1,M" (a genuine range) rather than "-M<M>,<M>" works around a real bug
-% in this TISEAN build where a fixed single embedding dimension reports "0
+% "-M1,M" (a genuine range) rather than "-M<M>,<M>" works around a bug in
+% the bundled TISEAN where a fixed single embedding dimension reports "0
 % lines read" and produces no output (see NL_GPCorrSum.m):
-% Length scale, in standard deviations of y scaled by sqrt(M) (the same
-% embedding-dimension correction validated in NL_GPCorrSum.m -- a
-% pairwise distance in an M-dimensional embedding scales as std(y)*sqrt(M),
-% not std(y) alone). Unlike NL_GPCorrSum (which only ever needs one
-% target dimension and can tolerate an occasional honest NaN there), every
-% embedding dimension 1:M needs usable data here, and the highest dimension
-% M is by far the most likely to have zero pairs at TISEAN's own default
-% minimum epsilon (data interval/1000) -- confirmed empirically: for
-% structureless noise embedded at a representative M=7, TISEAN's own
-% default left 25/50 bins with zero pairs (i.e. ln(C(r)) = -Inf) at that
-% dimension, and even minEps = maxEps/100 or /30 still left 25 or 16/50
-% zero; minEps = maxEps/10 was the first tested ratio to leave zero:
+% Length scale, in standard deviations of y scaled by sqrt(M) (as in
+% NL_GPCorrSum.m -- a pairwise distance in an M-dimensional embedding
+% scales as std(y)*sqrt(M), not std(y) alone). Unlike NL_GPCorrSum (which
+% only ever needs one target dimension), every embedding dimension 1:M
+% needs usable data here, and the highest dimension M is the most likely
+% to have bins with zero pairs (ln(C(r)) = -Inf) at small radii, e.g. at
+% TISEAN's own default minimum epsilon (data interval/1000) for
+% structureless noise. The smallest radius is therefore set to maxEps/10:
 maxEps = std(y) * sqrt(M);
 minEps = maxEps / 10;
-[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t0 -N0 -r%g -R%g -#%u %s', ...
-						  tau, M, minEps, maxEps, numBins, filePath));
+[~, res] = BF_TiseanSystem(sprintf('d2 -d%u -M1,%u -t%u -N0 -r%g -R%g -#%u %s', ...
+						  tau, M, thwin, minEps, maxEps, numBins, filePath));
 if isempty(res) || ~isempty(regexp(res, 'command not found', 'once'))
 	if exist([filePath '.c2'], 'file'), delete([filePath '.c2']); end
 	error('Call to TISEAN function ''d2'' failed.');
@@ -219,7 +230,7 @@ fclose(fid);
 delete([filePath '.c2']);
 fileLines = fileLines{1};
 
-w = strmatch('#dim=', fileLines);
+w = find(strncmp(fileLines, '#dim=', 5));
 if length(w) ~= M
 	error('TISEAN function ''d2'' returned an unexpected number of data blocks.');
 end
@@ -251,7 +262,7 @@ end
 
 % A zero-pair bin (Cr = 0, so log(Cr) = -Inf) would silently poison every
 % downstream mean/min/range/polyfit statistic that touches it. The minEps
-% floor above was tuned to avoid this in practice (see comment there), but
+% floor above is set to avoid this in practice (see comment there), but
 % as a safety net for configurations it doesn't fully cover, treat a
 % residual non-finite value as an honest "not enough data to estimate a
 % correlation-dimension curve at every requested embedding dimension" and
@@ -262,7 +273,7 @@ if any(~isfinite(bc_logN(:))) || any(~isfinite(co_logC(:)))
 end
 
 if doPlot
-	plot(bc_logr, bc_logN, 'o-')
+	plot(bc_logr, bc_logN, 'o-') %#ok<UNRCH>
 	input('BC')
 	plot(co_logr, co_logC, 'o-')
 	input('CO')
@@ -292,29 +303,19 @@ out = SUB_mch(co_logr, co_logC, 'co', out);
 % ... and how good is the fit over this range?
 % Use SUB_ScalingRange
 
-% Box counting dimension, m = 1
-out = SUB_ScalingRange(bc_logr, bc_logN(:, 1), 'scr_bc_m1', out);
+% The best scaling range is searched once per embedding dimension (column)
+% and reused for the m = 1, 2, 3 and mopt outputs and for SUB_bestm.
+bc_sr = SUB_ScalingSearch(bc_logr, bc_logN);
+co_sr = SUB_ScalingSearch(co_logr, co_logC);
 
-% Box counting dimension m = 2
-out = SUB_ScalingRange(bc_logr, bc_logN(:, 2), 'scr_bc_m2', out);
-
-% Box counting dimension m = 3
-out = SUB_ScalingRange(bc_logr, bc_logN(:, 3), 'scr_bc_m3', out);
-
-% Box counting dimension m = chosen/given
-out = SUB_ScalingRange(bc_logr, bc_logN(:, mopt), 'scr_bc_mopt', out);
-
-% Correlation dimension, m = 1
-out = SUB_ScalingRange(co_logr, co_logC(:, 1), 'scr_co_m1', out);
-
-% Correlation dimension m = 2
-out = SUB_ScalingRange(co_logr, co_logC(:, 2), 'scr_co_m2', out);
-
-% Correlation dimension m = 3
-out = SUB_ScalingRange(co_logr, co_logC(:, 3), 'scr_co_m3', out);
-
-% Correlation dimension m = chosen/given
-out = SUB_ScalingRange(co_logr, co_logC(:, mopt), 'scr_co_mopt', out);
+out = SUB_ScalingRange(bc_sr, 1, 'scr_bc_m1', out);
+out = SUB_ScalingRange(bc_sr, 2, 'scr_bc_m2', out);
+out = SUB_ScalingRange(bc_sr, 3, 'scr_bc_m3', out);
+out = SUB_ScalingRange(bc_sr, mopt, 'scr_bc_mopt', out);
+out = SUB_ScalingRange(co_sr, 1, 'scr_co_m1', out);
+out = SUB_ScalingRange(co_sr, 2, 'scr_co_m2', out);
+out = SUB_ScalingRange(co_sr, 3, 'scr_co_m3', out);
+out = SUB_ScalingRange(co_sr, mopt, 'scr_co_mopt', out);
 
 % ------------------------------------------------------------------------------
 %% What m gives best fit?
@@ -322,10 +323,10 @@ out = SUB_ScalingRange(co_logr, co_logC(:, mopt), 'scr_co_mopt', out);
 % Use SUB_bestm
 
 % Box counting dimension
-out = SUB_bestm(bc_logr, bc_logN, 'bc', out);
+out = SUB_bestm(bc_sr, 'bc', out);
 
 % Correlation dimension
-out = SUB_bestm(co_logr, co_logC, 'co', out);
+out = SUB_bestm(co_sr, 'co', out);
 
 % ------------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
@@ -358,11 +359,7 @@ function out = SUB_mch(logr, logN, prefix, out)
 	out.([prefix, '_meandiff']) = mean([mean(logN(:, 2)) - mean(logN(:, 1)), mean(logN(:, 3)) - mean(logN(:, 2))]);
 
 	% (v) slopes and goodness of fit across whole r range
-	% logr/logN are both columns here (this used to rely on TSTOOL's
-	% spacing() returning logr as a row, transposing logN(:,k) to match; with
-	% logr now a column too, that stray transpose inside subsublinfit turned
-	% "y - pfit" into an N-by-N broadcast instead of an N-by-1 residual, so
-	% it's dropped):
+	% logr/logN are both columns here (so the residual y - pfit is N-by-1):
 	[out.([prefix, '_lfitm1']), out.([prefix, '_lfitb1']), out.([prefix, '_lfitmeansqdev1'])] = subsublinfit(logr, logN(:, 1));
 	[out.([prefix, '_lfitm2']), out.([prefix, '_lfitb2']), out.([prefix, '_lfitmeansqdev2'])] = subsublinfit(logr, logN(:, 2));
 	[out.([prefix, '_lfitm3']), out.([prefix, '_lfitb3']), out.([prefix, '_lfitmeansqdev3'])] = subsublinfit(logr, logN(:, 3));
@@ -379,78 +376,24 @@ function out = SUB_mch(logr, logN, prefix, out)
 end
 
 % ------------------------------------------------------------------------------
-function out = SUB_ScalingRange(logr, logN, prefix, out)
-	% determines the scaling range in r for some m
-	% we remove points from either extreme in r until minimize some
-	% error measure
-	% two dimensional optimization: over starting point and ending
-	% point.
-
+function sr = SUB_ScalingSearch(logr, logNN)
+	% determines the best scaling range in r for each column (embedding dimension)
+	% of logNN: we remove points from either extreme in r until minimize some
+	% error measure, a two dimensional optimization over starting point and
+	% ending point.
+	gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
 	l = length(logr);
 	stptr = 1:floor(l / 2) - 1; % must be in the first half (not necessarily, but for here)
 	endptr = ceil(l / 2) + 1:l; % must be in second half (not necessarily, but for here)
-	mybad = zeros(length(stptr), length(endptr));
-	for i = 1:length(stptr)
-		for j = 1:length(endptr)
-			% logr/logN both columns here -- see SUB_mch's comment on the
-			% same stray-transpose issue:
-			mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
-		end
-	end
-	[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range (first of any ties)
-	%         plot(logr,logN,'o-b'); hold on; plot(logr(stptr(a):endptr(b)),logN(stptr(a):endptr(b)),'o-r');
-	%         hold off
-	%         disp(['keep from ' num2str(stptr(a)) ' to ' num2str(endptr(b))])
-
-	out.([prefix, '_logrmin']) = logr(stptr(a)); % minimum of scaling range
-	out.([prefix, '_logrmax']) = logr(endptr(b)); % maximum of scaling range
-	out.([prefix, '_logrrange']) = logr(endptr(b)) - logr(stptr(a)); % range of scaling... range
-	out.([prefix, '_pgone']) = (stptr(a) - 1 + l - endptr(b)) / length(logr); % number of points removed in process
-	% of choosing the optimum scaling range
-
-	% Do the optimum fit again
-	x = logr(stptr(a):endptr(b));
-	y = logN(stptr(a):endptr(b));
-	p = polyfit(x, y, 1);
-	pfit = p(1) * x + p(2);
-	res = pfit - y;
-	out.([prefix, '_meanabsres']) = mean(abs(res));
-	out.([prefix, '_meansqres']) = mean(res.^2);
-	out.([prefix, '_scaling_exp']) = p(1);
-	out.([prefix, '_scaling_int']) = p(2);
-	out.([prefix, '_minbad']) = min(min(mybad));
-
-	function badness = lfitbadness(x, y)
-		gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
-		p = polyfit(x, y, 1);
-		pfit = p(1) * x + p(2);
-		res = pfit - y;
-		badness = mean(abs(res)) - gamma * length(x); % want to still maximize length(x)
-	end
-end
-
-% ------------------------------------------------------------------------------
-function out = SUB_bestm(logr, logNN, prefix, out)
-	% logNN is a matrix... logN is a vector for a given m
-	% determines the scaling range in r for some m
-	% we remove points from either extreme in r until minimize some
-	% error measure
-	% two dimensional optimization: over starting point and ending
-	% point.
-
-	store_scalingexps = zeros(size(logNN, 2), 1);
-	store_meansqres = zeros(size(logNN, 2), 1);
-	for k = 1:size(logNN, 2);
-		logN = logNN(:, k); % take this element
-
-		l = length(logr);
-		stptr = 1:floor(l / 2) - 1; % must be in the first half (not necessarily, but for here)
-		endptr = ceil(l / 2) + 1:l; % must be in second half (not necessarily, but for here)
+	K = size(logNN, 2);
+	sr = struct('logr', logr, 'stptr', stptr, 'endptr', endptr, 'a', zeros(K, 1), 'b', zeros(K, 1), ...
+				'minbad', zeros(K, 1), 'p', zeros(K, 2), 'meanabsres', zeros(K, 1), 'meansqres', zeros(K, 1));
+	for k = 1:K
+		logN = logNN(:, k);
 		mybad = zeros(length(stptr), length(endptr));
 		for i = 1:length(stptr)
 			for j = 1:length(endptr)
-				% logr/logN both columns here -- see SUB_mch's comment on the
-				% same stray-transpose issue:
+				% logr/logN both columns here (see SUB_mch):
 				mybad(i, j) = lfitbadness(logr(stptr(i):endptr(j)), logN(stptr(i):endptr(j)));
 			end
 		end
@@ -462,28 +405,45 @@ function out = SUB_bestm(logr, logNN, prefix, out)
 		p = polyfit(x, y, 1);
 		pfit = p(1) * x + p(2);
 		res = pfit - y;
-		% subout.meanabsres = mean(abs(res));
-		% subout.meansqres = mean(res.^2);
-		% subout.scaling_exp = p(1);
-		% subout.scaling_int = p(2);
-		% subout.minbad = min(min(mybad));
-
-		store_scalingexps(k) = p(1);
-		store_meansqres(k) = mean(res.^2);
+		sr.a(k) = a; sr.b(k) = b; sr.minbad(k) = min(min(mybad)); sr.p(k, :) = p;
+		sr.meanabsres(k) = mean(abs(res)); sr.meansqres(k) = mean(res.^2);
 	end
 
-	out.([prefix, '_minscalingexp']) = min(store_scalingexps);
-	out.([prefix, '_meanscalingexp']) = mean(store_scalingexps);
-	out.([prefix, '_maxscalingexp']) = max(store_scalingexps);
-	out.([prefix, '_mbestfit']) = find(store_meansqres == min(store_meansqres), 1, 'first');
-
 	function badness = lfitbadness(x, y)
-		gamma = 0.02; % reguralization parameter gamma selected empirically, could be tweaked in future work
 		p = polyfit(x, y, 1);
 		pfit = p(1) * x + p(2);
 		res = pfit - y;
 		badness = mean(abs(res)) - gamma * length(x); % want to still maximize length(x)
 	end
+end
+
+% ------------------------------------------------------------------------------
+function out = SUB_ScalingRange(sr, k, prefix, out)
+	% scaling-range outputs for embedding dimension k, from SUB_ScalingSearch
+	logr = sr.logr; l = length(logr);
+	a = sr.a(k); b = sr.b(k);
+	st = sr.stptr(a); en = sr.endptr(b);
+	out.([prefix, '_logrmin']) = logr(st); % minimum of scaling range
+	out.([prefix, '_logrmax']) = logr(en); % maximum of scaling range
+	out.([prefix, '_logrrange']) = logr(en) - logr(st); % range of scaling... range
+	out.([prefix, '_pgone']) = (st - 1 + l - en) / length(logr); % number of points removed in process
+	% of choosing the optimum scaling range
+	out.([prefix, '_meanabsres']) = sr.meanabsres(k);
+	out.([prefix, '_meansqres']) = sr.meansqres(k);
+	out.([prefix, '_scaling_exp']) = sr.p(k, 1);
+	out.([prefix, '_scaling_int']) = sr.p(k, 2);
+	out.([prefix, '_minbad']) = sr.minbad(k);
+end
+
+% ------------------------------------------------------------------------------
+function out = SUB_bestm(sr, prefix, out)
+	% summarizes the best scaling-range fits over embedding dimensions
+	store_scalingexps = sr.p(:, 1);
+	store_meansqres = sr.meansqres;
+	out.([prefix, '_minscalingexp']) = min(store_scalingexps);
+	out.([prefix, '_meanscalingexp']) = mean(store_scalingexps);
+	out.([prefix, '_maxscalingexp']) = max(store_scalingexps);
+	out.([prefix, '_mbestfit']) = find(store_meansqres == min(store_meansqres), 1, 'first');
 end
 
 end

@@ -172,28 +172,21 @@ theVariables{2} = loadedData{2}.TimeSeries.Properties.VariableNames;
 %-------------------------------------------------------------------------------
 % Check the git data
 %-------------------------------------------------------------------------------
-hasGit = cellfun(@(x)ismember('gitInfo',x),theVariables);
-if sum(hasGit)==0
+hasGit = cellfun(@(x) isfield(x,'gitInfo') && isfield(x.gitInfo,'hash'), loadedData);
+if ~any(hasGit)
     % git info not present in either; keep an empty structure:
     gitInfo = struct();
-elseif sum(hasGit)==1
+elseif ~all(hasGit)
     % Git only stored in one of the HCTSA files
-    warning(sprintf(['!!!!!!!!!!%s contains git version info, but %s does not.\n',...
-        'If hctsa versions are inconsistent, results may not be comparable!!!!!!!!!!'],...
-                HCTSAs{find(hasGit)},HCTSAs{find(~hasGit)}))
-    gitInfo = struct(); % inconsistent so remove gitInfo from the combination...
+    warning(['%s contains git version info, but %s does not.\n',...
+        'If hctsa versions are inconsistent, results may not be comparable.'],...
+                HCTSAs{hasGit},HCTSAs{~hasGit})
+    gitInfo = struct(); % inconsistent so remove gitInfo from the combination
 elseif ~strcmp(loadedData{1}.gitInfo.hash,loadedData{2}.gitInfo.hash)
-    % Only check the hashes for consistency:
-    warning('Git versions are inconsistent between the two HCTSA files.');
-    warning(sprintf('%s: %s',HCTSA_1,loadedData{1}.gitInfo.hash));
-    warning(sprintf('%s: %s',HCTSA_2,loadedData{2}.gitInfo.hash));
-    reply = input(['GIT VERSIONS ARE INCONSISTENT; DANGEROUS TO COMBINE.\n',...
-        'IF YOU ARE SURE FEATURES ARE COMPUTED IDENTICALLY BETWEEN THE VERSIONS, TYPE ''DANGER'' TO CONTINUE'],'s');
-    if ~strcmp(reply,'DANGER')
-        fprintf(1,'Check the two hctsa versions and recompute features with consistent versions if necessary...\n');
-        return
-    end
-    fprintf(1,'DANGER-ALERT: We''re faking it by assigning git versioning information from %s\n',HCTSA_1);
+    % Inconsistent hashes: keep the first file's git info, with a warning
+    warning(['hctsa git versions are inconsistent between the two HCTSA files; ' ...
+        'results may not be comparable:\n  %s: %s\n  %s: %s'], ...
+        HCTSA_1,loadedData{1}.gitInfo.hash,HCTSA_2,loadedData{2}.gitInfo.hash);
     gitInfo = loadedData{1}.gitInfo;
 else
     % Consistent git hash in both files
@@ -288,12 +281,11 @@ else
     %-------------------------------------------------------------------------------
     % Check for time series duplicates
     %-------------------------------------------------------------------------------
-    didTrim = false; % whether you remove time series (that appear in both hctsa data files)
-
     if compare_tsids % TimeSeries IDs are comparable between the two files (i.e., produced by the same TS_Init run)
         fprintf(1,'Be careful, we are assuming that time series IDs were assigned from a *single* TS_Init\n')
 
         % Check for duplicate IDs:
+        numBeforeTrim = height(TimeSeries);
         uniqueTsids = unique(TimeSeries.ID); % sorted
         % Index the FIRST occurrence of each ID (ismember's second output is the
         % lowest matching index) so that HCTSA_1 takes precedence over HCTSA_2
@@ -303,27 +295,26 @@ else
         TimeSeries = TimeSeries(ix_ts,:);
 
         % Check whether trimming just occurred:
-        if length(uniqueTsids) < height(TimeSeries)
+        if length(uniqueTsids) < numBeforeTrim
             fprintf(1,'We''re assuming that TimeSeries IDs are equivalent between the two input files\n');
             fprintf(1,'We need to trim duplicate time series (with the same IDs)\n');
             fprintf(1,['(NB: This will NOT be appropriate if combinining time series from' ...
                     ' different databases, or produced using separate TS_Init commands)\n']);
             fprintf(1,'Trimming %u duplicate time series to a total of %u\n', ...
-                        height(TimeSeries)-length(uniqueTsids),length(uniqueTsids));
-            didTrim = true;
+                        numBeforeTrim-length(uniqueTsids),length(uniqueTsids));
         else
             fprintf(1,'All time series were distinct, we have a total of %u.\n',...
                         height(TimeSeries));
         end
     else
         % Check that time series names are unique, and trim if not:
+        numBeforeTrim = height(TimeSeries);
         [uniqueTimeSeriesNames,ix_ts] = unique(TimeSeries.Name,'stable');
         TimeSeries = TimeSeries(ix_ts,:);
         numUniqueTimeSeries = length(uniqueTimeSeriesNames);
-        if numUniqueTimeSeries < height(TimeSeries)
+        if numUniqueTimeSeries < numBeforeTrim
             warning('%u duplicate time series names present in combined dataset -- removed',...
-                                    height(TimeSeries) - numUniqueTimeSeries);
-            didTrim = true; % will trim the data matrix and other such matrices with ix_ts later
+                                    numBeforeTrim - numUniqueTimeSeries);
         end
 
         % Now see if there are duplicate IDs (meaning that we need to reindex):

@@ -40,10 +40,14 @@ function testBruteForceDistributions(testCase)
 		end
 	end
 	Prep = Prep / size(x, 1);
-	for a = 1:N, for b = 1:N, for c = 1:N
-		p = BF_OrdinalPatternRank(y([a, b, c])');
-		Pinf(p) = Pinf(p) + 1 / N^3;
-	end, end, end
+	for a = 1:N
+		for b = 1:N
+			for c = 1:N
+				p = BF_OrdinalPatternRank(y([a, b, c])');
+				Pinf(p) = Pinf(p) + 1 / N^3;
+			end
+		end
+	end
 	H = @(P) -sum(P(P > 0) .* log2(P(P > 0))) / log2(6);
 	o = EN_RandomizeOrdinal(y);
 	verifyEqual(testCase, o.normPermEnRep1, H(Prep), 'AbsTol', 1e-12);

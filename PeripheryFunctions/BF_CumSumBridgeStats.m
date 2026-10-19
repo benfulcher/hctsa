@@ -62,7 +62,7 @@ out.meanYC = mean(yC);
 %% Ordinary least-squares linear fit to the cumsum
 %-------------------------------------------------------------------------------
 coeffsOLS = polyfit(t, yC, 1);
-out.gradient = coeffsOLS(1); % ~ std(yC) too (r > 0.99 empirically); kept as the interpretable one
+out.gradient = coeffsOLS(1); % closely related to std(yC); kept as the interpretable one
 out.intercept = coeffsOLS(2);
 residOLS = yC - polyval(coeffsOLS, t);
 
@@ -90,7 +90,7 @@ out.stdBridge = std(bridge);
 warning('off', 'stats:statrobustfit:IterationLimit')
 [robCoeffs, robStats] = robustfit(t, yC);
 warning('on', 'stats:statrobustfit:IterationLimit')
-robustGradient = robCoeffs(2); % not output directly: r > 0.98 with out.gradient
+robustGradient = robCoeffs(2); % not output directly; used in gradientDiffSE below
 if robStats.se(2) > 0
 	out.gradientDiffSE = (out.gradient - robustGradient) / robStats.se(2);
 else
@@ -113,19 +113,15 @@ end
 %% which is ~chi-square(1) (mean 1) under the null; its trend over t asks a
 %% different question to maxBridge's peak-amplitude test -- whether the excess
 %% wandering grows/shrinks systematically across the series, e.g. for a
-%% gradually ramping variance (validated on synthetic ramping-variance vs.
-%% null series: trend ~0.45 vs ~0.01). t = Np is excluded: bridge(Np) = 0
-%% exactly by construction, and nullVar(Np) = 0, giving an uninformative 0/0.
+%% gradually ramping variance. t = Np is excluded: bridge(Np) = 0 exactly by
+%% construction, and nullVar(Np) = 0, giving an uninformative 0/0.
 %%
-%% A companion mean-level statistic (mean(stdResid), nominally ~1 under the
-%% null) and a differenced-AC1 statistic were also tried and dropped: the
-%% mean turned out to react strongly to genuine mean drift alone (not
-%% variance-specific -- e.g. 398 on a pure mean-ramp synthetic series with no
-%% variance change, likely redundant with maxBridge) and to have a masking
-%% problem for localized bursts (global var(p) in the denominator absorbs
-%% part of the anomaly it's meant to detect); the differenced-AC1 statistic
-%% didn't discriminate between burst-type and ramp-type variance structure
-%% in the same synthetic tests.
+%% A companion mean-level statistic (mean(stdResid)) and a differenced-AC1
+%% statistic were considered and not included: the mean level responds to genuine
+%% mean drift as well as to variance change, and is masked for localized bursts
+%% (the global var(p) in the denominator absorbs part of the anomaly it is meant
+%% to detect), while the differenced-AC1 statistic did not distinguish burst-type
+%% from ramp-type variance structure.
 %-------------------------------------------------------------------------------
 varP = var(p);
 if varP > 0 && Np > 21

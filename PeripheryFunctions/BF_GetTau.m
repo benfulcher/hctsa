@@ -33,8 +33,8 @@ function tau = BF_GetTau(y, tauRule)
 %           -0.5*log(1 - exp(-2)) (the Gaussian AMI at a correlation of 1/e).
 %   (iii) 'mi-gaussian': the first local minimum of the Gaussian AMI
 %           (= CO_FirstMin(y,'mi-gaussian')). The Gaussian AMI is a monotonic
-%           function of |ACF|, so this is not a nonlinear timescale. This was
-%           the rule used for 'mi' delays in earlier versions of hctsa.
+%           function of |ACF|, so this is not a nonlinear timescale. Use it to
+%           reproduce 'mi' delays computed with hctsa versions before v3.0.0.
 %   (iv) 'ac': the first zero crossing of the ACF (as CO_FirstCrossing(y,'ac',0,'discrete')).
 %
 %---OUTPUT:

@@ -37,6 +37,11 @@ function out = ST_MomentCorr(x, windowLength, wOverlap, mom1, mom2, whatTransfor
 % absR, the absolute value of R
 % density, the density of windows in the (mom1, mom2) plane: the number of windows
 %       divided by the area of the box bounding them, range(mom1)*range(mom2)
+%
+% ---NOTES:
+% Only full windows are used: windows start every windowLength - wOverlap samples
+% from the first sample, and a final window that would run past the end of the
+% series is not included.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -121,15 +126,11 @@ end
 % Create the windows:
 % ------------------------------------------------------------------------------
 x_buff = buffer(x, windowLength, wOverlap, 'nodelay');
-numWindows = (N / (windowLength - wOverlap)); % number of windows
-
-if size(x_buff, 2) > numWindows
-	% fprintf(1,'Should have %u columns but we have %u: removing last one',numWindows,size(x_buff,2))
-	x_buff = x_buff(:, 1:end - 1); % lose last point
-end
+numWindows = floor((N - windowLength) / (windowLength - wOverlap)) + 1; % number of full windows
+x_buff = x_buff(:, 1:max(numWindows, 0)); % keep only full windows (buffer zero-pads the last)
 pointsPerWindow = size(x_buff, 1);
 if pointsPerWindow == 1
-	error('This time series (N = %u) is too short to extract %u windows.', N, numWindows);
+	error('This time series (N = %u) is too short to extract %d windows.', N, numWindows);
 end
 
 % ok, now we have the sliding window ('buffered') signal, x_buff
@@ -144,7 +145,7 @@ out.absR = abs(R(2, 1)); % absolute value of correlation coefficient
 out.density = length(M1) / (range(M1) * range(M2)); % density of points in M1--M2 space: (number of windows) / (bounding-box area)
 
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	plot(M1, M2, '.k');
 end
 

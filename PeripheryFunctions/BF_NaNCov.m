@@ -51,9 +51,6 @@ end
 
 % ------------------------------------------------------------------------------
 
-% Number of rows and columns (should be the same):
-[~,numCol] = size(X);
-
 if any(isnan(X(:)))
     % Indicate non-NaN values:
     goodValues = single(~isnan(X));

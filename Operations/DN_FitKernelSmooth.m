@@ -2,9 +2,9 @@ function out = DN_FitKernelSmooth(x, varargin)
 % DN_FitKernelSmooth   Statistics of a kernel-smoothed distribution of the data.
 %
 % Estimates the distribution of the values with a kernel-smoothed density
-% (BF_KSDensity: a Gaussian kernel with a normal-reference bandwidth, evaluated
-% on 100 grid points from three bandwidths below the minimum to three above the
-% maximum) and returns statistics summarizing its shape: the number of peaks, the
+% (BF_KSDensity: a Gaussian kernel with Silverman's normal-reference bandwidth
+% using a robust, median-absolute-deviation scale estimate, evaluated on 100 grid
+% points from three bandwidths below the minimum to three above the maximum) and returns statistics summarizing its shape: the number of peaks, the
 % height of the highest peak, the entropy, and two measures of asymmetry about
 % the mean. Optionally, also counts the crossings of the curve through given
 % heights, measures the area under the curve where it is lower than given

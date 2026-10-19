@@ -80,7 +80,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 		tau = floor(N / 10);
 	end
 end
-if strcmp(tau, 'tau'),
+if strcmp(tau, 'tau')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)
 		out = NaN; return
@@ -90,7 +90,7 @@ if strcmp(tau, 'tau'),
 	end
 end
 % Make sure the time series is a column vector
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y';
 end
 
@@ -103,7 +103,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 % Plot the embedding:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	box('on'); hold('on')
 	plot(m(:, 1), m(:, 2), '.');
 	plot(m(1:min(200, end), 1), m(1:min(200, end), 2), 'k');
@@ -129,6 +129,7 @@ out.d_std = std(d); % Standard deviation of distances
 out.d_iqr = iqr(d); % Interquartile range of distances
 out.d_max = max(d); % Maximum distance
 out.d_min = min(d); % Minimum distance
+% (d_cv is mean over standard deviation: the reciprocal of the coefficient of variation)
 out.d_cv = mean(d) / std(d); % Coefficient of variation of distances
 
 % ------------------------------------------------------------------------------

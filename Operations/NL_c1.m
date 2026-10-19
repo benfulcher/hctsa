@@ -21,7 +21,7 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % tsep, time separation (the Theiler window, in samples); between 0 and 1 for a proportion
 %       of the time-series length (default: 0.02)
 % Nref, the number of reference points; between 0 and 1 for a proportion of the time-series
-%       length (default: 0.5). It is limited to between 500 (if N > 500) and 2500: fewer
+%       length (default: 0.5). It is limited to between 500 (if N > 500) and 1000: fewer
 %       centers make the best-scaling-range outputs depend on which points are the centers.
 %       The centers are spread evenly over the series (a fixed, deterministic choice).
 %
@@ -60,8 +60,13 @@ function out = NL_c1(y, tau, mmm, tsep, Nref)
 % valid range. Stock TISEAN also divides the summed log radii by Nref - (m-1)*tau rather than
 % by the number of reference points used, which inflates the mean log radius and biases the
 % dimension estimates low (more so with fewer reference points, higher m and longer delays);
-% the patched c1 divides by the number of reference points used. Recompile TISEAN
-% (compile_tisean) after updating.
+% the patched c1 divides by the number of reference points used. A reference point that
+% coincides with its k-th neighbor (to within 1e-12 of the range of the data; c1 works in
+% single precision, so in practice to single precision) is a repeated point: at least that
+% mass of the points sits on it, and its log distance is minus infinity. The mean log
+% distance at that mass is then not finite, so the patched c1 skips the mass (with no masses
+% left, there is no scaling range and the output is NaN, as for a periodic orbit). Recompile
+% TISEAN (compile_tisean) after updating.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -103,7 +108,7 @@ if N < 100
 	out = NaN; return
 end
 % Also freezes on constant data
-if length(unique(y)) == 1
+if isscalar(unique(y))
 	out = NaN; return
 end
 
@@ -152,7 +157,7 @@ if (Nref > 0) && (Nref <= 1)
 end
 
 Nrefmin = 500; % can't have fewer than 500 reference points (fewer gives unstable scaling ranges)
-Nrefmax = 2500; % for time reasons, don't use more than 2500 reference points
+Nrefmax = 1000; % for time reasons, don't use more than 1000 reference points
 
 if Nref > Nrefmax
 	Nref = Nrefmax;
@@ -179,7 +184,7 @@ tic
 if isempty(res)
 	if exist([filePath '.c1'], 'file'), delete([filePath '.c1']); end % remove the TISEAN file write output
 	error('Call to TISEAN method ''c1'' failed.');
-elseif strfind(res, 'dyld: Library not loaded')
+elseif contains(res, 'dyld: Library not loaded')
 	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
 elseif TISEANVerbose()
 	fprintf(1, 'TISEAN function ''c1'' took %s.\n', BF_TheTime(toc, 1));
@@ -330,7 +335,7 @@ function dimdat = SUB_readTISEANout(s, blocker, nc)
 	%                 end
 	%            end
 	%         end
-	w = strmatch(blocker, s);
+	w = find(strncmp(s, blocker, length(blocker)));
 	%         if length(w)~=maxm
 	%             disp('error reading TISEAN output'); return
 	%         end

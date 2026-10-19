@@ -3,14 +3,11 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %
 % Estimates D(q), the generalized dimension of the time-delay embedding as a
 % function of the order of the moment, from the distances of reference points to
-% their nearest neighbors. This operation previously used TSTOOL's 'fracdims',
-% whose actual computation (tstoolbox/@signal/fracdims.m is just a thin wrapper;
-% the real work is in the compiled mex-dev/GeneralizedDimensionEstimation/
-% gendimest.cpp, vendored in this repo under Toolboxes/OpenTSTOOL) turned out to
-% be a well-defined, published method rather than an undocumented black box,
-% "Generalized dimensions from near-neighbor information", W. van de Water and
-% P. Schram (Phys. Rev. A 37(8), 3118-3125, 1988; an earlier version of this text
-% wrote "Schram and van der Water"). It is reproduced exactly here in native MATLAB:
+% their nearest neighbors, using the method of W. van de Water and P. Schram,
+% "Generalized dimensions from near-neighbor information" (Phys. Rev. A 37(8),
+% 3118-3125, 1988), as implemented in TSTOOL's 'fracdims' (whose computation is in
+% the compiled mex-dev/GeneralizedDimensionEstimation/gendimest.cpp). It is
+% reproduced exactly here in native MATLAB:
 %
 % For each of Nref reference points, find the distances to its 1st..kmax-th
 % nearest neighbors (excluding a Theiler window of "past" samples). For
@@ -26,8 +23,17 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % measured moments M(kmin:kmax) under a robust (log(1+0.5*e^2)) error,
 % found via nested 1-D minimization (MATLAB's fminbnd stands in directly
 % for the original's hand-rolled Brent's-method minimizer -- the same
-% algorithm). Finally q(gamma) = 1 - gamma/D(gamma). The outputs summarize D
-% and q across the moments, and a straight-line fit of D against q.
+% algorithm). The error has a fixed width (1) in the units of the moments, so
+% D(gamma) depends on the scale of the series. Finally q(gamma) = 1 - gamma/D(gamma).
+% The outputs summarize D and q across the moments, and a straight-line fit of
+% D against q.
+%
+% D(gamma) is identified only where the error has a minimum inside the search
+% interval for D, and the moments are not zero: a minimum at either end of the
+% interval (for instance at the upper end when the moments do not grow with k,
+% as on a periodic orbit) is no estimate, nor is a fit to moments that are zero
+% (to within 1e-12 of the range of y; every kth neighbor coincides with its
+% reference point, so the error is flat in D), and the outputs are then NaN.
 %
 % ---INPUTS:
 % y, column vector of time series data
@@ -48,8 +54,9 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 %              (first zero-crossing of the autocorrelation function), 'ac1e' (floor
 %              of its first 1/e crossing) or 'mi' (the smaller of the first minimum
 %              of the Kraskov automutual information and the 'ac1e' delay; see
-%              BF_GetTau); m is a number of dimensions or 'fnn' (chosen by false
-%              nearest neighbors). Default: {'ac','fnn'}
+%              BF_GetTau); m is a number of dimensions, or 'fnn' or {'fnn',th}
+%              (chosen by false nearest neighbors at threshold th, at most
+%              floor(2*log10(N)); see BF_Embed). Default: {'ac','fnn'}
 % randomSeed [opt], not used by the choice of reference points, which is deterministic;
 %             passed on to the embedding (BF_Embed). Defaults to 'default'.
 %
@@ -58,6 +65,7 @@ function out = NL_FractalDimensions(y, kmin, kmax, Nref, gstart, gend, past, ste
 % maxq, rangeq, meanq: maximum, range and mean of q across the moments
 % linfit_a, linfit_b: slope and intercept of a linear fit of D against q
 % linfit_rmsqres: root-mean-square residual of that fit
+% All are NaN if D is not identified at every moment order.
 %
 % ---REFERENCES:
 % W. van de Water and P. Schram, "Generalized dimensions from near-neighbor
@@ -172,7 +180,7 @@ if isscalar(Y) && isnan(Y) % embedding failed
 	warning('Embedding of the %u-sample time series failed', N)
 	out = NaN; return
 end
-[N_embed, m] = size(Y);
+[N_embed, ~] = size(Y);
 
 if kmax >= N_embed
 	% Analogous to TSTOOL's own "too many neighbors ... requested" failure:
@@ -197,6 +205,7 @@ R = length(refIdx);
 % ------------------------------------------------------------------------------
 kFetch = min(N_embed - 1, kmax + 2 * past + 5);
 [idx, dist] = knnsearch(Y, Y(refIdx, :), 'K', kFetch + 1);
+tol = 1e-12 * (max(y) - min(y)); % distances below this are zero up to rounding
 
 distances = zeros(R, kmax); % distances(i,k) = i-th reference point's distance to its k-th nearest neighbor
 for ii = 1:R
@@ -240,10 +249,17 @@ for gi = 1:numGammas
 		mom = mean(distances.^g, 1).^(1 / g);
 	end
 
+	if any(mom(kmin:kmax) <= tol)
+		out = NaN; return % zero moments: the error is flat in D
+	end
 	DMin = max(0.05, -g / kmin);
 	DMax = 128;
 	errFcn = @(D) SUB_DimError(D, g, kmin, kmax, mom, innerOpts);
 	Dq(gi) = fminbnd(errFcn, DMin, DMax, outerOpts);
+	if min(Dq(gi) - DMin, DMax - Dq(gi)) <= 10 * outerOpts.TolX
+		% (the minimum lies at an end of the search interval: D is not identified)
+		out = NaN; return
+	end
 	q(gi) = 1 - g / Dq(gi);
 end
 
@@ -251,7 +267,7 @@ end
 % Plot the results in a figure:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(q, Dq, 'o-k');
 end
 
@@ -268,10 +284,7 @@ out.rangeq = range(q);
 out.meanq = mean(q);
 
 % ---Fit linear
-% q and Dq are both columns here (this used to rely on TSTOOL's spacing()
-% returning q as a row, transposing Dq to match; with q now a column too,
-% that stray transpose would turn "p_fit - Dq'" into an N-by-N broadcast
-% instead of an N-by-1 residual, so it's dropped):
+% q and Dq are both columns here (so the residual p_fit - Dq is N-by-1):
 p = polyfit(q, Dq, 1);
 p_fit = q * p(1) + p(2);
 res = p_fit - Dq;

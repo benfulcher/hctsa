@@ -1,4 +1,4 @@
-function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
+function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, ~)
 % NL_RQA   Recurrence quantification analysis (RQA) of the delay-embedded series.
 %
 % Embeds the time series in an m-dimensional delay space and computes standard recurrence
@@ -12,8 +12,9 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 % y, scalar time series as a column vector
 % tau, time delay for the embedding (can be 'ac', 'ac1e', or 'mi', cf. BF_Embed and
 %    BF_GetTau; default: 1)
-% m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
-%    neighbors (cf. BF_Embed; default: 3)
+% m, embedding dimension: a positive integer, or 'fnn' or {'fnn',th} to choose it by
+%    false nearest neighbors at threshold th, at most floor(2*log10(N)) for the N
+%    samples analyzed (cf. BF_Embed; default: 3)
 % theilerWin, Theiler window excluding temporally-correlated neighbors from the main
 %             diagonal: {'ac', k} for k times the first zero-crossing of the
 %             autocorrelation function, or a number of samples (see BF_TheilerWindow;
@@ -55,11 +56,9 @@ function out = NL_RQA(y, tau, m, theilerWin, rr, lmin, vmin, maxN, randomSeed)
 % distance matrix, and line-length statistics are computed directly from the resulting
 % (sparse) list of recurrent pairs, grouping by diagonal/column and looking for runs of
 % consecutive indices. This makes the neighbor search itself roughly linear in N, and
-% comfortably outperforms round-tripping through TISEAN's 'recurr' (which requires forming
-% a text file of every recurrent pair and re-parsing it back into MATLAB -- a benchmark on a
-% logistic-map series found the native approach 8-25x faster end-to-end, with the gap
-% widening at longer N, since TISEAN's ASCII pair-list I/O dominates over its C search
-% core). However, the number of recurrent pairs itself is intrinsically ~rr*N^2 (a property
+% avoids round-tripping through TISEAN's 'recurr' (which requires forming a text file of
+% every recurrent pair and re-parsing it back into MATLAB). However, the number of
+% recurrent pairs itself is intrinsically ~rr*N^2 (a property
 % of the definition of RQA at fixed recurrence rate, not of the search algorithm), so run
 % time still grows roughly quadratically with N at fixed rr -- hence the maxN cap above, in
 % the same spirit as the maxL cap in NW_VisibilityGraph.m.
@@ -119,22 +118,18 @@ end
 if nargin < 8 || isempty(maxN)
     maxN = 10000; % crops time series longer than this maximum length
 end
-if nargin < 9 || isempty(randomSeed)
-    randomSeed = 'default'; % (not used)
-end
 
 if ischar(maxN) && strcmp(maxN, 'full')
     % No cropping -- but flag potentially slow computations for very long series:
     slowThreshold = 20000;
     if N > slowThreshold
-        warning(sprintf(['Time series (%u samples) exceeds %u with maxN=''full''; ' ...
-                         'RQA computation may be slow (recurrent pairs grow as rr*N^2)'], N, slowThreshold));
+        warning(['Time series (%u samples) exceeds %u with maxN=''full''; ' ...
+                 'RQA computation may be slow (recurrent pairs grow as rr*N^2)'], N, slowThreshold);
     end
 elseif N > maxN
-    warning(sprintf(['Time series (%u > %u) is too long for RQA at this recurrence rate...' ...
-                     ' Analyzing the first %u samples'], N, maxN, maxN));
+    warning(['Time series (%u > %u) is too long for RQA at this recurrence rate...' ...
+             ' Analyzing the first %u samples'], N, maxN, maxN);
     y = y(1:maxN);
-    N = length(y);
 end
 
 % ------------------------------------------------------------------------------

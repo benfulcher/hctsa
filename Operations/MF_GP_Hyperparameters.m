@@ -5,9 +5,13 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % A zero-mean GP with a Gaussian likelihood is fitted using the covariance
 % function covFunc, e.g., (i) a sum of squared exponential and noise terms, or
 % (ii) a sum of squared exponential, periodic, and noise terms. The log
-% hyperparameters are found by maximizing the marginal likelihood (at most 50
-% function evaluations, with the noise standard deviation bounded below by 1% of
-% that of the data), starting from a data-informed initial guess. Goodness of
+% hyperparameters are found by maximizing the marginal likelihood to convergence, with
+% the noise standard deviation bounded below by 1% of that of the data and the length scales
+% between the sampling interval and the span of the series (see MF_GP_LearnHyperp). The
+% length scales are the fitted values when the fitted model beats its white-noise special case in a
+% likelihood-ratio test. Otherwise they are not identified, and are reported as the sampling
+% interval, the bound the data allow (periods and shape parameters are then NaN). The other outputs
+% are always reported, and approach those of white noise as the structure vanishes. Goodness of
 % fit is summarized by the per-point negative log marginal likelihood, the error of the fitted mean, and
 % the GP's predictive standard deviation.
 %
@@ -17,8 +21,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % the fit is repeated for numDraws different random samples and the outputs are
 % averaged over them).
 % Times are the sample indices (squishorsquash = 1), so length scales and periods
-% are in samples of the cut series. The output is NaN if the fit fails or if the
-% fitted mean is nearly constant (standard deviation below 0.01).
+% are in samples of the cut series. The output is NaN if the fit fails, or if the values
+% fitted are constant to within round-off.
 %
 % Uses GP fitting code from the gpml toolbox, which is available here:
 % http://gaussianprocess.org/gpml/code.
@@ -53,7 +57,8 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %
 % numDraws, the number of independent random samples to fit, for the settings of
 %             resampleHow that involve random number generation (default: 20). The
-%             outputs are the means over the draws that gave a valid fit: a single
+%             outputs are the means over the draws that gave a valid fit (the output is NaN if
+%             fewer than half did): a single
 %             random sample of a few tens of points is dominated by which points
 %             happened to be drawn, but the average over draws is not.
 %
@@ -64,16 +69,21 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 %       covPeriodic: [log length scale, log period, log amplitude];
 %       covMaterniso(3): [log length scale, log amplitude];
 %       covRQiso: [log length scale, log amplitude, log shape parameter alpha];
-%       covNoise: [log noise standard deviation].
+%       covNoise: [log of the standard deviation of the observation noise: the covNoise term and the
+%       likelihood noise together, see MF_GP_LearnHyperp].
 % nlml: the negative log marginal likelihood of the fitted model, divided by the number
 %       of points it was fitted to (so that it does not depend on the series length)
-% stde: root-mean-square error of the GP mean at the sampled times
+% stde: root-mean-square error of the posterior mean of the smooth (latent) function at the
+%       sampled times (the noise is not part of the function, so the mean does not reproduce it)
 % meanabs_std: mean absolute error of the GP mean, in units of the GP's
 %       predictive standard deviation at each sampled time
-% std_mu_data: standard deviation of the GP mean at the sampled times (if not close
-%       to one, the GP has not followed the z-scored data)
+% std_mu_data: standard deviation of the GP mean at the sampled times (it is near 0 when the
+%       smooth component is negligible, and near the standard deviation of the data when the GP
+%       follows the series)
 % std_S_data: standard deviation of the GP's predictive standard deviation at the
-%       sampled times
+%       sampled times (informative only for irregularly sampled times, as with
+%       'random_i': for evenly spaced times the predictive standard deviation is
+%       constant except near the ends)
 % maxS, minS, meanS: maximum, minimum, and mean of the GP's predictive standard
 %       deviation over 1000 equally spaced times spanning the sampled series
 % oosmedabserr: out-of-sample error, for the random-subsample settings of resampleHow
@@ -91,33 +101,16 @@ function out = MF_GP_Hyperparameters(y, covFunc, squishorsquash, maxN, resampleH
 % term). See the NOTES of MF_GP_LearnHyperp.m for how the hyperparameters are
 % initialized.
 %
-% The "statistics on variance" block below uses the modern gp()/hyp-struct API rather
-% than the legacy gpml v3.2 gpr() function, whose hyperparameter-counting logic
-% assumes every covSum component is a plain string and so fails on
-% degree-parameterized components like {'covMaterniso',3}.
-%
 % Covariance functions: covSEiso (+ optional covPeriodic), covMaterniso(3)
 % [smoothness/roughness class, distinct from SE's infinite differentiability] and
-% covRQiso [scale-mixture of length-scales, for multi-scale structure]. The latter two
-% were validated on synthetic ground truth rather than a real-data correlation check
-% alone:
-%   - Matern: fit covMaterniso(3)+noise and covSEiso+noise to data generated
-%     from a genuinely rough (Matern d=1) process vs. a genuinely smooth (SE)
-%     process. The relative fit-quality advantage (mlik_SE - mlik_Matern)
-%     cleanly separated the two groups (t=4.88, p<4e-5, n=15 realizations
-%     each). On real EEG data, Matern(3) fits substantially and
-%     consistently better than SE (mlik advantage 170-565 nlZ units across
-%     15 series, no exceptions) -- a genuine, consistent finding that EEG is
-%     not well-described by SE's infinite-smoothness assumption.
-%   - Rational Quadratic: fit covRQiso+noise to data generated as a mixture
-%     of two SE processes at very different length-scales (genuinely
-%     multi-scale) vs. a single SE process (matched total variance). The
-%     fitted shape parameter alpha (logh3) cleanly separated the two groups
-%     (t=-3.56, p=0.0013, n=15 each; low alpha = heavier-tailed length-scale
-%     mixture = more multi-scale, alpha->inf recovers exact SE).
-% Each is registered as a single sampling-method variant ('first'), not replicated
-% across all three MF_GP_Hyperparameters sampling methods, to avoid redundant
-% registrations.
+% covRQiso [scale-mixture of length-scales, for multi-scale structure: for covRQiso,
+% a low shape parameter alpha (logh3) means a heavier-tailed length-scale mixture,
+% i.e., more multi-scale, and alpha->inf recovers exact SE]. Tests on synthetic data
+% showed that the fit-quality advantage of covMaterniso(3) over covSEiso separates
+% rough from smooth processes, and that the covRQiso shape parameter separates
+% multi-scale from single-scale ones. The latter two are each
+% registered as a single sampling-method variant ('first'), not replicated across all
+% three MF_GP_Hyperparameters sampling methods, to avoid redundant registrations.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -158,7 +151,7 @@ N = length(y); % time-series length
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y'; % ensure a column vector input
 end
 % Make sure that y is indeed zscored
@@ -166,7 +159,7 @@ if ~BF_iszscored(y)
 	warning('The input time series is not, but should be z-scored')
 end
 
-if nargin < 2 || isempty(covFunc),
+if nargin < 2 || isempty(covFunc)
 	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
 	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
@@ -181,7 +174,7 @@ if nargin < 4 || isempty(maxN)
 	% maxN = 0 --> include the whole thing
 end
 if ischar(maxN) && strcmpi(maxN, 'full')
-	maxN = 0; % 'full' is an alias for the pre-existing maxN=0 "no resampling" convention
+	maxN = 0; % 'full' is an alias for the maxN=0 "no resampling" convention
 end
 if (maxN > 0) && (maxN < 1)
 	% Specify a proportion of the time series length, N
@@ -199,6 +192,8 @@ end
 if nargin < 7 || isempty(numDraws)
 	numDraws = 20;
 end
+
+Nin = N; % length of the input series (N can change when the series is cut below)
 
 % ------------------------------------------------------------------------------
 %% Random samples: average the fit over several independent draws
@@ -225,13 +220,12 @@ if numDraws > 1 && maxN > 0 && N > maxN && ismember(resampleHow, {'random_i', 'r
 	return
 end
 
-% Inference algorithm -- use the Laplace approximation:
-% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Inference algorithm:
+% Exact Gaussian inference. (Not @infLaplace: with a Gaussian likelihood the
 % Laplace approximation is exact but is computed by Newton iteration, and
 % gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
-% previous call's solution, so every fit depended on whatever series was
-% fitted before it -- the same series gave outputs differing in the 4th digit
-% from call to call once the optimizer amplified the difference.)
+% previous call's solution, so each fit would depend on whatever series was
+% fitted before it.)
 infAlg = @infGaussLik;
 
 % ------------------------------------------------------------------------------
@@ -257,7 +251,7 @@ elseif (maxN > 0) && (N > maxN)
 				y = y(1:maxN);
 			end
 			if beVocal
-				fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN);
+				fprintf(1, 'Resampled the time series from a length %u down to %u (%u)\n', N, length(y), maxN); %#ok<UNRCH>
 			end
 			N = length(y); % update time series length (should be maxN)
 			t = SUB_settimeindex(N, squishorsquash); % set time index
@@ -308,6 +302,16 @@ else
 	t = SUB_settimeindex(N, squishorsquash); % set time index
 end
 
+% The values fitted are constant to within round-off (e.g., a flat stretch at the start of
+% the series for 'first'): there is nothing for a Gaussian process to describe, and the
+% fit has no scale to work with (its noise floor is set relative to std(y)). As in
+% PP_Compare, the bound is the rounding error of the processing (resampling sums up to
+% Nin terms), relative to the root-mean-square of the values fitted.
+if std(y) <= 10 * Nin * eps * sqrt(mean(y.^2))
+	out = NaN;
+	return
+end
+
 % ------------------------------------------------------------------------------
 %% Learn the hyperparameters
 % ------------------------------------------------------------------------------
@@ -331,7 +335,7 @@ likFunc = @likGauss; hyp.lik = log(0.1);
 numfevals = -50; % (specified as the negative)
 
 try
-	hyp = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp);
+	[hyp, hasStructure, shapePos, shapeBound, latent] = MF_GP_LearnHyperp(t, y, covFunc, meanFunc, likFunc, infAlg, numfevals, hyp, true);
 catch emsg
 	out = NaN;
 	return
@@ -343,28 +347,35 @@ end
 
 % Get non-logarithmic hyperparameters
 logHyper = hyp.cov;
+% (The noise is reported as the total standard deviation of the observation noise, the covNoise term and
+%  the likelihood noise together. Predictions are made with the latent-function model, in which all
+%  noise is observation noise: see MF_GP_LearnHyperp.)
+logHyper(latent.noisePos) = latent.hyp.lik;
+hyp = latent.hyp; covFunc = latent.covFunc;
+if ~hasStructure
+	logHyper(shapePos) = shapeBound; % length scales are not identified without correlation structure: report the bound
+end
 % Output the log-hyperparameters.
-% (Dropped: h%u = exp(logh%u). Hyperparameters are positive, so exp is strictly monotone and
-%  the two are rank-identical by construction. Only one GP master operation ever registered
-%  the raw h%u alongside logh%u; the other four already used logh%u alone.)
 for i = 1:numHPs
 	% Set up structure output
 	out.(sprintf('logh%u', i)) = logHyper(i);
 end
+% (h%u = exp(logh%u) is not returned: hyperparameters are positive, so exp is strictly
+%  monotone and the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 %% For Plotting
 % ------------------------------------------------------------------------------
 if doPlot
-	xstar = t;
+	xstar = t; %#ok<UNRCH>
 	% xstar = linspace(min(t),max(t),1000)';
 	[mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar);
 	% S2p = S2 - exp(2*logHyper(3)); % remove noise from predictions
 	S2p = S2;
 
 	figure('color', 'w');
-	f = [mu + 2 * sqrt(S2p); flipdim(mu - 2 * sqrt(S2p), 1)];
-	fill([xstar; flipdim(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
+	f = [mu + 2 * sqrt(S2p); flip(mu - 2 * sqrt(S2p), 1)];
+	fill([xstar; flip(xstar, 1)], f, [6, 7, 7] / 8, 'EdgeColor', [7, 7, 6] / 8); % grayscale error bars
 	hold on;
 	plot(xstar, mu, 'k-', 'LineWidth', 2); % mean function
 	plot(t, y, '.-k'); % original data
@@ -382,14 +393,8 @@ out.nlml = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y) / length(t);
 [mu, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, t); % evaluate at datapoints
 % [mu, S2] = gpr(logHyper, covFunc, t, y, t); % evaluate at datapoints
 
-if std(mu) < 0.01; % hasn't fit the time series well at all -- too constant
-	fprintf(1, 'This time series is not suited to Gaussian Process fitting\n');
-	out = NaN; return
-end
 
 % Root-mean-square error of the mean function, mu.
-% (Note: this was previously mean(sqrt((y-mu).^2)), which cancels pointwise to
-%  mean(abs(y-mu)) -- a mean absolute error, not an RMSE.)
 out.stde = sqrt(mean((y - mu).^2));
 % Better to look at mean distance away in units of std
 out.meanabs_std = mean(abs((y - mu) ./ sqrt(S2)));
@@ -399,11 +404,11 @@ out.std_mu_data = std(mu); % std of mean function evaluated at datapoints
 out.std_S_data = std(sqrt(S2)); % should vary a fair bit
 
 % Statistics on variance:
+% (This uses the modern gp()/hyp-struct API rather than the legacy gpml v3.2 gpr(),
+%  whose hyperparameter counting fails for degree-parameterized covariance components
+%  such as {'covMaterniso',3}.)
 xstar = linspace(min(t), max(t), 1000)'; % crude, I know, but it's nearly 5pm
 [~, S2] = gp(hyp, infAlg, meanFunc, covFunc, likFunc, t, y, xstar); % evaluate at datapoints
-% (was gpr(logHyper,...), the legacy gpml v3.2 API -- broke for degree-
-% parameterized covariance components like {'covMaterniso',3}, since gpr's
-% own hyperparameter-counting logic assumes each component is a plain string)
 S = sqrt(S2); % standard deviation function (S2 is the variance)
 out.maxS = max(S); % maximum predictive standard deviation
 out.minS = min(S); % minimum predictive standard deviation

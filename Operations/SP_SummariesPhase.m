@@ -13,7 +13,8 @@ function out = SP_SummariesPhase(y)
 %
 % The FFT is of the mean-subtracted series, zero-padded to a power of 2, with the
 % phase referenced to the centre of the series. Phases are weighted by their bin's
-% magnitude throughout (a standard approach in circular statistics for data of
+% magnitude throughout, except in magPhaseCorr, an unweighted correlation across
+% bins (weighting is a standard approach in circular statistics for data of
 % uneven reliability): a single pure tone concentrates essentially all energy in
 % 1-2 bins, and every other bin's phase is set by numerical noise and must not
 % swamp an unweighted average. The DC and Nyquist bins (both purely real, phase
@@ -53,23 +54,11 @@ function out = SP_SummariesPhase(y)
 % Cambridge (1993). DOI: 10.1017/CBO9780511564345
 %
 % ---NOTES:
-% Validation, from the original docstring. R: white noise gave R ~ 0.028 +/- 0.015
-% over 300 trials (an empirical null), a periodic sine wave R ~ 0.22 and a linear
-% chirp R ~ 0.46. phEnt is anti-correlated with R (r = -0.88 on real-world series) but
-% not a function of it: entropy is sensitive to the full shape of the phase
-% distribution (e.g., bimodal), which R cannot distinguish from uniformity.
-% groupDelay was previously referenced to the first sample, which made it ~N/2 for
-% any stationary series and aliased under unwrap (Spearman 0.47 with N on
-% real-world series); phaseLinearity was previously un-normalized and grew as sqrt(N)
-% (Spearman 0.78 with N); on the normalized scale an unstructured (random-walk)
-% unwrapped phase gives ~0.4 regardless of series length.
-% phaseUnwrapAC1 is strongly diagnostic of dispersive, frequency-dependent delay: a
-% linear chirp gave ~0.86, while every other synthetic test signal was within
-% +/-0.02 of zero. magPhaseCorr is the weakest-validated statistic: inconsistent
-% across synthetic signals (all within +/-0.06 of zero), and weakly correlated with
-% everything else on real-world series (max |r| 0.29 against any existing feature, 0.11
-% against the other five here). It is kept in the spirit of hctsa's general
-% preference for including a plausible statistic.
+% phEnt is anti-correlated with R but not a function of it: entropy is sensitive to
+% the full shape of the phase distribution (e.g., bimodal), which R cannot
+% distinguish from uniformity. phaseUnwrapAC1 is diagnostic of dispersive,
+% frequency-dependent delay (e.g., large for a linear chirp). magPhaseCorr was the
+% weakest statistic in tests (near zero for all synthetic test signals).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -116,11 +105,10 @@ Sc = Sc(1:NFFT / 2 + 1); % single-sided
 % sample. The Fourier phase of any signal carries a linear term -w*t0 set
 % by where its energy sits in time (t0 ~ (Ny-1)/2 for a stationary series),
 % which for the full-series FFT is a phase advance of ~pi*Ny/NFFT per bin --
-% up to pi. That term (i) dominated the unwrapped phase, so groupDelay was
-% ~Ny/2 for any stationary series and phaseLinearity grew with Ny, and
-% (ii) aliased under unwrap once Ny/NFFT approached 1, so both jumped
-% between regimes with Ny (e.g., groupDelay ~0 at Ny <= 2048 but ~1050 at
-% Ny = 5000 for white noise). Shifting the time origin to the centre
+% up to pi. That term would (i) dominate the unwrapped phase, making
+% groupDelay ~Ny/2 for any stationary series and phaseLinearity grow with
+% Ny, and (ii) alias under unwrap once Ny/NFFT approached 1, so that both
+% would jump between regimes with Ny. Shifting the time origin to the centre
 % removes it: groupDelay is then the delay of the series' energy relative
 % to its centre (0 for stationary data, +/- for a transient early or
 % late in the window), and the other statistics describe the phase
@@ -152,8 +140,8 @@ out.R = abs(Rvec);
 % ------------------------------------------------------------------------------
 nBins = 20;
 edges = linspace(-pi, pi, nBins + 1);
-[~, binIdx] = histc(ph, edges);
-binIdx(binIdx == 0) = 1; binIdx(binIdx > nBins) = nBins; % guard the (rare) ph == pi edge case
+[~, ~, binIdx] = histcounts(ph, edges); % (the last bin includes ph == pi)
+binIdx(binIdx == 0) = 1; % guard against NaN phases
 pBin = accumarray(binIdx, wgt, [nBins, 1]);
 pBin_nz = pBin(pBin > 0);
 out.phEnt = -sum(pBin_nz .* log(pBin_nz)) / log(nBins);
@@ -170,12 +158,11 @@ out.groupDelay = -beta(2) / Ny; % relative to the series centre, as a fraction o
 resid = phUnwrap - X * beta;
 % (normalized by sqrt(#bins): the residual of an unstructured -- random-walk
 % -- unwrapped phase grows as sqrt(#bins), so without this the statistic
-% was mostly a restatement of series length: Spearman 0.78 with N on
-% real-world series, and 6.6 -> 34 for white noise from N = 500 to 10000)
+% would mostly restate the series length)
 out.phaseLinearity = sqrt(sum(wgt .* resid.^2)) / sqrt(length(ww));
 
 % ------------------------------------------------------------------------------
-%% Magnitude-phase correlation
+%% Magnitude-phase correlation (unweighted)
 % ------------------------------------------------------------------------------
 out.magPhaseCorr = corr(mag, ph);
 

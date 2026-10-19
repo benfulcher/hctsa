@@ -2,12 +2,11 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % BF_TiseanSystem   Run a TISEAN command-line call with a bounded timeout.
 %
 % All TISEAN-based operations shell out to a compiled binary via system().
-% Verified empirically that these binaries do not always error on a bad
-% invocation: false_nearest given a missing/unreadable input file blocks
-% indefinitely (likely falling back to reading stdin, a common Unix CLI
-% pattern, rather than erroring) instead of exiting with a diagnosable
-% failure. Left unguarded, that silently stalls a batch computation forever
-% with no error, warning, or partial output -- worse than any exception.
+% These binaries do not always error on a bad invocation: e.g., false_nearest
+% given a missing/unreadable input file can block indefinitely instead of
+% exiting with a diagnosable failure. Left unguarded, that silently stalls a
+% batch computation forever with no error, warning, or partial output --
+% worse than any exception.
 %
 % This wraps the call with the 'timeout' (or 'gtimeout', GNU coreutils'
 % macOS/Homebrew name for the same utility, since it clashes with no
@@ -22,13 +21,8 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % Operations calling this have no length cap on their input (unlike
 % NL_RQA/NL_LyapSpec's explicit maxN), so a legitimately long series can
 % legitimately take a while, and a timeout that fires on a merely-slow (not
-% hung) call would be worse than the bug this fixes -- it would silently
-% truncate mid-computation rather than erroring outright (see below).
-% Measured directly: NL_c1, the slowest of the 16 TISEAN-calling operations
-% tested, took 38s at N=10000 (already longer than any series in this
-% toolbox's two standard validation datasets) and 88s at N=30000 -- cost
-% flattens with N rather than exploding, so 600s leaves a wide margin
-% without being effectively unbounded.
+% hung) call would needlessly abort a valid computation (see below). It is a
+% cap on computation time for hung calls, not a tight budget.
 %
 % A call that fails this way -- status 124 (this wrapper's own timeout),
 % 126/127 (the shell's reserved "found but not executable"/"command not
@@ -41,10 +35,19 @@ function [status, res] = BF_TiseanSystem(tiseanCommand, timeoutSecs)
 % instead of a diagnosable failure. Any other exit code means the TISEAN
 % binary itself ran to completion (whether cleanly or with its own
 % terse refusal, e.g. false_nearest's exit 54 for "too large" -- see
-% NL_FNN.m) and is passed through as before for the caller to interpret.
+% NL_FNN.m) and is passed through for the caller to interpret.
+%
+% The command's output is NOT taken from system()'s own captured output. On
+% Linux, under load (e.g. many parallel pool workers on one node), MATLAB's
+% system() can return before it has read all of the child's output, and deliver
+% the remainder as the start of the NEXT system() call's output in the same
+% process. A TISEAN call then returns truncated output (a missing final block,
+% which parses without complaint, or an error), and the call after it gets a
+% stray numeric tail in front of its own output. The output is therefore
+% collected through a file and checked for completeness: see BF_SystemCaptured.m.
 %
 %---INPUTS:
-% tiseanCommand, the TISEAN command-line string to run (as previously
+% tiseanCommand, the TISEAN command-line string to run (as would be
 %                 passed directly to system())
 % timeoutSecs [opt], wall-clock time limit in seconds (default: 600)
 %
@@ -85,14 +88,8 @@ if isempty(timeoutChecked)
     % The probe runs '<cmd> --version' and inspects ONLY the exit status
     % (0 = present). This deliberately uses no shell redirection or shell
     % builtins so it behaves identically whichever shell MATLAB's system()
-    % invokes. The previous probe -- "command -v timeout >/dev/null 2>&1"
-    % -- is sh/bash/zsh syntax that silently fails under csh/tcsh: 'command'
-    % is not a tcsh builtin and '2>&1' is a parse error ("Ambiguous output
-    % redirect"), so the whole test returned nonzero. On a tcsh cluster
-    % (MATLAB's system() follows $SHELL) hctsa therefore concluded no
-    % timeout utility existed and ran EVERY TISEAN call unbounded -- a hung
-    % or runaway binary's console output then accumulated in 'res' until
-    % MATLAB exhausted memory and the process was killed.
+    % invokes (it follows $SHELL, which may be csh/tcsh, where sh-style
+    % syntax such as 'command -v' or '2>&1' fails).
     [statusTimeout,~]  = system('timeout --version');
     [statusGtimeout,~] = system('gtimeout --version');
     if statusTimeout == 0
@@ -140,10 +137,37 @@ if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH','');
 end
 
-[status, res] = system(fullCommand);
+% A TISEAN call can fail to start, or be killed, for reasons unrelated to the
+% data: the shell or the dynamic loader failing transiently under load (status
+% 126/127 or a negative status for a command that is installed, or the
+% executable, its libraries or its input file briefly unreadable on a busy
+% network filesystem), the process being killed by a signal (status 129-192,
+% e.g. 137 = SIGKILL from the memory cgroup, 139 = SIGSEGV), a non-zero exit
+% that printed nothing at all, or the exit marker (see the header) being absent.
+% Such a call is repeated a few times, after a short randomized pause, before it
+% is reported as a failure: re-running a deterministic TISEAN binary on the same
+% input file either gives the same answer or fixes the glitch, so a retry cannot
+% change any value. Statuses the binaries choose themselves (e.g. 54, 50: 50-99,
+% see tisean_cec.h) and the wrapper's own timeout (124) are never retried.
+maxAttempts = 3;
+for attempt = 1:maxAttempts
+    [status, res, gotMarker] = BF_SystemCaptured(fullCommand);
+    isTransient = ~gotMarker || any(status == [126, 127]) || status < 0 || (status > 128 && status < 193) ...
+        || (status ~= 0 && isempty(strtrim(res)) && ~(status >= 50 && status <= 99)); % exit with no message at all
+    if ~isTransient || attempt == maxAttempts
+        break
+    end
+    pause(0.2*attempt + 0.3*rand);
+end
 
 if clearLdLibraryPath
     setenv('LD_LIBRARY_PATH', oldLdLibraryPath);
+end
+
+if ~gotMarker
+    error('BF_TiseanSystem:tiseanFailed', ...
+        ['TISEAN command did not report an exit status (the shell running it died or could not write its output file; ' ...
+         '%d attempt(s)).\nCommand: %s\nOutput: %s'], attempt, tiseanCommand, res);
 end
 
 % See the header comment: any of these three means TISEAN never produced a
@@ -159,8 +183,17 @@ if any(status == [124, 126, 127])
             reason = 'not found on the system path -- is TISEAN installed and compiled? (see install.m)';
     end
     error('BF_TiseanSystem:tiseanFailed', ...
-        'TISEAN command could not be completed (%s).\nCommand: %s\nOutput: %s', ...
-        reason, tiseanCommand, res);
+        'TISEAN command could not be completed (%s; exit status %d after %d attempt(s)).\nCommand: %s\nOutput: %s', ...
+        reason, status, attempt, tiseanCommand, res);
+end
+
+% A call that was still killed by a signal after the retries is passed on to the
+% caller exactly as before (same status and output, so no feature value changes),
+% but with a warning rather than silently:
+if status > 128 && status < 193
+    warning('BF_TiseanSystem:tiseanKilled', ...
+        'TISEAN command was terminated by a signal (exit status %d, %d attempt(s)): %s', ...
+        status, attempt, tiseanCommand);
 end
 
 % Belt-and-braces guard against a runaway binary -- one that streams console

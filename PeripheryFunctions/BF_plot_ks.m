@@ -1,13 +1,25 @@
-function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize,trimRange)
+function [fr,xr,h_line,h_points] = BF_plot_ks(dataVector,whatColor,doSwap,lineWidth,markerSize,~)
 % Plot a kernel smoothed distribution with individual datapoints annotated
 %
 %---INPUTS:
-% dataVector, a vector of data to plot
+% dataVector, a vector of data to plot (NaNs are not plotted)
 % whatColor, the color to plot line and points
 % doSwap, (logical) whether to swap axes to be horizontal
 % lineWidth, width of line to plot
 % markerSize, size of markers annotating points
-% trimRange, (logical) whether to trim the range of plot to that of the data points
+% (sixth input), trimRange, accepted for backwards compatibility but has no effect: the density
+%           is only ever evaluated between the minimum and maximum of the data
+%
+%---OUTPUTS:
+% fr, the height of the density at each datapoint, in the same order as dataVector
+%       (a row vector, NaN where dataVector is NaN)
+% xr, the position of each datapoint on the density's grid, in the same order
+%       as dataVector (so that [xr(i),fr(i)] is the plotted point for dataVector(i))
+% h_line, handle to the plotted density curve
+% h_points, handle to the plotted datapoints
+%
+% For constant data, the density is not defined, so a single stem (of unit
+% height) at the value is plotted.
 %
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -46,47 +58,40 @@ end
 if nargin < 5 || isempty(markerSize)
     markerSize = 14;
 end
-if nargin < 6 || isempty(trimRange)
-    trimRange = false;
-end
 
 numPoints = 1000; % points for the ks density
 
 %-------------------------------------------------------------------------------
 % Estimate a probability density:
 %-------------------------------------------------------------------------------
-if all(dataVector-dataVector(1)<10*eps); % ~ constant data vector
-    warning('Constant data')
-    x = dataVector(1);
-    f = 1;
+isGood = ~isnan(dataVector(:)');
+goodData = dataVector(isGood);
+if isempty(goodData)
+    error('No (non-NaN) data to plot');
 end
 
-[f,x] = ksdensity(dataVector,linspace(min(dataVector),max(dataVector),numPoints),...
-                    'function','pdf');
+fr = nan(1,length(dataVector));
+xr = nan(1,length(dataVector));
 
-%-------------------------------------------------------------------------------
-% Match each datapoint to a point on the distribution:
-%-------------------------------------------------------------------------------
-getIndex = @(m) find(x>=dataVector(m),1,'first');
-ind = arrayfun(getIndex,1:length(dataVector));
-ind = sort(ind,'ascend');
-
-% The matched points, [xr,fr]
-xr = x(ind);
-fr = f(ind);
-
-%-------------------------------------------------------------------------------
-% Trim
-%-------------------------------------------------------------------------------
-if trimRange
-    rPlot = (x>=min(dataVector) & x<=max(dataVector));
-    if sum(rPlot) > 0
-        x = x(rPlot);
-        f = f(rPlot);
-    else
-        x = ones(2,1)*xr(1);
-        f = [0,fr(1)];
+if max(goodData) - min(goodData) < 10*eps(max(abs(goodData))) % ~ constant data
+    if length(goodData) > 1
+        warning('Constant data: plotting a single stem')
     end
+    x = goodData(1)*ones(1,2);
+    f = [0,1];
+    xr(isGood) = goodData(1);
+    fr(isGood) = 1;
+else
+    [f,x] = ksdensity(goodData,linspace(min(goodData),max(goodData),numPoints),...
+                        'function','pdf');
+
+    %---------------------------------------------------------------------------
+    % Match each datapoint to a point on the distribution (the first grid point
+    % at or above it), keeping the order of dataVector:
+    %---------------------------------------------------------------------------
+    ind = discretize(goodData,[-Inf,x],'IncludedEdge','right');
+    xr(isGood) = x(ind);
+    fr(isGood) = f(ind);
 end
 
 %-------------------------------------------------------------------------------

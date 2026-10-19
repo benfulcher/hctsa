@@ -10,7 +10,8 @@ function out = MF_hmm_Fit(y, trainp, numStates)
 % the quantiles (k-1/2)/numStates of the training data, or evenly spaced within one
 % standard deviation of its mean; a variance equal to that of the training data; and
 % probabilities 0.5, 0.9 and 0.99 of staying in a state); the fit with the highest
-% training log-likelihood is kept (ZG_hmm_fit). The
+% training log-likelihood (of the training data under the fit's final parameters) is
+% kept (ZG_hmm_fit). The
 % shared variance cannot fall below 1% of the variance of the training data, so that
 % states placed on a few repeated values do not give unbounded likelihoods.
 %
@@ -36,7 +37,8 @@ function out = MF_hmm_Fit(y, trainp, numStates)
 % stdmeanP: standard deviation across states of the mean probability of moving into
 %       each state
 % maxP, stdP: maximum and standard deviation of the transition probabilities
-% LLtrainpersample: the highest log-likelihood per sample reached on the training part
+% LLtrainpersample: the log-likelihood per sample of the training part under the
+%       fitted model
 % LLtestpersample: the log-likelihood per sample of the test part
 % LLdifference: LLtestpersample - LLtrainpersample
 % ------------------------------------------------------------------------------
@@ -132,7 +134,7 @@ out.maxP = max(P(:));
 out.stdP = std(P(:));
 
 % Within-sample log-likelihood
-out.LLtrainpersample = max(LL) / Ntrain; % loglikelihood per sample
+out.LLtrainpersample = LL / Ntrain; % log-likelihood per sample of the fitted model
 
 % ------------------------------------------------------------------------------
 %% Calculate log likelihood for the test data

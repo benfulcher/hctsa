@@ -18,10 +18,6 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % points dominating its mean and standard deviation). To avoid infinite densities
 % when there are repeated values (zero neighbor distance, as in quantized or
 % held series), distances are smoothed as sqrt(r^2 + (0.01*median(r(r>0)))^2).
-% This operation previously used TSTOOL's 'localdensity', which the original
-% author noted was "very poorly documented in the TSTOOL package" -- its
-% exact algorithm was never confirmed; the estimate is now computed natively
-% (no toolbox dependency at all).
 %
 % The result is a series of log-density values in the time order of the embedded
 % points, of length N - (m-1)*tau. The outputs describe its distribution and its
@@ -36,9 +32,10 @@ function out = NL_LocalDensity(y, NNR, past, embedParams)
 % embedParams, the embedding parameters, inputs to BF_Embed as {tau,m}, where
 %              tau and m can be characters specifying a given automatic method
 %              of determining tau ('ac', 'ac1e' or 'mi'; see BF_GetTau) and/or m
-%              ('fnn') (see BF_Embed; default: {'ac','fnn'})
+%              ('fnn' or {'fnn',th}: false nearest neighbors at threshold th, at
+%              most floor(2*log10(N))) (see BF_Embed; default: {'ac','fnn'})
 %
-% ---OUTPUTS: statistics of the log local density series (output names retain 'den'):
+% ---OUTPUTS: statistics of the log local density series (output names use 'den'):
 % minden, maxden, iqrden, rangeden, stdden, meanden, medianden: minimum, maximum,
 %       interquartile range, range, standard deviation, mean and median
 % ac1den, ac2den, ac3den, ac4den, ac5den: autocorrelation at lags 1 to 5

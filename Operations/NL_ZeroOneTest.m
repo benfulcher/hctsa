@@ -22,15 +22,14 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % ---INPUTS:
 % y, the input time series
 % numC, the number of evenly spaced frequencies c to average the test statistic K_c over
-%       (default: 20 -- checked against numC = 100 on periodic/quasi-periodic/chaotic/
-%       stochastic test signals: K agrees to within 0.003 and Kstd to within a similar
-%       margin, so the extra cost of a much larger numC buys little additional stability)
+%       (default: 20; the extra cost of a much larger numC buys little additional
+%       stability)
 % maxN, the maximum number of samples to consider. Time series longer than this are cropped
 %       to their first maxN points (default: 10000), since the computation cost of this
 %       operation scales roughly as N^2 (tcut = N/10 window lengths are each averaged over
 %       ~N points, per c value; cf. NL_RQA's maxN, same rationale). Set to 'full' to disable
 %       cropping (a warning is given above N = 50000, where run time starts to become
-%       substantial -- around 10s at N = 50000-60000 with the default numC)
+%       substantial)
 %
 % ---OUTPUTS:
 % K, the median of K_c across the numC frequencies -- the chaos statistic itself (~0:
@@ -44,9 +43,7 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 %    ~0)
 % Dstd, the standard deviation of D_c across the numC frequencies -- can be heavy-tailed for
 %    complex/near-resonant dynamics (a handful of c values giving an anomalously large slope
-%    estimate), validated as a genuine signal rather than a numerical artifact (e.g. the
-%    synthetic Duffing-van der Pol series in a validation set, whose own
-%    Kstd is also elevated)
+%    estimate)
 % The output is NaN for series shorter than 200 samples.
 %
 % ---REFERENCES:
@@ -66,9 +63,8 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % K and D answer different questions: K asks only whether (p_c,q_c) is bounded or not, while
 % D asks how fast it grows given that it isn't bounded -- e.g. white noise and a strongly
 % autocorrelated AR(1) process are both classified as unbounded by K (K ~ 1 for both), but D
-% is an order of magnitude smaller for the AR(1) process in validation on synthetic data
-% (the AR(1) process's smaller innovation variance per step directly slows the (p,q) random
-% walk, even though total series variance is matched by z-scoring).
+% is much smaller for the AR(1) process (its smaller innovation variance per step directly
+% slows the (p,q) random walk, even though total series variance is matched by z-scoring).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

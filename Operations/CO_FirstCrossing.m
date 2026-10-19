@@ -54,8 +54,6 @@ function out = CO_FirstCrossing(y, corrFun, threshold, whatOut)
 % Check inputs:
 % ------------------------------------------------------------------------------
 
-N = length(y); % the length of the time series
-
 if nargin < 2 || isempty(corrFun)
 	corrFun = 'ac'; % linear autocorrelation function
 end

@@ -47,9 +47,11 @@ function out = EN_DispEn(y, m, c, tau, mappingHow)
 % normDispEn, dispEn normalized by its maximum possible value, log(c^m)
 % fDispEn, the fluctuation-based dispersion entropy (in nats; NaN for m = 1)
 % normFDispEn, fDispEn normalized by log((2c-1)^(m-1)) (NaN for m = 1)
-% If tau cannot be determined, the series is constant, or it is too short for the
-% embedding (fewer than 5 embedding vectors), NaN is returned instead of a
-% structure.
+% A constant series (all values equal, up to floating-point rounding at their own
+% magnitude: a range of at most 4*eps(max(abs(y)))) has a single dispersion pattern,
+% so all four outputs are 0 (the fluctuation-based ones are NaN for m = 1, as always).
+% If tau cannot be determined, or the series is too short for the embedding (fewer
+% than 5 embedding vectors), NaN is returned instead of a structure.
 %
 % ---REFERENCES:
 % M. Rostaghi and H. Azami, "Dispersion Entropy: A Measure for Time-Series
@@ -140,22 +142,32 @@ end
 % ------------------------------------------------------------------------------
 %% Map the series onto (0,1), then onto c amplitude classes
 % ------------------------------------------------------------------------------
+if ~ismember(mappingHow, {'ncdf', 'linear'})
+	error('Unknown mapping ''%s'' (expected ''ncdf'' or ''linear'')', mappingHow);
+end
+
+% A constant series (values differing by at most a few units in the last place of their
+% magnitude, e.g., averages of the same repeating values summed in different orders) is
+% a single dispersion pattern: zero entropy. (Its rounding-level deviations must not be
+% classified: the mapping would stretch them over the classes.)
+if max(y) - min(y) <= 4 * eps(max(abs(y)))
+	out.dispEn = 0;
+	out.normDispEn = 0;
+	if m < 2
+		out.fDispEn = NaN;
+		out.normFDispEn = NaN;
+	else
+		out.fDispEn = 0;
+		out.normFDispEn = 0;
+	end
+	return
+end
+
 switch mappingHow
 	case 'ncdf'
-		sigma = std(y);
-		if sigma == 0
-			% Constant series: the NCDF is degenerate (every point identical)
-			warning('Constant time series has no dispersion structure');
-			out = NaN; return
-		end
-		yMapped = normcdf(y, mean(y), sigma);
+		yMapped = normcdf(y, mean(y), std(y));
 	case 'linear'
-		yRange = max(y) - min(y);
-		if yRange == 0
-			warning('Constant time series has no dispersion structure');
-			out = NaN; return
-		end
-		yMapped = (y - min(y)) / yRange;
+		yMapped = (y - min(y)) / (max(y) - min(y));
 	otherwise
 		error('Unknown mapping ''%s'' (expected ''ncdf'' or ''linear'')', mappingHow);
 end

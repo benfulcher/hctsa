@@ -67,7 +67,7 @@ if nargin < 2
 	chooseBest = ''; % just return all the time series in structure yp.
 end
 
-if nargin < 3 || isempty(order);
+if nargin < 3 || isempty(order)
 	order = 2; % extra parameter for some chooseBest settings.
 end
 
@@ -190,28 +190,24 @@ nfields = length(fields);
 
 switch chooseBest
 	case 'ar' % picks the *worst* fit to an AR(p) model
-		%% Check that a System Identification Toolbox license is available:
-		BF_CheckToolbox('identification_toolbox');
-
 		% order = 2; % should be set from inputs/defaults
 		rmserrs = zeros(nfields, 1);
 
-		for i = 1:nfields; % each preprocessing performed
-			data = [];
+		for i = 1:nfields % each preprocessing performed
 			data = yp.(fields{i});
 			data = zscore(data);
 
-			% (i) fit the model
-			m = ar(data, order);
-
-			% (ii) in-sample prediction error
-			e = pe(m, data);
-			rmserrs(i) = sqrt(mean(e.^2));
+			% RMS in-sample one-step prediction error of an AR model fitted by
+			% forward-backward least squares (the forward residuals, with zero error
+			% for the first 'order' samples, which have no full set of past values)
+			[~, ~, loss] = BF_ARfb(data, order);
+			N = length(data);
+			rmserrs(i) = sqrt(loss * (N - order) / N);
 		end
 
 		% Now choose the one with the *most* error (!) -- i.e., the AR
 		% model finds it hardest to fit
-		if any(rmserrs > rmserrs(1) * (1 + beatThis));
+		if any(rmserrs > rmserrs(1) * (1 + beatThis))
 			best = fields{rmserrs == max(rmserrs)};
 		else
 			best = 'nothing';
@@ -220,7 +216,6 @@ switch chooseBest
 	case 'ac' % picks the *lowest* tau-step autocorrelated result
 		acs = zeros(nfields, 1);
 		for i = 1:nfields
-			data = [];
 			data = yp.(fields{i}); % dynamic field referencing
 			% eval(['data = yp.' fields{i} ';']);
 			data = zscore(data); % unnecessary for AC

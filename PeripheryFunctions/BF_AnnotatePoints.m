@@ -2,10 +2,27 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % BF_AnnotatePoints     Annotates time series/metadata to a plot
 %
 %---INPUTS:
-% xy, a vector (or cell) of x-y co-ordinates of points on the plot
+% xy, a matrix of x-y co-ordinates of the points on the plot (one row per row of TimeSeries)
 % TimeSeries, a table of time series making up the plot
-% annotateParams, structure of custom plotting parameters
-
+% annotateParams, structure of custom plotting parameters, with optional fields:
+%       n, the number of points to annotate (default: 6; 0 turns annotation off)
+%       maxL, the maximum number of samples of each annotated time series (default: 300)
+%       userInput, true (default): the user clicks on the plot to pick each point to
+%               annotate (blocking until n points are picked); false: points are
+%               chosen at random with no user input
+%       fdim, 1x2 vector of the width and height of each annotated time series, as
+%               fractions of the plot size (default: [0.30,0.08])
+%       textAnnotation, 'Name', 'ID', 'length', or 'none' (default) to add this as text
+%       theLineWidth, line width of annotated time series (default: 0.8)
+%       doRainbow, when there is a single group, cycle through colors for the
+%               annotations (default: true), otherwise black
+%       groupColors, a cell of colors, one for each group
+%       cmap, a color map name (cf. BF_GetColorMap) or a cell of colors, used when
+%               groupColors is not specified
+%   Instead of a structure, annotateParams can be 0 or false to turn off annotation,
+%   or a positive integer to specify n (all other fields at their defaults).
+%   Time series without a group label are annotated in gray.
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -29,6 +46,17 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % ------------------------------------------------------------------------------
 
 numTimeSeries = height(TimeSeries);
+
+% Allow annotateParams to be given as a number (or logical) instead of a structure:
+if ~isstruct(annotateParams)
+    if isempty(annotateParams) || isequal(annotateParams,true)
+        annotateParams = struct();
+    elseif isequal(annotateParams,false) || isequal(annotateParams,0)
+        return % annotation turned off
+    else
+        annotateParams = struct('n',annotateParams);
+    end
+end
 
 % ------------------------------------------------------------------------------
 %% Set default plotting parameters:
@@ -58,10 +86,10 @@ if isfield(annotateParams,'fdim')
 else
     fdim = [0.30,0.08]; % width, height
 end
-% textAnnotation can be: 'Name' (annotate name),
-% 'ID' (annotate ts_id), or 'none' (not annotation)
+% textAnnotation can be: 'Name' (annotate name), 'ID' (annotate ts_id),
+% 'length' (annotate the length), or 'none' (no annotation)
 if isfield(annotateParams,'textAnnotation')
-    if ismember(annotateParams.textAnnotation,{'Name','ID','none'})
+    if ismember(annotateParams.textAnnotation,{'Name','ID','length','none'})
         textAnnotation = annotateParams.textAnnotation;
     else
         warning('Unknown annotation type: %s',annotateParams.textAnnotation);
@@ -97,9 +125,10 @@ pylim = ax.YLim; % plot limits
 pWidth = diff(pxlim); % plot width
 pHeight = diff(pylim); % plot height
 alreadyPicked = zeros(numAnnotate,1); % record those already picked
+originalTitle = ax.Title.String; % restored after annotating
 
 % Groups:
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
+[~,~,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 
 % Colors:
 if ~isfield(annotateParams,'groupColors')
@@ -122,7 +151,7 @@ end
 %-------------------------------------------------------------------------------
 if ~userInput
     % Annotate a random set:
-    alreadyPicked = randsample(numTimeSeries,numAnnotate);
+    alreadyPicked = randperm(numTimeSeries,numAnnotate)';
 end
 
 % ------------------------------------------------------------------------------
@@ -132,7 +161,7 @@ fprintf(1,['Annotating time series segments to %u points in the plot, ' ...
                     'displaying %u samples from each...\n'],numAnnotate,maxL);
 
 for j = 1:numAnnotate
-    title(sprintf('%u points remaining to annotate',numAnnotate-j+1));
+    title(ax,sprintf('%u points remaining to annotate',numAnnotate-j+1));
 
     % Get user to pick a point, then find closest datapoint to their input:
     if userInput % user input
@@ -178,13 +207,20 @@ for j = 1:numAnnotate
     % When only one group, cycle through rainbow colors for each annotation:
     if numGroups==1
         % cycle through rainbow colors sequentially:
-        groupColors{1} = rainbowColors{rem(j,length(rainbowColors)-1)+1};
+        groupColors{1} = rainbowColors{rem(j-1,length(rainbowColors))+1};
+    end
+
+    % Time series without a group label are gray:
+    if theGroupIndex==0
+        colorNow = [0.5,0.5,0.5];
+    else
+        colorNow = groupColors{theGroupIndex};
     end
 
     % Plot a circle around the annotated point:
     if plotCircle
-        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',groupColors{theGroupIndex},...
-                            'MarkerFaceColor',brighten(groupColors{theGroupIndex},0.5));
+        plot(plotPoint(1),plotPoint(2),'o','MarkerEdgeColor',colorNow,...
+                            'MarkerFaceColor',brighten(colorNow,0.5));
     end
 
     % Add text annotations:
@@ -192,26 +228,26 @@ for j = 1:numAnnotate
     case 'Name'
         % Annotate text with names of datapoints:
         if ismember('Group',TimeSeries.Properties.VariableNames)
-            text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%u',...
-                    TimeSeries.Name{iPlot},TimeSeries.Group(iPlot)),...
+            text(plotPoint(1),plotPoint(2)-0.01*pHeight,sprintf('%s-%s',...
+                    TimeSeries.Name{iPlot},char(TimeSeries.Group(iPlot))),...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroupIndex},-0.6));
+                    'color',brighten(colorNow,-0.6));
         else
             text(plotPoint(1),plotPoint(2)-0.01*pHeight,TimeSeries.Name{iPlot},...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroupIndex},-0.6));
+                    'color',brighten(colorNow,-0.6));
         end
     case 'ID'
         % Annotate text with ts_id:
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
                 num2str(TimeSeries.ID(iPlot)),...
                     'interpreter','none','FontSize',8,...
-                    'color',brighten(groupColors{theGroupIndex},-0.6));
+                    'color',brighten(colorNow,-0.6));
     case 'length'
         text(plotPoint(1),plotPoint(2)-0.01*pHeight,...
                 num2str(length(TimeSeries.Data{iPlot})),...
                 'interpreter','none','FontSize',8,...
-                'color',brighten(groupColors{theGroupIndex},-0.6));
+                'color',brighten(colorNow,-0.6));
     end
 
     % Adjust if annotation goes off axis x-limits
@@ -225,17 +261,21 @@ for j = 1:numAnnotate
         py(1) = pylim(2)-fdim(2)*pHeight;
     end
 
-    % Annotate the time series
+    % Annotate the time series (a constant segment is drawn flat)
     if ~isempty(timeSeriesSegment)
+        segmentRange = max(timeSeriesSegment) - min(timeSeriesSegment);
+        if segmentRange==0
+            segmentRange = 1;
+        end
         plot(px(1)+linspace(0,fdim(1)*pWidth,length(timeSeriesSegment)),...
-                py(1)+fdim(2)*pHeight*(timeSeriesSegment-min(timeSeriesSegment))/(max(timeSeriesSegment)-min(timeSeriesSegment)),...
-                    '-','color',groupColors{theGroupIndex},'LineWidth',theLineWidth);
+                py(1)+fdim(2)*pHeight*(timeSeriesSegment-min(timeSeriesSegment))/segmentRange,...
+                    '-','color',colorNow,'LineWidth',theLineWidth);
     end
 
 end
 
-% Clear the title
-title('')
+% Restore the original title
+title(ax,originalTitle)
 
 %-------------------------------------------------------------------------------
 function groupColors = GiveMeGroupColors(annotateParams,numGroups) % Set colors

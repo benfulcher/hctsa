@@ -1,18 +1,17 @@
 function filePath = BF_WriteTempFile(dataVector,whatPrecision)
 % BF_WriteTempFile   Write a temporary file in the system temporary directory
 %
-% All ~26 TISEAN-based master operation instances for a given time series
+% All TISEAN-based master operation instances for a given time series
 % call this with the SAME z-scored data, x_z (computed once per time series
 % in TS_CalculateFeatureVector.m) -- so, absent caching, the identical vector
-% gets written to disk from scratch up to ~26 times per time series. A
+% would be written to disk from scratch many times per time series. A
 % byte-for-byte isequal check against the last-written vector is far cheaper
 % than a disk write, so the file is only rewritten when the incoming data
 % actually differs from what's already cached on disk; otherwise the existing
 % path is returned directly.
 %
-% Because of this, ownership of the file's lifetime moves here: callers no
-% longer delete their own input file (the operations that used to call
-% `delete(filePath)` on it no longer do so). Deletion is handled by an
+% Because of this, this function owns the file's lifetime: callers do not
+% delete their own input file. Deletion is handled by an
 % onCleanup object held in this function's persistent memory, which fires
 % (a) once the cached file is superseded by different data, (b) on an
 % explicit 'clear' call, and (c) automatically when MATLAB clears this
@@ -20,6 +19,15 @@ function filePath = BF_WriteTempFile(dataVector,whatPrecision)
 % session/process exit -- so even a single standalone call (nothing else
 % ever calling this function again) still cleans up after itself; it does
 % not rely on a later call to trigger cleanup.
+%
+% The file lives alone in a freshly created, uniquely named directory
+% (<tempname>/ts), so a caller's side files (TISEAN writes <file>.c2, .d2, .h2,
+% .stat, .box, .ros, ... next to its input) can never meet another call's files,
+% and removing that directory removes every one of them, including any left
+% behind when an operation errored before its own cleanup. The write is
+% checked (bytes on disk against bytes written), so a full or failing temporary
+% filesystem is reported here rather than as a confusing downstream TISEAN
+% failure on a truncated series.
 %
 %---INPUTS:
 % dataVector, a vector of data to write to file. Pass the string 'clear' to
@@ -79,25 +87,59 @@ end
 % Reuse the cached file if the incoming data is byte-for-byte identical to
 % what's already written to disk (the common case -- see header comment):
 if ~isempty(cachedPath) && isequal(dataVector,cachedData) ...
-        && isequal(whatPrecision,cachedPrecision) && exist(cachedPath,'file')
+        && isequal(whatPrecision,cachedPrecision) && isfile(cachedPath)
     filePath = cachedPath;
     return
 end
 
-% Filename is the tempname (which will be unique). On Unix, generate it
-% under /tmp rather than the default system temp directory: macOS's
-% per-user $TMPDIR (e.g., /private/var/folders/.../T/) can push the full
-% path past 72 characters, silently overflowing the fixed-size Fortran
-% CHARACTER*72 filename buffers used by several TISEAN routines (c1, c2d,
-% c2g, c2t), which then just report "cannot open input file".
+% The file goes in its own new directory named by tempname (which is unique).
+% On Unix, generate it under /tmp rather than the default system temp
+% directory: macOS's per-user $TMPDIR (e.g., /private/var/folders/.../T/) can
+% push the full path past 72 characters, silently overflowing the fixed-size
+% Fortran CHARACTER*72 filename buffers used by several TISEAN routines (c1,
+% c2d, c2g, c2t), which then just report "cannot open input file". (The path
+% built here is <tempname>/ts: about 48 characters, so the longest suffix
+% callers append, e.g. '.c2', stays far below 72.)
 if isunix
-    filePath = tempname('/tmp');
+    workDir = tempname('/tmp');
 else
-    filePath = tempname;
+    workDir = tempname;
 end
+[madeDir,mkMsg] = mkdir(workDir);
+if ~madeDir
+    error('BF_WriteTempFile:mkdirFailed','Could not create temporary directory %s: %s',workDir,mkMsg);
+end
+filePath = fullfile(workDir,'ts');
 
-% Write the file:
-dlmwrite(filePath,dataVector,'precision',whatPrecision);
+% Write the file: one row per line, comma-delimited, each value written with
+% whatPrecision significant digits ('%.17g' by default). This is written with
+% fprintf because writematrix cannot be told to write more than 15 significant
+% digits, which would lose the exactness described above:
+if ischar(whatPrecision)
+    numFormat = whatPrecision; % a custom format string
+else
+    numFormat = ['%.' num2str(whatPrecision) 'g'];
+end
+fid = fopen(filePath,'wt');
+if fid < 0
+    BF_deleteTempDirIfExists(workDir);
+    error('BF_WriteTempFile:openFailed','Could not open temporary file %s for writing',filePath);
+end
+nBytesWritten = 0;
+if ~isempty(dataVector)
+    rowFormat = [repmat([numFormat ','],1,size(dataVector,2)-1), numFormat, '\n'];
+    nBytesWritten = fprintf(fid,rowFormat,dataVector.');
+end
+closeStatus = fclose(fid);
+% Check that everything reached the disk (a full filesystem, for example, can
+% leave a silently truncated file that TISEAN would then analyze as a shorter
+% series):
+fileInfo = dir(filePath);
+if closeStatus ~= 0 || isempty(fileInfo) || fileInfo.bytes < nBytesWritten
+    BF_deleteTempDirIfExists(workDir);
+    error('BF_WriteTempFile:writeFailed', ...
+        'Writing the temporary file %s failed or was incomplete (the temporary filesystem may be full)',filePath);
+end
 
 cachedData = dataVector;
 cachedPrecision = whatPrecision;
@@ -106,12 +148,18 @@ cachedPath = filePath;
 % onCleanup object (if any), firing its destructor immediately and deleting
 % the file it was superseding; the new object then guarantees this file's
 % eventual deletion the same way:
-cachedCleanup = onCleanup(@() BF_deleteTempFileIfExists(filePath));
+cachedCleanup = onCleanup(@() BF_deleteTempDirIfExists(workDir));
 
 end
 
-function BF_deleteTempFileIfExists(filePath)
-    if exist(filePath,'file')
-        delete(filePath);
+function BF_deleteTempDirIfExists(workDir)
+    % Remove the call's whole directory: the data file and any side files
+    % written beside it. Cleanup must never throw (it may run while MATLAB is
+    % exiting, or while unwinding from another error).
+    try
+        if isfolder(workDir)
+            rmdir(workDir,'s');
+        end
+    catch
     end
 end

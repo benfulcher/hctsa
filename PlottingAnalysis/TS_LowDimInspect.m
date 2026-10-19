@@ -49,7 +49,7 @@ align([h_TimeSeries,h_LowDim],'Left','None');
 
 % Load data
 [TS_DataMat,TimeSeries] = TS_LoadData(whatData);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
+[~,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 groupColors = GiveMeColors(numGroups); % Set colors
 
 %-------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ movegui(f,'center')
 f.Visible = 'on';
 
 %-------------------------------------------------------------------------------
-function annotateFigure_Callback(hObject,eventData)
+function annotateFigure_Callback(hObject,~)
     % Bits and pieces from BF_AnnotatePoints
 
     if ~isempty(hObject.UserData)

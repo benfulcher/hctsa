@@ -94,16 +94,12 @@ function out = MF_FitSubsegments(y, model, order, subsetHow, samplep, randomSeed
 % not predicted.
 %
 % 'arcrosspred': the level statistics (trace, mean, min, max, eigenvalue levels) of
-% the cross-prediction matrix correlated at |r| = 0.89-0.98 with this function's own
-% 'ar' fpe_mean/min/max fields on two collections of real-world series (150 series
-% each), so are not returned. The spread and off-diagonal statistics, which correlated
-% only at |r| = 0.4-0.88 with fpe_* and a_1_*, and 0.4-0.85 with SY_nstat_z's spread
-% statistics, are kept.
+% the cross-prediction matrix are not returned (largely redundant with the 'ar'
+% fpe_* fields); only the spread and off-diagonal statistics are.
 %
-% The 'arma' registration (order = [2, 2], 25 uniform 10%-length segments) was
-% deregistered: its AR-driven fields correlated at |r| = 0.69-0.99 with
-% the much cheaper 'ar' registration, and the MA-driven fields (q_k_*) were noisy.
-% The 'ar', 'arsbc' and 'ss' registrations are unaffected.
+% The 'arma' registration (order = [2, 2]) is not registered: its AR-driven fields were
+% largely redundant with the much cheaper 'ar' registration, and its MA-driven fields
+% (q_k_*) were noisy. The 'ar', 'arsbc' and 'ss' registrations are unaffected.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -212,7 +208,7 @@ switch subsetHow
 		r(:, 2) = spts + l - 1;
 
 	case 'uniform'
-		if length(samplep) == 1 % size will depend on number of unique subsegments
+		if isscalar(samplep) % size will depend on number of unique subsegments
 			spts = round(linspace(0, N, numPred + 1)); % numPred+1 boundaries = numPred portions
 			r(:, 1) = spts(1:numPred) + 1;
 			r(:, 2) = spts(2:end);
@@ -254,7 +250,7 @@ switch model
 			% p = 1-10
 			% Enforce zero mean level. This could be relaxed.
 			try
-				[west, Aest, Cest, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
+				[~, Aest, ~, SBC] = ARFIT_arfit(yy(r(i, 1):r(i, 2)), 1, 10, 'sbc', 'zero');
 			catch emsg
 				if contains(emsg.message, 'too short') % (ARFIT_arfit: 'Time series (N = %u) too short.')
 					fprintf(1, 'Time Series is too short for ARFIT\n');

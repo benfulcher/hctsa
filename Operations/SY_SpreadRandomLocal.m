@@ -1,4 +1,4 @@
-function out = SY_SpreadRandomLocal(y, l, numSegs, randomSeed)
+function out = SY_SpreadRandomLocal(y, l, numSegs, ~)
 % SY_SpreadRandomLocal   How local statistics vary across many overlapping segments of the series.
 %
 % numSegs time-series segments of length l are selected from the time series (with
@@ -102,10 +102,6 @@ if isnan(l) || l > 0.9 * N % operation is not suitable -- time series is too sho
 	return % NaN means not suitable
 end
 
-if nargin < 4
-	randomSeed = []; % (not used)
-end
-
 % ------------------------------------------------------------------------------
 % numSegs segments, each of length segl data points
 
@@ -145,10 +141,10 @@ end
 % Plot some output?:
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w');
+	figure('color', 'w'); %#ok<UNRCH>
 	subplot(2, 1, 1); hold on;
 	plot(y, 'k');
-	plot(ists, y(ists), '.r');
+	plot(istarts, y(istarts), '.r');
 	title('time series')
 	subplot(2, 1, 2); plot(qs(:, 1), 'b'); title('local means')
 end
@@ -156,16 +152,16 @@ end
 % ------------------------------------------------------------------------------
 % Take mean and standard deviation of this set of local time-series statistics:
 % ------------------------------------------------------------------------------
-% Can think of this as a big bootstrapped distribution of the timeseries at
+% Can think of this as a distribution of local statistics of the timeseries at
 % a scale given by the length l
 
 fs = zeros(numFeat, 2);
 fs(:, 1) = mean(qs,'omitnan'); % the mean value of the feature across subsegments of the time series
 fs(:, 2) = std(qs,0,'omitnan'); % the spread of the feature across subsegments of the time series
 
-% mean* fields dropped: they re-estimate global summary statistics (already
-% covered elsewhere in hctsa) rather than measuring local variability/
-% stationarity; only the across-segment spread (std*) is kept.
+% Only the across-segment spread (std*) is returned: the across-segment means
+% re-estimate global summary statistics (covered elsewhere in hctsa) rather than
+% measuring local variability/stationarity.
 out.stdmean = fs(1, 2);
 out.stdstd = fs(2, 2);
 out.stdskew = fs(3, 2);

@@ -159,7 +159,7 @@ out.diffTailRatio = mean(D2(isOuter))/mean(D2(isCentral));
 % ------------------------------------------------------------------------------
 % Pawula ratio (jumps vs continuous diffusion)
 % ------------------------------------------------------------------------------
-% (the mean over bins is more reliable than the median: test-retest 0.87 vs 0.76)
+% (the mean over bins is more reliable than the median)
 out.pawula = mean(D4 ./ D2.^2);
 
 end

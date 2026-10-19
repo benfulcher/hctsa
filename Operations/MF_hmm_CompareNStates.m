@@ -27,7 +27,7 @@ function out = MF_hmm_CompareNStates(y, trainp, nstater)
 %
 % ---OUTPUTS:
 % meanLLtrain, maxLLtrain: mean and maximum across models of the log-likelihood per
-%       sample on the training part
+%       sample of the training part (under each fitted model)
 % meanLLtest, maxLLtest: mean and maximum across models of the log-likelihood per
 %       sample on the test part
 % chLLtrain, chLLtest: change in training and test log-likelihood per sample from
@@ -90,8 +90,7 @@ end
 if Ntrain >= N
 	% Every subsequent step evaluates the fitted models on a held-out test
 	% portion, so a training proportion that consumes the whole series leaves
-	% nothing to evaluate on (this used to leave yTest/Ntest undefined and
-	% error deeper in the loop):
+	% nothing to evaluate on:
 	error('trainp = %g leaves no test data for a series of length %u', trainp, N);
 end
 if Ntrain < 2
@@ -113,7 +112,7 @@ for j = 1:Nstate
 	% convergence), from fixed starting points; default termination tolerance
 	[Mu, Cov, P, Pi, LL] = ZG_hmm_fit(yTrain, numStates, 30);
 
-	LLtrains(j) = LL(end) / Ntrain;
+	LLtrains(j) = LL / Ntrain; % training data under the fitted model
 
 	%% Calculate log likelihood for the test data
 	lik = ZG_hmm_cl(yTest, Ntest, numStates, Mu, Cov, P, Pi);

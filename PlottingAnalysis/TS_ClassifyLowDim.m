@@ -44,11 +44,10 @@ end
 %-------------------------------------------------------------------------------
 %% Load data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 TellMeAboutLabeling(TimeSeries);
 
 if nargin < 2 || isempty(cfnParams)
@@ -83,18 +82,18 @@ end
 if ~any(isnan(TS_DataMat))
     fprintf('Computing top %u PCs...',numPCs)
     if doComputeAtMaxInSample
-        [pcCoeff,pcScore,~,~,percVar] = pca(zscore(TS_DataMat));
+        [pcCoeff,pcScore] = pca(zscore(TS_DataMat));
     else
-        [pcCoeff,pcScore,~,~,percVar] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
+        [pcCoeff,pcScore] = pca(zscore(TS_DataMat),'NumComponents',numPCs);
     end
 else
     warning(['Data matrix contains %.2g%% NaNs. Estimating covariances on remaining data...\n' ...
                 '(Could take some time...)'],100*mean(isnan(TS_DataMat(:))))
     if doComputeAtMaxInSample
-        [pcCoeff,pcScore,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
+        [pcCoeff,pcScore] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
                             'Rows','pairwise');
     else
-        [pcCoeff,pcScore,~,~,percVar] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
+        [pcCoeff,pcScore] = pca(BF_NormalizeMatrix(TS_DataMat,'zscore'),...
                             'Rows','pairwise','NumComponents',numPCs);
     end
     % If this fails (covariance matrix not positive definite), can try the
@@ -195,9 +194,8 @@ hold('on')
 
 %-------------------------------------------------------------------------------
 % All-feature out-of-sample:
-l_allfeats = yline(cfnRateAll,'-','color',plotColors{4},'LineWidth',lineWidth,...
+yline(cfnRateAll,'-','color',plotColors{4},'LineWidth',lineWidth,...
             'Label',sprintf('All %u features (%.1f +/- %.1f%%)',numFeatures,cfnRateAll,stdAll));
-legendEntryAllFeatures = sprintf('All %u features (%.1f%%)',numFeatures,cfnRateAll);
 
 % All-feature in-sample:
 if cfnParams.computePerFold
@@ -209,9 +207,9 @@ end
 
 %-------------------------------------------------------------------------------
 % Naive null estimate
-l_naive_null = yline(mean(nullStatsFoldMeans),'-','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+yline(mean(nullStatsFoldMeans),'-','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
                         'Label','Naive null');
-l_naive_null_over = yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
                         'Label','Naive null 95% quantile');
 
 %-------------------------------------------------------------------------------
@@ -272,7 +270,7 @@ if doComputeAtMaxInSample
     extraParams.theColors = plotColors;
     BF_ViolinPlot(accData,[],[],false,extraParams);
 
-    ax_bar_folds.XTick = [1:5+0.5];
+    ax_bar_folds.XTick = 1:5+0.5;
     xTickLabels = {'Naive-shuffle null',sprintf('all %u features train folds',numFeatures),...
                     'all features test folds',...
                     sprintf('perfect-in-fold (%u PCs) train folds',theNumPCs),...
@@ -321,7 +319,7 @@ extraParams = struct();
 plotColors{1} = ones(1,3)*0.5;
 extraParams.theColors = plotColors;
 BF_ViolinPlot(accData,[],[],false,extraParams);
-l_naive_null_over = yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
+yline(quantile(nullStatsFoldMeans,0.95),'--','color',ones(1,3)*0.5,'LineWidth',lineWidth,...
                         'Label','Naive null 95% quantile');
 
 if ~isnan(allFoldsAtPerfectInSample)

@@ -82,7 +82,7 @@ doPlot = false;
 % Embed the signal via time-delay method
 y_embed = BF_Embed(y, tau, m, false);
 
-if isnan(y_embed);
+if isnan(y_embed)
 	% embedding parameters are unsuitable (likely that tau is too long...)
 	fprintf(1, 'Embedding parameters are not suitable for this time series\n');
 	out = NaN; return
@@ -103,7 +103,7 @@ end
 perc = latent / sum(latent); % proportion of variance explained
 
 if doPlot
-	figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]);
+	figure('color', 'w'); plot(perc, 'o-k'); ylim([0, 1]); %#ok<UNRCH>
 end
 
 % -------------------------------------------------------------------------------

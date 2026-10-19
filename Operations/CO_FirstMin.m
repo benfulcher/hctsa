@@ -19,8 +19,9 @@ function out = CO_FirstMin(y, minWhat, extraParam, minNotMax)
 %          implementations), or 'mi-hist' (histogram-based method).
 %          'mi' is the Kraskov automutual information, the same as 'mi-kraskov1'
 %          (with the estimator's default of 4 nearest neighbors). The Gaussian
-%          estimate must be requested explicitly as 'mi-gaussian' (earlier versions
-%          of hctsa used the name 'mi' for it). Default: 'mi-gaussian'.
+%          estimate must be requested explicitly as 'mi-gaussian' (which
+%          reproduces 'mi' in hctsa versions before v3.0.0).
+%          Default: 'mi-gaussian'.
 %          (In the adaptive delay rules of BF_GetTau, 'mi' is the smaller of the
 %          first minimum of the Kraskov automutual information and the 1/e decay
 %          time of the autocorrelation function, which is not computed here.)
@@ -94,10 +95,11 @@ end
 % Cache the resolved output (keyed on an exact, NaN-safe match of all inputs
 % that affect the result), since many different operations call this function
 % to resolve a time delay for the same series and method (e.g., BF_GetTau's
-% 'mi-gaussian' rule, which is itself called from many other operations). A miss falls through to exactly the same computation
-% as before, so this cannot change behavior -- only whether the result was
-% already sitting in the cache (see CO_AutoCorr.m for the same pattern and
-% rationale, including why this is safe under parfor).
+% 'mi-gaussian' rule, which is itself called from many other operations). A
+% miss falls through to the full computation, so the cache cannot change
+% results -- only whether the result was already sitting in the cache (see
+% CO_AutoCorr.m for the same pattern and rationale, including why this is
+% safe under parfor).
 % ------------------------------------------------------------------------------
 persistent cacheY cacheMinWhat cacheExtraParam cacheMinNotMax cacheOut
 maxCacheEntries = 4;
@@ -136,9 +138,9 @@ end
 
 % ------------------------------------------------------------------------------
 function out = CO_FirstMin_Compute(y, minWhat, extraParam, minNotMax)
-% The original computation, unchanged -- moved into its own local function so
-% the cache wrapper above can store its result regardless of which of the
-% early-return paths below produced it.
+% The computation itself, in its own local function so the cache wrapper
+% above can store its result regardless of which of the early-return paths
+% below produced it.
 % ------------------------------------------------------------------------------
 
 N = length(y); % Time-series length
@@ -195,7 +197,7 @@ if minNotMax
 			% already increases at lag of 2 from lag of 1: a minimum (since ac(0) is maximal)
 			out = 1;
 			return
-		elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)); % minimum at previous i
+		elseif (i > 2) && (autoCorr(i - 2) > autoCorr(i - 1)) && (autoCorr(i - 1) < autoCorr(i)) % minimum at previous i
 			out = i - 1; % I found the first minimum!
 			return
 		end
@@ -216,7 +218,7 @@ else
 		end
 
 		% We're at a local maximum:
-		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)); % maximum at previous i
+		if (i > 2) && (autoCorr(i - 2) < autoCorr(i - 1)) && (autoCorr(i - 1) > autoCorr(i)) % maximum at previous i
 			out = i - 1; % I found the first maximum!
 			return
 		end

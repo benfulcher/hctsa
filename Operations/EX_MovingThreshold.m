@@ -114,7 +114,7 @@ for i = 2:N
 end
 
 if doPlot
-	figure('color', 'w'); box('on')
+	figure('color', 'w'); box('on') %#ok<UNRCH>
 	hold('on')
 	plot(y, '.-k')
 	plot(q, '--r')

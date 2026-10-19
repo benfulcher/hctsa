@@ -1,4 +1,4 @@
-function hadProblem = TS_InspectQuality(inspectWhat,customFile)
+function hadProblem = TS_InspectQuality(inspectWhat,customFile,askIfLarge)
 % TS_InspectQuality   Statistics of quality labels from an hctsa analysis.
 %
 % This function loads the calculation quality information from HCTSA.mat,
@@ -19,6 +19,14 @@ function hadProblem = TS_InspectQuality(inspectWhat,customFile)
 %
 % customFile: run on a custom HCTSA file (HCTSA.mat by default), can also be
 %             strings like 'raw' or 'norm' (cf. TS_LoadData)
+%
+% askIfLarge: (logical) whether to wait for a key press before plotting a very
+%             large matrix (more than 900,000 values, for 'full' and 'reduced')
+%             (default: true). Set to false to plot without waiting.
+%
+%---OUTPUTS:
+% hadProblem: a logical vector indicating which operations (or, for 'master',
+%             which master operations) have some special-valued outputs
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -50,6 +58,12 @@ if nargin < 1 || isempty(inspectWhat)
 end
 if nargin < 2
     customFile = 'raw'; % use un-normalized data by default, 'HCTSA.mat'
+end
+if nargin < 3 || isempty(askIfLarge)
+    askIfLarge = true;
+end
+if ~ismember(inspectWhat,{'full','all','reduced','master','summary'})
+    error('Unknown input option ''%s''',inspectWhat);
 end
 
 % ------------------------------------------------------------------------------
@@ -87,8 +101,11 @@ case {'full','all'}
 
     % Plot:
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
+
+    % Operations with some special values:
+    hadProblem = (mean(TS_Quality,1,'omitnan') > 0);
 
     % Give uncalculated entries the label 8
     TS_Quality(isnan(TS_Quality)) = 8;
@@ -103,7 +120,7 @@ case {'full','all'}
 
 case 'reduced'
     % First find where problems exist, and only show these columns
-    qualityMean = mean(TS_Quality,'omitnan');
+    qualityMean = mean(TS_Quality,1,'omitnan');
     hadProblem = (qualityMean > 0);
 
     if sum(hadProblem)==0
@@ -117,7 +134,7 @@ case 'reduced'
 
     % Plot:
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
 
     % Give uncalculated entries the label 8
@@ -129,7 +146,7 @@ case 'reduced'
     ax.XTickLabel = Operations.ID(hadProblem);
     ax.XTickLabelRotation = 90;
 
-    title(sprintf('Displaying %u x %u (displaying %u/%u operations with some special values',...
+    title(sprintf('Displaying %u x %u (%u/%u operations with some special values)',...
                     size(TS_Quality,1),sum(hadProblem),sum(hadProblem),size(TS_Quality,2)),...
                     'interpreter','none')
 
@@ -157,7 +174,13 @@ case 'master'
     end
 
     % Focus on master operations with problems:
-    hadProblem = (mean(qualities) > 0);
+    hadProblem = (mean(qualities,1) > 0);
+
+    if sum(hadProblem)==0
+        fprintf(1,'No master operations have problems! Nothing to inspect.\n');
+        if nargout==0, clear('hadProblem'), end
+        return
+    end
 
     % ------------
     % Text output:
@@ -172,13 +195,13 @@ case 'master'
     % Plotting:
     % ------------
     % Get handles for figure (f) and axes (ax):
-    f = figure('color','w');
+    figure('color','w');
     ax = gca;
     imagesc(qualities(:,hadProblem));
 
     colormap([0.1686,0.5137,0.7294; 0.8431,0.0980,0.1098]);
 
-    ax.YTick = 1:8;
+    ax.YTick = 1:7;
     qLabels = {'error','NaN','Inf','-Inf','complex','empty','link error'};
     ax.YTickLabel = qLabels;
 
@@ -261,13 +284,11 @@ case 'summary'
     xlabel('Operation ID','interpreter','none')
     ylabel(sprintf('Proportion of outputs (across %u time series)',size(TS_Quality,1)))
 
-otherwise
-    error('Unknown input option ''%s''',inspectWhat);
 end
 
 % Be nice (to the eyes):
 if nargout==0
-    clear('all')
+    clear('hadProblem')
 end
 
 % ------------------------------------------------------------------------------
@@ -298,7 +319,7 @@ function formatYAxisColorBar(doYaxis,offSet)
     maxShow = max(labelsExist); % maximum quality label to plot
 
     cb = colorbar(ax);
-    caxis([-0.5+offSet,maxShow+0.5+offSet]);
+    clim([-0.5+offSet,maxShow+0.5+offSet]);
     cb.Ticks = (0+offSet:1:maxShow+offSet);
     cb.TickLabels = allLabels(1:maxShow+1);
 
@@ -313,7 +334,9 @@ function checkSize(A)
     % Checks size of a matrix, and sends a warning if too large
     if size(A,1)*size(A,2) > 100*9000
         fprintf('Attempting to plot each value in a large matrix (%ux%u)...\n',size(A,1),size(A,2))
-        input('[Press any key to continue (or cntrl-C to abort)]','s');
+        if askIfLarge
+            input('[Press any key to continue (or cntrl-C to abort)]','s');
+        end
     end
 end
 

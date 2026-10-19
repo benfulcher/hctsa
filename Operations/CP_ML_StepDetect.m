@@ -58,7 +58,8 @@ function out = CP_ML_StepDetect(y, method, params)
 % Kalafut and Visscher, "An objective, model-independent method for detection of
 % non-uniform steps in noisy signals", Comp. Phys. Comm. 179, 716-723 (2008).
 %
-% S.-J. Kim et al., "l_1 Trend Filtering", SIAM Review 51, 339 (2009).
+% S.-J. Kim, K. Koh, S. Boyd, D. Gorinevsky, "l_1 Trend Filtering", SIAM Review 51, 339 (2009).
+% DOI: 10.1137/070690274
 %
 % Software available at: http://www.maxlittle.net/software/index.php
 
@@ -235,7 +236,7 @@ end
 % -------------------------------------------------------------------------------
 % Plot computed change points onto the time series:
 if doPlot
-	f = figure('color', 'w');
+	f = figure('color', 'w'); %#ok<UNRCH>
 	hold('on')
 	plot(y, 'k')
 	plot(chpts, y(chpts), 'or')
@@ -275,8 +276,8 @@ else
 	out.ratn12 = 0;
 end
 % Difference between number of change points in first and second half of data
-% as a proportion of total number of change points
-% Maximal (1) when all change points are in one half of data
+% as a proportion of the number of segments (k change points give k + 1 segments)
+% Maximal, k/(k + 1), when all k change points are in one half of data
 % Minimal (0) when same number of change points in both halves
 out.diffn12 = abs(sum1 - sum2) / numChangePoints;
 

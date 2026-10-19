@@ -16,7 +16,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.fatalAssertTrue(pass, 'HCTSA failed to startup successfully.')
         end
 
-        function clearSharedCaches(testCase)
+        function clearSharedCaches(~)
             % CO_AutoCorr.m and CO_FirstMin.m cache their results across
             % calls (persistent variables) to avoid redundant recomputation
             % across operations. Clear them here so tests are hermetic and
@@ -900,22 +900,17 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
         end
 
         %-------------------------------------------------------------
-        % NL_TakensEstimator (now via TISEAN d2/c2t, no TSTOOL dependency)
+        % NL_TakensEstimator (length scale enclosing a fraction of the pairs)
         %-------------------------------------------------------------
         function test_NL_TakensEstimator_DiscriminatesDimension(testCase)
-            % NL_TakensEstimator used to depend on TSTOOL's
-            % signal/takens_estimator; it now uses TISEAN's d2 and c2t
-            % (already relied on by NL_d2.m) instead. Confirm the
-            % replacement still does its actual job: high-dimensional
-            % (structureless) noise embedded at m should give a dimension
-            % estimate close to m, while a logistic map (a classic 1-D
-            % chaotic system, known correlation dimension ~1) should give an
+            % Structureless noise embedded at m should give a dimension estimate close
+            % to m, while a logistic map (correlation dimension ~1) should give an
             % estimate close to 1, clearly distinguishing it from noise.
             rng(41);
             yNoise = randn(2000,1);
-            outNoise = NL_TakensEstimator(yNoise,-1,0.05,1,{1,3});
-            testCase.verifyGreaterThan(outNoise, 2, ...
-                'Structureless noise embedded at m=3 should have a dimension estimate well above 1.');
+            outNoise = NL_TakensEstimator(yNoise,-1,0.01,1,{1,3});
+            testCase.verifyEqual(outNoise, 3, 'AbsTol', 0.3, ...
+                'Structureless noise embedded at m=3 should have a dimension estimate near 3.');
 
             N = 2000;
             yChaotic = zeros(N,1);
@@ -923,11 +918,81 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             for i = 2:N
                 yChaotic(i) = 3.9*yChaotic(i-1)*(1-yChaotic(i-1));
             end
-            outChaotic = NL_TakensEstimator(yChaotic,-1,0.05,1,{1,3});
+            outChaotic = NL_TakensEstimator(yChaotic,-1,0.01,1,{1,3});
             testCase.verifyLessThan(outChaotic, 1.5, ...
                 'The logistic map''s known correlation dimension (~1) should give a low estimate.');
             testCase.verifyLessThan(outChaotic, outNoise, ...
                 'The logistic map should have a clearly lower dimension estimate than structureless noise.');
+        end
+
+        function test_NL_TakensEstimator_DegenerateCases(testCase)
+            % Quantized values and coinciding delay vectors give estimates; too few
+            % pairs, fewer than three distinct distances, or a constant series give NaN.
+            t = (1:400)';
+            x = sin(0.3*t) + 0.5*cos(1.7*t).^3 + 0.2*sin(0.011*t.^1.5) + 0.4*sin(0.77*t.^1.1);
+            x = (x - mean(x))/std(x);
+            v = NL_TakensEstimator(x,-1,0.01,{'ac',1},{3,3});
+            testCase.verifyEqual(v, 2.86282933331, 'AbsTol', 1e-9);
+            % quantized to steps of 0.25: too discrete at the length scale
+            q = round(x/0.25)*0.25; q = (q - mean(q))/std(q);
+            testCase.verifyTrue(isnan(NL_TakensEstimator(q,-1,0.01,{'ac',1},{3,3})));
+            z = max(x - 0.5, 0); z = (z - mean(z))/std(z);
+            testCase.verifyEqual(NL_TakensEstimator(z,-1,0.01,{'ac',1},{2,3}), 1.10192541585, 'AbsTol', 1e-9);
+            testCase.verifyTrue(isnan(NL_TakensEstimator(x(1:60),-1,0.01,{'ac',1},{3,3})));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(sign(x),-1,0.01,{'ac',1},{1,2})));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(ones(100,1),-1,0.01,2,{1,2})));
+        end
+
+        function test_NL_TakensEstimator_ShiftScaleReflection(testCase)
+            % The tolerances are relative to the data: y, 3.7*y - 12 and -y give the same
+            % output (the same values as pyhctsa's takens_estimator).
+            lg = zeros(1500, 1); lg(1) = 0.3;
+            ch = zeros(1500, 1); ch(1) = 0.3141;
+            for k = 2:1500
+                lg(k) = 3.84*lg(k-1)*(1 - lg(k-1)); % a transient converging to a period-3 orbit
+                ch(k) = 3.9*ch(k-1)*(1 - ch(k-1));
+            end
+            int12 = round(4095*ch); % a chaotic series quantized to 12 bits
+            F = {@(v) v, @(v) 3.7*v - 12, @(v) -v};
+            for f = 1:3
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(int12)),-1,0.01,{'ac',1},{1,3}), ...
+                    1.002896002752, 'AbsTol', 1e-9);
+                testCase.verifyEqual(NL_TakensEstimator(zscore(F{f}(int12)),-1,0.01,{'ac',1},{1,2}), ...
+                    1.019092095706, 'AbsTol', 1e-9);
+                % the period-3 orbit: too few distinct distances below the length scale
+                testCase.verifyTrue(isnan(NL_TakensEstimator(zscore(F{f}(lg)),-1,0.01,{'ac',1},{1,3})));
+            end
+        end
+
+        function test_NL_TakensEstimator_AboveEmbeddingDimension(testCase)
+            % A random walk (with chaotic increments) whose 'ac' delay and Theiler window are
+            % about a third of the series: the estimate at m = 3 would be 9.4, so NaN.
+            x = zeros(2000, 1); x(1) = 0.3141;
+            for k = 2:2000
+                x(k) = 4*x(k-1)*(1 - x(k-1));
+            end
+            y = zscore(cumsum(x - 0.5));
+            testCase.verifyTrue(isnan(NL_TakensEstimator(y,-1,0.01,{'ac',1},{'ac',3})));
+            testCase.verifyEqual(NL_TakensEstimator(y,-1,0.01,{'ac',1},{1,3}), 1.93575005343, 'AbsTol', 1e-9);
+        end
+
+        function test_NL_GPCorrSum_RoundOffRatios(testCase)
+            % An exactly periodic series: residuals at round-off give NaN, not a ratio of
+            % rounding noise.
+            tab = sin(2*pi*(0:6)'/7 + 0.3);
+            y = zscore(tab(mod(0:999, 7) + 1));
+            out = NL_GPCorrSum(y,-1,0.5,{'ac',1},20,{'ac',{'fnn',0.05}},1);
+            testCase.verifyTrue(isnan(out.robfit_sigrat) && isnan(out.robfitresac1));
+        end
+
+        function test_NL_d2_TakensNeedsPairs(testCase)
+            % White noise, N = 1000: at m = 8-10 the length scale 0.5 holds fewer than 10
+            % pairs, whose estimates (14-33) are not dimension estimates; the takens05
+            % statistics stop at m = 7 (56 pairs, estimate 8.3).
+            rng(0);
+            out = NL_d2(zscore(randn(1000, 1)), 1, 10, {'ac', 1});
+            testCase.verifyLessThan(out.takens05_max, 10);
+            testCase.verifyGreaterThan(out.takens05_max, 4);
         end
 
         %-------------------------------------------------------------
@@ -1279,7 +1344,7 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             yPeriodic = sin(2*pi*t/17);
             outPeriodic = NL_ReturnTime(yPeriodic, 0.02, 100, {'ac',1}, 500, {1,8});
 
-            testCase.verifyEqual(outNoise.statrtym, 1, 'AbsTol', 0.1, ...
+            testCase.verifyEqual(outNoise.fracmeanrt, 0.5, 'AbsTol', 0.025, ...
                 'Noise should return to its neighborhoods at chance level at all lags.');
             testCase.verifyGreaterThan(outPeriodic.std, 5 * outNoise.std, ...
                 'A periodic signal should return to its neighborhoods far more at some lags than others.');
@@ -1501,9 +1566,15 @@ classdef OperationsUnitTests < matlab.unittest.TestCase
             testCase.verifyEqual(outSq.dispEn, -sum(pSq.*log(pSq)), 'AbsTol', 1e-12);
             testCase.verifyEqual(outSq.dispEn, log(2), 'AbsTol', 1e-6);
 
+            % A constant series (exactly, or up to rounding) is a single
+            % pattern: zero entropy
+            outC = EN_DispEn(ones(500,1));
+            testCase.verifyEqual([outC.dispEn, outC.normDispEn, outC.fDispEn, outC.normFDispEn], ...
+                zeros(1,4), 'A constant series has zero dispersion entropy.');
+            outC = EN_DispEn(0.3 + [0; 1e-17; 0; 5.5e-17; 0; 0]);
+            testCase.verifyEqual(outC.dispEn, 0);
+
             % Data-dependent failures return NaN rather than erroring:
-            testCase.verifyTrue(isnan(EN_DispEn(ones(500,1))), ...
-                'A constant series should give NaN, not an error.');
             testCase.verifyTrue(isnan(EN_DispEn(randn(5,1))), ...
                 'A too-short series should give NaN, not an error.');
 

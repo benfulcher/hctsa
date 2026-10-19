@@ -50,13 +50,10 @@ function out = SP_PhaseAmpCoupling(y, nBands, maxN, nPhaseBins)
 % 104(2), 1195-1210 (2010). DOI: 10.1152/jn.00106.2010
 %
 % ---NOTES:
-% maxMI was chosen over the mean or standard deviation of MI across pairs after
-% checking all three on real-world series: meanMI and stdMI were near-duplicates of
-% maxMI (r = 0.96 and r = 0.99) and mechanically diluted by nBands (doubling
-% nBands from 5 to 10 roughly halved meanMI, while maxMI barely moved, x0.97),
-% making maxMI the only one whose meaning does not depend on this parameter.
-% entropyMI carries genuinely separate information from maxMI (r = 0.08-0.23 on
-% real-world series).
+% maxMI is returned rather than the mean or standard deviation of MI across pairs:
+% those are largely redundant with maxMI and are diluted by the number of bands
+% (nBands), whereas the meaning of maxMI does not depend on this parameter.
+% entropyMI carries information that is separate from maxMI.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -164,8 +161,7 @@ for i = 1:nBands - 1
         k = k + 1;
         phi = phaseBand{i};
         A = ampBand{j};
-        [~, binIdx] = histc(phi, phaseEdges);
-        binIdx(binIdx == nPhaseBins + 1) = nPhaseBins; % phi == pi edge case
+        [~, ~, binIdx] = histcounts(phi, phaseEdges); % (the last bin includes phi == pi)
         meanAmp = accumarray(binIdx, A, [nPhaseBins, 1], @mean, 0);
         p = meanAmp / sum(meanAmp);
         p = p(p > 0);

@@ -122,7 +122,7 @@ for k = 1:numTimeDelays
 
 	% Plot:
 	if doPlot
-		plot(y1, y2, '.k')
+		plot(y1, y2, '.k') %#ok<UNRCH>
 		title(sprintf('ami = %.3f', amis(k)))
 		pause(0.1)
 	end
@@ -134,7 +134,7 @@ if any(isnan(amis))
 end
 
 if doPlot
-	plot(amis, '-k')
+	plot(amis, '-k') %#ok<UNRCH>
 end
 
 % -------------------------------------------------------------------------------

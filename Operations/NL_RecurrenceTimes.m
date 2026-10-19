@@ -1,4 +1,4 @@
-function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, randomSeed)
+function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, ~)
 % NL_RecurrenceTimes   Recurrence-time statistics from a recurrence plot.
 %
 % Embeds the time series in an m-dimensional delay space and characterizes the *white*
@@ -34,8 +34,9 @@ function out = NL_RecurrenceTimes(y, tau, m, theilerWin, rr, numSegments, maxN, 
 % y, scalar time series as a column vector
 % tau, time delay for the embedding (can be 'ac', 'ac1e', or 'mi', cf. BF_Embed and
 %    BF_GetTau; default: 1)
-% m, embedding dimension: a positive integer, or 'fnn' to choose it by false nearest
-%    neighbors (cf. BF_Embed; default: 3)
+% m, embedding dimension: a positive integer, or 'fnn' or {'fnn',th} to choose it by
+%    false nearest neighbors at threshold th, at most floor(2*log10(N)) for the N
+%    samples analyzed (cf. BF_Embed; default: 3)
 % theilerWin, Theiler window excluding temporally-correlated neighbors: {'ac', k} for k
 %             times the first zero-crossing of the autocorrelation function, or a number of
 %             samples (see BF_TheilerWindow and NL_RQA; default: {'ac', 1}). Narrowed to
@@ -121,17 +122,13 @@ end
 if nargin < 7 || isempty(maxN)
     maxN = 10000;
 end
-if nargin < 8 || isempty(randomSeed)
-    randomSeed = 'default'; % (not used)
-end
 
 if ischar(maxN) && strcmp(maxN, 'full')
     % no cropping
 elseif N > maxN
-    warning(sprintf(['Time series (%u > %u) is too long for recurrence-time ' ...
-                     'analysis at this recurrence rate. Analyzing the first %u samples'], N, maxN, maxN));
+    warning(['Time series (%u > %u) is too long for recurrence-time ' ...
+             'analysis at this recurrence rate. Analyzing the first %u samples'], N, maxN, maxN);
     y = y(1:maxN);
-    N = length(y);
 end
 
 % ------------------------------------------------------------------------------
@@ -237,10 +234,10 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
         nbrsR = nbrs(nbrs > j); % neighbors after j
         % band edges act as recurrent points, so lines start at the edge of the band:
         if j - theilerWinAbs >= 1
-            nbrsL = [nbrsL; j - theilerWinAbs];
+            nbrsL = [nbrsL; j - theilerWinAbs]; %#ok<AGROW>
         end
         if j + theilerWinAbs <= NsegEmb
-            nbrsR = [j + theilerWinAbs; nbrsR];
+            nbrsR = [j + theilerWinAbs; nbrsR]; %#ok<AGROW>
         end
         % White vertical line lengths: the number of NON-recurrent points
         % between successive recurrent points in this column of the
@@ -259,13 +256,12 @@ function [T_MRT, N_MPRT] = SUB_recurrenceTimeStats(Yseg, radius, theilerWinAbs)
 
     T_MRT = mean(w);
     uniqueW = unique(w);
-    counts = histc(w, uniqueW);
+    counts = histcounts(w, [uniqueW(:)', Inf]); % (the number of times each unique value occurs)
     % Normalized to a probability mass (fraction of all pooled
     % recurrence-time samples falling at the modal value), not the paper's
     % raw count -- the raw count scales directly with how many samples
-    % went in (checked empirically on real-world series: r=0.84 with plain series
-    % length), which would make it a length artifact
-    % rather than a dynamical one.
+    % went in, which would make it a length artifact rather than a
+    % dynamical one.
     N_MPRT = max(counts) / numel(w);
 end
 % ------------------------------------------------------------------------------

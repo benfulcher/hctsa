@@ -92,7 +92,7 @@ for i = 1:numSegs
 end
 
 if doPlot
-	figure('color', 'w')
+	figure('color', 'w') %#ok<UNRCH>
 	plot(dns, 'k')
 end
 
@@ -108,10 +108,10 @@ switch eachOrPar
 			divs(i) = 0.5 * sum(abs(dns(:, i) - pardn')); % each is just divergence to parent
 		end
 		if doPlot
-			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off
+			hold on; plot(pardn, 'r', 'LineWidth', 2); hold off %#ok<UNRCH>
 		end
 	case 'each'
-		% Compares each subdistribtuion to the parent (full signal) distribution
+		% Compares each subdistribution to every other subdistribution
 		if numSegs == 2 % output is just an integer: only two distributions to compare
 			out = 0.5 * sum(abs(dns(:, 1) - dns(:, 2)));
 			return
@@ -141,8 +141,8 @@ end
 
 % -------------------------------------------------------------------------------
 % Return basic statistics on differences in distributions in different
-% segments of the time series. mediandiv/mindiv/maxdiv dropped: each
-% correlates r >= 0.95 with meandiv on a diverse set of real-world series.
+% segments of the time series. Only meandiv and stddiv are returned: mediandiv,
+% mindiv, and maxdiv are largely redundant with meandiv.
 out.meandiv = mean(divs);
 out.stddiv = std(divs);
 

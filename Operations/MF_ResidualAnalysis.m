@@ -8,10 +8,8 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 %
 % Two levels are provided. 'core' is cheap (no test, no model fit) and is intended for
 % operations that are themselves cheap; 'full' adds diagnostics that need extra
-% machinery. The field sets were chosen by measuring 26 candidate statistics on 1,740
-% residual series -- ordinary residuals from three model classes, plus GARCH
-% standardized residuals -- and keeping a set in which no field is closely predictable
-% from the others. 'full' recovers 94.5% of the variance of the old 26-field block.
+% machinery. The fields were chosen so that no field is closely predictable from the
+% others.
 %
 % ---INPUTS:
 % e, the residuals, as prediction minus data (e = yp - y), a column vector.
@@ -50,6 +48,10 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 % their standardized size and their windowed statistics are rounding noise. Then only
 % meane, meanabs and stde (which have meaningful limiting values) are returned, and all
 % other fields are NaN.
+%
+% No spectral fields are returned (this also keeps the function free of toolbox
+% dependencies): they were largely predictable from the autocorrelation fields, as
+% expected since the autocorrelation function and the power spectrum are Fourier duals.
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -82,12 +84,6 @@ function out = MF_ResidualAnalysis(e, y, summaryLevel)
 % ------------------------------------------------------------------------------
 %% Preliminaries
 % ------------------------------------------------------------------------------
-% No toolbox dependency: the spectral estimate that previously required spa() from the
-% System Identification Toolbox (and, in an intermediate revision, pwelch from the Signal
-% Processing Toolbox) has been removed. The four spectral fifths it produced were 83-88%
-% predictable from the autocorrelation fields, which is expected -- the autocorrelation
-% function and the power spectrum are Fourier duals.
-
 if nargin < 2
 	y = []; % no original series supplied; taurat will be NaN
 end
@@ -151,8 +147,8 @@ out.ac3 = autoCorrResid(3);
 % Proportion of the autocorrelation function within the significance band:
 out.propbth = sum(abs(autoCorrResid) < 2.6 / sqrtN) / maxLag;
 
-% Residual decorrelation time relative to that of the data. This is the most independent
-% field in the block after meane -- it is not recoverable from the autocorrelations:
+% Residual decorrelation time relative to that of the data (this carries information
+% that is not recoverable from the autocorrelations):
 if isempty(y)
 	out.taurat = NaN;
 else
@@ -190,7 +186,7 @@ else
 end
 
 % Normality of the residuals (the KS statistic; its p-value is a deterministic function
-% of the statistic and N, and was 99.1% recoverable, so it is not reported):
+% of the statistic and N, so it is not reported):
 [~, ~, ksstat] = kstest(eZ);
 out.normksstat = ksstat;
 

@@ -1,10 +1,13 @@
-function OutputToCSV(whatData,writeTimeSeriesData,writeMasterFeatures)
+function OutputToCSV(whatData,writeTimeSeriesData,writeMasterFeatures,numSigFigs)
 % OutputToCSV     Outputs data to csv for external analysis
 %
 %---INPUTS:
 % whatData, which hctsa .mat file to use (default: HCTSA.mat)
 % writeTimeSeriesData, (logical)[false] whether to also output time-series data to file
 % writeMasterFeatures, (logical)[false] whether to also output master operation info
+% numSigFigs, (positive integer)[15] number of significant digits written for each
+%               value of the feature matrix and the time-series data (17 reproduces
+%               each double exactly)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -37,9 +40,16 @@ end
 if nargin < 2 || isempty(writeTimeSeriesData)
     writeTimeSeriesData = false;
 end
-if nargin < 3
+if nargin < 3 || isempty(writeMasterFeatures)
     writeMasterFeatures = false;
 end
+if nargin < 4 || isempty(numSigFigs)
+    numSigFigs = 15;
+end
+if ~isscalar(numSigFigs) || numSigFigs < 1 || numSigFigs ~= round(numSigFigs)
+    error('numSigFigs must be a positive integer');
+end
+numFormat = sprintf('%%.%ug',numSigFigs); % e.g., '%.15g'
 theDelimiter = ',';
 %-------------------------------------------------------------------------------
 
@@ -55,7 +65,12 @@ end
 % Output data matrix to file:
 %-------------------------------------------------------------------------------
 fileName = 'hctsa_datamatrix.csv';
-dlmwrite(fileName,TS_DataMat,'delimiter',theDelimiter);
+fid = fopen(fileName,'w');
+if fid < 0
+    error('Could not open %s for writing',fileName);
+end
+SUB_WriteRows(fid,num2cell(TS_DataMat,2),numFormat,theDelimiter);
+fclose(fid);
 fprintf(1,'Wrote feature matrix to %s.\n',fileName);
 
 %-------------------------------------------------------------------------------
@@ -66,16 +81,12 @@ if writeTimeSeriesData
     fprintf(1,'Writing time-series data for %u time series...\n',numTimeSeries);
     fileName = 'hctsa_timeseries-data.csv';
     fid = fopen(fileName,'w');
-    for i = 1:numTimeSeries
-        x = TimeSeries.Data{i};
-        L = length(x);
-        for t = 1:L-1
-            fprintf(fid,'%.6g,',x(t)); % up to last value with commas
-        end
-        fprintf(fid,'%.6g\n',x(L)); % final value with new line
+    if fid < 0
+        error('Could not open %s for writing',fileName);
     end
+    SUB_WriteRows(fid,TimeSeries.Data,numFormat,theDelimiter); % one time series per line
     fclose(fid);
-    fprintf(1,'Wrote comma-delimited time-series data (6-decimal precision) to %s.\n',fileName);
+    fprintf(1,'Wrote comma-delimited time-series data (%u significant digits) to %s.\n',numSigFigs,fileName);
 end
 
 %-------------------------------------------------------------------------------
@@ -87,17 +98,11 @@ if strcmp(theDelimiter,',')
     % warning(['The comma-delimited Keywords variable may cause trouble for ',...
         % 'the comma-delimited %s file: quoting strings should help'],fileName);
 else
-    doQuoteStrings = false;
+    doQuoteStrings = false; %#ok<UNRCH>
 end
 
 % We don't want the data to be written out in this info file:
-v = version;
-if str2double(v(1:3)) < 9.4
-    % 2017 or older MATLAB version
-    TimeSeries(:,'Data') = [];
-else
-    TimeSeries = removevars(TimeSeries,{'Data'});
-end
+TimeSeries = removevars(TimeSeries,{'Data'});
 writetable(TimeSeries,fileName,'FileType','text','WriteVariableNames',true,...
                 'Delimiter',theDelimiter,'QuoteStrings',doQuoteStrings)
 fprintf(1,'Wrote the TimeSeries table to %s.\n',fileName);
@@ -137,4 +142,14 @@ end
 % end
 
 
+end
+
+%-------------------------------------------------------------------------------
+function SUB_WriteRows(fid,rows,numFormat,theDelimiter)
+    % Write each numeric vector in the cell array rows as one delimited line
+    for i = 1:numel(rows)
+        x = rows{i};
+        lineFormat = [repmat([numFormat theDelimiter],1,numel(x)-1), numFormat, '\n'];
+        fprintf(fid,lineFormat,x);
+    end
 end

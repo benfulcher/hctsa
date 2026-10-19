@@ -34,7 +34,10 @@ function [groupLabels,newFileName] = TS_LabelGroups(whatData,keywordGroups,saveB
 %                  save out to a new, filtered version of the data)
 %
 %---OUTPUTS:
-% groupIndices: the indicies corresponding to each keyword in keywordGroups.
+% groupLabels: the group label assigned to each time series (a categorical
+%               row vector, all undefined if keywordGroups is 'clear').
+% newFileName: the file the labeling was saved to (a new, filtered file if
+%               filterMissing is true).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -96,7 +99,9 @@ numTimeSeries = height(TimeSeries);
 % Check for 'clear' mode:
 %-------------------------------------------------------------------------------
 if doClear
-    TimeSeries.Group = categorical(nan(numTimeSeries,1));
+    groupLabels = categorical(nan(1,numTimeSeries));
+    newFileName = theFile;
+    TimeSeries.Group = groupLabels';
     assert(saveBack)
     fprintf(1,'Cleared group labels; saving back to %s...',theFile);
     save(theFile,'TimeSeries','-append')
@@ -122,7 +127,10 @@ if isempty(keywordGroups)
     if strcmp(reply,'y')
         keywordGroups = UKeywords;
     else
-        fprintf(1,'No wuckers, thanks anyway ^_^\n'); return
+        fprintf(1,'No wuckers, thanks anyway ^_^\n');
+        groupLabels = categorical(nan(1,numTimeSeries));
+        newFileName = theFile;
+        return
     end
 end
 
@@ -174,7 +182,7 @@ if any(unlabeled)
         %             TimeSeries.Name{isUnlabeled(i)},TimeSeries.Keywords{isUnlabeled(i)});
         % end
     else
-        reply = input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
+        input(sprintf('%u/%u time series were unlabeled and WILL BE REMOVED from the dataset (press enter to see them)',...
                                     sum(unlabeled),length(unlabeled)));
         if ischar(whatData) && strcmp(theFile,'HCTSA_N.mat')
             warning('If data are already normalized, feature distributions will change after removing data; and normalizations may no longer be valid')

@@ -209,7 +209,8 @@ end
 %% PLOT WALKER AND ORIGINAL TIME SERIES TOGETHER:
 % ------------------------------------------------------------------------------
 if doPlot
-	lw = 1; % set the line width for plotting
+	% Set the line width for plotting:
+	lw = 1; %#ok<UNRCH>
 	figure('color', 'w'); box('on'); hold on;
 	c = BF_GetColorMap('set1', 3, 1);
 	plot(y, '.-k', 'LineWidth', lw); % original time series

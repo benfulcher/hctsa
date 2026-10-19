@@ -59,7 +59,7 @@ function out = EN_CID(y)
 
 % Original definition (in Table 2 of paper cited above)
 % sum -> mean to deal with non-equal time-series lengths
-% (now scales properly with length)
+% (so values scale properly with length)
 f_CE1 = @(x) sqrt(mean(diff(x).^2));
 
 out.CE1 = f_CE1(y);

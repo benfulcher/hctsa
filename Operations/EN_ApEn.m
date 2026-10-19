@@ -32,7 +32,6 @@ function out = EN_ApEn(y, mnom, rth, tau)
 %
 % ---NOTES:
 % For more information, cf. http://physionet.org/physiotools/ApEn/
-% I have no record of where this code was derived from :-/
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -102,11 +101,8 @@ for k = 1:2
 	x = y(idx);
 
 	for i = 1:numVectors
-		% m - m(i,:)-style implicit broadcasting subtracts the row x(i,:)
-		% from every row of x, giving the same result as explicitly building
-		% ax (formerly done via an inner for-loop over j=1:m per i -- an
-		% O(N*m) rebuild on every one of the N-m+1 outer iterations) without
-		% that per-iteration loop. The outer loop over i is kept (rather than
+		% Implicit broadcasting subtracts the row x(i,:) from every row of x,
+		% with no inner loop. The outer loop over i is kept (rather than
 		% vectorizing across all i at once) to avoid an O(N^2*m) intermediate
 		% array that could be excessive memory for long time series:
 		d = abs(x - x(i, :));

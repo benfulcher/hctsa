@@ -89,7 +89,7 @@ end
 % ------------------------------------------------------------------------------
 
 % Determine if input is a .mat file or an input text file based on filename extension:
-if strcmp(inputFile(end-3:end),'.mat');
+if strcmp(inputFile(end-3:end),'.mat')
     isMatFile = true;
 else
     isMatFile = false;
@@ -310,7 +310,15 @@ case 'ts' % Prepare metadata for time series
             Keywords{j} = regexprep(dataIn{j,2},'\"',''); % Take out inverted commas from keywords lists
             % Read the time series from its filename:
             try
-                Data{j} = dlmread(Name{j});
+                % A text file of numbers separated by whitespace or commas:
+                Data{j} = readmatrix(Name{j},'FileType','text','EmptyValue',0, ...
+                                'LeadingDelimitersRule','ignore', ...
+                                'ConsecutiveDelimitersRule','join', ...
+                                'TrailingDelimitersRule','ignore', ...
+                                'ImportErrorRule','error');
+                if isempty(Data{j})
+                    error('The data file is empty.');
+                end
             catch emsg
                 fprintf(1,'%s\n',emsg.message);
                 error(['\nCould not read the data file for ''%s''.',...

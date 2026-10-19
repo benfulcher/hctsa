@@ -289,8 +289,7 @@ out.olapint = sum(f .* ffit * dx) * std(x);
 
 % RELENT: returns the relative entropy of the two distributions
 % By convention 0*log(0/y) := 0, so also exclude points where f == 0 -- otherwise
-% log(0/ffit) = -Inf and 0*(-Inf) evaluates to NaN, which propagated into a real fraction
-% of series (up to ~9% for some distributions) rather than contributing zero as intended.
+% log(0/ffit) = -Inf and 0*(-Inf) evaluates to NaN rather than contributing zero.
 r = (ffit ~= 0) & (f ~= 0);
 out.relent = sum(f(r) .* log(f(r) ./ ffit(r)) * dx);
 

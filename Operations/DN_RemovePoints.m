@@ -39,10 +39,8 @@ function out = DN_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % A similar idea is implemented in DN_OutlierInclude.
 % The change in skewness is a difference rather than a ratio because the skewness of
 % the original series can be near 0 (symmetric distributions), where a ratio is
-% unstable (this output was previously the ratio, skewnessrat). The kurtosis
-% is at least 1 for any series, so its ratio is always well defined.
-% The autocorrelation outputs of this function (fzcacrat, ac1diff, ac2diff, ac3diff,
-% sumabsacfdiff) moved to CO_RemovePoints.
+% unstable. The kurtosis is at least 1 for any series, so its ratio is always well
+% defined.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

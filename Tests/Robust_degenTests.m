@@ -58,7 +58,7 @@ classdef Robust_degenTests < matlab.unittest.TestCase
             rng(4);
             y = zscore(cumsum(randn(1000, 1)) + 5 * (1:1000)' / 1000); % strongly trending: p-values underflow
             out = SY_VarRatioTest(y, [2, 4, 6, 8, 2, 4, 6, 8], [0, 0, 0, 0, 1, 1, 1, 1]);
-            [~, p, stat] = vratiotest(y, 'period', [2, 4, 6, 8, 2, 4, 6, 8], 'IID', logical([0, 0, 0, 0, 1, 1, 1, 1]));
+            [~, ~, stat] = vratiotest(y, 'period', [2, 4, 6, 8, 2, 4, 6, 8], 'IID', logical([0, 0, 0, 0, 1, 1, 1, 1]));
             [~, i] = max(abs(stat));
             periods = [2, 4, 6, 8, 2, 4, 6, 8];
             testCase.verifyEqual(out.periodminpValue, periods(i));

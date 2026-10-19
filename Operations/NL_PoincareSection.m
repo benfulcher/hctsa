@@ -47,9 +47,7 @@ function out = NL_PoincareSection(y, ref, embedParams)
 % TISEAN: https://www.pks.mpg.de/tisean/
 %
 % ---NOTES:
-% This operation previously used TSTOOL's 'poincare', which cut a hyperplane orthogonal to
-% the local tangent vector at a chosen reference point in the time series -- a construction
-% TISEAN has no equivalent for. 'ref' is repurposed here to instead pick which of the two
+% TISEAN's 'poincare' has no reference-point concept: 'ref' instead picks which of the two
 % possible crossing directions to use.
 %
 % Another thing that could be cool to do is to analyze variation in the plots as ref
@@ -152,7 +150,7 @@ x = v(:, 1);
 y = v(:, 2);
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(x, y, '.k'); axis equal
 end
 
@@ -231,7 +229,7 @@ for i = 1:length(numPartitions)
 
 	out.(sprintf('maxpbox%u', numPartitions(i))) = max(pbox(:));
 	out.(sprintf('minpbox%u', numPartitions(i))) = min(pbox(:));
-	out.(sprintf('zerospbox%u', numPartitions(i))) = sum(pbox(:) == 0);
+	out.(sprintf('zerospbox%u', numPartitions(i))) = nnz(pbox(:) == 0);
 	out.(sprintf('meanpbox%u', numPartitions(i))) = mean(pbox(:));
 	out.(sprintf('rangepbox%u', numPartitions(i))) = range(pbox(:));
 	% Box-occupancy entropy, Miller-Madow corrected: the plug-in estimator

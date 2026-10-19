@@ -22,10 +22,12 @@ function out = PP_Compare(y, detrndmeth)
 % detrndmeth, the preprocessing to apply (default: 'medianf3'):
 %       'poly<n>': remove a polynomial of order n = 1-9 (Curve Fitting Toolbox),
 %           e.g., 'poly1', a linear detrending
-%       'sin<n>': remove a sum of n = 1-8 sinusoids a1*sin(2*pi*f1*t+c1) + ... fitted
-%           by least squares to the mean-subtracted series, with frequencies searched
-%           deterministically between 1/(2N) and 1/2 - 1/(2N) cycles per sample
-%           (BF_FitSinusoids), e.g., 'sin1'
+%       'sin<n>': remove a constant plus a sum of n = 1-8 sinusoids
+%           a1*sin(2*pi*f1*t+c1) + ..., fitted jointly by least squares, with frequencies
+%           searched deterministically between 1/N and 1/2 - 1/(2N) cycles per sample
+%           (BF_FitSinusoids), e.g., 'sin1': this removes oscillations, and a component
+%           with less than one full cycle in the series is a trend, not an oscillation
+%           (trends are removed by 'poly' and 'spline')
 %       'spline<npieces><order>': remove a least-squares spline fitted with
 %           spap2 (Spline Toolbox) with the given number of polynomial pieces and
 %           spline order, e.g., 'spline24', a cubic spline with 2 pieces
@@ -60,8 +62,17 @@ function out = PP_Compare(y, detrndmeth)
 %       against the best-fitting normal (DN_CompareKSFit)
 % olbt_m2, olbt_m5, the mean after trimming the 2% and 5% most extreme values at
 %       each end (DN_OutlierTest)
-% A scalar NaN is returned if the processed series is identically zero (or, for
-% 'logr' and 'boxcox', if the data are not all positive).
+% A scalar NaN is returned if the processed series has no variation beyond
+% floating-point round-off, as statistics of round-off are not meaningful: this is the
+% case for the residual of an exact fit (e.g., a polynomial or a sum of sinusoids that
+% the series is), or the differences of an exact linear trend. The criterion is a
+% standard deviation of at most 10*N*eps times the root-mean-square of the series the
+% processing acts on (its length N; the log of the series for 'logr', and the
+% transformed series itself for 'boxcox'), a bound on the rounding error of the
+% processing (sums of up to N terms, and the phase of sinusoids evaluated at times up
+% to N). Small but genuine variation, such as the quantization noise left by an exact
+% fit to 24-bit data (about 1e-7 of the amplitude), is computed. NaN is also returned
+% for 'logr' and 'boxcox' if the data are not all positive.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -102,6 +113,7 @@ end
 % Preparation
 N = length(y); % time-series length
 r = (1:N)'; % the time-range over which to fit
+yRef = y; % the series the processing acts on (its magnitude sets the round-off below)
 
 % -------------------------------------------------------------------------------
 %% APPLY PREPROCESSINGS
@@ -117,21 +129,22 @@ if length(detrndmeth) == 5 && strcmp(detrndmeth(1:4), 'poly') && ~isnan(str2doub
 	% Check a curve-fitting toolbox license is available:
 	BF_CheckToolbox('curve_fitting_toolbox');
 
-	[cfun, gof] = fit(r, y, detrndmeth);
+	% (time centered and scaled, so that high orders are well conditioned)
+	[cfun, ~] = fit(r, y, detrndmeth, 'Normalize', 'on');
 	y_fit = feval(cfun, r);
 	y_d = y - y_fit;
 
 	% 2) Seasonal detrend
 elseif length(detrndmeth) == 4 && strcmp(detrndmeth(1:3), 'sin') && ~isnan(str2double(detrndmeth(4))) && ~strcmp(detrndmeth(4), '9')
 
-	% (the mean is removed first: the sinusoids have no offset, and the frequencies
-	% are bounded away from zero, so they could not otherwise absorb a non-zero mean)
+	% (a constant is fitted jointly, so that a constant plus sinusoids is removed exactly:
+	% the frequencies are bounded away from zero, so the sinusoids cannot absorb a mean)
 	numSin = str2double(detrndmeth(4));
-	if N <= 3*numSin
-		out = NaN; % too short to fit this many sinusoids
+	if N <= 3*numSin + 1
+		out = NaN; % too short to fit this many sinusoids and a constant
 		return
 	end
-	y_d = y - mean(y) - BF_FitSinusoids(y - mean(y), numSin);
+	y_d = y - BF_FitSinusoids(y, numSin, true);
 
 	% 3) Spline detrend
 elseif length(detrndmeth) == 8 && strcmp(detrndmeth(1:6), 'spline') && ~isnan(str2double(detrndmeth(7))) && ~isnan(str2double(detrndmeth(8)))
@@ -181,7 +194,9 @@ elseif length(detrndmeth) > 9 && strcmp(detrndmeth(1:9), 'resample_')
 
 	% 8) Log Returns
 elseif strcmp(detrndmeth, 'logr')
-	if all(y > 0), y_d = diff(log(y));
+	if all(y > 0)
+		yRef = log(y);
+		y_d = diff(yRef);
 	else
 		out = NaN;
 		return % return all NaNs
@@ -192,7 +207,9 @@ elseif strcmp(detrndmeth, 'boxcox')
 	% Requires a financial toolbox to run boxcox, check one is available:
 	BF_CheckToolbox('financial_toolbox');
 
-	if all(y > 0), y_d = boxcox(y);
+	if all(y > 0)
+		y_d = boxcox(y);
+		yRef = y_d; % a transformation, not a residual: only a constant result is degenerate
 	else
 		out = NaN;
 		return % return all NaNs
@@ -203,7 +220,15 @@ end
 
 % -------------------------------------------------------------------------------
 %% Quick check that outputs are meaningful
-if all(y_d == 0)
+% The processed series is round-off if its variation is within the rounding error of the
+% processing, bounded relative to the magnitude (root-mean-square) of the values it acts
+% on: a fitted or filtered value accumulates rounding over sums of up to N terms (at
+% most about N*eps/2), and a sinusoid of frequency up to 1/2 evaluated at times up to N
+% has a rounding error in its phase of up to about 1.5*pi*N*eps (three roundings of
+% 2*pi*f*t), in both the data and the fit. Averaged over the series (the phase error
+% grows with t), these are below about 8*N*eps of the root-mean-square, so 10*N*eps
+% covers them.
+if std(y_d) <= 10 * length(yRef) * eps * sqrt(mean(yRef.^2))
 	out = NaN;
 	return
 end
@@ -221,25 +246,29 @@ y_d = zscore(y_d);
 f_diff = @(proc, orig) proc - orig;
 f_normDiff = @(proc, orig) SUB_normDiff(proc, orig);
 
+% The statistics of the original series are the same for every preprocessing, so
+% they are computed once per series (cached, as in BF_GetTau):
+orig = SUB_origStats(y);
+
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), SY_StatAv(y, 'seg', 2));
+out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), orig.statav2);
 
 % (b) Sliding window mean
-out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), SY_SlidingWindow(y, 'mean', 'std', 2, 2));
-out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), SY_SlidingWindow(y, 'mean', 'std', 5, 1));
-out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), SY_SlidingWindow(y, 'mean', 'std', 10, 1));
+out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), orig.swms2_2);
+out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), orig.swms5_1);
+out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), orig.swms10_1);
 
 % (c) Sliding window std
-out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), SY_SlidingWindow(y, 'std', 'std', 2, 1));
-out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), SY_SlidingWindow(y, 'std', 'std', 5, 1));
-out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), SY_SlidingWindow(y, 'std', 'std', 10, 1));
+out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), orig.swss2_1);
+out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), orig.swss5_1);
+out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), orig.swss10_1);
 
 % 2) Gaussianity
 % (a) kernel density fit
 me1 = DN_SimpleFit(y_d, 'gauss1', 0); % kernel density fit to 1-peak gaussian
-me2 = DN_SimpleFit(y, 'gauss1', 0); % kernel density fit to 1-peak gaussian
+me2 = orig.simpleFit;
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	% fitting gaussian failed -- returns a NaN rather than a structure
 	out.gauss1_kd_r2 = NaN;
@@ -253,7 +282,7 @@ end
 
 % (b) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d, 'norm');
-me2 = DN_CompareKSFit(y, 'norm');
+me2 = orig.compareKSFit;
 
 out.kscn_peaksepy = f_diff(me1.peaksepy, me2.peaksepy);
 out.kscn_peaksepx = f_diff(me1.peaksepx, me2.peaksepx);
@@ -261,9 +290,45 @@ out.kscn_olapint = f_normDiff(me1.olapint, me2.olapint);
 out.kscn_relent = f_diff(me1.relent, me2.relent);
 
 % 3) Outliers
-out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), DN_OutlierTest(y, 2, 'mean'));
-out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), DN_OutlierTest(y, 5, 'mean'));
-out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), DN_OutlierTest(y, 5, 'std'));
+out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), orig.olbt_m2);
+out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), orig.olbt_m5);
+out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), orig.olbt_s5);
+
+% ------------------------------------------------------------------------------
+function orig = SUB_origStats(y)
+	% Statistics of the z-scored original series, shared by all preprocessings:
+	% cache the last few results, keyed on the exact (z-scored) input series
+	persistent cacheY cacheOrig
+	maxCacheEntries = 4;
+	if isempty(cacheY)
+		cacheY = {};
+		cacheOrig = {};
+	end
+	for ci = 1:numel(cacheY)
+		if isequaln(y, cacheY{ci})
+			orig = cacheOrig{ci};
+			return
+		end
+	end
+	orig.statav2 = SY_StatAv(y, 'seg', 2);
+	orig.swms2_2 = SY_SlidingWindow(y, 'mean', 'std', 2, 2);
+	orig.swms5_1 = SY_SlidingWindow(y, 'mean', 'std', 5, 1);
+	orig.swms10_1 = SY_SlidingWindow(y, 'mean', 'std', 10, 1);
+	orig.swss2_1 = SY_SlidingWindow(y, 'std', 'std', 2, 1);
+	orig.swss5_1 = SY_SlidingWindow(y, 'std', 'std', 5, 1);
+	orig.swss10_1 = SY_SlidingWindow(y, 'std', 'std', 10, 1);
+	orig.simpleFit = DN_SimpleFit(y, 'gauss1', 0);
+	orig.compareKSFit = DN_CompareKSFit(y, 'norm');
+	orig.olbt_m2 = DN_OutlierTest(y, 2, 'mean');
+	orig.olbt_m5 = DN_OutlierTest(y, 5, 'mean');
+	orig.olbt_s5 = DN_OutlierTest(y, 5, 'std');
+	cacheY = [{y}, cacheY];
+	cacheOrig = [{orig}, cacheOrig];
+	if numel(cacheY) > maxCacheEntries
+		cacheY(maxCacheEntries+1:end) = [];
+		cacheOrig(maxCacheEntries+1:end) = [];
+	end
+end
 
 % ------------------------------------------------------------------------------
 function nd = SUB_normDiff(proc, orig)

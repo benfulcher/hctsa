@@ -11,7 +11,8 @@ function out = SP_Rhythmicity(y, m, tau, nFreq, fLow, fHigh, smoothWin, minCycle
 % Method (the Lagged-Angle Vector Index, LAVI, of G. Karvat et al., "Universal
 % rhythmic architecture uncovers two modes of neural dynamics", Nature
 % Communications 17 (2026); a phase-only refinement of the lagged coherence of
-% J. Fransen et al., NeuroImage 111, 158 (2015)):
+% J. W. Fransen, F. van Ede, E. Maris, "Identifying neuronal oscillations using
+% rhythmicity", NeuroImage 118, 256 (2015), DOI: 10.1016/j.neuroimage.2015.06.003):
 %
 % (1) Complex Morlet wavelet transform at each analysis frequency f (m cycles
 %     per wavelet), giving the instantaneous phase phi(t,f). No Wavelet

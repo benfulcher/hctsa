@@ -21,7 +21,7 @@ function out = CO_FallingSticks(y)
 % see.
 %
 % Adapted from a Python 'FALLstick' reference implementation by Eugene Chon
-% <eugenechon04@gmail.com>.
+% (@EugeneChon04, https://github.com/EugeneChon04; <eugenechon04@gmail.com>).
 %
 % ---INPUTS:
 % y, the input time series (assumed z-scored: the sign split is around the
@@ -135,9 +135,8 @@ out.propCase2_all = SUB_propCase2Pooled(casePos, caseNeg);
 % ------------------------------------------------------------------------------
 %% Distribution shape
 % ------------------------------------------------------------------------------
-% (The 90th percentile is omitted: across two independent redundancy-check
-% datasets it landed exactly on the pi/2 flat-fall spike every time, since
-% most series have >=10% flat falls -- it carries no information.)
+% (The 90th percentile is not returned: whenever at least 10% of falls are
+% flat it equals pi/2, the flat-fall angle.)
 if length(allAngles) >= 2
 	out.q10_all = quantile(allAngles, 0.1);
 else

@@ -38,14 +38,9 @@ function out = MD_Porta(x,numLevels)
 % Physiol. 293(1), H702-H708 (2007). DOI: 10.1152/ajpheart.00006.2007
 %
 % ---NOTES:
-% Earlier versions of this docstring cited "A. Porta et al., Quantifying the
-% strength of the linear and nonlinear relationships between heart period and
-% arterial pressure, IEEE Trans. Biomed. Eng. 45(8) 1017 (1998)". No paper with
-% that title was found; IEEE Trans. Biomed. Eng. 45(8), 1017-1023 (1998) is a
-% different paper (Cammarota and Onaral, DOI: 10.1109/10.704870). The references
-% above are the papers that define and use the word classes implemented here. The
-% default of six quantization levels is the value reported for this method in
-% secondary sources; it was not checked in the two papers above.
+% The references above are the papers that define and use the word classes
+% implemented here. The default of six quantization levels is the value reported
+% for this method in secondary sources; it was not checked in the two papers above.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -9,7 +9,7 @@ function out = SP_SinusoidFit(y, model)
 % The fitted models are:
 %   'sinK':     a sum of K sinusoids, sum_{i=1..K} a_i*sin(2*pi*f_i*t + c_i), with
 %               free amplitudes a_i, phases c_i, and frequencies f_i in
-%               [1/(2N), 1/2 - 1/(2N)] cycles per sample,
+%               [1/N, 1/2 - 1/(2N)] cycles per sample,
 %   'fourierK': a K-term Fourier series,
 %               a0 + sum_{i=1..K} (a_i*cos(i*w*t) + b_i*sin(i*w*t)),
 %               with a single fitted fundamental frequency w (so that the terms
@@ -32,7 +32,8 @@ function out = SP_SinusoidFit(y, model)
 %       (vi) 'fourier3': a Fourier series with three terms
 %
 % ---OUTPUTS: a structure containing
-% r2, the R^2 of the fit
+% r2, the R^2 of the fit, relative to the mean of the series. The sinK models have
+%         no intercept (constant) term, so r2 can be negative for them
 % adjr2, the degrees-of-freedom-adjusted R^2
 % rmse, the root mean square error of the fit (the residual sum of squares divided
 %         by the degrees of freedom of the error, as in the Curve Fitting Toolbox)
@@ -42,19 +43,26 @@ function out = SP_SinusoidFit(y, model)
 % resrunsz, the signed z-statistic of a runs test on the residuals (BF_RunsZ):
 %         negative when the residuals have fewer runs about their median than
 %         expected for a random order (slowly varying residuals)
+% resAC1, resAC2 and resrunsz are NaN if the residuals have no variation beyond
+% floating-point round-off, as for an exact fit (BF_ResidualStats).
 % If the model cannot be fitted (NaN or Inf computed by the model function, or
 % fewer than 3K+1 samples for K sinusoids), NaN is returned instead of a structure.
 %
 % ---NOTES:
-% This function holds the time-series-model branch of the former DN_SimpleFit,
-% from which it was split because the distribution of values is unaffected by
-% temporal ordering, whereas these fits are not. r2 and adjr2 are not registered
-% for the sin1/sin2/sin3 mops (rmse is).
-% The sinusoid frequencies are bounded below by 1/(2N) cycles per sample, because
-% a sinusoid of lower frequency cannot be told apart from a constant plus a linear
-% trend, so that its amplitude and phase are not determined, and the best-fitting
-% frequency of the unbounded fit of a trending series tends to zero. The search is
-% deterministic (no random starts, no iterative optimizer): see BF_FitSinusoids.
+% These time-series models are kept separate from DN_SimpleFit, which fits the
+% distribution of values: that distribution is unaffected by temporal ordering,
+% whereas these fits are not. r2 and adjr2 are not registered for the
+% sin1/sin2/sin3 mops (rmse is).
+% The sinusoid frequencies are bounded below by 1/N cycles per sample, so that each
+% sinusoid completes at least one full cycle within the series: these models measure
+% how well the series is described by oscillations, and a component with less than
+% one cycle in the window is a trend (its period is not observed), which would let
+% a sinusoid fit a trending series as if it were periodic (and below 1/(2N) its
+% amplitude and phase are not determined: it cannot be told apart from a constant
+% plus a linear trend, and the best-fitting frequency of a trending series tends to
+% zero). The search is
+% deterministic (no random starts: a grid search refined by Gauss-Newton iterations):
+% see BF_FitSinusoids.
 % The Fourier series are fitted by the Curve Fitting Toolbox from its own start
 % points, which do not depend on the random number generator.
 
@@ -121,7 +129,7 @@ else
 	BF_CheckToolbox('curve_fitting_toolbox');
 	t = (1:N)'; % Time variable for equal sampling of the univariate time series
 	try
-		[cfun, gof, output] = fit(t, y, model); % fit the model
+		[~, gof, output] = fit(t, y, model); % fit the model
 	catch emsg % this model can't even be fitted OR license problem
 		if strcmp(emsg.message, 'NaN computed by model function.') || strcmp(emsg.message, 'Inf computed by model function.')
 			fprintf(1, 'The model %s failed for this data -- returning NaNs for all fitting outputs\n', model);
@@ -131,7 +139,6 @@ else
 		end
 	end
 	res = output.residuals;
-	sstot = sum((y - mean(y)).^2);
 	out.r2 = gof.rsquare;
 	out.adjr2 = gof.adjrsquare;
 	out.rmse = gof.rmse;
@@ -140,6 +147,6 @@ end
 % ------------------------------------------------------------------------------
 %% Remaining structure in the residuals
 % ------------------------------------------------------------------------------
-[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, sstot);
+[out.resAC1, out.resAC2, out.resrunsz] = BF_ResidualStats(res, y);
 
 end

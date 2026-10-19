@@ -47,14 +47,11 @@ function out = CO_Quantilogram(y, lag)
 % The central quantile levels measure the same persistence as the quantile-state
 % transition probabilities and the up-down motif frequencies (SB_TransitionMatrix,
 % SB_MotifTwo): at the adaptive lag set by 'mi' the hit processes for q25, q50 and
-% q75 are transforms of SB_TransitionMatrix stay-probabilities (maximum absolute
-% Spearman correlation 0.96-0.97 on real series), so hctsa does not register them.
-% It registers only the tail levels: q05, q10, q90 and q95 at the adaptive lag set
-% by 'mi' (maximum absolute correlation with the SB_TransitionMatrix features 0.88),
-% which grows with the series' own timescale and so is less dependent on the
-% sampling rate (a series that decorrelates within a step, such as a chaotic map,
-% keeps a lag of 1), and q05 and q95 at lag 1 (correlation 0.93 with the
-% SB_TransitionMatrix_51 diagonal entries, accepted as interpretable). All seven
+% q75 are transforms of SB_TransitionMatrix stay-probabilities, so hctsa does not
+% register them. It registers only the tail levels: q05, q10, q90 and q95 at the
+% adaptive lag set by 'mi', which grows with the series' own timescale and so is
+% less dependent on the sampling rate (a series that decorrelates within a step,
+% such as a chaotic map, keeps a lag of 1), and q05 and q95 at lag 1. All seven
 % levels remain computed and available.
 
 % ------------------------------------------------------------------------------

@@ -40,9 +40,7 @@ function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 % median, mean, iqr, hist_ent = 0; mode_val = 1; mode = 0; the rest NaN).
 %
 % ---NOTES:
-% `max` is not computed: it was redundant with `mean` and `std` (|r| >= 0.9 with both,
-% on each of two collections of real-world series), at both registered radii (r = 0.1
-% and r = 1).
+% `max` is not returned: it is largely redundant with `mean` and `std`.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -110,7 +108,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 		tau = floor(length(y) / 10);
 	end
 end
-if strcmp(tau, 'tau'),
+if strcmp(tau, 'tau')
 	tau = CO_FirstCrossing(y, 'ac', 0, 'discrete');
 	if isnan(tau)
 		out = NaN; return
@@ -122,7 +120,7 @@ if strcmp(tau, 'tau'),
 end
 
 % Ensure y is a column vector:
-if size(y, 2) > size(y, 1);
+if size(y, 2) > size(y, 1)
 	y = y';
 end
 
@@ -133,7 +131,7 @@ m = [y(1:end - tau), y(1 + tau:end)];
 N = length(m);
 
 if doPlot % plot the recurrence space:
-	plot(m(:, 1), m(:, 2), '.');
+	plot(m(:, 1), m(:, 2), '.'); %#ok<UNRCH>
 end
 
 %% Start the analysis
@@ -209,7 +207,7 @@ out.mode = binCentres(mix);
 out.hist_ent = sum(binP(binP > 0) .* log(binP(binP > 0)));
 
 if doPlot
-	bar(binCentres, binP);
+	bar(binCentres, binP); %#ok<UNRCH>
 end
 
 % --- Stationarity measure for fifths of the time series

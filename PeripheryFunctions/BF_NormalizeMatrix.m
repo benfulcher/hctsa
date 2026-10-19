@@ -1,19 +1,58 @@
-function dataMatrixNorm = BF_NormalizeMatrix(dataMatrix,normMethod,isTraining)
+function [dataMatrixNorm,normParams] = BF_NormalizeMatrix(dataMatrix,normMethod,isTraining)
 % BF_NormalizeMatrix    Normalizes all columns of an input matrix.
 %
+% Each column is transformed separately. The parameters of each transformation
+% are fitted on the training rows and the transformation is then applied to all
+% rows. The fitted parameters can be returned and applied to new data later.
+%
+%---USAGE:
+% XNorm = BF_NormalizeMatrix(X,'mixedSigmoid'); % fit on all rows, transform all rows
+% XNorm = BF_NormalizeMatrix(X,'zscore',isTraining); % fit on training rows only
+% [XNorm,normParams] = BF_NormalizeMatrix(X,'mixedSigmoid'); % also return the parameters
+% XNewNorm = BF_NormalizeMatrix(XNew,normParams); % apply fitted parameters to new data
+%
 %---INPUTS:
-% dataMatrix, the input data matrix
-% normMethod, the normalization method to use (see body of the code for options)
+% dataMatrix, the input data matrix (observations as rows, features as columns)
+% normMethod, the normalization method to use:
+%   'subtractMean': x - mean(x)
+%   'maxmin': linear rescaling to the unit interval, (x - min(x))/(max(x) - min(x))
+%   'zscore': (x - mean(x))/std(x)
+%   'sigmoid': 1/(1 + exp(-(x - mean(x))/std(x)))
+%   'scaledSigmoid': 'sigmoid', then a linear rescaling to the unit interval
+%   'robustSigmoid': outlier-robust sigmoid, 1/(1 + exp(-(x - median(x))/(iqr(x)/1.35)))
+%   'scaledRobustSigmoid': 'robustSigmoid', then a linear rescaling to the unit interval
+%   'mixedSigmoid': 'scaledRobustSigmoid', or 'scaledSigmoid' for a column with iqr = 0
+%   'scaledsigmoid5q': 'scaledSigmoid' with the mean and std computed from values
+%                       between the 5th and 95th percentiles only
+%   OR the normParams output of an earlier call: its fitted parameters are then
+%   applied to the columns of dataMatrix (nothing is fitted; isTraining is not used).
+%   Default: 'sigmoid'.
 % isTraining, learn the normalization parameters just on this training portion
 %             of data, then apply it to the full dataset (required for training
 %             /testing procedures where the testing data has to remain unseen).
 %             Should be input as a logical of the same size as the number of rows
-%             in the dataMatrix.
+%             in the dataMatrix. Default: all rows.
 %
-%---OUTPUT:
+%---OUTPUTS:
 % dataMatrixNorm, the normalized matrix
+% normParams, the fitted parameters, a structure with fields:
+%   normMethod, the normalization method
+%   featureParams, a table with a row for each column of dataMatrix, with variables:
+%       transform: the transformation applied to that column: 'subtractMean',
+%                  'maxmin', 'zscore', 'sigmoid', 'scaledSigmoid', 'robustSigmoid',
+%                  'scaledRobustSigmoid', 'constant' (values set to 0: constant
+%                  training values), or 'allNaN' (values set to NaN: no training
+%                  values, or a scale of zero for a robust sigmoid or 'scaledsigmoid5q').
+%       location: the mean (median for robust sigmoids, minimum for 'maxmin')
+%       scale: the std (iqr for robust sigmoids, max - min for 'maxmin')
+%       rescaleMin, rescaleMax: for the scaled sigmoids, the range of the sigmoid
+%                  output on the training rows, used to rescale to the unit interval
+%                  (all values are set to 0 if they are equal; no rescaling is done
+%                  if they are NaN, i.e., no training output is a real number).
 %
-% NaNs are ignored -- only real data is used for the normalization
+% NaNs are ignored when fitting (only real data is used for the normalization),
+% and stay NaN in the output. Infs are not treated specially (TS_Normalize
+% converts them to NaN before normalizing).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -53,180 +92,178 @@ if nargin < 2 || isempty(normMethod)
     normMethod = 'sigmoid';
 end
 
-if nargin < 3
-    isTraining = true(size(dataMatrix,1),1);
-end
-if size(isTraining,2) > size(isTraining,1)
-    isTraining = isTraining'; % should be a column vector
-end
-if size(isTraining,2)~=1
-    error('Logical specifying training indices should be a vector');
-end
-%-------------------------------------------------------------------------------
-
+numObs = size(dataMatrix,1);
 numFeatures = size(dataMatrix,2);
 
 % ------------------------------------------------------------------------------
-% Normalize each column according to the specified normalizing transformation
+%% Apply previously fitted parameters
 % ------------------------------------------------------------------------------
-
-dataMatrixNorm = zeros(size(dataMatrix));
-
-switch normMethod
-    case 'subtractMean'
-        % Subtract the mean:
-        dataMatrixNorm = bsxfun(@minus,dataMatrix,mean(dataMatrix));
-
-    case 'maxmin'
-        % Linear rescaling to the unit interval
-        for i = 1:numFeatures % cycle through the operations
-            dataMatrixNorm(:,i) = UnityRescale(dataMatrix(:,i));
-        end
-
-    case 'zscore'
-        for i = 1:numFeatures
-            dataMatrixNorm(:,i) = ZScore(dataMatrix(:,i));
-        end
-
-    case 'robustSigmoid'
-        % A outlier-robust sigmoid
-        for i = 1:numFeatures % cycle through the features
-            dataMatrixNorm(:,i) = RobustSigmoid(dataMatrix(:,i),0);
-        end
-
-    case 'scaledRobustSigmoid'
-        % A scaled, outlier-robust sigmoid
-        % Problem is that if the iqr=0, this is not defined
-
-        for i = 1:numFeatures % cycle through the features
-            dataMatrixNorm(:,i) = RobustSigmoid(dataMatrix(:,i),1);
-        end
-
-    case 'sigmoid'
-        % Standard sigmoidal transformation
-        for i = 1:numFeatures % cycle through the features
-            dataMatrixNorm(:,i) = Sigmoid(dataMatrix(:,i),0);
-        end
-
-    case 'scaledSigmoid'
-        % Standard sigmoid transform, then a rescaling to the unit interval
-        dataMatrixNorm = zeros(size(dataMatrix));
-        for i = 1:numFeatures % cycle through the features
-            dataMatrixNorm(:,i) = Sigmoid(dataMatrix(:,i),1);
-        end
-
-    case 'mixedSigmoid'
-        % Uses a scaled sigmoid if iqr=0; a scaled, outlier-robust sigmoid otherwise
-        % Uses only non-NaNs
-
-        % Outlier-adjusted sigmoid:
-        for i = 1:numFeatures % cycle through columns
-            theColumn = dataMatrix(:,i);
-            if max(dataMatrix(:,i))==min(theColumn)
-                % A constant column is set to 0:
-                dataMatrixNorm(:,i) = 0;
-            elseif all(isnan(theColumn))
-                % Everything a NaN, kept at NaN:
-                dataMatrixNorm(:,i) = NaN;
-            elseif iqr(dataMatrix(~isnan(theColumn),i))==0
-                % iqr of data is zero: perform a normal sigmoidal transformation:
-                dataMatrixNorm(:,i) = Sigmoid(dataMatrix(:,i),1);
-            else
-                % Perform an outlier-robust version of the sigmoid:
-                dataMatrixNorm(:,i) = RobustSigmoid(dataMatrix(:,i),1);
-            end
-        end
-
-    case 'scaledsigmoid5q'
-        % First caps at 5th and 95th quantile, then does scaled sigmoid
-        for i = 1:numFeatures % cycle through the features
-            goodRows = ~isnan(dataMatrix(:,i));
-            FF = dataMatrix(goodRows,i);
-            qs = quantile(FF,[0.05,0.95]);
-            qr = (FF>=qs(1) & FF<=qs(2)); % quantile range
-            % calculate mean and std based on quantile range only
-            meanF = mean(FF(qr));
-            stdF = std(FF(qr));
-            if stdF==0
-                dataMatrixNorm(goodRows,i) = NaN; % avoid +/- Infs
-            else
-%                 kk = 1./(1+exp(-zscore(FF)));
-                kk = 1./(1+exp(-(FF-meanF)/stdF));
-                dataMatrixNorm(goodRows,i) = (kk-min(kk))/(max(kk)-min(kk));
-            end
-        end
-
-    otherwise
-        error('Invalid normalization method ''%s''', normMethod)
+if isstruct(normMethod)
+    normParams = normMethod;
+    if ~isfield(normParams,'featureParams') || height(normParams.featureParams)~=numFeatures
+        error(['Normalization parameters must be the normParams output of BF_NormalizeMatrix,' ...
+                    ' with one row of featureParams for each of the %u columns'],numFeatures);
+    end
+    fp = normParams.featureParams;
+    dataMatrixNorm = zeros(size(dataMatrix));
+    for i = 1:numFeatures
+        dataMatrixNorm(:,i) = ApplyTransform(dataMatrix(:,i),fp.transform{i},fp.location(i),...
+                                fp.scale(i),fp.rescaleMin(i),fp.rescaleMax(i));
+    end
+    return
 end
 
+if nargin < 3 || isempty(isTraining)
+    isTraining = true(numObs,1);
+end
+isTraining = isTraining(:); % should be a column vector
+if ~islogical(isTraining) || length(isTraining)~=numObs
+    error('isTraining should be a logical vector with one entry for each of the %u rows',numObs);
+end
+
+% ------------------------------------------------------------------------------
+%% Fit the parameters of each column on the training rows, and transform
+% ------------------------------------------------------------------------------
+transform = cell(numFeatures,1);
+location = nan(numFeatures,1);
+scale = nan(numFeatures,1);
+rescaleMin = nan(numFeatures,1);
+rescaleMax = nan(numFeatures,1);
+dataMatrixNorm = zeros(size(dataMatrix));
+
+for i = 1:numFeatures
+    x = dataMatrix(:,i);
+    xTrain = x(~isnan(x) & isTraining); % only learn from real training data
+
+    switch normMethod
+        case 'subtractMean'
+            transform{i} = 'subtractMean';
+            location(i) = mean(xTrain);
+
+        case 'maxmin'
+            % Linear rescaling to the unit interval
+            if isempty(xTrain)
+                transform{i} = 'allNaN';
+            elseif min(xTrain)==max(xTrain)
+                % There is no variation -- set all to zero -- attempts to rescale will blow up
+                transform{i} = 'constant';
+            else
+                transform{i} = 'maxmin';
+                location(i) = min(xTrain);
+                scale(i) = max(xTrain) - min(xTrain);
+            end
+
+        case 'zscore'
+            transform{i} = 'zscore';
+            location(i) = mean(xTrain);
+            scale(i) = std(xTrain);
+
+        case {'sigmoid','scaledSigmoid'}
+            % Standard sigmoidal transformation (optionally rescaled to the unit interval)
+            transform{i} = normMethod;
+            location(i) = mean(xTrain);
+            scale(i) = std(xTrain);
+
+        case {'robustSigmoid','scaledRobustSigmoid'}
+            % An outlier-robust sigmoid (optionally rescaled to the unit interval)
+            % It is not defined if iqr = 0
+            location(i) = median(xTrain);
+            scale(i) = iqr(xTrain);
+            if scale(i)==0
+                transform{i} = 'allNaN';
+            else
+                transform{i} = normMethod;
+            end
+
+        case 'mixedSigmoid'
+            % Uses a scaled sigmoid if iqr=0; a scaled, outlier-robust sigmoid otherwise
+            if isempty(xTrain)
+                % Everything a NaN, kept at NaN:
+                transform{i} = 'allNaN';
+            elseif max(xTrain)==min(xTrain)
+                % A constant column is set to 0:
+                transform{i} = 'constant';
+            elseif iqr(xTrain)==0
+                % iqr of data is zero: perform a normal sigmoidal transformation:
+                transform{i} = 'scaledSigmoid';
+                location(i) = mean(xTrain);
+                scale(i) = std(xTrain);
+            else
+                % Perform an outlier-robust version of the sigmoid:
+                transform{i} = 'scaledRobustSigmoid';
+                location(i) = median(xTrain);
+                scale(i) = iqr(xTrain);
+            end
+
+        case 'scaledsigmoid5q'
+            % Scaled sigmoid, with mean and std computed from values within the
+            % 5th--95th quantile range only
+            qs = quantile(xTrain,[0.05,0.95]);
+            qr = (xTrain>=qs(1) & xTrain<=qs(2)); % quantile range
+            location(i) = mean(xTrain(qr));
+            scale(i) = std(xTrain(qr));
+            if isempty(xTrain) || scale(i)==0
+                transform{i} = 'allNaN'; % avoid +/- Infs
+            else
+                transform{i} = 'scaledSigmoid';
+            end
+
+        otherwise
+            error('Invalid normalization method ''%s''', normMethod)
+    end
+
+    % Range of the sigmoid output on the training rows, for rescaling to the unit interval:
+    if ismember(transform{i},{'scaledSigmoid','scaledRobustSigmoid'})
+        xhat = ApplyTransform(x,transform{i},location(i),scale(i),NaN,NaN);
+        xhatTrain = xhat(~isnan(xhat) & isTraining);
+        if ~isempty(xhatTrain)
+            rescaleMin(i) = min(xhatTrain);
+            rescaleMax(i) = max(xhatTrain);
+        end
+    end
+
+    dataMatrixNorm(:,i) = ApplyTransform(x,transform{i},location(i),scale(i),...
+                                            rescaleMin(i),rescaleMax(i));
+end
+
+if nargout > 1
+    normParams = struct('normMethod',normMethod,'featureParams',...
+                    table(transform,location,scale,rescaleMin,rescaleMax));
+end
 
 %-------------------------------------------------------------------------------
 % Normalization functions:
 %-------------------------------------------------------------------------------
-
-function xhat = Sigmoid(x,doScale)
-    % Classic sigmoidal transformation (optionally scaled to the unit interval)
-    if nargin < 2
-        doScale = true;
+function xhat = ApplyTransform(x,transform,location,scale,rescaleMin,rescaleMax)
+    % Apply the transformation of a single column, given its fitted parameters
+    switch transform
+        case 'subtractMean'
+            xhat = x - location;
+        case {'maxmin','zscore'}
+            xhat = (x - location)/scale;
+        case {'sigmoid','scaledSigmoid'}
+            % Classic sigmoidal transformation:
+            xhat = 1./(1 + exp(-(x - location)/scale));
+        case {'robustSigmoid','scaledRobustSigmoid'}
+            % Outlier-robust sigmoid:
+            xhat = 1./(1 + exp(-(x - location)/(scale/1.35)));
+        case 'constant'
+            xhat = zeros(size(x));
+            xhat(isnan(x)) = NaN;
+        case 'allNaN'
+            xhat = nan(size(x));
+        otherwise
+            error('Unknown transformation ''%s''',transform);
     end
 
-    goodVals = (~isnan(x) & isTraining);
-    meanX = mean(x(goodVals));
-    stdX = std(x(goodVals));
-
-    % Sigmoidal transformation:
-    xhat = 1./(1 + exp(-(x-meanX)/stdX));
-
-    % Rescale to unit interval:
-    if doScale
-        xhat = UnityRescale(xhat);
-    end
-end
-
-function xhat = RobustSigmoid(x,doScale)
-    % Outlier-adjusted sigmoid (optionally scaled to unit interval)
-    if nargin < 2
-        doScale = true;
-    end
-
-    goodVals = (~isnan(x) & isTraining);
-    medianX = median(x(goodVals));
-    iqrX = iqr(x(goodVals));
-
-    if iqrX==0 % Can't apply an outlier-robust sigmoid meaningfully
-        xhat = nan(size(x));
-    else
-        % Outlier-robust sigmoid:
-        xhat = 1./(1 + exp(-(x-medianX)/(iqrX/1.35)));
-        if doScale % Rescale to the unit interval:
-            xhat = UnityRescale(xhat);
+    % Rescale the sigmoid output to the unit interval (using its training range):
+    if ismember(transform,{'scaledSigmoid','scaledRobustSigmoid'}) && ~isnan(rescaleMin)
+        if rescaleMin==rescaleMax
+            % There is no variation -- set all to zero -- attempts to rescale will blow up
+            xhat(~isnan(xhat)) = 0;
+        else
+            xhat = (xhat - rescaleMin)/(rescaleMax - rescaleMin);
         end
-    end
-end
-
-function xhat = ZScore(x)
-    goodVals = (~isnan(x) & isTraining);
-    meanX = mean(x(goodVals));
-    stdX = std(x(goodVals));
-    xhat = (x-meanX)/stdX;
-end
-
-function xhat = UnityRescale(x)
-    % Linearly rescale a data vector to unit interval:
-    goodVals = (~isnan(x) & isTraining); % only work with non-NaN data
-    if ~any(goodVals) % all NaNs:
-        xhat = x; return
-    end
-    minX = min(x(goodVals));
-    maxX = max(x(goodVals));
-    if minX==maxX
-        % There is no variation -- set all to zero -- attempts to rescale will blow up
-        xhat = x;
-        xhat(goodVals) = 0;
-    else
-        % There is some variation -- rescale to unit interval
-        xhat = (x-minX)/(maxX-minX);
     end
 end
 

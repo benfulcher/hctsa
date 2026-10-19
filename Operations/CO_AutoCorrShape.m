@@ -14,12 +14,18 @@ function out = CO_AutoCorrShape(y, stopWhen)
 %                       turns negative); the default,
 %           'drown': up to the first lag where the ACF is within +/-2/sqrt(N) of
 %                    zero,
-%           'doubleDrown': up to twice that lag,
+%           'doubleDrown': up to twice the most recent lag at which the ACF is within
+%                          +/-2/sqrt(N) of zero (this lag is updated at every such lag,
+%                          so the ACF is cut at the first lag equal to twice the most
+%                          recent such lag; all lags are used if that point is not
+%                          reached),
 %           or a positive integer, the maximum lag.
 %
 % ---OUTPUTS:
-% Nac, the number of lags in the initial positive stretch ('posDrown'), or the
-%       first lag within the threshold band of zero (otherwise),
+% Nac, the number of lags in the initial positive stretch ('posDrown'; 0 if the
+%       ACF never drops below the threshold), the first lag within the threshold
+%       band of zero ('drown'), the most recent such lag ('doubleDrown'), or
+%       stopWhen (numeric),
 % sumacf, meanacf, the sum and mean of the ACF values retained,
 % sumabsacf, meanabsacf, the sum and mean of their absolute values (not output
 %       for 'posDrown', where the ACF is positive),
@@ -142,7 +148,8 @@ elseif ischar(stopWhen) % compute ACF up to a given threshold:
 				Ndrown = N - 1;
 			end
 		case 'doubleDrown'
-			% Stop at 2*tau, where tau is the lag where ACF ~ 0 (within 1/sqrt(N) threshold)
+			% Stop at 2*tau, where tau is the most recent lag with ACF ~ 0 (within the
+			% 2/sqrt(N) threshold); tau is updated at every such lag
 			for i = 1:N
 				acf(i) = full_acf(i); % *** NOTE acf vector indicies are not lags
 				if (Ndrown > 0) && (i == 2 * Ndrown + 1)
@@ -169,7 +176,7 @@ if any(isnan(acf))
 end
 
 if doPlot
-	f = figure('color', 'w'); hold on
+	f = figure('color', 'w'); hold on %#ok<UNRCH>
 	plot(acf, 'o-k')
 	plot([1, length(acf)], th * ones(2, 1), '--k')
 	plot([1, length(acf)], -th * ones(2, 1), '--k')
@@ -261,6 +268,8 @@ if strcmp(stopWhen, 'posDrown') & (Nac >= minPointsToFitExp)
 	try
 		[c, gof] = fit((0:Nac - 1)', acf, f);
 		fitSuccess = true;
+	catch
+		% the exponential fit failed: leave fitSuccess false (the outputs are NaN)
 	end
 end
 if fitSuccess % Fit was successful

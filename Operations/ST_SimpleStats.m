@@ -94,7 +94,7 @@ switch whatStat
 		y = detrend(x);
 		ych = y(1:end - 1) .* y(2:end);
 		h2 = sum(ych < 0); % of detrended series
-		if h1 == 0;
+		if h1 == 0
 			out = NaN;
 		else
 			out = h2 / h1;

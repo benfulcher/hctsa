@@ -49,10 +49,9 @@ function out = CP_WaveletVarChg(y, wName, level, maxnchpts, minDelay)
 %       tau = 1 + 2*sum_{h=1..L} (1 - h/(L+1))*rho(h)^2 (at least 1),
 % multiplied by max(1, (kurtosis - 1)/2) for heavy tails (kurtosis 3 for
 % Gaussian data). Dividing the contrast by tau counts N/tau effective
-% observations. Calibrated by simulation (white, AR(1), fractional Gaussian and
-% Student-t noise, N = 500-5000, wavelets db3 and sym2 at levels 2-5): stationary
-% series give at least one change point about 4-5% of the time (at most 6% in
-% any process and length).
+% observations. The penalty is calibrated by simulation so that stationary series
+% (including autocorrelated and heavy-tailed ones) yield a spurious change point
+% about 5% of the time.
 % The deeper the decomposition level, the fewer effective observations the
 % detail signal has (tau is about 2, 4, 8 and 15 at levels 2-5 for white noise),
 % so only larger variance changes are detected there.
@@ -163,26 +162,27 @@ function [J, segEnds] = VarianceSegmentations(x, K, d)
 	d = max(floor(d), 1);
 	x = x - mean(x);
 	cs = [0; cumsum(x.^2)];
-	% F(m+1, e+1): minimal contrast of the first e samples in m segments
-	F = Inf(K + 2, N + 1);
+	% F(e+1, m+1): minimal contrast of the first e samples in m segments (stored with
+	% segments along columns so that the minimum over start points runs down contiguous memory)
+	F = Inf(N + 1, K + 2);
 	F(1, 1) = 0;
-	back = zeros(K + 2, N + 1);
+	back = zeros(N + 1, K + 2);
 	for e = d:N
 		sMax = e - d; % (the last segment has at least d samples)
-		s = 0:sMax;
+		s = (0:sMax)';
 		n = e - s;
-		c = n .* log(max(cs(e + 1) - cs(s + 1)', 0) ./ n);
-		cand = F(1:K + 1, 1:sMax + 1) + c;
+		c = n .* log(max(cs(e + 1) - cs(s + 1), 0) ./ n);
+		cand = F(1:sMax + 1, 1:K + 1) + c;
 		if any(c == -Inf) % (a zero-variance segment: Inf + -Inf counts as infeasible)
 			cand(isnan(cand)) = Inf;
 		end
-		[F(2:end, e + 1), idx] = min(cand, [], 2);
-		back(2:end, e + 1) = idx - 1;
+		[F(e + 1, 2:end), idx] = min(cand, [], 1);
+		back(e + 1, 2:end) = idx - 1;
 	end
 	J = Inf(K + 1, 1);
 	segEnds = zeros(K + 1, K + 1);
 	for k = 0:K
-		J(k + 1) = F(k + 2, N + 1);
+		J(k + 1) = F(N + 1, k + 2);
 		if ~isfinite(J(k + 1))
 			continue
 		end
@@ -190,7 +190,7 @@ function [J, segEnds] = VarianceSegmentations(x, K, d)
 		ends = zeros(1, k + 1);
 		for mm = k + 1:-1:1
 			ends(mm) = e;
-			e = back(mm + 1, e + 1);
+			e = back(e + 1, mm + 1);
 		end
 		segEnds(k + 1, 1:k + 1) = ends;
 	end

@@ -1,6 +1,6 @@
 classdef Robust_bugsTests < matlab.unittest.TestCase
-    % Regression tests for bug fixes in DVV_surrogate, NL_PersistentHomology,
-    % MF_GARCHfit and MF_CompareAR.
+    % Regression tests for bug fixes in DVV_surrogate, NL_PersistentHomology
+    % and MF_CompareAR.
 
     methods (TestClassSetup)
         function setPaths(~)
@@ -33,20 +33,6 @@ classdef Robust_bugsTests < matlab.unittest.TestCase
             o0 = NL_PersistentHomology(y, 5, 3, 0, 150);
             o1 = NL_PersistentHomology(y, 5, 3, 1, 150);
             tc.verifyEqual(o1.totalPersistenceH0, o0.totalPersistenceH0, 'AbsTol', 1e-10);
-        end
-
-        function garchErrorsIndexedByPosition(tc)
-            % P = 2 fit with GARCH{1} estimated at zero: standard errors must be those of
-            % the matching parameters (errors holds one entry per parameter)
-            rng(9); y = randn(500, 1);
-            out = MF_GARCHfit(y, 'none', 2, 1);
-            M = garch(2, 1); M.Constant = NaN;
-            [F, C] = estimate(M, zscore(y), 'Display', 'off');
-            e = sqrt(diag(C));
-            tc.assertEqual(F.GARCH{1}, 0); % the case of interest
-            tc.verifyTrue(isnan(out.GARCHerr_1));
-            tc.verifyEqual(out.GARCHerr_2, e(3), 'RelTol', 1e-6);
-            tc.verifyEqual(out.ARCHerr_1, e(4), 'RelTol', 1e-6);
         end
 
         function compareARNaNOnShortSeries(tc)

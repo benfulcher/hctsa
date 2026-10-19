@@ -147,7 +147,7 @@ function fit = SUB_core(y, n, r, s)
     end
     root = sqrt(evals + 1e-3 * mean(evals));
     W = (evecs ./ root') * evecs';
-    [U, ~, ~] = svd(W * O);
+    [U, ~, ~] = svd(W * O, 'econ');
     gamma = ((evecs .* root') * evecs') * U(:, 1:n); % extended observability matrix (r x n)
 
     gPinv = BF_Pinv(gamma(1:end-1, :));

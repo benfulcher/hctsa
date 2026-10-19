@@ -12,11 +12,20 @@ function TS_SimSearch(varargin)
 %               (*) 'matrix' plots a pairwise similarity matrix
 %               (*) 'scatter' plots scatter plots of outputs between target and neighbors
 %               (*) 'network', a network visualization of neighbors
+% whatDistMetric, the distance metric used to find neighbors, when distances are
+%               not stored in the data (cf. TS_Cluster): 'Euclidean', 'Spearman'
+%               (1 - Spearman correlation), 'Pearson' or 'corr' (1 - Pearson
+%               correlation), 'abscorr' (1 - |Spearman correlation|), or 'corr_fast'.
+%               Defaults match TS_Cluster: 'Euclidean' for time series and
+%               'corr_fast' for operations. When distances are stored in the data,
+%               those are used (and the metric they were computed with).
+%               Distances are defined as in BF_pdist, so the neighbors are the same
+%               whether or not TS_Cluster has been run.
 %
 %---EXAMPLE USAGE:
 % Find neighbors of time series (ID = 30), and visualize as a similarity matrix
 % and network plot:
-% TS_SimSearch(30,'whatPlots',{'matrix','network'})
+% TS_SimSearch('targetID',30,'whatPlots',{'matrix','network'})
 
 %-------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -74,7 +83,8 @@ addParameter(inputP,'whatPlots',default_whatPlots,check_whatPlots);
 
 % whatDistMetric
 default_whatDistMetric = '';
-check_whatDistMetric = @(x) islogical(x) || (isnumeric(x) && (x==0 || x==1));
+check_whatDistMetric = @(x) ischar(x) && (isempty(x) || ...
+        ismember(x,{'Euclidean','Spearman','Pearson','corr','abscorr','corr_fast'}));
 addParameter(inputP,'whatDistMetric',default_whatDistMetric,check_whatDistMetric);
 
 %-------------------------------------------------------------------------------
@@ -98,16 +108,6 @@ if ischar(whatPlots)
 end
 whatDistMetric = inputP.Results.whatDistMetric;
 clear inputP;
-
-if isempty(whatDistMetric)
-    switch tsOrOps
-    case 'ts'
-        whatDistMetric = 'Euclidean';
-    case 'ops'
-        whatDistMetric = 'Spearman';
-    end
-    fprintf(1,'Using default distance metric: %s\n',whatDistMetric);
-end
 
 %-------------------------------------------------------------------------------
 % Load data
@@ -133,6 +133,45 @@ end
 numItems = height(dataTable);
 clear('TimeSeries','Operations')
 
+% Distances: use those stored in the data file (by TS_Cluster) if they exist,
+% otherwise compute them
+hasStoredDist = isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij);
+if hasStoredDist
+    % The stored distances define the metric
+    distMetric = clustStruct.distanceMetric;
+    if ~isempty(whatDistMetric)
+        fprintf(1,'Using the stored %s distances (ignoring whatDistMetric = ''%s'').\n',...
+                    distMetric,whatDistMetric);
+    end
+else
+    if isempty(whatDistMetric)
+        switch tsOrOps
+        case 'ts'
+            whatDistMetric = 'Euclidean';
+        case 'ops'
+            whatDistMetric = 'corr_fast';
+        end
+        fprintf(1,'Using default distance metric: %s\n',whatDistMetric);
+    end
+    % The name of the metric in BF_pdist:
+    switch whatDistMetric
+    case 'Euclidean'
+        distMetric = 'euclidean';
+    case 'corr'
+        distMetric = 'Pearson';
+    otherwise
+        distMetric = whatDistMetric;
+    end
+end
+% Is it a correlation distance (1 - rho or 1 - |rho|)?
+if ismember(distMetric,{'abscorr','abscorr_fast'})
+    corrKind = 'abs';
+elseif ismember(distMetric,{'Spearman','Pearson','PearsonCorr','corr','correlation','corr_fast'})
+    corrKind = 'signed';
+else
+    corrKind = 'none';
+end
+
 if numNeighbors == 0 % code for 'all'
     numNeighbors = numItems - 1;
 else % specify a number of neighbours
@@ -156,48 +195,29 @@ end
 % (There is potential to store pairwise distance information in the HCTSA*.mat
 % file for retrieval later). Use this if it exists, otherwise calculate for this one.
 
-if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
+if hasStoredDist
     % pairwise distances already computed, stored in the HCTSA .mat file
-    fprintf(1,'Loaded %s distances from %s\n',clustStruct.distanceMetric,whatData);
+    fprintf(1,'Loaded %s distances from %s\n',distMetric,whatData);
     Dij = squareform(clustStruct.Dij);
     Dj = Dij(:,targetInd);
 else
-    % Compute distances:
+    % Compute distances, as defined by BF_pdist:
     % (Note that TS_DataMat has been transposed in the case of 'ops')
-    switch whatDistMetric
-    case 'Euclidean'
-        fprintf(1,'Computing Euclidean distances to %u other time series...',numItems-1);
-        Dj = bsxfun(@minus,TS_DataMat,TS_DataMat(targetInd,:));
-        Dj = sqrt(mean(Dj.^2,2));
-    case {'Spearman','Pearson','corr'}
-        switch whatDistMetric
-        case 'Spearman'
-            theType = 'Spearman';
-        case {'Pearson','corr'}
-            theType = 'Pearson';
-        otherwise
-            error('Unknown distance metric');
-        end
-        % Is there a nicer way of computing abs correlations?
-        fprintf(1,'Computing absolute %s correlation distances to %u other features...',...
-                        theType,numItems-1);
-        Dj = zeros(numItems,1);
-        for j = 1:numItems
-            Dj(j) = 1 - abs(corr(TS_DataMat(targetInd,:)',TS_DataMat(j,:)','type',theType));
-        end
-    otherwise
-        error('Unknown distance metric: %s',whatDistMetric);
-    end
+    fprintf(1,'Computing %s distances to %u other objects...',distMetric,numItems-1);
+    Dj = TargetDistances(TS_DataMat,targetInd,distMetric);
     fprintf(1,' Done.\n');
 end
 
 %-------------------------------------------------------------------------------
 % Find N neighbors under the distance metric (used for Dj)
 %-------------------------------------------------------------------------------
-% Sort distances (ascending):
-[~,dix] = sort(Dj,'ascend');
+% Sort distances (ascending), putting the target first by index (other items can have
+% distance zero to it, e.g., duplicates, and its own distance is undefined if it has NaNs):
+Dsort = Dj;
+Dsort(targetInd) = -Inf;
+[~,dix] = sort(Dsort,'ascend');
 
-% Indices of nearest neighbors:
+% Indices of the target and its nearest neighbors:
 neighborInd = dix(1:numNeighbors+1);
 
 %-------------------------------------------------------------------------------
@@ -205,13 +225,16 @@ neighborInd = dix(1:numNeighbors+1);
 %-------------------------------------------------------------------------------
 for j = 1:numNeighbors
     theInd = neighborInd(j+1);
-    switch whatDistMetric
-    case 'Euclidean'
-        fprintf(1,'%u. [%u] %s (%s): d = %.2f\n',j,dataTable.ID(theInd),...
-                dataTable.Name{theInd},dataTable.Keywords{theInd},Dj(theInd));
-    case {'Spearman','Pearson','corr'}
+    switch corrKind
+    case 'signed'
+        fprintf(1,'%u. [%u] %s (%s): rho = %.2f\n',j,dataTable.ID(theInd),...
+                dataTable.Name{theInd},dataTable.Keywords{theInd},1 - Dj(theInd));
+    case 'abs'
         fprintf(1,'%u. [%u] %s (%s): |rho| = %.2f\n',j,dataTable.ID(theInd),...
                 dataTable.Name{theInd},dataTable.Keywords{theInd},1 - Dj(theInd));
+    otherwise
+        fprintf(1,'%u. [%u] %s (%s): d = %.2f\n',j,dataTable.ID(theInd),...
+                dataTable.Name{theInd},dataTable.Keywords{theInd},Dj(theInd));
     end
 end
 fprintf(1,'\n');
@@ -221,17 +244,12 @@ fprintf(1,'\n');
 %   (needed for 'matrix' and 'network')
 %-------------------------------------------------------------------------------
 if any(ismember(whatPlots,'matrix')) || any(ismember(whatPlots,'network'))
-    if isfield(clustStruct,'Dij') && ~isempty(clustStruct.Dij)
+    if hasStoredDist
         % Use pre-computed distances:
-        Dij = Dij(neighborInd,neighborInd)/sqrt(size(TS_DataMat,2)+1);
+        Dij = Dij(neighborInd,neighborInd);
     else
-        % Recompute distances:
-        switch tsOrOps
-        case 'ts'
-            Dij = squareform(pdist(TS_DataMat(neighborInd,:),whatDistMetric)/sqrt(size(TS_DataMat,2)+1));
-        case 'ops'
-            Dij = 1 - abs(squareform(1 - pdist(TS_DataMat(neighborInd,:),whatDistMetric)));
-        end
+        % Compute distances (on the same scale as the stored ones):
+        Dij = BF_pdist(TS_DataMat(neighborInd,:),distMetric,false,[],true);
     end
 end
 
@@ -269,7 +287,7 @@ if any(ismember(whatPlots,'scatter'))
         h{j}.UserData.hRaw = plot(xData,yData,'.k','MarkerSize',4,'Visible','off');
         h{j}.UserData.hRank = plot(xDataRanks,yDataRanks,'.b','MarkerSize',4,'Visible','off');
         if doRank
-            h{j}.UserData.hRank.Visible = 'on';
+            h{j}.UserData.hRank.Visible = 'on'; %#ok<UNRCH>
         else
             h{j}.UserData.hRaw.Visible = 'on';
         end
@@ -306,12 +324,12 @@ if any(ismember('matrix',whatPlots))
     Dij_clust = Dij(ord,ord);
     dataTable_clust = dataTable(neighborInd(ord),:);
 
-    labels = cell(numNeighbors+1);
+    labels = cell(numNeighbors+1,1);
     for i = 1:numNeighbors+1
         labels{i} = sprintf('[%u] %s',dataTable_clust.ID(i),dataTable_clust.Name{i});
     end
 
-    f = figure('color','w');
+    figure('color','w');
 
     switch tsOrOps
     case 'ts'
@@ -345,21 +363,29 @@ if any(ismember('matrix',whatPlots))
     Dij_clust(logical(eye(numNeighbors+1))) = NaN; % zero diagonals mess things up
     Dij_clust(Dij_clust==0) = NaN; % all zeros mess things up
     dLims = [min(Dij_clust(~isnan(Dij_clust))),max(Dij_clust(~isnan(Dij_clust)))];
+    if isempty(dLims) || dLims(2) <= dLims(1)
+        % (no distinct nonzero distances to display, e.g., perfectly correlated neighbors)
+        dLims = [0,1];
+    end
     imagesc(Dij_clust)
 
     % Get group labeling if possible (time series):
-    [groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
+    [~,~,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(dataTable);
 
     % Add class labels as rectangles along the edge…
     if numClasses > 1
-        dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - min(x))./(max(x)-min(x)));
-        imagesc(0,1,dRescale(groupLabelsInteger))
+        % The class of each displayed item (unlabeled items, coded 0, are left blank),
+        % scaled so that classes 1,...,numClasses take the class colors of the colormap:
+        groupLabelsShown = groupLabelsInteger(neighborInd(ord));
+        groupLabelsShown(groupLabelsShown==0) = NaN;
+        dRescale = @(x) dLims(1) + numClasses/8*diff(dLims)*(-1 + 0.9999*(x - 1)./(numClasses - 1));
+        imagesc(0,1,dRescale(groupLabelsShown))
         plot(ones(2,1)*0.5,[0.5,numNeighbors+1.5],'k')
         colormap([BF_GetColorMap('dark2',numClasses,0);BF_GetColorMap('redyellowblue',8,0)]);
-        caxis([dLims(1)-diff(dLims)*numClasses/8,dLims(2)])
+        clim([dLims(1)-diff(dLims)*numClasses/8,dLims(2)])
     else
         colormap(BF_GetColorMap('redyellowblue',8,0));
-        caxis([min(Dij(Dij>0)),max(Dij(:))])
+        clim(dLims)
     end
 
     % Black rectangles over NaNs:
@@ -376,7 +402,7 @@ if any(ismember('matrix',whatPlots))
 
     % Add a color bar:
     cB = colorbar('northoutside');
-    cB.Label.String = sprintf('%s distance',whatDistMetric);
+    cB.Label.String = sprintf('%s distance',distMetric);
     if numClasses > 1
         cB.Limits = dLims;
     end
@@ -429,32 +455,49 @@ if any(ismember(whatPlots,'network'))
     if numNeighbors > numNetwork
         warning('Displaying a maximum of %u neighbors for the network visualization',numNetwork)
     end
-    numNetwork = min(numNeighbors,numNetwork); % number neighbours for network
+    numNetwork = min(numNeighbors,numNetwork) + 1; % number of nodes: the target and its neighbors
 
-    % Define the adjacency matrix, A (target node is 1)
-    A = 1 - Dij(1:numNetwork,1:numNetwork);
+    % Define the adjacency matrix, A (target node is 1), as a similarity in [0,1]:
+    Dnet = Dij(1:numNetwork,1:numNetwork);
+    if strcmp(corrKind,'none')
+        % Relative to the largest distance displayed
+        maxDist = max(Dnet(:),[],'omitnan');
+        if isempty(maxDist) || isnan(maxDist) || maxDist==0
+            maxDist = 1;
+        end
+        A = 1 - Dnet/maxDist;
+    else
+        % Correlation similarity (negative correlations are not linked)
+        A = max(1 - Dnet,0);
+    end
+    A(isnan(A)) = 0;
 
     % Remove the diagonal:
     A(logical(eye(size(A)))) = 0;
 
     % Assign group labels (or just distinguish the target)
     if ismember('Group',dataTable.Properties.VariableNames)
-        nodeLabels = dataTable.Group;
-        nodeLabels = nodeLabels(dix(1:numNetwork));
+        % Integer group labels, with the target as its own group:
+        [~,~,nodeLabels] = TS_ExtractGroupLabels(dataTable);
+        nodeLabels = nodeLabels(neighborInd(1:numNetwork));
         nodeLabels(1) = max(nodeLabels) + 1;
+        % Relabel as 1,2,...,numGroups for the network visualization:
+        [~,~,nodeLabels] = unique(nodeLabels);
     else
         nodeLabels = 2*ones(numNetwork,1);
         nodeLabels(1) = 1;
     end
 
     if strcmp(tsOrOps,'ts')
-        dataLabels = dataTable.Data(dix(1:numNetwork));
+        dataLabels = dataTable.Data(neighborInd(1:numNetwork));
     else
         dataLabels = {};
     end
 
-    NetVis_netvis(A,'k',0.01,'textLabels',dataTable.Name(dix(1:numNetwork)),...
+    % (links are classed by quantiles of A, so the legend gives the strongest x% of entries)
+    NetVis_netvis(A,'k',0.01,'textLabels',dataTable.Name(neighborInd(1:numNetwork)),...
                     'linkThresh',[0.9,0.8,0.7,0.6],...
+                    'thresholdByProportion',true,...
                     'nodeLabels',nodeLabels,...
                     'dataLabels',dataLabels,...
                     'colorMap','set1',...
@@ -463,7 +506,7 @@ end
 
 
 %-------------------------------------------------------------------------------
-function swapRanked(hObject,eventData)
+function swapRanked(hObject,~)
     % Swap between raw and ranked values for a scatter plot
     if hObject.UserData.doRank
         hObject.UserData.hRaw.Visible = 'on';
@@ -480,4 +523,53 @@ function swapRanked(hObject,eventData)
 end
 %-------------------------------------------------------------------------------
 
+end
+
+%-------------------------------------------------------------------------------
+function Dj = TargetDistances(X,targetInd,distMetric)
+    % Distances from row targetInd of X to every row of X, defined as in BF_pdist
+    % (including the use of overlapping good values when there are NaNs, and the
+    % maximum distance for an undefined correlation), without the full pairwise matrix
+    switch distMetric
+    case {'euclidean','Euclidean'}
+        d = X - X(targetInd,:);
+        isGood = ~isnan(d);
+        d(~isGood) = 0;
+        % Rescale for the number of good values, by sqrt(numFeatures/numGood)
+        Dj = sqrt(sum(d.^2,2)*size(X,2)./sum(isGood,2));
+    case {'corr_fast','abscorr_fast'}
+        if any(isnan(X(:)))
+            % (BF_NaNCov approximates the correlations when there are NaNs, and only
+            % has a full-matrix form)
+            Dfull = BF_pdist(X,distMetric,false,[],true);
+            Dj = Dfull(:,targetInd);
+        else
+            Dj = TargetDistances(X,targetInd,'Pearson');
+            if strcmp(distMetric,'abscorr_fast')
+                Dj = 1 - abs(1 - Dj);
+            end
+        end
+    case {'Spearman','abscorr','Pearson','PearsonCorr','corr','correlation'}
+        if ismember(distMetric,{'Spearman','abscorr'})
+            corrType = 'Spearman';
+        else
+            corrType = 'Pearson';
+        end
+        if any(isnan(X(:)))
+            rowsHow = 'pairwise';
+        else
+            rowsHow = 'all';
+        end
+        rho = corr(X(targetInd,:)',X','Type',corrType,'Rows',rowsHow)';
+        if strcmp(distMetric,'abscorr')
+            Dj = 1 - abs(rho);
+            Dj(isnan(rho)) = 1;
+        else
+            Dj = 1 - rho;
+            Dj(isnan(rho)) = 2;
+        end
+        Dj(targetInd) = 0;
+    otherwise
+        error('Unknown distance metric: %s',distMetric);
+    end
 end

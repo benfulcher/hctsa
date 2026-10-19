@@ -7,7 +7,9 @@ function out = PP_Iterate(y, dtMeth)
 % statistic's profile across the strengths is then z-scored and summarized by
 % a trend (the sum of its successive differences, i.e., last minus first value)
 % and a jump (the largest t-statistic for a step change in the mean, over all
-% split points).
+% split points). (The slope of a linear fit to the profile is not returned: it is
+% largely redundant with the trend, since both estimate whether the short profile
+% is increasing.)
 %
 % ---INPUTS:
 % y, the input time series
@@ -40,7 +42,11 @@ function out = PP_Iterate(y, dtMeth)
 % normdiff_trend, normdiff_jump: the distance between the original and
 %       processed series, norm(y - y_processed) / N
 % (The last three statistics need the processed series to be as long as the
-% original, so they are NaN for 'diff'.)
+% original, so they are NaN for 'diff'.) All outputs are NaN if, at any strength,
+% the processed series has no variation beyond floating-point round-off (a standard
+% deviation of at most 10*N*eps times the root-mean-square of the original, a bound
+% on the rounding error of the processing; as in PP_Compare), as statistics of
+% round-off are not meaningful. Small but genuine variation is computed.
 %
 % ---NOTES:
 % Requires the Curve Fitting Toolbox.
@@ -111,7 +117,7 @@ end
 %% Do the progessive processing with running statistical evaluation
 % ------------------------------------------------------------------------------
 if doPlot
-	f = figure('color', 'w'); box('on'); hold on
+	f = figure('color', 'w'); box('on'); hold on %#ok<UNRCH>
 	h1 = plot(y, 'k');
 end
 
@@ -122,7 +128,7 @@ for q = 1:length(nRange)
 		case 'spline' % Spline detrend
 			nknots = n; % progressively make more knots
 			intp = 4; % cubic interpolants
-			spline = spap2(nknots, intp, [1:N]', y); % just a single middle knot with cubic interpolants
+			spline = spap2(nknots, intp, (1:N)', y); % just a single middle knot with cubic interpolants
 			y_spl = fnval(spline, 1:N); % evaluate at the 1:N time intervals
 			y_d = y - y_spl';
 
@@ -147,7 +153,7 @@ for q = 1:length(nRange)
 	end
 	outmat(q, :) = doYourCalcThing(y, y_d);
 	if doPlot
-		if q == 1
+		if q == 1 %#ok<UNRCH>
 			h2 = plot(y_d, 'r');
 		else
 			h2.YData = (y_d);
@@ -160,7 +166,7 @@ end
 % ------------------------------------------------------------------------------
 
 stats = zeros(10, 3);
-for t = 1:10;
+for t = 1:10
 	if any(~isfinite(outmat(:, t)))
 		if ~(strcmp(dtMeth, 'diff') && t > 7) % expected that these won't work
 			fprintf(1, '%u is a bad statistic\n', t)
@@ -172,11 +178,6 @@ end
 % ------------------------------------------------------------------------------
 %% WRITE OUTPUT
 % ------------------------------------------------------------------------------
-% Note: the 'lin' statistic (slope of a linear fit to the across-iteration
-% profile) is dropped throughout -- it correlates with 'trend' (sum of
-% differences across the same profile) at r=0.84-0.99 across all 7 measured
-% categories on real EEG data, since both are point-estimators of the same
-% underlying "is this short profile increasing" question.
 
 % 1) StatAv_5
 out.statav5_trend = stats(1, 1);
@@ -232,6 +233,12 @@ out.normdiff_jump = stats(10, 2);
 %% TESTS:
 % ------------------------------------------------------------------------------
 function f = doYourCalcThing(y, y_d)
+	% A processed series whose variation is within the rounding error of the processing
+	% (sums of up to N terms, relative to the magnitude of the values; see PP_Compare) is
+	% round-off: its statistics are not meaningful
+	if std(y_d) <= 10 * length(y) * eps * sqrt(mean(y.^2))
+		f = NaN(10, 1); return
+	end
 	y = zscore(y);
 	y_d = zscore(y_d);
 
@@ -317,7 +324,7 @@ function g = doYourTestThing(f)
 	end
 
 	% Pick the maximum difference
-	[c, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
+	[~, ind] = max(abs(mbfatd(:, 1) - mbfatd(:, 2)));
 
 	% t-statistic at this point
 	tstat = abs((mbfatd(ind, 1) - mbfatd(ind, 2)) / sqrt(mbfatd(ind, 3)^2 + mbfatd(ind, 4)^2));
@@ -325,7 +332,7 @@ function g = doYourTestThing(f)
 
 	% (3) is it linear?
 	try
-		[cfun, gof] = fit((1:length(f))', f, 'poly1');
+		[cfun, ~] = fit((1:length(f))', f, 'poly1');
 		% The gradient of the line
 		g(3) = cfun.p1;
 	catch emsg

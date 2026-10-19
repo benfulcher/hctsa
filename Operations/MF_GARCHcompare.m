@@ -7,19 +7,25 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % combinations of p and q are compared, and the outputs are summaries across the
 % grid of fitted models, and the orders that fit best.
 %
-% Uses the following functions from MATLAB's Econometrics Toolbox: archtest, lbqtest,
-% garch, estimate, infer, aicbic.
+% The models are fitted by maximum likelihood with BF_GARCHFit (see MF_GARCHfit), in order
+% of increasing p and q, each also started from the fits of its smaller neighbors (nested
+% models), so the log-likelihood never decreases as an order increases. The
+% GARCH(min(p),min(q)) model is tested against constant variance as in MF_GARCHfit; if it does
+% not beat it (hasStructure is 0), the constant term and the residual statistics are those of
+% constant variance, since the coefficients of the models are not identified.
 %
-% This operation focuses on the GARCH/variance component. It therefore detrends the
-% time series, optionally pre-whitens it (BF_Whiten), and z-scores it, so that a
-% constant-mean process is assumed.
+% This operation focuses on the GARCH/variance component. It therefore optionally
+% pre-whitens the time series (BF_Whiten, which detrends it first) and z-scores it,
+% so that a constant-mean process is assumed.
 %
 % ---INPUTS:
 % y, the input time series
 %
-% preProc, a preprocessing to apply (after detrending):
-%           (i) 'none': no preprocessing is performed (default),
-%           (ii) 'ar': performs a preprocessing that maximizes AR(2) whiteness.
+% preProc, a preprocessing to apply:
+%           (i) 'none': no preprocessing is performed, and the series is not
+%               detrended (default),
+%           (ii) 'ar': detrends the series, then performs a preprocessing that
+%               maximizes AR(2) whiteness.
 %
 % pr, a vector of model orders, p, to compare (default 1:3)
 %
@@ -33,6 +39,7 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 %
 % ---OUTPUTS: statistics across the (p,q) models that fitted successfully. The
 % log-likelihood, AIC and BIC are per observation, i.e., divided by the series length.
+% hasStructure: 1 if the GARCH(min(p),min(q)) model beats constant variance, otherwise 0
 % minLLF, maxLLF, meanLLF: the minimum, maximum and mean log-likelihood
 % minBIC, maxBIC, meanBIC: the minimum, maximum and mean Bayesian information
 %       criterion (BIC)
@@ -50,20 +57,26 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 %       squared standardized residuals
 % min_maxlbqps, max_maxlbqps, mean_maxlbqps: the same for the maximum p-value over the
 %       20 lags
-% bestpLLF, bestqLLF: the orders p and q of the model with the maximum log-likelihood
 % bestpAIC, bestqAIC: the orders p and q of the model with the minimum AIC
 % bestpBIC, bestqBIC: the orders p and q of the model with the minimum BIC
 % Ks_vary_p, Ks_vary_q: how much the constant term varies with p, and with q: the
 %       standard deviation of the constant across one order, averaged over the other
 %
 % ---NOTES:
-% bestpLLF/bestqLLF select the order with the maximum log-likelihood, as the
-% best-fitting model has the highest log-likelihood (AIC and BIC are minimized).
-% (Selecting the minimum, as an earlier version did, almost always returned the
-% lowest-complexity corner of the (pr,qr) grid.) They are not registered in hctsa's
-% feature set: the models are nested, so their maximized likelihoods differ mostly at
-% the level of the optimizer's tolerance, and the selected orders change under tiny
-% perturbations of the series.
+% The orders chosen by AIC and BIC are among the grid and the constant-variance model
+% (orders 0 and 0), which is chosen when the GARCH models do not improve on it enough to
+% pay for their parameters; ties go to the smaller model.
+%
+% A model fitted with its variance constant at the floor of 1e-6 (within 1%; see MF_GARCHfit)
+% has no likelihood maximum. A summary that such a model determines is then NaN: the minimum
+% or maximum over the models if that model attains it, the mean if any model is at the
+% floor, the orders chosen by AIC or BIC if the chosen model is; the constant and the
+% residual statistics only when the variance model is reported (hasStructure is 1).
+%
+% Registered in hctsa's feature set: maxLLF, bestpAIC, bestqAIC, bestpBIC, bestqBIC
+% and max_meanarchps. The constant terms (minK, maxK, meanK) follow from the
+% persistence, and the other summaries repeat these (FeatureSets/renamed_operations.csv gives
+% the reason for each).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -95,11 +108,6 @@ function out = MF_GARCHcompare(y, preProc, pr, qr, randomSeed, beVocal)
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-%% Check that an Econometrics Toolbox license is available:
-% ------------------------------------------------------------------------------
-BF_CheckToolbox('econometrics_toolbox');
-
-% ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
 if nargin < 2 || isempty(preProc)
@@ -125,139 +133,108 @@ if nargin < 6
 	beVocal = 0; % (no by default)
 end
 
+pr = sort(pr(:)'); % fitted in order of increasing p and q
+qr = sort(qr(:)');
+
 % ------------------------------------------------------------------------------
 %% (1) Data preprocessing
 % ------------------------------------------------------------------------------
-y0 = y; % the original, unprocessed time series
-
-y = BF_Whiten(y, preProc, 0, randomSeed); % Use a basic preprocessing to whiten the time series
-
-% ------------------------------------------------------------------------------
-%% Preliminaries
-% ------------------------------------------------------------------------------
-y = zscore(y); % make sure the (whitened) time series is z-scored
+% (whitened and z-scored; shared with MF_GARCHfit on the same series: BF_GARCHCache)
+[y, D] = BF_GARCHCache('prep', y, preProc, randomSeed);
 N = length(y); % could be different to original (e.g., if chose a differencing above)
 
 % Now have the preprocessed time series saved over y.
-% The original, unprocessed time series is retained in y0.
-% (Note that y=y0 is possible; when all preprocessings are found to be
-%   worse at the given criterion).
-
-%% (2) Data pre-estimation
-% Aim is to return some statistics indicating the suitability of this class
-% of modeling.
-% Will use the statistics to motivate a GARCH model in the next
-% section.
-% Will use the statistics to compare to features of the residuals after
-% modeling.
-
-% (Commented out as a historical marker: unused by any output; saves wasted compute.)
-% (i) Engle's ARCH test
-%       look at autoregressive lags 1:20
-%       use the 10% significance level
-% [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y, 'lags', 1:20, 'alpha', 0.1);
-% [Engle_h_y, Engle_pValue_y, Engle_stat_y, Engle_cValue_y] = archtest(y,1:20,0.1); % depricated syntax
-
-% (ii) Ljung-Box Q-test
-%       look at autocorrelation at lags 1:20
-%       use the 10% significance level
-%       departure from randomness hypothesis test
-% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2, 'lags', 1:20, 'alpha', 0.1);
-% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1); % depricated syntax
-% [lbq_h_y2, lbq_pValue_y2, lbq_stat_y2, lbq_cValue_y2] = lbqtest(y.^2,1:20,0.1,[]); % depricated syntax
-
-% (iii) Correlation in time series: autocorrelation
-% autocorrs_y = CO_AutoCorr(y,1:20);
-% autocorrs_var = CO_AutoCorr(y.^2,1:20);
-% [ACF_y, Lags_acf_y, bounds_acf_y] = autocorr(y, 'NumLags', 20);
-% [ACF_var_y, Lags_acf_var_y, bounds_acf_var_y] = autocorr(y.^2, 'NumLags', 20);
-
-% (iv) Partial autocorrelation function: PACF
-% [PACF_y, Lags_pacf_y, bounds_pacf_y] = parcorr(y, 'NumLags', 20);
 
 % ------------------------------------------------------------------------------
-%% (3) Create an appropriate GARCH model
+%% (2) Fit the GARCH(p,q) models
 % ------------------------------------------------------------------------------
-% initialize statistics
+nullFit = BF_GARCHFit('null', D, false); % constant variance
+
 np = length(pr);
 nq = length(qr);
-LLFs = NaN * ones(np, nq); % log-likelihood
-AICs = NaN * ones(np, nq); % AIC
-BICs = NaN * ones(np, nq); % BIC
-Ks = NaN * ones(np, nq); % constant term in variance
-meanarchps = NaN * ones(np, nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
-maxarchps = NaN * ones(np, nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
-meanlbqps = NaN * ones(np, nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
-maxlbqps = NaN * ones(np, nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
-isBad = zeros(np, nq);
-
+fits = cell(np, nq);
 for i = 1:np
 	p = pr(i); % garch order
 	for j = 1:nq
 		q = qr(j); % arch order
-
-		% (i) specify a zero-mean, Gaussian innovation GARCH(P,Q) model.
-		GModel = garch(p, q);
-		GModel.Constant = NaN;
-
-		% (ii) fit the model
-		[Gfit, estParamCov, LLF, info] = estimate(GModel, y, 'Display', 'off');
-		% [coeff, errors, LLF, innovations, sigmas, summary] = garchfit(spec,y);
-
-		numParams = sum(any(estParamCov)); % number of parameters
-		if numParams < p + q + 1
+		try
+			% Start from the fits of the models one order smaller (nested in this one)
+			S = BF_GARCHFit('spec', D, p, q, false, false);
+			warm = zeros(S.k, 0);
+			if j > 1 && ~isempty(fits{i, j-1})
+				warm(:, end+1) = BF_GARCHFit('embed', fits{i, j-1}.theta, fits{i, j-1}.spec, S);
+			end
+			if i > 1 && ~isempty(fits{i-1, j})
+				warm(:, end+1) = BF_GARCHFit('embed', fits{i-1, j}.theta, fits{i-1, j}.spec, S);
+			end
+			if i == 1 && j == 1
+				% (the Gaussian GARCH(1,1) fit from the grid starts, as in MF_GARCHfit)
+				fits{i, j} = BF_GARCHCache('gauss', y, D, p, q, false);
+			else
+				fits{i, j} = BF_GARCHFit('mle', D, p, q, false, false, warm, false);
+			end
+		catch
 			if beVocal
 				fprintf(1, 'Bad fit at p = %u, q = %u\n', p, q);
 			end
-			isBad(i, j) = 1;
-			continue; % didn't fit successfully; everything stays NaN
 		end
-
-		% (iii) store derived statistics on the fitted model
-		LLFs(i, j) = LLF;
-		[AIC, BIC] = aicbic(LLF, numParams, N); % aic and bic of fit
-		AICs(i, j) = AIC;
-		BICs(i, j) = BIC;
-		Ks(i, j) = Gfit.Constant;
-
-		% (iv) store summaries of standardized errors
-		%    (less need to compare to original because now we're only
-		%    comparing *between* models, which should all have the same
-		%    baseline...?) It's just that the absolute values of these
-		%    summaries are less meaningful; should be with respect to the
-		%    original time series
-		innovations = (y - Gfit.Offset); % residuals (departures from mean process)
-		[sigmas, logL] = infer(Gfit, y); % estimate time series of conditional variance, sigmas
-		stde = innovations ./ sqrt(sigmas); % standardized residuals
-		stde2 = stde.^2; % squared
-
-		% (i) Engle's ARCH test
-		%       look at autoregressive lags 1:20
-		[Engle_h_stde, Engle_pValue_stde, Engle_stat_stde, Engle_cValue_stde] = archtest(stde, 'lags', 1:20, 'alpha', 0.1);
-
-		meanarchps(i, j) = mean(Engle_pValue_stde);
-		maxarchps(i, j) = max(Engle_pValue_stde);
-
-		% (ii) Ljung-Box Q-test
-		%       look at autocorrelation at lags 1:20
-		%       use the 10% significance level
-		%       departure from randomness hypothesis test
-		[lbq_h_stde2, lbq_pValue_stde2, lbq_stat_stde2, lbq_cValue_stde2] = lbqtest(stde2, 'lags', 1:20, 'alpha', 0.1);
-
-		meanlbqps(i, j) = mean(lbq_pValue_stde2);
-		maxlbqps(i, j) = max(lbq_pValue_stde2);
-
-		% Difficult to take parameter values since their number if
-		% changing...
 	end
 end
 
 % Check if fits went well...
-if all(isBad(:))
+if isempty(fits{1, 1})
 	% Nothing fit well! Output a NaN:
 	warning('None of the ARCH or GARCH models could be fit.')
 	out = NaN;
 	return
+end
+
+% Is there any conditional heteroskedasticity to model? If not, the constant and the
+% residual statistics are those of constant variance
+[~, hasStructure] = BF_GARCHFit('structure', fits{1, 1}, nullFit, D, false);
+
+% ------------------------------------------------------------------------------
+%% (3) Store derived statistics on the fitted models
+% ------------------------------------------------------------------------------
+LLFs = NaN(np, nq); % log-likelihood
+AICs = NaN(np, nq); % AIC
+BICs = NaN(np, nq); % BIC
+Ks = NaN(np, nq); % constant term in variance
+meanarchps = NaN(np, nq); % mean over 20 lags from Engle's ARCH test on standardized innovations
+maxarchps = NaN(np, nq); % maximum p-value over 20 lags from Engle's ARCH test on standardized innovations
+meanlbqps = NaN(np, nq); % mean lbq p-value over 20 lags from Q-test on squared standardized innovations
+maxlbqps = NaN(np, nq); % maximum p-value over 20 lags from Q-test on squared standardized innovations
+floorML = false(np, nq); % whether the fit has its variance constant at the floor
+
+for i = 1:np
+	for j = 1:nq
+		ml = fits{i, j};
+		if isempty(ml)
+			continue % didn't fit successfully; everything stays NaN
+		end
+		% (the likelihood and information criteria are those of the maximum-likelihood
+		% fit; the constant and the residual tests those of the reported fit)
+		if hasStructure
+			fit = ml;
+		else
+			fit = nullFit;
+		end
+		floorML(i, j) = BF_GARCHFit('atfloor', ml.theta);
+		LLFs(i, j) = ml.llf;
+		AICs(i, j) = -2*ml.llf + 2*ml.k;
+		BICs(i, j) = -2*ml.llf + ml.k*log(N);
+		Ks(i, j) = fit.theta(1);
+
+		% Summaries of the standardized errors (the absolute values are less
+		% meaningful than the comparison between models)
+		stde = y ./ sqrt(fit.h); % standardized residuals
+		pArch = BF_ARCHTest(stde, 20); % Engle's ARCH test, lags 1:20
+		pLbq = BF_LjungBoxTest(stde.^2, 20); % Ljung-Box Q-test of the squared residuals, lags 1:20
+		meanarchps(i, j) = mean(pArch);
+		maxarchps(i, j) = max(pArch);
+		meanlbqps(i, j) = mean(pLbq);
+		maxlbqps(i, j) = max(pLbq);
+	end
 end
 
 % ------------------------------------------------------------------------------
@@ -266,54 +243,90 @@ end
 % Log-likelihoods and information criteria are sums over observations, so they
 % scale with the series length; express them per observation so they are
 % comparable across lengths (order selection below is unaffected)
-LLFs = LLFs / N;
-AICs = AICs / N;
-BICs = BICs / N;
+LLFn = LLFs / N;
+AICn = AICs / N;
+BICn = BICs / N;
+
+out.hasStructure = double(hasStructure);
+
+% A model with its variance constant at the floor has no likelihood maximum: a summary that
+% it determines is NaN. The constant and the residual statistics come from the variance
+% model only if it is reported.
+floorVar = floorML & hasStructure;
 
 % 'whole things'
-out.minLLF = min(LLFs(:));
-out.maxLLF = max(LLFs(:));
-out.meanLLF = mean(LLFs(:),'omitnan');
-out.minBIC = min(BICs(:));
-out.maxBIC = max(BICs(:));
-out.meanBIC = mean(BICs(:),'omitnan');
-out.minAIC = min(AICs(:));
-out.maxAIC = max(AICs(:));
-out.meanAIC = mean(AICs(:),'omitnan');
-out.minK = min(Ks(:));
-out.maxK = max(Ks(:));
-out.meanK = mean(Ks(:),'omitnan');
-out.min_meanarchps = min(meanarchps(:));
-out.max_meanarchps = max(meanarchps(:));
-out.mean_meanarchps = mean(meanarchps(:),'omitnan');
-out.min_maxarchps = min(maxarchps(:));
-out.max_maxarchps = max(maxarchps(:));
-out.mean_maxarchps = mean(maxarchps(:),'omitnan');
-out.min_meanlbqps = min(meanlbqps(:));
-out.max_meanlbqps = max(meanlbqps(:));
-out.mean_meanlbqps = mean(meanlbqps(:),'omitnan');
-out.min_maxlbqps = min(maxlbqps(:));
-out.max_maxlbqps = max(maxlbqps(:));
-out.mean_maxlbqps = mean(maxlbqps(:),'omitnan');
+sets = {'LLF', LLFn, floorML; 'BIC', BICn, floorML; 'AIC', AICn, floorML; 'K', Ks, floorVar};
+for k = 1:size(sets, 1)
+	out.(['min' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'min');
+	out.(['max' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'max');
+	out.(['mean' sets{k,1}]) = floorSummary(sets{k,2}, sets{k,3}, 'mean');
+end
+sets = {'meanarchps', meanarchps; 'maxarchps', maxarchps; 'meanlbqps', meanlbqps; 'maxlbqps', maxlbqps};
+for k = 1:size(sets, 1)
+	out.(['min_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'min');
+	out.(['max_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'max');
+	out.(['mean_' sets{k,1}]) = floorSummary(sets{k,2}, floorVar, 'mean');
+end
 
-% 'bests' (orders)
-[a, b] = find(LLFs == max(LLFs(:)), 1, 'first');
-out.bestpLLF = pr(a);
-out.bestqLLF = qr(b);
-
-[a, b] = find(AICs == min(AICs(:)), 1, 'first');
-out.bestpAIC = pr(a);
-out.bestqAIC = qr(b);
-
-[a, b] = find(BICs == min(BICs(:)), 1, 'first');
-out.bestpBIC = pr(a);
-out.bestqBIC = qr(b);
+% 'bests' (orders): among the grid and the constant-variance model (orders 0, 0), which
+% is chosen when the models do not improve on it enough to pay for their parameters.
+% Ties go to the smaller model.
+nullAIC = -2*nullFit.llf + 2*nullFit.k;
+nullBIC = -2*nullFit.llf + nullFit.k*log(N);
+critNames = {'AIC', 'BIC'};
+critValues = {AICs, BICs};
+critNull = [nullAIC, nullBIC];
+for c = 1:2
+	best = critNull(c); bp = 0; bq = 0; bad = false;
+	for j = 1:nq
+		for i = 1:np
+			if critValues{c}(i, j) < best
+				best = critValues{c}(i, j); bp = pr(i); bq = qr(j); bad = floorML(i, j);
+			end
+		end
+	end
+	if bad
+		bp = NaN; bq = NaN;
+	end
+	out.(['bestp' critNames{c}]) = bp;
+	out.(['bestq' critNames{c}]) = bq;
+end
 
 % 'trends' in each direction -- i.e., how much effect on the statistics
 % does changing the order (either p or q) have. Sometimes changing q will
 % have negligible effect -- we want to quantify this.
 
 out.Ks_vary_p = mean(std(Ks,0,'omitnan'),'omitnan'); % mean variation along p direction
-out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); % mean variation along q direction
+% mean variation along q direction:
+out.Ks_vary_q = mean(std(Ks',0,'omitnan'),'omitnan'); %#ok<UDIM>
+if any(floorVar(:))
+	out.Ks_vary_p = NaN;
+	out.Ks_vary_q = NaN;
+end
 
+end
+
+% ------------------------------------------------------------------------------
+function v = floorSummary(values, flags, kind)
+% The minimum, maximum or mean over the models; NaN if a model at the floor determines it
+% (for the mean: any model at the floor)
+ok = ~isnan(values);
+if ~any(ok(:))
+	v = NaN;
+	return
+end
+switch kind
+case 'mean'
+	if any(flags(ok))
+		v = NaN;
+	else
+		v = mean(values(ok));
+	end
+case 'min'
+	[v, idx] = min(values(:));
+	if flags(idx), v = NaN; end
+case 'max'
+	[v, idx] = max(values(:));
+	if flags(idx), v = NaN; end
+end
 end

@@ -51,9 +51,8 @@ function out = EN_PermEnComplexity(y, m, tau)
 % symmetric functions of a single probability: they are then forced to be
 % near-perfect reparameterizations of one another (|r| ~ 1) regardless of the
 % input data, making jsComplexity redundant with plain permutation entropy at
-% that order. m = 3 was also found redundant with existing normPermEn/motif
-% fields on real-world data (r up to 0.97); only m = 4 and m = 5
-% are registered in the default feature set.
+% that order. m = 3 is also largely redundant with existing normPermEn/motif
+% fields, so only m = 4 and m = 5 are registered in the default feature set.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

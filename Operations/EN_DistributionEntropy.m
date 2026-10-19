@@ -112,7 +112,7 @@ switch histOrKS
 		binEdges = BF_HistEdges(y, numBins); % explicit edges, whether a number of bins or a rule
 		px = histcounts(y, binEdges, 'Normalization', 'probability');
 		% Compute bin centers:
-		xr = mean([binEdges(1:end - 1); binEdges(2:end)]);
+		xr = mean([binEdges(1:end - 1); binEdges(2:end)]); %#ok<NASGU>
 		% Compute bin widths:
 		binWidths = diff(binEdges);
 
@@ -122,10 +122,10 @@ switch histOrKS
 		% ksdensity's default grid spans the observed data range, and the range
 		% of a sample grows with N (as ~sqrt(2*log(N)) for Gaussian data), so
 		% the grid -- and with it the log(binWidth) term in the entropy sum
-		% below -- widened with time-series length regardless of the underlying
-		% distribution. Anchoring the grid to extreme *quantiles* instead fixes
-		% that: quantiles are consistent estimators, so the interval converges
-		% as N grows rather than expanding.
+		% below -- would widen with time-series length regardless of the
+		% underlying distribution. The grid is instead anchored to extreme
+		% *quantiles*: quantiles are consistent estimators, so the interval
+		% converges as N grows rather than expanding.
 		numGridPts = 200;
 		lo = quantile(y, 0.001);
 		hi = quantile(y, 0.999);
@@ -141,18 +141,16 @@ switch histOrKS
 			% inconsistent -- for consistency the bandwidth must shrink with
 			% sample size (Silverman: h ~ N^(-1/5)) -- so the smoothness of the
 			% estimated density, and hence its entropy, drifts with N whatever
-			% the underlying distribution. Measured eta^2 against length was
-			% 0.56-0.97 for fixed bandwidths against 0.08 for the automatic
-			% selection, so the fixed-bandwidth variants are no longer
-			% registered as hctsa features. The option is kept for callers who
-			% want a specific smoothing scale.
+			% the underlying distribution, so the fixed-bandwidth variants are
+			% not registered as hctsa features. The option is kept for callers
+			% who want a specific smoothing scale.
 			[px, xr] = BF_KSDensity(y, xGrid, numBins); % uses specified bandwidth
 		end
 		binWidths = ones(1, length(px)) * (xr(2) - xr(1));
 		% ksdensity returns a *density* evaluated on a grid, whereas the entropy
 		% sum below (shared with the 'hist' branch) expects probability mass per
-		% cell. Using the raw density there left sum(px) ~= 1, so the result was
-		% neither a discrete nor a differential entropy. Convert to probability
+		% cell (with the raw density, sum(px) ~= 1, and the result would be
+		% neither a discrete nor a differential entropy). Convert to probability
 		% mass and renormalize (the grid truncates a little tail mass).
 		px = px .* binWidths;
 		px = px / sum(px);
@@ -162,7 +160,7 @@ switch histOrKS
 end
 
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(xr, px, 'k')
 end
 
@@ -176,8 +174,8 @@ out = -sum(px(px > 0) .* log(px(px > 0) ./ binWidths(px > 0)));
 
 % Miller-Madow correction to the discrete part, for the histogram estimator
 % only: the plug-in entropy is biased low by (M-1)/(2n) for M occupied bins and
-% n samples, which made the finer binnings (20 and 50 bins) track time-series
-% length more than the distribution. Kernel density estimates are smoothed
+% n samples, which would make finer binnings track time-series length more
+% than the distribution. Kernel density estimates are smoothed
 % rather than plug-in, so the discrete-bin correction does not apply to them.
 if strcmp(histOrKS, 'hist')
 	out = out + (sum(px > 0) - 1) / (2 * length(y));

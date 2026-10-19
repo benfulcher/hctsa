@@ -65,8 +65,9 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 %           (log10 power)
 % maxPeakBW, the width (standard deviation, in log10 frequency) of the tallest peak
 % totalPeakPower, the sum of the heights of all peaks (log10 power)
-% periodicFraction, sum(peaks^2) / sum((logS - mean(logS))^2): the share of the
-%           variation of the log10 spectrum accounted for by the periodic component
+% periodicFraction, sum(peaks^2) / sum((logS - mean(logS))^2): the squared size of
+%           the periodic component relative to the variation of the log10 spectrum
+%           about its mean (not bounded above by 1, and not a fraction of power)
 % modelR2, modelMAE, the R^2 and mean absolute error of the combined
 %           (aperiodic + periodic) fit to the log10 spectrum
 % (maxPeakFreq, maxPeakPower and maxPeakBW are NaN if no peaks are found.)
@@ -77,51 +78,28 @@ function out = SP_Specparam(y, aperiodicMode, maxNPeaks, peakThreshold, peakWidt
 % neural power spectra into periodic and aperiodic components", Nature Neuroscience
 % 23, 1655-1665 (2020). DOI: 10.1038/s41593-020-00744-x
 %
-% ---NOTES: Which outputs are registered, and why:
+% ---NOTES: Which outputs are registered:
 % Seven of the ten are registered: apExponent, apOffset, numPeaks,
-% maxPeakFreq, maxPeakPower, maxPeakBW and periodicFraction. The
-% exclusions are measured rather than assumed:
+% maxPeakFreq, maxPeakPower, maxPeakBW and periodicFraction.
 %
-%   * modelR2 and modelMAE are genuinely length-dependent (eta^2 against N
-%     of 0.50-0.76 and 0.60-0.61) and consistently so across three
-%     different generating processes, including a stationary AR(1). This
-%     is intrinsic to what they measure: goodness of fit depends on how
-%     noisy the spectral estimate is, which depends on how many segments
-%     there are to average, which depends on N. They cannot be compared
-%     across a dataset of mixed lengths.
-%   * apKnee reaches eta^2 = 0.69 on AR(1) -- whose spectrum is a
-%     Lorentzian, i.e. exactly the knee model, so the knee is genuinely
-%     identifiable there and its estimate is correspondingly sensitive to
-%     how much data is available. Since it is the only field unique to
-%     'knee' mode, only the 'fixed' variant is registered; 'knee' remains
-%     callable and does fit real knees well (recovering a planted knee of
-%     1e-3 as 1.01e-3, R^2 0.996 vs 0.945 for the 'fixed' form) but costs
-%     ~4x more.
-%   * totalPeakPower is excluded as a near-duplicate of maxPeakPower
-%     (R^2 = 0.85 across 1000 real series; they coincide exactly whenever
-%     only one peak is found, which is the common case), with numPeaks
-%     already carrying the 'how many' information.
+%   * modelR2 and modelMAE depend on series length: goodness of fit
+%     depends on how noisy the spectral estimate is, which depends on how
+%     many segments there are to average, which depends on N. They cannot
+%     be compared across a dataset of mixed lengths.
+%   * apKnee is the only field unique to 'knee' mode, and its estimate is
+%     sensitive to how much data is available, so only the 'fixed' variant
+%     is registered; 'knee' remains callable, at a higher computational
+%     cost.
+%   * totalPeakPower largely duplicates maxPeakPower (they coincide exactly
+%     whenever only one peak is found), with numPeaks already carrying the
+%     'how many' information.
 %
-% Measuring length-dependence needs care, and getting it wrong initially
-% led this operation to discard six fields that were in fact fine.
-% Generating a fresh realization at each N is *not* a valid test for a
-% 1/f-type process: a longer realization contains lower frequencies, so
-% the process itself changes with N and the resulting eta^2 conflates that
-% with any bias in the operation. The correct design, used for the figures
-% above, is to draw one long realization per replicate and take prefixes
-% of it, which varies the observation length while holding the process
-% fixed.
-%
-% On novelty: across 1000 real series, periodicFraction reaches a maximum
-% R^2 of only 0.17 against any of the ~7700 other hctsa features, and
-% numPeaks 0.24 (and only 0.17 against SP_Summaries' own spectral-peak
-% fields) -- i.e. counting peaks *relative to a fitted aperiodic
-% background* really is different from counting them by absolute
-% prominence, which was the motivating claim for this operation.
-% apExponent is much the most redundant (R^2 = 0.76 against
-% SP_Summaries' linfitloglog_all_a2) but is the better-motivated estimator of that
-% same quantity, being both peak-corrected and fitted to a segment-averaged
-% spectrum.
+% apExponent overlaps with SP_Summaries' linfitloglog_all_a2 (the slope of a
+% straight-line fit to the log-log spectrum), but is the better-motivated
+% estimator of that quantity, being peak-corrected and fitted to a
+% segment-averaged spectrum. Counting peaks relative to a fitted aperiodic
+% background (periodicFraction, numPeaks) is a different quantity from counting
+% them by absolute prominence, as SP_Summaries does.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -189,9 +167,8 @@ end
 N = length(y);
 if isempty(segLength)
     % Scale the segment length with the series, so that longer series buy
-    % both finer frequency resolution and more segments to average over.
-    % Holding it fixed instead was tried and measurably rejected: see the
-    % note on the spectral estimate below.
+    % both finer frequency resolution and more segments to average over
+    % (see the note on the spectral estimate below).
     segLength = max(round(N / 8), 32);
 end
 minSegments = 4; % need several segments to average over for a usable estimate
@@ -212,27 +189,15 @@ end
 % A parameterization of the spectrum's *shape* needs a smooth, low-variance
 % spectral estimate. A raw periodogram is a statistically inconsistent
 % estimator (its per-bin variance does not shrink as more data is added),
-% so fitting peaks to one mostly fits noise -- the same fact that forced
-% SP_Summaries' peak-detection thresholds to be calibrated on Welch
-% estimates only. Hence Welch's method (segment-averaged) is used here
-% unconditionally rather than being left to the caller.
+% so fitting peaks to one mostly fits noise. Hence Welch's method
+% (segment-averaged) is used here unconditionally rather than being left
+% to the caller.
 % The segment length scales with N by default, and all available data is
 % used. Holding both fixed instead (so that every series yields a
-% statistically identical spectral estimate, and hence perfectly
-% length-invariant parameters) is available via the segLength and
-% maxSegments arguments, but was tried as the default and rejected on
-% measurement: fixing segLength = 256 and capping at 15 segments starved
-% the estimate badly enough that the exponent recovered from a known 1/f
-% process degraded (chi = 1.0 recovered as 1.040 rather than 1.001), the
-% white-noise false-peak rate rose from 2% to 12%, the knee model began
-% misfitting pure power-law data (returning a spurious knee of 1e-2 and
-% an exponent of 1.22 instead of 1.0), and -- decisively -- the
-% peak-corrected exponent went from twice as accurate as a naive
-% log-log slope fit to six times *worse* than it, because the naive
-% comparator still gets to use the whole series. Length-invariance
-% bought at the price of discarding most of the data is not worth having
-% here; the length-dependent outputs are excluded from registration
-% instead.
+% statistically identical spectral estimate, and hence length-invariant
+% parameters) is available via the segLength and maxSegments arguments,
+% at the cost of discarding data and so of a noisier spectral estimate.
+% The length-dependent outputs are instead excluded from registration.
 winLength = segLength;
 maxSamples = winLength + (maxSegments - 1) * floor(winLength / 2);
 if N > maxSamples
@@ -245,11 +210,8 @@ NFFT = 2^nextpow2(winLength);
 % frequency only completing one or two cycles within a Welch segment is
 % essentially unestimated, and on a log-frequency axis those lowest bins
 % sit isolated far to the left, where a straight-line fit is
-% unconstrained -- so any wiggle there reads as a huge 'peak'. Verified:
-% without this cut, 1/f noise (which contains no oscillation at all)
-% produced a spurious peak in 73% of replicates, and *every* one of them
-% sat in the lowest one or two frequency bins. Requiring several cycles
-% per segment removes them.
+% unconstrained -- so any wiggle there reads as a huge 'peak'. Requiring
+% several cycles per segment removes them.
 % Note this makes the fitted frequency range depend on N, which is
 % physically correct (a shorter series genuinely cannot resolve low
 % frequencies) but does mean these features are not strictly
@@ -290,8 +252,6 @@ nBins = length(resid);
 % always. Scaling by that factor makes the threshold a genuine
 % "bigger than the biggest thing noise would produce" test, and adapts
 % automatically as the number of bins changes with series length.
-% Verified: without this, white noise hit the maximum peak count in 100%
-% of replicates and pink noise found a spurious peak in 98%.
 nullMaxFactor = sqrt(2 * log(nBins));
 
 for k = 1:maxNPeaks

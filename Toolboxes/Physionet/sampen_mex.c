@@ -233,13 +233,19 @@ void sampen2(double *y, int mm, double r, int n)
 }
 
 /* sampen() calculates an estimate of sample entropy but does NOT calculate
-   the variance of the estimate */
-void sampen(double *y, int M, double r, int n, double *sampEnt)
+   the variance of the estimate. For each order k = 0, ..., M-1 it writes
+   SampEn(k) to sampEnt[k] and, when countA and countB are not NULL, the
+   template-match counts that define it, SampEn(k) = -log(countA[k]/countB[k]):
+   countB[k] is the number of pairs of runs of k values that match (all pairs
+   for k = 0) and countA[k] the number of those still matching when extended by
+   one more value. */
+void sampen(double *y, int M, double r, int n, double *sampEnt,
+            double *countA, double *countB)
 {
     double *p = NULL;
     double *e = NULL;
-    long *run = NULL, *lastrun = NULL, N;
-    double *A = NULL, *B = NULL;
+    long *run = NULL, *lastrun = NULL;
+    double *A = NULL, *B = NULL, nA, nB;
     int M1, j, nj, jj, m;
     int i;
     double y1;
@@ -279,25 +285,24 @@ void sampen(double *y, int M, double r, int n, double *sampEnt)
 	    lastrun[j] = run[j];
     }				/* for i */
 
-    N = (long) (n * (n - 1) / 2);
-    p[0] = A[0] / N;
-    sampEnt[0] = -log(p[0]);
-    /* printf("SampEn(0,%g,%d) = %lf\n", r, n, sampEnt[0]); */
-
-    for (m = 1; m < M-1; m++) {
-	p[m] = A[m] / B[m - 1];
-	if (p[m] == 0)
-    {
-        sampEnt[m] = 0;
-        /* printf("No matches! SampEn((%d,%g,%d) = Inf!\n", m, r, n); */
-    }
-	else
-    {
-        sampEnt[m] = -log(p[m]);
-	    /* printf("SampEn(%d,%g,%d) = %lf\n", m, r, n, sampEnt[m]);
-        printf("A = %lf\n",A[m]));
-        printf("B = %lf\n",B[m])); */
-    }
+    /* SampEn(k) = -log(A/B), from the count B of pairs of runs of k values that
+       match (all n(n-1)/2 pairs for k = 0) and the count A of those that still
+       match when extended by one more value. It is NaN when B = 0 (no matches
+       to form the ratio of) and when A = 0, B > 0: the estimate is then
+       infinite, i.e., the data cannot support it at this m, r and n. */
+    for (m = 0; m < M-1; m++) {
+        nA = A[m];
+        nB = (m == 0) ? (double) n * (n - 1) / 2 : B[m - 1];
+        if (countA != NULL) {
+            countA[m] = nA;
+            countB[m] = nB;
+        }
+        if ((nA > 0) && (nB > 0)) {
+            p[m] = nA / nB;
+            sampEnt[m] = -log(p[m]);
+        }
+        else
+            sampEnt[m] = mxGetNaN();
     }
 
     mxFree(A);
@@ -332,7 +337,11 @@ void help()
 	(void) fprintf(stderr, "%s\n", help_strings[i]);
 }
 
-/* The gateway function */
+/* The gateway function:
+   [sampEn, countA, countB] = sampen_mex(y, M, r), with y a row vector.
+   sampEn (M+1 x 1) holds SampEn(k) for k = 0, ..., M-1 in its first M entries.
+   The optional countA and countB (M x 1) hold the template-match counts for
+   each k, SampEn(k) = -log(countA(k+1)/countB(k+1)). */
 void mexFunction(int nlhs,              /* number of expected outputs */
                  mxArray *plhs[],       /* array of pointers to output arguments */
                  int nrhs,              /* number of inputs */
@@ -344,13 +353,14 @@ void mexFunction(int nlhs,              /* number of expected outputs */
     double r;                   /* threshold value */
     double *sampEnt;            /* The sample entropies computed from the algorithm */
     double *sampEnt_out;     /* outputs */
+    double *countA = NULL, *countB = NULL; /* template-match counts (optional outputs) */
 
     /* Check for proper number of arguments */
     if(nrhs!=3) {
         mexErrMsgIdAndTxt("hctsa:sampen:nrhs","Three inputs required.");
     }
-    if(nlhs!=1) {
-        mexErrMsgIdAndTxt("hctsa:sampen:nlhs","One output required.");
+    if(nlhs>3) {
+        mexErrMsgIdAndTxt("hctsa:sampen:nlhs","At most three outputs.");
     }
 
     /* check that the first input argument is double */
@@ -393,8 +403,14 @@ void mexFunction(int nlhs,              /* number of expected outputs */
 
     /* mexPrintf("\nRunning SampEn(%f,%f) on a time series with %d samples\n",m,r,numSamples); */
 
+    /* Template-match counts, if requested: */
+    if (nlhs > 1) {
+        countA = (double *)mxCalloc(m, sizeof(double));
+        countB = (double *)mxCalloc(m, sizeof(double));
+    }
+
     /* call the computational routine */
-    sampen(x_in, m, r, numSamples, sampEnt);
+    sampen(x_in, m, r, numSamples, sampEnt, countA, countB);
 
     /* assign output: */
     /* mexPrintf("\nSampEn(%f,%f) completed! Assigning output....\n",m,r); */
@@ -406,6 +422,17 @@ void mexFunction(int nlhs,              /* number of expected outputs */
     {
        sampEnt_out[i] = sampEnt[i];
        /*    mexPrintf("\n %u SampEn(%u) = %f.\n",i,i,sampEnt[i]); */
+    }
+
+    if (nlhs > 1) {
+        plhs[1] = mxCreateDoubleMatrix(m, 1, mxREAL);
+        memcpy(mxGetPr(plhs[1]), countA, (size_t) m * sizeof(double));
+        if (nlhs > 2) {
+            plhs[2] = mxCreateDoubleMatrix(m, 1, mxREAL);
+            memcpy(mxGetPr(plhs[2]), countB, (size_t) m * sizeof(double));
+        }
+        mxFree(countA);
+        mxFree(countB);
     }
 
     /* Release allocated memory. */

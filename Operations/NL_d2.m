@@ -6,10 +6,12 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 % embedding dimensions m = 1, ..., maxm. Our code uses the outputs from this algorithm to
 % return a set of informative features about the results.
 %
-% Takens' estimator is computed for the correlation dimension, as well as related statistics,
-% including other dimension estimates by finding appropriate scaling ranges, and searching
-% for a flat region in the output of TISEAN's h2 algorithm, which indicates
-% determinism/deterministic chaos.
+% Takens' estimator is computed for the correlation dimension, at a fixed upper length scale
+% of 0.5 standard deviations (the estimator is a reasonable dimension estimate when
+% evaluated at the upper end of the scaling range; Hegger, Kantz & Schreiber 1999), as well
+% as related statistics, including other dimension estimates by finding appropriate scaling
+% ranges, and searching for a flat region in the output of TISEAN's h2 algorithm, which
+% indicates determinism/deterministic chaos.
 %
 % To find a suitable scaling range, a penalized regression procedure is used to determine an
 % optimal scaling range that simultaneously spans the greatest range of scales and shows the
@@ -32,13 +34,25 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 % each embedding dimension is roughly constant, found by a penalized search; "goodness" is
 % a standard deviation of rescaled values minus a penalty times the length of the stretch,
 % so lower is better; "stabled" is the mean of the quantity from m_min upward; "linrmserr"
-% is the RMS error of a straight-line fit of the rescaled quantity against m.)
+% is the RMS error of a straight-line fit of the rescaled quantity against m. All four are
+% NaN when the quantity is the same at every m, to within round-off, since it cannot then
+% be rescaled.)
 % takens05_mean, takens05_median, takens05_max, takens05_min, takens05_std, takens05_iqr:
 %       statistics, across embedding dimensions, of Takens' estimator of the correlation
 %       dimension at the first length scale above 0.5 (standard deviations of a z-scored
-%       series)
+%       series), over the dimensions m = 1, ..., m_v at which it rests on at least 33 pairs
+%       of delay vectors within that scale (the number of pairs falls with m; m_v is the
+%       last such dimension, and stops before any estimate above 2*m). With fewer pairs the
+%       estimate is set by a handful of pairs in the few occupied radii of the correlation
+%       sum and is not a dimension estimate (33 is the smallest number of pairs for which
+%       the 95% sampling interval of Takens' estimator, for independent pairs, spans less
+%       than a factor of two). An estimate above 2*m is not a dimension estimate either: a
+%       set with a scaling region below the length scale has a dimension of at most m, and
+%       larger values arise when the correlation sum rises much faster than r^m, as in
+%       nonstationary series.
 % takens05mmin_ri, takens05mmin_goodness, takens05mmin_stabled, takens05mmin_linrmserr:
-%       m_min, goodness, stabled and linrmserr of Takens' estimates over m
+%       m_min, goodness, stabled and linrmserr of Takens' estimates over m = 1, ..., m_v
+%       (all ten takens05 outputs are NaN if fewer than two dimensions qualify)
 % bend2_mindim, bend2_maxdim, bend2_meandim: the minimum, maximum and mean, across
 %       embedding dimensions, of the correlation dimension estimate (mean local slope of
 %       the correlation sum, over the best scaling range for each embedding dimension)
@@ -73,7 +87,7 @@ function out = NL_d2(y, tau, maxm, theilerWin)
 %
 % ---REFERENCES:
 % Hegger, Kantz, Schreiber, "Practical implementation of nonlinear time series methods: The
-% TISEAN package", Chaos 9(2) 413 (1999).
+% TISEAN package", Chaos 9(2) 413-435 (1999). DOI: 10.1063/1.166424
 % Theiler, "Spurious dimension from correlation algorithms applied to limited time-series
 % data", Phys. Rev. A, 34(3) 2427 (1986).
 % Kantz and Schreiber, "Nonlinear Time Series Analysis", Cambridge University Press (2004).
@@ -182,7 +196,7 @@ if isempty(res) || ~isempty(regexp(res, 'command not found', 'once')) % nothing 
 	else
 		error('Call to TISEAN function ''d2'' failed: %s', res)
 	end
-elseif strfind(res, 'dyld: Library not loaded')
+elseif contains(res, 'dyld: Library not loaded')
 	error('DYLD library not found -- try recompiling TISEAN:\n%s', res);
 end
 
@@ -196,39 +210,29 @@ if ~exist([filePath '.c2'], 'file') || ~exist([filePath '.d2'], 'file') || ~exis
 	error([filePath, '.c2/.d2/.h2 not generated?']);
 end
 
+% The correlation sums (.c2), for the number of pairs behind Takens' estimator below:
+fid_c2 = fopen([filePath '.c2']);
+s = textscan(fid_c2, '%[^\n]');
+fclose(fid_c2);
+try
+	c2dat = SUB_readTISEANout(s{1}, maxm, '#dim=', 2);
+catch
+	c2dat = cell(maxm, 1); % unreadable: no pair counts, so no Takens statistics
+end
+
 % this creates files in the local directory:
 %  * extension .c2: This file contains the correlation sums for all treated length scales and embedding dimensions.
 %  * extension .d2: This file contains the local slopes of the logarithm of the correlation sum, the correlation dimension.
 %  * extension .h2: This file contains the correlation entropies.
 
-%% Retreve output from file
-
-% % (1) --------- C2 -----------
-% fid_c2 = fopen([filePath '.c2']);
-% s = textscan(fid_c2,'%[^\n]');
-% if isempty(s)
-%     disp(['Error reading TISEAN output file ' filePath '.c2'])
-%     fclose(fid_c2); % close the file
-%     delete([filePath '.c2']) % delete this file
-%     delete([filePath '.d2']) % delete this file
-%     delete([filePath '.h2']) % delete this file
-%     return;
-% end
-% s = s{1};
-% w = zeros(maxm+1,1);
-% c2dat = SUB_readTISEANout(s,maxm,'#dim=',2);
-% fclose(fid_c2); % close the file
-%
-% % c2dat now contains the correlation sums (second column)
-% % as a function of the length scale epsilon (first column) for
-% % the different embedding dimension (cell components 1--10)
+%% Retrieve output from file
 
 % ------- GAUSSIAN KERNEL CORRELATION INTEGRAL -----------
 % Now implement Gaussian Kernel Correlation integral
 [~, res] = BF_TiseanSystem(sprintf('c2g %s.c2', filePath));
 % output is in res -- check it
 s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('writing to stdout', s);
+wi = find(strncmp(s, 'writing to stdout', 17));
 s = s(wi + 1:end);
 if isempty(s) % TISEAN did produce valid output
 	delete([filePath, '.c2']); delete([filePath, '.d2']); delete([filePath, '.h2']) % just in case these files were generated...
@@ -257,7 +261,7 @@ end
 [~, res] = BF_TiseanSystem(sprintf('c2t %s.c2', filePath));
 % output is in res
 s = textscan(res, '%[^\n]'); s = s{1};
-wi = strmatch('writing to stdout', s);
+wi = find(strncmp(s, 'writing to stdout', 17));
 s = s(wi + 1:end);
 c2tdat = SUB_readTISEANout(s, maxm, '#m=', 2);
 delete([filePath '.c2']);
@@ -296,24 +300,52 @@ delete([filePath '.h2']); % delete the file
 % ------------------------------------------------------------------------------
 %% (1) TAKENS ESTIMATOR
 % ------------------------------------------------------------------------------
-% correlation dimension at upper length scale of eup
-% (for z-scored time series, std = 1...; in units of this)
-% Kantz & Shreiber recommend taking at half the std of the signal
-takens05 = SUB_takens(c2tdat, 0.5);
-out.takens05_mean = mean(takens05);
-out.takens05_median = median(takens05);
-out.takens05_max = max(takens05);
-out.takens05_min = min(takens05);
-out.takens05_std = std(takens05);
-out.takens05_iqr = iqr(takens05);
+% correlation dimension at an upper length scale of 0.5 (standard deviations of the
+% z-scored series), a fixed scale that is the same for every embedding dimension
+% Only embedding dimensions whose estimate rests on at least 33 pairs of delay vectors
+% within that length scale enter the statistics (with fewer, the estimate is dominated by a
+% handful of pairs in the few occupied radii, and is not a dimension estimate): the
+% dimensions m = 1, ..., m_v up to the first one without an estimate on 33 pairs (the count
+% falls with m) or with an estimate above 2*m (see above)
+numEmb = N - (maxm - 1) * tau;
+numPairs = max(0, (numEmb - theilerWin - 1) * (numEmb - theilerWin) / 2);
+[takens05all, takens05count] = SUB_takens(c2tdat, 0.5, c2dat, numPairs);
+isOK = ~isnan(takens05all) & (takens05count >= 33) & (takens05all(:) <= 2*(1:numel(takens05all))');
+m_v = find(~isOK, 1, 'first') - 1;
+if isempty(m_v), m_v = maxm; end
+takens05 = takens05all(1:m_v);
+if m_v < 2
+	% Fewer than two embedding dimensions with an estimate: no statistics across them
+	out.takens05_mean = NaN;
+	out.takens05_median = NaN;
+	out.takens05_max = NaN;
+	out.takens05_min = NaN;
+	out.takens05_std = NaN;
+	out.takens05_iqr = NaN;
+	out.takens05mmin_ri = NaN;
+	out.takens05mmin_goodness = NaN;
+	out.takens05mmin_stabled = NaN;
+	out.takens05mmin_linrmserr = NaN;
+else
+	out.takens05_mean = mean(takens05);
+	out.takens05_median = median(takens05);
+	out.takens05_max = max(takens05);
+	out.takens05_min = min(takens05);
+	out.takens05_std = std(takens05);
+	out.takens05_iqr = iqr(takens05);
 
-% Find outliers as means of inferring m_min
-% looking for approaching a constant for m>m_min
-mmintakens05 = SUB_findmmin(takens05);
-out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
-out.takens05mmin_goodness = mmintakens05.goodness;
-out.takens05mmin_stabled = mmintakens05.stabled;
-out.takens05mmin_linrmserr = mmintakens05.linrmserr;
+	% Find outliers as means of inferring m_min
+	% looking for approaching a constant for m>m_min
+	mmintakens05 = SUB_findmmin(takens05);
+	if isempty(mmintakens05.ri1) % constant estimates: no minimum dimension can be picked out
+		out.takens05mmin_ri = NaN;
+	else
+		out.takens05mmin_ri = mmintakens05.ri1; % minimum dimension to observe a scaling range
+	end
+	out.takens05mmin_goodness = mmintakens05.goodness;
+	out.takens05mmin_stabled = mmintakens05.stabled;
+	out.takens05mmin_linrmserr = mmintakens05.linrmserr;
+end
 
 % ------------------------------------------------------------------------------
 %% (2) D2, local slopes of correlation integral
@@ -360,12 +392,12 @@ d2dat_M_frs = d2dat_M(mminfulcherd2.ri1:end, :);
 % find scaling region across m for a saturated range m.
 scd2 = findscalingr(d2dat_M_frs);
 
-if isempty(scd2.ri1);
+if isempty(scd2.ri1)
 	out.d2_logminscr = NaN;
 else
 	out.d2_logminscr = log(d2dat_v(scd2.ri1));
 end
-if isempty(scd2.ri2);
+if isempty(scd2.ri2)
 	out.d2_logmaxscr = NaN;
 else
 	out.d2_logmaxscr = log(d2dat_v(scd2.ri2));
@@ -510,7 +542,7 @@ function dimdat = SUB_readTISEANout(s, maxm, blocker, nc)
 	% blocker the string distinguishing sections of output
 	% nc number of columns in string
 
-	w = strmatch(blocker, s);
+	w = find(strncmp(s, blocker, length(blocker)));
 	if length(w) ~= maxm
 		error('error reading TISEAN output');
 	end
@@ -527,7 +559,6 @@ function dimdat = SUB_readTISEANout(s, maxm, blocker, nc)
 				tmp = textscan(ss{jj}, '%f%f%f');
 			end
 			if all(cellfun(@isempty, tmp))
-				% Ben Fulcher, 2015-03-06
 				% Sometimes a comment at the bottom of the output file
 				nn = nn(1:jj - 1, :);
 				break
@@ -542,21 +573,24 @@ end
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
-function takensp = SUB_takens(dat, eup)
+function [takensp, countp] = SUB_takens(dat, eup, c2dat, numPairs)
 	% dat is takens estimator data, cell with a component corresponding to each
 	% embedding dimension
 	% eup is the cutoff length scale
-	% returns a vector containing the dimension estimate at eup with
-	% each element corresponding to an embedding dimension m up to the
-	% maximum
+	% returns a vector containing the dimension estimate at the first length scale
+	% above eup for each embedding dimension up to the maximum, and the number of
+	% pairs within that length scale (its correlation sum times the number of pairs)
 	mmax = length(dat);
-	takensp = zeros(mmax, 1);
+	takensp = NaN(mmax, 1);
+	countp = zeros(mmax, 1);
 	for ii = 1:mmax
 		theindex = find(dat{ii}(:, 1) > eup, 1, 'first');
 		if ~isempty(theindex)
 			takensp(ii) = dat{ii}(theindex, 2);
-		else
-			takensp(ii) = NaN;
+			if ~isempty(c2dat{ii})
+				[~, jj] = min(abs(log(c2dat{ii}(:, 1)) - log(dat{ii}(theindex, 1))));
+				countp(ii) = c2dat{ii}(jj, 2) * numPairs;
+			end
 		end
 	end
 
@@ -706,9 +740,16 @@ function out = SUB_findmmin(ds)
 	% to minimize variance
 
 	l = length(ds);
-	gamma = 0.1; % regularizer: CHOSEN AD HOC!! (maybe it's nicer to say 'empirically'...)
+	gamma = 0.1; % regularization parameter, chosen ad hoc
 	dsraw = ds; % before normalization
-	ds = (ds - min(ds)) ./ (max(ds) - min(ds)); % rescale data to [0,1] so weights are consistent
+	if max(ds) - min(ds) <= 1e-12 * max(abs(ds))
+		% values equal to within round-off are a constant curve, which cannot be rescaled to
+		% [0,1] (rescaling the round-off differences would give arbitrary values): NaN, as for
+		% exactly equal values
+		ds = NaN(size(ds));
+	else
+		ds = (ds - min(ds)) ./ (max(ds) - min(ds)); % rescale data to [0,1] so weights are consistent
+	end
 	stptr = 1:l - 1; % need at least two points
 	mybad = zeros(length(stptr), 1);
 	for ii = 1:length(stptr)
@@ -741,7 +782,7 @@ function results = SUB_getslopes(x, Y)
 	dx = log10(x(2)) - log10(x(1));
 	%         dx = x(2) - x(1);
 	ndim = size(Y, 1); % number of embeding dimensions
-	gamma = 2E-3; % regularizer, chosen 'empirically' (i.e., ad hoc)
+	gamma = 2E-3; % regularization parameter, chosen ad hoc
 	l = size(Y, 2) - 1; % number of distance/scaling points per dimension
 	stptr = 1:floor(l / 2) - 1; % must be in the first half
 	endptr = ceil(l / 2) + 1:l; % must be in second half

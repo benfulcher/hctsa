@@ -217,7 +217,7 @@ end
 
 %-------------------------------------------------------------------------------
 fprintf(1,'[%s]: Extracting %u features from each of %u time series.\n',...
-                    datestr(now),numOps,numTimeSeries);
+                    timeStamp(),numOps,numTimeSeries);
 
 
 % The times vector stores the time taken for each time series to have its
@@ -282,7 +282,7 @@ if doParallelSeries
 
         blockData = TimeSeries.Data(blockRows); % raw time-series vectors only
 
-        fv = cell(nBlock,1); ct = cell(nBlock,1); cq = cell(nBlock,1);
+        fv = cell(nBlock,1); ct = cell(nBlock,1); cq = cell(nBlock,1); me = cell(nBlock,1);
         elapsed = zeros(nBlock,1);
         failMsg = repmat({''},nBlock,1);
 
@@ -293,7 +293,7 @@ if doParallelSeries
             end
             seriesTimer = tic;
             try
-                [fv{k},ct{k},cq{k}] = TS_CalculateFeatureVector(blockData{k},false,...
+                [fv{k},ct{k},cq{k},me{k}] = TS_CalculateFeatureVector(blockData{k},false,...
                         opsConstant.Value(toCalc_k,:),mopsConstant.Value,true,'fast',beVerbose);
             catch ME
                 failMsg{k} = ME.message;
@@ -313,6 +313,13 @@ if doParallelSeries
             toCalc_k = blockToCalc(k,:);
             if ~any(toCalc_k)
                 continue
+            end
+            % A worker's own text output never reaches the client, so report any
+            % master-operation errors here (their entries are stored as TS_Quality = 1):
+            for ee = 1:size(me{k},1)
+                fprintf(1,'[%s]: Error evaluating %s on time series %u / %u (%s): %s\n',...
+                    timeStamp(),me{k}{ee,1},blockPos(k),numTimeSeries,TimeSeries.Name{blockRows(k)},...
+                    strrep(strtrim(me{k}{ee,2}),newline,' | '));
             end
             TS_DataMat(blockRows(k),toCalc_k)  = fv{k};
             TS_CalcTime(blockRows(k),toCalc_k) = ct{k};
@@ -382,7 +389,7 @@ else
             fprintf(1,'- - - - - - - Time series %u / %u: %s - - - - -\n',i,numTimeSeries,TimeSeries.Name{tsInd});
         case 'full'
             fprintf(1,'\n\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n');
-            fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',datestr(now));
+            fprintf(1,'; ; ; : : : : ; ; ;    %s     ; ; ; : : : ; ; ;\n',timeStamp());
             fprintf(1,'- - - - - - - - - - - Time series %u / %u - - - - - - - - - - -\n',i,numTimeSeries);
         end
 
@@ -470,7 +477,7 @@ if strcmp(howVocal,'fast')
 else
     fprintf(1,'!! !! !! !! !! !! Calculation completed !! !! !! !! !!\n');
     fprintf(1,'[%s]: Calculations complete in a total of %s.\n',...
-                        datestr(now),timeString);
+                        timeStamp(),timeString);
 end
 
 % Save back to local files (if results were computed):
@@ -498,8 +505,14 @@ function saveSeconds = saveResults(customFile,TS_DataMat,TS_CalcTime,TS_Quality,
     save(customFile,'TS_DataMat','TS_CalcTime','TS_Quality','-append')
     saveSeconds = toc(saveTimer);
     if isAutosave
-        fprintf(1,'[%s] Autosaved progress to %s (%s).\n',datestr(now),customFile,BF_TheTime(saveSeconds));
+        fprintf(1,'[%s] Autosaved progress to %s (%s).\n',timeStamp(),customFile,BF_TheTime(saveSeconds));
     else
         fprintf(1,' Saved in %s.\n',BF_TheTime(saveSeconds));
     end
+end
+
+%===============================================================================
+function ts = timeStamp()
+    % The current date and time as text, e.g., '15-Oct-2026 14:03:22'
+    ts = char(datetime('now','Format','dd-MMM-yyyy HH:mm:ss'));
 end

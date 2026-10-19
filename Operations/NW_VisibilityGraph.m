@@ -26,8 +26,8 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 %       of the natural visibility graph may be slow). Only the degrees are
 %       computed, with no adjacency matrix stored, so memory is not a concern:
 %       the horizontal graph takes O(N) time and the natural graph typically
-%       well under O(N^2) (a smooth random walk of 20000 samples takes about
-%       0.5 s; a worst-case series, with no early stop in the sweep, takes O(N^2)).
+%       well under O(N^2) (a worst-case series, with no early stop in the sweep,
+%       takes O(N^2)).
 %
 % ---OUTPUTS:
 % modek, propmode: the most common degree, and the proportion of nodes that
@@ -55,8 +55,9 @@ function out = NW_VisibilityGraph(y, meth, maxL)
 % dpowerk_r2, dpowerk_adjr2, dpowerk_rmse, dpowerk_resAC1, dpowerk_resAC2,
 % dpowerk_resrunsz: the same, for a power law fitted to the distribution of degrees
 %       (for each of the three fits, NaN if the degrees take no more distinct values
-%       than the fit has parameters: 3 for the Gaussian, 2 for the others; also NaN
-%       if the fit is exact, which leaves no meaningful residuals)
+%       than the fit has parameters: 3 for the Gaussian, 2 for the others; the three
+%       residual statistics are also NaN if the residuals have no variation beyond
+%       floating-point round-off, as for an exact fit: BF_ResidualStats)
 % gaussnlogL, expnlogL: the mean negative log-likelihood per node of a Gaussian
 %       and of an exponential distribution fitted to the degrees
 % evparam1, evparam2, evnlogL: the location and scale parameters of an
@@ -124,15 +125,13 @@ if ischar(maxL) && strcmp(maxL, 'full')
 	% No cropping -- but flag potentially slow computations for very long series:
 	slowThreshold = 50000;
 	if N > slowThreshold && strcmp(meth, 'norm')
-		warning(sprintf(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
-						 'visibility graph computation may be slow'], N, slowThreshold));
+		warning(['Time series (%u samples) exceeds %u with maxL=''full''; ' ...
+				 'visibility graph computation may be slow'], N, slowThreshold);
 	end
 elseif N > maxL % too long: crop
-	% ++BF changed on 8/3/2010 to reduce down to first maxL samples. In future,
-	% could alter to take different subsets, or set a maximum distance range
-	% allowed to make a link (using sparse), etc.
-	warning(sprintf(['Time series (%u > %u) is too long for visibility graph...' ...
-					 ' Analyzing the first %u samples'], N, maxL, maxL));
+	% Reduce to the first maxL samples
+	warning(['Time series (%u > %u) is too long for visibility graph...' ...
+			 ' Analyzing the first %u samples'], N, maxL, maxL);
 	y = y(1:maxL);
 	N = length(y); % new time-series length
 end
@@ -258,7 +257,7 @@ for i = 1:length(fitModels)
 		r2 = 1 - sse/sstot;
 		adjr2 = 1 - (1 - r2)*(length(kVals) - 1)/dfe;
 		rmse = sqrt(sse/dfe) * std(k); % in density units of the standardized degrees
-		[resAC1, resAC2, resrunsz] = BF_ResidualStats(res, sstot);
+		[resAC1, resAC2, resrunsz] = BF_ResidualStats(res, kProb);
 	end
 	out.([fitName '_r2']) = r2; % rsquared
 	out.([fitName '_adjr2']) = adjr2; % degrees of freedom-adjusted rsquared

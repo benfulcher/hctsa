@@ -9,10 +9,18 @@ function Dij = TS_PairwiseDist(tsOrOps,whatData,distanceMetric,doSave)
 % tsOrOps: Compute pairwise distances between all pairs of time series
 %               ('ts', default), or operations ('ops')
 %
-% whatData: what hctsa data source to use (cf. TS_LoadData)
+% whatData: what hctsa data source to use (cf. TS_LoadData), or a time-series x
+%           operations data matrix
 %
-% distanceMetric: what distance metric to use, e.g., 'euclidean' (default for
-%                 time series) or 'corr_fast' (default for operations)
+% distanceMetric: what distance metric to use (cf. BF_pdist), e.g., 'euclidean'
+%                 (default for time series) or 'corr_fast' (default for operations)
+%
+% doSave: whether to store the distances back in the local .mat file, in ts_clust
+%         or op_clust (default: true if there are at most 1000 objects, otherwise
+%         false). Only possible when whatData specifies a data file.
+%
+%---OUTPUT:
+% Dij, the pairwise distances as a vector (cf. squareform)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -52,7 +60,7 @@ if nargin < 2
     whatData = 'norm';
 end
 
-if nargin < 3
+if nargin < 3 || isempty(distanceMetric)
     switch tsOrOps
     case 'ts'
         distanceMetric = 'euclidean';
@@ -61,22 +69,31 @@ if nargin < 3
     end
 end
 
-% doSave
-if nargin < 4
-    % By default, save back to the file specified as whatData
-    doSave = 1;
-end
-
 % ------------------------------------------------------------------------------
 % Load data
 % ------------------------------------------------------------------------------
 
-if ischar(whatData)
-    [TS_DataMat,~,~,theFile] = TS_LoadData(whatData);
-else
-    % If provided a matrix, assume it's from HCTSA_N.mat by default:
+if isnumeric(whatData)
+    % A data matrix: there is no file to save back to
     TS_DataMat = whatData;
-    theFile = 'HCTSA_N.mat';
+    theFile = '';
+else
+    [TS_DataMat,~,~,theFile] = TS_LoadData(whatData);
+end
+
+% doSave
+% (By default, save back to the file specified as whatData, if there are not too many objects)
+if strcmp(tsOrOps,'ts')
+    numObjects = size(TS_DataMat,1);
+else
+    numObjects = size(TS_DataMat,2);
+end
+canSave = ischar(theFile) && endsWith(theFile,'.mat') && exist(theFile,'file');
+if nargin < 4 || isempty(doSave)
+    doSave = canSave && (numObjects <= 1000);
+elseif doSave && ~canSave
+    warning('Cannot save the pairwise distances: the data did not come from a .mat file');
+    doSave = false;
 end
 
 % ------------------------------------------------------------------------------

@@ -61,13 +61,13 @@ cf = polyfit(t, y, k);
 warning('on', 'MATLAB:polyfit:RepeatedPointsOrRescale');
 
 f = polyval(cf, t);
-out = sqrt(mean((y - f).^2)); % RMS error of fit (was mean squared error, undocumented)
+out = sqrt(mean((y - f).^2)); % RMS error of fit
 
 % ------------------------------------------------------------------------------
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-	n = 10;
+	n = 10; %#ok<UNRCH>
 	errs = zeros(n, 1);
 	x = 1:length(y);
 	for i = 1:n
@@ -75,9 +75,10 @@ if doPlot
 		f = polyval(cf, x);
 		errs(i) = sum((y' - f).^2);
 	end
-	f = figure('color', 'w'); hold on;
-	plot(f, 'k')
-	plot(errs);
+	figure('color', 'w'); hold on;
+	plot(errs, 'o-k');
+	xlabel('polynomial order')
+	ylabel('sum of squared errors')
 end
 
 end

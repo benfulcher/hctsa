@@ -39,10 +39,7 @@ function out = CO_RemovePoints(y, removeHow, p, removeOrSaturate, randomSeed)
 % Only the first zero-crossing is a ratio: its original value is an interpolated lag
 % of at least 0.5, so the ratio is always well defined. The autocorrelation outputs
 % are differences, because the original autocorrelation can be near 0, where a ratio
-% is unstable (the ratios ac1rat, ac2rat and ac3rat, redundant with the differences,
-% have been removed).
-% This function and DN_RemovePoints were split from a single function that returned
-% both sets of outputs.
+% is unstable.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,

@@ -10,6 +10,30 @@ function NetVis_netvis(A,varargin)
 % 1. Adjacency matrix is symmetric.
 % 2. Adjacency matrix is not sparse.
 %
+%---INPUTS:
+% A, the (symmetric, non-negative) adjacency matrix of link strengths
+% [OPTIONS, as name-value pairs]:
+% 'k', positive regularization parameter for the layout (default: 1/numNodes).
+%       Typically k = 0.01 is a largish value, and k = 1/numNodes is more usual.
+%       k must be positive: the layout needs a positive-definite matrix.
+% 'textLabels', a cell of text labels, one for each node
+% 'labelLength', crop text labels to this many characters (default: 0, no cropping)
+% 'linkThresh', a vector of decreasing thresholds that divide the links into classes
+%       drawn in different shades (strongest first); the legend states each class.
+%       By default all links with A > 0 are drawn.
+% 'thresholdByProportion', how to interpret linkThresh: as quantiles of the entries of A
+%       (including its diagonal and both triangles), such that [0.9,0.8] gives the
+%       top 10% of entries and then the next 10%; or as actual values of A.
+%       By default linkThresh is read as quantiles, unless any value exceeds 1.
+% 'nodeLabels', an integer group label for each node, used to color nodes (1,2,...)
+% 'dataLabels', a cell containing a time series to draw next to each node
+% 'nodeSize', the marker size, as a scalar or a vector with one value for each node
+% 'colorMap', the name of a color set for BF_GetColorMap, or a cell of colors
+% 'tagStyle', how to display the text labels: 'k' (black text, default),
+%       'coloredtext', or 'boxedtext'
+% 'nits', [maxIter,numRepeats] for the layout optimization (default: [2000,1])
+% 'makeFigure', whether to make a new figure (default: true)
+%
 %---EXAMPLE USAGE:
 % NetVis_netvis(A,'k',0.01,...
 %                'textLabels',textLabels,...
@@ -37,9 +61,10 @@ numNodes = length(A);
 inputP = inputParser;
 
 % Parameter k
-% Typically k = 0.01 is a largish value - for fully connected
-% graphs k = 0 is valid, k = 1/numNodes is more usual
-default_k = 0;
+% Typically k = 0.01 is a largish value, and k = 1/numNodes is more usual.
+% It must be positive: for k = 0 the matrix E below is a graph Laplacian, which is
+% singular, so it cannot be factorized.
+default_k = 1/numNodes;
 check_k = @(x) validateattributes(x,{'numeric'},{'positive'});
 addParameter(inputP,'k',default_k,check_k);
 
@@ -61,7 +86,7 @@ check_labelLength = @(x) validateattributes(x,{'numeric'},{'positive'});
 addParameter(inputP,'labelLength',default_labelLength,check_labelLength);
 
 % dataLabels, A piece of time-series data for each node
-default_dataLabels = cell(numNodes,1);
+default_dataLabels = {};
 addParameter(inputP,'dataLabels',default_dataLabels,@iscell);
 
 % Number of iterations, repeats: nits
@@ -80,7 +105,7 @@ addParameter(inputP,'tagStyle',default_tagStyle,@ischar);
 
 % Threshold by proportion or actual threshold on the weights?
 default_pthresh = []; % set default below, after par_OperationCodeString
-addParameter(inputP,'thresholdByProportion',default_pthresh,@isnumeric);
+addParameter(inputP,'thresholdByProportion',default_pthresh,@(x) isnumeric(x) || islogical(x));
 
 % Make a new figure?:
 default_makeFigure = true;
@@ -126,7 +151,7 @@ fprintf(1,'Visualizing a network with %u nodes\n',numNodes);
 
 % ------------------------------------------------------------------------------
 
-fprintf(1,'--------Generating a network visualization with k = %u--------\n',k);
+fprintf(1,'--------Generating a network visualization with k = %g--------\n',k);
 
 % ------------------------------------------------------------------------------
 %% Determine a distance similarity matrix A
@@ -136,9 +161,10 @@ if isempty(linkThresh)
     Ath = cell(1);
     Ath{1} = (A > 0);
     linkThresh = 1;
+    linkLabels = {'all links'};
 else
     Ath = cell(length(linkThresh),1);
-    for i = 1:length(linkThresh);
+    for i = 1:length(linkThresh)
         if thresholdByProportion
             if i==1
                 Ath{i} = (A >= quantile(A(:),linkThresh(i))); % threshold
@@ -153,6 +179,26 @@ else
             end
         end
     %     Ath = (A>th1 & A<=th2); % threshold (2) % absolute threshold
+    end
+
+    % Legend labels that state what each class of links is:
+    linkLabels = cell(length(linkThresh),1);
+    for i = 1:length(linkThresh)
+        if thresholdByProportion
+            % (percentage of the entries of A, from the strongest)
+            if i==1
+                linkLabels{i} = sprintf('strongest %g%% of entries',100*(1-linkThresh(i)));
+            else
+                linkLabels{i} = sprintf('strongest %g-%g%%',100*(1-linkThresh(i-1)), ...
+                                                            100*(1-linkThresh(i)));
+            end
+        else
+            if i==1
+                linkLabels{i} = sprintf('A >= %g',linkThresh(i));
+            else
+                linkLabels{i} = sprintf('%g <= A < %g',linkThresh(i),linkThresh(i-1));
+            end
+        end
     end
 end
 
@@ -337,6 +383,9 @@ for i = 1:numGroups
         % do it as a proportion (fdim) of plot size
         Nodes_in_i = find(nodeLabels==i);
         for j = 1:length(Nodes_in_i)
+            if isempty(dataLabels{Nodes_in_i(j)})
+                continue
+            end
             ts = dataLabels{Nodes_in_i(j)}(1:min(maxL,end));
             plot(x(Nodes_in_i(j)) + linspace(0,pwidth*fdim(1),length(ts)),...
                     y(Nodes_in_i(j)) - pheight*fdim(2) + pheight*fdim(2)*(ts-min(ts))/(max(ts)-min(ts)),...
@@ -370,7 +419,10 @@ end
 
 %-------------------------------------------------------------------------------
 % Set a legend for links:
-legend([handles{:}],arrayfun(@(x)num2str(linkThresh(x)),sort(anyLinks,'ascend'),'UniformOutput',false))
+% (in the same order as the plotted handles)
+if ~isempty(handles)
+    legend([handles{:}],linkLabels(ordering))
+end
 
 % ------------------------------------------------------------------------------
 % Tidy up:

@@ -1,4 +1,4 @@
-function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatData,whatTestStat,cfnParams,varargin)
+function [ifeat,testStat,testStat_rand,featureClassifier,pVals,qVals] = TS_TopFeatures(whatData,whatTestStat,cfnParams,varargin)
 % TS_TopFeatures  Top individual features for discriminating labeled time series
 %
 % This function compares each feature in an hctsa dataset individually for its
@@ -7,6 +7,8 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %
 % Can also compare this performance to a set of randomized null features to
 % evaluate the statistical significance of the result (pooled permutation testing).
+% The nulls, p-values, and FDR-corrected q-values are computed whenever
+% 'numNulls' > 0, whichever plots are requested, and are returned as outputs.
 %
 % Note that it can be more interpretable to run this function on filtered but
 % un-normalized data (e.g., from TS_Normalize('none')), so that feature values
@@ -14,18 +16,45 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %
 %---INPUTS:
 %
-% whatData, the hctsa data to use (input to TS_LoadData, default: 'raw')
-% whatTestStat, the test statistic to quantify the goodness of each feature
-%               (e.g., 'tstat','ustat'; set 'classification' to use classifier
-%                   described in cfnParams; or 'medianClassify' for a simple,
-%                   parameter-free multiclass nearest-median classifier)
+% whatData, the hctsa data to use (input to TS_LoadData, default: 'norm')
+% whatTestStat, the test statistic to quantify the goodness of each feature.
+%               Default: 'ustat' for 2 classes, 'classification' for 3 or more.
+%               Two-class-only statistics (an error is raised for 3+ classes):
+%                 'ustat' (or 'ranksum'): Mann-Whitney U of the first class minus its
+%                       expected value n1*n2/2 (zero if no difference, positive if
+%                       class 1 tends to be higher, negative if lower). Features are
+%                       ranked by its magnitude, so the ranking does not depend on
+%                       the order of the classes (only the sign flips).
+%                 'ustatP' / 'ranksumP': -log10(p) of the Mann-Whitney test (approximate)
+%                 'ustatPsign' / 'ranksumPsign': as 'ustatP', signed by the direction of
+%                       the difference (ranked by magnitude)
+%                 'ustatExactP' / 'ranksumExactP': as 'ustatP' using the exact method
+%                 'tstat' (or 'ttest'): Welch's t-statistic (ranked by magnitude)
+%                 'tstatP' (or 'ttestP'): -log10(p) of Welch's t-test
+%                 'svmBeta': feature weights of one linear SVM fit to all features
+%                       (multivariate, ranked by magnitude, scaled by the largest
+%                       magnitude, and unaffected by 'doParallel')
+%               Any number of classes:
+%                 'classification': classifier-based accuracy described by cfnParams
+%                       (the loss in cfnParams.whatLoss), with each feature
+%                       scored in-sample (trained and tested on the same data;
+%                       cfnParams.numFolds is overridden to 0). Chance level is
+%                       reported as 100/numClasses, which assumes balanced classes.
+%                 'medianClassify' (or 'nearestMedian'): a simple, parameter-free
+%                       in-sample nearest-median classifier (plain accuracy, not
+%                       balanced across classes).
 % cfnParams, the classification settings if using 'classification'-based selection
+%               (default: GiveMeDefaultClassificationParams with 'fast-linear').
+%               Setting cfnParams.classifierFilename saves a classifier for the
+%               single best feature to that file (only for 'classification').
+%               Its cross-validated accuracy (cfnParams.numFolds > 0) is
+%               optimistically biased, because the feature was chosen on all of the data.
 %
 %---OPTIONAL extra inputs:
 %
-% 'whatPlots', can specify what output plots to produce (cell of strings), e.g.,
-%               specify {'histogram','distributions','cluster','datamatrix'} to
-%               produce all four possible output plots (this is the default).
+% 'whatPlots', can specify what output plots to produce (cell of strings), from
+%               'histogram','distributions','dendrogram','cluster','datamatrix'
+%               (default: {'histogram','distributions','dendrogram','cluster'}).
 % 'numTopFeatures' [40], specifies the number of top features to analyze, both in
 %                   terms of the list of outputs, the histogram plots, and the
 %                   cluster plot.
@@ -33,7 +62,12 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %                   set this lower to avoid producing large numbers of figures).
 % 'numNulls' [0], the number of shuffled nulls to generate (e.g., 10 shuffles pools
 %               shuffles for all M features, for a total of 10*M elements in the
-%               null distribution)
+%               null distribution). Uses the global random number generator.
+%               A feature's p-value is (1 + number of pooled null statistics at least
+%               as good as the feature) / (1 + number of pooled null statistics),
+%               comparing magnitudes for statistics ranked by magnitude.
+%               Features with NaN statistics get NaN p-values and are not counted as
+%               significant.
 % 'doParallel' [false], whether to use parfor to speed up the (serial, per-feature)
 %               test-statistic computation across all M features -- speeds up both
 %               the real-data computation and every null shuffle.
@@ -48,11 +82,16 @@ function [ifeat,testStat,testStat_rand,featureClassifier] = TS_TopFeatures(whatD
 %
 %---OUTPUTS:
 %
-% ifeat, the ordering of operations by their performance
-% testStat, the test statistic (whatTestStat) for each operation
-% testStat_rand, test statistics making up the null distributions
-% featureClassifier, the individual-feature classifier (if using single-feature
-%               classification)
+% ifeat, the ordering of operations by their performance (operations with a NaN
+%               statistic are omitted)
+% testStat, the test statistic (whatTestStat) for each operation (NaN where the
+%               statistic could not be computed)
+% testStat_rand, test statistics making up the null distributions (numFeatures x
+%               numNulls; empty if numNulls = 0)
+% featureClassifier, the classifier for the single best feature (if
+%               cfnParams.classifierFilename is set)
+% pVals, the null-based p-value of each operation (empty if numNulls = 0)
+% qVals, the FDR-corrected (Benjamini-Hochberg) p-values (empty if numNulls = 0)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -126,7 +165,7 @@ clear('inputP');
 %-------------------------------------------------------------------------------
 %% Load the data
 %-------------------------------------------------------------------------------
-[TS_DataMat,TimeSeries,Operations,whatDataFile] = TS_LoadData(whatData);
+[TS_DataMat,TimeSeries,Operations] = TS_LoadData(whatData);
 
 %-------------------------------------------------------------------------------
 %% Checks
@@ -134,7 +173,7 @@ clear('inputP');
 % Does the grouping information exist?:
 % Assign group labels (removing unlabeled data):
 [TS_DataMat,TimeSeries] = FilterLabeledTimeSeries(TS_DataMat,TimeSeries);
-[groupLabels,classLabels,groupLabelsInteger,numClasses] = TS_ExtractGroupLabels(TimeSeries);
+[~,classLabels,~,numClasses] = TS_ExtractGroupLabels(TimeSeries);
 % Give basic info about the represented classes:
 TellMeAboutLabeling(TimeSeries);
 
@@ -151,12 +190,17 @@ if numInputArgs < 2 || isempty(whatTestStat)
 end
 % Set cfnParams default (if using 'classification') later after loading the time series
 if strcmp(whatTestStat,'classification')
-    if numInputArgs < 3 || isempty(fieldnames(cfnParams))
+    if numInputArgs < 3 || isempty(cfnParams) || (isstruct(cfnParams) && isempty(fieldnames(cfnParams)))
         cfnParams = GiveMeDefaultClassificationParams(TimeSeries);
         cfnParams.whatClassifier = 'fast-linear';
         cfnParams = UpdateClassifierText(cfnParams);
     end
 else
+    if numInputArgs >= 3 && isstruct(cfnParams) && isfield(cfnParams,'classifierFilename') && ...
+                    ~isempty(cfnParams.classifierFilename)
+        warning(['cfnParams.classifierFilename is only used with the ''classification'' ',...
+                    'test statistic: no classifier will be saved']);
+    end
     cfnParams = struct();
 end
 
@@ -171,25 +215,23 @@ numTopFeatures = min(numTopFeatures,numFeatures);
 %-------------------------------------------------------------------------------
 % chanceLevel -- what you'd expect by chance
 
-% Check that simple stats are being applied just for pairs:
-if ismember(whatTestStat,{'ustat','ranksum','ustatExact','ustatP','ranksumExact',...
-                            'ttest','ttestP','tstat','svmBeta'})
-    if numClasses~=2
-        error(['There are %u labeled classes.\nStatistics like ''%s'' are only valid',...
-                    ' for problems with 2 labeled classes'],numClasses,whatTestStat);
-    end
-end
-
-% Set up the test statistic computation and relevant description text:
+% Set up the test statistic computation and relevant description text
+% (twoClassOnly is set for statistics that compare exactly two classes):
+twoClassOnly = false;
 switch whatTestStat
     case 'classification'
-        % Set up the loss function for a classifier-based metric:
-        fn_testStat = GiveMeFunctionHandle(cfnParams);
+        % Set up the loss function for a classifier-based metric. Each feature is
+        % scored in-sample (trained and tested on the same data, as below), so
+        % no cross-validation is used here, whatever cfnParams.numFolds is:
+        cfnParamsInSample = cfnParams;
+        cfnParamsInSample.numFolds = 0;
+        fn_testStat = GiveMeFunctionHandle(cfnParamsInSample);
         chanceLevel = 100/numClasses; % (could be a bad assumption: accuracy for equiprobable groups...)
         testStatText = sprintf('%s %s',cfnParams.classifierText,cfnParams.whatLoss);
         statUnit = cfnParams.whatLossUnits;
         whatIsBetter = 'high';
     case 'svmBeta'
+        twoClassOnly = true;
         % Feature weight from a linear (in-sample) SVM
         fn_testStat = [];
         chanceLevel = NaN;
@@ -206,6 +248,7 @@ switch whatTestStat
         statUnit = '%';
         whatIsBetter = 'high';
     case {'ustatP','ranksumP'}
+        twoClassOnly = true;
         % Approximate p-value from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                 fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,false);
@@ -214,6 +257,7 @@ switch whatTestStat
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
     case {'ustatPsign','ranksumPsign'}
+        twoClassOnly = true;
         % Approximate p-value from ranksum test, signed by the direction of difference
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                 fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,true,true);
@@ -222,6 +266,7 @@ switch whatTestStat
         statUnit = ' signed(-log10(p))';
         whatIsBetter = 'abs';
     case {'ustatExactP','ranksumExactP'}
+        twoClassOnly = true;
         % Exact p-value from ranksum test
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                     fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true,true,false);
@@ -230,14 +275,17 @@ switch whatTestStat
         statUnit = ' (-log10(p))';
         whatIsBetter = 'high';
     case {'ustat','ranksum'}
-        % Approximate test statistic from ranksum test
+        twoClassOnly = true;
+        % Mann-Whitney U of class 1 minus its null expectation n1*n2/2: signed by the
+        % direction of the difference, so features are ranked by magnitude
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                 fn_uStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false,false,false);
-        chanceLevel = NaN; % (check if you can compute the chance level stat?)
-        testStatText = 'Mann-Whitney approx test statistic';
+        chanceLevel = 0;
+        testStatText = 'Mann-Whitney U (centered)';
         statUnit = '';
-        whatIsBetter = 'high';
+        whatIsBetter = 'abs';
     case {'ttest','tstat'}
+        twoClassOnly = true;
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                         fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),false);
         chanceLevel = 0; % chance-level t statistic is zero
@@ -245,6 +293,7 @@ switch whatTestStat
         statUnit = '';
         whatIsBetter = 'abs';
     case {'ttestP','tstatP'}
+        twoClassOnly = true;
         fn_testStat = @(XTrain,yTrain,Xtest,yTest) ...
                         fn_tStat(XTrain(yTrain==classLabels{1}),XTrain(yTrain==classLabels{2}),true);
         chanceLevel = NaN;
@@ -253,6 +302,12 @@ switch whatTestStat
         whatIsBetter = 'high';
     otherwise
         error('Unknown test statistic: ''%s''',whatTestStat);
+end
+
+% Check that two-class statistics are only applied to two labeled classes:
+if twoClassOnly && numClasses~=2
+    error(['There are %u labeled classes.\nThe ''%s'' statistic is only valid',...
+                ' for problems with 2 labeled classes'],numClasses,whatTestStat);
 end
 
 %-------------------------------------------------------------------------------
@@ -300,6 +355,7 @@ end
 isNaN = isnan(testStat_sort);
 testStat_sort = testStat_sort(~isNaN);
 ifeat = ifeat(~isNaN);
+numTopFeatures = min(numTopFeatures,length(ifeat)); % (NaN features can't be top features)
 
 % List the top features:
 for i = 1:numTopFeatures
@@ -322,6 +378,66 @@ topFeatureLabelsMinimal = arrayfun(@(x) makeLabelMinimal(x),featInd,'UniformOutp
 topFeatureLabelsFull = arrayfun(@(x) makeLabelFull(x),featInd,'UniformOutput',false);
 
 %-------------------------------------------------------------------------------
+%% Null distributions, p-values and FDR-corrected q-values
+%-------------------------------------------------------------------------------
+testStat_rand = zeros(numFeatures,numNulls);
+pVals = [];
+qVals = [];
+if numNulls > 0
+    fprintf(1,'Now for %u nulls... ',numNulls);
+    nullTimer = tic;
+    for j = 1:numNulls
+        if j < numNulls
+            fprintf(1,'%u,',j);
+        else
+            fprintf(1,'%u.',j);
+        end
+        shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
+        testStat_rand(:,j) = giveMeStats(TS_DataMat,shuffledLabels,false);
+    end
+    fprintf(1,'\n%u %s statistics computed in %s.\n',numFeatures*numNulls,...
+                                    testStatText,BF_TheTime(toc(nullTimer)));
+    if any(isnan(testStat_rand(:)))
+        fprintf(1,'%u null statistics are NaN (not used).\n',sum(isnan(testStat_rand(:))));
+    end
+
+    % Pool nulls to estimate p-values (the proportion of null statistics at least as
+    % good as each feature's, with the +1 correction so that p is never zero)
+    pooledNulls = testStat_rand(~isnan(testStat_rand));
+    isValid = ~isnan(testStat);
+    pVals = NaN(numFeatures,1);
+    qVals = NaN(numFeatures,1);
+    if isempty(pooledNulls)
+        warning('All null statistics are NaN: no p-values computed');
+    else
+        if strcmp(whatIsBetter,'abs')
+            % Bigger magnitudes are better
+            numBelow = fn_countBelow(abs(testStat(isValid)),abs(pooledNulls));
+        else
+            numBelow = fn_countBelow(testStat(isValid),pooledNulls);
+        end
+        numAtLeastAsGood = length(pooledNulls) - numBelow;
+        pVals(isValid) = (numAtLeastAsGood + 1)/(length(pooledNulls) + 1);
+        % FDR-corrected q-values:
+        qVals(isValid) = mafdr(pVals(isValid),'BHFDR',true);
+    end
+    fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls.\n',numNulls);
+    fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
+
+    % Give summary:
+    sigThreshold = 0.05;
+    numSig = sum(qVals < sigThreshold);
+    if numSig > 0
+        fprintf(1,['%u/%u features show better performance using %s than the null distribution\n' ...
+                    'at the magical 0.05 threshold (FDR corrected).\n'],...
+                        numSig,sum(isValid),testStatText);
+    else
+        fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
+                'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
+    end
+end
+
+%-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
 %% Plot outputs
 %-------------------------------------------------------------------------------
@@ -331,50 +447,6 @@ topFeatureLabelsFull = arrayfun(@(x) makeLabelFull(x),featInd,'UniformOutput',fa
 %% Histogram of distribution of test statistics for labeled and null data
 %-------------------------------------------------------------------------------
 if ismember('histogram',whatPlots)
-    % Plot the distribution of test statistics across all features:
-
-    %-------------------------------------------------------------------------------
-    % Compute null distribution
-    %-------------------------------------------------------------------------------
-    testStat_rand = zeros(numFeatures,numNulls);
-    if numNulls > 0
-        fprintf(1,'Now for %u nulls... ',numNulls);
-        tic
-        for j = 1:numNulls
-            if j < numNulls
-                fprintf(1,'%u,',j);
-            else
-                fprintf(1,'%u.',j);
-            end
-            shuffledLabels = TimeSeries.Group(randperm(height(TimeSeries)));
-            testStat_rand(:,j) = giveMeStats(TS_DataMat,shuffledLabels,false);
-        end
-        fprintf(1,'\n%u %s statistics computed in %s.\n',numFeatures*numNulls,...
-                                        testStatText,BF_TheTime(toc(timer)));
-
-        % Pool nulls to estimate p-values
-        pooledNulls = testStat_rand(:);
-        pVals = arrayfun(@(x) mean(testStat(x) < pooledNulls),1:length(testStat));
-        % FDR-corrected q-values:
-        FDR_qVals = mafdr(pVals,'BHFDR','true');
-        fprintf(1,'Estimating FDR-corrected p-values across all features by pooling across %u nulls.\n',numNulls);
-        fprintf(1,'(Given strong dependences across %u features, will produce conservative p-values)\n',numFeatures);
-
-        % Give summary:
-        sigThreshold = 0.05;
-        if any(FDR_qVals < sigThreshold)
-            fprintf(1,['%u/%u features show better performance using %s than the null distribution\n' ...
-                        'at the magical 0.05 threshold (FDR corrected).\n'],...
-                            sum(FDR_qVals < 0.05),length(FDR_qVals),testStatText);
-        else
-            fprintf(1,['Tough day at the office, hey? No features show statistically better performance than ' ...
-                    'the null distribution at a FDR of 0.05.\nDon''t you go p-hacking now, will you?\n']);
-        end
-    end
-
-    %---------------------------------------------------------------------------
-    % Plot histogram
-    %---------------------------------------------------------------------------
     f = figure('color','w'); hold('on')
     f.Position(3:4) = [559,278];
     colors = BF_GetColorMap('spectral',5,1);
@@ -416,7 +488,7 @@ if ismember('histogram',whatPlots)
             legend([h_null,h_real,l_meannull,l_mean],'null','real','null mean','mean')
         end
         title(sprintf(['%u features significantly informative of groups',...
-                        ' (FDR-corrected at 0.05)'],sum(FDR_qVals < 0.05)))
+                        ' (FDR-corrected at 0.05)'],sum(qVals < sigThreshold)))
     else
         if ~isnan(chanceLevel)
             legend([h_real,l_chance,l_mean],{'real','chance','mean'});
@@ -424,8 +496,6 @@ if ismember('histogram',whatPlots)
             legend([h_real,l_mean],{'real','mean'});
         end
     end
-else
-    testStat_rand = [];
 end
 
 %-------------------------------------------------------------------------------
@@ -433,6 +503,7 @@ end
 %-------------------------------------------------------------------------------
 if ismember('distributions',whatPlots)
     subPerFig = 16; % subplots per figure
+    numFeaturesDistr = min(numFeaturesDistr,length(ifeat));
 
     % Space the figures out properly:
     numFigs = ceil(numFeaturesDistr/subPerFig);
@@ -442,14 +513,8 @@ if ismember('distributions',whatPlots)
                 'Operations',Operations);
 
     for figi = 1:numFigs
-        if figi*subPerFig > length(ifeat)
-            break % We've exceeded number of features
-        end
         % Get the indices of features to plot
-        r = ((figi-1)*subPerFig+1:figi*subPerFig);
-        if figi==numFigs % filter down for last one
-            r = r(r <= numFeaturesDistr);
-        end
+        r = (figi-1)*subPerFig+1:min(figi*subPerFig,numFeaturesDistr);
         featHere = ifeat(r); % features to plot on this figure
         % Make the figure
         f = figure('color','w');
@@ -471,7 +536,7 @@ if ismember('datamatrix',whatPlots)
     dataLocal = struct('TS_DataMat',BF_NormalizeMatrix(TS_DataMat(:,featInd(ixFeat)),'maxmin'),...
                     'TimeSeries',TimeSeries,...
                     'Operations',Operations(featInd(ixFeat),:));
-    TS_PlotDataMatrix(dataLocal,'colorGroups',true,'groupReorder',true);
+    TS_PlotDataMatrix('whatData',dataLocal,'colorGroups',true,'groupReorder',true);
 end
 
 %-------------------------------------------------------------------------------
@@ -515,7 +580,7 @@ if ismember('dendrogram',whatPlots)
     f = figure('color','w');
 
     if doVertical
-        f.Position(3:4) = [950,750];
+        f.Position(3:4) = [950,750]; %#ok<UNRCH>
     else
         f.Position(3:4) = [750,950];
     end
@@ -525,7 +590,7 @@ if ismember('dendrogram',whatPlots)
     ord = BF_LinkageOrdering(distVec,links);
     if doVertical
         h_dend = dendrogram(links,0,'Orientation','right','Reorder',ord,...
-                    'ColorThreshold',colorThreshold);
+                    'ColorThreshold',colorThreshold); %#ok<UNRCH>
     else
         h_dend = dendrogram(links,0,'Orientation','top','Reorder',ord,...
                     'ColorThreshold',colorThreshold);
@@ -542,7 +607,8 @@ if ismember('dendrogram',whatPlots)
     ax = gca();
     ax.TickLabelInterpreter = 'none';
     if doVertical
-        ax.YDir = 'reverse'; % needs to be reversed to match the imagesc plot (if 'cluster' is selected)
+        % The y-axis needs to be reversed to match the imagesc plot (if 'cluster' is selected):
+        ax.YDir = 'reverse'; %#ok<UNRCH>
         ax.YTick = 1:numTopFeatures;
         ax.YTickLabel = topFeatureLabelsFull(ord);
         xlabel(sprintf('%s distance',distanceMetric));
@@ -575,27 +641,26 @@ if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilen
     theTopFeatureIndex = ifeat(1);
     topFeatureValues = TS_DataMat(:,theTopFeatureIndex);
 
+    % Cross-validated accuracy of the top feature (if cfnParams.numFolds > 0):
+    if cfnParams.numFolds > 0
+        cvAccuracy = ComputeCVAccuracies(topFeatureValues,TimeSeries.Group,cfnParams);
+    else
+        % CV was never done
+        cvAccuracy = NaN;
+    end
+
     % Build in-sample classifier (no CV):
-    numFoldsAbove = cfnParams.numFolds;
     cfnParams.numFolds = 0;
 
     % Train a classification model on the top feature:
-    GiveMeCfn(XTrain,yTrain,XTest,yTest,cfnParams,beVerbose)
-    [bestTestStat,bestMdl,whatTestStat] = GiveMeCfn(topFeatureValues,TimeSeries.Group,...
-                                                    topFeatureValues,TimeSeries.Group,...
-                                                    cfnParams);
+    [bestTestStat,bestMdl] = GiveMeCfn(topFeatureValues,TimeSeries.Group,...
+                                        topFeatureValues,TimeSeries.Group,cfnParams);
 
     % Prepare the featureClassifier structure:
     featureClassifier.Operation.ID = Operations.ID(theTopFeatureIndex); % Sorted list of top operations
     featureClassifier.Operation.Name = Operations.Name{theTopFeatureIndex}; % Sorted list of top operations
     featureClassifier.Mdl = bestMdl; % sorted feature models
-    if numFoldsAbove > 0
-        % From sorted accuracy of models
-        featureClassifier.CVAccuracy = testStat_sort(1);
-    else
-        % CV was never done
-        featureClassifier.CVAccuracy = NaN;
-    end
+    featureClassifier.CVAccuracy = cvAccuracy;
     featureClassifier.Accuracy = bestTestStat;
     featureClassifier.whatTestStat = whatTestStat;
     featureClassifier.normalizationInfo = TS_GetFromData(whatData,'normalizationInfo');
@@ -604,17 +669,17 @@ if isfield(cfnParams,'classifierFilename') && ~isempty(cfnParams.classifierFilen
     % Save to file
     if exist(cfnParams.classifierFilename,'file')~=0
         save(cfnParams.classifierFilename,'featureClassifier','classes','-append');
-        fprintf(1,'Appended individual-feature classifiers to %s\n',cfnParams.classifierFilename);
+        fprintf(1,'Appended the best-feature classifier to %s\n',cfnParams.classifierFilename);
     else
         save(cfnParams.classifierFilename,'featureClassifier','classes','-v7.3');
-        fprintf(1,'Saved individual-feature classifiers to %s\n',cfnParams.classifierFilename);
+        fprintf(1,'Saved the best-feature classifier to %s\n',cfnParams.classifierFilename);
     end
 end
 
 %-------------------------------------------------------------------------------
 % Don't display unused outputs to screen:
 if numOutputArgsRequested == 0
-    clear('ifeat','testStat','testStat_rand','featureClassifier');
+    clear('ifeat','testStat','testStat_rand','featureClassifier','pVals','qVals');
 end
 
 %-------------------------------------------------------------------------------
@@ -632,8 +697,12 @@ function [theStatistic,stats] = fn_uStat(d1,d2,doExact,doP,doSigned)
         % -log10(p) from a Mann-Whitney U-test
         theStatistic = -log10(p);
     else
-        % ranksum test statistic from a Mann-Whitney U-test
-        theStatistic = stats.ranksum;
+        % Mann-Whitney U of d1 (its rank sum minus n1*(n1+1)/2) minus its null
+        % expectation, n1*n2/2: that is, the rank sum minus n1*(n1+n2+1)/2
+        % (NaNs are ignored, as in ranksum)
+        n1 = sum(~isnan(d1));
+        n2 = sum(~isnan(d2));
+        theStatistic = stats.ranksum - n1*(n1 + n2 + 1)/2;
     end
     if doSigned
         % Gives the statistic the sign of the z statistic
@@ -671,21 +740,16 @@ function accuracy = fn_nearestMedianClassify(XTrain,yTrain,XTest,yTest,classLabe
     accuracy = 100*mean(yPredict(:)==yTest(:));
 end
 %-------------------------------------------------------------------------------
-function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
-    % Return a test statistic for each feature:
-    % (captured up-front: bare nargout isn't allowed anywhere in a file
-    % that contains a parfor-loop, see note above numInputArgs)
-    numOutArgsGiveMeStats = nargout;
-    testStat = zeros(numFeatures,1);
-    if numOutArgsGiveMeStats==2
-        Mdl = cell(numFeatures,1);
-    end
+function testStat = giveMeStats(dataMatrix,groupLabels,isRealData)
+    % Return a test statistic for each feature (NaN where it can't be computed):
+    testStat = NaN(numFeatures,1);
+    numFailed = 0;
+    lastError = '';
 
     if strcmp(whatTestStat,'svmBeta')
         % Fit a linear SVM (multivariate) and return feature weights:
-        % Mdl = fitcsvm(dataMatrix,dataLabels,'KernelFunction','linear');
-        Mdl = fitcsvm(dataMatrix,groupLabels,'KernelFunction','linear','Weights',InverseProbWeight(groupLabels));
-        testStat = Mdl.Beta; % (code assumes bigger is better)
+        svmMdl = fitcsvm(dataMatrix,groupLabels,'KernelFunction','linear','Weights',InverseProbWeight(groupLabels));
+        testStat = svmMdl.Beta;
         testStat = testStat/max(abs(testStat)); % rescale by max-abs
     elseif doParallel
         % PARFOR loop (parallel), dispatched in per-worker CHUNKS rather than
@@ -699,49 +763,61 @@ function [testStat,Mdl] = giveMeStats(dataMatrix,groupLabels,beVerbose)
         numChunks = min(numFeatures,4*poolObj.NumWorkers);
         chunkEdges = round(linspace(0,numFeatures,numChunks + 1));
         testStatChunks = cell(numChunks,1);
-        MdlChunks = cell(numChunks,1);
+        numFailedChunks = zeros(numChunks,1);
+        errorChunks = cell(numChunks,1);
         parfor c = 1:numChunks
-            chunkFeatureIDs = (chunkEdges(c) + 1):chunkEdges(c + 1);
-            localStat = zeros(length(chunkFeatureIDs),1);
-            localMdl = cell(length(chunkFeatureIDs),1);
+            chunkFeatureIDs = (chunkEdges(c) + 1):chunkEdges(c + 1); %#ok<PFBNS>
+            localStat = NaN(length(chunkFeatureIDs),1);
+            localFailed = 0;
+            localError = '';
             for kk = 1:length(chunkFeatureIDs)
                 k = chunkFeatureIDs(kk);
                 try
-                    if numOutArgsGiveMeStats == 2
-                        % This is slower for the fast-linear classifier (but returns a model)
-                        [localStat(kk),localMdl{kk}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-                    else
-                        localStat(kk) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-                    end
-                catch
-                    warning('Error computing %s test statistic for feature %u.',whatTestStat,k);
+                    localStat(kk) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels); %#ok<PFBNS>
+                catch ME
+                    localFailed = localFailed + 1;
+                    localError = ME.message;
                 end
             end
             testStatChunks{c} = localStat;
-            MdlChunks{c} = localMdl;
+            numFailedChunks(c) = localFailed;
+            errorChunks{c} = localError;
         end
         testStat = vertcat(testStatChunks{:});
-        if numOutArgsGiveMeStats == 2
-            Mdl = vertcat(MdlChunks{:});
+        numFailed = sum(numFailedChunks);
+        errorChunks = errorChunks(numFailedChunks > 0);
+        if ~isempty(errorChunks)
+            lastError = errorChunks{end};
         end
     else
-        loopTimer = tic;
         BF_ProgressBar('new')
         for k = 1:numFeatures
             try
-                if numOutArgsGiveMeStats == 2
-                    % This is slower for the fast-linear classifier (but returns a model)
-                    [testStat(k),Mdl{k}] = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-                else
-                    testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
-                end
-            catch
-                warning('Error computing %s test statistic for feature %u.',whatTestStat,k);
+                testStat(k) = fn_testStat(dataMatrix(:,k),groupLabels,dataMatrix(:,k),groupLabels);
+            catch ME
+                numFailed = numFailed + 1;
+                lastError = ME.message;
             end
             BF_ProgressBar(k/numFeatures)
         end
         BF_ProgressBar('close')
     end
+    if isRealData && numFailed > 0
+        warning('Could not compute the %s test statistic for %u/%u features (set to NaN). Last error: %s',...
+                        whatTestStat,numFailed,numFeatures,lastError);
+    end
+end
+%-------------------------------------------------------------------------------
+function numBelow = fn_countBelow(x,pool)
+    % For each element of x, the number of elements of pool that are strictly less
+    % (x and pool must not contain NaNs). Sorting the two together is O(n log n),
+    % rather than comparing each x against all of pool.
+    x = x(:);
+    [~,sortOrder] = sort([x; pool(:)]); % (stable, so x comes before tied pool values)
+    isX = (sortOrder <= length(x));
+    poolBefore = cumsum(~isX);
+    numBelow = zeros(length(x),1);
+    numBelow(sortOrder(isX)) = poolBefore(isX);
 end
 %-------------------------------------------------------------------------------
 

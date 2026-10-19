@@ -11,7 +11,23 @@ function TS_FeatureSummary(opID,whatData,doViolin,doInspect,annotateParams,custo
 % doViolin, (logical) show distributions as a violin plot (instead of
 %           conventional kernel-smoothed distributions).
 % doInspect, (logical) whether to use an interactive version of the plot.
-% annotateParams, a structure of custom plotting options.
+% annotateParams, a structure of custom plotting options, with optional fields:
+%       n, the number of time series to annotate (default: 15, or the number of
+%           time series if fewer; 0 turns off annotation, giving only the distribution).
+%           Not used when doInspect is true.
+%       maxL, the maximum number of samples of each annotated time series (default: 1000)
+%       showGlobalDist, whether to show the distribution of all time series
+%           alongside the distribution of each group (default: true)
+%       groupColors, a cell of colors, one for each group (default: GiveMeColors)
+%       customNormalization, a normalization applied to the feature values (cf.
+%           BF_NormalizeMatrix; default: none)
+%       userInput, for the non-violin plot (doViolin is false), whether you click
+%           on the plot to choose each time series to annotate (true, the default,
+%           blocks until n points are picked), or they are chosen at random (false).
+%       Other fields are passed to BF_AnnotatePoints (for the non-violin plot).
+%   Can also be 0 (or false) to turn off annotation, or a positive integer to specify n.
+%   (With doInspect set to true, time series are only plotted as you click on the
+%   distribution, so there is nothing to turn off.)
 % customAnnotation, function handle to plot something unique.
 
 % ------------------------------------------------------------------------------
@@ -48,11 +64,19 @@ end
 if nargin < 3 || isempty(doViolin) % annotation parameters
     doViolin = true;
 end
-if nargin < 4
+if nargin < 4 || isempty(doInspect)
     doInspect = false;
 end
 if nargin < 5 || isempty(annotateParams) % annotation parameters
     annotateParams = struct();
+elseif ~isstruct(annotateParams)
+    if isequal(annotateParams,true)
+        annotateParams = struct();
+    elseif isequal(annotateParams,false)
+        annotateParams = struct('n',0); % no annotation
+    else
+        annotateParams = struct('n',annotateParams);
+    end
 end
 if nargin < 6
     customAnnotation = [];
@@ -71,6 +95,9 @@ dataVector = TS_DataMat(:,theOp); % the outputs of interest
 notNaN = find(~isnan(dataVector));
 dataVector = dataVector(notNaN); % remove bad values
 TimeSeries = TimeSeries(notNaN,:); % remove bad values
+if ismember('Group',TimeSeries.Properties.VariableNames)
+    TimeSeries.Group = removecats(TimeSeries.Group); % only count classes with members
+end
 numTimeSeries = height(TimeSeries);
 theOperation = table2struct(Operations(theOp,:));
 
@@ -81,7 +108,7 @@ end
 % Retrieve group names also:
 [timeSeriesGroup,classLabels,groupLabelsInteger,numGroups] = TS_ExtractGroupLabels(TimeSeries);
 if ~isfield(annotateParams,'groupColors')
-    annotateParams.groupColors = BF_GetColorMap('set1',numGroups,true);
+    annotateParams.groupColors = GiveMeColors(numGroups);
 end
 
 %-------------------------------------------------------------------------------
@@ -97,9 +124,10 @@ end
 if ~isfield(annotateParams,'n')
     annotateParams.n = min(15,height(TimeSeries));
 end
-if annotateParams.n < 1
-    error('You need to specify at least one time series to annotate with TS_FeatureSummary.');
+if annotateParams.n < 0
+    error('The number of time series to annotate (annotateParams.n) cannot be negative.');
 end
+doAnnotate = (annotateParams.n > 0);
 if ~isfield(annotateParams,'maxL')
     annotateParams.maxL = 1000;
 end
@@ -114,11 +142,15 @@ f = figure('color','w');
 box('on');
 hold('on');
 
+% Gray is used for the distribution of all time series (and for any time series
+% without a group label)
+grayColor = ones(1,3)*0.5;
+
 if doViolin
     %-------------------------------------------------------------------------------
     % Violin plot of a distribution for each labeled time-series class
 
-    if ~doInspect
+    if ~doInspect && doAnnotate
         % Spaced time-series annotations shown on the right of the plot.
         % Determine a subset, highlightInd, of time series to highlight:
         [~,ix] = sort(dataVector,'ascend');
@@ -135,8 +167,10 @@ if doViolin
         end
         h_violin.ButtonDownFcn = {@annotateFigure_Callback};
         h_violin.HitTest = 'on';
-    else
+    elseif doAnnotate
         h_violin = subplot(1,4,1:2);
+    else
+        h_violin = gca;
     end
 
     % Set up parameters:
@@ -148,75 +182,79 @@ if doViolin
     end
 
     if numGroups > 1
+        % The distribution of all time series (if shown) is the first violin
+        globalOffset = double(annotateParams.showGlobalDist);
+        numViolins = numGroups + globalOffset;
+        dataCell = cell(numViolins,1);
         if annotateParams.showGlobalDist
-            dataCell = cell(numGroups+1,1);
             dataCell{1} = dataVector; % global distribution
-        else
-            dataCell = cell(numGroups,1);
         end
         for i = 1:numGroups
-            if annotateParams.showGlobalDist
-                theIndex = i+1;
-            else
-                theIndex = i;
-            end
-            dataCell{theIndex} = dataVector(timeSeriesGroup==classLabels{i});
+            dataCell{i+globalOffset} = dataVector(timeSeriesGroup==classLabels{i});
         end
 
+        myColors = cell(numViolins,1);
         if annotateParams.showGlobalDist
-            myColors = cell(numGroups+1,1);
-            myColors{1} = ones(3,1)*0.5; % gray for combined
-            myColors(2:numGroups+1) = annotateParams.groupColors;
-        else
-            myColors = annotateParams.groupColors;
+            myColors{1} = grayColor;
         end
+        myColors(1+globalOffset:end) = annotateParams.groupColors;
         extraParams.theColors = myColors;
         extraParams.customOffset = -0.5;
         extraParams.offsetRange = 0.7;
         extraParams.customSpot = '.';
         [ff,xx,xScatter,yScatter] = BF_ViolinPlot(dataCell,false,true,false,extraParams);
 
-        % Add lines denoting each annotated time-series in the distribution:
-        if ~doInspect & annotateParams.showGlobalDist
+        % Add lines denoting each annotated time series in the distribution (of
+        % all time series if shown, otherwise of the time series's own group):
+        if ~doInspect && doAnnotate
             for i = 1:annotateParams.n
-                ri = find(xx{1} >= dataVector(highlightInd(i)),1);
-                groupColor = myColors{1 + groupLabelsInteger(highlightInd(i))};
-                plot(0.5 + 0.35*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColors{rem(i-1,10) + 1},'LineWidth',2)
-                plot(0.5 + 0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
-                plot(0.5 - 0.35*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
+                theGroupIndex = groupLabelsInteger(highlightInd(i));
+                if annotateParams.showGlobalDist
+                    iViolin = 1;
+                elseif theGroupIndex > 0
+                    iViolin = theGroupIndex;
+                else
+                    continue % no distribution to mark an unlabeled time series on
+                end
+                groupColor = colorOfGroup(theGroupIndex);
+                ri = find(xx{iViolin} >= dataVector(highlightInd(i)),1);
+                plot(iViolin - 0.5 + 0.35*[-ff{iViolin}(ri),ff{iViolin}(ri)],ones(2,1)*xx{iViolin}(ri),'color',rainbowColors{rem(i-1,10) + 1},'LineWidth',2)
+                plot(iViolin - 0.5 + 0.35*ff{iViolin}(ri),xx{iViolin}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
+                plot(iViolin - 0.5 - 0.35*ff{iViolin}(ri),xx{iViolin}(ri),'o','MarkerFaceColor',groupColor,'MarkerEdgeColor',groupColor)
             end
         end
 
         % Label axes:
+        axisLabels = cell(numViolins,1);
         if annotateParams.showGlobalDist
-            axisLabels = cell(numGroups + 1,1);
             axisLabels{1} = 'all';
-            axisLabels(2:end) = classLabels;
-        else
-            axisLabels = classLabels;
         end
+        axisLabels(1+globalOffset:end) = classLabels;
         if doInspect
-            h_violin.YTick = 0.5 + (0:numGroups);
+            h_violin.YTick = 0.5 + (0:numViolins-1);
             h_violin.YTickLabel = axisLabels;
             h_violin.YTickLabelRotation = 20;
         else
-            h_violin.XTick = 0.5 + (0:numGroups);
+            h_violin.XTick = 0.5 + (0:numViolins-1);
             h_violin.XTickLabel = axisLabels;
             h_violin.XTickLabelRotation = 20;
         end
     else
         % No groups: just show the global distribution
-        extraParams.theColors = {ones(3,1)*0.5};
+        globalOffset = 1;
+        extraParams.theColors = {grayColor};
         [ff,xx,xScatter,yScatter] = BF_ViolinPlot({dataVector},false,true,false,extraParams);
 
         % Annotate lines for each feature in the distribution:
         if ~doInspect
-            for i = 1:annotateParams.n
-                ri = find(xx{1} >= dataVector(highlightInd(i)),1);
-                rainbowColor = rainbowColors{rem(i - 1,10)+1};
-                plot(1 + 0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
-                plot(1 + 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
-                plot(1 - 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+            if doAnnotate
+                for i = 1:annotateParams.n
+                    ri = find(xx{1} >= dataVector(highlightInd(i)),1);
+                    rainbowColor = rainbowColors{rem(i - 1,10)+1};
+                    plot(1 + 0.25*[-ff{1}(ri),ff{1}(ri)],ones(2,1)*xx{1}(ri),'color',rainbowColor,'LineWidth',2)
+                    plot(1 + 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+                    plot(1 - 0.25*ff{1}(ri),xx{1}(ri),'o','MarkerFaceColor',rainbowColor,'MarkerEdgeColor',rainbowColor)
+                end
             end
             h_violin.XTick = [];
         end
@@ -243,7 +281,7 @@ if doViolin
             h_Custom = subplot(4,1,4);
         end
         tHandle = text(0.2,0.5,'Click near a point above to inspect a time series!');
-    elseif annotateParams.showGlobalDist
+    elseif doAnnotate
         h_TimeSeries = subplot(1,4,3:4);
         plotOptions.newFigure = false;
         plotOptions.colorMap = cell(annotateParams.n,1);
@@ -255,12 +293,12 @@ if doViolin
         TS_PlotTimeSeries(TimeSeries,annotateParams.n,flipud(highlightInd),annotateParams.maxL,plotOptions);
 
         % Put rectangles if data is grouped
-        if ~isempty(timeSeriesGroup)
+        if numGroups > 1
             rectHeight = 1/annotateParams.n;
             rectWidth = 0.1;
             for i = 1:annotateParams.n
                 rectangle('Position',[-rectWidth*1,(i - 1)*rectHeight,rectWidth,rectHeight],...
-                                'FaceColor',myColors{1 + groupLabelsInteger(highlightInd(i))});
+                                'FaceColor',colorOfGroup(groupLabelsInteger(highlightInd(i))));
             end
             h_TimeSeries.XLim = [-rectWidth,1];
         end
@@ -326,7 +364,7 @@ end
 
 %-------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------
-function annotateFigure_Callback(hObject,eventData)
+function annotateFigure_Callback(hObject,~)
     % Bits and pieces from BF_AnnotatePoints(lowDimComponents,TimeSeries,annotateParams);
 
     % Get the coordinates of the current cursor position
@@ -342,7 +380,7 @@ function annotateFigure_Callback(hObject,eventData)
     if numGroups == 1
         xyData = [xScatter{1},yScatter{1}];
     else
-        xyData = arrayfun(@(x)[xScatter{x},yScatter{x}],1:numGroups+1,'UniformOutput',false);
+        xyData = arrayfun(@(x)[xScatter{x},yScatter{x}],1:numViolins,'UniformOutput',false);
     end
 
     % Match the point
@@ -350,26 +388,26 @@ function annotateFigure_Callback(hObject,eventData)
         iPlot = BF_ClosestPoint_ginput(xyData,point,true);
         plotPoint = xyData(iPlot,:);
     else
-        iPlots = zeros(numGroups + 1,1);
-        minDists = zeros(numGroups + 1,1);
-        for g = 1:numGroups+1
+        iPlots = zeros(numViolins,1);
+        minDists = zeros(numViolins,1);
+        for g = 1:numViolins
             [iPlots(g),minDists(g)] = BF_ClosestPoint_ginput(xyData{g},point,true);
         end
         [~,theIndex] = min(minDists);
         plotPoint = xyData{theIndex}(iPlots(theIndex),:);
-        if theIndex==1 % from the full distribution
+        if annotateParams.showGlobalDist && theIndex==1 % from the full distribution
             iPlot = iPlots(1);
         else % from a specific group
             % Find its index from TimeSeries
             theIndices = 1:numTimeSeries;
-            theIndicesGroup = theIndices(timeSeriesGroup==classLabels{theIndex-1});
+            theIndicesGroup = theIndices(timeSeriesGroup==classLabels{theIndex-globalOffset});
             iPlot = theIndicesGroup(iPlots(theIndex));
             % iPlot should be an index of the TimeSeries table
         end
     end
     if numGroups > 1
         theGroupIndex = groupLabelsInteger(iPlot);
-        theColor = myColors{1 + theGroupIndex};
+        theColor = colorOfGroup(theGroupIndex);
         if theGroupIndex==0
             % Can only happen in the rare case of a partially group-labeled dataset
             thisClassLabel = '<Unlabeled>';
@@ -405,6 +443,16 @@ function annotateFigure_Callback(hObject,eventData)
         customAnnotation(timeSeriesData);
         % More complicated would be to give the annotation function access to both axes:
         % customAnnotation(timeSeriesData,[h_TimeSeries,h_Custom]);
+    end
+end
+
+%-------------------------------------------------------------------------------
+function groupColor = colorOfGroup(theGroupIndex)
+    % The color of the group with the given integer index (gray if unlabeled)
+    if theGroupIndex==0
+        groupColor = grayColor;
+    else
+        groupColor = annotateParams.groupColors{theGroupIndex};
     end
 end
 

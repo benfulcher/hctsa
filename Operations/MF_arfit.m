@@ -108,7 +108,6 @@ function out = MF_arfit(y, pmin, pmax, selector)
 if size(y, 2) > size(y, 1)
 	y = y'; % needs to be a column vector
 end
-N = length(y); % time series length
 
 if nargin < 2 || isempty(pmin)
 	pmin = 1;
@@ -165,7 +164,6 @@ for i = 2:6
 	else
 		% This coefficient was not estimated at the selected order -- report NaN, not 0,
 		% which would be indistinguishable from a genuinely-fitted zero coefficient.
-		% (Affects ~36% of series at this mop's order range, so this is not an edge case.)
 		out.(sprintf('A%u', i)) = NaN;
 	end
 end
@@ -177,8 +175,8 @@ out.meanA = mean(Aest);
 out.stdA = std(Aest);
 out.sumA = sum(Aest);
 out.rmsA = sqrt(sum(Aest.^2));
-% (Dropped: sumsqA = sum(Aest.^2). rmsA is its square root, a strictly monotone transform,
-%  so the two are rank-identical by construction.)
+% (The sum of squares, sum(Aest.^2), is not returned: rmsA is its square root, a
+%  strictly monotone transform, so the two are rank-identical by construction.)
 
 % ------------------------------------------------------------------------------
 % (3) Noise covariance matrix, Cest
@@ -204,7 +202,7 @@ out.popt_sbc = find(SBC == min(SBC), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC));
+if (out.popt_sbc > 1) && (out.popt_sbc < length(SBC))
 	meanaround = mean(abs([SBC(out.popt_sbc - 1), SBC(out.popt_sbc + 1)]));
 elseif out.popt_sbc == 1
 	meanaround = abs(SBC(out.popt_sbc + 1)); % just the next value
@@ -229,7 +227,7 @@ out.popt_fpe = find(FPE == min(FPE), 1, 'first');
 
 % (iii) How convincing is the minimum?
 % adjacent values
-if out.popt_fpe > 1 && out.popt_fpe < length(FPE);
+if out.popt_fpe > 1 && out.popt_fpe < length(FPE)
 	meanaround = mean(abs([FPE(out.popt_fpe - 1), FPE(out.popt_fpe + 1)]));
 elseif out.popt_fpe == 1
 	meanaround = abs(FPE(out.popt_fpe + 1)); % just the next value
@@ -251,10 +249,8 @@ out.aroundmin_fpe = abs(min(FPE)) / meanaround;
 out.res_siglev = siglev;
 
 % (2) Residual diagnostics, through the shared contract at the cheap 'core' level.
-% Replaces the hand-rolled res_ac1, res_ac1_norm and pcorr_res: the first two are now
-% ac1 (ac1n was dropped as ~92% recoverable from the rest), and pcorr_res -- the
-% proportion of the first 20 autocorrelations exceeding 1.96/sqrt(N) -- is superseded by
-% propbth, which is the same idea over 25 lags at the 2.6/sqrt(N) threshold.
+% (The normalized lag-1 autocorrelation, ac1n, is not returned: it is largely recoverable
+%  from the other fields.)
 residOut = MF_ResidualAnalysis(-res, y, 'core'); % ARFIT_arres returns data minus fit; the contract is prediction minus data
 fields = fieldnames(residOut);
 for k = 1:length(fields)
@@ -288,10 +284,8 @@ out.aerr_mean = mean(Aerr);
 % tau: damping times (margins of error in second row)
 % exct: measures of relative dynamical importance of eigenmodes
 
-% Since there will be a variable number, best to just use summaries
-% (These were previously computed from S, the last component of each unit-length,
-%  phase-adjusted eigenvector, which reflects the eigenvector normalization rather than
-%  the dynamics; they are now computed from the eigenvalues, lambda, themselves.)
+% Since there will be a variable number, best to just use summaries (of the
+% eigenvalues, lambda, themselves)
 out.maxReLambda = max(real(lambda));
 out.maxImLambda = max(imag(lambda));
 out.maxabsLambda = max(abs(lambda));

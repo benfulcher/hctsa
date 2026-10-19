@@ -138,14 +138,9 @@ m = size(pairs, 1); % number of unique directed edges
 % ------------------------------------------------------------------------------
 %% Core measures (cf. Kulp et al. 2016)
 % ------------------------------------------------------------------------------
-% NB on what is deliberately *not* returned here: meanDegreeNorm
-% (= meanDegree/d), NFPnorm (= NFP/factorial(d)), density (= meanDegree/n) and
-% meanEdgeWeight (= 1/m) were all removed as exact algebraic functions of the
-% fields below -- verified to machine precision (residuals 0 to 3e-17) on a
-% mixed noise/AR/periodic/logistic ensemble. Being deterministic rescalings,
-% they are literally identical columns after hctsa's z-scoring and so add no
-% information to a feature library. Any of them can be recovered from
-% meanDegree and NFP if wanted, since n = factorial(d) - NFP.
+% Not returned: meanDegree/d, NFP/factorial(d), the density (meanDegree/n) and
+% the mean edge weight (1/m), which are exact rescalings of the fields below
+% (recoverable from meanDegree and NFP, since n = factorial(d) - NFP).
 out.meanDegree = m / n; % mean in-degree = mean out-degree = m/n for any directed network
 
 dFactorial = factorial(d);

@@ -136,7 +136,7 @@ N = length(y); % time-series length
 if size(y, 2) > size(y, 1)
 	y = y'; % ensure a column vector input
 end
-if nargin < 2 || isempty(covFunc),
+if nargin < 2 || isempty(covFunc)
 	fprintf(1, 'Using a default covariance function: sum of squared exponential and noise\n');
 	covFunc = {'covSum', {'covSEiso', 'covNoise'}};
 end
@@ -187,12 +187,11 @@ numPreds = numPreds * numSplits;
 % Details of GP:
 meanFunc = {'meanZero'}; % zero-mean process
 likFunc = @likGauss; % likelihood function (Gaussian)
-% Exact Gaussian inference. (Was @infLaplace: with a Gaussian likelihood the
+% Exact Gaussian inference. (Not @infLaplace: with a Gaussian likelihood the
 % Laplace approximation is exact but is computed by Newton iteration, and
 % gpml's infLaplace warm-starts that iteration from a PERSISTENT copy of the
-% previous call's solution, so every fit depended on whatever series was
-% fitted before it -- the same series gave outputs differing in the 4th digit
-% from call to call once the optimizer amplified the difference.)
+% previous call's solution, so each fit would depend on whatever series was
+% fitted before it.)
 infAlg = @infGaussLik;
 nfevals = -50;
 hyp = struct; % structure for storing hyperparameter information in latest version of GMPL toolbox
@@ -330,7 +329,7 @@ for i = 1:numPreds
 
 	% Plot
 	if doPlot
-		if strcmp(pmode, 'frombefore')
+		if strcmp(pmode, 'frombefore') %#ok<UNRCH>
 			plot(tt, yt, '.-k');
 			hold on;
 			plot(ts, ys, '.-b');
@@ -442,8 +441,6 @@ end
 % Worst (maximum) per-point marginal neg-log-likelihood attained
 % Best (minimum) per-point marginal neg-log-likelihood attained
 % spread in per-point marginal neg-log-likelihoods
-% (Previously maxmlik, minmlik and stdmlik: the log marginal likelihood, i.e., the
-%  negative of nlZ, summed over the training points rather than per point.)
 
 out.maxnlml = max(nlmls);
 out.q90nlml = quantile(nlmls, 0.9);

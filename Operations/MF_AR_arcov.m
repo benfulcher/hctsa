@@ -109,8 +109,7 @@ err = y_est - y; % residuals (prediction minus data, the MF_ResidualAnalysis con
 err = err(p+1:end);
 
 % Report the residuals through the shared contract, at the cheap 'core' level (this
-% operation is meant to stay cheap). Replaces the four hand-rolled statistics res_mu,
-% res_std, res_AC1 and res_AC2, which are now meane, stde, ac1 and ac2.
+% operation is meant to stay cheap).
 residOut = MF_ResidualAnalysis(err, y, 'core');
 fields = fieldnames(residOut);
 for k = 1:length(fields)

@@ -38,10 +38,7 @@ function out = SP_SpectralTimeFreq(y, numWindows)
 %         frequency bin, divided by the mean over frequencies of the mean power
 %         across windows. Both are powers, so this is a dimensionless coefficient
 %         of variation of the power, independent of the variance of the series and
-%         of the window length (about 1 for white noise). (Formerly sk_meanSpread,
-%         the unnormalized spread, which scaled with the variance of the series and
-%         as 1/(window length); and sk_meanCentroid, a mean power, not a centroid
-%         frequency, which is no longer output.)
+%         of the window length (about 1 for white noise).
 % se_mean, se_std, se_max, se_min, se_range: mean, standard deviation, maximum,
 %         minimum and range, over windows, of the spectral entropy of each window's
 %         power spectrum. MATLAB's spectralEntropy is scaled by default: it is the

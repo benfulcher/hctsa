@@ -21,6 +21,17 @@
 /*Changes:
   12/10/05: It's multivariate now
   12/16/05: Scaled <eps> and sigma(eps)
+  hctsa: a fifth output column, the number of points that found a neighbor
+         within the search range at that dimension (the denominator of the
+         fraction of false nearest neighbors)
+  hctsa: distances are compared with a tolerance (DIST_TOL, in the units of
+         the data rescaled to [0,1]), so that the result does not depend on
+         rounding: distances within DIST_TOL of each other are equal, and a
+         pair closer than DIST_TOL is a repeated point (no neighbor). When
+         several neighbors are equally near, each point contributes the
+         fraction of them that are false (the expected outcome of choosing
+         one of them at random), so the result does not depend on the order
+         in which the neighbors are searched.
 */
 
 #include <stdio.h>
@@ -41,6 +52,10 @@ unsigned int delay=1,maxdim=5,minemb=1;
 unsigned int comp=1,maxemb=5;
 unsigned int verbosity=0xff;
 double rt=2.0;
+/* distances closer than this (data rescaled to [0,1]) are equal: some 10^4 times
+   the rounding error of the rescaled data (about 10^-16), and far finer than any
+   measured data resolve */
+#define DIST_TOL 1.0e-12
 double eps0=1.0e-5;
 double **series;
 double aveps,vareps;
@@ -50,7 +65,7 @@ double varianz;
 int ibox=BOX-1;
 long **box,*list;
 unsigned int *vcomp,*vemb;
-unsigned long toolarge;
+double toolarge;
 
 void show_options(char *progname)
 {
@@ -129,32 +144,44 @@ void mmb(unsigned int hdim,unsigned int hemb,double eps)
   }
 }
 
+/* the max-norm distance between points n and element in dim+1 dimensions */
+static double maxnorm(long n,long element,unsigned int dim)
+{
+  long i,ic,i1;
+  double dx,maxdx;
+
+  maxdx=fabs(series[0][n]-series[0][element]);
+  for (i=1;i<=dim;i++) {
+    ic=vcomp[i];
+    i1=vemb[i];
+    dx=fabs(series[ic][n+i1]-series[ic][element+i1]);
+    if (dx > maxdx)
+      maxdx=dx;
+  }
+  return maxdx;
+}
+
 char find_nearest(long n,unsigned int dim,double eps)
 {
-  long x,y,x1,x2,y1,i,i1,ic,ie;
+  long x,y,x1,x2,y1,i,ic,ie;
   long element,which= -1;
-  double dx,maxdx,mindx=1.1,hfactor,factor;
+  unsigned long nnear,nfalse;
+  double maxdx,mindx=1.1,dx,factor;
 
   ic=vcomp[dim];
   ie=vemb[dim];
   x=(long)(series[0][n]/eps)&ibox;
   y=(long)(series[ic][n+ie]/eps)&ibox;
-  
+
+  /* the distance to the nearest neighbor (repeated points excluded) */
   for (x1=x-1;x1<=x+1;x1++) {
     x2=x1&ibox;
     for (y1=y-1;y1<=y+1;y1++) {
       element=box[x2][y1&ibox];
       while (element != -1) {
 	if (labs(element-n) > theiler) {
-	  maxdx=fabs(series[0][n]-series[0][element]);
-	  for (i=1;i<=dim;i++) {
-	    ic=vcomp[i];
-	    i1=vemb[i];
-	    dx=fabs(series[ic][n+i1]-series[ic][element+i1]);
-	    if (dx > maxdx)
-	      maxdx=dx;
-	  }
-	  if ((maxdx < mindx) && (maxdx > 0.0)) {
+	  maxdx=maxnorm(n,element,dim);
+	  if ((maxdx < mindx) && (maxdx > DIST_TOL)) {
 	    which=element;
 	    mindx=maxdx;
 	  }
@@ -164,19 +191,40 @@ char find_nearest(long n,unsigned int dim,double eps)
     }
   }
 
-  if ((which != -1) && (mindx <= eps) && (mindx <= varianz/rt)) {
+  /* every point within mindx+DIST_TOL is in the 3x3 boxes once mindx+DIST_TOL <= eps */
+  if ((which != -1) && (mindx+DIST_TOL <= eps) && (mindx <= varianz/rt)) {
     aveps += mindx;
     vareps += mindx*mindx;
-    factor=0.0;
-    for (i=1;i<=comp;i++) {
-      ic=vcomp[dim+i];
-      ie=vemb[dim+i];
-      hfactor=fabs(series[ic][n+ie]-series[ic][which+ie])/mindx;
-      if (hfactor > factor) 
-	factor=hfactor;
+    /* the nearest neighbors: all within DIST_TOL of the nearest distance */
+    nnear=nfalse=0;
+    for (x1=x-1;x1<=x+1;x1++) {
+      x2=x1&ibox;
+      for (y1=y-1;y1<=y+1;y1++) {
+	element=box[x2][y1&ibox];
+	while (element != -1) {
+	  if (labs(element-n) > theiler) {
+	    maxdx=maxnorm(n,element,dim);
+	    if ((maxdx > DIST_TOL) && (maxdx <= mindx+DIST_TOL)) {
+	      factor=0.0;
+	      for (i=1;i<=comp;i++) {
+		ic=vcomp[dim+i];
+		ie=vemb[dim+i];
+		dx=fabs(series[ic][n+ie]-series[ic][element+ie]);
+		if (dx > factor)
+		  factor=dx;
+	      }
+	      nnear++;
+	      /* false if the next coordinate separates them by more than rt times
+		 their distance */
+	      if (factor > rt*maxdx+DIST_TOL)
+		nfalse++;
+	    }
+	  }
+	  element=list[element];
+	}
+      }
     }
-    if (factor > rt)
-      toolarge++;
+    toolarge += (double)nfalse/(double)nnear;
     return 1;
   }
   return 0;
@@ -282,7 +330,7 @@ int main(int argc,char **argv)
   for (emb=minemb;emb<=maxemb;emb++) {
     dim=emb*comp-1;
     epsilon=eps0;
-    toolarge=0;
+    toolarge=0.0;
     alldone=0;
     donesofar=0;
     aveps=0.0;
@@ -313,13 +361,13 @@ int main(int argc,char **argv)
     aveps *= (1./(double)donesofar);
     vareps *= (1./(double)donesofar);
     if (stdo) {
-      fprintf(stdout,"%u %e %e %e\n",dim+1,(double)toolarge/(double)donesofar,
-	      aveps*inter,sqrt(vareps)*inter);
+      fprintf(stdout,"%u %e %e %e %lu\n",dim+1,toolarge/(double)donesofar,
+	      aveps*inter,sqrt(vareps)*inter,donesofar);
       fflush(stdout);
     }
     else {
-      fprintf(file,"%u %e %e %e\n",dim+1,(double)toolarge/(double)donesofar,
-	      aveps*inter,sqrt(vareps)*inter);
+      fprintf(file,"%u %e %e %e %lu\n",dim+1,toolarge/(double)donesofar,
+	      aveps*inter,sqrt(vareps)*inter,donesofar);
       fflush(file);
     }
   }

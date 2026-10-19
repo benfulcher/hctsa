@@ -239,7 +239,7 @@ end
 % Plot
 % ------------------------------------------------------------------------------
 if doPlot
-	figure('color', 'w'); box('on');
+	figure('color', 'w'); box('on'); %#ok<UNRCH>
 	plot(round(winLength / 2):inc:(numSteps - 1) * inc + round(winLength / 2), qs, 'r');
 end
 
