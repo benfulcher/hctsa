@@ -144,7 +144,7 @@ else % use a routine to inform m
                     th = m{2};
                 end
                 escapeFactor = 5;
-                m = NL_FNN(y,tau,10,{'ac',1},1,th,escapeFactor);
+                m = SUB_FNN(y,tau,10,th,escapeFactor);
                 % No more dimensions than the N points can resolve (Eckmann & Ruelle 1992)
                 if ~isnan(m)
                     m = min(m, max(1, floor(2*log10(length(y)))));
@@ -216,5 +216,33 @@ if beVocal
                         '--Embedding dimension m %s\n'],sstau,tau,ssm);
 end
 
+end
 
+% ------------------------------------------------------------------------------
+function m = SUB_FNN(y,tau,maxm,th,escapeFactor)
+    % False-nearest-neighbors dimension; many operations ask for the same one for the
+    % same series, so cache the last few results (TISEAN's false_nearest is expensive)
+    persistent cacheY cacheKey cacheM
+    maxCacheEntries = 4;
+    if isempty(cacheY)
+        cacheY = {};
+        cacheKey = {};
+        cacheM = {};
+    end
+    key = [tau, maxm, th, escapeFactor];
+    for ci = 1:numel(cacheY)
+        if isequal(key, cacheKey{ci}) && isequaln(y, cacheY{ci})
+            m = cacheM{ci};
+            return
+        end
+    end
+    m = NL_FNN(y,tau,maxm,{'ac',1},1,th,escapeFactor);
+    cacheY = [{y}, cacheY];
+    cacheKey = [{key}, cacheKey];
+    cacheM = [{m}, cacheM];
+    if numel(cacheY) > maxCacheEntries
+        cacheY(maxCacheEntries+1:end) = [];
+        cacheKey(maxCacheEntries+1:end) = [];
+        cacheM(maxCacheEntries+1:end) = [];
+    end
 end

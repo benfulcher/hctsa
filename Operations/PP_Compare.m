@@ -246,25 +246,29 @@ y_d = zscore(y_d);
 f_diff = @(proc, orig) proc - orig;
 f_normDiff = @(proc, orig) SUB_normDiff(proc, orig);
 
+% The statistics of the original series are the same for every preprocessing, so
+% they are computed once per series (cached, as in BF_GetTau):
+orig = SUB_origStats(y);
+
 % 1) Stationarity
 
 % (a) StatAv
-out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), SY_StatAv(y, 'seg', 2));
+out.statav2 = f_normDiff(SY_StatAv(y_d, 'seg', 2), orig.statav2);
 
 % (b) Sliding window mean
-out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), SY_SlidingWindow(y, 'mean', 'std', 2, 2));
-out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), SY_SlidingWindow(y, 'mean', 'std', 5, 1));
-out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), SY_SlidingWindow(y, 'mean', 'std', 10, 1));
+out.swms2_2 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 2, 2), orig.swms2_2);
+out.swms5_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 5, 1), orig.swms5_1);
+out.swms10_1 = f_normDiff(SY_SlidingWindow(y_d, 'mean', 'std', 10, 1), orig.swms10_1);
 
 % (c) Sliding window std
-out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), SY_SlidingWindow(y, 'std', 'std', 2, 1));
-out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), SY_SlidingWindow(y, 'std', 'std', 5, 1));
-out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), SY_SlidingWindow(y, 'std', 'std', 10, 1));
+out.swss2_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 2, 1), orig.swss2_1);
+out.swss5_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 5, 1), orig.swss5_1);
+out.swss10_1 = f_normDiff(SY_SlidingWindow(y_d, 'std', 'std', 10, 1), orig.swss10_1);
 
 % 2) Gaussianity
 % (a) kernel density fit
 me1 = DN_SimpleFit(y_d, 'gauss1', 0); % kernel density fit to 1-peak gaussian
-me2 = DN_SimpleFit(y, 'gauss1', 0); % kernel density fit to 1-peak gaussian
+me2 = orig.simpleFit;
 if (~isstruct(me1) && isnan(me1)) || (~isstruct(me2) && isnan(me2))
 	% fitting gaussian failed -- returns a NaN rather than a structure
 	out.gauss1_kd_r2 = NaN;
@@ -278,7 +282,7 @@ end
 
 % (b) compare distribution to fitted normal distribution
 me1 = DN_CompareKSFit(y_d, 'norm');
-me2 = DN_CompareKSFit(y, 'norm');
+me2 = orig.compareKSFit;
 
 out.kscn_peaksepy = f_diff(me1.peaksepy, me2.peaksepy);
 out.kscn_peaksepx = f_diff(me1.peaksepx, me2.peaksepx);
@@ -286,9 +290,45 @@ out.kscn_olapint = f_normDiff(me1.olapint, me2.olapint);
 out.kscn_relent = f_diff(me1.relent, me2.relent);
 
 % 3) Outliers
-out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), DN_OutlierTest(y, 2, 'mean'));
-out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), DN_OutlierTest(y, 5, 'mean'));
-out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), DN_OutlierTest(y, 5, 'std'));
+out.olbt_m2 = f_diff(DN_OutlierTest(y_d, 2, 'mean'), orig.olbt_m2);
+out.olbt_m5 = f_diff(DN_OutlierTest(y_d, 5, 'mean'), orig.olbt_m5);
+out.olbt_s5 = f_normDiff(DN_OutlierTest(y_d, 5, 'std'), orig.olbt_s5);
+
+% ------------------------------------------------------------------------------
+function orig = SUB_origStats(y)
+	% Statistics of the z-scored original series, shared by all preprocessings:
+	% cache the last few results, keyed on the exact (z-scored) input series
+	persistent cacheY cacheOrig
+	maxCacheEntries = 4;
+	if isempty(cacheY)
+		cacheY = {};
+		cacheOrig = {};
+	end
+	for ci = 1:numel(cacheY)
+		if isequaln(y, cacheY{ci})
+			orig = cacheOrig{ci};
+			return
+		end
+	end
+	orig.statav2 = SY_StatAv(y, 'seg', 2);
+	orig.swms2_2 = SY_SlidingWindow(y, 'mean', 'std', 2, 2);
+	orig.swms5_1 = SY_SlidingWindow(y, 'mean', 'std', 5, 1);
+	orig.swms10_1 = SY_SlidingWindow(y, 'mean', 'std', 10, 1);
+	orig.swss2_1 = SY_SlidingWindow(y, 'std', 'std', 2, 1);
+	orig.swss5_1 = SY_SlidingWindow(y, 'std', 'std', 5, 1);
+	orig.swss10_1 = SY_SlidingWindow(y, 'std', 'std', 10, 1);
+	orig.simpleFit = DN_SimpleFit(y, 'gauss1', 0);
+	orig.compareKSFit = DN_CompareKSFit(y, 'norm');
+	orig.olbt_m2 = DN_OutlierTest(y, 2, 'mean');
+	orig.olbt_m5 = DN_OutlierTest(y, 5, 'mean');
+	orig.olbt_s5 = DN_OutlierTest(y, 5, 'std');
+	cacheY = [{y}, cacheY];
+	cacheOrig = [{orig}, cacheOrig];
+	if numel(cacheY) > maxCacheEntries
+		cacheY(maxCacheEntries+1:end) = [];
+		cacheOrig(maxCacheEntries+1:end) = [];
+	end
+end
 
 % ------------------------------------------------------------------------------
 function nd = SUB_normDiff(proc, orig)
