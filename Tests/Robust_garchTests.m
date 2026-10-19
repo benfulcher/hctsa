@@ -58,6 +58,42 @@ classdef Robust_garchTests < matlab.unittest.TestCase
             testCase.verifyEqual(f.h(1), w + (a + b)*v0, 'RelTol', 1e-12);
         end
 
+        function analyticHessian(testCase)
+            % The analytic gradient against central differences of the likelihood, and the
+            % analytic Hessian against central differences of the gradient, extrapolated
+            % (Richardson) to remove their O(step^2) error
+            y = Robust_garchTests.simulate(600, 0.1, 0.1, 0.8, 2);
+            D = BF_GARCHFit('data', y);
+            cases = [1 1 0 0; 3 2 0 0; 0 2 0 0; 2 1 1 0; 1 1 0 1; 2 2 1 1; 0 0 0 1];
+            for c = 1:size(cases, 1)
+                P = cases(c, 1); Q = cases(c, 2); gjr = cases(c, 3); isT = cases(c, 4);
+                S = BF_GARCHFit('spec', D, P, Q, gjr, isT);
+                th = zeros(S.k, 1);
+                th(1) = 0.1; th(S.ib) = 0.5 / max(P, 1); th(S.ia) = 0.2 / max(Q, 1);
+                if gjr, th(S.ig) = 0.05; end
+                if isT, th(S.ik) = 0.15; end
+                [~, g, H] = BF_GARCHFit('nll', th, D, S);
+                testCase.verifyEqual(H, H');
+                cd1 = zeros(S.k); cd2 = zeros(S.k);
+                for i = 1:S.k
+                    e = zeros(S.k, 1); e(i) = 1e-6;
+                    fp = BF_GARCHFit('nll', th + e, D, S);
+                    fm = BF_GARCHFit('nll', th - e, D, S);
+                    testCase.verifyEqual(g(i), (fp - fm) / 2e-6, 'AbsTol', 1e-7);
+                    e(i) = 1e-3;
+                    [~, gp] = BF_GARCHFit('nll', th + e, D, S);
+                    [~, gm] = BF_GARCHFit('nll', th - e, D, S);
+                    cd1(:, i) = (gp - gm) / 2e-3;
+                    e(i) = 5e-4;
+                    [~, gp] = BF_GARCHFit('nll', th + e, D, S);
+                    [~, gm] = BF_GARCHFit('nll', th - e, D, S);
+                    cd2(:, i) = (gp - gm) / 1e-3;
+                end
+                num = (4 * cd2 - cd1) / 3;
+                testCase.verifyLessThan(max(abs(H(:) - num(:))), 1e-7 * max(abs(H(:))));
+            end
+        end
+
         function parameterRecovery(testCase)
             y = Robust_garchTests.simulate(6000, 0.1, 0.1, 0.8, 1);
             D = BF_GARCHFit('data', y);

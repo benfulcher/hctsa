@@ -27,8 +27,9 @@ function varargout = BF_GARCHFit(action, varargin)
 % in the ARCH terms and, for t, the tail weight) is scored by the likelihood. The best 12 grid
 % points are taken through a coarse sequence of log-barrier Newton problems (barrier weights
 % 1e-3 to 1e-5); the two best are then taken to barrier weight 1e-10 (the Newton polish),
-% and the better is the fit. Newton steps use the analytic gradient and a central-difference
-% Hessian of it, and flip the sign of negative curvature. Nothing is random.
+% and the better is the fit. Newton steps use the analytic gradient and the analytic Hessian
+% (derived in the local function nll), and flip the sign of negative curvature. Nothing is
+% random.
 %
 % ---USAGE (the first input selects the action):
 % D = BF_GARCHFit('data', y)
@@ -41,6 +42,8 @@ function varargout = BF_GARCHFit(action, varargin)
 %       grid is used anyway if there are no extra starts). The fit has fields theta, llf
 %       (total log-likelihood), h (conditional variances), spec, dec (the last Newton
 %       decrement, small when converged) and k (the number of parameters)
+% [f, g, H] = BF_GARCHFit('nll', theta, D, spec)
+%       the negative log-likelihood per observation, its gradient and its Hessian at theta
 % fit = BF_GARCHFit('null', D, isT)
 %       the constant-variance special case (Gaussian in closed form; t by maximum likelihood)
 % theta = BF_GARCHFit('embed', theta, specFrom, specTo)
@@ -116,6 +119,8 @@ case 'mle'
     varargout{1} = mleFit(varargin{:});
 case 'null'
     varargout{1} = nullFit(varargin{:});
+case 'nll'
+    [varargout{1}, varargout{2}, ~, varargout{3}] = nll(varargin{:}, true, false, true);
 case 'embed'
     varargout{1} = embedParams(varargin{:});
 case 'tailstarts'
@@ -240,22 +245,43 @@ dh(:, S.k - S.t + 1:S.k) = 0;   % (the kappa column carries no variance derivati
 end
 
 % ------------------------------------------------------------------------------
-function [f, g, sc] = nll(theta, D, S, wantGrad, wantScores)
-% Negative log-likelihood per observation, its gradient and per-observation scores
+function [f, g, sc, H] = nll(theta, D, S, wantGrad, wantScores, wantHess)
+% Negative log-likelihood per observation, its gradient, per-observation scores and Hessian.
+%
+% With l_t the negative log-likelihood of observation t as a function of h_t (and, for t
+% innovations, of nu), the chain rule gives the gradient mean(l_h dh) and the Hessian
+% mean(l_hh dh dh' + l_h d2h) (d2h: see curvatureOfH).
+% Gaussian: l = (log(2 pi) + log h + y^2/h)/2, l_h = (1/h - y^2/h^2)/2,
+% l_hh = (2 y^2/h - 1)/(2 h^2).
+% Student-t, with w = y^2/(h (nu - 2)) and q = w/(1 + w):
+% l = -c(nu) + log(h)/2 + (nu + 1) log(1 + w)/2, l_h = (1 - (nu + 1) q)/(2 h),
+% l_hh = (-1 + (nu + 1) w (2 + w)/(1 + w)^2)/(2 h^2),
+% l_hnu = -(q - (nu + 1) w/((nu - 2)(1 + w)^2))/(2 h),
+% l_nu = -c'(nu) + log(1 + w)/2 - (nu + 1) q/(2 (nu - 2)),
+% l_nunu = -c''(nu) - q/(2 (nu - 2)) + 3 q/(2 (nu - 2)^2) + (nu + 1) w/(2 (nu - 2)^2 (1 + w)^2),
+% c'(nu) = (psi((nu + 1)/2) - psi(nu/2))/2 - 1/(2 (nu - 2)),
+% c''(nu) = (psi'((nu + 1)/2) - psi'(nu/2))/4 + 1/(2 (nu - 2)^2);
+% the parameter is kappa = 1/nu (dnu/dkappa = -nu^2, d2nu/dkappa2 = 2 nu^3).
+if nargin < 6, wantHess = false; end
 y2 = D.y2; N = D.N;
-g = []; sc = [];
-[h, dh] = condVariance(theta, D, S, wantGrad);
+g = []; sc = []; H = [];
+[h, dh] = condVariance(theta, D, S, wantGrad || wantHess);
 if any(h <= 0) || any(~isfinite(h))
     f = Inf;
     return
 end
 if ~S.t
     f = 0.5 * (log(2*pi) + mean(log(h) + y2 ./ h));
-    if wantGrad
+    if wantGrad || wantHess
         w1 = 0.5 * (1 ./ h - y2 ./ h.^2);
         g = (w1' * dh)' / N;
         if wantScores
             sc = w1 .* dh;
+        end
+        if wantHess
+            w2 = 0.5 * (2 * y2 ./ h - 1) ./ h.^2;
+            H = (dh' * (w2 .* dh)) / N + curvatureOfH(theta, dh, w1, S);
+            H = 0.5 * (H + H');
         end
     end
     return
@@ -265,7 +291,7 @@ w = y2 ./ (h * (nu - 2));
 lw = log1p(w);
 c = gammaln((nu + 1)/2) - gammaln(nu/2) - 0.5 * log(pi * (nu - 2));
 f = -c + 0.5 * mean(log(h)) + 0.5 * (nu + 1) * mean(lw);
-if wantGrad
+if wantGrad || wantHess
     w1 = 0.5 ./ h .* (1 - (nu + 1) * w ./ (1 + w));
     g = (w1' * dh)' / N;
     cnu = 0.5 * psi((nu + 1)/2) - 0.5 * psi(nu/2) - 0.5 / (nu - 2);
@@ -275,51 +301,75 @@ if wantGrad
         sc = w1 .* dh;
         sc(:, S.ik) = dnuObs * (-nu^2);
     end
-end
-end
-
-% ------------------------------------------------------------------------------
-function room = slackSteps(theta, S)
-% The largest step in each coordinate that keeps every constraint satisfied
-s = S.c - S.A * theta;
-room = Inf(length(theta), 1);
-for r = 1:size(S.A, 1)
-    idx = find(S.A(r, :) ~= 0);
-    for i = idx
-        room(i) = min(room(i), s(r) / abs(S.A(r, i)));
+    if wantHess
+        q = w ./ (1 + w);
+        w2 = 0.5 * (-1 + (nu + 1) * w .* (2 + w) ./ (1 + w).^2) ./ h.^2;
+        H = (dh' * (w2 .* dh)) / N + curvatureOfH(theta, dh, w1, S);
+        lhnu = -0.5 ./ h .* (q - (nu + 1) * w ./ ((nu - 2) * (1 + w).^2));
+        cnu2 = 0.25 * psi(1, (nu + 1)/2) - 0.25 * psi(1, nu/2) + 0.5 / (nu - 2)^2;
+        lnunu = -cnu2 - 0.5 * q / (nu - 2) + 1.5 * q / (nu - 2)^2 ...
+                + 0.5 * (nu + 1) * w ./ ((nu - 2)^2 * (1 + w).^2);
+        hk = (lhnu' * dh)' / N * (-nu^2);
+        hk(S.ik) = mean(lnunu) * nu^4 + 2 * nu^3 * mean(dnuObs);
+        H(S.ik, :) = hk';
+        H(:, S.ik) = hk;
+        H = 0.5 * (H + H');
     end
 end
 end
 
 % ------------------------------------------------------------------------------
-function H = numHessian(theta, D, S)
-k = length(theta);
-room = slackSteps(theta, S);
-H = zeros(k, k);
-g0 = [];
-for i = 1:k
-    step = max(min(1e-5 * max(1, abs(theta(i))), 0.4 * room(i)), 1e-13);
-    e = zeros(k, 1); e(i) = step;
-    [~, gp] = nll(theta + e, D, S, true, false);
-    [~, gm] = nll(theta - e, D, S, true, false);
-    if isempty(gp) || isempty(gm)
-        if isempty(g0)
-            [~, g0] = nll(theta, D, S, true, false);
+function C = curvatureOfH(theta, dh, w1, S)
+% sum_t w1_t d2h_t / N: the part of the Hessian from the second derivatives of the variances.
+% Differentiating dh_t/dtheta_l = x_{t,l} + sum_j b_j dh_{t-j}/dtheta_l (x_{t,l} is 1,
+% h_{t-j}, y_{t-i}^2 or y_{t-i}^2 [y_{t-i} < 0]) once more gives the same recursion for
+% d2h_t/dtheta_k dtheta_l, driven by dh_{t-j}/dtheta_l when k = b_j plus dh_{t-m}/dtheta_k
+% when l = b_m: the inputs x are linear in theta except the lagged variances. So d2h is
+% nonzero only for pairs with a GARCH coefficient, and each such pair is one more filter by
+% 1/A (zero presample: the presample variance B does not depend on theta).
+k = S.k; P = S.P;
+C = zeros(k, k);
+if P == 0
+    return
+end
+N = size(dh, 1);
+kv = k - S.t;   % (the variances do not depend on kappa)
+nPairs = P * kv - P * (P - 1) / 2;
+pairs = zeros(nPairs, 2); src = zeros(N, nPairs);
+n = 0;
+for j = 1:P
+    bj = S.ib(j);
+    for l = 1:kv
+        m = find(S.ib == l);
+        if ~isempty(m) && m < j
+            continue   % (the pair is listed under the other GARCH coefficient)
         end
-        if isempty(gp), gp = g0; end
-        if isempty(gm), gm = g0; end
+        n = n + 1;
+        src(j+1:N, n) = dh(1:N-j, l);
+        if ~isempty(m)
+            src(m+1:N, n) = src(m+1:N, n) + dh(1:N-m, bj);
+        end
+        pairs(n, :) = [bj, l];
     end
-    H(:, i) = (gp - gm) / (2 * step);
 end
-H = 0.5 * (H + H');
+v = (w1' * filter(1, [1; -theta(S.ib)], src))' / N;
+for n = 1:nPairs
+    a = pairs(n, 1); b = pairs(n, 2);
+    C(a, b) = C(a, b) + v(n);
+    if a ~= b
+        C(b, a) = C(b, a) + v(n);
+    end
+end
 end
 
 % ------------------------------------------------------------------------------
-function [phi, g, s] = barrier(theta, D, S, mu, wantGrad)
-% (wantGrad false: the value only, as needed in the line search)
+function [phi, g, s, Hf] = barrier(theta, D, S, mu, wantGrad, wantHess)
+% (wantGrad false: the value only, as needed in the line search; wantHess: also the Hessian
+% of the negative log-likelihood)
 if nargin < 5, wantGrad = true; end
+if nargin < 6, wantHess = false; end
 s = S.c - S.A * theta;
-g = [];
+g = []; Hf = [];
 if any(s <= 0)
     phi = Inf;
     return
@@ -329,7 +379,7 @@ if ~wantGrad
     phi = f - mu * sum(log(s));
     return
 end
-[f, gf] = nll(theta, D, S, true, false);
+[f, gf, ~, Hf] = nll(theta, D, S, true, false, wantHess);
 if isempty(gf)
     phi = Inf;
     return
@@ -344,8 +394,8 @@ maxIt = 60; tol = 1e-13;
 dec = Inf;
 for mu = mus
     for it = 1:maxIt
-        [phi, g, s] = barrier(theta, D, S, mu);
-        H = numHessian(theta, D, S) + mu * (S.A' * diag(1 ./ s.^2) * S.A);
+        [phi, g, s, Hf] = barrier(theta, D, S, mu, true, true);
+        H = Hf + mu * (S.A' * diag(1 ./ s.^2) * S.A);
         H = 0.5 * (H + H');
         [V, E] = eig(H);
         ev = diag(E);
