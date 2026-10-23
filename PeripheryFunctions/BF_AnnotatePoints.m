@@ -89,10 +89,17 @@ end
 % textAnnotation can be: 'Name' (annotate name), 'ID' (annotate ts_id),
 % 'length' (annotate the length), or 'none' (no annotation)
 if isfield(annotateParams,'textAnnotation')
-    if ismember(annotateParams.textAnnotation,{'Name','ID','length','none'})
-        textAnnotation = annotateParams.textAnnotation;
+    textAnnotation = annotateParams.textAnnotation;
+    isText = ischar(textAnnotation) || isStringScalar(textAnnotation);
+    if isText && ismember(textAnnotation,{'Name','ID','length','none'})
+        textAnnotation = char(textAnnotation);
     else
-        warning('Unknown annotation type: %s',annotateParams.textAnnotation);
+        if isText
+            warning('Unknown annotation type: %s',textAnnotation);
+        else
+            warning(['Unknown annotation type (a %s): textAnnotation should be ' ...
+                    '''Name'', ''ID'', ''length'', or ''none'''],class(textAnnotation));
+        end
         textAnnotation = 'none'; % no annotations by default
     end
 else

@@ -72,8 +72,7 @@ if noDistributedToolbox
     fprintf(1,'Matlab''s Parallel Computing Toolbox is required for distributed calculation but is not installed.\n');
 end
 % Desirable (needed for some hctsa features):
-toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','identification_toolbox',...
-                    'wavelet_toolbox','econometrics_toolbox','financial_toolbox'};
+toolboxCodes = {'curve_fitting_toolbox','signal_toolbox','wavelet_toolbox','econometrics_toolbox'};
 flags = zeros(length(toolboxCodes),1);
 names = cell(length(toolboxCodes),1);
 for i = 1:length(toolboxCodes)
