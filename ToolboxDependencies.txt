@@ -1,8 +1,20 @@
 ------------------------------------------------------------------------------
-This list was manually curated from the output of fdep (run: March 2015)
-cf.
-https://au.mathworks.com/matlabcentral/fileexchange/17291-fdep--a-pedestrian-function-dependencies-finder
-(This function may no longer work with newer versions of Matlab, R2015b+)
+Regenerated for hctsa v3.0.0 (October 2026) with
+matlab.codetools.requiredFilesAndProducts (MATLAB R2026a), run on each
+operation function named in FeatureSets/INP_mops_hctsa.txt (the registered
+operations) and listing the toolbox products it reports. This is static
+analysis of the call graph, so a function is listed if any code path might
+need a toolbox, even if that path is not used by a registered operation.
+Notes:
+  * CO_PartialAutoCorr needs the Econometrics Toolbox (parcorr) only for the
+    optional 'ols' method; the registered operations use 'burg' only.
+  * PP_Compare needs the Financial Toolbox (boxcox) only for the optional
+    'boxcox' method, which no registered operation uses.
+  * The System Identification Toolbox is no longer required.
+  * Operations that need the Econometrics Toolbox otherwise: SY_VarRatioTest,
+    SY_PPtest, SY_KPSStest and the Ljung-Box test in HT_IndependenceTests.
+The lists of provided (external) toolboxes further down were compiled from
+the calls the code makes into each toolbox, not from this analysis.
 Any modifications to toolbox dependencies would be appreciated.
 ------------------------------------------------------------------------------
 
@@ -10,141 +22,178 @@ Any modifications to toolbox dependencies would be appreciated.
 MATLAB TOOLBOXES REQUIRED
 ------------------------------------------------------------------------------
 
-Statistics Toolbox (Matlab Toolbox)
+Statistics and Machine Learning Toolbox (Matlab Toolbox)
 
 CO_AddNoise.m
 CO_CompareMinAMI.m
 CO_Embed2.m
+CO_Embed2_Basic.m
 CO_Embed2_Dist.m
 CO_Embed2_Shapes.m
-CO_HistogramAMI.m
+CO_FZCGLSCF.m
+CO_FallingSticks.m
+CO_FirstMin.m
+CO_GLSCF.m
+CO_JointNonGaussianity.m
+CO_Quantilogram.m
 CO_StickAngles.m
+CO_TC3.m
+CO_TimeRevKLD.m
+CO_TranslateShape.m
+CO_trev.m
+CR_RAD.m
 DN_CompareKSFit.m
-DN_Compare_zscore.m
-DN_Cumulants.m
-DN_CustomSkewness.m
-DN_FitKernelSmooth.m
-DN_Fit_mle.m
 DN_Mean.m
 DN_Moments.m
-DN_OutlierTest.m
-DN_Quantile.m
+DN_OutlierInclude.m
 DN_RemovePoints.m
-DN_SimpleFit.m
 DN_Spread.m
 DN_TrimmedMean.m
-DN_PLeft.m
+EN_ApEn.m
+EN_BubbleEn.m
+EN_DispEn.m
 EN_DistributionEntropy.m
-EN_Randomize.m
-EX_MovingThreshold.m
+EN_LZComplexity.m
+EN_MSE.m
+EN_PermEn.m
+EN_PermEnComplexity.m
+EN_RandomizeOrdinal.m
+EN_SampEn.m
+EN_rpde.m
 FC_LocalSimple.m
 FC_LoopLocalSimple.m
 FC_Surprise.m
 HT_DistributionTest.m
-HT_MarginalTests.m
-HT_HypothesisTest.m
 HT_IndependenceTests.m
+HT_MarginalTests.m
+IN_AutoMutualInfoStats.m
+IN_MultivariateAMI.m
+MF_AR_arcov.m
 MF_CompareTestSets.m
 MF_ExpSmoothing.m
 MF_FitSubsegments.m
 MF_GARCHcompare.m
 MF_GARCHfit.m
-MF_ResidualAnalysis.m
+MF_GP_FitAcross.m
+MF_GP_Hyperparameters.m
+MF_StateSpaceCompOrder.m
 MF_StateSpace_n4sid.m
+MF_arfit.m
 MF_armax.m
+MF_steps_ahead.m
+NL_BoxCountEntropyRate.m
+NL_DVV.m
+NL_DelayTime.m
+NL_Dimensions.m
+NL_EVTLocalDim.m
+NL_EmbedCluster.m
+NL_EmbedKernelPCA.m
+NL_EmbedPCA.m
+NL_FNN.m
+NL_FractalDimensions.m
+NL_GPCorrSum.m
+NL_LargestLyap.m
+NL_LocalDensity.m
+NL_LyapSpec.m
+NL_PersistentHomology.m
+NL_PoincareSection.m
+NL_RQA.m
+NL_RecurrenceTimes.m
+NL_ReturnTime.m
+NL_SSA.m
+NL_TakensEstimator.m
+NL_ZeroOneTest.m
 NL_c1.m
 NL_d2.m
-NL_FractalDimensions.m
-NL_EmbedPCA.m
+NL_nlpe.m
+NW_OrdinalPartitionNetwork.m
 NW_VisibilityGraph.m
 PH_ForcePotential.m
+PH_KramersMoyal.m
 PH_Walker.m
 PP_Compare.m
 PP_Iterate.m
 PP_ModelFit.m
-PP_PreProcess.m
-SB_BinaryStats.m
-SB_CoarseGrain.m
+PP_SchreiberDenoise.m
 SB_MotifThree.m
+SB_MotifTwo.m
 SB_TransitionMatrix.m
 SB_TransitionPAlphabet.m
 SC_FluctAnal.m
+SC_HiguchiFD.m
 SD_SurrogateTest.m
 SD_Surrogates.m
-SP_Rhythmicity.m
-SP_SinusoidFit.m
+SP_Bicoherence.m
+SP_Specparam.m
 SP_Summaries.m
+SP_SummariesPhase.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
 ST_SimpleStats.m
-SY_DynWin.m
-SY_LocalDistributions.m
+SY_DriftingAutoCorr.m
+SY_DriftingMeanCUSUM.m
 SY_LocalGlobal.m
+SY_RampingWindows.m
 SY_RangeEvolve.m
 SY_SlidingWindow.m
+SY_SlowFeatureAnalysis.m
 SY_SpreadRandomLocal.m
+SY_StdNthDerChange.m
+SY_nstat_z.m
 WL_cwt.m
 
 Signal Processing Toolbox (Matlab Toolbox)
 
 CO_StickAngles.m
-DN_OutlierInclude.m
-EN_Randomize.m
-FC_LoopLocalSimple.m
 MD_hrv_classic.m
 MF_AR_arcov.m
 MF_GP_Hyperparameters.m
+NL_PersistentHomology.m
 PP_Compare.m
 PP_Iterate.m
+SB_MotifThree.m
+SB_MotifTwo.m
 SB_TransitionMatrix.m
 SB_TransitionPAlphabet.m
 SC_FluctAnal.m
-SP_Summaries.m
+SP_Bicoherence.m
+SP_Specparam.m
 SP_SpectralTimeFreq.m
+SP_Summaries.m
 ST_LocalExtrema.m
 ST_MomentCorr.m
 ST_PeakIntervals.m
 
 Curve Fitting Toolbox (Matlab Toolbox)
 
-CO_AddNoise.m
 CO_AutoCorrShape.m
-DT_IsSeasonal.m
-EN_Randomize.m
+DN_SimpleFit.m
 FC_LocalSimple.m
-NL_LargestLyap.m
+FC_LoopLocalSimple.m
 PD_PeriodicityWang.m
 PP_Compare.m
 PP_Iterate.m
 SP_SinusoidFit.m
+SP_Specparam.m
 SP_Summaries.m
-SY_StdNthDerChange.m
-
-System Identification Toolbox (Matlab Toolbox)
-
-MF_GARCHcompare.m
-MF_GARCHfit.m
-PP_ModelFit.m
-PP_PreProcess.m
-SD_SurrogateTest.m
 
 Wavelet Toolbox (Matlab Toolbox)
 
 CP_WaveletVarChg.m
 EN_wentropy.m
-WL_DetailCoeffs.m
 WL_Coeffs.m
-WL_cwt.m
 WL_DWTCoeff.m
+WL_DetailCoeffs.m
+WL_cwt.m
 WL_fBM.m
+WL_modwtvar.m
 WL_scal2frq.m
+WL_wpdBestTree.m
 
 Econometrics Toolbox (Matlab Toolbox)
 
-HT_HypothesisTest.m
+CO_PartialAutoCorr.m
 HT_IndependenceTests.m
-MF_GARCHcompare.m
-MF_GARCHfit.m
 SY_KPSStest.m
 SY_PPtest.m
 SY_VarRatioTest.m
@@ -157,34 +206,44 @@ PP_Compare.m
 EXTERNAL TOOLBOXES (PROVIDED)
 ------------------------------------------------------------------------------
 
+These lists name the registered operations that call each provided toolbox,
+directly or through a hctsa helper function.
+
 Michael Small Package (provided)
 
-NL_MS_LZcomplexity.m
+EN_LZComplexity.m
+EN_Shannon.m
+EX_ExtremeEventOrder.m
 NL_nlpe.m
-NL_BoxCountEntropyRate.m
-NL_PoincareSection.m
-NL_ReturnTime.m
-NL_TakensEstimator.m
-NL_EmbedPCA.m
 SD_SurrogateTest.m
-SY_nstat_z.m
 
-TISEAN Package (GPL; provided)
+TISEAN Package (GPL; provided; binaries compiled by install.m)
 
 NL_BoxCountEntropyRate.m
+NL_Dimensions.m
+NL_FNN.m
 NL_GPCorrSum.m
 NL_LargestLyap.m
-NL_PoincareSection.m
+NL_LyapSpec.m
 NL_c1.m
 NL_d2.m
-NL_TakensEstimator.m
-NL_Dimensions.m
+PP_SchreiberDenoise.m
 SY_nstat_z.m
+(Operations that choose the embedding dimension with BF_Embed's 'fnn' option
+also run TISEAN, through NL_FNN.)
 
 ARFIT Toolbox (provided)
 
+FC_LocalSimple.m
+FC_LoopLocalSimple.m
+MF_AR_arcov.m
+MF_CompareTestSets.m
+MF_ExpSmoothing.m
+MF_FitSubsegments.m
+MF_GARCHfit.m
 MF_StateSpace_n4sid.m
 MF_arfit.m
+MF_armax.m
 MF_steps_ahead.m
 NL_nlpe.m
 SD_SurrogateTest.m
@@ -192,11 +251,51 @@ SD_SurrogateTest.m
 gpml Toolbox (FreeBSD License, provided)
 
 MF_GP_FitAcross.m
-MF_GP_LearnHyperp.m
-MF_GP_LocalPrediction.m
 MF_GP_Hyperparameters.m
 
 HMM Toolbox (MIT License, provided)
 
 MF_hmm_CompareNStates.m
 MF_hmm_Fit.m
+
+Danny Kaplan's routines (provided; the operations live in the toolbox folder)
+
+DK_crinkle.m
+DK_theilerQ.m
+DK_timerev.m
+
+DVV Toolbox (provided)
+
+NL_DVV.m
+
+Max Little's steps_bumps_toolkit and rpde (provided)
+
+CP_ML_StepDetect.m
+CP_l1pwc_SweepLambda.m
+EN_rpde.m
+
+nsamdf (provided)
+
+NL_NSAMDF.m
+
+Physionet sample entropy (provided)
+
+EN_MSE.m
+EN_SampEn.m
+
+ripser (provided; binary compiled by install.m)
+
+NL_PersistentHomology.m
+
+Java Information Dynamics Toolkit (GPL; provided)
+
+Used by the mutual-information code (IN_Initialize_MI), and so by operations
+that estimate mutual information, e.g., IN_AutoMutualInfoStats, IN_MultivariateAMI.
+
+------------------------------------------------------------------------------
+ANALYSIS FUNCTIONS (NOT OPERATIONS)
+------------------------------------------------------------------------------
+
+Bioinformatics Toolbox (Matlab Toolbox)
+
+TS_TopFeatures.m (FDR-corrected q-values, mafdr, only when numNulls > 0)

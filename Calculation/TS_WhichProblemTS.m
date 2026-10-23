@@ -61,7 +61,7 @@ ts_ind = find(qualityLabels > 0);
 
 if nargout > 1
     % data for these time series
-    dataCell = {TimeSeries.Data(ts_ind)};
+    dataCell = TimeSeries.Data(ts_ind);
 end
 
 if nargout > 2
