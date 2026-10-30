@@ -217,7 +217,8 @@ EX_ExtremeEventOrder.m
 NL_nlpe.m
 SD_SurrogateTest.m
 
-TISEAN Package (GPL; provided; binaries compiled by install.m)
+TISEAN Package (GPL; provided as a git subtree of
+https://github.com/DynamicsAndNeuralSystems/tisean; binaries compiled by install.m)
 
 NL_BoxCountEntropyRate.m
 NL_Dimensions.m
