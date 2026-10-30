@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,10 +17,8 @@
  *   along with TISEAN; if not, write to the Free Software
  *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-/*Author: Rainer Hegger. Last modified Dec 6, 2005*/
-/*Changes:
-  12/06/05: shift output x value to center of interval
-*/
+/*Author: Rainer Hegger. Last modified May 16, 2014*/
+
 #include <math.h>
 #include <limits.h>
 #include <stdio.h>
@@ -28,7 +26,7 @@
 #include <string.h>
 #include "routines/tsa.h"
 
-#define WID_STR "Makes a histogram of the data"
+#define WID_STR "Creates a histogram of a onedimensional dataset"
 
 unsigned long length=ULONG_MAX;
 unsigned long base=50;
@@ -36,14 +34,9 @@ unsigned long exclude=0;
 unsigned int column=1;
 unsigned int verbosity=0xff;
 double size;
-char my_stdout=1,gotsize=0;
+char my_stdout=1,gotsize=0,density=0;
 char *outfile=NULL;
 char *infile=NULL;
-
-double *series;
-double average,var;
-double min,max;
-long *box;
 
 void show_options(char *progname)
 {
@@ -57,6 +50,8 @@ void show_options(char *progname)
   fprintf(stderr,"\t-x # of lines to ignore [default %ld]\n",exclude);
   fprintf(stderr,"\t-c column to read [default %d]\n",column);
   fprintf(stderr,"\t-b # of intervals [default %ld]\n",base);
+  fprintf(stderr,"\t-D output densities not relative frequencies"
+	  " [default not set]\n");
   fprintf(stderr,"\t-o output file [default 'datafile'.dat ;"
 	  " If no -o is given: stdout]\n");
   fprintf(stderr,"\t-V verbosity level [default 1]\n\t\t"
@@ -80,6 +75,8 @@ void scan_options(int n,char **str)
     sscanf(out,"%lu",&base);
   if ((out=check_option(str,n,'V','u')) != NULL)
     sscanf(out,"%u",&verbosity);
+  if ((out=check_option(str,n,'D','n')) != NULL)
+    density=1;
   if ((out=check_option(str,n,'o','o')) != NULL) {
     my_stdout=0;
     if (strlen(out) > 0)
@@ -92,6 +89,10 @@ int main(int argc,char **argv)
   char stdi=0;
   unsigned long i,j;
   double x,norm,size=1.0,size2=1.0;
+  double min,max;
+  double *series;
+  double average,var;
+  long *box;
   FILE *fout;
 
   if (scan_help(argc,argv))
@@ -123,24 +124,36 @@ int main(int argc,char **argv)
 
   series=(double*)get_series(infile,&length,exclude,column,verbosity);
   variance(series,length,&average,&var);
-  rescale_data(series,length,&min,&max);
-  
-  
+
+  min=max=series[0];
+  for (i=1;i<length;i++) {
+    if (series[i] < min) min=series[i];
+    else if (series[i] > max) max=series[i];
+  }
+  max -= min;
+
+  for (i=0;i<length;i++)
+    series[i]=(series[i]-min);
+
   if (base > 0) {
     check_alloc(box=(long*)malloc(sizeof(long)*base));
     for (i=0;i<base;i++)
       box[i]=0;
     size=1./base;
-    size2=size/2.0;
+    size2=(1.0-size/2.0)*max;
     for (i=0;i<length;i++) {
-      if (series[i] > (1.0-size2))
-	series[i]=1.0-size2;
-      j=(long)(series[i]*base);
+      if (series[i] > size2)
+	series[i]=size2;
+      j=(long)(series[i]*base/max);
       box[j]++;
     }
   }
 
-  norm=1.0/(double)length;
+  if (!density)
+    norm=1.0/(double)length;
+  else
+    norm=1.0/(double)length*(double)base/max;
+
   if (!my_stdout) {
     fout=fopen(outfile,"w");
     if (verbosity&VER_INPUT)
@@ -150,7 +163,7 @@ int main(int argc,char **argv)
     fprintf(fout,"#standard deviation= %e\n",var);
     for (i=0;i<base;i++) {
       x=(double)(i*size);
-      fprintf(fout,"%e %e\n",(x+size2)*max+min,(double)box[i]*norm);
+      fprintf(fout,"%e %e\n",(x+size/2.0)*max+min,(double)box[i]*norm);
     }
     fclose(fout);
   }
@@ -162,7 +175,7 @@ int main(int argc,char **argv)
     fprintf(stdout,"#standard deviation= %e\n",var);
     for (i=0;i<base;i++) {
       x=(double)(i*size);
-      fprintf(stdout,"%e %e\n",(x+size2)*max+min,(double)box[i]*norm);
+      fprintf(stdout,"%e %e\n",(x+size/2.0)*max+min,(double)box[i]*norm);
       fflush(stdout);
     }
   }

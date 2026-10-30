@@ -32,7 +32,7 @@ for ccc in "$CC" cc gcc acc "cc -Aa"; do
    ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.c 1>&5'
    ac_link='$CC -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.c $LIBS 1>&5'
    echo '#include "confdefs.h"'  > conftest.c
-   echo 'main(int argc,char **argv){return(0);}' >> conftest.c
+   echo 'int main(int argc,char **argv){return(0);}' >> conftest.c
    if { (eval $ac_link) 2>&5; } && test -s conftest; then
 	 rm -fr conftest*
 	 AC_MSG_RESULT(yes)
@@ -95,7 +95,7 @@ fi
 
 AC_SUBST(CC)
 
-for fff in "$FC" f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
+for fff in "$FC" "gfortran -std=legacy" gfortran f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
    if test -z "$fff"; then 
       continue
    fi

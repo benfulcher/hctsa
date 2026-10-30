@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 char *format,*outfile=NULL,stout=1,normalize=1;
 unsigned int column=1;
 unsigned int verbosity=0xff;
-unsigned long tau=100,length=ULONG_MAX,exclude=0;
+unsigned long tau=100,step=1,length=ULONG_MAX,exclude=0;
 double *array;
 double av,var;
 char *infile=NULL;
@@ -48,6 +48,8 @@ void show_options(char *progname)
   fprintf(stderr,"\t-x # of lines to be ignored [default 0]\n");
   fprintf(stderr,"\t-c column to read [default is 1]\n");
   fprintf(stderr,"\t-D corrlength  [default is 100]\n");
+  fprintf(stderr,"\t-s # calculate the correlation only every #-th step "
+	  "[default is 1]\n");
   fprintf(stderr,"\t-n don\'t normalize to the variance"
 	  " of the data [not set]\n");
   fprintf(stderr,"\t-o output_file  [default is 'datafile'.cor; no -o"
@@ -72,6 +74,8 @@ void scan_options(int argc,char **argv)
     sscanf(out,"%u",&column);
   if ((out=check_option(argv,argc,'D','u')) != NULL)
     sscanf(out,"%lu",&tau);
+  if ((out=check_option(argv,argc,'s','u')) != NULL)
+    sscanf(out,"%lu",&step);
   if ((out=check_option(argv,argc,'n','n')) != NULL)
     normalize=0;
   if ((out=check_option(argv,argc,'V','u')) != NULL)
@@ -88,16 +92,17 @@ double corr(long i)
   long j;
   double c=0.0;
   
-  for (j=0;j<(length-i);j++)
+  for (j=0;j<(length-i);j++) {
     c += array[j]*array[j+i];
+  }
 
-  return c/(length-i);
+  return c/(double)(length-i);
 }
 
 int main(int argc,char** argv)
 {
-  char stdi=0;
-  long i;
+  char stdi=0,done=0;
+  unsigned long i;
   FILE *fout=NULL;
   
   if (scan_help(argc,argv))
@@ -157,13 +162,24 @@ int main(int argc,char** argv)
   else
     var=1.0;
 
-  for (i=0;i<=tau;i++)
+  for (i=0;i<=tau;i += step)
     if (!stout) {
       fprintf(fout,"%ld %e\n",i,corr(i)/var);
       fflush(fout);
+      if (i == tau) done=1;
     }
     else {
       fprintf(stdout,"%ld %e\n",i,corr(i)/var);
+      fflush(stdout);
+      if (i == tau) done=1;
+    }
+  if (!done)
+    if (!stout) {
+      fprintf(fout,"%ld %e\n",tau,corr(tau)/var);
+      fflush(fout);
+    }
+    else {
+      fprintf(stdout,"%ld %e\n",tau,corr(tau)/var);
       fflush(stdout);
     }
   if (!stout)

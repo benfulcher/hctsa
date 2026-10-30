@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ int main(int argc,char **argv)
   fclose(file);
 
   dummy=(double**)get_multi_series(parin,&plength,0LU,
-				   &dim,"",(char)"1",verbosity);
+				   &dim,"",1,verbosity);
   
   check_alloc(order=(unsigned int**)malloc(sizeof(int*)*plength));
   for (i=0;i<plength;i++) {

@@ -84,7 +84,7 @@ Note that, in the case that some of them are unavailable, _hctsa_ can still be u
 **Matlab Add-On Toolboxes**: Statistics and Machine Learning, Signal Processing, Curve Fitting, Wavelet, and Econometrics.
 
 **External Packages (provided):**
-- [_TISEAN_ package for nonlinear time-series analysis, version 3.0.1](http://www.mpipks-dresden.mpg.de/~tisean/Tisean_3.0.1/index.html) (GPL license).
+- [_TISEAN_ package for nonlinear time-series analysis](https://www.pks.mpg.de/tisean/), version 3.0.1 with the authors' unreleased fixes and hctsa's fixes, maintained at [DynamicsAndNeuralSystems/tisean](https://github.com/DynamicsAndNeuralSystems/tisean) and included here as a git subtree (GPL license).
 - Joseph T. Lizier's [Java Information Dynamics Toolkit (JIDT)](https://github.com/jlizier/jidt) for studying information-theoretic measures of computation in complex systems, version 1.3 (GPL license).
 - Time-series analysis code developed by [Michael Small](http://staffhome.ecm.uwa.edu.au/~00027830/code.html) (unlicensed).
 - Max Little's [Time-series analysis code](http://www.maxlittle.net/software/index.php) (GPL license).

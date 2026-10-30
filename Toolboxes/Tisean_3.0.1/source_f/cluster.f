@@ -2,7 +2,7 @@ c===========================================================================
 c
 c   This file is part of TISEAN
 c 
-c   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+c   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
 c 
 c   TISEAN is free software; you can redistribute it and/or modify
 c   it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ c===========================================================================
       d(i,j)=dij
       np=max(i,j,np)
       goto 1
- 999  if(iv_io(iverb).eq.1) write(0,'(a,i)') "matrix size ", np
+ 999  if(iv_io(iverb).eq.1) write(0,'(a,i8)') "matrix size ", np
       dmean=0
       nd=0
       do 20 i=1,np

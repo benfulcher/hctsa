@@ -32,7 +32,7 @@ install: do_install missing
 
 do_install:
 	@rm -f install.log
-	@test -d ${BINDIR} || (echo "${BINDIR} does not exist")
+	@test -d ${BINDIR} || mkdir -p ${BINDIR}
 	-@test -d ${BINDIR} -a -n "${FC}" && (cd source_f && $(MAKE) install)
 	-@test -d ${BINDIR} -a -n "${CC}" &&  (cd source_c && $(MAKE) install)
 

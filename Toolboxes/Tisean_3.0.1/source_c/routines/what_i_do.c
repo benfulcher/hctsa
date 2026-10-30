@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,6 +26,6 @@
 void what_i_do(char *name,char *text)
 {
   fprintf(stderr, "\nTISEAN 3.0.1 (C) R. Hegger, H. Kantz,"
-                  " T. Schreiber (1998-2007)\n\n"
+                  " T. Schreiber (1998-2015)\n\n"
      "%s: %s\n\n",name,text);
 }

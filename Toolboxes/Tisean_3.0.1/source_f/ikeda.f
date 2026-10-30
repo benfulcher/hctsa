@@ -2,7 +2,7 @@ c===========================================================================
 c
 c   This file is part of TISEAN
 c 
-c   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+c   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
 c 
 c   TISEAN is free software; you can redistribute it and/or modify
 c   it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ c===========================================================================
       a=fcan('A',real(a))
       b=fcan('B',real(b))
       c=fcan('C',real(c))
-      xo=fcan('X',real(xo))
-      yo=fcan('Y',real(yo))
+      xo=fcan('R',real(xo))
+      yo=fcan('I',real(yo))
       isout=igetout(fout,iverb)
 
       if(isout.eq.1) fout="ikeda.dat"

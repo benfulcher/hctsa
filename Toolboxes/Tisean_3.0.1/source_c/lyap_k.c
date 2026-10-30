@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -279,6 +279,15 @@ int main(int argc,char **argv)
     epscount=1;
   }
   
+  /* the dimensions are settled before they bound the reference points (with
+     -M1 the bound used maxdim=1, and the search then read past the data) */
+  if (maxdim < 2)
+    maxdim=2;
+  if (mindim < 2)
+    mindim=2;
+  if (mindim > maxdim)
+    maxdim=mindim;
+
   if (reference > (length-maxiter-(maxdim-1)*delay))
     reference=length-maxiter-(maxdim-1)*delay;
   if ((maxiter+(maxdim-1)*delay) >= length) {
@@ -286,13 +295,6 @@ int main(int argc,char **argv)
     exit(LYAP_K__MAXITER_TOO_LARGE);
   }
 
-  if (maxdim < 2)
-    maxdim=2;
-  if (mindim < 2)
-    mindim=2;
-  if (mindim > maxdim)
-    maxdim=mindim;
-  
   check_alloc(liste=(long*)malloc(sizeof(long)*(length)));
   check_alloc(found=(long*)malloc(sizeof(long)*(maxdim-1)));
   check_alloc(lfound=(long**)malloc(sizeof(long*)*(maxdim-1)));

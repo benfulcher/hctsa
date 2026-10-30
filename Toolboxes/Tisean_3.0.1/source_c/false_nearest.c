@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 /*Changes:
   12/10/05: It's multivariate now
   12/16/05: Scaled <eps> and sigma(eps)
+  03/08/09: delay was missing in delay embedding of univariate case
   hctsa: a fifth output column, the number of points that found a neighbor
          within the search range at that dimension (the denominator of the
          fraction of false nearest neighbors)
@@ -48,7 +49,7 @@ char *infile=NULL;
 char stdo=1,dimset=0;
 char *column=NULL;
 unsigned long length=ULONG_MAX,exclude=0,theiler=0;
-unsigned int delay=1,maxdim=5,minemb=1;
+unsigned int delay=1,maxdim=6,minemb=1;
 unsigned int comp=1,maxemb=5;
 unsigned int verbosity=0xff;
 double rt=2.0;
@@ -320,9 +321,10 @@ int main(int argc,char **argv)
   check_alloc(vemb=(unsigned int*)malloc(sizeof(int)*(maxdim)));
   /* Embedding coordinate i is component i%comp at lag (i/comp)*delay. For a
      scalar series (comp == 1) this is a delay embedding with lag i*delay.
-     (Upstream TISEAN 3.0.0/3.0.1 special-cased comp == 1 with vemb[i]=i, so
-     the -d option never set the lag between coordinates in the scalar case,
-     only the loop bounds above.) */
+     (TISEAN 3.0.0/3.0.1 as released special-cased comp == 1 with vemb[i]=i,
+     so the -d option never set the lag between coordinates in the scalar
+     case, only the loop bounds above; the authors fixed this in 2009 in an
+     unreleased version, see the 03/08/09 note above.) */
   for (i=0;i<maxdim;i++) {
     vcomp[i]=i%comp;
     vemb[i]=(i/comp)*delay;

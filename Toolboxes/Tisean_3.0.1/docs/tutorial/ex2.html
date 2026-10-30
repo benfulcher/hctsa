@@ -82,7 +82,7 @@ The ar-data have zero mean by construction. If you wish to superimpose
 the two histograms, you thus should shift the one with respect to the
 other by the mean value of the data:<br>
 <font color=green>  
-set data style histep<br>
+set style data histep<br>
 plot '&#60; histogram amplitude.dat' u ($1-.146):2,'&#60; histogram
 ar.dat' </font> 
 <br>Result: The data sets are differnt: the distribution of <font
@@ -95,7 +95,7 @@ spectra (by either <a href="../docs_c/mem_spec.html">mem_spec</a> or
 <a href="../docs_f/spectrum.html">spectrum</a>) of both of them:<br>
 <font color=red> corr amplitude.dat -D500 -o<br>
 corr ar.dat -D500 -o</font><br>
-<font color=green>set data style lines</font><br>
+<font color=green>set style data lines</font><br>
 <font color=green> plot 'ar.dat.cor','amplitude.dat.cor'</font><br>
 <font color=red>spectrum amplitude.dat -o<br>
 spectrum ar.dat -o</font><br>
@@ -150,7 +150,7 @@ the same as for <font color=blue> amplitude.dat</font>.
 <ul>
 <li> compute the false nearest neighbour statistics 
 (<a href="../docs_c/false_nearest.html">false_nearest</a>):<br>
-<font color=red> false_nearest  amplitude.dat -M8 -d8 -o
+<font color=red> false_nearest  amplitude.dat -M1,8 -d8 -o
 -t200 -f5 </font><br>
 Study the output, <font color=blue>amplitude.dat.fnn</font>, and
 observe the invariance of the result (namely that the embedding dimension
@@ -158,9 +158,9 @@ observe the invariance of the result (namely that the embedding dimension
 <br><br>
 
 <li> Use the zeorth-order predictor 
-(<a href="../docs_c/zeroth.html">zeroth</a>)
+(<a href="../docs_c/lzo-test.html">zeroth</a>)
 on amplitude.dat and on ar.dat.<br>
-<font color=red> zeroth amplitude.dat -m1,4 -d8 -o
+<font color=red> lzo-test amplitude.dat -m1,4 -d8 -o
 -s250<br>
 zeroth ar.dat -m1,4 -d8 -o
 -s250</font><br>

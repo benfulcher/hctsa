@@ -7,6 +7,8 @@
 <h1 align=center>Changes, bug fixes and new programs</h1>
 <hr>
 <ul>
+<li><a href="#tisean3.0.1">TISEAN_3.0.1 -&gt; TISEAN_3.0.2</a>
+<li><a href="#tisean3.0.0">TISEAN_3.0.0 -&gt; TISEAN_3.0.1</a>
 <li><a href="#tisean2.1">TISEAN_2.1 -&gt; TISEAN_3.0.x</a>
 <li><a href="#tisean2.0">TISEAN_2.0 -&gt; TISEAN_2.1</a>
 <li><a href="#tisean1.2">TISEAN_1.2 -&gt; TISEAN_2.0</a>
@@ -18,6 +20,49 @@
 <li><a href="#tisean0.2">TISEAN_0.2 -&gt; TISEAN_0.3</a>
 <li><a href="#tisean0.1">TISEAN_0.1 -&gt; TISEAN_0.2</a>
 </ul>
+
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean3.0.1">TISEAN_3.0.1 -&gt; TISEAN_3.0.2</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li><a href="corr.html">corr</a> got the <font color=red>-s</font>
+  option.</li>
+<li><a href="delay.html">delay</a>: Bug fix. For certain choices of
+  paramters the delay vector was wrong when written to a file.</li>
+<li><a href="false_nearest.html">false_nearest</a>: Bug fix. The delay
+  was handled wrongly.</li>
+<li><a href="histogram.html">histogram</a>: Now you can choose whether
+  to write relative frequencies or densities by using the new option
+  <font color=red>-D</font>.</li>
+<li><a href="lzo-run.html">lzo-run</a>: Bug
+  fix. The <font color=red>-K</font> option was always activated.</li>
+<li><a href="lzo-test.html">lzo-test</a>: To be consistent
+  with <a href="lzo-run.html">lzo-run</a> the <font color=red>-K</font>
+  option was added.</li>
+<li><a href="mem_spec.html">mem_spec</a>: Different normalization of
+the output spectrum (now its divided by the number of data
+  points).</li>
+<li><a href="polynom.html">polynom</a>: Fixed segmentation fault and
+  added correct normalization of the forecast errors.</li>
+<li><a href="polynomp.html">polynomp</a>: Fixed syntax error.</li>
+<li><a href="xcor.html">xcor</a>: Fixed syntax error.</li>
+</ul>
+<hr>
+
+<hr>
+<center><font size=4 color=blue><b>
+<a name="tisean3.0.0">TISEAN_3.0.0 -&gt; TISEAN_3.0.1</a>
+</b></font></center>
+<hr>
+<h4 align=center>Changes</h4>
+<ul>
+<li>A few bug fixes</li>
+</ul>
+<hr>
+
 <hr>
 <center><font size=4 color=blue><b>
 <a name="tisean2.1">TISEAN_2.1 -&gt; TISEAN_3.0.x</a>
@@ -63,6 +108,7 @@ it handles multivariate data and returns individual residuals.</li>
 first dimension (means h(0)=H(1)) now.</li>
 </ul>
 <hr>
+
 <h4 align=center>Bug fixes and Cleanups</h4>
 <ul>
 <li><a href="boxcount.html">boxcount</a> did not compile with newer

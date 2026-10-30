@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ int main(int argc,char** argv)
     fprintf(stdout,"# standard deviation of sec. comp.=%e\n",var2);
   }
 
-  for (i= -tau;i<=tau;i++)
+  for (i= -(long)tau;i<=(long)tau;i++)
     if (!stout) {
       fprintf(fout,"%ld %e\n",i,corr(i)/var1/var2);
       fflush(fout);

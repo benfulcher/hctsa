@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ and iterates a trajectory"
 
 #define NMAX 128
 
-char onscreen=1,epsset=0,*outfile=NULL,setsort=1,setnoise=0;
+char onscreen=1,epsset=0,*outfile=NULL,setsort=0,setnoise=0;
 char *infile=NULL;
 unsigned int nmax=(NMAX-1);
 unsigned int verbosity=0xff;
@@ -49,7 +49,7 @@ unsigned int MINN=50;
 unsigned int **indexes;
 unsigned long LENGTH=ULONG_MAX,FLENGTH=1000,exclude=0;
 unsigned long seed=0x9074325L;
-double EPS0=1.e-3,EPSF=1.2,Q=10.0;
+double EPS0=1.e-3,EPSF=1.2,Q=0.0;
 
 double **mat,*vec,*hsum,*newav;
 

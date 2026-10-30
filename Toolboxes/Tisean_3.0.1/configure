@@ -35,17 +35,17 @@ verbose=
 x_includes=NONE
 x_libraries=NONE
 bindir='bin'
-sbindir='${exec_prefix}/sbin'
-libexecdir='${exec_prefix}/libexec'
-datadir='${prefix}/share'
-sysconfdir='${prefix}/etc'
-sharedstatedir='${prefix}/com'
-localstatedir='${prefix}/var'
-libdir='${exec_prefix}/lib'
-includedir='${prefix}/include'
+sbindir='sbin'
+libexecdir='libexec'
+datadir='share'
+sysconfdir='etc'
+sharedstatedir='com'
+localstatedir='var'
+libdir='lib'
+includedir='include'
 oldincludedir='/usr/include'
-infodir='${prefix}/info'
-mandir='${prefix}/man'
+infodir='info'
+mandir='man'
 
 # Initialize some other variables.
 subdirs=
@@ -554,7 +554,7 @@ echo "configure:553: checking whether ($CC $CFLAGS $LDFLAGS) works" >&5
    ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.c 1>&5'
    ac_link='$CC -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.c $LIBS 1>&5'
    echo '#include "confdefs.h"'  > conftest.c
-   echo 'main(int argc,char **argv){return(0);}' >> conftest.c
+   echo 'int main(int argc,char **argv){return(0);}' >> conftest.c
    if { (eval $ac_link) 2>&5; } && test -s conftest; then
 	 rm -fr conftest*
 	 echo "$ac_t""yes" 1>&6
@@ -1020,7 +1020,7 @@ fi
 
 
 
-for fff in "$FC" gfortran f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
+for fff in "$FC" "gfortran -std=legacy" gfortran f77 g77 "f77 +U77" "f77 -q -f -B108 -lU77"; do
    if test -z "$fff"; then 
       continue
    fi

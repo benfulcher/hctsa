@@ -1,0 +1,25 @@
+# configure and make
+/Makefile
+/config.cache
+/config.log
+/config.status
+/install.log
+/missing.log
+conftest*
+
+# programs and generated Makefiles: files with no extension under source_c/ and source_f/
+/source_c/**/*
+/source_f/**/*
+!/source_c/**/
+!/source_f/**/
+!/source_c/**/*.*
+!/source_f/**/*.*
+
+# generated sources, objects and libraries (after the rules above, which would
+# re-include them)
+/source_f/istdio.f
+*.o
+*.a
+
+# tests
+__pycache__/

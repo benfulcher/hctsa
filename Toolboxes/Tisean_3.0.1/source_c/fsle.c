@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -159,6 +159,10 @@ char make_iterate(long act)
   if ((minelement != -1) && (mindx < eps)) {
     act += del1-delay+1;
     minelement += del1-delay+1;
+    /* the step above can reach the end of the data, and the loops below
+       read series[act] and series[minelement] before checking */
+    if ((act >= length) || (minelement >= length))
+      return ok;
     which=(int)(log(mindx/eps0)/log(epsfactor));
     if (which < 0) {
       while ((dx=fabs(series[act]-series[minelement])) < data[0].eps) {

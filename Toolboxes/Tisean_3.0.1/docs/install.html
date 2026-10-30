@@ -5,8 +5,7 @@
 <font color=red><b>Note:</b></font> As you may know, we are not a software
 company and, after all, you got this package for free, so don't expect anything
 to be fool-proof, or even comfortable. We have compiled this package only under
-linux on PCs (32 and 64 bit) and digital unix on alpha
-workstations. We use it routinely on linux PCs and on Hewlett-Packard alpha. 
+linux on PCs (32 and 64 bit).
 <p>
 All you probably have to do is to say
 <blockquote>
@@ -41,19 +40,20 @@ We have verified the Makefile with GNU make (Linux: PC) and
 True64 make (Hewlett-Packard: alpha). Who knows what else can go wrong. 
 
 <p>
-<font color=red><b>f77/g77, gcc/cc/acc:</b></font> You can
+<font color=red><b>gfortran, gcc:</b></font> You can
 override what <font color=blue><tt>configure</tt></font> finds by setting the
 environment variables <font color=blue><tt>FC</tt></font> and <font
 color=blue><tt>CC</tt></font>,
 respectively. Use double quotes for a multi-word command.  We have tested the
-Fortran routines on g77 (Linux: PC),  PGI compiler (Linux: PC), Intel
-compiler (Linux: PC) and True64 f77 (Hewlett-Packard: alpha).
-The C routines were tested with gcc (Linux: PC) and True64 cc
-(Hewlett-Packard: alpha). In any case, the C compiler must 
-be able to handle <font color=red>ANSI C</font> function headers.
+Fortran routines on gfortran (Linux: PC). The C routines were tested
+with gcc (Linux: PC). Other compilers may work, but in any case, the C
+compiler must be able to handle <font color=red>ANSI C</font> function
+headers.
+</p>
 
 <p>
-<font color=red><b>size:</b></font> The Fortran programs allocate memory which
+<font color=red><b>size:</b></font> The Fortran programs are written
+in fortran77 and thus allocate memory statically, which
 might exceed what you can make available. In such a case you need to edit the
 programs and change these sizes, sometimes also in major sub-programs, sorry.
 Also, if you request things for which the allocated space is too small, the
@@ -70,7 +70,7 @@ programs use machine constants. In an emergency, these may be changed in
 <font color=blue><tt>source_f/slatec</tt></font>
 <hr>
 <p>
-<em>Copyright &#169; (1998-2007) Rainer Hegger, Holger Kantz, Thomas
+<em>Copyright &#169; (1998-2015) Rainer Hegger, Holger Kantz, Thomas
 Schreiber</em> 
 </p>
 <p>

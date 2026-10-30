@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 /*Author: Rainer Hegger*/
 /* Changes:
    6/30/2006: Norm of the errors was wrong
+   6/5/2008: Norm was still wrong. Now its given as an absolute value in 
+             units of the data
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -226,7 +228,6 @@ void make_cast(FILE *fcast)
       series[j]=series[j+1];
     series[hi]=casted;
   }
-  fclose(fcast);
 }
 
 int main(int argc,char **argv)
@@ -265,6 +266,7 @@ int main(int argc,char **argv)
 
   series=(double*)get_series(infile,&LENGTH,exclude,COLUMN,verbosity);
   variance(series,LENGTH,&av,&std_dev);
+
   for (i=0;i<LENGTH;i++)
     series[i] /= std_dev;
 
@@ -307,11 +309,11 @@ int main(int argc,char **argv)
 
   in_error=make_error((unsigned long)0,INSAMPLE);
 
-  fprintf(file,"#average insample error= %e\n",sqrt(in_error));
+  fprintf(file,"#average insample error= %e\n",sqrt(in_error)*std_dev);
 
   if (INSAMPLE < LENGTH) {
     out_error=make_error(INSAMPLE,LENGTH);
-    fprintf(file,"#average out of sample error= %e\n",sqrt(out_error));
+    fprintf(file,"#average out of sample error= %e\n",sqrt(out_error)*std_dev);
   }
 
   if (CAST)

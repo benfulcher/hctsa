@@ -1,7 +1,7 @@
 /*
  *   This file is part of TISEAN
  *
- *   Copyright (c) 1998-2007 Rainer Hegger, Holger Kantz, Thomas Schreiber
+ *   Copyright (c) 1998-2015 Rainer Hegger, Holger Kantz, Thomas Schreiber
  *
  *   TISEAN is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -38,10 +38,10 @@ order fit from a multidimensional time series"
 unsigned int nmax=(NMAX-1);
 long **box,*list;
 unsigned long *found;
-double **series,**diffs;
+double **series,**diffs,*abstand;
 double interval,min,epsilon;
 
-char epsset=0,dimset=0,clengthset=0,causalset=0;
+char epsset=0,dimset=0,clengthset=0,causalset=0,setsort=0;
 char *infile=NULL;
 char *outfile=NULL,stdo=1;
 char *COLUMNS=NULL;
@@ -72,6 +72,7 @@ void show_options(char *progname)
 	  " [default: %lu]\n",refstep);
   fprintf(stderr,"\t-k minimal number of neighbors for the fit "
 	  "[default: %d]\n",MINN);
+  fprintf(stderr,"\t-K fix # of neighbors  [default no]\n");
   fprintf(stderr,"\t-r neighborhoud size to start with "
 	  "[default: (data interval)/1000]\n");
   fprintf(stderr,"\t-f factor to increase size [default: 1.2]\n");
@@ -113,6 +114,8 @@ void scan_options(int n,char **in)
     sscanf(out,"%lu",&refstep);
   if ((out=check_option(in,n,'k','u')) != NULL)
     sscanf(out,"%u",&MINN);
+  if ((out=check_option(in,n,'K','n')) != NULL)
+    setsort=1;
   if ((out=check_option(in,n,'r','f')) != NULL) {
     epsset=1;
     sscanf(out,"%lf",&EPS0);
@@ -132,6 +135,36 @@ void scan_options(int n,char **in)
     if (strlen(out) > 0)
       outfile=out;
   }
+}
+
+void sort(unsigned long nfound,double **x)
+{
+  double dx,dswap;
+  int i,j,k,hf,iswap,hdim;
+
+  hdim=(embed-1)*DELAY;
+
+  for (i=0;i<nfound;i++) {
+    hf=found[i];
+    abstand[i]=0.0;
+    for (j=0;j<dim;j++) {
+      for (k=0;k<=hdim;k += DELAY) {
+	dx=fabs(series[j][hf-k]-x[j][-k]);
+	if (dx > abstand[i]) abstand[i]=dx;
+      }
+    }
+  }
+
+  for (i=0;i<MINN;i++)
+    for (j=i+1;j<nfound;j++)
+      if (abstand[j]<abstand[i]) {
+	dswap=abstand[i];
+	abstand[i]=abstand[j];
+	abstand[j]=dswap;
+	iswap=found[i];
+	found[i]=found[j];
+	found[j]=iswap;
+      }
 }
 
 void make_fit(long act,unsigned long number,long istep,double **error)
@@ -203,6 +236,7 @@ int main(int argc,char **argv)
     series=(double**)get_multi_series(infile,&LENGTH,exclude,&dim,COLUMNS,
 				      dimset,verbosity);
 
+  check_alloc(abstand=(double*)malloc(sizeof(double)*LENGTH));
   check_alloc(hser=(double**)malloc(sizeof(double*)*dim));
   check_alloc(av=(double*)malloc(sizeof(double)*dim));
   check_alloc(rms=(double*)malloc(sizeof(double)*dim));
@@ -260,8 +294,12 @@ int main(int argc,char **argv)
 				       (unsigned int)dim,(unsigned int)embed,
 				       (unsigned int)DELAY,epsilon,hfound);
 	actfound=exclude_interval(actfound,hi-(long)causal+1,
-				  hi+causal+(embed-1)*DELAY-1,hfound,found);	
+				  hi+causal+(embed-1)*DELAY-1,hfound,found);
 	if (actfound >= MINN) {
+	  if (setsort) {
+	    sort(actfound,hser);
+	    actfound=MINN;
+	  }
 	  for (j=1;j<=STEP;j++) {
 	    make_fit(hi,actfound,j,error);
 	  }
@@ -337,6 +375,7 @@ int main(int argc,char **argv)
   free(found);
   free(hfound);
   free(done);
+  free(abstand);
   for (i=0;i<NMAX;i++)
     free(box[i]);
   free(box);
