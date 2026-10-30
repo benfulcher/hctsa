@@ -24,6 +24,8 @@ function TS_Compute(parallelHow,ts_id_range,op_id_range,computeWhat,customFile,h
 % 				ALSO retry any result that previously did not return a good value ('bad')
 % customFile: reads in and writes to a custom output file
 % howVocal:   {'fast','minimal','full'}: how much output to show about the calculation of operations.
+%               [default: 'full', or 'fast' when computing fewer than 30 operations;
+%               true is an alias for 'full' and false for 'fast'.]
 % beVerbose:  [default: false] whether to show text output (fprintf/warning messages)
 % 				generated inside individual Operations, rather than suppressing it.
 % autosaveEvery: how often (seconds) to write partial progress to disk during a
@@ -107,10 +109,19 @@ if nargin < 5 || isempty(customFile)
 end
 
 % Be vocal?
-if nargin < 6
+setVocalDefault = (nargin < 6 || isempty(howVocal));
+if setVocalDefault
     howVocal = 'full'; % Write back full information on all calculations to screen
     % prints every piece of code evaluated (nice for error checking)
+elseif (islogical(howVocal) || isnumeric(howVocal)) && isscalar(howVocal)
+    % Logical alias: true -> 'full', false -> 'fast' (the least output)
+    if howVocal
+        howVocal = 'full';
+    else
+        howVocal = 'fast';
+    end
 end
+howVocal = validatestring(howVocal,{'fast','minimal','full'},'TS_Compute','howVocal');
 
 % Show text output generated inside individual Operations?
 if nargin < 7 || isempty(beVerbose)
@@ -211,7 +222,7 @@ if numTimeSeries==0 || numOps==0
     return
 end
 
-if (nargin < 6) && (numOps < 30)
+if setVocalDefault && (numOps < 30)
     howVocal = 'fast';
 end
 

@@ -67,7 +67,8 @@ function [ifeat,testStat,testStat_rand,featureClassifier,pVals,qVals] = TS_TopFe
 %               as good as the feature) / (1 + number of pooled null statistics),
 %               comparing magnitudes for statistics ranked by magnitude.
 %               Features with NaN statistics get NaN p-values and are not counted as
-%               significant.
+%               significant. The FDR-corrected q-values use mafdr, so numNulls > 0
+%               needs the Bioinformatics Toolbox.
 % 'doParallel' [false], whether to use parfor to speed up the (serial, per-feature)
 %               test-statistic computation across all M features -- speeds up both
 %               the real-data computation and every null shuffle.

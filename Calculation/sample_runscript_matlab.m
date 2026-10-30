@@ -10,7 +10,7 @@ function sample_runscript_matlab(doParallelize,saveIncrement,fileName)
 % fileName, the source of the HCTSA dataset (a .mat file)
 %
 %---EXAMPLE USAGE:
-% sample_runscript_matlab(1,'HCTSA.mat');
+% sample_runscript_matlab(true,5,'HCTSA.mat');
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -57,8 +57,9 @@ end
 [~,TimeSeries,Operations] = TS_LoadData(fileName);
 tsIDs = TimeSeries.ID;
 
-% Set the IDs to compute at each iteration:
-ID_inc = 1:saveIncrement:length(tsIDs)+1;
+% Set the IDs to compute at each iteration (the last block holds any remainder):
+numTimeSeries = length(tsIDs);
+ID_inc = [1:saveIncrement:numTimeSeries,numTimeSeries+1];
 
 % Provide a quick message:
 fprintf(1,['About to calculate across %u time series and %u operations ' ...

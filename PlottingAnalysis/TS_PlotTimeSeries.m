@@ -56,7 +56,7 @@ function TS_PlotTimeSeries(whatData,numPerGroup,whatTimeSeries,maxLength,plotOpt
 % ------------------------------------------------------------------------------
 %% Check Inputs
 % ------------------------------------------------------------------------------
-% Get time-series data from where? ('norm' by default)
+% Get time-series data from where? ('raw' by default)
 if nargin < 1 || isempty(whatData)
     whatData = 'raw';
 end

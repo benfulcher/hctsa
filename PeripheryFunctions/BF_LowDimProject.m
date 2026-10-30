@@ -3,7 +3,7 @@ function [lowDimComponents,componentLabels] = BF_LowDimProject(dataMatrix,whatAl
 %
 %---INPUTS:
 % dataMatrix, matrix of observations x variables
-% whatAlgorithm, the dimensionality reduction algorithm ('pca','tnse')
+% whatAlgorithm, the dimensionality reduction algorithm ('pca','tsne')
 % numComponents, the number of components to use
 % Operations, table detailing the columns of dataMatrix (optional)
 

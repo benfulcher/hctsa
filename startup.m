@@ -145,11 +145,11 @@ if ~isfolder(tiseanBinaryLocation)
     homeDir = regexprep(homeDir,'[\s]',''); % remove whitespace
     tiseanBinaryLocation = fullfile(homeDir,'bin');
 end
-if isempty(regexp(getenv('PATH'),tiseanBinaryLocation,'once'))
+if ~ismember(tiseanBinaryLocation,strsplit(getenv('PATH'),pathsep))
     % Prepend (not append): an older manual install may already sit in
     % ~/bin (e.g., via a generic $HOME/bin PATH entry in .bash_profile
     % unrelated to TISEAN), which must not shadow the locally-built version.
-    sysPath = [tiseanBinaryLocation,':',getenv('PATH')];
+    sysPath = [tiseanBinaryLocation,pathsep,getenv('PATH')];
     setenv('PATH', sysPath)
 end
 
@@ -159,8 +159,8 @@ end
 % ------------------------------------------------------------------------------
 fprintf(1,', ripser\n')
 ripserBinaryLocation = fullfile(hctsaDir,'Toolboxes','ripser','bin');
-if isempty(regexp(getenv('PATH'),ripserBinaryLocation,'once'))
-    sysPath = [ripserBinaryLocation,':',getenv('PATH')];
+if ~ismember(ripserBinaryLocation,strsplit(getenv('PATH'),pathsep))
+    sysPath = [ripserBinaryLocation,pathsep,getenv('PATH')];
     setenv('PATH', sysPath)
 end
 

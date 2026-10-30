@@ -94,7 +94,7 @@ parse(inputP,varargin{:});
 
 % Additional checks:
 if strcmp(inputP.Results.whatData,'cl')
-    error('Using clustered permutations of data not suppored');
+    error('Using clustered permutations of data not supported');
 end
 
 % Make variables from results of input parser:
@@ -321,6 +321,8 @@ if any(ismember('matrix',whatPlots))
     % Do a quick cluster of distance matrix using euclidean distances
     % (just for visualization):
     ord = BF_ClusterReorder(Dij,'euclidean','average');
+    % BF_ClusterReorder leaves out items with NaN distances; show them at the end:
+    ord = [ord(:);setdiff((1:numNeighbors+1)',ord(:))];
     Dij_clust = Dij(ord,ord);
     dataTable_clust = dataTable(neighborInd(ord),:);
 
