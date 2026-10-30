@@ -1,0 +1,55 @@
+<html>
+<head><title>Gaussian kernel correlation integral</title></head>
+<body bgcolor="#ffffff">
+<h3><a name="c2g"></a>Gaussian kernel correlation integral</h3>
+<font color=blue><tt>c2g [-o </tt><em>outfile</em><tt> -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_g</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Reads two columns, r, c(r) from <font color=blue><em>file</em></font> 
+(correlation integral output of 
+<a href="c2naive.html">c2naive</a> or
+<a href="../docs_c/d2.html">d2</a> (extension <b>.c2</b>)
+and computes the <a href="../chaospaper/node32.html">Gaussian kernel</a> 
+correlation integral
+<pre>
+               
+              /00            2
+          1   |        /    x   \
+ C (r) = ---  | dx exp |- ----- | x C(x)
+  G        2  |        \     2  /
+          r   /0           2r
+             
+</pre>
+As well as its logarithmic derivative with respect to r:
+<pre>
+
+            d
+ D (r) = ------- log C (r)
+  G      d log r      G
+
+</pre>
+<b><font color=red>Note:</font></b> The length scale has been shifted by
+2<sup>1/2</sup> with respect to the manual: r<sup>2</sup>=2<IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="epsilon.gif"><sup>2</sup>.
+<p>
+Between the given values of r, C(r) is interpolated by an exact power law and
+the integral is evaluated numerically. Above the largest given value of r,
+C(r)=1 is assumed and the corresponding integral is evaluated analytically.
+The derivative is carried out analytically on the above expression and the
+resulting integral is evaluated in the same manner as described.
+<p>
+Output is to <font color=blue><tt>stdout</tt></font>, or to 
+file <font color=blue><em>file</em><tt>_g</tt></font> if 
+<font color=blue><tt> -o</tt></font> is given. The first column contains
+r, the second the Gaussian kernel correlation integral C<sub>G</sub>(r) and 
+the third its
+logarithmic derivative D<sub>G</sub>(r).
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+
+
+

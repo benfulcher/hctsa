@@ -1,0 +1,55 @@
+<html> 
+<head><title>Surrogate data testing</title></head>
+<body bgcolor="#ffffff">
+<h3>Surrogate data testing</h3>
+A simple (one sided) surrogate data test for data in file <font color=blue><em>file</em></font>, using
+a prediction error statistic, can be made with a sequence of commands similar 
+to the following. First select a sub-sequence without large endpoint effect:
+<blockquote>
+      <tt>&gt;</tt><font color=blue><tt> endtoend </tt> <em>file</em></font>
+</blockquote>
+Suppose, the full data of length 1000 gave a 17% end effect, but a truncated 
+length of 972 and offset 80 the effect was reduced to 0.2%. To choose that
+sub-sequence: 
+<blockquote>
+      <tt>&gt;</tt><font color=blue><tt> choose -o selected.dat -x80 -l972 </tt> <em>file</em></font>
+</blockquote>
+Here is the actual test:
+<blockquote>
+      <tt>&gt;</tt><font color=blue><tt> surrogates -o -n19 selected.dat</tt></font>
+  <br><tt>&gt;</tt><font color=blue><tt> predict -o -d1 -m3 -v0.1 
+      selected.dat selected.dat_surr_??? | sort -nr</tt></font>
+</blockquote>
+If the line of output corresponding to 
+<font color=blue><tt>selected.dat</tt></font> 
+is the last, the null
+hypothesis of a stationary, possibly rescaled, linear Gaussian random process
+may be rejected at the 95% level of significance, since the prediction error of
+the data is found to be smaller than that of the surrogates.
+<p>
+Or for a two sided test using time reversal symmetry statistic:
+<blockquote>
+      <tt>&gt;</tt><font color=blue><tt> surrogates -n39 selected.dat</tt></font>
+  <br><tt>&gt;</tt><font color=blue><tt> timerev -d1 
+      selected.dat selected.dat_surr_??? | sort -nr</tt></font>
+</blockquote>
+If the line of output corresponding to  
+<font color=blue><tt>selected.dat</tt></font> 
+is the last <font color=red>or</font>
+the first, the null hypothesis of a stationary, possibly rescaled, linear
+Gaussian random process may be rejected at the 95% level of significance, since
+the time asymmetry of the data is found to be significantly different from 
+that of the surrogates.
+<p>
+Test statistics can be derived from many of the programs given, including
+prediction errors (<a href="predict.html">predict</a>), third order statistics
+(<a href="timerev.html">timerev</a>),
+correlation sums (<a href="c2.html">c2</a>), as well as unstable periodic
+orbits (<a href="upo.html">upo</a>).
+<p>
+Surrogate data are made by <a href="surrogates.html">surrogates</a>, or by a
+version of <a href="randomize.html">randomize</a>.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

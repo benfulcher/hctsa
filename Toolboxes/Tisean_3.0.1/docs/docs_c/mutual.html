@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>
+mutual
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>mutual
+</font>
+</h1>
+<hr>
+Estimates the time delayed mutual information of the data. It is the simplest
+possible realization. It uses a fixed mesh of boxes.<br>
+No finite sample corrections are implemented so far.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>mutual [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-b#
+<td>number of boxes for the partition
+<td>16
+</tr>
+<tr>
+<th>-D#
+<td>maximal time delay
+<td>20
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without name given: 'datafile'.mut<br>
+(or stdin.mut if data were read from stdin)<br>
+without -o results are written to stdout.
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The first line contains the number of occupied boxes,
+the second one the shannon entropy (normalized to the number of
+occupied boxes),
+the last <font color=blue>D</font> lines the mutual information (first
+column: delay, second column: mutual information).
+<hr>
+View the <a href="../../source_c/mutual.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

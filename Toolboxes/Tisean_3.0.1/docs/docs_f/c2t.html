@@ -1,0 +1,35 @@
+<html>
+<head><title>Maximum likelihood estimator from correlation sums</title></head>
+<body bgcolor="#ffffff">
+<h3><a name="c2d"></a>Maximum likelihood estimator from correlation sums</h3>
+<font color=blue><tt>c2t [-o </tt><em>outfile</em><tt> -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_t</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Reads two columns, r, c(r) from <font color=blue><em>file</em></font> 
+(correlation integral output of 
+<a href="c2naive.html">c2naive</a>,
+<a href="c1.html">c1</a>,
+or <a href="../docs_c/d2.html">d2</a>)
+and computes a maximum likelihood estimator (<a href="../chaospaper/node31.html">Takens' estimator</a>) 
+<pre>
+
+             C(r)
+ D (r) = ------------
+  T       /r    C(x)
+          |  dx ----
+          /0     x
+
+</pre>
+as a function of the upper cutoff length scale. The integral is computed from
+the discrete values of C(r) by assuming an exact power law between the
+available points. Output is to <font color=blue><tt>stdout</tt></font>, or to 
+file <font color=blue><em>file</em><tt>_t</tt></font> if 
+<font color=blue><tt> -o</tt></font> is given.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

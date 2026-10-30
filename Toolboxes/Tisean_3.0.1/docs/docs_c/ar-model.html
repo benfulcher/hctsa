@@ -1,0 +1,110 @@
+<html>
+<head>
+<title>
+AR-Model
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>ar-model
+</font>
+</h1>
+<hr>
+This program fits (by means of least squares) a simple autoregressive
+(AR) model to the possibly
+multivariate data. The model is given by the equation
+<center>
+<img src="ar-model-eq1.gif"></img>
+</center>
+The matrices <b>A<sup>i</sup></b> are determined by the program.<br>
+The output file contains the coefficients of the model and the
+residuals.  Note that now the mean is subtracted first, conforming
+with common practice.  If you want to run the resulting model to
+generate a time series, you can either use the <b>-s</b> flag of the
+program or pipe the output to <a
+href="../docs_f/ar-run.html">ar-run</a>. Note that no attempt has 
+been made to generate a <em>stable</em> model.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>ar-model [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-m#
+<td>dimension of the vectors
+<td>1
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1,...,dimension of the vectors
+</tr>
+<tr>
+<th>-p#
+<td>order of the model
+<td>5
+</tr>
+<tr>
+<th>-s#
+<td>iterate s steps of the model
+<td>no iteration
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.ar<br>
+(or stdin.ar if stdin was used)<br>
+if no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: print residuals though iterating a model
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The first line just contains the average forecast errors of the model
+for each component of the vector <b>x</b>, the
+next <font color=blue>p*(dimension of the vectors)</font> lines
+contain the AR coefficients for each of the components.
+The rest of the file are the individual errors (residuals) or a
+iterated time series depending on the flag <b>-s</b>.
+<hr>
+View the <a href="../../source_c/ar-model.c">C-sources</a>
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>
+
+
+
+

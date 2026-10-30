@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Takens-Theiler estimator</TITLE>
+<META NAME="description" CONTENT="Takens-Theiler estimator">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html391" HREF="node32.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html389" HREF="node30.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html383" HREF="node30.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html392" HREF="node32.html">Gaussian kernel correlation integral</A>
+<B>Up:</B> <A NAME="tex2html390" HREF="node30.html">Correlation dimension</A>
+<B> Previous:</B> <A NAME="tex2html384" HREF="node30.html">Correlation dimension</A>
+<BR> <P>
+<H3><A NAME="SECTION00081100000000000000">Takens-Theiler estimator</A></H3>
+<P>
+Convergence to a finite correlation dimension can be checked by plotting scale
+dependent ``effective dimensions'' versus length scale for various
+embeddings. The easiest way to proceed is to compute (numerically) the
+derivative of <IMG WIDTH=74 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7627" SRC="img144.gif"> with respect to <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7629" SRC="img145.gif">, for example
+by fitting straight lines to the log-log plot of <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif">.  In
+Fig.&nbsp;<A HREF="node32.html#figdim2"><IMG  ALIGN=BOTTOM ALT="gif"
+SRC="icons/cross_ref_motif.gif"></A>&nbsp;<B>(a)</B>
+we see the output of the routine <a href="../docs_f/c2.html">c2</a> acting
+on data from the NMR laser, processed by <a href="../docs_f/c2d.html">c2d</a> in order to obtain local
+slopes.  By default, straight lines are fitted over one octave in <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">,
+larger ranges give smoother results. We can see that on the large scales,
+self-similarity is broken due to the finite extension of the attractor, and on
+small but yet statistically significant scales we see the embedding dimension
+instead of a saturated, <I>m</I>-independent value. This is the effect of noise,
+which is infinite dimensional, and thus fills a volume in every embedding
+space. Only on the intermediate scales we see the desired <EM>plateau</EM> where
+the results are in good approximation independent of <I>m</I> and <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">. The
+region where scaling is <EM>established</EM>, not just the range selected for
+straight line fitting, is called the <EM>scaling range</EM>.
+<P>
+Since the statistical fluctuations in plots like Fig.&nbsp;<A HREF="node32.html#figdim2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>&nbsp;<B>(a)</B>
+show characteristic (anti-)correlations, it has been
+suggested&nbsp;[<A HREF="citation.html#takens_est">78</A>, <A HREF="citation.html#takens_theiler">79</A>] to apply a maximum likelihood
+estimator to obtain optimal values for <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7567" SRC="img133.gif">.  The Takens-Theiler-estimator
+reads
+<BR><A NAME="eqd2t">&#160;</A><IMG WIDTH=500 HEIGHT=43 ALIGN=BOTTOM ALT="equation5753" SRC="img146.gif"><BR>
+and can be obtained by processing the output of <a
+href="../docs_f/c2.html">c2</a> by <a href="../docs_f/c2t.html">c2t</a>. Since
+<IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif"> is available only at discrete values
+<IMG WIDTH=111 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7645" SRC="img147.gif">, we 
+interpolate it by a pure power law (or, equivalently, the log-log plot by
+straight lines: <IMG WIDTH=152 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7647" SRC="img148.gif">) in between these. The 
+resulting integrals can be solved
+trivially and summed: 
+<BR><IMG WIDTH=500 HEIGHT=102 ALIGN=BOTTOM ALT="eqnarray5757" SRC="img149.gif"><BR>
+Plotting <IMG WIDTH=31 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7649" SRC="img150.gif"> versus <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> (Fig.&nbsp;<A HREF="node32.html#figdim2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>
+<B>(b)</B>) is an interesting alternative to the usual local slopes plot,
+Fig.&nbsp;<A HREF="node32.html#figdim2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>&nbsp;<B>(a)</B>. It is tempting to use such an ``estimator of
+dimension'' as a black box to provide a number one might quote as a dimension.
+This would imply the unjustified assumption that all deviations from exact
+scaling behavior is due to the statistical fluctuations. Instead, one still has
+to verify the existence of a scaling regime. Only then, <IMG WIDTH=50 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7653" SRC="img151.gif"> evaluated at the upper end of the scaling range is a reasonable
+dimension estimator.
+<P>
+<HR><A NAME="tex2html391" HREF="node32.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html389" HREF="node30.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html383" HREF="node30.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html392" HREF="node32.html">Gaussian kernel correlation integral</A>
+<B>Up:</B> <A NAME="tex2html390" HREF="node30.html">Correlation dimension</A>
+<B> Previous:</B> <A NAME="tex2html384" HREF="node30.html">Correlation dimension</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

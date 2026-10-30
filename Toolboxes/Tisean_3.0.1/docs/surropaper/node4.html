@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Phase space observables</TITLE>
+<META NAME="description" CONTENT="Phase space observables">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html105" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html103" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html99" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html106" HREF="node5.html">Surrogate data testing</A>
+<B>Up:</B> <A NAME="tex2html104" HREF="node2.html">Detecting weak nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html100" HREF="node3.html">Higher order statistics</A>
+<BR> <P>
+<H2><A NAME="SECTION00022000000000000000">Phase space observables</A></H2>
+<P>
+When a nonlinearity test is performed with the question in mind if nonlinear
+deterministic modeling of the signal may be useful, it seems most appropriate
+to use a test statistic that is related to a nonlinear deterministic approach.
+We have to keep in mind, however, that a positive test result only indicates
+nonlinearity, not necessarily determinism. Since nonlinearity tests are usually
+performed on data sets which do not show unambiguous signatures of
+low-dimensional determinism (like clear scaling over several orders of
+magnitude), one cannot simply estimate one of the quantitative indicators of
+chaos, like the fractal dimension or the Lyapunov exponent. The formal answer
+would almost always be that both are probably infinite. Still, some useful test
+statistics are at least inspired by these quantities. Usually, some effective
+value at a finite length scale has to be computed without establishing scaling
+region or attempting to approximate the proper limits.
+<P>
+In order to define an observable in <I>m</I>-dimensional phase space, we first have
+to reconstruct that space from a scalar time series, for example by the method
+of delays:
+<BR><A NAME="eqdelay">&#160;</A><IMG WIDTH=500 HEIGHT=18 ALIGN=BOTTOM ALT="equation1023" SRC="img9.gif"><BR>
+One of the more robust choices of phase space observable is a nonlinear
+prediction error with respect to a locally constant predictor
+<I>F</I> that can be defined by
+<BR><A NAME="eqerror">&#160;</A><IMG WIDTH=500 HEIGHT=43 ALIGN=BOTTOM ALT="equation1025" SRC="img10.gif"><BR>
+The prediction over one time step is performed by averaging over the future
+values of all neighbouring delay vectors closer than <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1920" SRC="img11.gif"> in <I>m</I>
+dimensions.
+<P>
+We have to consider the limiting case that the deterministic signature to be
+detected is weak. In that case, the major limiting factor for the performance
+of a statistical indicator is its variance since possible differences between
+two samples may be hidden among the statistical fluctuations. In
+Ref.&nbsp;[<A HREF="node36.html#power">13</A>], a number of popular measures of nonlinearity are compared
+quantitatively. The results can be summarised by stating that in the presence
+of time-reversal asymmetry, the particular quantity Eq.(<A HREF="node3.html#eqskew">3</A>) that
+derives from the three-point autocorrelation function gives very reliable
+results. However, many nonlinear evolution equations produce little or no
+time-reversal asymmetry in the statistical properties of the signal. In these
+cases, simple measures like a prediction error of a locally constant phase
+space predictor, Eq.(<A HREF="node4.html#eqerror">5</A>), performed best.  It was found to be
+advantageous to choose embedding and other parameters in order to obtain a
+quantity that has a small spread of values for different realisations of the
+same process, even if at these parameters no valid embedding could be expected.
+<P>
+Of course, prediction errors are not the only class of nonlinearity measures
+that has been optimised for robustness. Notable other examples are
+coarse-grained redundancies&nbsp;[<A HREF="node36.html#milan2">14</A>, <A HREF="node36.html#pompe">15</A>, <A HREF="node36.html#pt">16</A>], and, at an even higher
+level of coarse-graining, symbolic methods&nbsp;[<A HREF="node36.html#hao">17</A>]. The very popular method
+of <EM>false nearest neighbours</EM>&nbsp;[<A HREF="node36.html#FNN">18</A>] can be easily modified to yield a
+scalar quantity suitable for nonlinearity testing. The same is true for the
+concept of <EM>unstable periodic orbits</EM> (UPOs)&nbsp;[<A HREF="node36.html#PM">19</A>, <A HREF="node36.html#soso">20</A>].
+<P>
+<HR><A NAME="tex2html105" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html103" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html99" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html106" HREF="node5.html">Surrogate data testing</A>
+<B>Up:</B> <A NAME="tex2html104" HREF="node2.html">Detecting weak nonlinearity</A>
+<B> Previous:</B> <A NAME="tex2html100" HREF="node3.html">Higher order statistics</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

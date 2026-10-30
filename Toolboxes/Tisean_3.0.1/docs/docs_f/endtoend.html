@@ -1,0 +1,67 @@
+<html> 
+<head><title>Determine end-to-end mismatch before making surrogate data</title></head>
+<body bgcolor="#ffffff">
+<h3>Determine end-to-end mismatch before making surrogate data</h3>
+<font color=blue><tt>endtoend [-o </tt><em>outfile</em><tt> -l# -x# -m# -c#[,#]
+-V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_end</tt></font>
+   <br> 	<font color=blue><tt> -l  </tt></font>number of points (whole file)
+   <br> 	<font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br> 	<font color=blue><tt> -m  </tt></font>number of <a href=../general.html#columns>columns to be read</a> (1)
+   <br> 	<font color=blue><tt> -c  </tt></font><a href=../general.html#columns>columns to be read</a> (1)
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br> 	<font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Determine the effect of an end-to-end mismatch on the autocorrelation
+structure for various sub-sequence lenths. It is important to avoid <a href="../surropaper/node14.html">jumps and
+phase slips</a> that occur when the data is periodically continued when making
+Fourier based surrogates, e.g. with <a href="surrogates.html">surrogates</a>.
+<p>
+The mismatch in value is <a href="../surropaper/node34.html#endtoend">measured</a> by 
+<pre>
+          /           \ 2
+          | x(1)-x(N) |
+          \           /
+d     = __________________
+ jump     __
+         \   /      _ \ 2
+          |  | x(n)-x | 
+         /__ \        /
+        
+</pre>
+and the phase slip by
+<pre>
+         /                           \ 2
+         | (x(2)-x(1))-(x(N)-x(N-1)) |
+         \                           /
+d     = _________________________________
+ slip     	  __                         .
+          	 \   /      _ \ 2
+          	  |  | x(n)-x | 
+          	 /__ \        /
+        	
+</pre>
+The weighted mismatch is then 
+<pre>
+      j*d     + (1-j)*d     .
+         jump          slip
+</pre>
+In the multivariate case, the values of d are computed for each channel
+seperately and then averaged.
+<p>
+The sub-sequence length is successively decreased, only considering lengths
+which can be factorized with factors 2, 3 and 5 (that is what <a
+href="surrogates.html">surrogates</a> can handle). For each length, the optimal
+time offset is determined and a result is printed whenever an improvement was
+found. You can then use the <font color=blue><tt> -x </tt></font> and 
+<font color=blue><tt> -l </tt></font> options to <a href="choose.html">choose</a> that sub-sequence for 
+<a href="surrogates.html">surrogates</a>.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+
+
+
+

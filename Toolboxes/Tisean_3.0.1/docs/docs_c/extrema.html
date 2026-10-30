@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>
+extrema
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>extrema
+</font>
+</h1>
+<hr>
+This program determines the maxima (minima) of one component of a
+possibly multivariate time series. This
+corresponds to a <a href="../chaospaper/node11.html">Poincar&eacute; section</a>
+ at the zeros of the derivative.
+To get a better estimate of the extremum, a quadratic interpolation is done.
+<p>
+<font color=red><b>Note:</b></font> Very sensitive to noise!
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>extrema [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-m#
+<td># of components
+<td>1
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1,...,# of components
+</tr>
+<tr>
+<th>-w#
+<td>which components to maxi(mini)mize
+<td>1
+</tr>
+<tr>
+<th>-z
+<td>determine minima instead of maxima
+<td>maxima
+</tr>
+<tr>
+<th>-t#
+<td>minimal time required between two extrema
+<td>0.0
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.ext<br>
+(or stdin.ext if data were read from stdin)<br>
+if no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output consists of m+1 columns:
+<ul>
+<li>First m columns: The position of the extrema</li>
+<li>Last column: The time between the last two extrema</li>
+</ul>
+Note that the time given for the first extremum (the first row in the
+output file) is the absolute time from the start of the time series
+(t=0) to the first extremum.
+<hr>
+View the <a href="../../source_c/extrema.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

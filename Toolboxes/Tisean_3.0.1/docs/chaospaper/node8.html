@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Mutual information</TITLE>
+<META NAME="description" CONTENT="Mutual information">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html154" HREF="node9.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html152" HREF="node7.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html146" HREF="node7.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html155" HREF="node9.html">False nearest neighbors</A>
+<B>Up:</B> <A NAME="tex2html153" HREF="node7.html">Embedding parameters</A>
+<B> Previous:</B> <A NAME="tex2html147" HREF="node7.html">Embedding parameters</A>
+<BR> <P>
+<H3><A NAME="SECTION00032100000000000000">Mutual information</A></H3>
+<P>
+The time delayed mutual information was suggested by Fraser and
+Swinney&nbsp;[<A HREF="citation.html#fraser">25</A>] as a tool to determine a reasonable delay: Unlike the
+autocorrelation function, the mutual information takes into account also
+nonlinear correlations. One has to compute
+<BR><A NAME="eqdelaymutual">&#160;</A><IMG WIDTH=500 HEIGHT=45 ALIGN=BOTTOM ALT="equation4425" SRC="img19.gif"><BR> 
+where for some partition on the real numbers <IMG WIDTH=13 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6569" SRC="img20.gif"> is the probability to find
+a time series value in the <I>i</I>-th interval, and <IMG WIDTH=40 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline6573" SRC="img21.gif"> is the joint
+probability that an observation falls into the <I>i</I>-th interval and the
+observation time <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif"> later falls into the <I>j</I>-th. In theory this expression
+has no systematic dependence on the size of the partition elements and can be
+quite easily computed. There exist good arguments that if the time delayed
+mutual information exhibits a marked minimum at a certain value of <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">,
+then this is a good candidate for a reasonable time delay. However, these
+arguments have to be modified when the embedding dimension exceeds two.
+Moreover, as will become transparent in the following sections, not all
+applications work optimally with the same delay. Our routine <a href="../docs_c/mutual.html">mutual</a> uses
+Eq.(<A HREF="node8.html#eqdelaymutual"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>), where the number of boxes of identical size and
+the maximal delay time has to be supplied. The adaptive algorithm used
+in&nbsp;[<A HREF="citation.html#fraser">25</A>] is more data intensive. Since we are not really interested in
+absolute values of the mutual information here but rather in the first
+minimum, the minimal implementation given here seems to be sufficient. The
+related generalized mutual information of order two can be defined using the
+correlation sum concept (Sec.<A HREF="node29.html#secdimension"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>, [<A HREF="citation.html#pompe">26</A>, <A HREF="citation.html#milan">27</A>]).
+Estimation of the correlation entropy is explained in Sec.<A HREF="node30.html#secdimc2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>.
+<P><HR><A NAME="tex2html154" HREF="node9.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html152" HREF="node7.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html146" HREF="node7.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html155" HREF="node9.html">False nearest neighbors</A>
+<B>Up:</B> <A NAME="tex2html153" HREF="node7.html">Embedding parameters</A>
+<B> Previous:</B> <A NAME="tex2html147" HREF="node7.html">Embedding parameters</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

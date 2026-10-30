@@ -1,0 +1,90 @@
+<html>
+<head>
+<title>
+low121
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>low121
+</font>
+</h1>
+<hr>
+This program applies a simple low pass filter in the time
+domain. The filter works as follows:<br>
+<font color=blue>
+x'<sub>n</sub>=(x<sub>n-1</sub>+2x<sub>n</sub>+x<sub>n+1</sub>)/4
+</font>
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>low121 [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-i#
+<td>number of iterations
+<td>1
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a> (0: only save the last iteration<br>
+otherwise: save all iterations)
+<td>otherwise
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>'datafile'.low.n, where n is the iteration<br>
+(or stdin.low.n if stdin was read)<br>
+without -o the last iteration is <b>also</b> written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: print each iteration to a separate file
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+Depending on the the <font color=blue>-V</font> flag one or more files
+are produced. Each of the files contains one column, consisting of the
+filtered time series.
+<hr>
+View the <a href="../../source_c/low121.c">C-sources</a>
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>The causality window</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>The meaning of the causality window</h1>
+This parameter is relevant for programs which estimate the forecast
+errors for a given model. Suppose one wants to forecast the element
+n<sub>j</sub> of a time series. Since one implicitly supposes that this
+element is unknown, one should not use any information about this
+element to build the model. Therefore one should exclude all delay
+vectors containing this element from the model building process. This
+is realized by the routine <a
+href="../../source_c/routines/exclude_interval.c">exclude_interval</a>.<br>
+
+This exclusion of parts of the vectors from the model building process
+can be a severe problem if one doesn't do a one-step forecast, but a
+n-step forecast, with n large. In this case one has to exclude a large
+part of the data (roughly 2*n) and it could happen that the rest of
+the data is not sufficient for a reasonable model creation. By means
+of the <font color=blue>-C</font> flag one can therefore shorten this
+window. Setting the parameter to zero corresponds to a window of a
+one-step forecast.<br>
+<center><font color=red>Change this parameter only if you really know
+what you are doing!</font> </center>
+
+
+
+</body>
+</html>

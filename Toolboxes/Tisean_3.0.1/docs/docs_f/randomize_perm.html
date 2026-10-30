@@ -1,0 +1,50 @@
+<html> 
+<head><title>Permutation schemes</title></head>
+<body bgcolor="#ffffff">
+<h3>Permutation schemes</h3>
+
+The <a href="randomize_extend.html">extendable</a> family of routines for the
+generation of annealed surrogate data can accomodate different permutation
+schemes. In this version, the most important module implements the exchange of
+randomly chosen pairs. An (yet unimplemented) alternative is, at lower
+temperatures,  to select pairs of comparable magnitudes in order to increase
+the acceptance rate.
+
+<p>For the particulat purpose of generating series of inter-event intervals, it
+may be computationally better to exchange two adjacent intervals only, since in
+that case only one event time changes.
+
+<h4>Random pairs</h4>
+<p>
+<font
+color=blue><tt>randomize_</tt><em>cost</em><tt>_</tt><em>cool</em><tt>_</tt><font
+color=red><tt>random</tt></font><tt> [-X </tt><em>xfile</em><tt>]
+[</tt><em>general options</em><tt>] [</tt><em>cost function options</em><tt>] [</tt><em>cooling options</em><tt>] </tt><em>file</em></font>
+<blockquote>
+     <font color=blue><tt> -X </tt><em>xfile</em></font>
+   file containing list of indices excluded from permutation
+</blockquote>
+At each annealing step, one pair of values is exchanged. Here, two disjoint
+indices are selected at random. It is possible to specify a list of indices
+which shall be excluded from permutations. This can be useful if the data has
+artefacts (e.g. zeroed gaps) and if the boundary points are to be kept fixed.
+The file <font color=blue><em>xfile</em></font> is expected to contain one
+(integer) index per line.
+<p>
+
+<h4>Adjacent intervals</h4>
+<p>
+<font
+color=blue><tt>randomize_</tt><em>cost</em><tt>_</tt><em>cool</em><tt>_</tt><font
+color=red><tt>event</tt></font><tt> 
+[</tt><em>general options</em><tt>] [</tt><em>cost function options</em><tt>] [</tt><em>cooling options</em><tt>] </tt><em>file</em></font>
+<p>
+At each annealing step, one adjacent pair of inter-event intervals is 
+exchanged. That is, one event time selected at random is changed.
+Note that the first and last events are always ket fixed.
+<p>
+
+<a href="randomize.html"><em>constrained randomization</em></a> *
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

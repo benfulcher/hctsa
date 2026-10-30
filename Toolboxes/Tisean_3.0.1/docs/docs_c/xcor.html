@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>
+xcor
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>xcor
+</font>
+</h1>
+<hr>
+This program computes the cross correlations between two time series,
+given as two columns of ONE datafile. 
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>xcor [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#columns>columns to be read</a> (numbers have to be separated by commas)
+<td>1,2
+</tr>
+<tr>
+<th>-D#
+<td>number of correlations
+<td>100
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a><br>
+<td>without file name: 'datafile'.cor<br>
+(or stdin.cor if stdin was read)<br>
+If no -o option is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+The first four lines contain the average and the standard deviation of
+the two data sets. The last lines are the crosscorrelations:
+&#60;x<sub>t</sub>*y<sub>t+d</sub>&#62; devided by the standard
+deviations of both data sets. d ranges from <font color=blue>-D</font>
+to <font color=blue>D</font>.
+<hr>
+View the <a href="../../source_c/xcor.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

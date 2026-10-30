@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Dimensions and entropies</TITLE>
+<META NAME="description" CONTENT="Dimensions and entropies">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html364" HREF="node30.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html362" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html356" HREF="node28.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html365" HREF="node30.html">Correlation dimension</A>
+<B>Up:</B> <A NAME="tex2html363" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html357" HREF="node28.html">The Lyapunov spectrum</A>
+<BR> <P>
+<H1><A NAME="SECTION00080000000000000000">Dimensions and entropies</A></H1>
+<A NAME="secdimension">&#160;</A>
+Solutions of dissipative dynamical systems cannot fill a volume of the phase
+space, since dissipation is synonymous with a contraction of volume elements
+under the action of the equations of motion. Instead, trajectories are confined
+to lower dimensional subsets which have measure zero in the phase space. These
+subsets can be extremely complicated, and frequently they possess a fractal
+structure, which means that they are in a nontrivial way
+self-similar. Generalized dimensions are one class of quantities to
+characterize this fractality. The <EM>Hausdorff dimension</EM> is, from the
+mathematical point of view, the most natural concept to characterize fractal
+sets&nbsp;[<A HREF="citation.html#EckRuelle">67</A>], whereas the <EM>information dimension</EM> takes into
+account the relative visitation frequencies and is therefore more attractive for
+physical systems. Finally, for the characterization of measured data, other
+similar concepts, like the <EM>correlation dimension</EM>, are more useful. One
+general remark is highly relevant in order to understand the limitations of any
+numerical approach: dimensions characterize a set or an invariant measure whose
+support is the set, whereas any data set contains only a finite number of
+points representing the set or the measure. By definition, the dimension of a
+finite set of points is zero. When we determine the dimension of an attractor
+numerically, we extrapolate from finite length scales, where the statistics we
+apply is insensitive to the finiteness of the number of data, to the
+infinitesimal scales, where the concept of dimensions is defined. This
+extrapolation can fail for many reasons which will be partly discussed
+below. Dimensions are invariant under smooth transformations and thus again
+computable in time delay embedding spaces.
+<P>
+Entropies are an information theoretical concept to characterize the amount of
+information needed to predict the next measurement with a certain
+precision. The most popular one is the Kolmogorov-Sinai entropy. We will
+discuss here only the correlation entropy, which can be computed in a much more
+robust way. The occurrence of entropies in a section on dimensions has to do
+with the fact that they can be determined both by the same statistical tool.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html366" HREF="node30.html#SECTION00081000000000000000">Correlation dimension</A>
+<UL>
+<LI> <A NAME="tex2html367" HREF="node31.html#SECTION00081100000000000000">Takens-Theiler estimator</A>
+<LI> <A NAME="tex2html368" HREF="node32.html#SECTION00081200000000000000">Gaussian kernel correlation integral</A>
+</UL> 
+<LI> <A NAME="tex2html369" HREF="node33.html#SECTION00082000000000000000">Information dimension</A>
+<UL>
+<LI> <A NAME="tex2html370" HREF="node34.html#SECTION00082100000000000000">Entropy estimates</A>
+</UL>
+</UL>
+<HR><A NAME="tex2html364" HREF="node30.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html362" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html356" HREF="node28.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html365" HREF="node30.html">Correlation dimension</A>
+<B>Up:</B> <A NAME="tex2html363" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html357" HREF="node28.html">The Lyapunov spectrum</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

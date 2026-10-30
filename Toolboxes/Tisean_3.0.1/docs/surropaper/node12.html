@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Iteratively refined surrogates</TITLE>
+<META NAME="description" CONTENT="Iteratively refined surrogates">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html192" HREF="node13.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html190" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html184" HREF="node11.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html193" HREF="node13.html">Example: Southern oscillation index</A>
+<B>Up:</B> <A NAME="tex2html191" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html185" HREF="node11.html">Flatness bias of AAFT </A>
+<BR> <P>
+<H2><A NAME="SECTION00043000000000000000">Iteratively refined surrogates</A></H2>
+<A NAME="seciterative">&#160;</A>
+In Ref.&nbsp;[<A HREF="node36.html#surrowe">30</A>], we propose a method which iteratively corrects
+deviations in spectrum and distribution from the goal set by the measured
+data. In an alternating fashion, the surrogate is filtered towards the correct
+Fourier amplitudes and rank-ordered to the correct distribution.
+<P>
+Let <IMG WIDTH=47 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2008" SRC="img34.gif"> be the Fourier amplitudes, Eq.(<A HREF="node9.html#eqpgram">7</A>), of the
+data and <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2010" SRC="img35.gif"> a copy of the data sorted by magnitude in ascending order.
+At each iteration stage (<I>i</I>), we have a sequence <IMG WIDTH=36 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2014" SRC="img36.gif">
+that has the correct distribution (coincides with <IMG WIDTH=28 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2010" SRC="img35.gif"> when sorted), and a
+sequence <IMG WIDTH=36 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2018" SRC="img37.gif"> that has the correct Fourier amplitudes
+given by <IMG WIDTH=47 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2008" SRC="img34.gif">.  One can start with <IMG WIDTH=38 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2022" SRC="img38.gif">
+being either an AAFT surrogate, or simply a random shuffle of the data.
+<P>
+The step <IMG WIDTH=68 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2024" SRC="img39.gif"> is a very crude
+``filter'' in the Fourier domain: The Fourier amplitudes are simply <EM>
+replaced</EM> by the desired ones. First, take the (discrete) Fourier transform of
+<IMG WIDTH=36 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2014" SRC="img36.gif">:
+<BR><IMG WIDTH=500 HEIGHT=46 ALIGN=BOTTOM ALT="equation1038" SRC="img40.gif"><BR>
+Then transform back, replacing the actual amplitudes by the desired ones, but
+keeping the phases <IMG WIDTH=126 HEIGHT=38 ALIGN=MIDDLE ALT="tex2html_wrap_inline2028" SRC="img41.gif">:
+<BR><A NAME="eqstep1">&#160;</A><IMG WIDTH=500 HEIGHT=47 ALIGN=BOTTOM ALT="equation1040" SRC="img42.gif"><BR>
+The step <IMG WIDTH=84 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2030" SRC="img43.gif"> proceeds by rank
+ordering:
+<BR><A NAME="eqstep2">&#160;</A><IMG WIDTH=500 HEIGHT=25 ALIGN=BOTTOM ALT="equation1042" SRC="img44.gif"><BR>
+It can be heuristically understood that the iteration scheme is attracted to a
+fixed point <IMG WIDTH=81 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2032" SRC="img45.gif"> for large
+(<I>i</I>). Since the minimal possible change equals to the smallest nonzero
+difference <IMG WIDTH=64 HEIGHT=13 ALIGN=MIDDLE ALT="tex2html_wrap_inline2036" SRC="img46.gif"> and is therefore finite for finite <I>N</I>, the fixed
+point is reached after a finite number of iterations. The remaining discrepancy
+between <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif"> and <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2042" SRC="img48.gif"> can be
+taken as a measure of the accuracy of the method. Whether the residual bias in
+<IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif"> or <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2042" SRC="img48.gif"> is more tolerable
+depends on the data and the nonlinearity measure to be used. For coarsely
+digitised data,<A NAME="tex2html6" HREF="footnode.html#220"><IMG  ALIGN=BOTTOM ALT="gif" SRC="foot_motif.gif"></A>
+deviations from the discrete distribution can lead to spurious results
+whence <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif"> is the safer choice. If linear correlations
+are dominant, <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2042" SRC="img48.gif"> can be more suitable.
+<P>
+The final accuracy that can be reached depends on the size and structure of the
+data and is generally sufficient for hypothesis testing. In all the cases we
+have studied so far, we have observed a substantial improvement over the
+standard AAFT approach. Convergence properties are also discussed
+in&nbsp;[<A HREF="node36.html#surrowe">30</A>]. In Sec.&nbsp;<A HREF="node21.html#secaccuracy">5.5</A> below, we will say more about the
+remaining inaccuracies.
+<P>
+<HR><A NAME="tex2html192" HREF="node13.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html190" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html184" HREF="node11.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html193" HREF="node13.html">Example: Southern oscillation index</A>
+<B>Up:</B> <A NAME="tex2html191" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html185" HREF="node11.html">Flatness bias of AAFT </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

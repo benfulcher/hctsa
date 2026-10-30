@@ -1,0 +1,36 @@
+<html> 
+<head><title>Autocorrelation function</title></head>
+<body bgcolor="#ffffff">
+<h3>Autocorrelation function</h3>
+<font color=blue><tt>autocor [-v -p -P -o </tt><em>outfile</em><tt> -l# -x# -c# -V# -h] </tt><em> file(s)</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -v  </tt></font>give unnormalised autocovariance
+   <br>     <font color=blue><tt> -p  </tt></font>assume periodic continuation
+   <br>     <font color=blue><tt> -P  </tt></font>assume periodic continuation exactly
+   <br>     <font color=blue><tt> -l  </tt></font>number of values to be read (all)
+   <br>     <font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br>     <font color=blue><tt> -c  </tt></font><a href=../general.html#column>column to be read</a> (1 or <font color=blue><em>file</em></font>,#)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_co</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Computes the autocorrelation (or with <font color=blue><tt>-v</tt></font> the
+autocovariance) function of a time series. This routine uses the FFT for
+convolution and should thus asymptotically be faster than <a
+href="../docs_c/corr.html">corr</a>.
+
+By default, zero padding is used, that is, no periodic continuation is assumed.
+With the option <font color=blue><tt>-P</tt></font>, it is assumed that the
+data is exactly one period of a periodic function. If the number of data points
+is not factorisable with factors of 2,3, or 5, a slow Fourier transform would
+have to be used. Therefore, with the option <font
+color=blue><tt>-p</tt></font>, approximate periodicity can be imposed by
+finding the largest part of the time series that <em>is</em> thus factorisable.
+Output file <font color=blue><em>file</em><tt>_co</tt></font>.
+<hr>
+See also <a href="../docs_c/corr.html">corr</a>
+<hr>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

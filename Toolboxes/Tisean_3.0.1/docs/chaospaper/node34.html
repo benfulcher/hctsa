@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Entropy estimates</TITLE>
+<META NAME="description" CONTENT="Entropy estimates">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html416" HREF="node35.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html414" HREF="node33.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html410" HREF="node33.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html417" HREF="node35.html">Testing for nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html415" HREF="node33.html">Information dimension</A>
+<B> Previous:</B> <A NAME="tex2html411" HREF="node33.html">Information dimension</A>
+<BR> <P>
+<H3><A NAME="SECTION00082100000000000000">Entropy estimates</A></H3>
+<P>
+The correlation dimension characterizes the <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> dependence of the
+correlation sum inside the scaling range. It is natural to ask what we can
+learn form its <I>m</I>-dependence, once <I>m</I> is larger than <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7885" SRC="img166.gif">. The number of
+<IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">-neighbors of a delay vector is an estimate of the local probability
+density, and in fact it is a kind of joint probability: All <I>m</I>-components of
+the neighbor have to be similar to those of the actual vector simultaneously.
+Thus when increasing <I>m</I>, joint probabilities covering larger time spans get
+involved. The scaling of these joint probabilities is related to the
+correlation entropy <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7893" SRC="img167.gif">, such that
+<BR><A NAME="eqdimfullC2">&#160;</A><IMG WIDTH=500 HEIGHT=19 ALIGN=BOTTOM ALT="equation5956" SRC="img168.gif"><BR>
+As for the scaling in <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">, also the dependence on <I>m</I> is valid
+only asymptotically for large <I>m</I>, which one will not reach due to the lack
+of data points. So one will study <IMG WIDTH=40 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7901" SRC="img169.gif"> versus <I>m</I> and try to extrapolate to
+large <I>m</I>. The correlation entropy is a lower bound of the Kolmogorov Sinai
+entropy, which in turn can be estimated by the sum of the positive Lyapunov
+exponents.  The program <a href="../docs_c/d2.html">d2</a> produces as output the estimates of <IMG WIDTH=14 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7893" SRC="img167.gif">
+directly, from the other correlation sum programs it has to be extracted by
+post-processing the output.
+<P>
+The entropies of first and second order can be derived from the output of 
+<a href="../docs_f/c1.html">c1</a> and <a href="../docs_c/d2.html">d2</a> 
+respectively. An alternate means of obtaining these and the
+other generalized entropies is by a box counting approach. Let <IMG WIDTH=13 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6569" SRC="img20.gif"> be the
+probability to find the system state in box <I>i</I>, then the order <I>q</I> entropy is
+defined by the limit of small box size and large <I>m</I> of
+<BR><A NAME="eqhq">&#160;</A><IMG WIDTH=500 HEIGHT=34 ALIGN=BOTTOM ALT="equation5961" SRC="img170.gif"><BR>   
+To evaluate <IMG WIDTH=38 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline7917" SRC="img171.gif"> over a fine mesh of boxes in <IMG WIDTH=46 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline7919" SRC="img172.gif"> dimensions,
+economical use of memory is necessary: A simple histogram would take 
+<IMG WIDTH=45 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7921"
+SRC="img173.gif"> storage. Therefore the program <a href="../docs_c/boxcount.html">boxcount</a> implements
+the mesh of boxes as a tree with <IMG WIDTH=33 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7923" SRC="img174.gif">-fold branching points. The
+tree is worked through recursively so that at each instance at most one
+complete branch exists in storage. The current version does not implement
+finite sample corrections to Eq.(<A HREF="node34.html#eqhq"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>).
+<P>
+<HR><A NAME="tex2html416" HREF="node35.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html414" HREF="node33.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html410" HREF="node33.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html417" HREF="node35.html">Testing for nonlinearity</A>
+<B>Up:</B> <A NAME="tex2html415" HREF="node33.html">Information dimension</A>
+<B> Previous:</B> <A NAME="tex2html411" HREF="node33.html">Information dimension</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

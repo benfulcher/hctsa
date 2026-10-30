@@ -1,0 +1,43 @@
+<html>
+<head><title>Add noise to data</title></head>
+<body bgcolor="#ffffff">
+<h3>Add Gaussian / uniform white noise</h3>
+<font color=blue><tt>addnoise <font color=red>[-r# | -v#]</font> [-u -0 -o </tt><em>outfile</em><tt> -l# -x# -c# -V# -h] </tt><em> file(s)</em>
+</font>
+<blockquote>
+   <br>     <font color=red><tt> -r  </tt></font>absolute noise level
+   <br>     <font color=red><tt> -v  </tt></font>same as fraction of standard deviation
+   <br>     <font color=blue><tt> -u  </tt></font>add uniform noise (default Gaussian)
+   <br>     <font color=blue><tt> -0  </tt></font>do not read input, just issue random numbers
+   <br>     <font color=blue><tt> -l  </tt></font>number of values to be read (all)
+   <br>     <font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br>     <font color=blue><tt> -c  </tt></font><a href=../general.html#column>column to be read</a> (1 or <font color=blue><em>file</em></font>,#)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_noisy</tt></font>
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Adds Gaussian noise of rms amplitude given by 
+<font color=blue><tt>-r</tt></font> to data in
+<font color=blue><em>file(s)</em></font>. 
+The amplitude can also be given (<font color=blue><tt>-v</tt></font>) 
+as a fraction of
+the rms amplitude of the data. 
+With <font color=blue><tt>-u</tt></font>, uniform noise in 
+[0:<font color=blue><tt>#</tt></font>] is added,
+<font color=blue><tt>#</tt></font> given by 
+<font color=blue><tt>-r</tt></font> or 
+<font color=blue><tt>-v</tt></font>. 
+Either <font color=blue><tt>-r</tt></font> 
+or <font color=blue><tt>-v</tt></font> must be present.  Output
+file <font color=blue><em>file</em><tt>_noisy</tt></font>. 
+<p>
+If <font color=blue><tt>-0</tt></font> is given, no input files are
+read. Instead, <font color=blue><tt> -l  </tt></font> random numbers
+of magnitude <font color=blue><tt> -r  </tt></font> are produced.
+<hr>
+See also <a href="../docs_c/makenoise.html">makenoise</a> which uses a
+different random umber generator. 
+<hr>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

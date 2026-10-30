@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Measures of nonlinearity</TITLE>
+<META NAME="description" CONTENT="Measures of nonlinearity">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html408" HREF="node34.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html406" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html400" HREF="node32.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html409" HREF="node34.html">Iterative FFT surrogates</A>
+<B>Up:</B> <A NAME="tex2html407" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html401" HREF="node32.html">The TISEAN implementation</A>
+<BR> <P>
+<H2><A NAME="SECTION000101000000000000000">Measures of nonlinearity</A></H2>
+<P>
+A few programs in the package directly issue scalar quantities that can be used
+in nonlinearity testing. These are the zeroth order nonlinear predictors (<a href="../docs_f/predict.html">predict</a> and <a href="../docs_c/zeroth.html">zeroth</a>) which implement Eq.(<A HREF="node4.html#eqerror">5</A>) and the time
+reversibility statistic (<a href="../docs_f/timerev.html>timerev</a>) 
+implementing Eq.(<A HREF="node3.html#eqskew">3</A>).  For a
+couple of other quantities, we have deliberately omitted a black box algorithm
+to turn the raw results into a single number. A typical example are the
+programs for dimension estimation (<a href="../docs_c/d2.html">d2</a>,
+<a href="../docs_f/c2naive.html">c2naive</a>, and 
+<a href="../docs_f/c1.html">c1</a>) which compute correlation sums for ranges of length scales <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline1920" SRC="img11.gif"> and
+embedding dimensions <I>m</I>. For dimension estimation, these curves have to be
+interpreted with due care to establish scaling behaviour and convergence with
+increasing <I>m</I>. Single numbers issued by black box routines have lead to too
+many spurious results in the literature. Researchers often forget that such
+numbers are not interpretable as fractal dimensions at all but only useful for
+comparison and classification. Without genuine scaling at small length scales,
+a data set that gives <IMG WIDTH=61 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2450" SRC="img189.gif"> by some ad hoc method to estimate
+<IMG WIDTH=19 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2452" SRC="img190.gif"> cannot be said to have more degrees of freedom, or be more
+``complex'' than one that yields <IMG WIDTH=61 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2454" SRC="img191.gif">.
+<P>
+This said, users are welcome to write their own code to turn correlation
+integrals, local slopes (<a href="../docs_f/c2d.html">c2d</a>), 
+Takens' estimator (<a href="../docs_f/c2t.html">c2t</a>), or Gaussian
+Kernel correlation integrals (<a href="../docs_f/c2g.html">c2g</a>) 
+into nonlinearity measures.  The same
+situation is found for Lyapunov exponents 
+(<a href="../docs_c/lyap_k.html">lyap_k</a>, 
+<a href="../docs_c/lyap_r.html">lyap_r</a>),
+entropies (<a href="../docs_c/boxcount.html">boxcount</a>) and other quantities. Since all of these have
+already been described in Ref.&nbsp;[<A HREF="node36.html#tisean">9</A>], we refer the reader there for
+further details.
+<P>
+<HR><A NAME="tex2html408" HREF="node34.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html406" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html400" HREF="node32.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html409" HREF="node34.html">Iterative FFT surrogates</A>
+<B>Up:</B> <A NAME="tex2html407" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html401" HREF="node32.html">The TISEAN implementation</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

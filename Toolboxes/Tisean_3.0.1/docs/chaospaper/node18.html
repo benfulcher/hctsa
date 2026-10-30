@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Simple nonlinear prediction</TITLE>
+<META NAME="description" CONTENT="Simple nonlinear prediction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html255" HREF="node19.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html253" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html247" HREF="node17.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html256" HREF="node19.html">Finding unstable periodic orbits</A>
+<B>Up:</B> <A NAME="tex2html254" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html248" HREF="node17.html">Model validation</A>
+<BR> <P>
+<H2><A NAME="SECTION00052000000000000000">Simple nonlinear prediction</A></H2>
+<A NAME="seczeroth">&#160;</A>
+Conventional linear prediction schemes average over all locations in phase
+space when they extract the correlations they exploit for predictability.
+Tong&nbsp;[<A HREF="citation.html#TAR">42</A>] promoted an extension that fits different linear models if the
+current state is below or above a given threshold (TAR, <B>T</B>hreshold <B>
+A</B>utoregressive <B>M</B>odel). If we expect more than a slight nonlinear
+component to be present, it is preferable to make the approximation as local in
+phase space as possible.  There have been many similar suggestions in the
+literature how to exploit local structure, see
+e.g.&nbsp;[<A HREF="citation.html#Arkady">43</A>, <A HREF="citation.html#sugimay">44</A>, <A HREF="citation.html#Eckmann">45</A>, <A HREF="citation.html#fsid0">46</A>]. The simplest approach is to make the
+approximation local but only keep the zeroth order, that is, approximate the
+dynamics locally by a constant.  In the TISEAN package we include such a
+robust and simple method: In a delay embedding space, all neighbors of <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6691" SRC="img38.gif">
+are saught, if we want to predict the measurements at time <I>n</I>+<I>k</I>. The forecast
+is then simply
+<BR><A NAME="eqpredictlazy">&#160;</A><IMG WIDTH=500 HEIGHT=44 ALIGN=BOTTOM ALT="equation4804" SRC="img48.gif"><BR>
+i.e. the average over the ``futures'' of the neighbors. The average forecast
+errors obtained with the routine <a
+href="../docs_c/zeroth.html">zeroth</a> (<a href="../docs_f/predict.html">predict</a> would give similar
+results) for the laser output data used in Fig.&nbsp;<A HREF="node11.html#figdelayPoincare"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> as a
+function of the number <I>k</I> of steps ahead the predictions are made is shown in
+Fig.&nbsp;<A HREF="node18.html#figpredictINOzero"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. One can also iterate the predictions by using
+the time series as a data base.
+<P>
+<P><blockquote><A NAME="4798">&#160;</A><IMG WIDTH=345 HEIGHT=247 ALIGN=BOTTOM ALT="figure657" SRC="img47.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figpredictINOzero">&#160;</A>
+  Predictions <I>k</I> time steps ahead (no iterated predictions) using the program
+  <a href="../docs_c/zeroth.html">zeroth</a>. Top (red) curve: embedding dimension two is insufficient, since these
+  flow data fill a (2+<IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM
+  ALT="tex2html_wrap_inline6495" SRC="img3.gif">)-dimensional attractor.
+  Second from top (blue):
+  Although embedding dimension four should in theory be a good
+  embedding, <IMG WIDTH=37 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline6837" SRC="img46.gif"> suppresses structure perpendicular to the diagonal so
+  that the predictions are as bad as in <I>m</I>=2! Lower (green, pink) curves: <I>m</I>=3 and 4 with
+  a delay of about 4-8 time units serve well. <BR>
+</blockquote><P>
+Apart from the embedding parameters, all that has to be specified for zeroth
+order predictions is the size of the neighborhoods. Since the diffusive
+motion below the noise level cannot be predicted anyway, it makes sense to
+select neighborhoods which are at least as large as the noise level, maybe
+two or three times larger. For fairly clean time series, this guideline may
+result in neighborhoods with very few points. Therefore <a
+href="../docs_c/zeroth.html">zeroth</a> also
+permits to specify the minimal number of neighbors to base the predictions
+on.
+<P>
+A relevant modification of this method is to extend the neighborhood <IMG WIDTH=11 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline6891" SRC="img49.gif"> to infinity, but to introduce a distance dependent weight,
+<BR><A NAME="eqpredictkernel">&#160;</A><IMG WIDTH=500 HEIGHT=44 ALIGN=BOTTOM ALT="equation4809" SRC="img50.gif"><BR>
+where <I>w</I> is called the kernel. For <IMG WIDTH=111 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6895" SRC="img51.gif"> where <IMG WIDTH=11 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline6897" SRC="img52.gif"> is
+the Heaviside step function, we return to Eq.(<A HREF="node18.html#eqpredictlazy"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>).
+<P><HR><A NAME="tex2html255" HREF="node19.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html253" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html247" HREF="node17.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html256" HREF="node19.html">Finding unstable periodic orbits</A>
+<B>Up:</B> <A NAME="tex2html254" HREF="node16.html">Nonlinear prediction</A>
+<B> Previous:</B> <A NAME="tex2html248" HREF="node17.html">Model validation</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

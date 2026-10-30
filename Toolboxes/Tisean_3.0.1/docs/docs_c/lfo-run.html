@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>
+lfo-run
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>lfo-run
+</font>
+</h1>
+<hr>
+This program makes depending on whether <font color=red>-0</font> is
+set either a local linear ansatz or a zeroth order ansatz for a
+possibly multivariate 
+time series and iterates a artificial
+trajectory. The initial values for the trajectory are the last points
+of the original time series. Thus it actually forecasts the time series.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>lfo-run [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-m#,#
+<td># of components,embedding dimension
+<td>1,2
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1,...,# of components
+</tr>
+<tr>
+<th>-d#
+<td>delay for the embedding
+<td>1
+</tr>
+<tr>
+<th>-L#
+<td>length of prediction
+<td>1000
+</tr>
+<tr>
+<th>-k#
+<td>minimal numbers of neighbors for the fit
+<td>30
+</tr>
+<tr>
+<th>-r#
+<td>neighborhood size to start with
+<td>(interval of data)/1000
+</tr>
+<tr>
+<th>-f#
+<td>factor to increase the neighborhood size<br> if not enough
+neighbors were found
+<td>1.2
+</tr>
+<tr>
+<th>-0
+<td>perform a zeroth order fit instead of a local linear one
+<td>not set (local linear)
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without name: 'datafile'.cast<br>
+(or stdin.cast if data were read from stdin)<br>
+without -o results are written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+The output is just the components of the forecasted time series.
+<hr>
+View the <a href="../../source_c/lfo-run.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>
