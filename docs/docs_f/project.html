@@ -1,0 +1,60 @@
+<html>
+<head><title>Nonlinear noise reduction</title></head>
+<body bgcolor="#ffffff">
+<h3>Nonlinear noise reduction</h3>  
+<font color=blue><tt>project <font color=red>-m# -q# -r# -k#</font> [-i# -o </tt><em>outfile</em><tt> -l# -x# -c# -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+   <br>     <font color=red><tt> -m  </tt></font>embedding dimension
+   <br>     <font color=red><tt> -q  </tt></font>dimension of manifold
+   <br>     <font color=red><tt> -r  </tt></font>radius of neighbourhoods
+   <br>     <font color=red><tt> -k  </tt></font>minimal number of neighbours
+   <br>     <font color=blue><tt> -i  </tt></font>number of iterations (1)
+   <br>     <font color=blue><tt> -l  </tt></font>number of values to be read (all)
+   <br>     <font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br>     <font color=blue><tt> -c  </tt></font><a href=../general.html#column>column to be read</a> (1 or <font color=blue><em>file</em></font>,#)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_c</tt></font>, <font color=blue><em>file</em></font><font color=blue><tt>_cc</tt></font> (etc.)
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+<p>
+   <a href=../general.html#verbosity>verbosity level</a> (add what you want):
+<p>
+    <font color=blue>             1</font> = input/output<br>
+    <font color=blue>             2</font> = state of neighbour search<br>
+</blockquote>
+Performs <a href="../chaospaper/node24.html">nonlinear projective noise reduction</a>.  Output file (the cleaned
+sequence) is <font color=blue><em>file</em><tt>_c[ccc]</tt></font> 
+(one letter <font color=blue><tt>c</tt></font> per iteration). As a second
+column, the difference between original and cleaned sequence is printed.
+<p>
+<font color=red><b>Note:</b></font> This routine is largely redundant with
+<a href="../docs_c/ghkss.html">ghkss</a>.
+<p>
+This routine is based on
+<blockquote>
+   P. Grassberger, R. Hegger, H. Kantz, C. Schaffrath, and T. Schreiber, 
+      <br><em> On noise reduction methods for chaotic data</em>,
+      <br>Chaos <b>3</b>, 127 (1993); 
+      <br>Reprinted in: E. Ott, T. Sauer, and J. A. Yorke, eds., 
+      <br><em> Coping With Chaos</em>, Wiley, New York (1994)
+</blockquote>
+<p>
+<hr>
+<h3>Usage example</h3>
+Try also just running: <font color=blue><tt>gnuplot project.gnu</tt></font> in
+the <font color=blue><tt>examples</tt></font> directory.
+<p>
+<pre>
+&gt; <font color=blue><tt>henon -l10000 &gt; data</tt></font>
+&gt; <font color=blue><tt>addnoise -v0.02 data</tt></font>
+&gt; <font color=blue><tt>project -m7 -q2 -r0.05 -k20 -i3 data_noisy</tt></font>
+
+gnuplot&gt; <font color=blue><tt>plot '&lt; cat data_noisy | delay'</tt></font>
+gnuplot&gt; <font color=blue><tt>plot '&lt; cat data_noisy_ccc | delay'</tt></font>
+</pre>
+<p>
+<IMG SRC="addnoise.gif" alt="noisy data"> 
+<IMG SRC="project.gif" alt="corrected data">
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>

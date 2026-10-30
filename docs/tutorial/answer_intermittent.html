@@ -1,0 +1,28 @@
+The logistic equation near <font color=blue>a=1.75</font>
+ shows so called <b>type-I
+intermittency</b>, where a periodic orbit is born out of the chaotic
+regime by a tangent bifurcation.
+For <font color=blue>a</font>
+ larger than the bifurcation value, the graph of the third iterate of the
+map intersects the diagonal six times: Three times for the stable
+period three orbit, and three times for an unstable counterpart (slope
+at the intersection has modulus larger than unity), plus one
+intersection  for the unstable genuine fixed point (period one orbit). 
+For <font color=blue>a</font> slightly below the bifurcation value,
+ none of these 6 
+intersections exists, but the graph touches the diagonal almost
+tangentially (therefore tangent bifurcation). It thus forms, together
+with the diagonal, a very thin channel, through which the trajectory
+has to pass in very many iterations. Hence, one observes long episodes
+of almost period-three motion, until the trajectory leaves these
+channels and performs for some steps chaotic motion. You can convince
+ yourselves that this is indeed the case by selecting
+a part of the trajectory which starts just before an almost period
+ part and finishes just after the end of this periodic part (assumed
+ to be stored in the file 
+ intermittency.dat) and plotting only every third data point 
+ with lines:<br><br>
+<font color=green>  plot '&#60; delay intermittency.dat -d3 ' every 3 w
+ linespoints, x</font> 
+
+

@@ -1,0 +1,26 @@
+<b><font color=red>Answers to time scales problems</font></b><br><br>
+
+Notice that since <b>arch.dat</b> is non-stationary, no time averaged
+information is meaningful! Once can compute the numbers, but they
+cannot characterize the properties of the data!
+<br>
+<table noborder>
+<tr> <td> </td><td> amplitude.dat</td><td>
+whatisit.dat</td></tr> 
+<tr><td>First zero of the auto-correlation function
+</td><td>8-9 </td><td>10</td></tr>
+<tr><td>exponential decay of envelope</td><td>data set too short</td><td> -0.0025</td></tr>
+<tr><td>lag from 2-dim delay embedding</td><td> 8 </td><td>3</td></tr>
+<tr><td> Theiler window </td><td> about 20 </td><td> about 20</td></tr>
+</table>
+<br>
+The Theiler window should be half a period for such an almost periodic
+pattern, but is suitablt chosen much larger, since typically not much
+statistics is lost, as long as it remains smaller than about 10% of
+the data set size.
+<br><br>
+Usage of <a href="../docs_f/stp.html"> stp </a>, e.g.,: <br>
+<font color=green>  plot '&#60; stp whatisit.dat -d5 -m3 -t50' </font>
+<br><br>
+
+

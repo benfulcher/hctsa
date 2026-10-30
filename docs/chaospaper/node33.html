@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Information dimension</TITLE>
+<META NAME="description" CONTENT="Information dimension">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html407" HREF="node34.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html405" HREF="node29.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html401" HREF="node32.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html408" HREF="node34.html">Entropy estimates</A>
+<B>Up:</B> <A NAME="tex2html406" HREF="node29.html">Dimensions and entropies</A>
+<B> Previous:</B> <A NAME="tex2html402" HREF="node32.html">Gaussian kernel correlation integral</A>
+<BR> <P>
+<H2><A NAME="SECTION00082000000000000000">Information dimension</A></H2>
+<P>
+Another way of attaching weight to <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">-balls, which is more natural, is
+the probability <IMG WIDTH=13 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline6569" SRC="img20.gif"> itself. The resulting scaling exponent is called the
+information dimension <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7809" SRC="img157.gif">. Since the Kaplan-Yorke dimension of
+Sec.<A HREF="node26.html#seclyap"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> is an approximation of <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7809" SRC="img157.gif">, the computation of <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7809" SRC="img157.gif">
+through scaling properties is a relevant cross-check for highly deterministic
+data. <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7809" SRC="img157.gif"> can be computed from a modified correlation sum, where, however,
+unpleasant systematic errors occur. The <EM>fixed mass</EM>
+approach&nbsp;[<A HREF="citation.html#badiipoliti">81</A>] circumvents these problems, so that, including
+finite sample corrections&nbsp;[<A HREF="citation.html#grass_finite">77</A>], a rather robust estimator
+exists. Instead of counting the number of points in a ball one asks here for
+the diameter <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> which a ball must have to contain a certain number <I>k</I>
+of points when a time series of length <I>N</I> is given. Its scaling with <I>k</I> and
+<I>N</I> yields the dimension in the limit of small length scales by
+<BR><A NAME="eqdim1fixmass">&#160;</A><IMG WIDTH=500 HEIGHT=38 ALIGN=BOTTOM ALT="equation5952" SRC="img158.gif"><BR>
+The routine <a href="../docs_f/c1.html">c1</a> computes the (geometric) mean length scale
+<IMG WIDTH=107 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7827" SRC="img159.gif"> for which <I>k</I> neighbors are found in <I>N</I> data
+points, as a function of <I>k</I>/<I>N</I>. Unlike the correlation sum, finite sample
+corrections are necessary if <I>k</I> is small&nbsp;[<A HREF="citation.html#grass_finite">77</A>]. Essentially, the
+<IMG WIDTH=20 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7837" SRC="img160.gif"> of <I>k</I> has to be replaced by the digamma function <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7841" SRC="img161.gif">.  The
+resulting expression is implemented in <a href="../docs_f/c1.html">c1</a>. Given <I>m</I> and <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">, the
+routine varies <I>k</I> and <I>N</I> such that the largest reasonable range of <I>k</I>/<I>N</I> is
+covered with moderate computational effort. This means that for <IMG WIDTH=136 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7853" SRC="img162.gif"> (default: <I>K</I>=100), all <I>N</I> available points are searched for neighbors
+and <I>k</I> is varied. For <IMG WIDTH=115 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7861" SRC="img163.gif">, <I>k</I>=<I>K</I> is kept fixed and <I>N</I> is
+decreased.  The result for the NMR laser data is shown in
+Fig.&nbsp;<A HREF="node32.html#figdim2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>&nbsp;<B>(d)</B>, where a nice scaling with <IMG WIDTH=69 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7867" SRC="img164.gif"> can
+be discerned. For comparability, the logarithmic derivative of <I>k</I>/<I>N</I> is plotted
+versus <IMG WIDTH=107 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7871" SRC="img165.gif"> and not vice versa, although <I>k</I>/<I>N</I>
+is the independent variable.  One easily detects again the violations of
+scaling discussed before: Cut-off on the large scales, noise on small scales,
+fluctuations on even smaller scales, and a scaling range in between. In this
+example, <IMG WIDTH=18 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7809" SRC="img157.gif"> is close to <IMG WIDTH=19 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7567" SRC="img133.gif">, and multifractality cannot be established
+positively.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html409" HREF="node34.html#SECTION00082100000000000000">Entropy estimates</A>
+</UL>
+<HR><A NAME="tex2html407" HREF="node34.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html405" HREF="node29.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html401" HREF="node32.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html408" HREF="node34.html">Entropy estimates</A>
+<B>Up:</B> <A NAME="tex2html406" HREF="node29.html">Dimensions and entropies</A>
+<B> Previous:</B> <A NAME="tex2html402" HREF="node32.html">Gaussian kernel correlation integral</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

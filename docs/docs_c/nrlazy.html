@@ -1,0 +1,117 @@
+<html>
+<head>
+<title>
+lazy
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>nrlazy
+</font>
+</h1>
+<hr>
+This program performs <a href="../chaospaper/node23.html">simple
+nonlinear noise reduction</a>. Each embedded point is replaced by the
+average vector calculated in its neighbourhood with a given size. This
+is different from what is described in <a
+href="../chaospaper/citation.html#lazy">Schreiber</a>. There and in
+the program <a href="../docs_f/lazy.html">lazy</a> only the central
+component of each vector is corrected. It is advisable to give both a
+try.  We found a tendency that <a href="../docs_f/lazy.html">lazy</a>
+performs better on map like data while <font color=blue>nrlazy</font>
+is superiour on flow like data.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>nrlazy [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential
+datafile name. Given no datafile at all, means read stdin. Also <font
+color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>5
+</tr>
+<tr>
+<th>-d#
+<td>delay for the embedding
+<td>1
+</tr>
+<tr>
+<th>-i#
+<td>number of iterations 
+<td>1
+</tr>
+<tr>
+<th>-r#
+<td>neighborhood size
+<td>(interval of the data)/1000
+</tr>
+<tr>
+<th>-v#
+<td>neighborhood size in units of the std. dev. of the data<br>
+overwrites the -r option
+<td>not set
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>;
+<td>without file name:'datafile'.laz.n where n is the iteration<br>
+(or stdin.laz.n if data were read from stdin)<br>
+without -o the last iteration is <b>also</b> written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: write output of all iterations to files<br>
+&nbsp;&nbsp;4: write the number of neighbors found for each point
+<td>3
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+Each of the files produced consists of one column being the filtered
+time series. If the verbosity level is set accordingly, the second
+column contains the number of neighbors found for this point. If this
+number is 1, no correction is done at all for this point.
+<hr>
+View the <a href="../../source_c/nrlazy.c"> C-sources</a>.
+<hr>
+See also <a href="../docs_f/lazy.html">lazy</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

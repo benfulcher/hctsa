@@ -1,0 +1,131 @@
+<html>
+<head>
+<title>
+ghkss
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>ghkss
+</font>
+</h1>
+<hr>
+
+This program performs a <a href="../chaospaper/node24.html">noise
+reduction</a> as proposed in <a
+href="../chaospaper/citation.html#on">Grassberger et al</a>. In
+principal, it performs a orthogonal projection onto a q-dimensional
+manifold using a special (tricky) metric. In case the <font
+color=red>-2</font> parameter is set, an euclidean metric is
+used. This is done in <a
+href="../chaospaper/citation.html#cawley">Cawley et al.</a> as well as
+in <a href="../chaospaper/citation.html#sauer">Sauer</a> and is
+sometimes useful for flow systems.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>ghkss [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential
+datafile name. Given no datafile at all, means read stdin. Also <font
+color=Red>-</font> means stdin 
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1,...,dimension of the vectors
+<tr>
+<th>-m#,#
+<td>number of components, embedding dimension
+<td>1,5
+</tr>
+<tr>
+<th>-d#
+<td>delay for the embedding
+<td>1
+</tr>
+<tr>
+<th>-q#
+<td>dimension of the manifold to project to
+<td>2
+</tr>
+<tr>
+<th>-k#
+<td>minimal number of neighbours
+<td>30
+</tr>
+<tr>
+<th>-r#
+<td>minimal size of the neighbourhood
+<td>(interval of data)/1000
+</tr>
+<tr>
+<th>-i#
+<td>number of iterations 
+<td>1
+</tr>
+<tr>
+<th>-2
+<td>use euclidean metric instead of the tricky one
+<td>tricky metric
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.opt.n, where n is the iteration<br>
+(or stdin.opt.n if data was read from stdin)<br>
+without -o the last iteration is <b>also</b> written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: add average correction and trend<br>
+&nbsp;&nbsp;4: add how many points were corrected for which epsilon
+<td>7
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+Each file produced contains the filtered time series as one
+column. The standard error device shows some statistics, namely for each 
+iteration (i)
+the number of vectors corrected up to the actual value of the
+neighborhood size, (ii) the average shift and (iii) the average correction.
+(iv) The next line shows for how many points the correction was
+unreasonably large and the last line shows (v) the file, to which the
+corrected data was written.
+<hr>
+View the <a href="../../source_c/ghkss.c"> C-sources</a>.
+<hr>
+See also <a href="../docs_f/project.html">project</a> 
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

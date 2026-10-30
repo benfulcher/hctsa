@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Multivariate data</TITLE>
+<META NAME="description" CONTENT="Multivariate data">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html317" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html315" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html309" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html318" HREF="node25.html">Uneven sampling</A>
+<B>Up:</B> <A NAME="tex2html316" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html310" HREF="node23.html">Including non-stationarity</A>
+<BR> <P>
+<H2><A NAME="SECTION00062000000000000000">Multivariate data</A></H2>
+<A NAME="secmulti2">&#160;</A> 
+In Ref.&nbsp;[<A HREF="node36.html#anneal">26</A>], the flexibility of the approach was illustrated by a
+simultaneous recording of the breath rate and the instantaneous heart rate of a
+human subject during sleep. The interesting question was, how much of the
+structure in the heart rate data can be explained by linear dependence on the
+breath rate. In order to answer this question, surrogates were made that had
+the same autocorrelation structure but also the same cross-correlation with
+respect to the fixed input signal, the breath rate. While the linear
+cross-correlation with the breath rate explained the coherent structure of the
+heart rate, other features, in particular its asymmetry under time reversal,
+remained unexplained. Possible explanations include artefacts due to the
+peculiar way of deriving heart rate from inter-beat intervals, nonlinear
+coupling to the breath activity, nonlinearity in the cardiac system, and
+others.
+<P>
+Within the general framework, multivariate data can be treated very much the 
+same way as scalar time series. In the above example, we chose to use one of
+the channels as a reference signal which was not randomised. The rationale
+behind this was that we were not looking for nonlinear structure in the breath
+rate itself and thus we didn't want to destroy any such structure in the
+surrogates. In other cases, we can decide either to keep or to destroy
+cross-correlations between channels. The former can be achieved by applying the
+same permutations to all channels. Due to the limited experience we have so far
+and the multitude of possible cases, multivariate problems have not been
+included in the TISEAN implementation yet.
+<P>
+<HR><A NAME="tex2html317" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html315" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html309" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html318" HREF="node25.html">Uneven sampling</A>
+<B>Up:</B> <A NAME="tex2html316" HREF="node22.html">Various Examples</A>
+<B> Previous:</B> <A NAME="tex2html310" HREF="node23.html">Including non-stationarity</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

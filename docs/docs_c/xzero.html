@@ -1,0 +1,119 @@
+<html>
+<head>
+<title>
+xzero
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>xzero
+</font>
+</h1>
+<hr>
+This program takes two data sets (i.e. two columns in a single datafile)
+and fits a zeroth order model of data
+set 1 to predict data set 2 (cross prediction). It then computes the 
+error of the model. This is done by searching for all neighbors in set
+1 of the points of set 2 which should be forecasted and taking as
+their images the average of the images of the neighbors. The given
+forecast error is normalized to the variance of data set 2.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>xzero [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#columns>columns to be read</a> (separated by a comma)
+<td>1,2
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>3
+</tr>
+<tr>
+<th>-d#
+<td>delay for the embedding
+<td>1
+</tr>
+<tr>
+<th>-n#
+<td>for how many points should the error be calculated
+<td>all
+</tr>
+<tr>
+<th>-k#
+<td>minimal numbers of neighbors for the fit
+<td>30
+</tr>
+<tr>
+<th>-r#
+<td>neighborhood size to start with
+<td>(data interval)/1000
+</tr>
+<tr>
+<th>-f#
+<td>factor to increase the neighborhood size<br> if not enough
+neighbors were found
+<td>1.2
+</tr>
+<tr>
+<th>-s#
+<td>steps to be forecasted (x<sup>2</sup><sub>n+steps</sub>=
+av(x<sup>1</sup><sub>i+steps</sub>)
+<td>1
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.cze<br>
+(or stdin.cze if stdin was read)<br>
+If no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+The output consists of <font color=blue>s</font> lines, each of which
+containing the steps forecasted (first column) and the relative
+forecast error (second column). Relative means that the forecast error
+is devided by the standard deviation of the second (the one which is
+forecasted) data set.
+<hr>
+View the <a href="../../source_c/xzero.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

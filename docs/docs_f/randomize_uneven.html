@@ -1,0 +1,73 @@
+<html> 
+<head><title>General constrained randomization</title></head>
+<body bgcolor="#ffffff">
+<h3><a name="top"></a>General constrained randomization:<br>
+Nonlinearity test for unevenly sampled time series</h3>
+<p>
+The program uses the autocorelation
+function, binned to a given resolution and computed up to a given lag as a cost
+function. See the <a href="../surropaper/node25.html">paper</a> for an
+introduction. An unevenly sample time series needs to provide two pieces of
+information, the actual value and the time it was sampled. Thus a two-column
+file is expected. The default is to have the values in the first and the times
+in the second column. It can be changed by spcifying <font color=blue><tt>
+-c </tt></font> with one or two arguments. Th output file <em> always</em> has
+the data first and then the times.
+
+<p>
+<font color=blue><tt>randomize_uneven_exp_random
+<font color=red>-d# -D#</font> [-W#]<br>&nbsp;&nbsp;&nbsp;&nbsp;[-n# -u# -I# -o </tt><em>outfile</em><tt>
+-l# -x# -c#[,#] -V# -h -T# -a# -S# -s# -z# -C#] 
+</tt><em>file</em></font>
+<blockquote>
+ <br><font color=red><tt> -d </tt></font>time span of one bin
+ <br><font color=red><tt> -D </tt></font>total time spanned
+<br><font color=blue><tt> -W </tt></font>type of average: 
+         0=max(c), 1=|c|/lag, 2=(c/lag)**2 (default 0)
+<br> <font color=blue><tt> -n </tt></font>number of surrogates (default 1)
+<br> <font color=blue><tt> -u </tt></font>improvement factor before write
+(default 0.9 = if 10% better)
+<br> <font color=blue><tt> -I </tt></font>seed for random numbers (0)
+<br><font color=blue><tt> -l </tt></font>maximal number of points to be processed (default all)
+   <br> <font color=blue><tt>    -x </tt></font>number of values to be skipped (0) 
+   <br> <font color=blue><tt>    -c </tt></font><a href=../general.html#columns>columns to be read</a>
+ (measurements from 1, times from 2)
+   <br>    <font color=blue><tt>  -o  </tt></font><a href=../general.html#outfile>output file name</a>, just<font color=blue><tt>  -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_rnd(_nnn)</tt></font>
+<br> <font color=blue><tt> -V </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+<br> <font color=blue><tt> -h </tt></font>show usage message 
+
+<br> <font color=blue><tt> -T </tt></font>
+   initial temperature (default: automatic melting)
+<br> <font color=blue><tt> -a </tt></font>cooling factor (default automatic)
+<br> <font color=blue><tt> -S </tt></font>
+   total steps before cooling (default 20000)
+<br> <font color=blue><tt> -s </tt></font>
+   successful steps before cooling (default 2000)
+<br> <font color=blue><tt> -z </tt></font>
+   minimal successful steps (default 200)
+<br> <font color=blue><tt> -C </tt></font>
+   goal value of cost function (default zero)
+<p>
+   <a href=../general.html#verbosity>verbosity level</a> (add what you want):
+<p>
+      <font color=blue> 	1</font> = input/output
+<br>   <font color=blue> 	2</font> = current value of cost function upon printable improvement
+<br>   <font color=blue> 	4</font> = cost mismatch
+<br>   <font color=blue> 	8</font> = temperature etc. at cooling
+<br>   <font color=blue>   16</font> = verbose cost if improved
+<br>   <font color=blue>   32</font> = verbose cost mismatch
+</blockquote>
+<p>
+<font color=red><b>Note:</b></font> if neither <font
+color=blue><tt>-a</tt></font> nor <font color=blue><tt>-C</tt></font> are
+given, the annealing will keep starting over with slower cooling rates. This
+may be necessary if good guesses are not available but of course, multiple 
+surrogates will have to be made by further separate calls.
+<p>
+<a href="randomize.html">Constrained Randomization</a> * <a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+
+
+
+
+

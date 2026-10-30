@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Flatness bias of AAFT surrogates</TITLE>
+<META NAME="description" CONTENT="Flatness bias of AAFT surrogates">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html182" HREF="node12.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html180" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html174" HREF="node10.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html183" HREF="node12.html">Iteratively refined surrogates</A>
+<B>Up:</B> <A NAME="tex2html181" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html175" HREF="node10.html">Rescaled Gaussian linear process</A>
+<BR> <P>
+<H2><A NAME="SECTION00042000000000000000">Flatness bias of AAFT surrogates</A></H2>
+<P>
+It is argued in Ref.&nbsp;[<A HREF="node36.html#surrowe">30</A>] that for short and strongly correlated
+sequences, the AAFT algorithm can yield an incorrect test since it introduces a
+bias towards a slightly flatter spectrum. In Fig.&nbsp;<A HREF="node11.html#figflat">3</A> we see power
+spectral estimates of a clinical data set and of 19 AAFT surrogates.  The data
+is taken from data set B of the Santa Fe Institute time series
+contest&nbsp;[<A HREF="node36.html#gold">31</A>]. It consists of 4096 samples of the breath rate of a
+patient with sleep apnoea. The sampling interval is 0.5&nbsp;seconds. The
+discrepancy of the spectra is significant. A bias towards a white spectrum is
+noted: power is taken away from the main peak to enhance the low and high
+frequencies.
+<P>
+<blockquote><A NAME="926">&#160;</A><IMG WIDTH=349 HEIGHT=186 ALIGN=BOTTOM ALT="figure1037" SRC="img31.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figflat">&#160;</A>
+   Discrepancy of the power spectra of human breath rate data (solid
+   line) and 19 AAFT surrogates (dashed lines). Here the power spectra have
+   been  computed with a square window of length&nbsp;64.<BR>
+</blockquote>
+<P>
+Heuristically, the flatness bias can be understood as follows. Amplitude
+adjustment attempts to invert the unknown measurement function <IMG WIDTH=22 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1908" SRC="img2.gif">
+empirically. The estimate <IMG WIDTH=39 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2000" SRC="img32.gif"> of the inverse obtained by the
+rescaling of a finite sample to values drawn from a Gaussian distribution is
+expected to be consistent but it is not exact for finite <I>N</I>. The sampling
+fluctuations of <IMG WIDTH=161 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2004" SRC="img33.gif"> will be essentially
+independent of <I>n</I> and thus spectrally white. Consequently, Gaussian scaling
+amounts to adding a white component to the spectrum, which therefore tends to
+become flatter under the procedure. Since such a bias can lead to spurious
+results, surrogates have to be refined before a test can be performed.
+<P>
+<HR><A NAME="tex2html182" HREF="node12.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html180" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html174" HREF="node10.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html183" HREF="node12.html">Iteratively refined surrogates</A>
+<B>Up:</B> <A NAME="tex2html181" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html175" HREF="node10.html">Rescaled Gaussian linear process</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,29 @@
+<html> 
+<head><title>Normalise / compute mean, standard deviation</title></head>
+<body bgcolor="#ffffff">
+<h3>Normalise time series and/or compute mean, standard deviation</h3>
+<font color=blue><tt>rms [-a -v -o </tt><em>outfile</em><tt> -l# -x# -c# -V# -h] </tt><em> file(s)</em>
+</font>
+<blockquote>
+   <br>     <font color=blue><tt> -a  </tt></font>subtract average
+   <br>     <font color=blue><tt> -v  </tt></font>subtract mean, normalise to unit variance
+   <br>     <font color=blue><tt> -l  </tt></font>number of values to be read (all)
+   <br>     <font color=blue><tt> -x  </tt></font>number of values to be skipped (0)
+   <br>     <font color=blue><tt> -c  </tt></font><a href=../general.html#column>column to be read</a> (1 or <font color=blue><em>file</em></font>,#)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means <font color=blue><em>file</em></font><font color=blue><tt>_a</tt></font> (if -a), <font color=blue><em>file</em></font><font color=blue><tt>_v</tt></font> (if -v)
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Prints mean, standard deviation, minimal and maximal value of time
+series. Optionally subtracts mean and normalises to unit variance. Output file
+<font color=blue><em>file</em><tt>_a</tt></font> 
+(if <font color=blue><tt>-a</tt></font> is set) or 
+<font color=blue><em>file</em><tt>_v</tt></font> 
+(if <font color=blue><tt>-v</tt></font> is set).
+<hr>
+See also <a href="../docs_c/histogram.html">histogram</a>
+and  <a href="../docs_c/rescale.html">rescale</a>
+<hr>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
+

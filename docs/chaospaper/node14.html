@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Recurrence plots</TITLE>
+<META NAME="description" CONTENT="Recurrence plots">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html212" HREF="node15.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html210" HREF="node13.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html204" HREF="node13.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html213" HREF="node15.html">Space-time separation plot</A>
+<B>Up:</B> <A NAME="tex2html211" HREF="node13.html">Visualizationnon-stationarity</A>
+<B> Previous:</B> <A NAME="tex2html205" HREF="node13.html">Visualizationnon-stationarity</A>
+<BR> <P>
+<H2><A NAME="SECTION00041000000000000000">Recurrence plots</A></H2>
+<P>
+Recurrence plots are a useful tool to identify structure in a data set in a
+time resolved way qualitatively. This can be intermittency (which one detects
+also by direct inspection), the temporary vicinity of a chaotic trajectory to
+an unstable periodic orbit, or non-stationarity.  They were introduced
+in&nbsp;[<A HREF="citation.html#Ruelle">37</A>] and investigated in much detail in [<A HREF="citation.html#Casdagli_recurr">38</A>],
+where you find many hints on how to interprete the results. Our routine
+<a href="../docs_c/recurr.html">recurr</a> simply scans the time series and marks each pair of time indices
+(<I>i</I>,<I>j</I>) with a black dot, whose corresponding pair of delay vectors has
+distance <IMG WIDTH=22 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline6759" SRC="img42.gif">. Thus in the (<I>i</I>,<I>j</I>)-plane, black dots indicate
+closeness. In an ergodic situation, the dots should cover the plane uniformly
+on average, whereas non-stationarity expresses itself by an overall tendency
+of the dots to be close to the diagonal. Of course, a return to a dynamical
+situation the system was in before becomes evident by a black region far away
+from the diagonal. In Fig.&nbsp;<A HREF="node14.html#figvisualrecur"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>, a recurrence plot is used
+to detect transient behavior at the beginning of a longer recording.
+<P>
+<P><blockquote><A NAME="4671">&#160;</A><IMG WIDTH=328 HEIGHT=319 ALIGN=BOTTOM ALT="figure568" SRC="img43.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figvisualrecur">&#160;</A>
+   Recurrence plot for Poincar&#233; section data from a vibrating string
+   experiment&nbsp;[<A HREF="citation.html#string">39</A>]. Above the diagonal an embedding in two dimensions
+   was used while below the diagonal, scalar time series values were compared.
+   In both cases the lighter shaded region at the beginning of the recording
+   indicates that these data are dynamically distinct from the rest. In this
+   particular case this was due to adjustments in the measurement apparatus.<BR>
+</blockquote><P>
+<P>
+For the purpose of stationary testing, the recurrence plot is not particularly
+sensitive to the choice of embedding. The contrast of the resulting images can
+be selected by the distance <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif"> and the percentage of dots that should
+be actually plotted. Various software involving the color rendering and
+quantification of recurrence plots is offered in DOS executable form by
+Webber&nbsp;[<A HREF="citation.html#webber">40</A>]. The interpretation of the often intriguing patterns
+beyond the detection and study of non-stationarity is still an open question.
+For suggestions for the study of nonstationary signals see&nbsp;[<A HREF="citation.html#habil">3</A>] and
+references given there.
+<P><HR><A NAME="tex2html212" HREF="node15.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html210" HREF="node13.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html204" HREF="node13.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html213" HREF="node15.html">Space-time separation plot</A>
+<B>Up:</B> <A NAME="tex2html211" HREF="node13.html">Visualizationnon-stationarity</A>
+<B> Previous:</B> <A NAME="tex2html205" HREF="node13.html">Visualizationnon-stationarity</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

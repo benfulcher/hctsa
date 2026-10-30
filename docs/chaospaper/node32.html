@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Gaussian kernel correlation integral</TITLE>
+<META NAME="description" CONTENT="Gaussian kernel correlation integral">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html399" HREF="node33.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html397" HREF="node30.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html393" HREF="node31.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html400" HREF="node33.html">Information dimension</A>
+<B>Up:</B> <A NAME="tex2html398" HREF="node30.html">Correlation dimension</A>
+<B> Previous:</B> <A NAME="tex2html394" HREF="node31.html">Takens-Theiler estimator</A>
+<BR> <P>
+<H3><A NAME="SECTION00081200000000000000">Gaussian kernel correlation integral</A></H3>
+<P>
+The correlation sum Eq.(<A HREF="node30.html#eqdim2c2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) can be regarded as an average density
+of points where the local density is obtained by a kernel estimator with a step
+kernel <IMG WIDTH=56 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7655" SRC="img152.gif">. A natural modification for small point sets is to
+replace the sharp step kernel by a smooth kernel function of <EM>bandwidth</EM>
+<IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">. A particularly attractive case that has been studied in the
+literature&nbsp;[<A HREF="citation.html#ghez1">80</A>] is given by the Gaussian kernel, that is,
+<IMG WIDTH=56 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7655" SRC="img152.gif"> is replaced by <IMG WIDTH=30 HEIGHT=22 ALIGN=BOTTOM ALT="tex2html_wrap_inline7661" SRC="img153.gif">.  The
+resulting Gaussian kernel correlation sum <IMG WIDTH=39 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7663" SRC="img154.gif">
+has the same scaling properties as the usual <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif">. It has been
+observed in&nbsp;[<A HREF="citation.html#habil">3</A>] that <IMG WIDTH=39 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7663" SRC="img154.gif"> can be
+obtained from <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif"> via
+<BR><A NAME="eqcg">&#160;</A><IMG WIDTH=500 HEIGHT=37 ALIGN=BOTTOM ALT="equation5759" SRC="img155.gif"><BR>
+without having to repeat the whole computation. If <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif"> is given
+at discrete values of <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">, the integrals in Eq.(<A HREF="node32.html#eqcg"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) can be
+carried out numerically by interpolating <IMG WIDTH=29 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7623" SRC="img142.gif"> with pure power laws
+. This is done in
+<a href="../docs_f/c2g.html">c2g</a> which uses a 15 point Gauss-Kronrod rule for the numerical integration.
+<P>
+<P><blockquote><A NAME="5947">&#160;</A><IMG WIDTH=343 HEIGHT=884 ALIGN=BOTTOM ALT="figure1650" SRC="img156.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figdim2">&#160;</A>
+   Dimension estimation for the (noise filtered) NMR laser data. Embedding
+   dimensions 2 to 7 are shown. From above: <B>(a)</B> slopes are determined by
+   straight line fits to the log-log plot of the correlation sum,
+   Eq.&nbsp;(<A HREF="node30.html#eqdim2c2"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>). <B>(b)</B> Takes-Theiler estimator of the same slope.
+   <B>(c)</B> Slopes are obtained by straight line fits to the Gaussian kernel
+   correlation sum, Eq.(<A HREF="node32.html#eqcg"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>). <B>(d)</B> Instead of the correlation
+   dimension, it has been attempted to estimate the information dimension.<BR>
+</blockquote><P><HR><A NAME="tex2html399" HREF="node33.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html397" HREF="node30.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html393" HREF="node31.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html400" HREF="node33.html">Information dimension</A>
+<B>Up:</B> <A NAME="tex2html398" HREF="node30.html">Correlation dimension</A>
+<B> Previous:</B> <A NAME="tex2html394" HREF="node31.html">Takens-Theiler estimator</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

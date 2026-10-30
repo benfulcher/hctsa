@@ -1,0 +1,182 @@
+<html>
+<head>
+<title>
+nstat_z
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>nstat_z
+</font>
+</h1>
+<hr>
+This program seeks for nonstationarity in a time series by dividing it
+into a number of segments and calculating the cross-forecast errors
+between the different segments. The model used for the forecast is
+zeroth order model as proposed by <a
+href="../chaospaper/citation.html#statio">Schreiber</a>.<p> 
+
+Since the usage of some (two) of the flags of this program is a bit
+peculiar, here some more detailed information about them. Say, the
+number of segments chosen is <font color=blue>N</font>. Then for all
+possible combinations of the <font color=blue>N</font> segments the
+forecast errors are calculated. Means for <font
+color=blue>N<sup>2</sup></font> combinations. Since this can be a
+large number and one might be only interested in some of all possible
+combinations, the combinations can be reduced with the <font
+color=red>-1</font> and the <font color=red>-2</font> flags. The
+values these options can take are either single numbers, or ranges
+separated by commas. A range looks like <font
+color=blue>n<sub>1</sub>-n<sub>2</sub></font> or like <font
+color=blue>+n</font>. To give some examples:
+<ul>
+<li><font color=blue>nstat_z file -# 10 -1 1</font><br>
+   means: Divide the 
+   data into 10 segments and use the first segment to forecast all segments.
+<li><font color=blue>nstat_z file -# 10 -1 1,3,7-9</font><br>
+    means: Divide the
+   data into 10 segments and use the first, the third and the seventh to the
+   ninth segments to forecast all segments</br>
+<li><font color=blue>nstat_z file -# 10 -1 +2</font><br>
+    means: Divide the
+   data into 10 segments and forecast all segments <font color=red>I</font>
+   using segments <font color=red>I-2</font> to <font color=red>I+2</font>. 
+</ul>
+In
+other words the <font color=blue>+n</font> defines a time window
+around to segment to be forecasted and only segments lying in this
+window are used for the forecast. If the 
+<font color=blue>+n</font> syntax is chosen, it can not be combined
+with other ranges or a number.
+The same works for the <font color=red>-2</font> flag, which specifies
+which segments are forecasted.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>nstat_z -# [other options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr bgcolor="pink">
+<th>-##
+<td>number of segments the data should be divided into
+<td>no default. has to be given
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>3
+</tr>
+<tr>
+<th>-d#
+<td>delay for the embedding
+<td>1
+</tr>
+<tr>
+<th>-1#
+<td>which segments should be used to forecast the others
+<td>1-(# of segments) (all)
+</tr>
+<tr>
+<th>-2#
+<td>which segments should be forecasted by the others
+<td>1-(# of segments) (all)
+</tr>
+<tr>
+<th>-n#
+<td>for how many reference points should the error be calculated
+<td>all
+</tr>
+<tr>
+<th>-k#
+<td>minimal numbers of neighbors for the fit
+<td>30
+</tr>
+<tr>
+<th>-r#
+<td>neighborhood size to start with
+<td>(data interval)/1000
+</tr>
+<tr>
+<th>-f#
+<td>factor to increase the neighborhood size<br> if not enough
+neighbors were found
+<td>1.2
+</tr>
+<tr>
+<th>-s#
+<td>step to be forecasted x<sub>n+step</sub>=av(x<sub>i+step</sub>)
+<td>1
+</tr>
+<tr>
+<th>-C#
+<td><a href="causality.html">width of causality window</a>
+<td>steps to be forecasted
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.nsz<br>
+(or stdin.nsz if stdin was read)<br>
+If no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+The output consists of a number of lines each of which consists of
+three columns:<br>
+<font color=blue>first column</font>: The index of the segment used for
+the forecast</br>
+<font color=blue>second column</font>: The index of the segment that was
+forecasted<br>
+<font color=blue>third column</font>: The cross-forecast error
+normalized to the standard deviation of the segment that was
+forecasted.
+<p>
+Before increasing the first index, an empty line is added to the
+file. Thus the file has a block structure which can be used to make 3d
+plots in gnuplot. Furthermore, the output format is suitable for
+clustering by <a href="../docs_f/cluster.html">cluster</a>.
+<hr>
+View the <a href="../../source_c/nstat_z.c"> C-sources</a>.
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

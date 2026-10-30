@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Delay coordinates</TITLE>
+<META NAME="description" CONTENT="Delay coordinates">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html132" HREF="node7.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html130" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html124" HREF="node5.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html133" HREF="node7.html">Embedding parameters</A>
+<B>Up:</B> <A NAME="tex2html131" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html125" HREF="node5.html">Phase space representation</A>
+<BR> <P>
+<H2><A NAME="SECTION00031000000000000000">Delay coordinates</A></H2>
+<P>
+The most important phase space reconstruction technique is the <EM>method of
+delays</EM>. Vectors in a new space, the embedding space, are formed from time
+delayed values of the scalar measurements:
+<BR><A NAME="eqdelay">&#160;</A><IMG WIDTH=500 HEIGHT=18 ALIGN=BOTTOM ALT="equation4416" SRC="img15.gif"><BR>
+The number <I>m</I> of elements is called the <EM>embedding dimension</EM>, the time
+<IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif"> is generally referred to as the <EM>delay</EM> or <EM>lag</EM>.  Celebrated
+embedding theorems by Takens&nbsp;[<A HREF="citation.html#takens">21</A>] and by Sauer et al.&nbsp;[<A HREF="citation.html#embed">22</A>]
+state that if the sequence <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6549" SRC="img14.gif"> does indeed consist of scalar measurements
+of the state of a dynamical system, then under certain genericity assumptions,
+the time delay embedding provides a one-to-one image of the original set
+<IMG WIDTH=23 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6557" SRC="img17.gif">, provided <I>m</I> is large enough.
+<P>
+Time delay embeddings are used in almost all methods described in this
+paper. The implementation is straightforward and does not require further
+explanation.  If <I>N</I> scalar measurements are available, the number of embedding
+vectors is only <IMG WIDTH=96 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6563" SRC="img18.gif">. This has to be kept in mind for the correct
+normalization of averaged quantities. There is a large literature on the
+``optimal'' choice of the embedding parameters <I>m</I> and <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6553" SRC="img16.gif">. It turns out,
+however, that what constitutes the optimal choice largely depends on the
+application. We will therefore discuss the choice of embedding parameters
+occasionally together with other algorithms below.
+<P>
+<P><blockquote><A NAME="4404">&#160;</A><IMG WIDTH=222 HEIGHT=481 ALIGN=BOTTOM ALT="figure190" SRC="img7.gif"><br>
+<STRONG>Figure:</STRONG> <A NAME="figmcgd">&#160;</A>
+   Time delay representation of a human magneto-cardiogram. In the upper panel,
+   a short delay time of 10&nbsp;ms is used to resolve the fast waveform
+   corresponding to the contraction of the ventricle. In the lower panel, the
+   slower recovery phase of the ventricle (small loop) is better resolved due
+   to the use of a slightly longer delay of 40&nbsp;ms.  Such a plot can be
+   conveniently be produced by a graphic tool such as 
+   <a href="http://www.cs.dartmouth.edu/gnuplot_info.html">gnuplot</a> without
+   generating extra data files.<BR>
+</blockquote><P>
+A stand-alone version of the delay procedure (<a
+href="../docs_c/delay.html">delay</a>) is an
+important tool for the visual inspection of data, even though visualization is
+restricted to two dimensions, or at most two-dimensional projections of
+three-dimensional renderings. A good unfolding already in two dimensions may
+give some guidance about a good choice of the delay time for higher
+dimensional embeddings.  As an example let us show two different
+two-dimensional delay coordinate representations of a human magneto-cardiogram
+(Fig.&nbsp;<A HREF="node6.html#figmcgd"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>). Note that we do neither assume nor claim that the
+magneto- (or electro-) cardiogram is deterministic or even chaotic. Although
+in the particular case of cardiac recordings the use of time delay embeddings
+can be motivated theoretically&nbsp;[<A HREF="citation.html#marcus">23</A>], we here only want to use the
+embedding technique as a visualization tool.
+<P>
+<HR><A NAME="tex2html132" HREF="node7.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html130" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html124" HREF="node5.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html133" HREF="node7.html">Embedding parameters</A>
+<B>Up:</B> <A NAME="tex2html131" HREF="node5.html">Phase space representation</A>
+<B> Previous:</B> <A NAME="tex2html125" HREF="node5.html">Phase space representation</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

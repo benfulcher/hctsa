@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Combinatorial minimisation and accuracy</TITLE>
+<META NAME="description" CONTENT="Combinatorial minimisation and accuracy">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html275" HREF="node21.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html273" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html267" HREF="node19.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html276" HREF="node21.html">The curse of accuracy</A>
+<B>Up:</B> <A NAME="tex2html274" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html268" HREF="node19.html">Example: avoiding periodicity artefacts</A>
+<BR> <P>
+<H2><A NAME="SECTION00054000000000000000">Combinatorial minimisation and accuracy</A></H2>
+<P>
+In principle, simulated annealing is able to reach arbitrary accuracy at the
+expense of computer time. We should, however, remark on a few points.  Unlike
+other minimisation problems, we are not really interested in the solutions that
+put <I>E</I>=0 exactly. Most likely, these are the data set itself and a few simple
+transformations of it that preserve the cost function (e.g. a time reversed
+copy). On the other hand, combinatorics makes it very unlikely that we ever
+reach one of these few of the <I>N</I>! permutations, unless <I>N</I> is really small or
+the constraints grossly over-specify the problem.  This can be the case, for
+example, if we include <EM>all</EM> possible lags of the autocorrelation function,
+which gives as many (nonlinear) equations as unknowns, <I>I</I>=<I>N</I>. These may close
+for small <I>N</I> in the space of permutations.  In such extreme situations, it is
+possible to include extra cost terms penalising closeness to one of the trivial
+transformations of the data.  Let us note that if the surrogates are ``too
+similar'' to the data, this does not in itself affect the validity of the
+test. Only the discrimination power may be severely reduced.
+<P>
+Now, if we don't want to reach <I>E</I>=0, how can we be sure that there are enough
+independent realisations with <IMG WIDTH=42 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2244" SRC="img115.gif">? The theoretical answer depends on
+the form of the constraints in a complicated way and cannot be given in
+general. We can, however, offer a heuristic argument that the number of
+configurations with <I>E</I> smaller than some <IMG WIDTH=24 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2248" SRC="img116.gif"> grows fast for large <I>N</I>.
+Suppose that for large <I>N</I> the probability distribution of <I>E</I> converges to an
+asymptotic form <I>p</I>(<I>E</I>). Assume further that <IMG WIDTH=288 HEIGHT=33 ALIGN=MIDDLE ALT="tex2html_wrap_inline2258" SRC="img117.gif"> is nonzero but maybe
+very small. This is evidently true for autocorrelations, for example. While
+thus the probability to find <IMG WIDTH=59 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline2260" SRC="img118.gif"> in a random draw from the
+distribution of the data may be extremely small, say <IMG WIDTH=107 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2262" SRC="img119.gif"> at 10 sigmas from the mean energy, the total number of
+permutations, figuring as the number of draws, grows as <IMG WIDTH=138 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2264" SRC="img120.gif">, that is, much faster than exponentially. Thus, we expect
+the number of permutations with <IMG WIDTH=59 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline2260" SRC="img118.gif"> to be <IMG WIDTH=79 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2268" SRC="img121.gif">.  For example, <IMG WIDTH=156 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2270" SRC="img122.gif">.
+<P>
+In any case, we can always monitor the convergence of the cost function to
+avoid spurious results due to residual inaccuracy in the surrogates.  As we
+will discuss below, it can also be a good idea to test the surrogates with a
+linear test statistic before performing the actual nonlinearity test.
+<P>
+<HR><A NAME="tex2html275" HREF="node21.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html273" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html267" HREF="node19.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html276" HREF="node21.html">The curse of accuracy</A>
+<B>Up:</B> <A NAME="tex2html274" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html268" HREF="node19.html">Example: avoiding periodicity artefacts</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

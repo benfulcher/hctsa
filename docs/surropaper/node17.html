@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Null hypotheses, constraints, and cost functions</TITLE>
+<META NAME="description" CONTENT="Null hypotheses, constraints, and cost functions">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html245" HREF="node18.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html243" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html237" HREF="node16.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html246" HREF="node18.html">Computational issues of simulated </A>
+<B>Up:</B> <A NAME="tex2html244" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html238" HREF="node16.html">General constrained randomisation</A>
+<BR> <P>
+<H2><A NAME="SECTION00051000000000000000">Null hypotheses, constraints, and cost functions</A></H2>
+<P>
+As we have discussed previously, we will often have to specify a null
+hypothesis in terms of a complete set of observable properties of the data.
+Only in specific cases (e.g. the two point autocorrelation function), there is
+a one-to-one correspondence to a class of models (here the ARMA process).  In
+any case, if <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1962" SRC="img20.gif"> denotes a surrogate time series, the
+constraints will most often be of (or can be brought into) the form
+<BR><A NAME="eqF">&#160;</A><IMG WIDTH=500 HEIGHT=16 ALIGN=BOTTOM ALT="equation1064" SRC="img81.gif"><BR>
+Such constraints can always be turned into a cost function
+<BR><A NAME="eqE">&#160;</A><IMG WIDTH=500 HEIGHT=54 ALIGN=BOTTOM ALT="equation1066" SRC="img82.gif"><BR>
+The fact that <IMG WIDTH=56 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2102" SRC="img83.gif"> has a global minimum when the constraints
+are fulfilled is unaffected by the choice of the weights <IMG WIDTH=46 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline2104" SRC="img84.gif"> and the
+order <I>q</I> of the average.  The least squares or <IMG WIDTH=17 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2108" SRC="img85.gif"> average is obtained at
+<I>q</I>=2, <IMG WIDTH=16 HEIGHT=14 ALIGN=BOTTOM ALT="tex2html_wrap_inline2112" SRC="img86.gif"> at <I>q</I>=1 and the maximum distance when <IMG WIDTH=47 HEIGHT=16 ALIGN=MIDDLE ALT="tex2html_wrap_inline2116" SRC="img87.gif">. Geometric
+averaging is also possible (and can be formally obtained by taking the limit
+<IMG WIDTH=40 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2118" SRC="img88.gif"> in a proper way).  We have experimented with different choices of <I>q</I>
+but we haven't found a choice that is uniformly superior to others. It seems
+plausible to give either uniform weights or to enhance those constraints which
+are particularly difficult to fulfil. Again, conclusive empirical results are
+still lacking.
+<P>
+Consider as an example the constraint that the sample autocorrelation function
+of the surrogate <IMG WIDTH=114 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2122" SRC="img89.gif">
+(data rescaled to zero mean and unit variance) are the same as those of the
+data, <IMG WIDTH=113 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2124" SRC="img90.gif">. This is done by specifying zero
+discrepancy as a constraint <IMG WIDTH=296 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2126" SRC="img91.gif">. If
+the correlations decay fast, <IMG WIDTH=29 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2128" SRC="img92.gif"> can be restricted,
+otherwise <IMG WIDTH=93 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline2130" SRC="img93.gif"> (the largest available lag).  Thus, a
+possible cost function could read
+<BR><A NAME="eqcost">&#160;</A><IMG WIDTH=500 HEIGHT=21 ALIGN=BOTTOM ALT="equation1072" SRC="img94.gif"><BR>
+Other choices of <I>q</I> and the weights are of course also possible.
+<P>
+In all the cases considered in this paper, one constraint will be that the
+surrogates take on the same values as the data but in different time order.
+This ensures that data and surrogates can equally likely be drawn from the same
+(unknown) single time probability distribution. This particular constraint is
+not included in the cost function but identically fulfilled by considering only
+permutations without replacement of the data for minimisation.
+<P>
+By introducing a cost function, we have turned a difficult nonlinear, high
+dimensional root finding problem (<A HREF="node17.html#eqF">21</A>) into a minimisation problem
+(<A HREF="node17.html#eqE">22</A>). This leads to extremely many false minima whence such a strategy
+is discouraged for general root finding problems&nbsp;[<A HREF="node36.html#Press92">42</A>]. Here, the
+situation is somewhat different since we need to solve Eq.(<A HREF="node17.html#eqF">21</A>) only
+over the set of all permutations of <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif">. Although this set is big, it is
+still discrete and powerful combinatorial minimisation algorithms are
+available that can deal with false minima very well. We choose to minimise
+<IMG WIDTH=56 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2102" SRC="img83.gif"> among all permutations <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1962" SRC="img20.gif"> of the
+original time series <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1972" SRC="img24.gif"> using the method of <EM>simulated annealing</EM>.
+Configurations are updated by exchanging pairs in <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline1962" SRC="img20.gif">. The
+annealing scheme will decide which changes to accept and which to reject. With
+an appropriate cooling scheme, the annealing procedure can reach any desired
+accuracy. Apart from simulated annealing, genetic algorithms&nbsp;[<A HREF="node36.html#genetic">35</A>]
+have become very popular for this kind of problems and there is no reason why
+they couldn't be used for the present purpose as well.
+<P>
+<HR><A NAME="tex2html245" HREF="node18.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html243" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html237" HREF="node16.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html246" HREF="node18.html">Computational issues of simulated </A>
+<B>Up:</B> <A NAME="tex2html244" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html238" HREF="node16.html">General constrained randomisation</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

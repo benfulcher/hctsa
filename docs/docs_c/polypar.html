@@ -1,0 +1,79 @@
+<html>
+<head>
+<title>
+polypar
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>polypar</font>
+</h1>
+<hr>
+This program creates a parameter file which can be used by the programs:
+<a href="polynomp.html">polynomp</a> and <a href="polyback.html">polyback</a>.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>polypar [Options]</font>
+<p>
+Everything not being a valid option will be ignored, since there is no 
+data required by the program.
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-m#
+<td>dimension of the polynomial
+<td>2
+</tr>
+<tr>
+<th>-p#
+<td>order of the polynomial
+<td>3
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>parameter.pol
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output</h2>
+<b>The output looks something like this:</b><br>
+Each line looks like:<br>
+<font size ="+2">
+i<sub>1</sub> i<sub>2</sub> ... i<sub>d</sub>
+</font><br>
+These i's define the order of the delay vector entries in the term of the polynomial. This means the above line defines a term (let x<sub>n</sub> be the time
+series element at time n and let the delay be 1):<br>
+<font size ="+2">
+x<sub>n</sub><sup>i<sub>1</sub></sup>
+x<sub>n-1</sub><sup>i<sub>2</sub></sup>...
+x<sub>n-m+1</sub><sup>i<sub>d</sub></sup>
+</font>
+<hr>
+View the <a href="../../source_c/polypar.c">C source</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>
+

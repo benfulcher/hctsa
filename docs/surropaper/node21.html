@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>The curse of accuracy</TITLE>
+<META NAME="description" CONTENT="The curse of accuracy">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html283" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html281" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html277" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html284" HREF="node22.html">Various Examples</A>
+<B>Up:</B> <A NAME="tex2html282" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html278" HREF="node20.html">Combinatorial minimisation and accuracy</A>
+<BR> <P>
+<H2><A NAME="SECTION00055000000000000000">The curse of accuracy</A></H2>
+<A NAME="secaccuracy">&#160;</A>
+Strictly speaking, the concept of constrained realisations requires the
+constraints to be fulfilled <EM>exactly</EM>, a practical impossibility. Most of
+the research efforts reported in this article have their origin in the attempt
+to increase the accuracy with which the constraints are implemented, that is,
+to minimise the bias resulting from any remaining discrepancy. Since most
+measures of nonlinearity are also sensitive to linear correlations, a side
+effect of the reduced bias is a reduced variance of such
+estimators. Paradoxically, thus the enhanced accuracy may result in false
+rejections of the null hypothesis on the ground of tiny differences in some
+nonlinear characteristics. This important point has been recently put forth by
+Kugiumtzis&nbsp;[<A HREF="node36.html#dimitris">39</A>].
+<P>
+Consider the highly correlated autoregressive process <IMG WIDTH=292 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2272" SRC="img123.gif">, measured by the function
+<IMG WIDTH=138 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2274" SRC="img124.gif"> and then normalised to zero mean and unit variance.  The
+strong correlation together with the rather strong static nonlinearity makes
+this a very difficult data set for the generation of
+surrogates. Figure&nbsp;<A HREF="node21.html#figaccuracy">12</A> shows the bias and variance for a <EM>
+linear</EM> statistic, the unit lag autocorrelation <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif">, Eq.(<A HREF="node14.html#eqcp">15</A>), as
+compared to its goal value given by the data.  The left part of
+Fig.&nbsp;<A HREF="node21.html#figaccuracy">12</A> shows <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif"> versus the iteration count <I>i</I> for 200
+iterative surrogates, <I>i</I>=1 roughly corresponding to AAFT surrogates.  Although
+the mean accuracy increases dramatically compared to the first iteration
+stages, the data consistently remains outside a 2<IMG WIDTH=9 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline2284" SRC="img126.gif"> error bound.  Since
+nonlinear parameters will also pick up linear correlations, we have to expect
+spurious results in such a case. In the right part, annealed surrogates are
+generated with a cost function <IMG WIDTH=215 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline2286" SRC="img127.gif">. The bias and variance of <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif"> are
+plotted versus the cost&nbsp;<I>E</I>. Since the cost function involves <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif">, it is
+not surprising that we see good convergence of the bias. It is also noteworthy
+that the variance is in any event large enough to exclude spurious results due
+to remaining discrepancy in the linear correlations.
+<P>
+<blockquote><A NAME="961">&#160;</A><IMG WIDTH=345 HEIGHT=189 ALIGN=BOTTOM ALT="figure1076" SRC="img128.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figaccuracy">&#160;</A>
+   Bias and variance of unit lag autocorrelation <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif"> for ensembles of
+   surrogates.  Left part: <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif"> plotted versus the iteration count <I>i</I> for
+   200 iterative surrogates. The AAFT method gives accuracies comparable to the
+   value obtained for <I>i</I>=1.  Right part: <IMG WIDTH=37 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2276" SRC="img125.gif"> plotted versus the goal
+   value of the cost function for 20 annealed surrogates.  The horizontal line
+   indicates the sample value for the data sequence. See text for discussion.<BR>
+</blockquote>
+<P>
+Kugiumtzis&nbsp;[<A HREF="node36.html#dimitris">39</A>] suggests to test the validity of the surrogate
+sample by performing a test using a linear statistic for normalisation. For the
+data shown in Fig.&nbsp;<A HREF="node21.html#figaccuracy">12</A>, this would have detected the lack of
+convergence of the iterative surrogates.  Currently, this seems to be the only
+way around the problem and we thus recommend to follow his suggestion. With the
+much more accurate annealed surrogates, we haven't so far seen examples of
+dangerous remaining inaccuracy, but we cannot exclude their possibility. If
+such a case occurs, it may be possible to generate unbiased ensembles of
+surrogates by specifying a cost function that explicitly minimises the bias.
+This would involve the whole collection of <I>M</I> surrogates at the same time,
+including extra terms like
+<BR><IMG WIDTH=500 HEIGHT=53 ALIGN=BOTTOM ALT="equation1077" SRC="img129.gif"><BR>
+Here, <IMG WIDTH=44 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2306" SRC="img130.gif"> denotes the autocorrelation function of the
+<I>m</I>-th surrogate.  In any event, this will be a very cumbersome procedure, in
+terms of implementation and in terms of execution speed and it is questionable
+if it is worth the effort.
+<P>
+<HR><A NAME="tex2html283" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html281" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html277" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html284" HREF="node22.html">Various Examples</A>
+<B>Up:</B> <A NAME="tex2html282" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html278" HREF="node20.html">Combinatorial minimisation and accuracy</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

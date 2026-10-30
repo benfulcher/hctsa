@@ -1,0 +1,144 @@
+<html>
+<head>
+<title>
+false_nearest
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>false_nearest
+</font>
+</h1>
+<hr>
+This program looks for the nearest neighbors of all data points in m
+dimensions and iterates these neighbors one step (more precisely delay
+steps) into the future. If
+the ratio of the distance of the iteration and that of the
+nearest neighbor exceeds a given threshold the point is marked as a
+wrong neighbor. The output is the fraction of <a href="../chaospaper/node9.html">false neighbors</a> for the
+specified embedding dimensions (see <a href="../chaospaper/citation.html#kennel92">
+Kennel et al.</a>).
+<p>
+<b><font color=red>Note:</font></b>
+We implemented a new second criterion.
+If the distance to the nearest neighbor becomes smaller than the
+standard deviation of the data devided by the threshold, the point is
+omitted. This turns out to be a stricter criterion, but can show the
+effect that for increasing embedding dimensions the number of points
+which enter the statistics is so small, that the whole statistics is
+meanlingless. <b>Be aware of this!</b>
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>false_nearest [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>ignore the first # rows
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>minimal embedding dimensions of the vectors
+<td>1
+</tr>
+<tr>
+<th>-M#,#
+<td># of components, max. embedding dimension of the vectors
+<td>1,5
+</tr>
+<tr>
+<th>-d#
+<td>delay of the vectors
+<td>1
+</tr>
+<tr>
+<th>-f#
+<td>ratio factor
+<td>2.0
+</tr>
+<tr>
+<th>-t#
+<td>theiler window
+<td>0
+</tr>
+<tr>
+<th>-o[#]
+<td><a href=../general.html#outfile>output file name</a>
+<td>without file name: 'datafile'.fnn<br>
+(or stdin.del if stdin was read)<br>
+If no -o is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages<br>
+&nbsp;&nbsp;2: add information about the current state of the program
+<td>3
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td> none
+</tr>
+</table>
+</center>
+<hr>
+<p>
+<h2 align=center>Construction of the vectors</h2>
+In case of a multivariate input the vectors are built in the following
+way (n= number of components):
+<center>
+(x<sub>1</sub>(i),...,x<sub>n</sub>(i),
+x<sub>1</sub>(i+delay),...,x<sub>n</sub>(i+delay),...,
+x<sub>1</sub>(i+(maxemb-1)*delay),...,x<sub>n</sub>(i+(maxemb-1)*delay))
+</center>
+The minimal embedding dimension given by the <font color=red>-m</font> flag
+just refers to the embedding of the components. That means if you
+start with a three component vector and give <font color=red> -m1
+-M3,3 -d1</font> then the program starts with <br>
+(x<sub>1</sub>(t),x<sub>2</sub>(t),x<sub>3</sub>(t))<br>
+for the first test, then it takes<br>
+(x<sub>1</sub>(t),x<sub>2</sub>(t),x<sub>3</sub>(t),x<sub>1</sub>(t+1),
+x<sub>2</sub>(t+1),x<sub>3</sub>(t+1),)<br>
+for the next case and so forth.
+</p>
+<hr>
+<p>
+<h2 align=center>Description of the Output:</h2>
+<b>output on stdout (or in the file):</b><br>
+first column: the dimension (counted like shown above) <br>
+second column: the fraction of false nearest neighbors<br>
+third column: the average size of the neighborhood<br>
+fourth column: the average of the squared size of the neighborhood<br>
+<b>output on stderr:</b><br>
+A statistics on how many points were found up to the given
+neighborhood size.
+</p>
+<hr>
+View the <a href="../../source_c/false_nearest.c">C source</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>
+

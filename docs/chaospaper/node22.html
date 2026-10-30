@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Nonlinear noise reduction</TITLE>
+<META NAME="description" CONTENT="Nonlinear noise reduction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html293" HREF="node23.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html291" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html285" HREF="node21.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html294" HREF="node23.html">Simple nonlinear noise reduction</A>
+<B>Up:</B> <A NAME="tex2html292" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html286" HREF="node21.html">Global function fits</A>
+<BR> <P>
+<H1><A NAME="SECTION00060000000000000000">Nonlinear noise reduction</A></H1>
+<A NAME="secnoise">&#160;</A>
+Filtering of signals from nonlinear systems requires the use of special
+methods since the usual spectral or other linear filters may interact
+unfavorably with the nonlinear structure. Irregular signals from nonlinear
+sources exhibit genuine broad band spectra and there is no justification to
+identify any continuous component in the spectrum as noise. Nonlinear noise
+reduction does not rely on frequency information in order to define the
+distinction between signal and noise. Instead, structure in the reconstructed
+phase space will be exploited. General serial dependencies among the
+measurements <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6549" SRC="img14.gif"> will cause the delay vectors <IMG WIDTH=30 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline6675" SRC="img35.gif"> to fill the
+available <I>m</I>-dimensional embedding space in an inhomogeneous way. Linearly
+correlated Gaussian random variables will for example be distributed according
+to an anisotropic multivariate Gaussian distribution. Linear geometric
+filtering in phase space seeks to identify the principal directions of this
+distribution and project onto them, see Sec.&nbsp;<A HREF="node12.html#secsvdfilter"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. Nonlinear
+noise reduction takes into account that nonlinear signals will form curved
+structures in delay space.  In particular, noisy <EM>deterministic</EM> signals
+form smeared-out lower dimensional manifolds. Nonlinear phase space filtering
+seeks to identify such structures and project onto them in order to reduce
+noise.
+<P>
+There is a rich literature on nonlinear noise reduction methods. Two articles
+of review character are available, one by Kostelich and Schreiber&nbsp;[<A HREF="citation.html#ks">57</A>],
+and one by Davies&nbsp;[<A HREF="citation.html#Davies">58</A>]. We refer the reader to these articles for
+further references and for the discussion of approaches not described in the
+present article. Here we want to concentrate on two approaches that represent
+the geometric structure in phase space by local approximation. The first and
+simplest does so to constant order, the more sophisticated uses local linear
+subspaces plus curvature corrections.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html295" HREF="node23.html#SECTION00061000000000000000">Simple nonlinear noise reduction</A>
+<LI> <A NAME="tex2html296" HREF="node24.html#SECTION00062000000000000000">Locally projective nonlinear noise reduction</A>
+<LI> <A NAME="tex2html297" HREF="node25.html#SECTION00063000000000000000">Nonlinear noise reduction in a data stream</A>
+</UL>
+<HR><A NAME="tex2html293" HREF="node23.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html291" HREF="TiseanHTML.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html285" HREF="node21.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html294" HREF="node23.html">Simple nonlinear noise reduction</A>
+<B>Up:</B> <A NAME="tex2html292" HREF="TiseanHTML.html">Practical implementation of nonlinear </A>
+<B> Previous:</B> <A NAME="tex2html286" HREF="node21.html">Global function fits</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

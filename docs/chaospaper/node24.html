@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Locally projective nonlinear noise reduction</TITLE>
+<META NAME="description" CONTENT="Locally projective nonlinear noise reduction">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html316" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html314" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html308" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html317" HREF="node25.html">Nonlinear noise reduction in </A>
+<B>Up:</B> <A NAME="tex2html315" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html309" HREF="node23.html">Simple nonlinear noise reduction</A>
+<BR> <P>
+<H2><A NAME="SECTION00062000000000000000">Locally projective nonlinear noise reduction</A></H2>
+<P>
+A more sophisticated method makes use of the hypotheses that the measured data
+is composed of the output of a low-dimensional dynamical system and of random
+or high-dimensional noise. This means that in an arbitrarily high-dimensional
+embedding space the deterministic part of the data would lie on a
+low-dimensional manifold, while the effect of the noise is to spread the data
+off this manifold. If we suppose that the amplitude of the noise is
+sufficiently small, we can expect to find the data distributed closely around
+this manifold. The idea of the projective nonlinear noise reduction scheme is
+to identify the manifold and to project the data onto it. The strategies
+described here go back to Ref.&nbsp;[<A HREF="citation.html#on">61</A>]. A realistic case study is detailed
+in Ref.&nbsp;[<A HREF="citation.html#buzug">62</A>].
+<P>
+Suppose the dynamical system, Eq.&nbsp;(<A HREF="node5.html#eqode"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>) or Eq.&nbsp;(<A HREF="node5.html#eqmap"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>), form a
+<I>q</I>-dimensional manifold <IMG WIDTH=18 HEIGHT=13 ALIGN=BOTTOM ALT="tex2html_wrap_inline7171" SRC="img78.gif"> containing the trajectory. According to the
+embedding theorems, there exists a one-to-one image of the attractor
+ in the embedding space, if the embedding dimension is sufficiently
+high. Thus, if the measured time series were not corrupted with noise, all the
+embedding vectors <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7173" SRC="img79.gif"> would lie inside another manifold
+<IMG WIDTH=18 HEIGHT=16 ALIGN=BOTTOM ALT="tex2html_wrap_inline7175" SRC="img80.gif"> in the embedding space. Due to the noise
+this condition is no longer fulfilled. The idea of the locally projective noise
+reduction scheme is that for each <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7173" SRC="img79.gif"> there exists a correction
+<IMG WIDTH=21 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7179" SRC="img81.gif">, with <IMG WIDTH=36 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7181" SRC="img82.gif"> small, in such a way that <IMG WIDTH=95 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline7183" SRC="img83.gif"> and that <IMG WIDTH=21 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7179" SRC="img81.gif"> is orthogonal
+on <IMG WIDTH=18 HEIGHT=16 ALIGN=BOTTOM ALT="tex2html_wrap_inline7175" SRC="img80.gif">. Of course a projection to the manifold can only be a
+reasonable concept if the vectors are embedded in spaces which are higher
+dimensional than the manifold <IMG WIDTH=18 HEIGHT=16 ALIGN=BOTTOM ALT="tex2html_wrap_inline7175" SRC="img80.gif">. Thus we have to over-embed in
+<I>m</I>-dimensional spaces with <I>m</I>&gt;<I>q</I>.
+<P>
+The notion of orthogonality depends on the metric used. Intuitively one would
+think of using the Euclidean metric. But this is not necessarily the best
+choice. The reason is that we are working with delay vectors which contain
+temporal information.  Thus even if the middle parts of two delay
+vectors are close, the late parts could be far away from each other due to the
+influence of the positive Lyapunov exponents, while the first parts could
+diverge due the negative ones. Hence it is usually desirable to correct only
+the center part of delay vectors and leave the outer parts mostly unchanged,
+since their divergence is not only a consequence of the noise, but also of the
+dynamics itself. It turns out that for most applications it is sufficient to
+fix just the first and the last component of the delay vectors and correct the
+rest. This can be expressed in terms of a metric tensor <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7195" SRC="img84.gif"> which we
+define to be&nbsp;[<A HREF="citation.html#on">61</A>]
+<BR><IMG WIDTH=500 HEIGHT=39 ALIGN=BOTTOM ALT="equation5225" SRC="img85.gif"><BR>
+where <I>m</I> is the dimension of the ``over-embedded'' delay vectors.
+<P>
+Thus we have to solve the minimization problem
+<BR><IMG WIDTH=500 HEIGHT=36 ALIGN=BOTTOM ALT="equation5227" SRC="img86.gif"><BR>
+with the constraints
+<BR><IMG WIDTH=500 HEIGHT=19 ALIGN=BOTTOM ALT="equation5229" SRC="img87.gif"><BR>
+and
+<BR><IMG WIDTH=500 HEIGHT=20 ALIGN=BOTTOM ALT="equation5231" SRC="img88.gif"><BR>
+where the <IMG WIDTH=17 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline7199" SRC="img89.gif"> are the normal vectors of <IMG WIDTH=18 HEIGHT=16 ALIGN=BOTTOM ALT="tex2html_wrap_inline7175" SRC="img80.gif"> at the point
+<IMG WIDTH=57 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7203" SRC="img90.gif">.
+<P>
+This ideas are realized in the programs <a
+href="../docs_c/ghkss.html">ghkss</a>, and <a
+href="../docs_f/project.html">project</a> in
+TISEAN. While the first two work as <EM>a posteriori</EM> filters on complete
+data sets, the last one can be used in a data stream. This means that it is
+possible to do the corrections online, while the data is coming in (for more
+details see section&nbsp;<A HREF="node25.html#subsecnoise_stream"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>).  All three algorithms mentioned
+above correct for curvature effects. This is done by either post-processing the
+corrections for the delay vectors (<a href="../docs_c/ghkss.html">ghkss</a>) or by preprocessing the centres of
+mass of the local neighborhoods (<a href="../docs_f/project.html">project</a>).
+<P>
+The idea used in the <a href="../docs_c/ghkss.html">ghkss</a> program is the following. Suppose the manifold
+were strictly linear. Then, provided the noise is white, the corrections in the
+vicinity of a point on the manifold would point in all directions with the same
+probability. Thus, if we added all the corrections <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7205" SRC="img91.gif"> we expect
+them to sum to zero (or <IMG WIDTH=60 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7207" SRC="img92.gif">). On the other
+hand, if the manifold is curved, we expect that there is a trend towards the
+centre of curvature (<IMG WIDTH=73 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7209" SRC="img93.gif">). Thus, to correct for this trend each
+correction <IMG WIDTH=12 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline7205" SRC="img91.gif"> is replaced by
+<IMG WIDTH=59 HEIGHT=22 ALIGN=MIDDLE ALT="tex2html_wrap_inline7213" SRC="img94.gif">.
+<P>
+A different strategy is used in the program <a href="../docs_f/project.html">project</a>. The projections are
+done in a local coordinate system which is defined by the condition that the
+average of the vectors in the neighborhood is zero. Or, in other words, the
+origin of the coordinate systems is the centre of mass <IMG WIDTH=36 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7215" SRC="img95.gif"> of the neighborhood <IMG WIDTH=11 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline6891" SRC="img49.gif">. This centre of mass has a
+bias towards the centre of the curvature&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>]. Hence, a
+projection would not lie on the tangent at the manifold, but on a secant. Now
+we can compute the centre of mass of these points in the neighborhood of <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline7173" SRC="img79.gif">. Let us call it <IMG WIDTH=48 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7221" SRC="img96.gif">. Under
+fairly mild assumptions this point has twice the distance from the manifold
+then <IMG WIDTH=36 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7215" SRC="img95.gif">. To correct for the bias the origin of
+the local coordinate system is set to the point: <IMG WIDTH=114 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline7225" SRC="img97.gif">.
+<P>
+The implementation and use of locally projective noise reduction as realized
+in <a href="../docs_f/project.html">project</a> and <a href="../docs_c/ghkss.html">ghkss</a> is described in detail in Refs.&nbsp;[<A HREF="citation.html#on">61</A>, <A HREF="citation.html#buzug">62</A>].
+Let us recall here the most important parameters that have to be set
+individually for each time series. The embedding parameters are usually chosen
+quite differently from other applications since considerable over-embedding may
+lead to better noise averaging. Thus, the delay time is preferably set to unity
+and the embedding dimension is chosen to provide embedding windows of
+reasonable lengths. Only for highly oversampled data (like the
+magneto-cardiogram, Fig.&nbsp;<A HREF="node25.html#figmcgnoise"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>, at about 1000 samples per cycle),
+larger delays are necessary so that a substantial fraction of a cycle can be
+covered without the need to work in prohibitively high dimensional spaces.
+Next, one has to decide how many dimensions <I>q</I> to leave for the manifold
+supposedly containing the attractor. The answer partly depends on the purpose
+of the experiment. Rather brisk projections can be optimal in the sense of
+lowest residual deviation from the true signal. Low rms error can however 
+coexist with systematic distortions of the attractor structure. Thus for a
+subsequent dimension calculation, a more conservative choice would be in order.
+Remember however that points are only moved <EM>towards</EM> the local linear
+subspace and too low a value of <I>q</I> does not do as much harm as may be though.
+<P>
+<P><blockquote><A NAME="5290">&#160;</A><IMG WIDTH=222 HEIGHT=493 ALIGN=BOTTOM ALT="figure1159" SRC="img98.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="fignoise_opt_raser">&#160;</A>
+   Two-dimensional representation of the NMR Laser data  (top) and the 
+   result of the <a href="../docs_c/ghkss.html">ghkss</a> algorithm (bottom) after three iterations.<BR>
+</blockquote><P>
+<P>
+The noise amplitude to be removed can be selected to some degree by the choice
+of the neighborhood size. In fact, nonlinear projective filtering can be seen
+independently of the dynamical systems background as filtering by amplitude
+rather than by frequency or shape. To allow for a clear separation of noise and
+signal directions locally, neighborhoods should be at least as large as the
+supposed noise level, rather larger. This of course competes with curvature
+effects. For small initial noise levels, it is recommended to also specify a
+minimal number of neighbors in order to permit stable linearizations.
+Finally, we should remark that in successful cases most of the filtering is
+done within the first one to three iterations. Going further is potentially
+dangerous since further corrections may lead mainly to distortion.
+One should watch the rms correction in each iteration and stop as soon as it
+doesn't decrease substantially any more.
+<P>
+As an example for nonlinear noise reduction we treat the data obtained from an
+NMR laser experiment&nbsp;[<A HREF="citation.html#raser">63</A>]. Enlargements of two-dimensional delay
+representations of the data are shown in Fig.&nbsp;<A HREF="node24.html#fignoise_opt_raser"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A>. The
+upper panel shows the raw experimental data which contains about 1.1% of
+noise. The lower panel was produced by applying three iterations of the noise
+reduction scheme. The embedding dimension was <I>m</I>=7, the vectors were projected
+down to two dimensions. The size of the local neighborhoods were chosen such
+that at least 50 neighbors were found.  One clearly sees that the fractal
+structure of the attractor is resolved fairly well.
+<P>
+<P><blockquote><A NAME="5376">&#160;</A><IMG WIDTH=236 HEIGHT=488 ALIGN=BOTTOM ALT="figure1231" SRC="img99.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="fignoise_opt_breath">&#160;</A>
+   Two-dimensional representation of a pure Gaussian process (top) and the
+   outcome of the <a href="../docs_c/ghkss.html">ghkss</a> algorithm (bottom) after 10 iterations. Projections
+   from <I>m</I>=7 down to two dimensions were performed.<BR>
+</blockquote><P>
+<P>
+The main assumption for this algorithm to work is that the data is well
+approximated by a low-dimensional manifold. If this is not the case it is
+unpredictable what results are created by the algorithm. In the absence of a
+real manifold, the algorithm must pick statistical fluctuations and spuriously
+interprets them as structure.  Figure&nbsp;<A HREF="node24.html#fignoise_opt_breath"><IMG  ALIGN=BOTTOM ALT="gif" SRC="icons/cross_ref_motif.gif"></A> shows a result
+of the <a href="../docs_c/ghkss.html">ghkss</a> program for pure Gaussian noise. The upper panel shows a delay
+representation of the original data, the lower shows the outcome of applying
+the algorithm for 10 iterations. The structure created is purely artifical and
+has nothing to do with structures in the original data. This means that if one
+wants to apply one of the algorithms, one has to carefully study the results.
+If the assumptions underlying the algorithms are not fulfilled in principle
+anything can happen. One should note however, that the performance of the
+program itself indicates such spurious behavior. For data which is indeed well
+approximated by a lower dimensional manifold, the average corrections applied
+should rapidly decrease with each successful iteration. This was the case with
+the NMR laser data and in fact, the correction was so small after three
+iteration that we stopped the procedure. For the white noise data, the
+correction only decreased at a rate that corresponds to a general shrinking of
+the point set, indicating a lack of convergence towards a genuine low
+dimensional manifold. Below, we will give an example where an approximating
+manifold is present without pure determinism. In that case, projecting onto the
+manifold does reduce noise in a reasonable way. See Ref.&nbsp;[<A HREF="citation.html#danger">64</A>] for
+material on the dangers of geometric filtering.
+<P>
+<HR><A NAME="tex2html316" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html314" HREF="node22.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html308" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html317" HREF="node25.html">Nonlinear noise reduction in </A>
+<B>Up:</B> <A NAME="tex2html315" HREF="node22.html">Nonlinear noise reduction</A>
+<B> Previous:</B> <A NAME="tex2html309" HREF="node23.html">Simple nonlinear noise reduction</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

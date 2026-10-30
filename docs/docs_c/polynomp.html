@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>
+polynomp
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>polynomp
+</font>
+</h1>
+<hr>
+This programs models the data making a polynomial ansatz. It differs from
+the <a href="polynom.html">polynom</a> program in the following way. It
+reads the terms of the polynomial from a parameter file. You can either
+create such a file by hand or by the program 
+<a href="polypar.html">polypar</a> (See there for a description of how the
+parameter file has to look like). The advantage is that it is possible to
+select the terms in the polynomial either by hand or by a 
+<a href="polyback.html">backward elimination</a>.
+
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>polynomp [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>embedding dimension
+<td>2
+</tr>
+<tr>
+<th>-d#
+<td>delay
+<td>1
+</tr>
+<tr>
+<th>-n#
+<td>length for the insample error estimation
+<td>all
+</tr>
+<tr>
+<th>-L#
+<td>length of the trajectory to cast
+<td>1000
+</tr>
+<tr>
+<th>-p#
+<td>name of the parameter file
+<td>parameter.pol
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>; without -o data is written to stdout
+<td>'datafile'.pbf
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+<b>The output file contains:</b><br>
+first row: forecasterrors (insample and out of sample)<br>
+next rows: The parameter of the model<br>
+last rows: the forecasted trajectory<br>
+<hr>
+View the <a href="../../source_c/polynomp.c"> C-sources</a>.
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

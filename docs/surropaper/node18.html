@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Computational issues of simulated annealing</TITLE>
+<META NAME="description" CONTENT="Computational issues of simulated annealing">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html255" HREF="node19.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html253" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html247" HREF="node17.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html256" HREF="node19.html">Example: avoiding periodicity artefacts</A>
+<B>Up:</B> <A NAME="tex2html254" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html248" HREF="node17.html">Null hypothesesconstraints, and </A>
+<BR> <P>
+<H2><A NAME="SECTION00052000000000000000">Computational issues of simulated annealing</A></H2>
+<P>
+Simulated annealing is a very powerful method of combinatorial minimisation in
+the presence of many false minima. Simulated annealing has a rich literature,
+classical references are Metropolis et al.&nbsp;[<A HREF="node36.html#metro">36</A>] and
+Kirkpatrick&nbsp;[<A HREF="node36.html#kirk">37</A>], more recent material can be found for example in
+Vidal&nbsp;[<A HREF="node36.html#annealbook">38</A>]. Despite its many successful applications, using
+simulated annealing efficiently is still a bit of an art. We will here discuss
+some issues we have found worth dealing with in our particular minimisation
+problem. Since the detailed behaviour will be different for each cost function,
+we can only give some general guidelines.
+<P>
+<P>
+The main idea behind simulated annealing is to interpret the cost function <I>E</I>
+as an energy in a thermodynamic system. Minimising the cost function is then
+equivalent to finding the ground state of a system. A glassy solid can be
+brought close to the energetically optimal state by first heating it and
+subsequently cooling it. This procedure is called ``annealing'', hence the name
+of the method.  If we want to simulate the thermodynamics of this tempering
+procedure on a computer, we notice that in thermodynamic equilibrium at some
+finite temperature <I>T</I>, system configurations should be visited with a
+probability according to the Boltzmann distribution <IMG WIDTH=43 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2166" SRC="img97.gif"> of the canonical
+ensemble. In Monte Carlo simulations, this is achieved by accepting changes of
+the configuration with a probability <I>p</I>=1 if the energy is decreased <IMG WIDTH=65 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2170" SRC="img98.gif"> and <IMG WIDTH=83 HEIGHT=30 ALIGN=MIDDLE ALT="tex2html_wrap_inline2172" SRC="img99.gif"> if the energy is increased, <IMG WIDTH=65 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2174" SRC="img100.gif">. This selection rule is often referred to as the <EM>Metropolis step</EM>. In
+a minimisation problem, the temperature is the parameter in the Boltzmann
+distribution that sets its width. In particular, it determines the probability
+to go ``up hill'', which is important if we need to get out of false minima.
+<P>
+In order to anneal the system to the ground state of minimal ``energy'', that
+is, the minimum of the cost function, we want to first ``melt'' the system at a
+high temperature <I>T</I>, and then decrease <I>T</I> slowly, allowing the system to be
+close to thermodynamic equilibrium at each stage. If the changes to the
+configuration we allow to be made connect all possible states of the system,
+the updating algorithm is called <EM>ergodic</EM>.  Although some general rigorous
+convergence results are available, in practical applications of simulated
+annealing some problem-specific choices have to be made. In particular, apart
+from the constraints and the cost function, one has to specify a method of
+updating the configurations and a schedule for lowering the temperature. In the
+following, we will discuss each of these issues.
+<P>
+Concerning the choice of cost function, we have already mentioned that there is
+a large degeneracy in that many cost functions have an absolute minimum
+whenever a given set of constraints if fulfilled. The convergence properties
+can depend dramatically on the choice of cost function. Unfortunately, this
+dependence seems to be so complicated that it is impossible even to discuss the
+main behaviour in some generality. In particular, the weights <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2180" SRC="img101.gif"> in
+Eq.(<A HREF="node17.html#eqE">22</A>) are sometimes difficult to choose. Heuristically, we would like
+to reflect changes in the <I>I</I> different constraints about equally, provided the
+constraints are independent. Since their scale is not at all set by
+Eq.(<A HREF="node17.html#eqF">21</A>), we can use the <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2180" SRC="img101.gif"> for this purpose. Whenever we have some
+information about which kind of deviation would be particularly problematic
+with a given test statistic, we can give it a stronger weight. Often, the
+shortest lags of the autocorrelation function are of crucial importance, whence
+we tend to weight autocorrelations by <IMG WIDTH=23 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2186" SRC="img102.gif"> when they occur in sums. Also,
+the <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2060" SRC="img57.gif"> with larger <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline2190" SRC="img103.gif"> are increasingly ill-determined due to the
+fewer data points entering the sums. As an extreme example, <IMG WIDTH=135 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2192" SRC="img104.gif">
+shows huge fluctuations due to the lack of self-averaging. Finally, there are
+many more <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2060" SRC="img57.gif"> with larger <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline2190" SRC="img103.gif"> than at the crucial short lags.
+<P>
+<blockquote><A NAME="957">&#160;</A><IMG WIDTH=330 HEIGHT=321 ALIGN=BOTTOM ALT="figure1074" SRC="img96.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figupdate">&#160;</A>
+   Building up correlations by pairwise permutation. Suppose we want to
+   generate the strong anti-correlation present in the data (upper trace) by
+   minimising <IMG WIDTH=126 HEIGHT=29 ALIGN=MIDDLE ALT="tex2html_wrap_inline2144" SRC="img95.gif">. The annealing started with a random
+   permutation (middle trace, <I>E</I>=1.129).  At a given intermediate state (lower
+   trace, <I>E</I>=0.256), exchanging the points <I>a</I> and <I>b</I> increases the
+   cost to <I>E</I>=0.2744 while exchanging <I>c</I> and <I>d</I> creates negative correlation
+   and reduces the cost to <I>E</I>=0.002.<BR>
+</blockquote>
+<p>
+
+A way to efficiently reach all permutations by small individual changes is by
+exchanging randomly chosen (not necessarily close-by) pairs. How the
+interchange of two points can affect the current cost is illustrated
+schematically in Fig.&nbsp;<A HREF="node18.html#figupdate">10</A>.  Optimising the code that computes and
+updates the cost function is essential since we need its current value at each
+annealing step -- which are expected to be many.  Very often, an exchange of
+two points is reflected in a rather simple update of the cost function. For
+example, computing <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2060" SRC="img57.gif"> for a single lag <IMG WIDTH=8 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline2190" SRC="img103.gif"> involves <I>O</I>(<I>N</I>)
+multiplications. Updating <IMG WIDTH=31 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2060" SRC="img57.gif"> upon the exchange of two points <I>i</I>&lt;<I>j</I> only
+requires the replacement of the terms <IMG WIDTH=40 HEIGHT=12 ALIGN=MIDDLE ALT="tex2html_wrap_inline2208" SRC="img105.gif">, <IMG WIDTH=40 HEIGHT=15 ALIGN=MIDDLE ALT="tex2html_wrap_inline2210" SRC="img106.gif">,
+<IMG WIDTH=43 HEIGHT=15 ALIGN=MIDDLE ALT="tex2html_wrap_inline2212" SRC="img107.gif">, and <IMG WIDTH=42 HEIGHT=15 ALIGN=MIDDLE ALT="tex2html_wrap_inline2214" SRC="img108.gif"> in the sum. Note that cheap updates are a
+source of potential mistakes (e.g. avoid subtracting terms twice in the case
+that <IMG WIDTH=61 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2216" SRC="img109.gif">) but also of roundoff errors. To ensure that the assumed cost
+is always equal to the actual cost, code carefully and monitor roundoff by
+computing a fresh cost function occasionally.
+<P>
+Further speed-up can be achieved in two ways. Often, not all the terms in a
+cost function have to be added up until it is clear that the resulting change
+goes up hill by an amount that will lead to a rejection of the exchange.
+Also, pairs to be exchanged can be selected closer in magnitude at low
+temperatures because large changes are very likely to increase the cost.
+<P>
+Many cooling schemes have been discussed in the
+literature&nbsp;[<A HREF="node36.html#annealbook">38</A>]. We use an exponential scheme in our work.  We
+will give details on the - admittedly largely ad hoc -- choices that have
+been made in the TISEAN implementation in Appendix&nbsp;<A HREF="node32.html#appA">A</A>. We found it
+convenient to have a scheme available that automatically adjusts parameters
+until a given accuracy is reached. This can be done by cooling at a certain
+rate until we are stuck (no more accepted changes). If the cost is not low
+enough yet, we melt the system again and cool at a slower rate.
+<P>
+<HR><A NAME="tex2html255" HREF="node19.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html253" HREF="node16.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html247" HREF="node17.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html256" HREF="node19.html">Example: avoiding periodicity artefacts</A>
+<B>Up:</B> <A NAME="tex2html254" HREF="node16.html">General constrained randomisation</A>
+<B> Previous:</B> <A NAME="tex2html248" HREF="node17.html">Null hypothesesconstraints, and </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

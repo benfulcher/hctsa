@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Iterative FFT surrogates</TITLE>
+<META NAME="description" CONTENT="Iterative FFT surrogates">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html418" HREF="node35.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html416" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html410" HREF="node33.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html419" HREF="node35.html">Annealed surrogates</A>
+<B>Up:</B> <A NAME="tex2html417" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html411" HREF="node33.html">Measures of nonlinearity</A>
+<BR> <P>
+<H2><A NAME="SECTION000102000000000000000">Iterative FFT surrogates</A></H2>
+<P>
+The workhorse for the generation of surrogate data within the TISEAN package is
+the program <a href="../docs_f/surrogates.html">surrogates</a>. It implements the iterative Fourier based scheme
+introduced in Ref.&nbsp;[<A HREF="node36.html#surrowe">30</A>] and discussed in Sec.&nbsp;<A HREF="node12.html#seciterative">4.3</A>. It
+has been extended to be able to handle multivariate data as discussed in
+Sec.&nbsp;<A HREF="node15.html#secmulti1">4.6</A>.  An FFT routine is used that can handle data sets of <I>N</I>
+points if <I>N</I> can be factorised using prime factors 2, 3, and 5 only.  Routines
+that take arbitrary <I>N</I> will end up doing a slow Fourier transform if <I>N</I> is
+not factorisable with small factors.  Occasionally, the length restriction
+results in the loss of a few points.
+<P>
+The routine starts with a random scramble as <IMG WIDTH=38 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2022" SRC="img38.gif">,
+performs as many iterates as necessary to reach a fixed point and then prints
+out <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif"> or <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2042" SRC="img48.gif">, as
+desired. Further, the number of iterations is shown and the residual root mean
+squared discrepancy between <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif"> and
+<IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2042" SRC="img48.gif">.  The number of iterations can be limited by an
+option. In particular, <I>i</I>=0 gives the initial scramble as
+<IMG WIDTH=38 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2022" SRC="img38.gif"> or a non-rescaled FFT surrogate as
+<IMG WIDTH=38 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2478" SRC="img192.gif">. The first iterate, <IMG WIDTH=38 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2480" SRC="img193.gif">, is
+approximately (but not quite) equivalent to an AAFT surrogate. It is advisable
+to evaluate the residual discrepancy whenever the algorithm took more than a
+few iterations. In cases of doubt if the accuracy is sufficient, it may be
+useful to plot the autocorrelation function (<TT>corr</TT>  or <TT>autocor</TT>)
+of the data and <IMG WIDTH=29 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2040" SRC="img47.gif">, and, in the multivariate case,
+the cross-correlation function (<TT>xcor</TT>) between the channels.
+The routine can generate up to 999 surrogates in one call.
+<P>
+
+<h4><a name="endtoend">End point effects</a></h4>
+
+
+Since the periodicity artefact discussed in Sec.&nbsp;<A HREF="node14.html#secperiod">4.5</A> can lead to
+spurious test results, we need to select a suitable sub-sequence of the data
+before making surrogates. For this purpose, TISEAN contains the program <a href="../docs_f/endtoend.html">endtoend</a>. Let <IMG WIDTH=107 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2484" SRC="img194.gif"> be a sub-sequence of length
+<IMG WIDTH=14 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2486" SRC="img195.gif"> and offset <IMG WIDTH=15 HEIGHT=14 ALIGN=MIDDLE ALT="tex2html_wrap_inline2488" SRC="img196.gif">. The program then computes the contribution of the
+end-to-end mismatch <IMG WIDTH=101 HEIGHT=35 ALIGN=MIDDLE ALT="tex2html_wrap_inline2490" SRC="img197.gif"> to the total power
+in the sub-sequence:
+<BR><IMG WIDTH=500 HEIGHT=52 ALIGN=BOTTOM ALT="equation1100" SRC="img198.gif"><BR>
+as well as the contribution of the mismatch in the first derivative
+<BR><IMG WIDTH=500 HEIGHT=53 ALIGN=BOTTOM ALT="equation1106" SRC="img199.gif"><BR>
+and the weighted average 
+<BR><IMG WIDTH=500 HEIGHT=26 ALIGN=BOTTOM ALT="equation1112" SRC="img200.gif"><BR> 
+The weight <I>w</I> can be selected by the user and is set to 0.5 by default.
+For multivariate data with <I>M</I> channels, <IMG WIDTH=141 HEIGHT=39 ALIGN=MIDDLE ALT="tex2html_wrap_inline2496" SRC="img201.gif"> is used.
+<P>
+Now the program goes through a sequence of decreasing <IMG WIDTH=173 HEIGHT=32 ALIGN=MIDDLE ALT="tex2html_wrap_inline2498" SRC="img202.gif">, and for each <IMG WIDTH=14 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2486" SRC="img195.gif"> determines <IMG WIDTH=15 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2502" SRC="img203.gif"> such that
+<IMG WIDTH=47 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2504" SRC="img204.gif"> is minimal. The values of <IMG WIDTH=14 HEIGHT=15 ALIGN=BOTTOM ALT="tex2html_wrap_inline2486" SRC="img195.gif">, <IMG WIDTH=15 HEIGHT=23 ALIGN=MIDDLE ALT="tex2html_wrap_inline2502" SRC="img203.gif">,
+and <IMG WIDTH=47 HEIGHT=36 ALIGN=MIDDLE ALT="tex2html_wrap_inline2504" SRC="img204.gif"> are printed whenever <IMG WIDTH=9 HEIGHT=16 ALIGN=MIDDLE ALT="tex2html_wrap_inline2512" SRC="img205.gif"> has
+decreased. One can thus easily find a sub-sequence that achieves negligible end
+point mismatch with the minimal loss of data.
+<P>
+<HR><A NAME="tex2html418" HREF="node35.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html416" HREF="node32.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html410" HREF="node33.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html419" HREF="node35.html">Annealed surrogates</A>
+<B>Up:</B> <A NAME="tex2html417" HREF="node32.html">The TISEAN implementation</A>
+<B> Previous:</B> <A NAME="tex2html411" HREF="node33.html">Measures of nonlinearity</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

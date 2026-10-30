@@ -1,0 +1,111 @@
+<html>
+<head>
+<title>
+makenoise
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>makenoise
+</font>
+</h1>
+<hr>
+Depending on whether the <font color=blue>-0</font> flag is set it
+either takes (possibly multivariate) data and adds a
+desired amount of noise to it or it just creates a series of random
+numbers with zero mean. 
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>makenoise [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of points to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-m#
+<td>number of columns to be used
+<td>1
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>column(s) to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-%#
+<td>noiselevel in percent
+<td>5
+</tr>
+<tr>
+<th>-r#
+<td>absolute noiselevel (or absolute variance if -g is set)
+<td>not set
+</tr>
+<tr>
+<th>-g
+<td>add gaussian noise instead of uniform
+<td>uniform
+</tr>
+<tr>
+<th>-I#
+<td>change the seed of the random number generator<br>
+If # = 0, the seed is taken from the time command, which means<br>
+the seed is set to the number of seconds since Jan 1st, 1970
+<td>some fixed value
+</tr>
+<tr>
+<th>-0
+<td>Don't read any data file, just generate random numbers with zero
+mean. (Requires <font color=blue>-r</font> and <font
+color=blue>-l</font>)
+<td>not set
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a>
+<td>-o without a name given: 'datafile'.noi<br>
+(or stdin.noi if data were read from stdin)<br>
+If no -o is given data are written to stdout
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output consists of the noisy time series.
+<hr>
+View the <a href="../../source_c/makenoise.c">C-sources</a>. 
+View <a href="../../source_c/routines/rand.c">rand.c</a>.
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

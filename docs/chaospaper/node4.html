@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.2//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>General computational issues</TITLE>
+<META NAME="description" CONTENT="General computational issues">
+<META NAME="keywords" CONTENT="TiseanHTML">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="TiseanHTML.css">
+</HEAD>
+<BODY bgcolor=ffffff LANG="EN" >
+ <A NAME="tex2html105" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html103" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html99" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html106" HREF="node5.html">Phase space representation</A>
+<B>Up:</B> <A NAME="tex2html104" HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html100" HREF="node3.html">Philosophy of the TISEAN </A>
+<BR> <P>
+<H2><A NAME="SECTION00022000000000000000">General computational issues</A></H2>
+<A NAME="secgeneral">&#160;</A>
+The natural basis to formulate nonlinear time series algorithms from chaos
+theory is a multi-dimensional phase space, rather than the time or the
+frequency domain. It will be essential for the global dynamics in this phase
+space to be nonlinear in order to fulfill the constraints of non-triviality and
+boundedness. Only in particular cases this nonlinear structure will be easily
+representable by a global nonlinear function. Instead, all properties will be
+expressed in terms of local quantities, often by suitable global averages.  All
+local information will be gained from neighborhood relations of various kinds
+from time series elements.  Thus a recurrent computational issue will be that
+of defining local neighborhoods in phase space. Finding neighbors in
+multidimensional space is a common problem of computational
+geometry. Multidimensional tree structures are widely used and have attractive
+theoretical properties. Finding all neighbors in a set of <I>N</I> vectors
+takes <I>O(</I>log<I>N)</I> operations, thus the total operation count is 
+<I>O(N</I>log<I>N)</I>.  A fast
+alternative that is particularly efficient for relatively low dimensional
+structures embedded in multidimensional spaces is given by box-assisted
+neighbor search methods which can push the operation count down to <I>O</I>(<I>N</I>)
+under certain assumptions. Both approaches are reviewed in Ref.&nbsp;[<A HREF="citation.html#neigh">20</A>]
+with particular emphasis on time series applications. In the TISEAN project,
+fast neighbor search is done using a box-assisted approach, as described in
+Ref.&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>].
+<P>
+No matter in what space dimension we are working, we will define <EM>
+candidates</EM> for nearest neighbors in two dimensions using a grid of evenly
+spaced boxes. With a grid of spacing <IMG WIDTH=6 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6495" SRC="img3.gif">, all neighbors of a vector
+<IMG WIDTH=9 HEIGHT=7 ALIGN=BOTTOM ALT="tex2html_wrap_inline6497" SRC="img4.gif"> closer than epsilon must be located in the adjacent boxes. But not all
+points in the adjacent boxes are neighbors, they may be up to <IMG WIDTH=13 HEIGHT=11 ALIGN=BOTTOM ALT="tex2html_wrap_inline6499" SRC="img5.gif">
+away in two dimensions and arbitrarily far in higher dimensions. Neighbors
+search is thus a two stage process. First the box-assisted data base has to be
+filled and then for each point a list of neighbors can be requested. 
+There are a few instances where it is advisable to abandon the fast neighbor
+search strategy. One example is the program <tt>noise</tt> that does nonlinear noise
+filtering in a data stream. (This program is no longer maintained as part of TISEAN). It is supposed to start filtering soon after the
+first points have been recorded. Thus the neighbor data base cannot be
+constructed in the beginning. Another exception is if quite short (&lt;500
+points, say), high dimensional data are processed. Then the overhead for the
+neighbor search should be avoided and instead an optimized straight
+<i>O(N&#178;)</i> method be used, like it is done in&nbsp;<a href="../docs_f/c2naive.html">c2naive</a>.
+<P>
+For portability, all programs expect time series data in column format
+represented by ASCII numbers. The column to be processed can be specified on
+the command line. Although somewhat wasteful for storing data, ASCII is the
+least common divisor between the different ways most software can store data.
+All parameters can be set by adding options to the command, which, in many
+programs, just replace the default values. Obviously, relying on default
+settings is particularly dangerous in such a subtle field.  Since almost all
+routines can read from standard input and write to standard output, programs
+can be part of pipelines. For example they can be called as filters from inside
+graphics software or other software tools which are able to execute shell
+commands.  Also, data conversion or compression can be done ``on the fly'' this
+way. The reader here realizes that we are speaking of UNIX or LINUX platforms
+which seems to be the most appropriate environment. It is however expected that
+most of the programs will be ported to other environments in the near future.
+<P>
+For those readers familiar with the programs published in
+Ref.&nbsp;[<A HREF="citation.html#KantzSchreiber">2</A>] we should mention that these form the basis for a
+number of those TISEAN programs written in FORTRAN. The C programs, even if
+they do similar things, are fairly independent implementations. All C 
+programs now use dynamic allocation of storage, for example.
+<P><HR><A NAME="tex2html105" HREF="node5.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="icons/next_motif.gif"></A> <A NAME="tex2html103" HREF="node2.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="icons/up_motif.gif"></A> <A NAME="tex2html99" HREF="node3.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="icons/previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html106" HREF="node5.html">Phase space representation</A>
+<B>Up:</B> <A NAME="tex2html104" HREF="node2.html">Introduction</A>
+<B> Previous:</B> <A NAME="tex2html100" HREF="node3.html">Philosophy of the TISEAN </A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Wed Jan  6 15:38:27 CET 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

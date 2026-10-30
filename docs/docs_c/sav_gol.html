@@ -1,0 +1,105 @@
+<html>
+<head>
+<title>
+sav_gol
+</title>
+</head>
+<body bgcolor=white>
+<h1 align=center>Description of the program: <font color=Blue>sav_gol
+</font>
+</h1>
+<hr>
+This program performes a <a
+href="../chaospaper/citation.html#numrec">Savitzky-Golay filter</a> to
+either clean the data from high frequency noise or to get a better
+estimate of the <font color=blue>D</font>th derivative. It it possible
+to run it on multivariate data.
+<hr>
+<h2 align=center>Usage:</h2>
+<center>
+<font color=Red>sav_gol [Options]</font>
+<p>
+Everything not being a valid option will be interpreted as a potential datafile name. Given no datafile at all, means read stdin. Also <font color=Red>-</font> means stdin
+<p>
+Possible options are:
+<p>
+<table border=2>
+<tr>
+<th>Option
+<th>Description
+<th>Default
+</tr>
+<tr>
+<th>-l#
+<td>number of data to use
+<td>whole file
+</tr>
+<tr>
+<th>-x#
+<td>number of lines to be ignored
+<td>0
+</tr>
+<tr>
+<th>-c#
+<td><a href=../general.html#column>columns to be read</a>
+<td>1
+</tr>
+<tr>
+<th>-m#
+<td>no. of components to be read (dimension)
+<td>1
+</tr>
+<tr>
+<th>-n#,#
+<td>length of the averaging window back in time,<br>
+length of the averaging window forward in time
+<td>2,2
+</tr>
+<tr>
+<th>-p#
+<td>order of the fitted polynomial
+<td>2
+</tr>
+<tr>
+<th>-D#
+<td>order of the derivative to be estimated
+<td>0 (just filter)
+</tr>
+<tr>
+<th>-o#
+<td><a href=../general.html#outfile>output file name</a><br>
+<td>without file name: 'datafile'.sg<br>
+(or stdin.sg if stdin was read)<br>
+If no -o option is given stdout is used
+</tr>
+<tr>
+<th>-V#
+<td><a href=../general.html#verbosity>verbosity level</a><br>
+&nbsp;&nbsp;0: only panic messages<br>
+&nbsp;&nbsp;1: add input/output messages
+<td>1
+</tr>
+<tr>
+<th>-h
+<td>show these options
+<td>none
+</tr>
+</table>
+</center>
+<hr>
+<h2 align=center>Description of the Output:</h2>
+The output file contains <font color=blue>l</font> lines, each of
+which has <font color=blue>m</font> columns. It is the filtered
+data. The first <font color=blue>length of the averaging window back
+in time</font> and the last <font color=blue>length of the averaging
+window forward in time</font> lines are special. They contain the raw
+data in case that <font color=blue>D</font> was set to 0 and zeroes in
+case <font color=blue>D</font> was larger than zero. 
+
+<hr>
+View the <a href="../../source_c/sav_gol.c"> C-sources</a>.
+
+<hr>
+<a href=../contents.html>Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body>
+</html>

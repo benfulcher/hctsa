@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Typical vs. constrained realisations</TITLE>
+<META NAME="description" CONTENT="Typical vs. constrained realisations">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html128" HREF="node7.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html126" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html120" HREF="node5.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html129" HREF="node7.html">The null hypothesis: model </A>
+<B>Up:</B> <A NAME="tex2html127" HREF="node5.html">Surrogate data testing</A>
+<B> Previous:</B> <A NAME="tex2html121" HREF="node5.html">Surrogate data testing</A>
+<BR> <P>
+<H2><A NAME="SECTION00031000000000000000">Typical vs. constrained realisations</A></H2>
+<P>
+Traditional bootstrap methods use explicit model equations that have to be
+extracted from the data and are then run to produce Monte Carlo samples.
+This <EM>typical realisations</EM> approach can be very powerful for the
+computation of confidence intervals, provided the model equations can be
+extracted successfully. The latter requirement is very delicate. Ambiguities in
+selecting the proper model class and order, as well as the parameter estimation
+problem have to be addressed. Whenever the null hypothesis involves an unknown
+<EM>function</EM> (rather than just a few parameters) these problems become
+profound. A recent example of a <EM>typical realisations</EM> approach to creating
+surrogates in the dynamical systems context is given by Ref.&nbsp;[<A HREF="node36.html#witt">24</A>].
+There, a Markov model is fitted to a coarse-grained dynamics obtained by
+binning the two dimensional delay vector distribution of a time series.
+Then, essentially the transfer matrix is iterated to yield surrogate
+sequences. We will offer some discussion of that work later in
+Sec.&nbsp;<A HREF="node27.html#secinterpret">7</A>.
+<P>
+As discussed by Theiler and Prichard&nbsp;[<A HREF="node36.html#tp">25</A>], the
+alternative approach of <EM>constrained realisations</EM> is more suitable for the
+purpose of hypothesis testing we are interested in here. It avoids the fitting
+of model equations by directly imposing the desired structures onto the
+randomised time series.  However, the choice of possible null hypothesis is
+limited by the difficulty of  imposing arbitrary structures on otherwise random
+sequences. In the following, we will discuss a number of null hypotheses and
+algorithms to provide the adequately constrained realisations. The most general
+method to generate constrained randomisations of time series&nbsp;[<A HREF="node36.html#anneal">26</A>] is 
+described in Sec.&nbsp;<A HREF="node16.html#secanneal">5</A>.
+<P>
+Consider as a toy example the null hypothesis that the data consists of
+independent draws from a fixed probability distribution. Surrogate time series
+can be simply obtained by randomly shuffling the measured data. If we find
+significantly different serial correlations in the data and the shuffles, we
+can reject the hypothesis of independence. Constrained realisations are
+obtained by creating permutations <EM>without replacement</EM>. The surrogates are
+constrained to take on exactly the same values as the data, just in random
+temporal order. We could also have used the data to infer the probability
+distribution and drawn new time series from it. These permutations <EM>with
+replacement</EM> would then be what we called typical realisations.
+<P>
+Obviously, independence is not an interesting null hypothesis for most time
+series problems. It becomes relevant when the residual errors of a time series
+model are evaluated. For example in the BDS test for
+nonlinearity&nbsp;[<A HREF="node36.html#brockpaper1">27</A>], an ARMA model is fitted to the data. If the
+data are linear, then the residuals are expected to be independent.
+It has been pointed out, however, that the resulting test is not particularly
+powerful for chaotic data&nbsp;[<A HREF="node36.html#bleach">28</A>].
+<P>
+<HR><A NAME="tex2html128" HREF="node7.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html126" HREF="node5.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html120" HREF="node5.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html129" HREF="node7.html">The null hypothesis: model </A>
+<B>Up:</B> <A NAME="tex2html127" HREF="node5.html">Surrogate data testing</A>
+<B> Previous:</B> <A NAME="tex2html121" HREF="node5.html">Surrogate data testing</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

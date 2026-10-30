@@ -1,0 +1,29 @@
+<html> 
+<head><title>Run autoregressive model</title></head>
+<body bgcolor="#ffffff">
+<h3>Run autoregressive model</h3>
+<font color=blue><tt>ar-run <font color=red>-l#</font> [-p# -I# -o </tt><em>outfile</em><tt> -x# -V# -h] </tt><em> file</em>
+</font>
+<blockquote>
+
+   <br>     <font color=red><tt> -l  </tt></font>number of iterations (l=0: infinite)
+   <br>     <font color=blue><tt> -p  </tt></font>order of AR-model (default determined from input)
+   <br> 	<font color=blue><tt> -I  </tt></font>seed for random numbers 
+   <br>     <font color=blue><tt> -x  </tt></font>number of transients discarded (10000)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means ar.dat
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Prints iterates of an autoregressive model 
+<blockquote>
+x<sub>n</sub>=a<sub>1</sub>x<sub>n-1</sub>+...+a<sub>p</sub>x<sub>n-p</sub> 
+   + noise.
+</blockquote>
+to  <font color=blue><tt>stdout</tt></font>. The coefficients are read from
+<font color=blue><tt>file</tt></font>. The format is either one line containing
+the rms amplitude of the increments and one for each of the coefficients, or
+alternatively the output of <a
+href="../docs_c/ar-model.html">ar-model</a>.
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>

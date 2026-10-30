@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Example: Southern oscillation index</TITLE>
+<META NAME="description" CONTENT="Example: Southern oscillation index">
+<META NAME="keywords" CONTENT="Surrogates">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="Surrogates.css">
+</HEAD>
+<BODY bgcolor=#ffffff LANG="EN" >
+ <A NAME="tex2html202" HREF="node14.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html200" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html194" HREF="node12.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html203" HREF="node14.html">Periodicity artefacts</A>
+<B>Up:</B> <A NAME="tex2html201" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html195" HREF="node12.html">Iteratively refined surrogates</A>
+<BR> <P>
+<H2><A NAME="SECTION00044000000000000000">Example: Southern oscillation index</A></H2>
+<P>
+As an illustration let us perform a statistical test for nonlinearity on a
+monthly time series of the Southern Oscillation Index (SOI) from 1866 to 1994
+(1560 samples).  For a reference on analysis of Southern Oscillation data
+see Graham et al.&nbsp;[<A HREF="node36.html#Graham87">32</A>]. Since a discussion of this 
+climatic phenomenon is not relevant to the issue at hand, let us just consider
+the time series as an isolated data item. Our null hypothesis is that the data
+is adequately described by its single time probability distribution and its
+power spectrum.  This corresponds to the assumption that an autoregressive
+moving average (ARMA) process is generating a sequence that is measured through
+a static monotonic, possibly nonlinear observation function.
+<P>
+For a test at the 99% level of significance (<IMG WIDTH=59 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline2052" SRC="img49.gif">), we generate a
+collection of <IMG WIDTH=89 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline2054" SRC="img50.gif"> surrogate time series which share the single time
+sample probability distribution and the periodogram estimator with the
+data. This is carried out using the iterative method described in
+Sec.&nbsp;<A HREF="node12.html#seciterative">4.3</A> above (see also Ref.&nbsp;[<A HREF="node36.html#surrowe">30</A>]).
+Figure&nbsp;<A HREF="node13.html#figsoi">4</A> shows the data together with one of the 99 surrogates.
+<P>
+As a discriminating statistics we use a locally constant predictor in embedding
+space, using three dimensional delay coordinates at a delay time of one
+month. Neighbourhoods were selected at 0.2 times the rms amplitude of the
+data. The test is set up in such a way that the null hypothesis may be rejected
+when the prediction error is smaller for the data than for all of the 99
+surrogates. But, as we can see in Fig.&nbsp;<A HREF="node13.html#figsoipred">5</A>, this is not the
+case. Predictability is not significantly reduced by destroying possible
+nonlinear structure.  This negative result can mean several things. The
+prediction error statistics may just not have any power to detect the kind of
+nonlinearity present.  Alternatively, the underlying process may be linear and
+the null hypothesis true. It could also be, and this seems the most likely
+option after all we know about the equations governing climate phenomena,
+that the process is nonlinear but the single time series at this sampling
+covers such a poor fraction of the rich dynamics that it must appear linear
+stochastic to the analysis.
+<P>
+<blockquote><A NAME="933">&#160;</A><IMG WIDTH=360 HEIGHT=251 ALIGN=BOTTOM ALT="figure1044" SRC="img51.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figsoi">&#160;</A> 
+   Monthly values of the Southern Oscillation Index (SOI) from 1866 to 1994
+   (upper trace) and a surrogate time series exhibiting the same
+   auto-covariance function (lower trace). All linear properties of the
+   fluctuations and oscillations are the same between both tracings. However,
+   any possible nonlinear structure except for a static rescaling of the data
+   is destroyed in the lower tracing by the randomisation procedure.<BR>
+</blockquote>
+<P>
+<P><blockquote><A NAME="935">&#160;</A><IMG WIDTH=319 HEIGHT=148 ALIGN=BOTTOM ALT="figure1045" SRC="img52.gif"><BR>
+<STRONG>Figure:</STRONG> <A NAME="figsoipred">&#160;</A>
+   Nonlinear prediction error measured for the SOI data set (see
+   Fig.&nbsp;<A HREF="node13.html#figsoi">4</A>) and 99 surrogates. The value for the original data is
+   plotted with a longer impulse. The mean and standard deviation of the
+   statistic obtained from the surrogates is also represented by an error
+   bar. It is evident that the data is not singled out by this property and we
+   are unable to reject the null hypothesis of a linear stochastic stationary
+   process, possibly rescaled by a nonlinear measurement function.<BR>
+</blockquote><P>
+<P>
+Of course, our test has been carried out disregarding any knowledge of the SOI
+situation. It is very likely that more informed measures of nonlinearity may be
+more successful in detecting structure. We would like to point out, however,
+that if such information is derived from the same data, or literature published
+on it, a bias is likely to occur. Similarly to the situation of multiple tests
+on the same sample, the level of significance has to be adjusted properly.
+Otherwise, if many people try, someone will eventually, and maybe accidentally,
+find a measure that indicates nonlinear structure.
+<P>
+<HR><A NAME="tex2html202" HREF="node14.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="next_motif.gif"></A> <A NAME="tex2html200" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="up_motif.gif"></A> <A NAME="tex2html194" HREF="node12.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="previous_motif.gif"></A>   <BR>
+<B> Next:</B> <A NAME="tex2html203" HREF="node14.html">Periodicity artefacts</A>
+<B>Up:</B> <A NAME="tex2html201" HREF="node9.html">Fourier based surrogates</A>
+<B> Previous:</B> <A NAME="tex2html195" HREF="node12.html">Iteratively refined surrogates</A>
+<P><ADDRESS>
+<I>Thomas Schreiber <BR>
+Mon Aug 30 17:31:48 CEST 1999</I>
+</ADDRESS>
+</BODY>
+</HTML>

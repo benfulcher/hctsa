@@ -1,0 +1,28 @@
+<html> 
+<head><title>H&eacute;non time series</title></head>
+<body bgcolor="#ffffff">
+<h3>Make H&eacute;non map data</h3>
+<font color=blue><tt>henon <font color=red>-l#</font> [-A# -B# -X# -Y# -o </tt><em>outfile</em><tt> -x# -V# -h]
+</tt>
+</font>
+<blockquote>
+   <br>     <font color=red><tt> -l  </tt></font>number of points x,y (l=0: infinite)
+   <br>     <font color=blue><tt> -A  </tt></font>parameter a (1.4)
+   <br>     <font color=blue><tt> -B  </tt></font>parameter b (0.3)
+   <br>     <font color=blue><tt> -X  </tt></font>initial x
+   <br>     <font color=blue><tt> -Y  </tt></font>initial y
+   <br>     <font color=blue><tt> -x  </tt></font>number of transients discarded (10000)
+   <br>     <font color=blue><tt> -o  </tt></font><a href=../general.html#outfile>output file name</a>, just <font color=blue><tt> -o  </tt></font>means henon.dat
+   <br>     <font color=blue><tt> -V  </tt></font><a href=../general.html#verbosity>verbosity level</a> (0 = only fatal errors)
+   <br>     <font color=blue><tt> -h  </tt></font>show this message
+</blockquote>
+Prints iterates of the H&eacute;non map (M. H&eacute;non,
+Commun. Math. Phys. <b>50</b>, 69, (1976)) to 
+<font color=blue><tt>stdout</tt></font>:
+<pre>
+     x(n+1) = 1- a*x(n)^2 + b*y(n)
+     y(n+1) = x(n)
+</pre>
+<p>
+<a href="../contents.html">Table of Contents</a> * <a href="../../index.html" target="_top">TISEAN home</a>
+</body></html>
