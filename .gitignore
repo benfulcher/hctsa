@@ -28,8 +28,8 @@ HCTSA*.mat
 plugininstall_*.m
 *.log
 
-# TISEAN generates platform-specific files:
-/Toolboxes/Tisean_3.0.1/
+# Compiled TISEAN binaries (TISEAN's own .gitignore, in the subtree, covers its other build files):
+/Toolboxes/Tisean_3.0.1/bin/
 
 # ripser build output (source/LICENSE/README are committed, the compiled binary is not):
 /Toolboxes/ripser/bin/
