@@ -50,11 +50,20 @@ if ~isempty(preProcessHow)
         % Keep one sample per (floored) 1/e autocorrelation time (cf. BF_GetTau),
         % so that features computed on the result do not change trivially with
         % the sampling rate. Iterated maps (ACF below 1/e at lag 1) are unchanged.
+        % Minimum length of the decimated series (shorter -> NaN). Features
+        % computed on fewer than ~50 decimated samples are finite but unreliable
+        % (their realization noise falls steadily with the decimated length), and
+        % a slowly decorrelating series (e.g., a random walk of 1000 samples) can
+        % decimate to fewer than 10 samples.
+        minDecimatedLength = 50;
         tau = BF_GetTau(y,'ac1e');
         if isnan(tau)
             y = NaN; return
         end
         y = y(1:tau:end);
+        if numel(y) < minDecimatedLength
+            y = NaN; return
+        end
     otherwise
         error('Unknown preprocessing setting: ''%s''',preProcessHow);
     end
