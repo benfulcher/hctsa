@@ -18,19 +18,23 @@ function tau = BF_GetTau(y, tauRule)
 %           autocorrelation of at least 1/e. The 1/e crossing is much more
 %           stable than the first zero crossing ('ac'), which for a
 %           monotonically decaying ACF is set mostly by estimation noise.
-%   (ii) 'mi': the smaller of the first local minimum of the (Kraskov, k = 4)
-%           automutual information (AMI) and the 'ac1e' delay, and at least 1.
-%           The first AMI minimum is the classic Fraser-Swinney delay for
-%           (nonlinear) flows; taking the smaller of the nonlinear and linear
-%           decorrelation times keeps the delay low (a chaotic map has a slowly
-%           decaying AMI but an ACF that decorrelates within a step, so gets
-%           tau = 1). The AMI is computed on a tie-aware rank transform of the
-%           series (see NOTES), and the first local minimum is taken of its
-%           centered 3-point moving average (2-point at the ends), over lags
-%           1, ..., ac1e + 2. If the ACF never crosses 1/e, the AMI is searched up
-%           to N/10 lags, taking the first local minimum of the smoothed AMI, or
-%           else the first crossing of the (unsmoothed) AMI below
-%           -0.5*log(1 - exp(-2)) (the Gaussian AMI at a correlation of 1/e).
+%   (ii) 'mi': the smaller of the first significant local minimum of the
+%           (Kraskov, k = 4) automutual information (AMI) and the 'ac1e' delay,
+%           and at least 1. The first AMI minimum is the classic Fraser-Swinney
+%           delay for (nonlinear) flows; taking the smaller of the nonlinear and
+%           linear decorrelation times keeps the delay low (a chaotic map has a
+%           slowly decaying AMI but an ACF that decorrelates within a step, so
+%           gets tau = 1). The AMI is computed on a tie-aware rank transform of
+%           the series (see NOTES) at lags 1, ..., ac1e + 2, and smoothed by a
+%           centered 3-point moving average (2-point at the ends). The minimum
+%           is the first lag l >= 2 at which the smoothed AMI is below its value
+%           at both neighboring lags and lies more than twice the estimator
+%           noise below both its maximum over the earlier lags (1, ..., l - 1)
+%           and its maximum over the later lags (l + 1, ...): a noise-gated
+%           minimum (see NOTES). If the ACF never crosses 1/e, the AMI is
+%           searched up to N/10 lags for such a minimum, or else tau is the
+%           first crossing of the (unsmoothed) AMI below -0.5*log(1 - exp(-2))
+%           (the Gaussian AMI at a correlation of 1/e).
 %   (iii) 'mi-gaussian': the first local minimum of the Gaussian AMI
 %           (= CO_FirstMin(y,'mi-gaussian')). The Gaussian AMI is a monotonic
 %           function of |ACF|, so this is not a nonlinear timescale. Use it to
@@ -50,10 +54,22 @@ function tau = BF_GetTau(y, tauRule)
 % 1e-5*std(y), separated from the rest by gaps of more than 1e-4*std(y) on both
 % sides). The ranks are z-scored and a fixed, reproducible jitter of
 % 1e-10 x (standard normal numbers from BF_Random with seed 0) is always added
-% to break the remaining ties between equal values and equal distances. The
-% first minimum of a Kraskov AMI curve is often shallow and comparable to the
-% estimator's own fluctuations between neighboring lags, which the 3-point
-% smoothing suppresses.
+% to break the remaining ties between equal values and equal distances.
+%
+% The first minimum of a Kraskov AMI curve is often shallow and comparable to
+% the estimator's own fluctuations between neighboring lags. The 3-point
+% smoothing suppresses these fluctuations, and the 'mi' minimum must also be
+% deeper than 2*sigma on both sides, where sigma, the noise of the AMI estimate
+% at a single lag, is estimated robustly from the second differences, d2, of the
+% (unsmoothed) AMI curve as 1.4826*median(|d2 - median(d2)|)/sqrt(6) (a second
+% difference of independent noise of standard deviation sigma has standard
+% deviation sqrt(6)*sigma; sigma = 0 if fewer than 4 lags are available). The
+% second differences of a smooth AMI curve are small, so they mostly measure
+% the noise. Without this gate, estimator noise on a flat or monotone AMI curve
+% (e.g., of a random walk observed with noise, or a trend plus noise) creates a
+% spurious minimum at lag 1 or another early lag, for a series whose ACF decays
+% over tens to hundreds of samples. A minimum at lag 1 never qualifies, as the
+% curve cannot have fallen into it.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -138,8 +154,8 @@ function tau = TauAC1e(y)
 end
 % ------------------------------------------------------------------------------
 function tau = TauMI(y)
-    % min(first minimum of the smoothed Kraskov AMI of tie-aware ranks, floor of the
-    % ACF 1/e crossing):
+    % min(first noise-gated minimum of the smoothed Kraskov AMI of tie-aware ranks,
+    % floor of the ACF 1/e crossing):
     N = length(y);
     tauAC = TauAC1e(y);
     if isnan(tauAC)
@@ -186,13 +202,29 @@ function tau = TauMI(y)
     amisSmooth(1) = (amis(1) + amis(2)) / 2;
     amisSmooth(end) = (amis(end - 1) + amis(end)) / 2;
 
-    % First local minimum of the smoothed curve (at lag 1 if it already increases
-    % from lag 1 to 2):
+    % Noise scale of the AMI estimate at a single lag, from a robust (MAD)
+    % estimate of the spread of the second differences of the raw AMI curve (a
+    % second difference of independent noise of std sigma has std sqrt(6)*sigma):
+    if numel(amis) >= 4
+        d2 = diff(amis, 2);
+        sigma = 1.4826 * median(abs(d2 - median(d2))) / sqrt(6);
+        delta = 2 * sigma;
+    else
+        delta = 0;
+    end
+
+    % First noise-gated local minimum of the smoothed curve: lower than both
+    % neighbors, and more than delta below the maximum on each side. Starts at
+    % lag 2, since the curve cannot have fallen into a minimum at lag 1:
     tauMin = NaN;
-    for l = 1:numel(amisSmooth) - 1
-        if amisSmooth(l + 1) > amisSmooth(l) && (l == 1 || amisSmooth(l - 1) > amisSmooth(l))
-            tauMin = l;
-            break
+    for l = 2:numel(amisSmooth) - 1
+        if amisSmooth(l + 1) > amisSmooth(l) && amisSmooth(l - 1) > amisSmooth(l)
+            fall = max(amisSmooth(1:l - 1)) - amisSmooth(l);
+            rise = max(amisSmooth(l + 1:end)) - amisSmooth(l);
+            if fall > delta && rise > delta
+                tauMin = l;
+                break
+            end
         end
     end
 
