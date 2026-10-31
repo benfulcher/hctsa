@@ -71,6 +71,12 @@ function out = SB_BinaryStats(y, binaryMethod)
 if nargin < 2 || isempty(binaryMethod)
 	binaryMethod = 'diff';
 end
+if any(~isfinite(y))
+	% Not applicable (e.g., a NaN from a preprocessing step, BF_PreProcess, that
+	% does not apply to this series)
+	out = NaN;
+	return
+end
 
 % -------------------------------------------------------------------------------
 % Binarize the time series:
