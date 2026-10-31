@@ -36,9 +36,12 @@ if ~isempty(preProcessHow)
         % Takes incremental differences of the input time series
         y = diff(y);
     case 'rescale_tau'
-        % Coarse-graining at a given scale, as in multiscale entropy approaches
-        % Find first zero of the autocorrelation function
-        tau = CO_FirstCrossing(y,'ac',0,'discrete');
+        % Coarse-graining at a given scale, as in multiscale entropy approaches,
+        % with the scale set by the 1/e autocorrelation time (cf. BF_GetTau).
+        % This is more stable than the first zero crossing of the ACF, which for
+        % a monotonically decaying ACF is set mostly by estimation noise (at
+        % several correlation times, and growing with the series length).
+        tau = BF_GetTau(y,'ac1e');
         if isnan(tau)
             y = NaN; return
         end
