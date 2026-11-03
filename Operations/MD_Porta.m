@@ -75,8 +75,10 @@ if nargin < 2 || isempty(numLevels)
     numLevels = 6; % as in the original papers
 end
 
-if std(x) == 0
-    % Constant series: quantization is undefined
+if any(~isfinite(x)) || std(x) == 0
+    % Constant series: quantization is undefined (and not applicable to a
+    % non-finite input, e.g., a NaN from a preprocessing step, BF_PreProcess,
+    % that does not apply to this series)
     out.pV0 = NaN;
     out.pV1 = NaN;
     out.pV2LV = NaN;

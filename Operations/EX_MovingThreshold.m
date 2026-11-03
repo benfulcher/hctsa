@@ -70,6 +70,13 @@ doPlot = false; % can set to 1 to plot outputs
 % ------------------------------------------------------------------------------
 %% Check inputs:
 % ------------------------------------------------------------------------------
+if any(~isfinite(y))
+	% Not applicable (e.g., a NaN from a preprocessing step, BF_PreProcess, that
+	% does not apply to this series)
+	out = NaN;
+	return
+end
+
 % Check that the time series is z-scored (just a warning)
 if ~BF_iszscored(y)
 	warning('The input time series should be z-scored')

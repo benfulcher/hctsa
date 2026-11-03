@@ -81,6 +81,13 @@ end
 % ------------------------------------------------------------------------------
 % Preliminaries:
 % ------------------------------------------------------------------------------
+if any(~isfinite(y))
+	% Not applicable (e.g., a NaN from a preprocessing step, BF_PreProcess, that
+	% does not apply to this series)
+	out = NaN;
+	return
+end
+
 N = length(y); % the length of the time series
 
 % y must be a column vector, transpose it if it's a row vector

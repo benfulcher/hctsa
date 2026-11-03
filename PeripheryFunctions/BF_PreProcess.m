@@ -36,9 +36,12 @@ if ~isempty(preProcessHow)
         % Takes incremental differences of the input time series
         y = diff(y);
     case 'rescale_tau'
-        % Coarse-graining at a given scale, as in multiscale entropy approaches
-        % Find first zero of the autocorrelation function
-        tau = CO_FirstCrossing(y,'ac',0,'discrete');
+        % Coarse-graining at a given scale, as in multiscale entropy approaches,
+        % with the scale set by the 1/e autocorrelation time (cf. BF_GetTau).
+        % This is more stable than the first zero crossing of the ACF, which for
+        % a monotonically decaying ACF is set mostly by estimation noise (at
+        % several correlation times, and growing with the series length).
+        tau = BF_GetTau(y,'ac1e');
         if isnan(tau)
             y = NaN; return
         end
@@ -50,11 +53,22 @@ if ~isempty(preProcessHow)
         % Keep one sample per (floored) 1/e autocorrelation time (cf. BF_GetTau),
         % so that features computed on the result do not change trivially with
         % the sampling rate. Iterated maps (ACF below 1/e at lag 1) are unchanged.
+        % Minimum length of the decimated series (shorter -> NaN): three samples,
+        % the shortest series whose features can vary (as pyhctsa's minimum
+        % series length). Features of a series spanning few correlation times
+        % are noisy (their realization noise falls with the decimated length),
+        % but not uninformative: a scan found every *_dec feature tested carries
+        % signal of its target from 4-15 decimated samples, so no higher floor is
+        % imposed. (A random walk of 1000 samples decimates to about 9 samples.)
+        minDecimatedLength = 3;
         tau = BF_GetTau(y,'ac1e');
         if isnan(tau)
             y = NaN; return
         end
         y = y(1:tau:end);
+        if numel(y) < minDecimatedLength
+            y = NaN; return
+        end
     otherwise
         error('Unknown preprocessing setting: ''%s''',preProcessHow);
     end

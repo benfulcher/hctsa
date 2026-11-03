@@ -25,7 +25,7 @@ function out = EN_MSE(y, scaleRange, m, r, preProcessHow, whatEntropy, numClasse
 % preProcessHow, how to preprocess the data before coarse-graining (default: do
 %    not). The preprocessed series (BF_PreProcess) is z-scored. Options include
 %    'diff1' (incremental differences) and 'rescale_tau' (first coarse-grain at
-%    the first zero-crossing of the autocorrelation function).
+%    the 1/e autocorrelation time, BF_GetTau(y,'ac1e')).
 % whatEntropy, which entropy to evaluate at each scale:
 %    'sampen' (default): sample entropy, the classical multiscale entropy of Costa
 %        et al.
