@@ -51,6 +51,15 @@ end
 
 % ------------------------------------------------------------------------------
 
+% Columns with very large values are divided by their largest magnitude (undone for
+% covariances at the end), because the sums of squares needed for variances overflow
+% double precision for values above ~1e154 (correlations are unaffected). Other
+% columns are left exactly as they are.
+colMax = max(abs(X),[],1,'omitnan');
+isHuge = (colMax > 1e100 & isfinite(colMax));
+colMax(~isHuge) = 1;
+X = X./colMax;
+
 if any(isnan(X(:)))
     % Indicate non-NaN values:
     goodValues = ~isnan(X);
@@ -96,7 +105,8 @@ if any(isnan(X(:)))
     else
         % Undo the scaling to recover covariances (in double precision, as they can be
         % beyond the range of single precision):
-        C = double(C).*(colScale'*colScale);
+        totalScale = colScale.*colMax;
+        C = double(C).*(totalScale'*totalScale);
     end
 else
     % no NaNs, use the matlab cov function:
@@ -107,6 +117,9 @@ else
         colStds = std(X,0,1);
         S = colStds'*colStds;
         C = C./S;
+    else
+        % Undo the scaling to recover covariances:
+        C = C.*(colMax'*colMax);
     end
 end
 

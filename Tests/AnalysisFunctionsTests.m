@@ -19,16 +19,37 @@ classdef AnalysisFunctionsTests < matlab.unittest.TestCase
             rng(1);
             X = randn(200,8);
             X(:,2) = 1e100*X(:,2) + 3e100*X(:,1);
-            X(:,3) = 1e150*X(:,3);
+            X(:,3) = 1e200*X(:,3); % (its sum of squares is beyond double precision)
             X(7,[1,2,5]) = NaN;
             R = double(BF_NaNCov(X,1,0));
             testCase.verifyTrue(all(isfinite(R(:))));
             testCase.verifyEqual(diag(R),ones(8,1),'AbsTol',1e-3);
-            refR = corr(X,'Rows','pairwise');
+            refR = corr(X./max(abs(X)),'Rows','pairwise'); % (corr itself overflows on the huge columns)
             testCase.verifyEqual(R,refR,'AbsTol',2e-2);
             % ... also for the distance form used for 'corr_fast':
             D = BF_NaNCov(X,1,1);
             testCase.verifyTrue(all(isfinite(D(:))));
+        end
+
+        function nanCovHandlesValuesBeyondDoublePrecisionSquares(testCase)
+            % With and without NaNs, for features around 1e200 (variances overflow double
+            % precision unless the columns are scaled first)
+            rng(5);
+            X = randn(150,5);
+            X(:,2) = 1e200*X(:,2);
+            X(:,4) = 3e250*X(:,4) + 1e250*X(:,1);
+            for hasNaN = [false,true]
+                Y = X;
+                if hasNaN, Y(9,[1,2]) = NaN; end
+                R = double(BF_NaNCov(Y,1,0));
+                testCase.verifyTrue(all(isfinite(R(:))),sprintf('NaNs: %d',hasNaN));
+                testCase.verifyEqual(R,corr(Y./max(abs(Y)),'Rows','pairwise'),'AbsTol',2e-2);
+                % Covariances are finite where they are representable:
+                C = double(BF_NaNCov(Y,0,0));
+                rows = ~isnan(Y(:,2));
+                refC = cov(Y(rows,2)/1e200,Y(rows,5));
+                testCase.verifyEqual(C(2,5),refC(1,2)*1e200,'RelTol',5e-2);
+            end
         end
 
         function nanCovIsScaleInvariantForCorrelations(testCase)
