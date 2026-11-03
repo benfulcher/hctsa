@@ -35,6 +35,8 @@ function out = PP_ModelFit(y, model, order, randomSeed)
 % stderat_d1, stderat_d2, stderat_p1_20, stderat_p2_5, stderat_rmgd
 % A ratio above 1 means the preprocessing left the series harder to predict, as
 % when it removes a trend or slow dynamics that the model had been exploiting.
+% stderat_p1_20 and stderat_p2_5 are NaN when that piece-wise removal is not
+% defined (too few samples per piece; see PP_PreProcess).
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -99,6 +101,11 @@ numFields = length(fields);
 rmsErr = zeros(numFields, 1);
 
 for i = 1:numFields
+	if isscalar(yp.(fields{i}))
+		% a piece-wise polynomial removal that is not defined (see PP_PreProcess)
+		rmsErr(i) = NaN;
+		continue
+	end
 	data = zscore(yp.(fields{i})); % z-score each preprocessed version
 	switch model
 		case 'ar'
