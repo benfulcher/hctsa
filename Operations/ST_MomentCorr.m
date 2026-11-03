@@ -37,6 +37,7 @@ function out = ST_MomentCorr(x, windowLength, wOverlap, mom1, mom2, whatTransfor
 % absR, the absolute value of R
 % density, the density of windows in the (mom1, mom2) plane: the number of windows
 %       divided by the area of the box bounding them, range(mom1)*range(mom2)
+% (all NaN when the windows have a single point, or there are fewer than three)
 %
 % ---NOTES:
 % Only full windows are used: windows start every windowLength - wOverlap samples
@@ -129,8 +130,11 @@ x_buff = buffer(x, windowLength, wOverlap, 'nodelay');
 numWindows = floor((N - windowLength) / (windowLength - wOverlap)) + 1; % number of full windows
 x_buff = x_buff(:, 1:max(numWindows, 0)); % keep only full windows (buffer zero-pads the last)
 pointsPerWindow = size(x_buff, 1);
-if pointsPerWindow == 1
-	error('This time series (N = %u) is too short to extract %d windows.', N, numWindows);
+if pointsPerWindow < 2 || numWindows < 3
+	% Not defined: one-point windows have no spread, and a correlation across
+	% fewer than three windows can only be +/-1
+	out = NaN;
+	return
 end
 
 % ok, now we have the sliding window ('buffered') signal, x_buff

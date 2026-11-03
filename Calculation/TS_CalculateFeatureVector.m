@@ -7,6 +7,11 @@ function [featureVector,calcTimes,calcQuality,masterErrors] = TS_CalculateFeatur
 % doParallel, (binary) whether to compute the features using parallel processing
 % Operations, an hctsa-style table of Operations
 % MasterOperations, an hctsa-style table of MasterOperations
+%               (with the default hctsa library, both are read from file, with
+%               its minimum lengths; for tables with a MinLength column (see
+%               TS_AddMinLengths), a master operation is not evaluated on a series
+%               shorter than its MinLength, and all its operations are NaN; an
+%               operation's own MinLength sets that output alone to NaN)
 % codeSpecial, whether to code special values with quality labels;
 % 				this makes sure the featureVector is all real numbers, and any
 %				special values (like NaNs, Infs, etc.) are coded with corresponding
@@ -103,6 +108,8 @@ if nargin < 4 || isempty(MasterOperations)
 	MasterOperations = TS_ReadInputFile('mops','INP_mops_hctsa.txt',false);
 	% Need to link operations to masters if not already supplied:
 	[Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
+	% With the minimum time-series lengths of the hctsa library:
+	[Operations,MasterOperations] = TS_AddMinLengths(Operations,MasterOperations,'hctsa');
 end
 
 % Whether to code up special-valued outputs
@@ -173,8 +180,18 @@ end
 if ~all(isfinite(x))
 	error('ERROR WITH ''%s'' -- contains non-finite values',tsStruct.Name);
 end
-if all(x==x(1))
-	warning('Data are a constant -- there is no information to derive from the time series; many features will fail')
+% Series with no dynamics to describe: fewer than 3 samples (a z-scored series of
+% length 2 is always (1,-1)/sqrt(2) or its negative), or a constant (whose
+% z-scored version is undefined). No operation is evaluated on these, and every
+% feature is NaN ('not appropriate').
+minSeriesLength = 3;
+isNotAppropriate = (length(x) < minSeriesLength) || all(x==x(1));
+if isNotAppropriate && ~strcmp(howVocal,'fast')
+	if length(x) < minSeriesLength
+		fprintf(1,'The time series has %u samples (fewer than %u): all features are NaN.\n',length(x),minSeriesLength);
+	else
+		fprintf(1,'The time series is constant: all features are NaN.\n');
+	end
 end
 
 % --------------------------------------------------------------------------
@@ -196,7 +213,6 @@ end
 featureVector = zeros(numCalc,1); % Output of each operation
 calcQuality = zeros(numCalc,1); % Quality of output from each operation
 calcTimes = nan(numCalc,1); % Calculation time for each operation
-masterErrors = cell(0,2); % {master code string, error message} for each master operation that errored
 
 % --------------------------------------------------------------------------
 %% Pre-Processing
@@ -244,6 +260,20 @@ par_MasterOpCodeCalc = MasterOperations.Code(Master_ind_calc); % Code strings, k
 par_MasterOpFnCalc = MasterOperations.Fn(Master_ind_calc); % Precompiled function handles to evaluate
 par_mop_ids = MasterOperations.ID(Master_ind_calc); % mop_id for each master operation
 
+% ----
+% Minimum lengths: a master operation applied to a series shorter than its
+% MinLength (or than minSeriesLength) is not evaluated, and all of its operations
+% are NaN. The length is that of the series the master operation is applied to:
+% the decimated series for those that use BF_PreProcess(x_z,'decimate_ac1e').
+% ----
+[par_isTooShort,masterInputLength] = minLengthCheck(x_z,MasterOperations,Master_ind_calc,minSeriesLength);
+if isNotAppropriate
+    par_isTooShort(:) = true;
+elseif strcmp(howVocal,'full') && any(par_isTooShort)
+    fprintf(1,['%u master operations are not evaluated: the time series is shorter ' ...
+                'than their minimum length.\n'],sum(par_isTooShort));
+end
+
 % Store in temporary variables for parfor loop then map back later
 MasterOutput_tmp = cell(numMopsToCalc,1);
 MasterCalcTime_tmp = zeros(numMopsToCalc,1);
@@ -260,9 +290,13 @@ masterTimer = tic;
 if doParallel
     % PARFOR Loop (parallel)
 	parfor jj = 1:numMopsToCalc
-		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
-			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
+		if par_isTooShort(jj)
+			MasterOutput_tmp{jj} = NaN; % not appropriate for a series this short
+		else
+			[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
+				TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
+					par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
+		end
 	end
 else
     % Normal FOR Loop (serial)
@@ -290,9 +324,13 @@ else
             BF_ProgressBar((jj-1)/numMopsToCalc,[],[],sprintf(' %.0f%% %s',100*(jj-1)/numMopsToCalc,currentCode));
         end
 
-		[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
-			TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
-				par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
+		if par_isTooShort(jj)
+			MasterOutput_tmp{jj} = NaN; % not appropriate for a series this short
+		else
+			[MasterOutput_tmp{jj},MasterCalcTime_tmp(jj),MasterErrorMsg_tmp{jj}] = ...
+				TS_ComputeMasterLoop(x,x_z,par_MasterOpFnCalc{jj},par_MasterOpCodeCalc{jj}, ...
+					par_mop_ids(jj),numMopsToCalc,howVocal,TimeSeries_i_ID,jj,beVerbose);
+		end
 	end
     if showProgressBar
         BF_ProgressBar(1,[],[],' 100% complete');
@@ -301,6 +339,7 @@ else
 end
 
 erroredInd = find(~cellfun(@isempty,MasterErrorMsg_tmp));
+% {master code string, error message} for each master operation that errored:
 masterErrors = [par_MasterOpCodeCalc(erroredInd),MasterErrorMsg_tmp(erroredInd)];
 
 % When errors were suppressed above to avoid interrupting the progress bar
@@ -358,6 +397,15 @@ for jj = 1:numCalc
 		calcQuality(jj) = 1;
 		calcTimes(jj) = NaN;
 	end
+end
+
+% --------------------------------------------------------------------------
+%% Operations with their own minimum length: NaN on a shorter series
+% --------------------------------------------------------------------------
+if ismember('MinLength',Operations.Properties.VariableNames)
+    isTooShortOp = masterInputLength(MasterOp_ind) < Operations.MinLength;
+    featureVector(isTooShortOp) = NaN;
+    calcQuality(isTooShortOp) = 0; % coded as NaN (2) below
 end
 
 % --------------------------------------------------------------------------
@@ -440,5 +488,31 @@ case 'minimal'
 case 'fast'
     % (none)
 end
+
+end
+
+%-------------------------------------------------------------------------------
+function [isTooShort,masterInputLength] = minLengthCheck(x_z,MasterOperations,masterInd,minSeriesLength)
+% Which of the master operations masterInd are below their minimum length (their
+% MinLength, and at least minSeriesLength), and the length of the series each
+% master operation is applied to (a vector over all rows of MasterOperations; NaN
+% for those not evaluated here). Master operations applied to the decimated series,
+% BF_PreProcess(x_z,'decimate_ac1e'), are checked on its length.
+numMops = height(MasterOperations);
+masterInputLength = nan(numMops,1);
+masterInputLength(masterInd) = length(x_z);
+
+masterBound = repmat(minSeriesLength,numMops,1);
+if ismember('MinLength',MasterOperations.Properties.VariableNames)
+    masterBound = max(masterBound,MasterOperations.MinLength);
+end
+
+isDecimated = false(numMops,1);
+isDecimated(masterInd) = contains(MasterOperations.Code(masterInd),"BF_PreProcess(x_z,'decimate_ac1e')");
+if any(isDecimated)
+    masterInputLength(isDecimated) = numel(BF_PreProcess(x_z,'decimate_ac1e'));
+end
+
+isTooShort = masterInputLength(masterInd) < masterBound(masterInd);
 
 end

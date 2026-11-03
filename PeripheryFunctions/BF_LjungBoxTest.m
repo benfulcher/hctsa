@@ -11,7 +11,7 @@ function p = BF_LjungBoxTest(x, maxLag)
 %
 %---OUTPUT:
 % p, the p-values for lags 1 to maxLag, as a row vector (all NaN for a constant or
-%       non-finite series)
+%       non-finite series, or one with no more than maxLag samples)
 %
 % Reference: G. M. Ljung and G. E. P. Box, "On a Measure of Lack of Fit in Time Series
 % Models", Biometrika 65, 297 (1978). DOI: 10.1093/biomet/65.2.297
@@ -50,11 +50,9 @@ if nargin < 2 || isempty(maxLag)
 end
 x = x(:);
 N = length(x);
-if maxLag > N - 1
-    error('Number of lags must be less than the sample size');
-end
 p = NaN(1, maxLag);
-if ~all(isfinite(x)) || max(x) == min(x)
+if maxLag > N - 1 || ~all(isfinite(x)) || max(x) == min(x)
+    % no more lags than samples allow, constant, or non-finite
     return
 end
 

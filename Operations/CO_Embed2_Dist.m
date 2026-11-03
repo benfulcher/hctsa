@@ -13,7 +13,7 @@ function out = CO_Embed2_Dist(y, tau)
 %      function), 'ac1e' (the floor of its first 1/e crossing), or
 %      'mi' (the smaller of the first minimum of the Kraskov automutual information
 %      and the 'ac1e' delay); see BF_GetTau. All three are capped
-%      at N/10
+%      at floor(N/10), but never below 1
 %
 % ---OUTPUTS:
 % d_ac1, d_ac2, d_ac3, the autocorrelation of the sequence of distances at lags 1, 2
@@ -77,7 +77,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > N / 10
-		tau = floor(N / 10);
+		tau = max(1, floor(N / 10));
 	end
 end
 if strcmp(tau, 'tau')
@@ -86,7 +86,7 @@ if strcmp(tau, 'tau')
 		out = NaN; return
 	end
 	if tau > N / 10
-		tau = floor(N / 10);
+		tau = max(1, floor(N / 10));
 	end
 end
 % Make sure the time series is a column vector

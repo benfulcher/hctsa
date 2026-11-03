@@ -88,7 +88,7 @@ function out = NL_FNN(y, tau, maxm, theilerWin, justBest, bestp, escapeFactor)
 %             one more than the last dimension tested, a lower bound. Not limited by
 %             the length of the series (unlike BF_Embed's 'fnn').
 % max1stepchange: the largest absolute change in the fraction between
-%             consecutive embedding dimensions
+%             consecutive embedding dimensions (NaN if only one dimension is tested)
 % mdrop: the mean change in the fraction per added dimension
 % pdrop: minus the mean sign of the change, i.e. the fraction of decreasing steps
 %        minus the fraction of increasing steps
@@ -318,8 +318,12 @@ out.dim02 = firstunderf(0.2, mDim, pNN, nPoints, minCount);   % 20%
 out.dim01 = firstunderf(0.1, mDim, pNN, nPoints, minCount);   % 10%
 out.dim005 = firstunderf(0.05, mDim, pNN, nPoints, minCount); % 5%
 
-% Maximum step-wise change across p
-out.max1stepchange = max(abs(diff(pNN)));
+% Maximum step-wise change across p (NaN for a single dimension)
+if numel(pNN) < 2
+	out.max1stepchange = NaN;
+else
+	out.max1stepchange = max(abs(diff(pNN)));
+end
 
 % Curve shape across dimensions (mean signed per-step change, and the
 % proportion of m -> m+1 steps for which pfnn decreased):

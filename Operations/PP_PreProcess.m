@@ -23,6 +23,12 @@ function [yp, best] = PP_PreProcess(y, chooseBest, order, beatThis, doSpectral, 
 % If second argument is specified, will choose amongst the preprocessings
 % for the 'best' one according to the given criterion.
 % Based on (really improvement/development of) PP_ModelFit.
+%
+% A piece-wise polynomial removal (p<order>_<pieces>) is NaN when the series has
+% fewer samples than pieces, or when each piece is fitted exactly (pieces of at
+% most order + 1 samples): its residual is then floating-point round-off, which
+% z-scoring would amplify into spurious structure. A NaN version is never chosen
+% as the 'best' one.
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -195,6 +201,10 @@ switch chooseBest
 
 		for i = 1:nfields % each preprocessing performed
 			data = yp.(fields{i});
+			if isscalar(data) % a piece-wise polynomial removal that is not defined
+				rmserrs(i) = NaN;
+				continue
+			end
 			data = zscore(data);
 
 			% RMS in-sample one-step prediction error of an AR model fitted by
@@ -217,6 +227,10 @@ switch chooseBest
 		acs = zeros(nfields, 1);
 		for i = 1:nfields
 			data = yp.(fields{i}); % dynamic field referencing
+			if isscalar(data) % a piece-wise polynomial removal that is not defined
+				acs(i) = NaN;
+				continue
+			end
 			% eval(['data = yp.' fields{i} ';']);
 			data = zscore(data); % unnecessary for AC
 			acs(i) = CO_AutoCorr(data, order, 'Fourier');
@@ -307,6 +321,11 @@ end
 function ydt = SUB_rempt(tsData, order, numBits)
 	% Remove piece-wise polynomials from input tsData
 	tsDataLength = length(tsData);
+	if tsDataLength < numBits
+		% too short to cut into numBits non-empty pieces
+		ydt = NaN;
+		return
+	end
 	ydt = zeros(tsDataLength, 1);
 	bits = round(linspace(0, tsDataLength, numBits + 1));
 	for k = 1:numBits
@@ -315,6 +334,13 @@ function ydt = SUB_rempt(tsData, order, numBits)
 		tsDataBit = tsData(r); % y-range
 		p = polyfit(x, tsDataBit, order);
 		ydt(r) = tsDataBit - polyval(p, x);
+	end
+	% Residuals at floating-point round-off (a standard deviation of at most 10*N*eps
+	% times the root-mean-square of the series, a bound on the rounding error of the
+	% fits; see PP_Compare): every piece is fitted exactly, leaving no structure
+	if std(ydt) <= 10 * tsDataLength * eps * sqrt(mean(tsData.^2))
+		ydt = NaN;
+		return
 	end
 	ydt = zscore(ydt);
 	if doPlot

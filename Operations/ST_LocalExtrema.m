@@ -129,8 +129,8 @@ end
 % ------------------------------------------------------------------------------
 y_buff = buffer(y, windowLength); % no overlap
 % Each *column* is a window of samples:
-if y_buff(end) == 0
-	y_buff = y_buff(:, 1:end - 1); % remove last window if zero-padded
+if mod(N, windowLength) ~= 0
+	y_buff = y_buff(:, 1:end - 1); % remove the last window, which buffer zero-pads
 end
 numWindows = size(y_buff, 2); % number of windows
 

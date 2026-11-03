@@ -249,6 +249,18 @@ if merge_features
     loadedData{2}.MasterOperations.ID = newMopMasterIDs;
 
     %-------------------------------------------------------------------------------
+    % Minimum lengths (TS_AddMinLengths): a file without them has no bounds
+    %-------------------------------------------------------------------------------
+    for i = 1:2
+        for tableName = {'Operations','MasterOperations'}
+            if ~ismember('MinLength',loadedData{i}.(tableName{1}).Properties.VariableNames) && ...
+                    ismember('MinLength',loadedData{3-i}.(tableName{1}).Properties.VariableNames)
+                loadedData{i}.(tableName{1}).MinLength = zeros(height(loadedData{i}.(tableName{1})),1);
+            end
+        end
+    end
+
+    %-------------------------------------------------------------------------------
     % All unique, so can simply concatenate:
     %-------------------------------------------------------------------------------
     Operations = [loadedData{1}.Operations;loadedData{2}.Operations];

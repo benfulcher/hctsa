@@ -21,7 +21,8 @@ function f = CR_RAD(x, tau, doAbs)
 %        (logical flag; default true)
 %
 % ---OUTPUTS:
-% f, a scalar: the RAD feature value.
+% f, a scalar: the RAD feature value (NaN if either half of the median split has
+%       no spread).
 %
 % ---REFERENCES:
 % B. Harris, L. L. Gollo and B. D. Fulcher, "Tracking the distance to criticality in
@@ -78,6 +79,12 @@ superMedianSD = std(x(~subMedians));
 subMedianSD = std(x(subMedians));
 
 % Properties of the auto-density
+if ~(superMedianSD > 0 && subMedianSD > 0)
+	% A half with no spread (e.g., the tied middle values of a short series, once
+	% centered at the median) has no defined density
+	f = NaN;
+	return
+end
 sigma_dx = std(y - x);
 densityDifference = 1 ./ superMedianSD - 1 ./ subMedianSD;
 
