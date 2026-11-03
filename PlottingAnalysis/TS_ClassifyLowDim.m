@@ -254,8 +254,8 @@ title(titleText,'interpreter','none')
 %-------------------------------------------------------------------------------
 % Violin plots of individual fold accuracies
 %-------------------------------------------------------------------------------
-title(sprintf('All (%u) individual folds',cfnParams.numRepeats*cfnParams.numFolds))
 ax_bar_folds = subplot(1,4,4);
+title(sprintf('All (%u) individual folds',cfnParams.numRepeats*cfnParams.numFolds))
 
 if doComputeAtMaxInSample
     allFeatures_allTrainFolds = squeeze(allFoldData(:,1,:));
@@ -301,8 +301,8 @@ linkaxes([ax,ax_bar_folds],'y')
 %-------------------------------------------------------------------------------
 % Violin plots of fold-average accuracies
 %-------------------------------------------------------------------------------
-title(sprintf('%u repeats of %u-fold averages',cfnParams.numRepeats,cfnParams.numFolds))
 ax_bar = subplot(1,4,3);
+title(sprintf('%u repeats of %u-fold averages',cfnParams.numRepeats,cfnParams.numFolds))
 hold('on')
 allFeatures_allTrainFoldMeans = mean(squeeze(allFoldData(:,1,:)),1);
 allFeatures_allTestFoldMeans = mean(squeeze(allFoldData(:,2,:)),1);
