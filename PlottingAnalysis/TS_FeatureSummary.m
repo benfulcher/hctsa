@@ -353,9 +353,10 @@ else
     % Annotate time series:
     xlabel(theOperation.Name,'Interpreter','none');
     ylabel('Probability Density')
-    BF_AnnotatePoints(xy,TimeSeries,annotateParams);
-    if isnumeric(annotateParams.maxL)
-        sampleText = sprintf(' (%u-sample annotations)',annotateParams.maxL);
+    numSamples = BF_AnnotatePoints(xy,TimeSeries,annotateParams);
+    if isnumeric(annotateParams.maxL) && numSamples > 0
+        % (The longest annotation, which can be shorter than maxL)
+        sampleText = sprintf(' (%u-sample annotations)',numSamples);
     else
         sampleText = '';
     end
