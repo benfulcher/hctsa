@@ -1,4 +1,4 @@
-function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
+function numSamples = BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % BF_AnnotatePoints     Annotates time series/metadata to a plot
 %
 %---INPUTS:
@@ -23,6 +23,9 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 %   or a positive integer to specify n (all other fields at their defaults).
 %   Time series without a group label are annotated in gray.
 %
+%---OUTPUTS:
+% numSamples, the number of samples of the longest annotated time series.
+%
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
 % <http://www.benfulcher.com>
@@ -46,6 +49,7 @@ function BF_AnnotatePoints(xy,TimeSeries,annotateParams)
 % ------------------------------------------------------------------------------
 
 numTimeSeries = height(TimeSeries);
+numSamples = 0; % (the length of the longest annotated segment, updated below)
 
 % Allow annotateParams to be given as a number (or logical) instead of a structure:
 if ~isstruct(annotateParams)
@@ -210,6 +214,7 @@ for j = 1:numAnnotate
     else
         timeSeriesSegment = [];
     end
+    numSamples = max(numSamples,length(timeSeriesSegment));
 
     % When only one group, cycle through rainbow colors for each annotation:
     if numGroups==1

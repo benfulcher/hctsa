@@ -245,6 +245,17 @@ linkaxes([ax1,ax2],'y');
 % Fix limits
 ax2.YLim = [0.5,numItems+0.5];
 
+% Make room on the left for long object labels (the default axes position can
+% push them off the edge of the figure, and out of saved images):
+if ~isempty(objectLabels)
+    drawnow();
+    leftMargin = ax2.TightInset(1) + 0.01;
+    if ax2.Position(1) < leftMargin
+        widthLost = leftMargin - ax2.Position(1);
+        ax2.Position([1,3]) = [leftMargin,ax2.Position(3)-widthLost];
+    end
+end
+
 % Align with dendrogram
 ax1.Position(1) = ax2.Position(1) + ax2.Position(3);
 ax1.Position(4) = ax2.Position(4);

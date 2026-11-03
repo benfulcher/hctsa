@@ -336,10 +336,38 @@ if addTimeSeries
     % Both have the same y and height:
     ax1.Position(2) = ax2.Position(2); % y
     ax1.Position(4) = ax2.Position(4); % height
+
+    % Make room on the left for the time-series names (which are clipped when the
+    % figure is narrow), by moving the time-series axes and the data matrix right:
+    drawnow();
+    leftMargin = ax1.TightInset(1) + 0.01;
+    if ax1.Position(1) < leftMargin
+        shift = leftMargin - ax1.Position(1);
+        ax1.Position(1) = leftMargin;
+        ax2.Position([1,3]) = [ax2.Position(1)+shift,max(0.1,ax2.Position(3)-shift)];
+    end
 else
     % Rows -- time series need labels
     ylabel('Time series')
     ax2.YTickLabel = TimeSeries.Name;
+end
+
+% Make sure the color bar and its labels are inside the figure (long group names
+% can otherwise be pushed off the right edge, and cropped from saved images):
+if addTimeSeries
+    drawnow();
+    tickLabels = cB.TickLabels;
+    if ~iscell(tickLabels), tickLabels = cellstr(tickLabels); end
+    % Measure the widest tick label as a fraction of the figure width (using
+    % temporary axes covering the figure, with limits [0,1]):
+    axTemp = axes('Position',[0,0,1,1],'Visible','off','XLim',[0,1],'YLim',[0,1]);
+    tText = text(axTemp,0,0,tickLabels,'FontSize',cB.FontSize,'Interpreter','none');
+    labelWidth = max(cellfun(@(x) x(3),get(tText,{'Extent'})));
+    delete(axTemp);
+    colorBarRight = cB.Position(1) + cB.Position(3) + labelWidth + 0.06; % (+ tick and axis label)
+    if colorBarRight > 0.99
+        ax2.Position(3) = max(0.1,ax2.Position(3) - (colorBarRight - 0.99));
+    end
 end
 
 end

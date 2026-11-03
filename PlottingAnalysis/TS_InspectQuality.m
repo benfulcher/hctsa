@@ -268,11 +268,20 @@ case 'summary'
     b = bar(whatLabel',1,'stacked','FaceColor','flat');
     for k = 1:size(whatLabel,1)
         b(k).CData = k;
+        b(k).EdgeColor = 'none'; % (edges would hide the colors of narrow bars)
     end
 
-    ax.XTick = 1:sum(hadProblem);
+    % Label every bar's operation ID when few, else a subset of evenly-spaced ones:
+    numProblem = sum(hadProblem);
+    maxTicks = 40;
+    if numProblem <= maxTicks
+        ax.XTick = 1:numProblem;
+    else
+        ax.XTick = unique(round(linspace(1,numProblem,maxTicks)));
+    end
     unSortedTicks = Operations.ID(hadProblem);
-    ax.XTickLabel = unSortedTicks(ix);
+    sortedIDs = unSortedTicks(ix);
+    ax.XTickLabel = sortedIDs(ax.XTick);
     ax.XTickLabelRotation = 90;
 
     title(sprintf('Displaying %u/%u operations with some special values',...

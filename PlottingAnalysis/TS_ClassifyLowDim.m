@@ -188,7 +188,7 @@ plotColors = {[0,114,178]/255,[213,94,0]/255,[0,158,115]/255,[204,121,167]/255,.
                 [230,159,0]/255,[86,180,233]/255,[240,215,66]/255,[0,0,0]/255};
 lineWidth = 2;
 f = figure('color','w');
-f.Position(3:4) = [506,324];
+f.Position(3:4) = [900,420]; % (wide enough for the titles and labels of the panels)
 ax = subplot(1,4,1:2);
 hold('on')
 
@@ -247,15 +247,25 @@ ax.XTick = 1:numPCs;
 xlabel('Number of PCs');
 ylabel('Classification accuracy (%)')
 
-titleText = sprintf('Classification rate (%u-class) using %u-fold %s',...
-            cfnParams.numClasses,cfnParams.numFolds,cfnParams.classifierText);
+% Leave room above the top reference line for its label (which would be clipped
+% by the top of the axes):
+yLines = findobj(ax,'Type','constantline','InterceptAxis','y');
+yLineValues = [yLines.Value];
+yLimits = ax.YLim;
+if any(yLineValues > yLimits(2) - 0.08*diff(yLimits))
+    ax.YLim(2) = yLimits(2) + 0.08*diff(yLimits);
+end
+
+% (Two lines, to fit in the panel)
+titleText = {sprintf('Classification rate (%u-class)',cfnParams.numClasses),...
+            sprintf('using %u-fold %s',cfnParams.numFolds,cfnParams.classifierText)};
 title(titleText,'interpreter','none')
 
 %-------------------------------------------------------------------------------
 % Violin plots of individual fold accuracies
 %-------------------------------------------------------------------------------
-title(sprintf('All (%u) individual folds',cfnParams.numRepeats*cfnParams.numFolds))
 ax_bar_folds = subplot(1,4,4);
+title({sprintf('All (%u)',cfnParams.numRepeats*cfnParams.numFolds),'individual folds'})
 
 if doComputeAtMaxInSample
     allFeatures_allTrainFolds = squeeze(allFoldData(:,1,:));
@@ -301,8 +311,8 @@ linkaxes([ax,ax_bar_folds],'y')
 %-------------------------------------------------------------------------------
 % Violin plots of fold-average accuracies
 %-------------------------------------------------------------------------------
-title(sprintf('%u repeats of %u-fold averages',cfnParams.numRepeats,cfnParams.numFolds))
 ax_bar = subplot(1,4,3);
+title({sprintf('%u repeats of',cfnParams.numRepeats),sprintf('%u-fold averages',cfnParams.numFolds)})
 hold('on')
 allFeatures_allTrainFoldMeans = mean(squeeze(allFoldData(:,1,:)),1);
 allFeatures_allTestFoldMeans = mean(squeeze(allFoldData(:,2,:)),1);
