@@ -339,7 +339,8 @@ else
         else
             legendText = classLabels;
         end
-        legend(horzcat(lineHandles{:}),legendText)
+        % (Don't let the annotations added below be added to the legend)
+        legend(horzcat(lineHandles{:}),legendText,'AutoUpdate','off')
     else
         % Just run a single global one (black)
         [fr,xr] = BF_plot_ks(dataVector,'k',0,1.5,10);

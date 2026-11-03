@@ -246,12 +246,11 @@ if newFigure
     figure('color','w');
 end
 
-% Set default for max length if unspecified (as max length of time series)
-if isempty(maxLength)
-    ls = TimeSeries.Length(iPlot);
-    maxN = max(ls); % maximum length of all time series to plot
-else
-    maxN = maxLength;
+% The number of samples spanned by the time axis: the longest of the time series to
+% plot, capped at maxLength when specified:
+maxN = max(TimeSeries.Length(iPlot));
+if ~isempty(maxLength)
+    maxN = min(maxN,maxLength);
 end
 
 % Carpet plot is just a grayscale visualization of many time series
