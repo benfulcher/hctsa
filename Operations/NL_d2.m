@@ -520,7 +520,12 @@ out.slopesh2_linrmserr = findch_h2.linrmserr;
 flattens = SUB_doesflatten(h2dat_v, h2dat_M);
 out.h2meangoodness = mean(flattens(:, 1)); % how close to having intermediate 'flat' regions
 out.h2bestgoodness = min(flattens(:, 1)); % best you can do
-out.h2besth2 = flattens(find(flattens(:, 1) == min(flattens(:, 1)), 1, 'first'), 2);
+iBest = find(flattens(:, 1) == min(flattens(:, 1)), 1, 'first');
+if isempty(iBest) % no embedding dimension with a flat region
+	out.h2besth2 = NaN;
+else
+	out.h2besth2 = flattens(iBest, 2);
+end
 out.meanh2 = mean(flattens(:, 2));
 out.medianh2 = median(flattens(:, 2));
 flatsh2min = SUB_findmmin(flattens(:, 2));

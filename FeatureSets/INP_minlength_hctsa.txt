@@ -235,7 +235,6 @@ EN_Shannon_2_5	9
 EN_Shannon_2t10_2	5
 EN_Shannon_2t10_3	6
 NL_BoxCountEntropyRate_50_ac1e_5	6
-NL_d2_ac1e_10_ac1	59
 NW_VisibilityGraph_horiz_full	4
 NW_VisibilityGraph_norm_20000	4
 PD_PeriodicityWang	13
