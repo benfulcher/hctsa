@@ -44,7 +44,12 @@ function out = NL_ZeroOneTest(y, numC, maxN)
 % Dstd, the standard deviation of D_c across the numC frequencies -- can be heavy-tailed for
 %    complex/near-resonant dynamics (a handful of c values giving an anomalously large slope
 %    estimate)
-% The output is NaN for series shorter than 200 samples.
+% The output is NaN for series shorter than 20 samples (two lags). K and Kstd, a correlation
+% over the lags, can only be +/-1 with two lags, and the minimum lengths of the hctsa feature
+% set (INP_minlength_hctsa.txt) set them to NaN below N = 30. On short series K is not on its
+% 0-1 scale: regular dynamics whose frequencies fall in the range of c (e.g., a period-3
+% orbit, or quasi-periodic signals) can give K well above 0, although K still ranks regular
+% below irregular dynamics.
 %
 % ---REFERENCES:
 % Gottwald and Melbourne, "On the implementation of the 0-1 test for chaos", SIAM J. Appl.
@@ -120,9 +125,10 @@ elseif N > maxN
     N = maxN;
 end
 
-minN = 200; % need tcut = floor(N/10) large enough for a meaningful growth-rate correlation
+% The statistics use lags n = 1, ..., floor(N/10): at least two lags are needed (N >= 20)
+minN = 20;
 if N < minN
-    warning('Time series (N = %u) too short for a meaningful 0-1 test (need >= %u)', N, minN);
+    warning('Time series (N = %u) too short for the 0-1 test (need >= %u)', N, minN);
     out = NaN; return
 end
 
