@@ -342,4 +342,22 @@ else
     ax2.YTickLabel = TimeSeries.Name;
 end
 
+% Make sure the color bar and its labels are inside the figure (long group names
+% can otherwise be pushed off the right edge, and cropped from saved images):
+if addTimeSeries
+    drawnow();
+    tickLabels = cB.TickLabels;
+    if ~iscell(tickLabels), tickLabels = cellstr(tickLabels); end
+    % Measure the widest tick label as a fraction of the figure width (using
+    % temporary axes covering the figure, with limits [0,1]):
+    axTemp = axes('Position',[0,0,1,1],'Visible','off','XLim',[0,1],'YLim',[0,1]);
+    tText = text(axTemp,0,0,tickLabels,'FontSize',cB.FontSize,'Interpreter','none');
+    labelWidth = max(cellfun(@(x) x(3),get(tText,{'Extent'})));
+    delete(axTemp);
+    colorBarRight = cB.Position(1) + cB.Position(3) + labelWidth + 0.06; % (+ tick and axis label)
+    if colorBarRight > 0.99
+        ax2.Position(3) = max(0.1,ax2.Position(3) - (colorBarRight - 0.99));
+    end
+end
+
 end
