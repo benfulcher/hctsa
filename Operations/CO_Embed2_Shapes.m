@@ -14,7 +14,7 @@ function out = CO_Embed2_Shapes(y, tau, shape, r, theilerWin)
 %      function), 'ac1e' (the floor of its first 1/e crossing), or
 %      'mi' (the smaller of the first minimum of the Kraskov automutual information
 %      and the 'ac1e' delay); see BF_GetTau. All three are capped
-%      at N/10
+%      at floor(N/10), but never below 1
 % shape, the shape (only 'circle' for now; default)
 % r, the radius of the circle (default 1)
 % theilerWin, the Theiler window: points closer in time than this are not counted
@@ -105,7 +105,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > length(y) / 10
-		tau = floor(length(y) / 10);
+		tau = max(1, floor(length(y) / 10));
 	end
 end
 if strcmp(tau, 'tau')
@@ -115,7 +115,7 @@ if strcmp(tau, 'tau')
 	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > length(y) / 10
-		tau = floor(length(y) / 10);
+		tau = max(1, floor(length(y) / 10));
 	end
 end
 

@@ -20,7 +20,9 @@ function out = SY_StdNthDer(y, n)
 % n, the order of derivative to analyze (default: 2)
 %
 % ---OUTPUTS:
-% a scalar: the standard deviation of the nth difference of the time series
+% a scalar: the standard deviation of the nth difference of the time series (NaN
+%       for a series with fewer than n + 2 samples, which leave fewer than two
+%       differences)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -58,9 +60,10 @@ end
 yd = diff(y, n); % crude method of taking a derivative that could be improved
 % upon in future
 
-if isempty(yd)
-	error('Time series (N = %u) too short to compute differences at %u', ...
-		  length(y), n);
+if numel(yd) < 2
+	% Too short for a spread of the nth differences
+	out = NaN;
+	return
 end
 out = std(yd);
 

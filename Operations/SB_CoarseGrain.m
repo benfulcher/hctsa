@@ -28,7 +28,7 @@ function yth = SB_CoarseGrain(y, howtocg, numGroups)
 %            backward compatibility; the lag can be meaninglessly long, or
 %            absent, for a slowly decorrelating series, and the cap below then
 %            silently sets it).
-%       A numeric or 'tau' delay is capped at floor(N/25). For 'ac1e' the output is
+%       A numeric or 'tau' delay is capped at floor(N/25) (but never below 1). For 'ac1e' the output is
 %       NaN if the autocorrelation function is undefined (a constant series) or
 %       never crosses 1/e (no delay exists); a crossing found at a long lag is
 %       still capped at floor(N/25). For 'tau', an undefined function gives NaN.
@@ -122,7 +122,7 @@ switch howtocg
 		else
 			tau = numGroups;
 		end
-		if tau > N / 25; tau = floor(N / 25); end
+		if tau > N / 25; tau = max(1, floor(N / 25)); end
 		m1 = y(1:end - tau);
 		m2 = y(1 + tau:end);
 

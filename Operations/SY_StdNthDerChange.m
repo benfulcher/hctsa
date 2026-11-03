@@ -39,6 +39,7 @@ function out = SY_StdNthDerChange(y, maxd)
 % overDiffRatio, the standard deviation at order maxd divided by the smallest
 % isInterior, 1 if the minimum is strictly between order 1 and maxd (a U shape),
 %       otherwise 0
+% (all NaN for a series with fewer than maxd + 2 samples)
 
 % ------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -82,6 +83,11 @@ end
 ms = zeros(maxd, 1);
 for i = 1:maxd
 	ms(i) = SY_StdNthDer(y, i);
+end
+if any(isnan(ms))
+	% Too short for a spread of the differences at every order (N < maxd + 2)
+	out = NaN;
+	return
 end
 
 if doPlot

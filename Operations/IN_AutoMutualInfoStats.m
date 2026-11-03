@@ -115,9 +115,11 @@ end
 % ------------------------------------------------------------------------------
 ami = IN_AutoMutualInfo(y, 1:maxTau, estMethod, extraParam);
 
-% Convert structure to a vector
-ami = struct2cell(ami);
-ami = [ami{:}];
+% Convert structure to a vector (a single delay, maxTau = 1, gives a scalar)
+if isstruct(ami)
+	ami = struct2cell(ami);
+	ami = [ami{:}];
+end
 
 % ------------------------------------------------------------------------------
 % Output the raw values:

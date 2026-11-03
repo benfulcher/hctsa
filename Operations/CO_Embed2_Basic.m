@@ -11,7 +11,8 @@ function out = CO_Embed2_Basic(y, tau)
 %      the series: 'tau' (the first zero-crossing of the autocorrelation function),
 %      'ac1e' (the floor of its first 1/e crossing), or 'mi' (the smaller of the
 %      first minimum of the Kraskov automutual information and the 'ac1e' delay);
-%      see BF_GetTau. All three are capped at N/10
+%      see BF_GetTau. All three are capped at floor(N/10),
+%      but never below 1
 %
 % ---OUTPUTS:
 % updiag01, updiag05, the fraction of points within 0.1 or 0.5 (vertically) of the
@@ -74,7 +75,7 @@ if ischar(tau) && ismember(tau, {'ac1e', 'mi'})
 	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > length(y) / 10
-		tau = floor(length(y) / 10);
+		tau = max(1, floor(length(y) / 10));
 	end
 end
 if strcmp(tau, 'tau')
@@ -85,7 +86,7 @@ if strcmp(tau, 'tau')
 	end
 	% Cannot set the time delay greater than 10% the length of the time series
 	if tau > length(y) / 10
-		tau = floor(length(y) / 10);
+		tau = max(1, floor(length(y) / 10));
 	end
 end
 if isnan(tau)

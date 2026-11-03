@@ -11,7 +11,7 @@ function p = BF_ARCHTest(x, maxLag)
 %
 %---OUTPUT:
 % p, the p-values for lags 1 to maxLag, as a row vector (all NaN for a constant or
-%       non-finite series)
+%       non-finite series, or when fewer than two samples remain after maxLag lags)
 %
 % Reference: R. F. Engle, "Autoregressive Conditional Heteroscedasticity with Estimates of the
 % Variance of United Kingdom Inflation", Econometrica 50, 987 (1982). DOI: 10.2307/1912773
@@ -50,12 +50,10 @@ if nargin < 2 || isempty(maxLag)
 end
 x = x(:);
 N = length(x);
-if N - maxLag < 2
-    error('The series is too short for the requested number of ARCH lags');
-end
 p = NaN(1, maxLag);
 x2 = x.^2;
-if ~all(isfinite(x2)) || max(x2) == min(x2)
+if N - maxLag < 2 || ~all(isfinite(x2)) || max(x2) == min(x2)
+    % too short for the regression on maxLag lags, constant, or non-finite
     return
 end
 

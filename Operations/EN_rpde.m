@@ -34,7 +34,7 @@ function out = EN_rpde(x, m, tau, epsilon, T_max)
 % meanNonZero, the mean value of the density where it is nonzero, rescaled by N
 % maxRPD, the maximum value of the density, rescaled by N
 % NaN (instead of a structure) is returned if the embedding parameters cannot be
-% determined.
+% determined, or if the embedding has fewer than four points.
 %
 % ---REFERENCES:
 % M. Little, P. McSharry, S. Roberts, D. Costello and I. Moroz, "Exploiting
@@ -95,6 +95,13 @@ end
 % ------------------------------------------------------------------------------
 
 % Compute the rpd using C code:
+% With three or fewer embedded points the only possible recurrence time is 2 (and the
+% recurrence search is not defined for fewer):
+if length(x) - (m - 1) * tau < 4
+	out = NaN;
+	return
+end
+
 rpd = ML_close_ret(x, m, tau, epsilon);
 
 if (T_max > -1)

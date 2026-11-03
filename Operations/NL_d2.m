@@ -672,6 +672,11 @@ function results = findscalingr_ind(x)
 			end
 		end
 		[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range
+		if isempty(a)
+			% too few scaling points for both ranges, or no finite gradients
+			results(c, :) = NaN;
+			continue
+		end
 		results(c, 1) = stptr(a);
 		results(c, 2) = endptr(b);
 		results(c, 3) = min(mybad(:));
@@ -800,6 +805,11 @@ function results = SUB_getslopes(x, Y)
 			end
 		end
 		[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range
+		if isempty(a)
+			% too few scaling points for both ranges, or no finite gradients
+			results(c, :) = NaN;
+			continue
+		end
 		results(c, 1) = stptr(a);
 		results(c, 2) = endptr(b);
 		results(c, 3) = min(mybad(:));
@@ -847,6 +857,11 @@ function results = SUB_doesflatten(x, Y)
 			end
 		end
 		[a, b] = find(mybad == min(mybad(:)), 1, 'first'); % this defines the 'best' scaling range
+		if isempty(a)
+			% too few scaling points for both ranges, or no finite gradients
+			results(c, :) = NaN;
+			continue
+		end
 
 		% best range for being near-flat: ri1--ri2
 		ri1 = stptr(a);
