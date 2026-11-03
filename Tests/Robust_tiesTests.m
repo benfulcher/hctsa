@@ -114,12 +114,18 @@ classdef Robust_tiesTests < matlab.unittest.TestCase
 
         function continuousSeriesUnchanged(tc)
             % values on continuous series, which have no repeated points or ties
+            % (lyap_spec and lyap_r write their results to 7 and 6 significant
+            % digits, so a different compiler can change the last digit written:
+            % those two agree to the precision written)
             E = controlValues();
             for i = 1:size(E, 1)
                 out = runOp(E{i, 2}, testSeries(E{i, 1}));
+                relTol = 1e-9;
+                if strcmp(E{i, 2}, 'LyapSpec'), relTol = 1e-6; end
+                if strcmp(E{i, 2}, 'LargestLyap'), relTol = 1e-5; end
                 f = fieldnames(E{i, 3});
                 for j = 1:numel(f)
-                    tc.verifyEqual(out.(f{j}), E{i, 3}.(f{j}), 'RelTol', 1e-9, 'AbsTol', 1e-12, ...
+                    tc.verifyEqual(out.(f{j}), E{i, 3}.(f{j}), 'RelTol', relTol, 'AbsTol', 1e-12, ...
                         sprintf('%s, %s.%s', E{i, 1}, E{i, 2}, f{j}));
                 end
             end
