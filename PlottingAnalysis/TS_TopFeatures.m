@@ -330,9 +330,16 @@ end
 %-------------------------------------------------------------------------------
 % Give mean and that expected from random classifier (there may be a little overfitting)
 if ~isnan(chanceLevel)
-    fprintf(1,['Mean %s across %u features = %4.2f%s\n' ...
-            '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
-        testStatText,numFeatures,mean(testStat,'omitnan'),statUnit,numClasses,chanceLevel,statUnit);
+    if ismember(whatTestStat,{'classification','medianClassify','nearestMedian'})
+        fprintf(1,['Mean %s across %u features = %4.2f%s\n' ...
+                '(Random guessing for %u equiprobable classes = %4.2f%s)\n'], ...
+            testStatText,numFeatures,mean(testStat,'omitnan'),statUnit,numClasses,chanceLevel,statUnit);
+    else
+        % (Statistics centered on zero for features unrelated to the class labels)
+        fprintf(1,['Mean %s across %u features = %4.2f%s\n' ...
+                '(Expected for a feature unrelated to the class labels = %g)\n'], ...
+            testStatText,numFeatures,mean(testStat,'omitnan'),statUnit,chanceLevel);
+    end
 else
     fprintf(1,'Mean %s across %u features = %4.2f%s\n',...
         testStatText,numFeatures,mean(testStat,'omitnan'),statUnit);
@@ -471,7 +478,7 @@ if ismember('histogram',whatPlots)
 
     % Add chance line:
     if ~isnan(chanceLevel)
-        l_chance = plot(chanceLevel*ones(2,1),[0,maxH],'--','color',colors{1},'LineWidth',2);
+        l_chance = plot(chanceLevel*ones(2,1),[0,maxH],':','color','k','LineWidth',2);
     end
 
     % Add mean of real distribution:
@@ -583,7 +590,8 @@ if ismember('dendrogram',whatPlots)
     if doVertical
         f.Position(3:4) = [950,750]; %#ok<UNRCH>
     else
-        f.Position(3:4) = [750,950];
+        % Wide enough for a readable label under each feature:
+        f.Position(3:4) = [max(750,30*numTopFeatures),950];
     end
 
     [distVec,links] = BF_DoLinkage(Dij,distanceMetric,'average');
@@ -618,6 +626,16 @@ if ismember('dendrogram',whatPlots)
         ax.XTickLabel = topFeatureLabelsFull(ord);
         ylabel(sprintf('%s distance',distanceMetric));
         ax.XTickLabelRotation = 40;
+        ax.FontSize = 8;
+
+        % Fit the axes to the (long, rotated) labels, which can otherwise run off the
+        % figure (the layout depends on the axes' position, so repeat once):
+        for iPass = 1:2
+            drawnow();
+            tightInset = ax.TightInset;
+            ax.Position = [tightInset(1)+0.01,tightInset(2)+0.01,...
+                            1-tightInset(1)-tightInset(3)-0.02,1-tightInset(2)-tightInset(4)-0.02];
+        end
     end
 end
 
