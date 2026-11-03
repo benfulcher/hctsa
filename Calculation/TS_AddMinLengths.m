@@ -62,7 +62,7 @@ MasterOperations.MinLength = zeros(height(MasterOperations),1);
 Operations.MinLength = zeros(height(Operations),1);
 
 % A feature-set name stands for that feature set's minimum-length file:
-if ~isempty(minLengthFile) && ~endsWith(minLengthFile,'.txt')
+if ~isempty(minLengthFile) && ~exist(minLengthFile,'file')
     [~,~,minLengthFile] = TS_GiveMeInputFiles(minLengthFile);
 end
 if isempty(minLengthFile)
