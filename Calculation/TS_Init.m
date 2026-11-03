@@ -10,7 +10,10 @@ function TS_Init(INP_ts,whatFeatureSet,beVocal,outputFile)
 % INP_ts: A time-series input file
 % whatFeatureSet: EITHER a feature-set name (like 'hctsa' or 'catch22')
 %             OR a 1x2 cell of filenames for INP_mops (master operations input file)
-%                   and INP_ops (an operations input file)
+%                   and INP_ops (an operations input file), optionally with a
+%                   third filename (or feature-set name) giving minimum
+%                   time-series lengths (see TS_AddMinLengths); without it, every
+%                   operation is computed at any length.
 % beVocal: Whether to display details of the progress of the script to screen.
 %           a 3-vector, specifying for 1. time series, 2. master operations,
 %           and 3. operations.
@@ -79,12 +82,18 @@ end
 % Convert a feature-set name to a set of input files
 %-------------------------------------------------------------------------------
 if ischar(whatFeatureSet)
-    [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet);
+    [INP_mops,INP_ops,INP_minLength] = TS_GiveMeInputFiles(whatFeatureSet);
 elseif iscell(whatFeatureSet)
     INP_mops = whatFeatureSet{1};
     fprintf(1,'Information about master operations taken from ''%s''\n',INP_mops);
     INP_ops = whatFeatureSet{2};
     fprintf(1,'Information about operations taken from ''%s''\n',INP_ops);
+    if numel(whatFeatureSet) > 2
+        INP_minLength = whatFeatureSet{3};
+        fprintf(1,'Minimum time-series lengths taken from ''%s''\n',INP_minLength);
+    else
+        INP_minLength = '';
+    end
 else
     error('Unknown format for setting the feature set')
 end
@@ -127,6 +136,11 @@ end
 [Operations,MasterOperations] = TS_LinkOperationsWithMasters(Operations,MasterOperations);
 % MasterOperations may have been trimmed by TS_LinkOperationsWithMasters:
 numMops = height(MasterOperations);
+
+%-------------------------------------------------------------------------------
+% Minimum time-series lengths (MinLength columns; 0 where there is no bound)
+%-------------------------------------------------------------------------------
+[Operations,MasterOperations] = TS_AddMinLengths(Operations,MasterOperations,INP_minLength);
 
 % ------------------------------------------------------------------------------
 % Generate the TS_DataMat, TS_Quality, and TS_CalcTime matrices

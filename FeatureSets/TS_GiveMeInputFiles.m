@@ -1,4 +1,4 @@
-function [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet)
+function [INP_mops,INP_ops,INP_minLength] = TS_GiveMeInputFiles(whatFeatureSet)
 % TS_GiveMeInputFiles  Gives a set of input files corresponding to a named feature set
 %
 %---INPUT:
@@ -7,6 +7,9 @@ function [INP_mops,INP_ops] = TS_GiveMeInputFiles(whatFeatureSet)
 %---OUTPUTS:
 % INP_mops: the filename for a master operations input file.
 % INP_ops: the filename for an operations input file.
+% INP_minLength: the filename for a file of minimum time-series lengths for its
+%               master operations and operations (empty if the feature set has
+%               none; see TS_AddMinLengths).
 
 %-------------------------------------------------------------------------------
 % Copyright (C) 2013-2026, Ben D. Fulcher <ben.d.fulcher@gmail.com>,
@@ -38,12 +41,15 @@ switch whatFeatureSet
 case 'hctsa'
     INP_mops = 'INP_mops_hctsa.txt';
     INP_ops = 'INP_ops_hctsa.txt';
+    INP_minLength = 'INP_minlength_hctsa.txt';
 case 'catch22'
     INP_mops = 'INP_mops_catch22.txt';
     INP_ops = 'INP_ops_catch22.txt';
+    INP_minLength = '';
 case 'catch24'
     INP_mops = 'INP_mops_catch24.txt';
     INP_ops = 'INP_ops_catch24.txt';
+    INP_minLength = '';
 otherwise
     error('Unknown feature set: ''%s''.',whatFeatureSet)
 end
