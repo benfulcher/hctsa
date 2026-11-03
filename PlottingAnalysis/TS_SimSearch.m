@@ -211,11 +211,13 @@ end
 %-------------------------------------------------------------------------------
 % Find N neighbors under the distance metric (used for Dj)
 %-------------------------------------------------------------------------------
-% Sort distances (ascending), putting the target first by index (other items can have
-% distance zero to it, e.g., duplicates, and its own distance is undefined if it has NaNs):
-Dsort = Dj;
-Dsort(targetInd) = -Inf;
-[~,dix] = sort(Dsort,'ascend');
+% Sort distances (ascending) over all other items, then put the target first by index
+% (other items can have distance zero to it, e.g., duplicates; its own distance can be
+% undefined if it has NaNs; and no sort key could be guaranteed not to tie with a
+% distance of another item):
+otherInd = find((1:numItems)' ~= targetInd);
+[~,dix] = sort(Dj(otherInd),'ascend');
+dix = [targetInd; otherInd(dix)];
 
 % Indices of the target and its nearest neighbors:
 neighborInd = dix(1:numNeighbors+1);

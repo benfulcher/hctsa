@@ -53,37 +53,50 @@ end
 
 if any(isnan(X(:)))
     % Indicate non-NaN values:
-    goodValues = single(~isnan(X));
+    goodValues = ~isnan(X);
 
-    % Compute column means, excluding NaNs (vectorized: exact match to a
-    % per-column mean(x(~isnan(x))) loop, but without the per-column
-    % function-call overhead, which matters once numCol reaches into the
-    % thousands, e.g. feature-feature correlations over many operations):
+    % Compute column means and standard deviations, excluding NaNs (vectorized:
+    % exact match to a per-column loop, but without the per-column function-call
+    % overhead, which matters once numCol reaches into the thousands, e.g.,
+    % feature-feature correlations over many operations):
     colMeans = mean(X,1,'omitnan');
+    colStds = std(X,0,1,'omitnan');
 
-    % Remove mean from each column, to make centered version:
-    Xc = X - colMeans;
+    % Scale each column to unit standard deviation (leaving columns with zero or
+    % undefined spread unscaled), after removing its mean. This keeps the values
+    % within single-precision range, whatever the scale of X: features above ~3.4e38
+    % (and products of those above ~1.8e19) overflow single precision, which made
+    % their correlations with every other feature infinite or undefined.
+    colScale = colStds;
+    isBadCol = ~(colScale > 0 & isfinite(colScale));
+    colScale(isBadCol) = 1;
+    Xc = (X - colMeans)./colScale;
 
     % X0 copies Xc but puts zeros over NaNs. Cast to single before the
     % O(numCol^2 * numRows) matrix multiply below, which dominates runtime
-    % for large numCol: single precision roughly halves it via BLAS, at a
-    % relative error of ~1e-6, negligible given this is already an
-    % approximate covariance estimate (see function description above).
+    % for large numCol: single precision is roughly 1.5-2x faster via BLAS (and
+    % halves the memory of the result), at a relative error of ~1e-6, negligible
+    % given this is already an approximate covariance estimate (see function
+    % description above).
     X0 = single(Xc);
     X0(~goodValues) = 0; % NaN -> 0
 
     % Count good points (overlapping non-NaN values)
+    goodValues = single(goodValues);
     goodBoth = goodValues' * goodValues;
 
-    % This is our approximation to the covariance matrix:
+    % This is our approximation to the covariance matrix of the scaled data, which is
+    % the matrix of correlation coefficients:
     C = (X0' * X0) ./ (goodBoth - 1);
 
-    % Convert to a correlation coefficient:
     if makeCoeff
-        % Normalize by sample standard deviations:
-        colStds = std(X,0,1,'omitnan');
-        S = colStds'*colStds;
-        C = C./S;
+        % Correlation with a column of zero or undefined spread is undefined:
+        C(isBadCol,:) = NaN;
+        C(:,isBadCol) = NaN;
+    else
+        % Undo the scaling to recover covariances (in double precision, as they can be
+        % beyond the range of single precision):
+        C = double(C).*(colScale'*colScale);
     end
 else
     % no NaNs, use the matlab cov function:
