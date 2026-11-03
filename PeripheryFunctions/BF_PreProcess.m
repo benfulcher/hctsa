@@ -53,12 +53,14 @@ if ~isempty(preProcessHow)
         % Keep one sample per (floored) 1/e autocorrelation time (cf. BF_GetTau),
         % so that features computed on the result do not change trivially with
         % the sampling rate. Iterated maps (ACF below 1/e at lag 1) are unchanged.
-        % Minimum length of the decimated series (shorter -> NaN). Features
-        % computed on fewer than ~50 decimated samples are finite but unreliable
-        % (their realization noise falls steadily with the decimated length), and
-        % a slowly decorrelating series (e.g., a random walk of 1000 samples) can
-        % decimate to fewer than 10 samples.
-        minDecimatedLength = 50;
+        % Minimum length of the decimated series (shorter -> NaN): three samples,
+        % the shortest series whose features can vary (as pyhctsa's minimum
+        % series length). Features of a series spanning few correlation times
+        % are noisy (their realization noise falls with the decimated length),
+        % but not uninformative: a scan found every *_dec feature tested carries
+        % signal of its target from 4-15 decimated samples, so no higher floor is
+        % imposed. (A random walk of 1000 samples decimates to about 9 samples.)
+        minDecimatedLength = 3;
         tau = BF_GetTau(y,'ac1e');
         if isnan(tau)
             y = NaN; return

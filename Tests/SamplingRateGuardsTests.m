@@ -1,7 +1,7 @@
 classdef SamplingRateGuardsTests < matlab.unittest.TestCase
     % Guards on the sampling-rate normalization: the length floor of the
-    % 'decimate_ac1e' preprocessing (and the NaN it gives to the *_dec
-    % features), the 1/e autocorrelation time used to coarse-grain in
+    % 'decimate_ac1e' preprocessing (3 samples, and the NaN it gives to the
+    % *_dec features below it), the 1/e autocorrelation time used to coarse-grain in
     % 'rescale_tau' (EN_MSE), and the noise-gated AMI minimum of
     % BF_GetTau(y,'mi'). All series are made with BF_Random, so they are the
     % same in MATLAB and Python.
@@ -35,39 +35,40 @@ classdef SamplingRateGuardsTests < matlab.unittest.TestCase
         % 'decimate_ac1e': length floor
         %-------------------------------------------------------------------
         function decimateBelowFloorIsNaN(tc)
-            % A random walk of 1000 samples decorrelates slowly, so it
-            % decimates to far fewer than 50 samples:
+            % Fewer than 3 decimated samples gives NaN (a 2-sample series):
+            y = zscore(BF_Random(2, 1, 'normal'));
+            tc.verifyEqual(numel(1:BF_GetTau(y, 'ac1e'):numel(y)), 2);
+            yDec = BF_PreProcess(y, 'decimate_ac1e');
+            tc.verifyTrue(isscalar(yDec) && isnan(yDec));
+            % ... and 3 samples are kept
+            y = zscore(BF_Random(3, 1, 'normal'));
+            tc.verifyEqual(BF_PreProcess(y, 'decimate_ac1e'), y(1:BF_GetTau(y, 'ac1e'):end));
+        end
+
+        function decimateShortResultIsKept(tc)
+            % A random walk of 1000 samples decorrelates slowly and decimates to
+            % fewer than 50 samples, which are kept (a 50-sample floor gave NaN):
             y = zscore(cumsum(BF_Random(1000, 1, 'normal')));
             tau = BF_GetTau(y, 'ac1e');
             tc.verifyLessThan(numel(1:tau:numel(y)), 50);
-            yDec = BF_PreProcess(y, 'decimate_ac1e');
-            tc.verifyTrue(isscalar(yDec) && isnan(yDec));
+            tc.verifyEqual(BF_PreProcess(y, 'decimate_ac1e'), y(1:tau:end));
         end
 
-        function decimateIsPlainSubsampleAtOrAboveFloor(tc)
-            % Prefixes of one AR(1) realization whose decimated lengths
-            % straddle the floor: NaN below 50 samples, else every tau-th sample.
+        function decimateIsPlainSubsample(tc)
+            % Prefixes of one AR(1) realization: every tau-th sample.
             u = filter(1, [1, -0.95], BF_Random(1500, 3, 'normal'));
-            decLength = zeros(11, 1);
             for i = 1:11
                 y = zscore(u(1:400 + 100*i));
                 tau = BF_GetTau(y, 'ac1e');
-                decLength(i) = numel(1:tau:numel(y));
-                yDec = BF_PreProcess(y, 'decimate_ac1e');
-                if decLength(i) < 50
-                    tc.verifyTrue(isscalar(yDec) && isnan(yDec));
-                else
-                    tc.verifyEqual(yDec, y(1:tau:end));
-                end
+                tc.verifyEqual(BF_PreProcess(y, 'decimate_ac1e'), y(1:tau:end));
             end
-            % (both sides of the floor are tested)
-            tc.verifyTrue(any(decLength < 50) && any(decLength >= 50));
         end
 
         function decimatedFeaturesAreNaNBelowFloor(tc)
             % Every registered master operation on the decimated series is NaN
-            % (no error, and no finite value from the NaN input):
-            x_z = zscore(cumsum(BF_Random(1000, 1, 'normal'))); %#ok<NASGU> (used in eval)
+            % (no error, and no finite value from the NaN input); a 2-sample
+            % series is below the floor:
+            x_z = zscore(BF_Random(2, 1, 'normal')); %#ok<NASGU> (used in eval)
             M = [];
             evalc('M = TS_ReadInputFile(''mops'', ''INP_mops_hctsa.txt'', false);');
             codes = M.Code(contains(M.Code, 'decimate_ac1e'));
