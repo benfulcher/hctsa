@@ -1,11 +1,11 @@
-function f = CR_RAD(x, tau, doAbs)
+function f = CR_RAD(x, tau, doCentre)
 % CR_RAD   The rescaled auto-density, a metric for inferring the distance to criticality.
 %
 % Computes the rescaled auto-density (RAD), a metric for inferring the distance to
 % criticality that is insensitive to uncertainty in the noise strength. Calibrated to
 % experiments on the Hopf bifurcation with variable and unknown measurement noise.
 %
-% With doAbs, the series is first centered at its median and made non-negative. It is
+% With doCentre, the series is first centered at its median and made non-negative. It is
 % then delay-embedded in two dimensions, (x(t), x(t+tau)), and split at the median of
 % x(t). The output is the standard deviation of the increments x(t+tau) - x(t), times
 % (1/std of the upper half of x(t) - 1/std of the lower half of x(t)).
@@ -13,12 +13,12 @@ function f = CR_RAD(x, tau, doAbs)
 % ---INPUTS:
 % x, the input time series (vector)
 % tau, the embedding and differencing delay in units of the timestep (integer; default
-%      1). A string sets it from the series (after any doAbs transformation): 'tau'
+%      1). A string sets it from the series (after any doCentre transformation): 'tau'
 %      (the first zero-crossing of the autocorrelation function), 'ac1e' (the floor
 %      of its first 1/e crossing), or 'mi' (the smaller of the first minimum of the
 %      Kraskov automutual information and the 'ac1e' delay); see BF_GetTau
-% doAbs, whether to center the time series at its median and then take absolute values
-%        (logical flag; default true)
+% doCentre, whether to center the time series at its median and then take absolute values
+%           (logical flag; default true)
 %
 % ---OUTPUTS:
 % f, a scalar: the RAD feature value.
@@ -39,8 +39,8 @@ function f = CR_RAD(x, tau, doAbs)
 if nargin < 2 || isempty(tau)
 	tau = 1;
 end
-if nargin < 3 || isempty(doAbs)
-	doAbs = true;
+if nargin < 3 || isempty(doCentre)
+	doCentre = true;
 end
 % -------------------------------------------------------------------------------
 % Basic checks & preprocessing
@@ -48,7 +48,7 @@ end
 if isrow(x)
 	x = x';
 end
-if doAbs
+if doCentre
 	x = x - median(x);
 	x = abs(x);
 end
